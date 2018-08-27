@@ -21,23 +21,16 @@
 package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
-import io.spine.core.CommandId;
-import io.spine.core.Event;
-import io.spine.core.EventId;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Sharding;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.given.EntityHistoryTestEnv.HistoryEventWatcher;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregate;
@@ -49,7 +42,6 @@ import io.spine.system.server.given.EntityHistoryTestEnv.TestProcmanRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjection;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjectionRepository;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.blackbox.CommandMemoizingTap;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,10 +49,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.core.Commands.getMessage;
+import static io.spine.core.Events.getMessage;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
@@ -68,10 +59,6 @@ import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -89,21 +76,15 @@ class EntityHistoryTest {
     private BoundedContext context;
     private BoundedContext system;
 
-    private CommandMemoizingTap commandMemoizingTap;
-
     @BeforeEach
     void setUp() {
         BoundedContextName contextName = BoundedContextName
                 .newBuilder()
                 .setValue(EntityHistoryTest.class.getSimpleName())
                 .build();
-        commandMemoizingTap = new CommandMemoizingTap();
-        CommandBus.Builder commandBus = CommandBus.newBuilder()
-                .appendFilter(commandMemoizingTap);
         context = BoundedContext
                 .newBuilder()
                 .setName(contextName)
-                .setCommandBus(commandBus)
                 .setStorageFactorySupplier(() -> newInstance(contextName, false))
                 .build();
         system = systemOf(context);
@@ -261,7 +242,7 @@ class EntityHistoryTest {
             assertId(dispatchedToReactor.getReceiver());
 
             TypeUrl expectedType = TypeUrl.of(PersonNameCreated.class);
-            TypeUrl actualType = TypeUrl.of(findEvent(dispatchedToReactor.getPayload()));
+            TypeUrl actualType = TypeUrl.ofEnclosed(dispatchedToReactor.getPayload().getMessage());
             assertEquals(expectedType, actualType);
 
             EntityStateChanged stateChanged = eventAccumulator.nextEvent(EntityStateChanged.class);
@@ -291,7 +272,7 @@ class EntityHistoryTest {
                     eventAccumulator.nextEvent(EventDispatchedToReactor.class);
             assertId(dispatched.getReceiver());
             TypeUrl expectedType = TypeUrl.of(PersonRenamed.class);
-            TypeUrl actualType = TypeUrl.of(findEvent(dispatched.getPayload()));
+            TypeUrl actualType = TypeUrl.ofEnclosed(dispatched.getPayload().getMessage());
             assertEquals(expectedType, actualType);
         }
 
@@ -326,7 +307,7 @@ class EntityHistoryTest {
             CommandDispatchedToHandler commandDispatched =
                     eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
             assertId(commandDispatched.getReceiver());
-            Message commandMessage = findCommand(commandDispatched.getPayload());
+            Message commandMessage = getMessage(commandDispatched.getPayload());
             assertEquals(command, commandMessage);
         }
 
@@ -344,8 +325,7 @@ class EntityHistoryTest {
                     eventAccumulator.nextEvent(EventDispatchedToSubscriber.class);
             EntityHistoryId receiver = eventDispatchedEvent.getReceiver();
             PersonId actualIdValue = unpack(receiver.getEntityId().getId());
-            DispatchedEvent dispatchedEvent = eventDispatchedEvent.getPayload();
-            PersonCreated payload = findEvent(dispatchedEvent, PersonCreated.class);
+            PersonCreated payload = (PersonCreated) getMessage(eventDispatchedEvent.getPayload());
             assertEquals(id, actualIdValue);
             assertEquals(TestProjection.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
@@ -363,8 +343,7 @@ class EntityHistoryTest {
                     eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
             PersonId actualIdValue = unpack(receiver.getEntityId().getId());
-            DispatchedCommand dispatchedCommand = commandDispatchedEvent.getPayload();
-            CreatePerson payload = findCommand(dispatchedCommand, CreatePerson.class);
+            CreatePerson payload = (CreatePerson) getMessage(commandDispatchedEvent.getPayload());
             assertEquals(id, actualIdValue);
             assertEquals(TestAggregate.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
@@ -418,42 +397,5 @@ class EntityHistoryTest {
     private void postCommand(Message commandMessage) {
         Command command = requestFactory.createCommand(commandMessage);
         context.getCommandBus().post(command, noOpObserver());
-    }
-
-    private Message findCommand(DispatchedCommand dispatchedCommand) {
-        return findCommand(dispatchedCommand, Message.class);
-    }
-
-    private <M extends Message> M findCommand(DispatchedCommand dispatchedCommand,
-                                              Class<M> commandClass) {
-        CommandId commandId = dispatchedCommand.getCommand();
-        Optional<M> found = commandMemoizingTap.find(commandId, commandClass);
-        assertTrue(found.isPresent());
-        return found.get();
-    }
-
-    private Message findEvent(DispatchedEvent dispatchedEvent) {
-        return findEvent(dispatchedEvent, Message.class);
-    }
-
-    private <M extends Message> M findEvent(DispatchedEvent dispatchedEvent,
-                                            Class<M> eventClass) {
-        MemoizingObserver<Event> eventObserver = memoizingObserver();
-        context.getEventBus()
-               .getEventStore()
-               .read(EventStreamQuery.getDefaultInstance(), eventObserver);
-        EventId expectedId = dispatchedEvent.getEvent();
-        String errorMessage = format("Event with ID %s not found.", expectedId.getValue());
-        Any eventAny = eventObserver.responses()
-                                  .stream()
-                                  .filter(event -> expectedId.equals(event.getId()))
-                                  .findAny()
-                                  .map(Event::getMessage)
-                                  .orElseThrow(() -> newIllegalStateException(errorMessage));
-        Message eventMessage = unpack(eventAny);
-        assertThat(eventMessage, instanceOf(eventClass));
-        @SuppressWarnings("unchecked") // Checked with an assertion.
-        M result = (M) eventMessage;
-        return result;
     }
 }

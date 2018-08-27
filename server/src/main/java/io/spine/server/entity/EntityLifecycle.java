@@ -152,7 +152,7 @@ public class EntityLifecycle {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandler
                 .newBuilder()
                 .setReceiver(historyId)
-                .setCommandId(command.getId())
+                .setCommand(command)
                 .build();
         systemGateway.postCommand(systemCommand);
     }
@@ -194,7 +194,7 @@ public class EntityLifecycle {
         DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
                 .newBuilder()
                 .setReceiver(historyId)
-                .setEventId(event.getId())
+                .setEvent(event)
                 .build();
         systemGateway.postCommand(systemCommand);
     }
@@ -208,7 +208,7 @@ public class EntityLifecycle {
         DispatchEventToReactor systemCommand = DispatchEventToReactor
                 .newBuilder()
                 .setReceiver(historyId)
-                .setEventId(event.getId())
+                .setEvent(event)
                 .build();
         systemGateway.postCommand(systemCommand);
     }

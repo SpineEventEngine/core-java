@@ -30,20 +30,36 @@ option (internal_all) = true;
 option java_package = "io.spine.system.server";
 option java_outer_classname = "HistoryRejections";
 
+import "google/protobuf/timestamp.proto";
+
 import "spine/core/event.proto";
 import "spine/core/command.proto";
 import "spine/system/server/entity_history.proto";
 
 message CannotDispatchEventTwice {
 
-    spine.core.EventId event_id = 1 [(valid) = true];
+    EntityHistoryId receiver = 1 [(valid) = true];
 
-    EntityHistoryId receiver = 2 [(valid) = true];
+    core.Event payload = 2 [(valid) = true];
+
+    // The time when the event was dispatched.
+    //
+    // This timestamp may differ from the one in the context of the event, since the time of
+    // dispatching may not be the same as the time of creation.
+    //
+    google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
 
 message CannotDispatchCommandTwice {
 
-    spine.core.CommandId command_id = 1 [(valid) = true];
+    EntityHistoryId receiver = 1 [(valid) = true];
 
-    EntityHistoryId receiver = 2 [(valid) = true];
+    core.Command payload = 2 [(valid) = true];
+
+    // The time when the event was dispatched.
+    //
+    // This timestamp may differ from the one in the context of the event, since the time of
+    // dispatching may not be the same as the time of creation.
+    //
+    google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
