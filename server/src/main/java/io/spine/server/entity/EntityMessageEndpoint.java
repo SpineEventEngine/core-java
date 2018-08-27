@@ -113,7 +113,7 @@ public abstract class EntityMessageEndpoint<I,
      *
      * @param entityId the ID of the entity for which to dispatch the message
      */
-    private void dispatchToOne(I entityId) {
+    public void dispatchToOne(I entityId) {
         try {
             doDispatchToOne(entityId);
         } catch (RuntimeException exception) {

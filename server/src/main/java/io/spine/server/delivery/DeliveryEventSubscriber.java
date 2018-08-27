@@ -20,17 +20,19 @@
 
 package io.spine.server.delivery;
 
+import com.google.protobuf.Any;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.Identifier.unpack;
 
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class DeliveryEventSubscriber extends AbstractEventSubscriber {
+public abstract class DeliveryEventSubscriber<I> extends AbstractEventSubscriber {
 
     private final TypeUrl targetType;
 
@@ -42,6 +44,12 @@ public abstract class DeliveryEventSubscriber extends AbstractEventSubscriber {
         String typeUrlRaw = historyId.getTypeUrl();
         TypeUrl typeUrl = TypeUrl.parse(typeUrlRaw);
         return typeUrl.equals(targetType);
+    }
+
+    protected I idFrom(EntityHistoryId historyId) {
+        Any id = historyId.getEntityId()
+                          .getId();
+        return unpack(id);
     }
 
     public final void registerAt(BoundedContext context) {

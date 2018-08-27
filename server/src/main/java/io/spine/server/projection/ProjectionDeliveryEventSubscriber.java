@@ -20,34 +20,54 @@
 
 package io.spine.server.projection;
 
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.delivery.DeliveryEventSubscriber;
+import io.spine.server.event.DuplicateEventException;
+import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
 import io.spine.system.server.HistoryRejections;
 
 /**
  * @author Dmytro Dashenkov
  */
-final class ProjectionDeliveryEventSubscriber extends DeliveryEventSubscriber {
+final class ProjectionDeliveryEventSubscriber<I> extends DeliveryEventSubscriber<I> {
 
-    private final ProjectionRepository<?, ?, ?> repository;
+    private final ProjectionRepository<I, ?, ?> repository;
 
-    ProjectionDeliveryEventSubscriber(ProjectionRepository<?, ?, ?> repository) {
+    ProjectionDeliveryEventSubscriber(ProjectionRepository<I, ?, ?> repository) {
         super(repository.getEntityStateType());
         this.repository = repository;
     }
 
     @Subscribe(external = true)
     public void on(EventDispatchedToSubscriber event) {
-        if (correctType(event.getReceiver())) {
-            // repository -> dispatch ...
+        EntityHistoryId receiver = event.getReceiver();
+        if (correctType(receiver)) {
+            I id = idFrom(receiver);
+            ProjectionEndpoint<I, ?> endpoint = endpointFor(event.getPayload());
+            endpoint.dispatchToOne(id);
         }
     }
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchEventTwice event) {
         if (correctType(event.getReceiver())) {
-            // repository -> dispatch ...
+            onError(event.getPayload());
         }
+    }
+
+    private ProjectionEndpoint<I, ?> endpointFor(Event event) {
+        EventEnvelope envelope = EventEnvelope.of(event);
+        ProjectionEndpoint<I, ?> endpoint = ProjectionEndpoint.of(repository, envelope);
+        return endpoint;
+    }
+
+    private void onError(Event event) {
+        RuntimeException exception = new DuplicateEventException(event);
+        EventEnvelope envelope = EventEnvelope.of(event);
+        ProjectionEndpoint<I, ?> endpoint = endpointFor(event);
+        endpoint.onError(envelope, exception);
     }
 }
