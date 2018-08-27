@@ -31,7 +31,6 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.procman.CommandTransformed;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
@@ -148,11 +147,12 @@ public class BoundedContextTestEnv {
         }
 
         @Assign
-        CommandTransformed handle(BcCreateProject command, CommandContext ctx) {
-            return CommandTransformed.getDefaultInstance();
+        BcProjectCreated handle(BcCreateProject command, CommandContext ctx) {
+            return BcProjectCreated.newBuilder()
+                                   .setProjectId(command.getProjectId())
+                                   .build();
         }
 
-        @SuppressWarnings("UnusedParameters") // OK for test method
         @Subscribe
         public void on(BcProjectCreated event, EventContext ctx) {
             // Do nothing, just watch.
