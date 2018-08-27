@@ -225,9 +225,20 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope envelope) {
         checkNotNull(envelope);
+        I target = route(envelope);
+        dispatchTo(target, envelope);
+        return target;
+    }
+
+    private I route(CommandEnvelope envelope) {
+        CommandRouting<I> routing = getCommandRouting();
+        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
+        return target;
+    }
+
+    private void dispatchTo(I id, CommandEnvelope envelope) {
         AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, envelope);
-        I result = endpoint.handle();
-        return result;
+        endpoint.dispatchTo(id);
     }
 
     /**
@@ -268,9 +279,20 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
+        Set<I> targets = route(envelope);
+        targets.forEach(id -> dispatchTo(id, envelope));
+        return targets;
+    }
+
+    private Set<I> route(EventEnvelope envelope) {
+        EventRouting<I> routing = getEventRouting();
+        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        return targets;
+    }
+
+    private void dispatchTo(I id, EventEnvelope envelope) {
         AggregateEventEndpoint<I, A> endpoint = new AggregateEventEndpoint<>(this, envelope);
-        Set<I> result = endpoint.handle();
-        return result;
+        endpoint.dispatchTo(id);
     }
 
     @Override

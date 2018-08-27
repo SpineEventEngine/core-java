@@ -63,7 +63,7 @@ public abstract class PmDelivery<I,
         }
 
         @Override
-        protected abstract PmEndpoint<I, P, M, ?> getEndpoint(M messageEnvelope);
+        protected abstract PmEndpoint<I, P, M> getEndpoint(M messageEnvelope);
 
         @Override
         protected ProcessManagerRepository<I, P, ?> repository() {

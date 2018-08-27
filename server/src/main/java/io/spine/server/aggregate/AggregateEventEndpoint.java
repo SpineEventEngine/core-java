@@ -26,7 +26,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Dispatches events to aggregates of the associated {@code AggregateRepository}.
@@ -39,7 +38,7 @@ import java.util.Set;
  */
 @Internal
 public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, EventEnvelope, Set<I>> {
+        extends AggregateEndpoint<I, A, EventEnvelope> {
 
     protected AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
         super(repo, event);
@@ -70,14 +69,4 @@ public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         // Do nothing.
     }
 
-    /**
-     * Obtains IDs of aggregates that react on the event processed by this endpoint.
-     */
-    @Override
-    protected Set<I> getTargets() {
-        EventEnvelope envelope = envelope();
-        Set<I> ids = repository().getEventRouting()
-                                 .apply(envelope.getMessage(), envelope.getEventContext());
-        return ids;
-    }
 }

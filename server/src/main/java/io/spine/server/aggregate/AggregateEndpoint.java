@@ -36,15 +36,12 @@ import java.util.List;
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
  * @param <M> the type of message envelopes
- * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
- *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
-                                 M extends ActorMessageEnvelope<?, ?, ?>,
-                                 R>
-        extends EntityMessageEndpoint<I, A, M, R> {
+                                 M extends ActorMessageEnvelope<?, ?, ?>>
+        extends EntityMessageEndpoint<I, A, M> {
 
     AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
         super(repository, envelope);
@@ -79,18 +76,6 @@ abstract class AggregateEndpoint<I,
         tx.commit();
         return producedEvents;
     }
-
-    /* Changes from `master` :
-        @CanIgnoreReturnValue
-    protected final List<? extends Message> dispatchInTx(A aggregate) {
-        M envelope = envelope();
-        List<? extends Message> eventMessages = doDispatch(aggregate, envelope);
-        AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope);
-        tx.commit();
-        return eventMessages;
-    }
-     */
 
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
     private AggregateTransaction startTransaction(A aggregate) {

@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandClass;
@@ -28,13 +27,12 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.delivery.Delivery;
-import io.spine.server.tenant.TenantAwareFunction0;
+import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.string.Stringifiers;
 
 import java.util.List;
-import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -47,15 +45,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <M> the type of message envelopes
- * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
- *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
 @Internal
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
-                                            M extends ActorMessageEnvelope<?, ?, ?>,
-                                            R> {
+                                            M extends ActorMessageEnvelope<?, ?, ?>> {
 
     /** The repository which created this endpoint. */
     private final Repository<I, E> repository;
@@ -69,51 +64,24 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
-     * Handles the message processing.
-     *
-     * @return the result of the message processing
-     */
-    public final R handle() {
-        TenantId tenantId = envelope().getTenantId();
-        TenantAwareFunction0<R> operation = new Operation(tenantId);
-        R result = operation.execute();
-        return result;
-    }
-
-    /**
-     * {@linkplain #getTargets() Selects} one or more message targets and
-     * {@linkplain #dispatchToOne(I) dispatches} the message to them.
-     */
-    @SuppressWarnings({"unchecked", "MethodOnlyUsedFromInnerClass"})
-    private R dispatch() {
-        R targets = getTargets();
-        if (targets instanceof Set) {
-            Set<I> handlingEntities = (Set<I>) targets;
-            return (R) (dispatchToMany(handlingEntities));
-        }
-        dispatchToOne((I) targets);
-        return targets;
-    }
-
-    /**
-     * Dispatches the message to multiple entities.
-     *
-     * @param targets the set of entity IDs to which dispatch the message
-     * @return the set of entity IDs to which the message was successfully dispatched
-     */
-    private Set<I> dispatchToMany(Set<I> targets) {
-        ImmutableSet<I> result = targets.stream()
-                                        .peek(this::dispatchToOne)
-                                        .collect(toImmutableSet());
-        return result;
-    }
-
-    /**
      * Attempts the message to the entity with the passed ID according to the delivery strategy.
      *
      * @param entityId the ID of the entity for which to dispatch the message
      */
-    public void dispatchToOne(I entityId) {
+    public void dispatchTo(I entityId) {
+        checkNotNull(entityId);
+        TenantId tenantId = envelope().getTenantId();
+        dispatchForTenant(entityId, tenantId);
+    }
+
+    private void dispatchForTenant(I entityId, TenantId tenantId) {
+        TenantAwareOperation operation = new Operation(entityId, tenantId);
+        operation.execute();
+    }
+
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass")
+        // Avoid writing logic in a TenantAwareOperation.
+    private void dispatchToOne(I entityId) {
         try {
             doDispatchToOne(entityId);
         } catch (RuntimeException exception) {
@@ -127,11 +95,6 @@ public abstract class EntityMessageEndpoint<I,
         delivery.getSender()
                 .send(entityId, envelope);
     }
-
-    /**
-     * Obtains IDs of entities to which the endpoint delivers the message.
-     */
-    protected abstract R getTargets();
 
     /**
      * Dispatches the message to the entity with the passed ID, providing transactional work
@@ -227,18 +190,18 @@ public abstract class EntityMessageEndpoint<I,
         throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
     }
 
-    /**
-     * The operation executed under the tenant context in which the message was created.
-     */
-    private class Operation extends TenantAwareFunction0<R> {
+    private final class Operation extends TenantAwareOperation {
 
-        private Operation(TenantId tenantId) {
+        private final I target;
+
+        private Operation(I target, TenantId tenantId) {
             super(tenantId);
+            this.target = target;
         }
 
         @Override
-        public R apply() {
-            return dispatch();
+        public void run() {
+            dispatchToOne(target);
         }
     }
 }

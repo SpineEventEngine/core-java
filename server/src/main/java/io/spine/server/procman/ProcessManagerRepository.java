@@ -235,7 +235,7 @@ public abstract class ProcessManagerRepository<I,
 
     final void dispatchNowTo(I id, CommandEnvelope command) {
         PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
-        endpoint.dispatchToOne(id);
+        endpoint.dispatchTo(id);
     }
 
     /**
@@ -264,7 +264,7 @@ public abstract class ProcessManagerRepository<I,
 
     final void dispatchNowTo(I id, EventEnvelope event) {
         PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, event);
-        endpoint.dispatchToOne(id);
+        endpoint.dispatchTo(id);
     }
 
     @Override

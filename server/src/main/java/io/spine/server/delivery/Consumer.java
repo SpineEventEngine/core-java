@@ -120,7 +120,7 @@ public abstract class Consumer<I,
      * @param messageEnvelope the envelope to obtain the endpoint for
      * @return the message endpoint
      */
-    protected abstract EntityMessageEndpoint<I, E, M, ?> getEndpoint(M messageEnvelope);
+    protected abstract EntityMessageEndpoint<I, E, M> getEndpoint(M messageEnvelope);
 
     protected Repository<I, E> repository() {
         return repository;

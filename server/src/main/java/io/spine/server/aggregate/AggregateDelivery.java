@@ -64,7 +64,7 @@ public abstract class AggregateDelivery<I,
         }
 
         @Override
-        protected abstract AggregateEndpoint<I, A, E, ?> getEndpoint(E messageEnvelope);
+        protected abstract AggregateEndpoint<I, A, E> getEndpoint(E messageEnvelope);
 
         @Override
         protected void passToEndpoint(I id, E envelopeMessage) {

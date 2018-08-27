@@ -39,7 +39,7 @@ import static io.spine.server.command.DispatchCommand.operationFor;
  */
 @Internal
 public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, CommandEnvelope, I> {
+        extends AggregateEndpoint<I, A, CommandEnvelope> {
 
     protected AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
         super(repo, command);
@@ -55,18 +55,6 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getEndpointDelivery() {
         return repository().getCommandEndpointDelivery();
-    }
-
-    /**
-     * Returns ID of the aggregate that is responsible for handling the command.
-     */
-    @Override
-    protected I getTargets() {
-        CommandEnvelope envelope = envelope();
-        I id = repository().getCommandRouting()
-                           .apply(envelope.getMessage(), envelope.getCommandContext());
-        repository().onCommandTargetSet(id, envelope.getId());
-        return id;
     }
 
     @Override
