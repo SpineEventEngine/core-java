@@ -59,7 +59,13 @@ final class DomainBoundedContext extends BoundedContext {
     }
 
     private void init() {
+        createGateway();
         getStand().onCreated(this);
+    }
+
+    private void createGateway() {
+        DomainGateway domainGateway = new DomainGateway(this);
+        getIntegrationBus().register(domainGateway);
     }
 
     @Override
