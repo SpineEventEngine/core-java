@@ -131,8 +131,8 @@ class EntityHistoryTest {
                                           .setId(id)
                                           .setName(PersonName.getDefaultInstance())
                                           .build());
-            checkEntityCreated(PROJECTION, TestProjection.TYPE);
             checkEventDispatchedToSubscriber();
+            checkEntityCreated(PROJECTION, TestProjection.TYPE);
             checkEntityStateChanged(PersonDetails.newBuilder()
                                                  .setId(id)
                                                  .setName(PersonName.getDefaultInstance())
@@ -145,13 +145,13 @@ class EntityHistoryTest {
             hidePerson();
             eventAccumulator.assertEventCount(6);
 
-            eventAccumulator.nextEvent(EntityCreated.class);
             eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
+            eventAccumulator.nextEvent(EntityCreated.class);
 
             checkEntityArchived();
 
-            eventAccumulator.nextEvent(EntityCreated.class);
             eventAccumulator.nextEvent(EventDispatchedToSubscriber.class);
+            eventAccumulator.nextEvent(EntityCreated.class);
 
             checkEntityDeleted();
         }

@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -48,7 +47,6 @@ import io.spine.test.integration.command.ItgStartProject;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
-import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.Int32ValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
@@ -146,11 +144,6 @@ public class IntegrationBusTestEnv {
                                  .setProjectId(projectId)
                                  .build()
         );
-    }
-
-    private static Command toCommand(ItgStartProject cmdMessage) {
-        return TestActorRequestFactory.newInstance(IntegrationBusTestEnv.class)
-                                      .createCommand(cmdMessage);
     }
 
     private static ProjectId projectId() {

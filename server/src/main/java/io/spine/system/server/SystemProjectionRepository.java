@@ -20,35 +20,21 @@
 
 package io.spine.system.server;
 
-import io.spine.core.CommandId;
-import io.spine.server.route.EventRouting;
+import com.google.protobuf.Message;
+import io.spine.core.EventEnvelope;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionRepository;
 
-import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.of;
-
 /**
- * A repository for {@link ScheduledCommand}s.
- *
  * @author Dmytro Dashenkov
  */
-final class ScheduledCommandRepository
-        extends SystemProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
+public class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
+        extends ProjectionRepository<I, P, S> {
 
     @Override
-    public void onRegistered() {
-        super.onRegistered();
-        EventRouting<CommandId> routing = getEventRouting();
-        routing.route(CommandDispatched.class,
-                      (message, context) -> routeToExisting(message));
-    }
-
-    private Set<CommandId> routeToExisting(CommandDispatched event) {
-        CommandId id = event.getId();
-        Optional<ScheduledCommand> existing = find(id);
-        return existing.isPresent()
-               ? of(id)
-               : of();
+    public final Set<I> dispatch(EventEnvelope envelope) {
+        return dispatchNow(envelope);
     }
 }

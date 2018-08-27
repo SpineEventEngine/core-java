@@ -86,7 +86,6 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
         doDispatch(projection, envelope());
-        repository().onEventDispatched(projection.getId(), envelope().getOuterObject());
         tx.commit();
     }
 

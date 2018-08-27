@@ -51,7 +51,6 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -83,8 +82,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
-
-    private @MonotonicNonNull ProjectionDeliveryEventSubscriber systemSubscriber;
 
     /**
      * Creates a new {@code ProjectionRepository}.
@@ -152,7 +149,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             }
         }
 
-        this.systemSubscriber = new ProjectionDeliveryEventSubscriber(this);
+        ProjectionDeliveryEventSubscriber<I> systemSubscriber =
+                new ProjectionDeliveryEventSubscriber<>(this);
         BoundedContext boundedContext = getBoundedContext();
         systemSubscriber.registerAt(boundedContext);
 
@@ -263,12 +261,17 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<I> dispatch(EventEnvelope envelope) {
-        Set<I> ids = ProjectionEndpoint.handle(this, envelope);
+        EventRouting<I> routing = getEventRouting();
+        Set<I> ids = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        Event event = envelope.getOuterObject();
+        ids.forEach(id -> lifecycleOf(id).onDispatchEventToSubscriber(event));
         return ids;
     }
 
-    void onEventDispatched(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToSubscriber(event);
+    @Internal
+    protected final Set<I> dispatchNow(EventEnvelope envelope) {
+        Set<I> ids = ProjectionEndpoint.handle(this, envelope);
+        return ids;
     }
 
     @Internal
