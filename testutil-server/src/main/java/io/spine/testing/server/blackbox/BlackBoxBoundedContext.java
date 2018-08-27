@@ -22,7 +22,9 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -107,10 +109,6 @@ public class BlackBoxBoundedContext {
      * Utilities for instance initialization.
      ******************************************************************************/
 
-    public TestActorRequestFactory requestFactory() {
-        return requestFactory;
-    }
-
     /**
      * Creates a new {@link io.spine.client.ActorRequestFactory actor request factory} for tests
      * with a provided tenant ID.
@@ -133,6 +131,28 @@ public class BlackBoxBoundedContext {
      */
     private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
         return TestEventFactory.newInstance(requestFactory);
+    }
+
+    /**
+     * Creates a new instance of {@link TestEventFactory} which supplies mock
+     * for {@linkplain io.spine.core.EventContext#getProducerId() producer ID} values.
+     */
+    public TestEventFactory newEventFactory() {
+        return eventFactory(requestFactory);
+    }
+
+    /**
+     * Creates a new instance of {@link TestEventFactory} which supplies the passed value
+     * of the {@linkplain io.spine.core.EventContext#getProducerId() event producer ID}.
+     *
+     * @param producerId can be {@code Integer}, {@code Long}, {@link String}, or {@code Message}
+     */
+    public TestEventFactory newEventFactory(Object producerId) {
+        checkNotNull(producerId);
+        Any id = producerId instanceof Any
+                 ? (Any) producerId
+                 : Identifier.pack(producerId);
+        return TestEventFactory.newInstance(id, requestFactory);
     }
 
     /**

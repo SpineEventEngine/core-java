@@ -123,8 +123,6 @@ class EventImportTest {
         }
     }
 
-
-
     @Nested
     @DisplayName("dispatch imported events")
     class Dispatching {
@@ -177,10 +175,9 @@ class EventImportTest {
      * @return generated event wrapped into the envelope
      */
     private EventEnvelope createEvent(Message eventMessage, @Nullable EngineId producerId) {
-        TestEventFactory eventFactory =
-                producerId == null
-                ? TestEventFactory.newInstance(boundedContext.requestFactory())
-                : TestEventFactory.newInstance(producerId, boundedContext.requestFactory());
+        TestEventFactory eventFactory = producerId == null
+                                        ? boundedContext.newEventFactory()
+                                        : boundedContext.newEventFactory(producerId);
         EventEnvelope result = EventEnvelope.of(eventFactory.createEvent(eventMessage));
         return result;
     }
