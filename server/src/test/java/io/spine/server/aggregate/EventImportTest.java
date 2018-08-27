@@ -27,6 +27,7 @@ import io.spine.server.aggregate.given.klasse.EngineId;
 import io.spine.server.aggregate.given.klasse.EngineRepository;
 import io.spine.server.aggregate.given.klasse.event.EngineStopped;
 import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
+import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -40,6 +41,7 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithErrors;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
 /**
@@ -79,11 +81,7 @@ class EventImportTest {
     @DisplayName("route imported events")
     class Routing {
 
-        private final EngineId engineId = EngineId
-                .newBuilder()
-                .setValue("AFB")
-                .build();
-
+        private final EngineId engineId = engineId("AFB");
         private final SettingsAdjusted eventMessage = SettingsAdjusted
                 .newBuilder()
                 .setId(engineId)
@@ -127,11 +125,7 @@ class EventImportTest {
     @DisplayName("dispatch imported events")
     class Dispatching {
 
-        private final EngineId engineId = EngineId
-                .newBuilder()
-                .setValue("AEL")
-                .build();
-
+        private final EngineId engineId = engineId("AEL");
         private final EngineStopped eventMessage = EngineStopped
                 .newBuilder()
                 .setId(engineId)
@@ -164,6 +158,20 @@ class EventImportTest {
         }
     }
 
+    @Test
+    @DisplayName("fail with exception when importing unsupported event")
+    void importUnsupported() {
+        EngineId id = engineId("AGR");
+        UnsupportedEngineEvent eventMessage = UnsupportedEngineEvent
+                .newBuilder()
+                .setId(id)
+                .build();
+        EventEnvelope unsupported = createEvent(eventMessage, id);
+
+        boundedContext.importsEvent(unsupported.getOuterObject())
+                      .assertThat(ackedWithErrors());
+    }
+
     /**
      * Creates a new event for the passed message.
      *
@@ -180,5 +188,12 @@ class EventImportTest {
                                         : boundedContext.newEventFactory(producerId);
         EventEnvelope result = EventEnvelope.of(eventFactory.createEvent(eventMessage));
         return result;
+    }
+
+    private static EngineId engineId(String value) {
+        return EngineId
+                .newBuilder()
+                .setValue(value)
+                .build();
     }
 }
