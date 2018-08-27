@@ -47,6 +47,7 @@ import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
+import io.spine.test.procman.command.PmStartIteration;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
@@ -80,6 +81,7 @@ import static io.spine.server.procman.given.pm.GivenMessages.addTask;
 import static io.spine.server.procman.given.pm.GivenMessages.cancelIteration;
 import static io.spine.server.procman.given.pm.GivenMessages.createProject;
 import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
+import static io.spine.server.procman.given.pm.GivenMessages.iterationPlanned;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
 import static io.spine.server.procman.given.pm.GivenMessages.startProject;
 import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
@@ -304,7 +306,25 @@ class ProcessManagerTest {
                               .assertThat(emittedCommands(PmScheduleRetrospective.class,
                                                           PmPlanIteration.class));
             }
+        }
 
+        @Nested
+        @DisplayName("optionally on incoming event")
+        class OptionalCommand {
+
+            @Test
+            @DisplayName("when command is generated")
+            void commandGenerated() {
+                boundedContext.receivesEvent(iterationPlanned(true))
+                              .assertThat(emittedCommand(PmStartIteration.class, once()));
+            }
+
+            @Test
+            @DisplayName("when command is NOT generated")
+            void noCommand() {
+                boundedContext.receivesEvent(iterationPlanned(false))
+                              .assertThat(emittedCommand(PmStartIteration.class, none()));
+            }
         }
     }
 
