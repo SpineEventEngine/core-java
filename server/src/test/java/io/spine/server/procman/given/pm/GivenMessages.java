@@ -32,6 +32,7 @@ import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmOwnerChanged;
 
 import static io.spine.server.procman.given.pm.TestProcessManager.ID;
@@ -71,6 +72,13 @@ public class GivenMessages {
                 .newBuilder()
                 .setProjectId(ID)
                 .build();
+    }
+
+    public static PmIterationPlanned iterationPlanned(boolean budgetAllocated) {
+        return PmIterationPlanned.newBuilder()
+                                 .setProjectId(ID)
+                                 .setBudgetAllocated(budgetAllocated)
+                                 .build();
     }
 
     public static RejectionEnvelope entityAlreadyArchived(Class<? extends Message> commandClass) {

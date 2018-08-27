@@ -66,6 +66,10 @@ message PmDeleteProcess {
     ProjectId project_id = 1;
 }
 
+message PmStartIteration {
+    ProjectId project_id = 1;
+}
+
 message PmCancelIteration {
     ProjectId project_id = 1;
 }
