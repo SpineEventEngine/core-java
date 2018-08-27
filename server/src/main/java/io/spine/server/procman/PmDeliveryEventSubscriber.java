@@ -18,27 +18,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.procman;
 
 import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.delivery.DeliveryEventSubscriber;
 import io.spine.system.server.CommandDispatchedToHandler;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.system.server.EventDispatchedToReactor;
+import io.spine.system.server.HistoryRejections;
 
 /**
  * @author Dmytro Dashenkov
  */
-final class DomainGateway extends AbstractEventSubscriber {
+final class PmDeliveryEventSubscriber extends DeliveryEventSubscriber {
 
-    private final DomainBoundedContext boundedContext;
+    private final ProcessManagerRepository<?, ?, ?> repository;
 
-    DomainGateway(DomainBoundedContext context) {
-        this.boundedContext = checkNotNull(context);
+    PmDeliveryEventSubscriber(ProcessManagerRepository<?, ?, ?> repository) {
+        super(repository.getEntityStateType());
+        this.repository = repository;
     }
 
     @Subscribe(external = true)
     public void on(CommandDispatchedToHandler event) {
-        System.out.println(event.getPayload().getWhenDispatched());
+        if (correctType(event.getReceiver())) {
+            // repository -> dispatch ...
+        }
+    }
+
+    @Subscribe(external = true)
+    public void on(HistoryRejections.CannotDispatchCommandTwice event) {
+        if (correctType(event.getReceiver())) {
+            // repository -> dispatch ...
+        }
+    }
+
+    @Subscribe(external = true)
+    public void on(EventDispatchedToReactor event) {
+        if (correctType(event.getReceiver())) {
+            // repository -> dispatch ...
+        }
+    }
+
+    @Subscribe(external = true)
+    public void on(HistoryRejections.CannotDispatchEventTwice event) {
+        if (correctType(event.getReceiver())) {
+            // repository -> dispatch ...
+        }
     }
 }

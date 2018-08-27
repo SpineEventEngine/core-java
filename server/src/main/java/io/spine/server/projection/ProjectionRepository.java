@@ -51,6 +51,7 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -82,6 +83,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
+
+    private @MonotonicNonNull ProjectionDeliveryEventSubscriber systemSubscriber;
 
     /**
      * Creates a new {@code ProjectionRepository}.
@@ -148,6 +151,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                 "event subscriptions.", this);
             }
         }
+
+        this.systemSubscriber = new ProjectionDeliveryEventSubscriber(this);
+        BoundedContext boundedContext = getBoundedContext();
+        systemSubscriber.registerAt(boundedContext);
 
         registerWithSharding();
     }

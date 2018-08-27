@@ -102,6 +102,8 @@ public abstract class ProcessManagerRepository<I,
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
+    private @MonotonicNonNull PmDeliveryEventSubscriber systemSubscriber;
+
     /**
      * Creates a new instance with the event routing by the first message field.
      */
@@ -163,6 +165,9 @@ public abstract class ProcessManagerRepository<I,
         }
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        this.systemSubscriber = new PmDeliveryEventSubscriber(this);
+        systemSubscriber.registerAt(boundedContext);
+
         registerWithSharding();
     }
 
