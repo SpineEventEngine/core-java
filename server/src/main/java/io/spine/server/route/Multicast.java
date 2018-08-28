@@ -30,5 +30,6 @@ import java.util.Set;
  * @param <I> the type of the entity IDs
  * @author Alexander Yevsyukov
  */
+@FunctionalInterface
 public interface Multicast<I, M extends Message, C extends Message> extends Route<M, C, Set<I>>  {
 }

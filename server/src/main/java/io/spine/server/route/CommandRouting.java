@@ -60,9 +60,6 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
         return new CommandRouting<>(defaultRoute);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final CommandRoute<I, Message> getDefault() {
         return (CommandRoute<I, Message>) super.getDefault();
@@ -116,6 +113,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
     public <M extends Message> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
         Optional<? extends Route<Message, CommandContext, I>> optional = doGet(commandClass);
         if (optional.isPresent()) {
+            @SuppressWarnings("unchecked") // Cast to external API.
             CommandRoute<I, M> route = (CommandRoute<I, M>) optional.get();
             return Optional.of(route);
         }

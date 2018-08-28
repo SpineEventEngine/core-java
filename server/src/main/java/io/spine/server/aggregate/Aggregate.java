@@ -38,7 +38,6 @@ import io.spine.server.aggregate.model.EventApplier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
-import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.EventsResult;
@@ -67,7 +66,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * one or more events. These events are used later to restore the state of the
  * aggregate.
  *
- * <h2>Creating an aggregate class</h2>
+ * <h1>Creating an aggregate class</h1>
  *
  * <p>In order to create a new aggregate class you need to:
  * <ol>
@@ -105,7 +104,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * <p>An {@code Aggregate} class must have applier methods for
  * <em>all</em> types of the events that it produces.
  *
- * <h2>Performance considerations for aggregate state</h2>
+ * <h1>Performance considerations</h1>
  *
  * <p>In order to improve performance of loading aggregates an
  * {@link AggregateRepository} periodically stores aggregate snapshots.
@@ -239,8 +238,8 @@ public abstract class Aggregate<I,
 
     @Override
     public void play(Iterable<Event> events) {
-        EventPlayers.forTransactionOf(this)
-                    .play(events);
+        EventPlayer.forTransactionOf(this)
+                   .play(events);
     }
 
     /**

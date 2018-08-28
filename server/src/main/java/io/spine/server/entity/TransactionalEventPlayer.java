@@ -45,8 +45,6 @@ final class TransactionalEventPlayer implements EventPlayer {
 
     /**
      * Plays the given events upon the underlying entity transaction.
-     *
-     * @param events {@inheritDoc}
      */
     @Override
     public void play(Iterable<Event> events) {

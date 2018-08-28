@@ -28,7 +28,6 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -37,10 +36,11 @@ import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.UnicastBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -55,10 +55,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.bus.BusBuilder.FieldCheck.checkSet;
+import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
+import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.GatewayFunction.delegatingTo;
-import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -70,10 +71,10 @@ import static java.util.Optional.ofNullable;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-public class CommandBus extends Bus<Command,
-                                    CommandEnvelope,
-                                    CommandClass,
-                                    CommandDispatcher<?>> {
+public class CommandBus extends UnicastBus<Command,
+                                           CommandEnvelope,
+                                           CommandClass,
+                                           CommandDispatcher<?>> {
 
     private final CommandScheduler scheduler;
     private final EventBus eventBus;
@@ -114,8 +115,10 @@ public class CommandBus extends Bus<Command,
                            : false;
         this.scheduler = builder.commandScheduler;
         this.eventBus = builder.eventBus;
-        this.systemGateway = builder.systemGateway;
-        this.tenantIndex = builder.tenantIndex;
+        this.systemGateway = builder.systemGateway()
+                                    .orElseThrow(gatewayNotSet());
+        this.tenantIndex = builder.tenantIndex()
+                                  .orElseThrow(tenantIndexNotSet());
         this.deadCommandHandler = new DeadCommandHandler();
         this.errorHandler = CommandErrorHandler.with(systemGateway);
         this.flowWatcher = builder.flowWatcher;
@@ -226,10 +229,6 @@ public class CommandBus extends Bus<Command,
         return registry().getRegisteredMessageClasses();
     }
 
-    private Optional<? extends CommandDispatcher<?>> getDispatcher(CommandClass commandClass) {
-        return registry().getDispatcher(commandClass);
-    }
-
     @Override
     protected DeadMessageHandler<CommandEnvelope> getDeadMessageHandler() {
         return deadCommandHandler;
@@ -251,28 +250,10 @@ public class CommandBus extends Bus<Command,
         dispatch(commandEnvelope);
     }
 
-    private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
-        String idStr = Identifier.toString(commandEnvelope.getId());
-        String msg = format("No dispatcher found for the command (class: %s id: %s).",
-                            commandEnvelope.getMessageClass()
-                                           .toString(),
-                            idStr);
-        throw new IllegalStateException(msg);
-    }
-
     @Override
     protected void store(Iterable<Command> commands) {
         TenantId tenantId = tenantOf(commands);
         tenantIndex.keep(tenantId);
-    }
-
-    private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
-        Optional<? extends CommandDispatcher<?>> dispatcher =
-                getDispatcher(commandEnvelope.getMessageClass());
-        if (!dispatcher.isPresent()) {
-            throw noDispatcherFound(commandEnvelope);
-        }
-        return dispatcher.get();
     }
 
     /**
@@ -289,7 +270,7 @@ public class CommandBus extends Bus<Command,
      * The {@code Builder} for {@code CommandBus}.
      */
     @CanIgnoreReturnValue
-    public static class Builder extends AbstractBuilder<CommandEnvelope, Command, Builder> {
+    public static class Builder extends BusBuilder<CommandEnvelope, Command, Builder> {
 
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
@@ -310,13 +291,9 @@ public class CommandBus extends Bus<Command,
          */
         private CommandScheduler commandScheduler;
         private EventBus eventBus;
-        private SystemGateway systemGateway;
-        private TenantIndex tenantIndex;
         private CommandFlowWatcher flowWatcher;
 
-        /**
-         * Prevents direct instantiation.
-         */
+        /** Prevents direct instantiation. */
         private Builder() {
             super();
         }
@@ -356,42 +333,14 @@ public class CommandBus extends Bus<Command,
             return this;
         }
 
-        /**
-         * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
-         *
-         * @apiNote This method is {@link Internal} to the framework. The name of the method starts
-         *          with the {@code inject} prefix so that this method does not appear in an
-         *          auto-complete hint for the {@code set} prefix.
-         */
-        @Internal
-        public Builder injectSystemGateway(SystemGateway gateway) {
-            this.systemGateway = checkNotNull(gateway);
-            return this;
-        }
-
-        /**
-         * Inject the {@link TenantIndex} of the bounded context to which the built bus belongs.
-         *
-         * @apiNote This method is {@link Internal} to the framework. The name of the method starts
-         *          with the {@code inject} prefix so that this method does not appear in an
-         *          auto-complete hint for the {@code set} prefix.
-         */
-        @Internal
-        public Builder injectTenantIndex(TenantIndex index) {
-            this.tenantIndex = checkNotNull(index);
-            return this;
-        }
-
-        Optional<SystemGateway> getSystemGateway() {
-            return ofNullable(systemGateway);
-        }
-
-        Optional<TenantIndex> getTenantIndex() {
-            return ofNullable(tenantIndex);
-        }
-
         Optional<EventBus> getEventBus() {
             return ofNullable(eventBus);
+        }
+
+        @Override
+        protected void checkFieldsSet() {
+            super.checkFieldsSet();
+            checkSet(eventBus, EventBus.class, "injectEventBus");
         }
 
         /**
@@ -404,15 +353,15 @@ public class CommandBus extends Bus<Command,
         @Internal
         @CheckReturnValue
         public CommandBus build() {
-            checkSet(eventBus, EventBus.class, "injectEventBus");
-            checkSet(systemGateway, SystemGateway.class, "injectSystemGateway");
-            checkSet(tenantIndex, TenantIndex.class, "injectTenantIndex");
+            checkFieldsSet();
 
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
-                SystemGateway result = delegatingTo(systemGateway).get(tenantId);
+                @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
+                SystemGateway gateway = systemGateway().get();
+                SystemGateway result = delegatingTo(gateway).get(tenantId);
                 return result;
             });
             commandScheduler.setFlowWatcher(flowWatcher);
@@ -423,19 +372,13 @@ public class CommandBus extends Bus<Command,
             return commandBus;
         }
 
-        private static <F> void checkSet(@Nullable F field,
-                                         Class<F> fieldType,
-                                         String setterName) {
-            checkState(field != null,
-                       "%s must be set. Please call CommandBus.Builder.%s().",
-                       fieldType.getSimpleName(), setterName);
-        }
-
         @Override
+        @CheckReturnValue
         protected Builder self() {
             return this;
         }
 
+        @CheckReturnValue
         @SuppressWarnings("CheckReturnValue")
             /* Calling registry() enforces creating the registry to make spying for CommandBus
                instances in tests work. */

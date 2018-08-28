@@ -35,7 +35,6 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.tenant.EventOperation;
-import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 
 import java.util.Optional;
@@ -97,7 +96,7 @@ public abstract class AbstractEventSubscriber
         checkNotNull(envelope);
         checkNotNull(exception);
         MessageClass messageClass = envelope.getMessageClass();
-        String messageId = Stringifiers.toString(envelope.getId());
+        String messageId = envelope.idAsString();
         String errorMessage =
                 format("Error handling event subscription (class: %s id: %s).",
                        messageClass, messageId);
@@ -158,7 +157,7 @@ public abstract class AbstractEventSubscriber
                               MessageEnvelope envelope,
                               RuntimeException exception) {
             MessageClass messageClass = envelope.getMessageClass();
-            String messageId = Stringifiers.toString(envelope.getId());
+            String messageId = envelope.idAsString();
             String errorMessage = format(msgFormat, messageClass, messageId);
             _error(errorMessage, exception);
         }

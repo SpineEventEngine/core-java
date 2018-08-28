@@ -28,5 +28,6 @@ import com.google.protobuf.Message;
  * @param <I> the type of entity ID
  * @author Alexander Yevsyukov
  */
+@FunctionalInterface
 public interface Unicast<I, M extends Message, C extends Message> extends Route<M, C, I> {
 }

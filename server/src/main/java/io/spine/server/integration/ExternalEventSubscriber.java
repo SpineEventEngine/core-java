@@ -91,7 +91,7 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
         checkNotNull(exception);
 
         MessageClass messageClass = envelope.getMessageClass();
-        String messageId = Stringifiers.toString(envelope.getId());
+        String messageId = envelope.idAsString();
         String errorMessage =
                 format("Error handling external event subscription (class: %s id: %s).",
                        messageClass, messageId);

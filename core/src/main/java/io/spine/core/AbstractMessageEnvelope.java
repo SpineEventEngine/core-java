@@ -20,6 +20,7 @@
 
 package io.spine.core;
 
+import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 
 import java.util.Objects;

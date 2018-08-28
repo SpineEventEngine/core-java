@@ -29,6 +29,7 @@ import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.aggregate.ImportBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -50,7 +51,7 @@ import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemBoundedContext;
+import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeName;
 
@@ -106,6 +107,7 @@ public abstract class BoundedContext
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final IntegrationBus integrationBus;
+    private final ImportBus importBus;
     private final Stand stand;
 
     /** Controls access to entities of all registered repositories. */
@@ -139,6 +141,21 @@ public abstract class BoundedContext
 
         this.commandBus = buildCommandBus(builder, eventBus);
         this.integrationBus = buildIntegrationBus(builder, eventBus, name);
+        this.importBus = buildImportBus(tenantIndex);
+    }
+
+    /**
+     * Prevents 3rd party code from creating classes extending from {@code BoundedContext}.
+     */
+    @SuppressWarnings("ClassReferencesSubclass")
+    private void checkInheritance() {
+        Class<? extends BoundedContext> thisClass = getClass();
+        checkState(
+                DomainContext.class.equals(thisClass) ||
+                        SystemContext.class.equals(thisClass),
+                "The class `BoundedContext` is not designed for " +
+                        "inheritance by the framework users."
+        );
     }
 
     private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
@@ -148,20 +165,6 @@ public abstract class BoundedContext
                                       .injectEventBus(eventBus)
                                       .build();
         return result;
-    }
-
-    /**
-     * Prevents 3rd party code from creating classes extending {@link BoundedContext}.
-     */
-    @SuppressWarnings("ClassReferencesSubclass")
-    private void checkInheritance() {
-        Class<? extends BoundedContext> thisClass = getClass();
-        checkState(
-                DomainBoundedContext.class.equals(thisClass) ||
-                        SystemBoundedContext.class.equals(thisClass),
-                "The class `BoundedContext` is not designed for " +
-                        "inheritance by the framework users"
-        );
     }
 
     /**
@@ -184,6 +187,13 @@ public abstract class BoundedContext
                           .setEventBus(eventBus)
                           .build();
         return result;
+    }
+
+    private static ImportBus buildImportBus(TenantIndex tenantIndex) {
+        ImportBus.Builder result = ImportBus
+                .newBuilder()
+                .injectTenantIndex(tenantIndex);
+        return result.build();
     }
 
     /**
@@ -346,6 +356,11 @@ public abstract class BoundedContext
         return this.integrationBus;
     }
 
+    /** Obtains instance of {@link ImportBus} of this {@code BoundedContext}. */
+    public ImportBus getImportBus() {
+        return this.importBus;
+    }
+
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
     public Stand getStand() {
         return stand;
@@ -372,7 +387,8 @@ public abstract class BoundedContext
     }
 
     /**
-     * @return {@code true} if the bounded context serves many organizations
+     * Returns {@code true} if the Bounded Context is designed to serve more than one tenant of
+     * the application, {@code false} otherwise.
      */
     public boolean isMultitenant() {
         return multitenant;
@@ -405,12 +421,9 @@ public abstract class BoundedContext
      *     <li>Closes {@link IntegrationBus}.
      *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      *     <li>Closes {@link Stand}.
-     *     <li>Shuts down all registered repositories. Each registered repository is:
-     *      <ul>
-     *          <li>un-registered from {@link CommandBus}
-     *          <li>un-registered from {@link EventBus}
-     *          <li>detached from its storage
-     *      </ul>
+     *     <li>Closes {@link ImportBus}.
+     *     <li>{@linkplain io.spine.server.entity.Repository#close()} Closes} all registered
+     *     repositories.
      * </ol>
      *
      * @throws Exception caused by closing one of the components
@@ -423,6 +436,7 @@ public abstract class BoundedContext
         eventBus.close();
         integrationBus.close();
         stand.close();
+        importBus.close();
 
         shutDownRepositories();
 

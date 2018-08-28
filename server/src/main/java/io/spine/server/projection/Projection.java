@@ -25,7 +25,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
-import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.model.EventSubscriberMethod;
@@ -98,7 +97,7 @@ public abstract class Projection<I,
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
-    static boolean play(Projection<?, ?, ?> projection, Iterable<Event> events) {
+    static boolean playOn(Projection<?, ?, ?> projection, Iterable<Event> events) {
         ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.play(events);
         tx.commit();
@@ -113,7 +112,7 @@ public abstract class Projection<I,
 
     @Override
     public void play(Iterable<Event> events) {
-        EventPlayer eventPlayer = EventPlayers.forTransactionOf(this);
+        EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
         eventPlayer.play(events);
     }
 }

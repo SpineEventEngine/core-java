@@ -20,6 +20,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.annotation.SPI;
+import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.DeliveryTag;
 import io.spine.server.delivery.EventShardedStream;
@@ -62,7 +63,11 @@ public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
 
         @Override
         protected AggregateEventEndpoint<I, A> getEndpoint(EventEnvelope envelope) {
-            return new AggregateEventEndpoint<>(repository(), envelope);
+            EventClass eventClass = envelope.getMessageClass();
+            if (repository().importsEvent(eventClass)) {
+                return new EventImportEndpoint<>(repository(), envelope);
+            }
+            return new AggregateEventReactionEndpoint<>(repository(), envelope);
         }
     }
 }

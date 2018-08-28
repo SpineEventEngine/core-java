@@ -46,9 +46,9 @@ import io.spine.server.event.EventBus;
  * @see BoundedContext
  */
 @Internal
-public final class SystemBoundedContext extends BoundedContext {
+public final class SystemContext extends BoundedContext {
 
-    private SystemBoundedContext(BoundedContextBuilder builder) {
+    private SystemContext(BoundedContextBuilder builder) {
         super(builder);
     }
 
@@ -59,10 +59,10 @@ public final class SystemBoundedContext extends BoundedContext {
      * @param builder the configuration of the instance to create
      * @return new {@code SystemBoundedContext}
      */
-    public static SystemBoundedContext newInstance(BoundedContextBuilder builder) {
+    public static SystemContext newInstance(BoundedContextBuilder builder) {
         CommandLifecycleRepository repository = new CommandLifecycleRepository();
         BoundedContextBuilder preparedBuilder = prepareEnricher(builder, repository);
-        SystemBoundedContext result = new SystemBoundedContext(preparedBuilder);
+        SystemContext result = new SystemContext(preparedBuilder);
         result.init(repository);
         return result;
     }

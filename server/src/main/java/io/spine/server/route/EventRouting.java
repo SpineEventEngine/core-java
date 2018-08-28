@@ -129,6 +129,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
     public <M extends Message> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
         Optional<? extends Route<Message, EventContext, Set<I>>> optional = doGet(eventClass);
         if (optional.isPresent()) {
+            @SuppressWarnings("unchecked") // Cast to external API.
             EventRoute<I, M> route = (EventRoute<I, M>) optional.get();
             return Optional.of(route);
         }

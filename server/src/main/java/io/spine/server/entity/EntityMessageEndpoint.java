@@ -27,6 +27,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.delivery.Delivery;
 import io.spine.string.Stringifiers;
+import io.spine.server.tenant.TenantAwareFunction0;
 
 import java.util.List;
 
@@ -169,9 +170,10 @@ public abstract class EntityMessageEndpoint<I,
      * @throws IllegalStateException always
      */
     protected void onUnhandledCommand(Entity<I, ?> entity, CommandEnvelope cmd, String format) {
-        String entityId = Stringifiers.toString(entity.getId());
-        String entityClass = entity.getClass().getName();
-        String commandId = Stringifiers.toString(cmd.getId());
+        String entityId = entity.idAsString();
+        String entityClass = entity.getClass()
+                                   .getName();
+        String commandId = cmd.idAsString();
         CommandClass commandClass = cmd.getMessageClass();
         throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
     }

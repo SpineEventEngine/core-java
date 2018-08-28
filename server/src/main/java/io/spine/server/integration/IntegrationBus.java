@@ -25,7 +25,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
@@ -370,7 +370,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      */
     @CanIgnoreReturnValue
     public static class Builder
-            extends Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
+            extends BusBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
 
         /**
          * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow

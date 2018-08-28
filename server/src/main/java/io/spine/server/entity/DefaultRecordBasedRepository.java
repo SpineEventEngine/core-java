@@ -27,9 +27,6 @@ import io.spine.type.TypeUrl;
  * Implementation of {@link RecordBasedRepository} that manages entities
  * derived from {@link AbstractEntity}.
  *
- * @param <I> the type of IDs of entities
- * @param <E> the type of entities
- * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
 public abstract class DefaultRecordBasedRepository<I,

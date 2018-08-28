@@ -93,8 +93,8 @@ public class AggregateRepositoryTestEnv {
     private static BoundedContext boundedContext = newBoundedContext();
     private static ProjectAggregateRepository repository = newRepository();
 
+    /** Prevent instantiation of this utility class. */
     private AggregateRepositoryTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     public static TestActorRequestFactory requestFactory() {
@@ -160,11 +160,6 @@ public class AggregateRepositoryTestEnv {
         return new ProjectAggregateRepository();
     }
 
-    /** Generates a command for the passed message and wraps it into the envelope. */
-    private static CommandEnvelope env(Message commandMessage) {
-        return CommandEnvelope.of(requestFactory.command()
-                                                .create(commandMessage));
-    }
 
     /** Utility factory for test aggregates. */
     public static class GivenAggregate {
@@ -200,6 +195,12 @@ public class AggregateRepositoryTestEnv {
             dispatchCommand(aggregate, env(startProject));
 
             return aggregate;
+        }
+
+        /** Generates a command for the passed message and wraps it into the envelope. */
+        private static CommandEnvelope env(Message commandMessage) {
+            return CommandEnvelope.of(requestFactory.command()
+                                                    .create(commandMessage));
         }
     }
 

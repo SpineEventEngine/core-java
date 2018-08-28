@@ -40,7 +40,7 @@ import static io.spine.core.Events.substituteVersion;
  *
  * @author Alex Tymchenko
  */
-class AggregateEvents {
+final class AggregateEvents {
 
     /**
      * Prevents this utility class from instantiation.
