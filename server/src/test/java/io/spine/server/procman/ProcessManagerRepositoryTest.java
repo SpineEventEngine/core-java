@@ -35,11 +35,14 @@ import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
+import io.spine.server.event.DuplicateEventException;
+import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.TestProcessManager;
@@ -68,6 +71,8 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.Commands.getMessage;
+import static io.spine.core.Events.getMessage;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.archiveProcess;
@@ -158,8 +163,8 @@ class ProcessManagerRepositoryTest
         super.tearDown();
     }
 
-    private ProcessManagerRepository<ProjectId, TestProcessManager, Project> repository() {
-        return (ProcessManagerRepository<ProjectId, TestProcessManager, Project>) repository;
+    private TestProcessManagerRepository repository() {
+        return (TestProcessManagerRepository) repository;
     }
 
     @SuppressWarnings("CheckReturnValue")
@@ -175,24 +180,26 @@ class ProcessManagerRepositoryTest
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
-    @SuppressWarnings("CheckReturnValue") // can ignore IDs of target PMs in this test.
     private void testDispatchEvent(Message eventMessage) {
-        CommandContext commandContext = requestFactory.createCommandContext();
+        Event event = GivenEvent.withMessage(eventMessage);
+        dispatchEvent(event);
+        assertTrue(TestProcessManager.processed(eventMessage));
+    }
 
+    @SuppressWarnings("CheckReturnValue") // can ignore IDs of target PMs in this test.
+    private void dispatchEvent(Event origin) {
         // EventContext should have CommandContext with appropriate TenantId to avoid usage
         // of different storages during command and event dispatching.
+        CommandContext commandContext = requestFactory.createCommandContext();
         EventContext eventContextWithTenantId =
                 GivenEvent.context()
                           .toBuilder()
                           .setCommandContext(commandContext)
                           .build();
-        Event event =
-                GivenEvent.withMessage(eventMessage)
-                          .toBuilder()
-                          .setContext(eventContextWithTenantId)
-                          .build();
+        Event event = origin.toBuilder()
+                            .setContext(eventContextWithTenantId)
+                            .build();
         repository().dispatch(EventEnvelope.of(event));
-        assertTrue(TestProcessManager.processed(eventMessage));
     }
 
     @Nested
@@ -224,6 +231,45 @@ class ProcessManagerRepositoryTest
         PmTaskAdded message = subscriber.getRemembered();
         assertNotNull(message);
         assertEquals(ID, message.getProjectId());
+    }
+
+    @Nested
+    @DisplayName("not dispatch duplicate")
+    class AvoidDuplicates {
+
+        @Test
+        @DisplayName("events")
+        void events() {
+            Event event = GivenMessage.projectStarted();
+
+            dispatchEvent(event);
+            assertTrue(TestProcessManager.processed(getMessage(event)));
+
+            dispatchEvent(event);
+            RuntimeException exception = repository().getLatestException();
+            assertNotNull(exception);
+            assertThat(exception, instanceOf(DuplicateEventException.class));
+        }
+
+        @Test
+        @DisplayName("commands")
+        void commands() {
+            Command command = GivenMessage.createProject();
+
+            dispatchCommand(command);
+            assertTrue(TestProcessManager.processed(getMessage(command)));
+
+            dispatchCommand(command);
+            RuntimeException exception = repository().getLatestException();
+            assertNotNull(exception);
+            assertThat(exception, instanceOf(DuplicateCommandException.class));
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored") // OK for tests.
+        private void dispatchCommand(Command command) {
+            CommandEnvelope envelope = CommandEnvelope.of(command);
+            repository().dispatchCommand(envelope);
+        }
     }
 
     @Nested
@@ -350,8 +396,9 @@ class ProcessManagerRepositoryTest
                 requestFactory.createCommand(Int32Value.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
         ProjectId id = createId(42);
+        ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         Throwable exception = assertThrows(RuntimeException.class,
-                                           () -> repository().dispatchNowTo(id, request));
+                                           () -> repo.dispatchNowTo(id, request));
         assertThat(getRootCause(exception), instanceOf(IllegalStateException.class));
     }
 

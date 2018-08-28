@@ -286,7 +286,7 @@ class ProjectionRepositoryTest
 
     @Nested
     @DisplayName("not allow duplicate")
-    class Idempotency {
+    class AvoidDuplicates {
 
         @Test
         @DisplayName("events")

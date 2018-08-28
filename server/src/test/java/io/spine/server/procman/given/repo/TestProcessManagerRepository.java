@@ -20,14 +20,33 @@
 
 package io.spine.server.procman.given.repo;
 
+import io.spine.core.CommandEnvelope;
+import io.spine.core.EventEnvelope;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TestProcessManagerRepository
         extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
+    private @Nullable RuntimeException latestException;
+
     public TestProcessManagerRepository() {
         super();
+    }
+
+    @Override
+    public void onError(EventEnvelope envelope, RuntimeException exception) {
+        this.latestException = exception;
+    }
+
+    @Override
+    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+        this.latestException = exception;
+    }
+
+    public @Nullable RuntimeException getLatestException() {
+        return latestException;
     }
 }
