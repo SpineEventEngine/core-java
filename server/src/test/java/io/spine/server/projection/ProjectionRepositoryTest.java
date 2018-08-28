@@ -38,6 +38,7 @@ import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
+import io.spine.server.event.DuplicateEventException;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
@@ -66,11 +67,15 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static java.lang.String.format;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -118,8 +123,8 @@ class ProjectionRepositoryTest
         }
     }
 
-    private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
-        return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
+    private TestProjectionRepository repository() {
+        return (TestProjectionRepository) repository;
     }
 
     @Override
@@ -279,6 +284,28 @@ class ProjectionRepositoryTest
         }
     }
 
+    @Nested
+    @DisplayName("not allow duplicate")
+    class Idempotency {
+
+        @Test
+        @DisplayName("events")
+        void events() {
+            PrjProjectCreated msg = GivenEventMessage.projectCreated();
+            TestEventFactory eventFactory = newEventFactory(tenantId(), pack(msg.getProjectId()));
+            Event event = eventFactory.createEvent(msg);
+
+            dispatchEvent(event);
+            assertTrue(TestProjection.processed(msg));
+            assertNull(repository().getLastException());
+
+            dispatchEvent(event);
+            RuntimeException exception = repository().getLastException();
+            assertNotNull(exception);
+            assertThat(exception, instanceOf(DuplicateEventException.class));
+        }
+    }
+
     @SuppressWarnings("CheckReturnValue") // Can ignore dispatch() result in this test.
     private void dispatchEvent(Event event) {
         repository().dispatch(EventEnvelope.of(event));
@@ -293,7 +320,7 @@ class ProjectionRepositoryTest
 
         dispatchEvent(event);
 
-        TestProjectionRepository testRepo = (TestProjectionRepository) repository();
+        TestProjectionRepository testRepo = repository();
 
         assertTrue(testRepo.getLastErrorEnvelope() instanceof EventEnvelope);
         assertEquals(Events.getMessage(event), testRepo.getLastErrorEnvelope()
@@ -375,7 +402,8 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("create stream query")
     void createStreamQuery() {
-        assertNotNull(repository().createStreamQuery());
+        ProjectionRepository<?, ?, ?> repository = repository();
+        assertNotNull(repository.createStreamQuery());
     }
 
     @Nested
@@ -389,7 +417,8 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("event store")
         void eventStore() {
-            assertNotNull(repository().getEventStore());
+            ProjectionRepository<?, ?, ?> repository = repository();
+            assertNotNull(repository.getEventStore());
         }
 
         /**
@@ -399,7 +428,8 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("bounded context")
         void boundedContext() {
-            assertNotNull(repository().boundedContext());
+            ProjectionRepository<?, ?, ?> repository = repository();
+            assertNotNull(repository.boundedContext());
         }
     }
 
