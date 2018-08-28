@@ -235,12 +235,18 @@ public abstract class ProcessManagerRepository<I,
     private I route(CommandEnvelope envelope) {
         CommandRouting<I> routing = getCommandRouting();
         I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
+        lifecycleOf(target).onTargetAssignedToCommand(envelope.getId());
         return target;
     }
 
     final void dispatchNowTo(I id, CommandEnvelope command) {
         PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
         endpoint.dispatchTo(id);
+    }
+
+    @Override
+    protected final void produceCommandToDispatch(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
     final void dispatchNowTo(I id, EventEnvelope event) {

@@ -102,9 +102,11 @@ public abstract class EventDispatchingRepository<I,
     private Set<I> doDispatch(EventEnvelope envelope) {
         Set<I> targets = route(envelope);
         Event event = envelope.getOuterObject();
-        targets.forEach(id -> lifecycleOf(id).onDispatchEventToReactor(event));
+        targets.forEach(id -> produceCommandToDispatch(id, event));
         return targets;
     }
+
+    protected abstract void produceCommandToDispatch(I id, Event event);
 
     @Internal
     protected final Set<I> route(EventEnvelope envelope) {

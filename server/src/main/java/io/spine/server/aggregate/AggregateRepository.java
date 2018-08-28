@@ -233,6 +233,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private I doDispatch(CommandEnvelope envelope) {
         I target = route(envelope);
+        lifecycleOf(target).onDispatchCommand(envelope.getCommand());
         dispatchTo(target, envelope);
         return target;
     }
@@ -241,6 +242,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private I route(CommandEnvelope envelope) {
         CommandRouting<I> routing = getCommandRouting();
         I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
+        lifecycleOf(target).onTargetAssignedToCommand(envelope.getId());
         return target;
     }
 
