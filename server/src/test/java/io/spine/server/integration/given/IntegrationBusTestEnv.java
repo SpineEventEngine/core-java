@@ -22,11 +22,11 @@ package io.spine.server.integration.given;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
@@ -49,7 +49,9 @@ import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.Int32ValueVBuilder;
+import io.spine.validate.Int64ValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -77,13 +79,6 @@ public class IntegrationBusTestEnv {
         boundedContext.register(new ProjectDetailsRepository());
         boundedContext.register(new ProjectWizardRepository());
         boundedContext.register(new ProjectCountAggregateRepository());
-        return boundedContext;
-    }
-
-    public static BoundedContext contextWithContextAwareEntitySubscriber(
-            TransportFactory transportFactory) {
-        BoundedContext boundedContext = contextWithTransport(transportFactory);
-        boundedContext.register(new ContextAwareProjectDetailsRepository());
         return boundedContext;
     }
 
@@ -165,12 +160,12 @@ public class IntegrationBusTestEnv {
         }
 
         @Subscribe(external = true)
-        void on(ItgProjectCreated event) {
+        public void on(ItgProjectCreated event) {
             externalEvent = event;
         }
 
         @Subscribe
-        void on(ItgProjectStarted event) {
+        public void on(ItgProjectStarted event) {
             domesticEvent = event;
         }
 
@@ -245,8 +240,6 @@ public class IntegrationBusTestEnv {
 
         private static ItgProjectCreated externalEvent = null;
 
-        private static ItgCannotStartArchivedProject externalRejection = null;
-
         protected ProjectCountAggregate(ProjectId id) {
             super(id);
         }
@@ -257,23 +250,12 @@ public class IntegrationBusTestEnv {
             return Collections.emptyList();
         }
 
-        @React(external = true)
-        List<Message> on(ItgCannotStartArchivedProject rejection) {
-            externalRejection = rejection;
-            return Collections.emptyList();
-        }
-
         public static ItgProjectCreated getExternalEvent() {
             return externalEvent;
         }
 
-        public static ItgCannotStartArchivedProject getExternalRejection() {
-            return externalRejection;
-        }
-
         public static void clear() {
             externalEvent = null;
-            externalRejection = null;
         }
     }
 
@@ -291,12 +273,41 @@ public class IntegrationBusTestEnv {
         }
     }
 
-    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ContextAwareProjectDetails
-            extends Projection<ProjectId, StringValue, StringValueVBuilder> {
+    public abstract static class MemoizingProjection<I,
+                                                      M extends Message,
+                                                      B extends ValidatingBuilder<M, ?>>
+            extends Projection<I, M, B> {
 
-        private static final Collection<EventContext> externalContexts = newLinkedList();
-        private static final Collection<ItgProjectCreated> externalEvents = newLinkedList();
+        private static final Collection<Message> events = newLinkedList();
+
+        /**
+         * Creates a new instance.
+         *
+         * @param id
+         *         the ID for the new instance
+         * @throws IllegalArgumentException
+         *         if the ID is not of one of the supported types
+         */
+        protected MemoizingProjection(I id) {
+            super(id);
+        }
+
+        static void memoize(Message event) {
+            events.add(event);
+        }
+
+        public static ImmutableList<Message> events() {
+            return ImmutableList.copyOf(events);
+        }
+
+        public static void clear() {
+            events.clear();
+        }
+    }
+
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
+    public static class MemoizingProjectDetails1
+            extends MemoizingProjection<ProjectId, StringValue, StringValueVBuilder> {
 
         /**
          * Creates a new instance.
@@ -304,37 +315,43 @@ public class IntegrationBusTestEnv {
          * @param id the ID for the new instance
          * @throws IllegalArgumentException if the ID is not of one of the supported types
          */
-        protected ContextAwareProjectDetails(ProjectId id) {
+        protected MemoizingProjectDetails1(ProjectId id) {
             super(id);
         }
 
         @Subscribe(external = true)
-        public void on(ItgProjectCreated event, EventContext eventContext) {
-            externalEvents.add(event);
-            externalContexts.add(eventContext);
-        }
-
-        public static List<EventContext> getExternalContexts() {
-            return ImmutableList.copyOf(externalContexts);
-        }
-
-        public static List<ItgProjectCreated> getExternalEvents() {
-            return ImmutableList.copyOf(externalEvents);
-        }
-
-        public static void clear() {
-            externalContexts.clear();
-            externalEvents.clear();
+        public void on(ItgProjectCreated event) {
+            memoize(event);
         }
     }
 
-    private static class ContextAwareProjectDetailsRepository
-            extends ProjectionRepository<ProjectId, ContextAwareProjectDetails, StringValue> {
+    public static class MemoizingProjectDetails2
+            extends MemoizingProjection<ProjectId, Int64Value, Int64ValueVBuilder> {
 
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            throw illegalStateWithCauseOf(exception);
+        /**
+         * Creates a new instance.
+         *
+         * @param id
+         *         the ID for the new instance
+         * @throws IllegalArgumentException
+         *         if the ID is not of one of the supported types
+         */
+        protected MemoizingProjectDetails2(ProjectId id) {
+            super(id);
         }
+
+        @Subscribe(external = true)
+        public void on(ItgProjectCreated event) {
+            memoize(event);
+        }
+    }
+
+    public static class MemoizingProjectDetails1Repository
+            extends ProjectionRepository<ProjectId, MemoizingProjectDetails1, StringValue> {
+    }
+
+    public static class MemoizingProjectDetails2Repository
+            extends ProjectionRepository<ProjectId, MemoizingProjectDetails2, Int64Value> {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
@@ -345,12 +362,12 @@ public class IntegrationBusTestEnv {
         private static ItgProjectStarted domesticEvent = null;
 
         @Subscribe(external = true)
-        void on(ItgProjectCreated msg) {
+        public void on(ItgProjectCreated msg) {
             externalEvent = msg;
         }
 
         @Subscribe
-        void on(ItgProjectStarted msg) {
+        public void on(ItgProjectStarted msg) {
             domesticEvent = msg;
         }
 
