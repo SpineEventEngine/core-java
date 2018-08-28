@@ -24,9 +24,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.route.EventRoute;
 
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 
@@ -56,8 +62,7 @@ final class DefaultSystemGateway implements SystemGateway {
     @Override
     public void postCommand(Message systemCommand) {
         checkNotNull(systemCommand);
-        CommandFactory commandFactory =
-                TenantAwareCommandFactory.newInstance(system.isMultitenant());
+        CommandFactory commandFactory = SystemCommandFactory.newInstance(system.isMultitenant());
         Command command = commandFactory.create(systemCommand);
         system.getCommandBus()
               .post(command, noOpObserver());
@@ -65,7 +70,26 @@ final class DefaultSystemGateway implements SystemGateway {
 
     @Override
     public void postEvent(Message systemEvent) {
-        //TODO:2018-08-28:alexander.yevsyukov: Implement
+        checkNotNull(systemEvent);
+        Message aggregateId = getAggregateId(systemEvent);
+
+        SystemEventFactory factory = new SystemEventFactory(aggregateId, system.isMultitenant());
+        Event event = factory.createEvent(systemEvent, null);
+        system.getImportBus()
+              .post(event, noOpObserver());
+    }
+
+    private static Message getAggregateId(Message systemEvent) {
+        Set<Object> routingOut =
+                EventRoute.byFirstMessageField()
+                          .apply(systemEvent, EventContext.getDefaultInstance());
+        checkArgument(routingOut.size() == 1,
+                      "System event message must have aggregate ID in the first field.");
+        Object id = routingOut.stream()
+                              .findFirst()
+                              .get();
+        checkArgument(id instanceof Message, "System aggregate ID must be a Message");
+        return (Message) id;
     }
 
     @VisibleForTesting

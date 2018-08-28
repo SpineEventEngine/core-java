@@ -32,15 +32,16 @@ import static io.spine.system.server.DefaultSystemGateway.SYSTEM_USER;
 /**
  * Creates a command factory for producing commands under the context of specified tenant.
  *
+ * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-final class TenantAwareCommandFactory {
+final class SystemCommandFactory {
 
     private static final ActorRequestFactory SINGLE_TENANT =
             newFactoryFor(TenantId.getDefaultInstance());
 
     /** Prevents instantiation of this utility class. */
-    private TenantAwareCommandFactory() {
+    private SystemCommandFactory() {
     }
 
     /**
@@ -51,13 +52,17 @@ final class TenantAwareCommandFactory {
      *        {@code false} otherwise
      */
     static CommandFactory newInstance(boolean multitenant) {
-        ActorRequestFactory requestFactory = multitenant
-                 ? buildMultitenantFactory()
-                 : SINGLE_TENANT;
+        ActorRequestFactory requestFactory = requestFactory(multitenant);
         return requestFactory.command();
     }
 
-    private static ActorRequestFactory buildMultitenantFactory() {
+    static ActorRequestFactory requestFactory(boolean multitenant) {
+        return multitenant
+        ? newForCurrentTenant()
+        : SINGLE_TENANT;
+    }
+
+    private static ActorRequestFactory newForCurrentTenant() {
         TenantFunction<ActorRequestFactory> createFactory =
                 new TenantFunction<ActorRequestFactory>(true) {
                     @Override

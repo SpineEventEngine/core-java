@@ -22,19 +22,10 @@ package io.spine.client;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
-import io.spine.core.UserId;
 import io.spine.test.commands.RequiredFieldCommand;
-import io.spine.testing.core.given.GivenTenantId;
-import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.Timestamps2;
-import io.spine.time.ZoneId;
-import io.spine.time.ZoneIds;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 import io.spine.time.testing.TimeTests;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.DisplayName;
@@ -47,27 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Command factory should")
 class CommandFactoryTest extends ActorRequestFactoryTest {
-
-    @Test
-    @DisplayName("create command context for given parameters")
-    void createCommandContext() {
-        TenantId tenantId = GivenTenantId.newUuid();
-        UserId userId = GivenUserId.newUuid();
-        ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
-        ZoneId zoneId = ZoneIds.systemDefault();
-        int targetVersion = 100500;
-
-        CommandContext commandContext =
-                CommandFactory.createContext(tenantId, userId, zoneId, zoneOffset, targetVersion);
-
-        ActorContext actorContext = commandContext.getActorContext();
-
-        assertEquals(tenantId, actorContext.getTenantId());
-        assertEquals(userId, actorContext.getActor());
-        assertEquals(zoneId, actorContext.getZoneId());
-        assertEquals(zoneOffset, actorContext.getZoneOffset());
-        assertEquals(targetVersion, commandContext.getTargetVersion());
-    }
 
     @Nested
     @DisplayName("create command")

@@ -20,36 +20,27 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Empty;
-import io.spine.type.MessageClass;
+import com.google.common.testing.SerializableTester;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
- * The class of an {@link Empty} message.
- *
- * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
  */
-public final class EmptyClass extends MessageClass {
+@DisplayName("EmptyClass should")
+class EmptyClassTest {
 
-    private static final long serialVersionUID = 0L;
-    private static final EmptyClass INSTANCE = new EmptyClass();
-
-    private EmptyClass() {
-        super(Empty.class);
+    @Test
+    @DisplayName("be serializable")
+    void serialize() {
+        SerializableTester.reserializeAndAssert(EmptyClass.instance());
     }
 
-    /**
-     * Return the single instance of the {@code EmptyClass}.
-     */
-    public static EmptyClass instance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String toString() {
-        return "EmptyClass.instance()";
-    }
-
-    private Object readResolve() {
-        return INSTANCE;
+    @Test
+    @DisplayName("return the same instance")
+    void sameInstance() {
+        assertSame(EmptyClass.instance(), EmptyClass.instance());
     }
 }

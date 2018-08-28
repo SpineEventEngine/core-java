@@ -155,21 +155,21 @@ public class EventFactory {
     }
 
     private EventContext createContext(@Nullable Version version) {
-        EventContext result = buildContext(version)
-                .build();
+        EventContext result = newContext(version).build();
         return result;
     }
 
     private EventContext createContext(@Nullable Version version,
                                        RejectionEventContext rejectionContext) {
-        EventContext result = buildContext(version)
-                .setRejection(rejectionContext)
-                .build();
+        EventContext result =
+                newContext(version)
+                        .setRejection(rejectionContext)
+                        .build();
         return result;
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    private EventContext.Builder buildContext(@Nullable Version version) {
+    private EventContext.Builder newContext(@Nullable Version version) {
         Timestamp timestamp = getCurrentTime();
         EventContext.Builder builder = EventContext
                 .newBuilder()

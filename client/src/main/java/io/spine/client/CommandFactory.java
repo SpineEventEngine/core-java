@@ -27,17 +27,12 @@ import io.spine.annotation.Internal;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Commands;
-import io.spine.core.TenantId;
-import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
-import io.spine.time.ZoneId;
-import io.spine.time.ZoneOffset;
 import io.spine.validate.ValidationException;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.core.Commands.generateId;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -108,8 +103,8 @@ public final class CommandFactory {
      * @param message the command message
      * @param context the command context to use as a base for the new command
      * @return new command instance
-     * @throws ValidationException if the passed message does not satisfy the constraints
-     *                             set for it in its Protobuf definition
+     * @throws ValidationException
+     * if the passed message does not satisfy the constraints set for it in its Protobuf definition
      */
     @Internal
     @VisibleForTesting
@@ -140,7 +135,7 @@ public final class CommandFactory {
         Any packed = AnyPacker.pack(message);
         Command.Builder result = Command
                 .newBuilder()
-                .setId(Commands.generateId())
+                .setId(generateId())
                 .setMessage(packed)
                 .setContext(context);
         return result.build();
@@ -151,93 +146,21 @@ public final class CommandFactory {
      */
     @VisibleForTesting
     CommandContext createContext() {
-        return createContext(actorRequestFactory.getTenantId(),
-                             actorRequestFactory.getActor(),
-                             actorRequestFactory.getZoneId(),
-                             actorRequestFactory.getZoneOffset());
+        ActorContext actorContext = actorRequestFactory.newActorContext();
+        return CommandContext.newBuilder()
+                             .setActorContext(actorContext)
+                             .build();
     }
 
     /**
      * Creates command context for a new command with entity ID.
      */
     private CommandContext createContext(int targetVersion) {
-        return createContext(actorRequestFactory.getTenantId(),
-                             actorRequestFactory.getActor(),
-                             actorRequestFactory.getZoneId(),
-                             actorRequestFactory.getZoneOffset(),
-                             targetVersion);
-    }
-
-    /**
-     * Creates a new command context with the current time.
-     *
-     * @param tenantId
-     *        the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId
-     *        the actor ID
-     * @param zoneId
-     *        the ID of the time-zone in which the user works
-     * @param zoneOffset
-     *        the offset of the timezone in which the user works
-     * @return new {@code CommandContext}
-     * @see CommandFactory#create(Message)
-     */
-    private static CommandContext createContext(@Nullable TenantId tenantId,
-                                                UserId userId,
-                                                ZoneId zoneId,
-                                                ZoneOffset zoneOffset) {
-        CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneId, zoneOffset);
-        return result.build();
-    }
-
-    /**
-     * Creates a new command context with the given parameters and
-     * {@link io.spine.base.Time#getCurrentTime() current time} as the {@code timestamp}.
-     *
-     * @param tenantId
-     *        the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId
-     *        the actor id
-     * @param zoneId
-     *        the ID of the time-zone in which the user works
-     * @param zoneOffset
-     *        the offset of the timezone in which the user works
-     * @param targetVersion
-     *        the version of the entity for which this command is intended
-     * @return new {@code CommandContext}
-     * @see CommandFactory#create(Message)
-     */
-    @VisibleForTesting
-    static CommandContext createContext(@Nullable TenantId tenantId,
-                                        UserId userId,
-                                        ZoneId zoneId,
-                                        ZoneOffset zoneOffset,
-                                        int targetVersion) {
-        CommandContext.Builder result =
-                newContextBuilder(tenantId, userId, zoneId, zoneOffset)
-                        .setTargetVersion(targetVersion);
-        return result.build();
-    }
-
-    @SuppressWarnings("CheckReturnValue") // calling builder
-    private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
-                                                            UserId userId,
-                                                            ZoneId zoneId,
-                                                            ZoneOffset zoneOffset) {
-        ActorContext.Builder actorContext = ActorContext
-                .newBuilder()
-                .setActor(userId)
-                .setTimestamp(getCurrentTime())
-                .setZoneId(zoneId)
-                .setZoneOffset(zoneOffset);
-        if (tenantId != null) {
-            actorContext.setTenantId(tenantId);
-        }
-
-        CommandContext.Builder result = CommandContext
-                .newBuilder()
-                .setActorContext(actorContext);
-        return result;
+        ActorContext actorContext = actorRequestFactory.newActorContext();
+        return CommandContext.newBuilder()
+                             .setActorContext(actorContext)
+                             .setTargetVersion(targetVersion)
+                             .build();
     }
 
     /**

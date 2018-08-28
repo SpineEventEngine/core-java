@@ -21,6 +21,7 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.annotation.Internal;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
@@ -206,8 +207,9 @@ public class ActorRequestFactory {
      * <p>Sets the timestamp value to the
      * {@linkplain io.spine.base.Time#getCurrentTime() current time}.
      */
+    @Internal
     @SuppressWarnings("CheckReturnValue") // calling builder
-    ActorContext actorContext() {
+    public final ActorContext newActorContext() {
         ActorContext.Builder builder = ActorContext
                 .newBuilder()
                 .setActor(actor)
