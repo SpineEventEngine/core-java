@@ -309,7 +309,7 @@ public class IntegrationBusTestEnv {
         }
 
         @Subscribe(external = true)
-        void on(ItgProjectCreated event, EventContext eventContext) {
+        public void on(ItgProjectCreated event, EventContext eventContext) {
             externalEvents.add(event);
             externalContexts.add(eventContext);
         }
