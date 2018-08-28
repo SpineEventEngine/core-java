@@ -36,22 +36,21 @@ import io.spine.server.security.InvocationGuard;
 @VisibleForTesting
 public final class TenantAwareTestSupport {
 
+    private static final String CALLER_CLASS = "io.spine.testing.server.tenant.TenantAwareTest";
+
     /** Prevents instantiation of this utility class. */
     private TenantAwareTestSupport() {
     }
 
     /** Sets the current tenant. */
     public static void inject(TenantId tenantId) throws SecurityException  {
-        checkCaller();
+        InvocationGuard.allowOnly(CALLER_CLASS);
         CurrentTenant.set(tenantId);
     }
 
     /** Clears the current tenant. */
     public static void clear() throws SecurityException {
-        checkCaller();
+        InvocationGuard.allowOnly(CALLER_CLASS);
         CurrentTenant.clear();
-    }
-    private static void checkCaller() {
-        InvocationGuard.allowOnly("io.spine.testing.server.tenant.TenantAwareTest");
     }
 }
