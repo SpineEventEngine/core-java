@@ -38,7 +38,7 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
     @Test
     @DisplayName("throw SecurityException if no classes are allowed")
     void nobodyAllowed() {
-        assertThrowsOn(InvocationGuard::allowOnly);
+        assertThrowsOn(() -> InvocationGuard.allowOnly(""));
     }
 
     @Test

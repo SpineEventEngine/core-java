@@ -20,37 +20,36 @@
 
 package io.spine.server.bc.given;
 
+import com.google.protobuf.Empty;
+import io.spine.core.CommandContext;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.server.command.Assign;
+import io.spine.server.procman.ProcessManager;
 import io.spine.test.bc.ProjectId;
+import io.spine.test.bc.command.BcCreateProject;
 import io.spine.test.bc.event.BcProjectCreated;
-import io.spine.test.bc.event.BcProjectStarted;
-import io.spine.test.bc.event.BcTaskAdded;
+import io.spine.validate.EmptyVBuilder;
 
-public class Given {
+/**
+ * @author Alexander Yevsyukov
+ */
+public class ProjectProcessManager
+        extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
 
-    private Given() {
+    public ProjectProcessManager(ProjectId id) {
+        super(id);
     }
 
-    public static class EventMessage {
+    @Assign
+    BcProjectCreated handle(BcCreateProject command, CommandContext ctx) {
+        return BcProjectCreated.newBuilder()
+                               .setProjectId(command.getProjectId())
+                               .build();
+    }
 
-        private EventMessage() {
-        }
-
-        public static BcProjectCreated projectCreated(ProjectId id) {
-            return BcProjectCreated.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
-
-        public static BcTaskAdded taskAdded(ProjectId id) {
-            return BcTaskAdded.newBuilder()
-                              .setProjectId(id)
-                              .build();
-        }
-
-        public static BcProjectStarted projectStarted(ProjectId id) {
-            return BcProjectStarted.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
+    @Subscribe
+    public void on(BcProjectCreated event, EventContext ctx) {
+        // Do nothing, just watch.
     }
 }

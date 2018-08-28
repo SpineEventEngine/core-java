@@ -20,37 +20,13 @@
 
 package io.spine.server.bc.given;
 
+import com.google.protobuf.Empty;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.event.BcProjectCreated;
-import io.spine.test.bc.event.BcProjectStarted;
-import io.spine.test.bc.event.BcTaskAdded;
 
-public class Given {
-
-    private Given() {
-    }
-
-    public static class EventMessage {
-
-        private EventMessage() {
-        }
-
-        public static BcProjectCreated projectCreated(ProjectId id) {
-            return BcProjectCreated.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
-
-        public static BcTaskAdded taskAdded(ProjectId id) {
-            return BcTaskAdded.newBuilder()
-                              .setProjectId(id)
-                              .build();
-        }
-
-        public static BcProjectStarted projectStarted(ProjectId id) {
-            return BcProjectStarted.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
-    }
+/**
+ * @author Alexander Yevsyukov
+ */
+public class ProjectReportRepository
+        extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
 }

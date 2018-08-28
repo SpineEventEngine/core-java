@@ -20,37 +20,28 @@
 
 package io.spine.server.bc.given;
 
-import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.event.BcProjectCreated;
+import com.google.common.collect.Lists;
+import io.spine.core.CommandContext;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.command.Assign;
+import io.spine.test.bc.SecretProject;
+import io.spine.test.bc.SecretProjectVBuilder;
+import io.spine.test.bc.command.BcStartProject;
 import io.spine.test.bc.event.BcProjectStarted;
-import io.spine.test.bc.event.BcTaskAdded;
 
-public class Given {
+import java.util.List;
 
-    private Given() {
+/**
+ * @author Alexander Yevsyukov
+ */
+class SecretProjectAggregate
+        extends Aggregate<String, SecretProject, SecretProjectVBuilder> {
+    private SecretProjectAggregate(String id) {
+        super(id);
     }
 
-    public static class EventMessage {
-
-        private EventMessage() {
-        }
-
-        public static BcProjectCreated projectCreated(ProjectId id) {
-            return BcProjectCreated.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
-
-        public static BcTaskAdded taskAdded(ProjectId id) {
-            return BcTaskAdded.newBuilder()
-                              .setProjectId(id)
-                              .build();
-        }
-
-        public static BcProjectStarted projectStarted(ProjectId id) {
-            return BcProjectStarted.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
+    @Assign
+    List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
+        return Lists.newArrayList();
     }
 }

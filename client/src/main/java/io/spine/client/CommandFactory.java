@@ -31,6 +31,7 @@ import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
 import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -152,6 +153,7 @@ public final class CommandFactory {
     CommandContext createContext() {
         return createContext(actorRequestFactory.getTenantId(),
                              actorRequestFactory.getActor(),
+                             actorRequestFactory.getZoneId(),
                              actorRequestFactory.getZoneOffset());
     }
 
@@ -161,6 +163,7 @@ public final class CommandFactory {
     private CommandContext createContext(int targetVersion) {
         return createContext(actorRequestFactory.getTenantId(),
                              actorRequestFactory.getActor(),
+                             actorRequestFactory.getZoneId(),
                              actorRequestFactory.getZoneOffset(),
                              targetVersion);
     }
@@ -168,16 +171,22 @@ public final class CommandFactory {
     /**
      * Creates a new command context with the current time.
      *
-     * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId     the actor ID
-     * @param zoneOffset the offset of the timezone in which the user works
+     * @param tenantId
+     *        the ID of the tenant or {@code null} for single-tenant applications
+     * @param userId
+     *        the actor ID
+     * @param zoneId
+     *        the ID of the time-zone in which the user works
+     * @param zoneOffset
+     *        the offset of the timezone in which the user works
      * @return new {@code CommandContext}
      * @see CommandFactory#create(Message)
      */
     private static CommandContext createContext(@Nullable TenantId tenantId,
                                                 UserId userId,
+                                                ZoneId zoneId,
                                                 ZoneOffset zoneOffset) {
-        CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneId, zoneOffset);
         return result.build();
     }
 
@@ -185,31 +194,41 @@ public final class CommandFactory {
      * Creates a new command context with the given parameters and
      * {@link io.spine.base.Time#getCurrentTime() current time} as the {@code timestamp}.
      *
-     * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId        the actor id
-     * @param zoneOffset    the offset of the timezone in which the user works
-     * @param targetVersion the version of the entity for which this command is intended
+     * @param tenantId
+     *        the ID of the tenant or {@code null} for single-tenant applications
+     * @param userId
+     *        the actor id
+     * @param zoneId
+     *        the ID of the time-zone in which the user works
+     * @param zoneOffset
+     *        the offset of the timezone in which the user works
+     * @param targetVersion
+     *        the version of the entity for which this command is intended
      * @return new {@code CommandContext}
      * @see CommandFactory#create(Message)
      */
     @VisibleForTesting
     static CommandContext createContext(@Nullable TenantId tenantId,
                                         UserId userId,
+                                        ZoneId zoneId,
                                         ZoneOffset zoneOffset,
                                         int targetVersion) {
         CommandContext.Builder result =
-                newContextBuilder(tenantId, userId, zoneOffset).setTargetVersion(targetVersion);
+                newContextBuilder(tenantId, userId, zoneId, zoneOffset)
+                        .setTargetVersion(targetVersion);
         return result.build();
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
                                                             UserId userId,
+                                                            ZoneId zoneId,
                                                             ZoneOffset zoneOffset) {
         ActorContext.Builder actorContext = ActorContext
                 .newBuilder()
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
+                .setZoneId(zoneId)
                 .setZoneOffset(zoneOffset);
         if (tenantId != null) {
             actorContext.setTenantId(tenantId);

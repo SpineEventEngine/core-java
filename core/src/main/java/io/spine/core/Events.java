@@ -373,9 +373,9 @@ public final class Events {
     @Internal
     public static Event substituteVersion(Event event, Version newVersion) {
         EventContext newContext = event.getContext()
-                                          .toBuilder()
-                                          .setVersion(newVersion)
-                                          .build();
+                                       .toBuilder()
+                                       .setVersion(newVersion)
+                                       .build();
         Event result = event.toBuilder()
                             .setContext(newContext)
                             .build();

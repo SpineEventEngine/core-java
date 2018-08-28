@@ -20,37 +20,35 @@
 
 package io.spine.server.bc.given;
 
-import io.spine.test.bc.ProjectId;
+import com.google.protobuf.Message;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
 
-public class Given {
+/**
+ * @author Alexander Yevsyukov
+ */
+public class TestEventSubscriber extends AbstractEventSubscriber {
 
-    private Given() {
+    private Message handledEvent;
+
+    @Subscribe
+    void on(BcProjectCreated event, EventContext context) {
+        this.handledEvent = event;
     }
 
-    public static class EventMessage {
+    @Subscribe
+    void on(BcTaskAdded event, EventContext context) {
+    }
 
-        private EventMessage() {
-        }
+    @Subscribe
+    void on(BcProjectStarted event, EventContext context) {
+    }
 
-        public static BcProjectCreated projectCreated(ProjectId id) {
-            return BcProjectCreated.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
-
-        public static BcTaskAdded taskAdded(ProjectId id) {
-            return BcTaskAdded.newBuilder()
-                              .setProjectId(id)
-                              .build();
-        }
-
-        public static BcProjectStarted projectStarted(ProjectId id) {
-            return BcProjectStarted.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
+    public Message getHandledEvent() {
+        return handledEvent;
     }
 }

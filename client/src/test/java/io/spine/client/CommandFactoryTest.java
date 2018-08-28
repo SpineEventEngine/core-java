@@ -31,6 +31,8 @@ import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.Timestamps2;
+import io.spine.time.ZoneId;
+import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.time.testing.TimeTests;
@@ -52,15 +54,17 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         TenantId tenantId = GivenTenantId.newUuid();
         UserId userId = GivenUserId.newUuid();
         ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
+        ZoneId zoneId = ZoneIds.systemDefault();
         int targetVersion = 100500;
 
         CommandContext commandContext =
-                CommandFactory.createContext(tenantId, userId, zoneOffset, targetVersion);
+                CommandFactory.createContext(tenantId, userId, zoneId, zoneOffset, targetVersion);
 
         ActorContext actorContext = commandContext.getActorContext();
 
         assertEquals(tenantId, actorContext.getTenantId());
         assertEquals(userId, actorContext.getActor());
+        assertEquals(zoneId, actorContext.getZoneId());
         assertEquals(zoneOffset, actorContext.getZoneOffset());
         assertEquals(targetVersion, commandContext.getTargetVersion());
     }
@@ -122,6 +126,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @DisplayName("throw ValidationException when creating command")
     class NotAccept {
 
+        @SuppressWarnings("unused")
         private final RequiredFieldCommand invalidCommand =
                 RequiredFieldCommand.getDefaultInstance();
 

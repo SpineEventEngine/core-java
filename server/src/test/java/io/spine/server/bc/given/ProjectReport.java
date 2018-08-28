@@ -20,37 +20,27 @@
 
 package io.spine.server.bc.given;
 
+import com.google.protobuf.Empty;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.event.BcProjectCreated;
-import io.spine.test.bc.event.BcProjectStarted;
-import io.spine.test.bc.event.BcTaskAdded;
+import io.spine.validate.EmptyVBuilder;
 
-public class Given {
+/**
+ * @author Alexander Yevsyukov
+ */
+public class ProjectReport
+        extends Projection<ProjectId, Empty, EmptyVBuilder> {
 
-    private Given() {
+    public ProjectReport(ProjectId id) {
+        super(id);
     }
 
-    public static class EventMessage {
-
-        private EventMessage() {
-        }
-
-        public static BcProjectCreated projectCreated(ProjectId id) {
-            return BcProjectCreated.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
-
-        public static BcTaskAdded taskAdded(ProjectId id) {
-            return BcTaskAdded.newBuilder()
-                              .setProjectId(id)
-                              .build();
-        }
-
-        public static BcProjectStarted projectStarted(ProjectId id) {
-            return BcProjectStarted.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
-        }
+    @Subscribe
+    void on(BcProjectCreated event, EventContext context) {
+        // Do nothing. We have the method so that there's one event class exposed
+        // by the repository.
     }
 }
