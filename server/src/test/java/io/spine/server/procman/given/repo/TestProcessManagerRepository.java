@@ -38,11 +38,13 @@ public class TestProcessManagerRepository
 
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
+        super.onError(envelope, exception);
         this.latestException = exception;
     }
 
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
+        super.onError(envelope, exception);
         this.latestException = exception;
     }
 
