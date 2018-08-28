@@ -133,10 +133,9 @@ public abstract class DispatcherRegistry<C extends MessageClass,
 
         // Since there can be only one dispatcher per message class, and the set is not empty,
         // we get the single element.
-        D result = dispatchers.stream()
-                              .findFirst()
-                              .get();
-        return Optional.of(result);
+        Optional<? extends D> result = dispatchers.stream()
+                                                  .findFirst();
+        return result;
     }
 
     /**

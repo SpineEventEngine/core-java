@@ -92,15 +92,17 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      * {@link Event} instance.
      *
      * @return the list with one {@code Event} which is being imported
+     * @implNote We do not need to perform anything with the aggregate and the passed event.
+     * The aggregate would consume the passed event when
+     * {@link io.spine.server.aggregate.AggregateEventEndpoint AggregateEventEndpoint}
+     * {@linkplain io.spine.server.aggregate.Aggregate#apply(List,
+     * io.spine.core.MessageEnvelope) applies} the returned event to the aggregate.
      */
     @Override
     protected List<Event> doDispatch(A aggregate, EventEnvelope envelope) {
         I id = aggregate.getId();
         Event event = envelope.getOuterObject();
         repository().onImportEvent(id, event);
-        // We do not need to perform anything with the aggregate. It would consume the passed
-        // event when `AggregateEndpoint` would `apply()` the returned event on the aggregate.
-        // Just return the event to be imported.
         return ImmutableList.of(event);
     }
 
