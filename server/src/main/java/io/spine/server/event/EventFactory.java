@@ -31,7 +31,6 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.integration.IntegrationEvent;
 import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -152,17 +151,6 @@ public class EventFactory {
                 .setMessage(packed)
                 .setContext(context)
                 .build();
-        return result;
-    }
-
-    /**
-     * Creates an event based on the passed integration event.
-     */
-    public static Event toEvent(IntegrationEvent ie) {
-        checkNotNull(ie);
-        Event result = IntegrationEventConverter.getInstance()
-                                                .convert(ie);
-        checkNotNull(result);
         return result;
     }
 

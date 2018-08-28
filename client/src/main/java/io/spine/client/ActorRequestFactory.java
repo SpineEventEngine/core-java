@@ -204,6 +204,8 @@ public class ActorRequestFactory {
     }
 
     /**
+     * Creates new {@code CommandContext}.
+     *
      * @see CommandFactory#createContext()
      */
     @VisibleForTesting
