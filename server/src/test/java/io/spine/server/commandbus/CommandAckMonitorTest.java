@@ -140,7 +140,7 @@ class CommandAckMonitorTest {
             Ack ack = okAck(commandId);
             monitor.onNext(ack);
 
-            Message actualCommand = gateway.lastSeen().command();
+            Message actualCommand = gateway.lastSeenCommand().message();
             assertThat(actualCommand, instanceOf(MarkCommandAsAcknowledged.class));
             MarkCommandAsAcknowledged markAsAcknowledged = (MarkCommandAsAcknowledged) actualCommand;
             assertEquals(commandId, markAsAcknowledged.getId());
@@ -152,7 +152,7 @@ class CommandAckMonitorTest {
             Ack ack = errorAck(commandId);
             monitor.onNext(ack);
 
-            Message actualCommand = gateway.lastSeen().command();
+            Message actualCommand = gateway.lastSeenCommand().message();
             assertThat(actualCommand, instanceOf(MarkCommandAsErrored.class));
             MarkCommandAsErrored markCommandAsErrored = (MarkCommandAsErrored) actualCommand;
             assertEquals(commandId, markCommandAsErrored.getId());

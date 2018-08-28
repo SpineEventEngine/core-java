@@ -37,7 +37,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -160,7 +159,7 @@ public final class Events {
      */
     public static UserId getActor(EventContext context) {
         checkNotNull(context);
-        CommandContext commandContext = checkNotNull(context).getCommandContext();
+        CommandContext commandContext = context.getCommandContext();
         return commandContext.getActorContext()
                              .getActor();
     }
@@ -302,23 +301,6 @@ public final class Events {
         }
 
         return Optional.of(commandContext);
-    }
-
-    /**
-     * Obtains an {@code ActorContext} from the passed {@code EventContext}.
-     *
-     * <p>Traverses the origin chain stored in the {@code EventContext}.
-     *
-     * @throws IllegalStateException if the actor context could not be found in the origin chain
-     *  of the passed event context
-     */
-    @Internal
-    public static ActorContext getActorContextOrThrow(EventContext eventContext) {
-        Optional<CommandContext> optional = findCommandContext(eventContext);
-        checkState(optional.isPresent(), "Unable to find origin CommandContext");
-        CommandContext commandContext = optional.get();
-        ActorContext result = commandContext.getActorContext();
-        return result;
     }
 
     /**

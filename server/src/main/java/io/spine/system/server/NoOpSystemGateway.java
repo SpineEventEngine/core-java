@@ -40,4 +40,9 @@ public enum NoOpSystemGateway implements SystemGateway {
     public void postCommand(Message systemCommand) {
         // NOP.
     }
+
+    @Override
+    public void postEvent(Message systemEvent) {
+        // NOP.
+    }
 }

@@ -59,12 +59,24 @@ final class TenantAwareSystemGateway implements SystemGateway {
     /**
      * {@inheritDoc}
      *
-     * <p>On an instance of {@code TenantAwareSystemGateway}, posts the given system command for
-     * the specified tenant.
+     * <p>Posts the given system command under the context of the specified tenant.
      */
     @Override
     public void postCommand(Message systemCommand) {
-        Runnable action = () -> delegate.postCommand(systemCommand);
+        run(() -> delegate.postCommand(systemCommand));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Posts the given system event under the context of the specified tenant.
+     */
+    @Override
+    public void postEvent(Message systemEvent) {
+        run(() -> delegate.postEvent(systemEvent));
+    }
+
+    private void run(Runnable action) {
         TenantAwareOperation operation = new Operation(tenantId, action);
         operation.execute();
     }

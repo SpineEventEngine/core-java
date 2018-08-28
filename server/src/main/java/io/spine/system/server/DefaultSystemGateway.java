@@ -66,6 +66,11 @@ final class DefaultSystemGateway implements SystemGateway {
               .post(command, noOpObserver());
     }
 
+    @Override
+    public void postEvent(Message systemEvent) {
+        //TODO:2018-08-28:alexander.yevsyukov: Implement
+    }
+
     @VisibleForTesting
     BoundedContext target() {
         return system;

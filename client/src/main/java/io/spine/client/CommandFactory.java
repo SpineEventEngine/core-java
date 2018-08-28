@@ -111,6 +111,7 @@ public final class CommandFactory {
      *                             set for it in its Protobuf definition
      */
     @Internal
+    @VisibleForTesting
     public Command createBasedOnContext(Message message, CommandContext context)
             throws ValidationException {
         checkNotNull(message);
