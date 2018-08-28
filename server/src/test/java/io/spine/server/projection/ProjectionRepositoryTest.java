@@ -30,7 +30,6 @@ import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -67,6 +66,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static java.lang.String.format;
@@ -295,10 +295,34 @@ class ProjectionRepositoryTest
             TestEventFactory eventFactory = newEventFactory(tenantId(), pack(msg.getProjectId()));
             Event event = eventFactory.createEvent(msg);
 
-            dispatchEvent(event);
-            assertTrue(TestProjection.processed(msg));
-            assertNull(repository().getLastException());
+            dispatchSuccessfully(event);
+            dispatchDuplicate(event);
+        }
 
+        @Test
+        @DisplayName("different events with same ID")
+        void differentEventsWithSameId() {
+            PrjProjectCreated created = GivenEventMessage.projectCreated();
+            PrjProjectArchived archived = GivenEventMessage.projectArchived();
+            ProjectId id = created.getProjectId();
+            TestEventFactory eventFactory = newEventFactory(tenantId(), pack(id));
+
+            Event firstEvent = eventFactory.createEvent(created);
+            Event secondEvent = eventFactory.createEvent(archived)
+                                          .toBuilder()
+                                          .setId(firstEvent.getId())
+                                          .build();
+            dispatchSuccessfully(firstEvent);
+            dispatchDuplicate(secondEvent);
+        }
+
+        private void dispatchSuccessfully(Event event) {
+            dispatchEvent(event);
+            assertTrue(TestProjection.processed(getMessage(event)));
+            assertNull(repository().getLastException());
+        }
+
+        private void dispatchDuplicate(Event event) {
             dispatchEvent(event);
             RuntimeException exception = repository().getLastException();
             assertNotNull(exception);
@@ -323,8 +347,8 @@ class ProjectionRepositoryTest
         TestProjectionRepository testRepo = repository();
 
         assertTrue(testRepo.getLastErrorEnvelope() instanceof EventEnvelope);
-        assertEquals(Events.getMessage(event), testRepo.getLastErrorEnvelope()
-                                                       .getMessage());
+        assertEquals(getMessage(event), testRepo.getLastErrorEnvelope()
+                                                .getMessage());
         assertEquals(event, testRepo.getLastErrorEnvelope()
                                     .getOuterObject());
 
