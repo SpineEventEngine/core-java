@@ -22,7 +22,9 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -132,6 +134,28 @@ public class BlackBoxBoundedContext {
     }
 
     /**
+     * Creates a new instance of {@link TestEventFactory} which supplies mock
+     * for {@linkplain io.spine.core.EventContext#getProducerId() producer ID} values.
+     */
+    public TestEventFactory newEventFactory() {
+        return eventFactory(requestFactory);
+    }
+
+    /**
+     * Creates a new instance of {@link TestEventFactory} which supplies the passed value
+     * of the {@linkplain io.spine.core.EventContext#getProducerId() event producer ID}.
+     *
+     * @param producerId can be {@code Integer}, {@code Long}, {@link String}, or {@code Message}
+     */
+    public TestEventFactory newEventFactory(Object producerId) {
+        checkNotNull(producerId);
+        Any id = producerId instanceof Any
+                 ? (Any) producerId
+                 : Identifier.pack(producerId);
+        return TestEventFactory.newInstance(id, requestFactory);
+    }
+
+    /**
      * Creates a new {@link TenantId Tenant ID} with a random UUID value convenient
      * for test purposes.
      */
@@ -238,6 +262,7 @@ public class BlackBoxBoundedContext {
      *                    in supplied order
      * @return current instance
      */
+    @SuppressWarnings("unused")
     public BlackBoxBoundedContext
     receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
@@ -263,12 +288,16 @@ public class BlackBoxBoundedContext {
         return events;
     }
 
-    public BlackBoxBoundedContext
-    importsEvents(Message firstEvent, Message secondEvent, Message ... otherEvents) {
-        return this.importsEvents(asList(firstEvent, secondEvent, otherEvents));
+    public BlackBoxBoundedContext importsEvent(Message eventOrMessage) {
+        return this.importAll(singletonList(eventOrMessage));
     }
 
-    private BlackBoxBoundedContext importsEvents(Collection<Message> domainEvents) {
+    public BlackBoxBoundedContext
+    importsEvents(Message firstEvent, Message secondEvent, Message ... otherEvents) {
+        return this.importAll(asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    private BlackBoxBoundedContext importAll(Collection<Message> domainEvents) {
         List<Event> events = toEvents(domainEvents);
         importBus.post(events, observer);
         return this;

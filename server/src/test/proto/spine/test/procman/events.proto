@@ -52,6 +52,10 @@ message PmOwnerChanged {
     ProjectId project_id = 1;
 }
 
+message PmIterationStarted {
+    ProjectId project_id = 1;
+}
+
 message PmIterationCompleted {
     ProjectId project_id = 1;
 }
@@ -62,4 +66,7 @@ message PmRetrospectiveScheduled {
 
 message PmIterationPlanned {
     ProjectId project_id = 1;
+
+    // If `false` the iteration won't be started.
+    bool budget_allocated = 2;
 }

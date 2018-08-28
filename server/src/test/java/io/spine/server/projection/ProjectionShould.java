@@ -48,14 +48,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * Tests {@link io.spine.server.projection.Projection}.
+ *
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
+ * @apiNote This class is named using the old-fashoned {@code Should} suffix to avoid the name clash
+ * with {@link io.spine.testing.server.projection.ProjectionTest ProjectionTest} class, which is
+ * a part of Testutil Server library.
  */
-// TODO:2018-07-16:dmytro.dashenkov: Rename to `ProjectionTest`.
-// todo                              https://github.com/SpineEventEngine/core-java/issues/753
 @DisplayName("Projection should")
-class ProjectionEventTest {
+class ProjectionShould {
 
     private TestProjection projection;
 
@@ -123,7 +126,7 @@ class ProjectionEventTest {
         Event e1 = eventFactory.createEvent(strValue, nextVersion);
         Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));
 
-        boolean projectionChanged = Projection.play(projection, ImmutableList.of(e1, e2));
+        boolean projectionChanged = Projection.playOn(projection, ImmutableList.of(e1, e2));
 
         String projectionState = projection.getState()
                                            .getValue();

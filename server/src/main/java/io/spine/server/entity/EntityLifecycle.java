@@ -200,11 +200,11 @@ public class EntityLifecycle {
     }
 
     public void onImportTargetSet(EventId id) {
-        //TODO:2018-08-22:alexander.yevsyukov: Implement
+        //TODO:2018-08-22:alexander.yevsyukov: Implement as posting event when import is finished.
     }
 
     public void onImportEvent(Event event) {
-        //TODO:2018-08-22:alexander.yevsyukov: Implement
+        //TODO:2018-08-22:alexander.yevsyukov: Implement as posting event when import is finished.
     }
 
     /**

@@ -166,8 +166,7 @@ public final class Events {
     }
 
     /**
-     * Obtains event producer ID from the passed {@code EventContext} and casts it to the
-     * {@code <I>} type.
+     * Obtains event producer ID from the passed {@code EventContext}.
      *
      * @param context the event context to to get the event producer ID
      * @return the producer ID
@@ -295,6 +294,7 @@ public final class Events {
                 case COMMAND_CONTEXT:
                     commandContext = ctx.getCommandContext();
                     break;
+                case IMPORT_CONTEXT:
                 case ORIGIN_NOT_SET:
                 default:
                     return Optional.empty();
@@ -335,7 +335,7 @@ public final class Events {
 
     /**
      * Analyzes the event context and determines if the event has been produced outside
-     * of the current BoundedContext
+     * of the current {@code BoundedContext}.
      *
      * @param context the context of event
      * @return {@code true} if the event is external, {@code false} otherwise

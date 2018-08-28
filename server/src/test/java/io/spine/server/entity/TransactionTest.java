@@ -364,6 +364,12 @@ public abstract class TransactionTest<I,
                 checkRollback(entity, originalState, originalVersion);
             }
         }
+
+        private void checkRollback(E entity, S originalState, Version originalVersion) {
+            assertNull(entity.getTransaction());
+            assertEquals(originalState, entity.getState());
+            assertEquals(originalVersion, entity.getVersion());
+        }
     }
 
     @Test
@@ -396,22 +402,16 @@ public abstract class TransactionTest<I,
         EventEnvelope envelope = EventEnvelope.of(event);
         tx.apply(envelope);
 
-        assertEquals(event.getContext()
-                          .getVersion(), tx.getVersion());
+        Version versionFromEvent = event.getContext()
+                                        .getVersion();
+        assertEquals(versionFromEvent, tx.getVersion());
         tx.commit();
-        assertEquals(event.getContext()
-                          .getVersion(), entity.getVersion());
+        assertEquals(versionFromEvent, entity.getVersion());
     }
 
     protected final Event createEvent(Message eventMessage) {
         return eventFactory.createEvent(eventMessage,
                                         someVersion());
-    }
-
-    private void checkRollback(E entity, S originalState, Version originalVersion) {
-        assertNull(entity.getTransaction());
-        assertEquals(originalState, entity.getState());
-        assertEquals(originalVersion, entity.getVersion());
     }
 
     private ArgumentMatcher<Phase<I, E, S, B>> matchesSuccessfulPhaseFor(Event event) {

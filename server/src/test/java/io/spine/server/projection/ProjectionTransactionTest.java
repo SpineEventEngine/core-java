@@ -45,6 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * Tests for {@link io.spine.server.projection.ProjectionTransaction}.
+ *
  * @author Alex Tymchenko
  */
 @DisplayName("ProjectionTransaction should")
@@ -160,7 +162,7 @@ class ProjectionTransactionTest
         Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
         Version oldVersion = entity.getVersion();
         Event event = createEvent(createEventMessage());
-        Projection.play(entity, Collections.singleton(event));
+        Projection.playOn(entity, Collections.singleton(event));
         Version expected = Versions.increment(oldVersion);
         assertEquals(expected.getNumber(), entity.getVersion()
                                                  .getNumber());

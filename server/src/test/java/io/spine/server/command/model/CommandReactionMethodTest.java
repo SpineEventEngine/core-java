@@ -53,7 +53,6 @@ class CommandReactionMethodTest {
 
     private static final
     CommandReactionSignature signature = new CommandReactionSignature();
-    private static final EventContext context = EventContext.getDefaultInstance();
 
     private static void assertValid(Method rawMethod, boolean isValid) {
         assertThat(signature.matches(rawMethod)).isEqualTo(isValid);
@@ -129,8 +128,9 @@ class CommandReactionMethodTest {
 
         private final Method rawMethod = new ReOptionalResult().getMethod();
 
-        @SuppressWarnings("ConstantConditions")     // It's OK for tests.
-        private final CommandReactionMethod method = signature.create(rawMethod).get();
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we surely get the result
+        private final CommandReactionMethod method = signature.create(rawMethod)
+                                                              .get();
 
         private EventReceiver target;
         private ProjectId id;
