@@ -43,7 +43,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Dmytro Kuzmin
  */
 @Internal
-public class MethodExceptionChecker {
+public final class MethodExceptionChecker {
 
     private final Method method;
 
@@ -52,7 +52,7 @@ public class MethodExceptionChecker {
     }
 
     /**
-     * Creates new instance of the {@link MethodExceptionChecker} for the specified {@link Method}.
+     * Creates new instance of the {@code MethodExceptionChecker} for the specified {@link Method}.
      *
      * @param method the method to create new instance for
      * @return a new instance of {@code MethodExceptionChecker}
@@ -79,7 +79,8 @@ public class MethodExceptionChecker {
      * @throws IllegalStateException if the method throws any exception types apart from the
      *                               types specified in {@code whiteList} and their descendants
      */
-    void checkThrowsNoExceptionsBut(Class<? extends Throwable>... whiteList) {
+    @SafeVarargs
+    final void checkThrowsNoExceptionsBut(Class<? extends Throwable>... whiteList) {
         checkNotNull(whiteList);
 
         Collection<Class<? extends Throwable>> allowedExceptions = Arrays.asList(whiteList);

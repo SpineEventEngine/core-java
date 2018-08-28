@@ -215,7 +215,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *
      * @return string form of the entity ID
      */
-    public String stringId() {
+    @Override
+    public String idAsString() {
         String result = stringId;
         if (result == null) {
             synchronized (this) {
@@ -232,7 +233,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("id", stringId())
+                          .add("id", idAsString())
                           .toString();
     }
 

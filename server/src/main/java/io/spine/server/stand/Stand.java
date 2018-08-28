@@ -53,7 +53,6 @@ import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -144,12 +143,12 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Posts the state of an {@link VersionableEntity} to this {@link Stand}.
+     * Posts the state of an {@link VersionableEntity} to this {@code Stand}.
      *
      * @param entity the entity which state should be delivered to the {@code Stand}
      */
-    public void post(TenantId tenantId, VersionableEntity entity) {
-        EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, tenantId);
+    public void post(TenantId tenantId, VersionableEntity<?, ?> entity) {
+        EntityStateEnvelope<?, ?> envelope = EntityStateEnvelope.of(entity, tenantId);
         update(envelope);
     }
 
@@ -506,7 +505,7 @@ public class Stand implements AutoCloseable {
          * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating
          * {@code BoundedContext}.
          */
-        private @MonotonicNonNull Boolean multitenant;
+        private @Nullable Boolean multitenant;
 
         private StandStorage storage;
         private Executor callbackExecutor;

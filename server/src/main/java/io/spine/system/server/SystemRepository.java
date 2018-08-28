@@ -18,16 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.system.server;
 
-import com.google.protobuf.Message;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.route.EventRoute;
 
 /**
- * A route for a message to be delivered ton one entity.
+ * Abstract base for system aggregate repositories.
  *
- * @param <I> the type of entity ID
+ * <p>System repositories dispatch imported events using the first event message field.
+ *
  * @author Alexander Yevsyukov
  */
-@FunctionalInterface
-public interface Unicast<I, M extends Message, C extends Message> extends Route<M, C, I> {
+abstract class SystemRepository<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateRepository<I, A> {
+
+    SystemRepository() {
+        super();
+        getEventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
+    }
 }

@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import io.spine.server.entity.Repository;
-import io.spine.system.server.SystemBoundedContext;
 import io.spine.system.server.SystemGateway;
 
 /**
@@ -36,24 +35,24 @@ import io.spine.system.server.SystemGateway;
  * {@linkplain BoundedContext#findRepository(Class) query processing}, etc.) happen through
  * an instance of this class.
  *
- * <p>Each {@code DomainBoundedContext} has an associated {@link SystemBoundedContext}, which
+ * <p>Each {@code DomainBoundedContext} has an associated {@link io.spine.system.server.SystemContext}, which
  * manages the meta information about this bounded context entities.
  *
  * @author Dmytro Dashenkov
- * @see SystemBoundedContext
+ * @see io.spine.system.server.SystemContext
  */
-final class DomainBoundedContext extends BoundedContext {
+final class DomainContext extends BoundedContext {
 
     private final SystemGateway systemGateway;
 
-    private DomainBoundedContext(BoundedContextBuilder builder,
-                                 SystemGateway gateway) {
+    private DomainContext(BoundedContextBuilder builder,
+                          SystemGateway gateway) {
         super(builder);
         this.systemGateway = gateway;
     }
 
-    static DomainBoundedContext newInstance(BoundedContextBuilder builder, SystemGateway gateway) {
-        DomainBoundedContext result = new DomainBoundedContext(builder, gateway);
+    static DomainContext newInstance(BoundedContextBuilder builder, SystemGateway gateway) {
+        DomainContext result = new DomainContext(builder, gateway);
         result.init();
         return result;
     }

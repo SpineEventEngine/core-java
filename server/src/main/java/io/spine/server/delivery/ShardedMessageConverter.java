@@ -25,7 +25,6 @@ import io.spine.base.Time;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
-import io.spine.string.Stringifiers;
 
 /**
  * The converter of messages, which have to be sent to a specific shard, into {@link ShardedMessage}
@@ -50,9 +49,8 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
 
     protected ShardedMessage convert(I targetId, E envelope) {
 
-        Message id = envelope.getId();
         M originalMessage = envelope.getOuterObject();
-        String stringId = Stringifiers.toString(id);
+        String stringId = envelope.idAsString();
         ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
                                                             .setValue(stringId)
                                                             .build();

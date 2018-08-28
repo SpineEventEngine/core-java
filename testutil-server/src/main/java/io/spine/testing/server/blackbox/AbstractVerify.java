@@ -35,8 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
+ * Abstract base for classes verifying emitted messages.
  *
- * @param <E>
  * @author Mykhailo Drachuk
  * @author Alexander Yevsyukov
  */

@@ -61,19 +61,4 @@ public interface EventDispatcher<I>
     default boolean dispatchesExternalEvents() {
         return !getExternalEventClasses().isEmpty();
     }
-
-    enum Error {
-
-        DISPATCHING_EXTERNAL_EVENT("Error dispatching external event (class: %s, id: %s)");
-
-        private final String messageFormat;
-
-        Error(String messageFormat) {
-            this.messageFormat = messageFormat;
-        }
-
-        public String format(Object... args) {
-            return String.format(messageFormat, args);
-        }
-    }
 }

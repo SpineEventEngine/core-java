@@ -61,8 +61,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>Such a repository is backed by {@link RecordStorage}.
  * Entity states are stored as {@link EntityRecord}s.
  *
- * @param <I> the type of IDs of entities
- * @param <E> the type of entities
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */

@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import io.spine.core.CommandClass;
 import io.spine.server.bus.DispatcherRegistry;
@@ -81,19 +80,6 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
         checkNotAlreadyRegistered(dispatcher);
     }
 
-    Optional<? extends CommandDispatcher<?>> getDispatcher(CommandClass commandClass) {
-        Set<CommandDispatcher<?>> dispatchers = getDispatchers(commandClass);
-        if (dispatchers.isEmpty()) {
-            return Optional.empty();
-        }
-
-        // Since there can be only one dispatcher per command the returned set
-        // contains only one element.
-        CommandDispatcher<?> result = FluentIterable.from(dispatchers)
-                                                    .get(0);
-        return Optional.of(result);
-    }
-
     /**
      * Ensures that all of the commands of the passed dispatcher are not
      * already registered for dispatched in this command bus.
@@ -108,9 +94,7 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
         for (CommandClass commandClass : commandClasses) {
             Optional<? extends CommandDispatcher<?>> registeredDispatcher =
                     getDispatcher(commandClass);
-            if (registeredDispatcher.isPresent()) {
-                alreadyRegistered.put(commandClass, registeredDispatcher.get());
-            }
+            registeredDispatcher.ifPresent(d -> alreadyRegistered.put(commandClass, d));
         }
 
         doCheck(alreadyRegistered, dispatcher);

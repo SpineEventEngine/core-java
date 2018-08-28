@@ -47,6 +47,11 @@ message TankEmpty {
     EngineId id = 1 [(required) = true];
 }
 
+// An event which is not handled in any way.
+message UnsupportedEngineEvent {
+    EngineId id = 1 [(required) = true];
+}
+
 //
 // External events
 //////////////////////////////

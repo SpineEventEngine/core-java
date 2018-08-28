@@ -20,13 +20,11 @@
 
 package io.spine.system.server;
 
-import io.spine.server.aggregate.AggregateRepository;
-
 /**
- * The repository for {@link CommandLifecycleAggregate}s.
+ * The repository for {@link EntityHistoryAggregate}s.
  *
  * @author Dmytro Dashenkov
  */
 final class EntityHistoryRepository
-        extends AggregateRepository<EntityHistoryId, EntityHistoryAggregate> {
+        extends SystemRepository<EntityHistoryId, EntityHistoryAggregate> {
 }

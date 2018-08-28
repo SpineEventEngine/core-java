@@ -18,38 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.aggregate.given.klasse;
 
-import io.spine.annotation.Internal;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.route.EventRoute;
 
 /**
- * The factory of {@link EventPlayer} instances.
+ * Test environment aggregate repository which can switch default routing of importable events.
  *
- * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
+ * @see io.spine.server.aggregate.EventImportTest
  */
-@Internal
-public final class EventPlayers {
+public class EngineRepository extends AggregateRepository<EngineId, EngineAggregate> {
 
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private EventPlayers() {
-    }
-
-    /**
-     * Creates a transactional {@link EventPlayer} for the given
-     * {@linkplain TransactionalEntity entity}.
-     *
-     * <p>It is expected that the given entity is currently in a transaction. If this condition is
-     * not met, an {@code IllegalStateException} is {@linkplain TransactionalEntity#tx() thrown}.
-     *
-     * @param entity the entity to create the player for
-     * @return new instance on {@code EventPlayer}
-     */
-    public static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
-        checkNotNull(entity);
-        return new TransactionalEventPlayer(entity.tx());
+    public void routeImportByFirstMessageField() {
+        getEventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
     }
 }

@@ -72,6 +72,7 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 @Internal
 public abstract class Transaction<I,
                                   E extends TransactionalEntity<I, S, B>,
@@ -133,6 +134,7 @@ public abstract class Transaction<I,
      * <p>Has {@code true} value since the transaction instance creation
      * until {@linkplain #commit() commit()} is performed.
      */
+    @SuppressWarnings("UnusedAssignment") // is used for documentation purposes.
     private boolean active = false;
 
     /**
@@ -351,7 +353,6 @@ public abstract class Transaction<I,
      *
      * @param event the envelope with the event
      * @return this instance of the transaction
-     * @see Transaction#apply(EventEnvelope)
      */
     @CanIgnoreReturnValue
     @SuppressWarnings("OverlyBroadCatchBlock")  /* to `rollback(..)` in case of any exception. */

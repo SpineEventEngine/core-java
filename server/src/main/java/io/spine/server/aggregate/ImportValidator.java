@@ -18,40 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.aggregate;
 
-import io.spine.core.Event;
+import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
+import io.spine.core.MessageInvalid;
+import io.spine.server.bus.EnvelopeValidator;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.MessageValidator;
+
+import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.event.InvalidEventException.onConstraintViolations;
+import static java.util.Optional.ofNullable;
 
 /**
- * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
+ * Checks if a message of the event to import is
+ * {@linkplain MessageValidator#validate(Message) valid}
  *
- * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
  */
-final class TransactionalEventPlayer implements EventPlayer {
+final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
 
-    private final Transaction<?, ?, ?, ?> transaction;
+    private final MessageValidator messageValidator = MessageValidator.newInstance();
 
-    /**
-     * Creates a new instance of {@code TransactionalEventPlayer}.
-     *
-     * @param transaction the transaction
-     */
-    TransactionalEventPlayer(Transaction<?, ?, ?, ?> transaction) {
-        this.transaction = checkNotNull(transaction);
-    }
-
-    /**
-     * Plays the given events upon the underlying entity transaction.
-     */
     @Override
-    public void play(Iterable<Event> events) {
-        checkNotNull(events);
-        for (Event event : events) {
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            transaction.apply(eventEnvelope);
+    public Optional<MessageInvalid> validate(EventEnvelope envelope) {
+        checkNotNull(envelope);
+        MessageInvalid result = null;
+        Message eventMessage = envelope.getMessage();
+        List<ConstraintViolation> violations = messageValidator.validate(eventMessage);
+        if (!violations.isEmpty()) {
+            result = onConstraintViolations(eventMessage, violations);
         }
+        return ofNullable(result);
     }
 }

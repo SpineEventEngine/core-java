@@ -38,6 +38,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 
 /**
+ * Test obtaining dispatched message classes from {@link AggregateClass}.
+ *
  * @author Alexander Yevsyukov
  */
 @DisplayName("AggregateClass should")
@@ -82,7 +84,7 @@ class AggregateClassTest {
     @Test
     @DisplayName("provide classes of events that are imported by the aggregate")
     void importedEvents() {
-        assertThat(aggregateClass.getImportEvents())
+        assertThat(aggregateClass.getImportableEventClasses())
                 .containsExactlyElementsIn(EventClass.setOf(
                         EngineStopped.class,
                         SettingsAdjusted.class

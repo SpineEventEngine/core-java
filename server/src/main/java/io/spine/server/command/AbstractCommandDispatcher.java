@@ -28,15 +28,12 @@ import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.string.Stringifiers;
-import io.spine.type.MessageClass;
 
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.protobuf.AnyPacker.pack;
-import static java.lang.String.format;
 
 /**
  * The abstract base for non-aggregate classes that dispatch commands to their methods
@@ -93,11 +90,10 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        MessageClass messageClass = envelope.getMessageClass();
-        String messageId = Stringifiers.toString(envelope.getId());
-        String errorMessage =
-                format("Error handling command (class: %s id: %s).", messageClass, messageId);
-        log().error(errorMessage, exception);
+        _error(exception,
+               "Error handling command (class: `{}` id: `{}`).",
+               envelope.getMessageClass(),
+               envelope.idAsString());
     }
 
     /**

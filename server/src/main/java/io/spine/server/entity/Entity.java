@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.reflect.GenericTypeIndex;
+import io.spine.string.Stringifiers;
 
 /**
  * A server-side object with an {@link Identifier#checkSupported(Class) identity}.
@@ -42,6 +43,16 @@ public interface Entity<I, S extends Message> {
      * Obtains the identifier of the entity.
      */
     I getId();
+
+    /**
+     * Obtains string representation of the entity identifier.
+     *
+     * @apiNote The primary purpose of this method is to display the identifier in human-readable
+     * form in debug and error messages.
+     */
+    default String idAsString() {
+        return Stringifiers.toString(getId());
+    }
 
     /**
      * Obtains the state of the entity.

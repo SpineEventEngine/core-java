@@ -52,7 +52,7 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.EventProducers;
+import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -106,7 +106,7 @@ public abstract class ProcessManagerRepository<I,
      * Creates a new instance with the event routing by the first message field.
      */
     protected ProcessManagerRepository() {
-        super(EventProducers.fromFirstMessageField());
+        super(EventRoute.byFirstMessageField());
     }
 
     /** Obtains class information of process managers managed by this repository. */

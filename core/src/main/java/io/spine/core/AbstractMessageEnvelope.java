@@ -20,6 +20,7 @@
 
 package io.spine.core;
 
+import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 
 import java.util.Objects;
@@ -65,5 +66,13 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
         }
         AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
         return Objects.equals(this.object, other.object);
+    }
+
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("object", getOuterObject())
+                          .toString();
     }
 }

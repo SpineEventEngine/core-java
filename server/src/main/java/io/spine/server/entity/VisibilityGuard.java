@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption.Visibility;
@@ -34,7 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -52,8 +51,8 @@ public final class VisibilityGuard {
 
     private final Map<Class<? extends Message>, RepositoryAccess> repositories = newHashMap();
 
+    /** Prevent instantiation from outside. */
     private VisibilityGuard() {
-        // Prevent instantiation from outside.
     }
 
     /**
@@ -129,19 +128,12 @@ public final class VisibilityGuard {
                              }).values();
 
         // Get type names for entities of the filtered repositories.
-        Iterable<TypeName> entityTypes =
-                transform(repos,
-                          input -> {
-                              checkNotNull(input);
-                              @SuppressWarnings("unchecked")
-                                  // Safe as it's bounded by Repository class definition.
-                                      Class<? extends Message> cls =
-                                      input.repository.entityClass()
-                                                      .getStateClass();
-                              TypeName result = TypeName.of(cls);
-                              return result;
-                          });
-        return Sets.newHashSet(entityTypes);
+        Set<TypeName> entityTypes =
+                repos.stream()
+                     .map(input -> input.repository.getEntityStateType()
+                                                   .toName())
+                     .collect(toImmutableSet());
+        return entityTypes;
     }
 
     /**

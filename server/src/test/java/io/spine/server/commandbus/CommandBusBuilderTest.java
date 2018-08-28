@@ -165,7 +165,7 @@ class CommandBusBuilderTest
         void gateway() {
             SystemGateway systemGateway = mock(SystemGateway.class);
             CommandBus.Builder builder = builder().injectSystemGateway(systemGateway);
-            Optional<SystemGateway> actual = builder.getSystemGateway();
+            Optional<SystemGateway> actual = builder.systemGateway();
             assertTrue(actual.isPresent());
             assertSame(systemGateway, actual.get());
         }
@@ -175,7 +175,7 @@ class CommandBusBuilderTest
         void tenantIndex() {
             TenantIndex index = mock(TenantIndex.class);
             CommandBus.Builder builder = builder().injectTenantIndex(index);
-            Optional<TenantIndex> actual = builder.getTenantIndex();
+            Optional<TenantIndex> actual = builder.tenantIndex();
             assertTrue(actual.isPresent());
             assertSame(index, actual.get());
         }

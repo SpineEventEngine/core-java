@@ -32,6 +32,7 @@ import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
+import "spine/core/actor_context.proto";
 import "spine/core/command.proto";
 import "spine/core/version.proto";
 import "spine/core/enrichment.proto";
@@ -99,6 +100,9 @@ message EventContext {
 
         // The context of the event which generated this event.
         EventContext event_context = 6 [(required) = true];
+
+        // The event was imported using this `AсtorContext`.
+        ActorContext import_context = 11 [(required) = true];
     }
 
     // An ID of the root command, which lead to this event.
@@ -106,7 +110,9 @@ message EventContext {
     // If the event is a reaction to another event, then this attribute holds the identifier 
     // of the very first command in this chain.
     //
-    CommandId root_command_id = 9 [(required) = true];
+    // This field is not populated if the event was imported.
+    //
+    CommandId root_command_id = 9;
 
     // The ID of the entity which generated the event.
     //
@@ -158,15 +164,4 @@ enum EventValidationError {
 
     // The event message is invalid according to custom Protobuf options set.
     INVALID_EVENT = 2;
-}
-
-// Data from an `Event` which is accessible from the end user code to which
-// the event was dispatched.
-message DispatchedEvent {
-
-    // The event message.
-    google.protobuf.Any message = 1 [(required) = true];
-
-    // The context of the event.
-    EventContext context = 2 [(required) = true];
 }

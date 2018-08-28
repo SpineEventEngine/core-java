@@ -27,8 +27,6 @@ import io.spine.server.delivery.DeliveryTag;
 /**
  * A strategy on delivering the commands to the instances of a certain aggregate type.
  *
- * @param <I> the ID type of aggregate, to which commands are being delivered
- * @param <A> the type of aggregate
  * @author Alex Tymchenko
  */
 @SPI
