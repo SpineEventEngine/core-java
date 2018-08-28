@@ -264,12 +264,6 @@ class ProcessManagerRepositoryTest
             assertNotNull(exception);
             assertThat(exception, instanceOf(DuplicateCommandException.class));
         }
-
-        @SuppressWarnings("ResultOfMethodCallIgnored") // OK for tests.
-        private void dispatchCommand(Command command) {
-            CommandEnvelope envelope = CommandEnvelope.of(command);
-            repository().dispatchCommand(envelope);
-        }
     }
 
     @Nested
