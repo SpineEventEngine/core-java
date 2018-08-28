@@ -37,6 +37,7 @@ public abstract class DeliveryEventSubscriber<I> extends AbstractEventSubscriber
     private final TypeUrl targetType;
 
     protected DeliveryEventSubscriber(TypeUrl targetType) {
+        super();
         this.targetType = checkNotNull(targetType);
     }
 
