@@ -125,8 +125,8 @@ class EntityHistoryTest {
             createPerson();
             eventAccumulator.assertEventCount(6);
 
-            checkEntityCreated(AGGREGATE, TestAggregate.TYPE);
             checkCommandDispatchedToAggregateHandler();
+            checkEntityCreated(AGGREGATE, TestAggregate.TYPE);
             checkEntityStateChanged(Person.newBuilder()
                                           .setId(id)
                                           .setName(PersonName.getDefaultInstance())
@@ -193,8 +193,8 @@ class EntityHistoryTest {
         @DisplayName("command is dispatched to handler in aggregate part")
         void commandToPart() {
             Message domainCommand = createPersonName();
-            checkEntityCreated(AGGREGATE, TestAggregatePart.TYPE);
             assertCommandDispatched(domainCommand);
+            checkEntityCreated(AGGREGATE, TestAggregatePart.TYPE);
         }
 
         @Test
@@ -206,8 +206,8 @@ class EntityHistoryTest {
                     .build();
             postCommand(startCommand);
 
-            checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
             eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
+            checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
             EntityStateChanged stateChanged = eventAccumulator.nextEvent(EntityStateChanged.class);
             assertId(stateChanged.getId());
             PersonCreation startedState = unpack(stateChanged.getNewState());
@@ -232,11 +232,10 @@ class EntityHistoryTest {
         void eventToReactorInProcman() {
             createPersonName();
 
-            eventAccumulator.nextEvent(EntityCreated.class);
             eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
+            eventAccumulator.nextEvent(EntityCreated.class);
             eventAccumulator.nextEvent(EntityStateChanged.class);
 
-            checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
             EventDispatchedToReactor dispatchedToReactor =
                     eventAccumulator.nextEvent(EventDispatchedToReactor.class);
             assertId(dispatchedToReactor.getReceiver());
@@ -244,6 +243,8 @@ class EntityHistoryTest {
             TypeUrl expectedType = TypeUrl.of(PersonNameCreated.class);
             TypeUrl actualType = TypeUrl.ofEnclosed(dispatchedToReactor.getPayload().getMessage());
             assertEquals(expectedType, actualType);
+
+            checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
 
             EntityStateChanged stateChanged = eventAccumulator.nextEvent(EntityStateChanged.class);
             PersonCreation processState = unpack(stateChanged.getNewState());
