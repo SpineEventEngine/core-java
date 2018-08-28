@@ -66,6 +66,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
@@ -343,14 +344,15 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("throw IAE when dispatching unknown command")
+    @DisplayName("throw ISE when dispatching unknown command")
     void throwOnUnknownCommand() {
         Command unknownCommand =
                 requestFactory.createCommand(Int32Value.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
+        ProjectId id = createId(42);
         Throwable exception = assertThrows(RuntimeException.class,
-                                           () -> repository().dispatchCommand(request));
-        assertThat(exception.getCause(), instanceOf(IllegalArgumentException.class));
+                                           () -> repository().dispatchNowTo(id, request));
+        assertThat(getRootCause(exception), instanceOf(IllegalStateException.class));
     }
 
     @Nested
