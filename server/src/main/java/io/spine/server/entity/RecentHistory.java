@@ -27,6 +27,7 @@ import io.spine.core.Event;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Queues.newArrayDeque;
 
@@ -82,6 +83,11 @@ public final class RecentHistory {
     public Iterator<Event> iterator() {
         ImmutableList<Event> events = ImmutableList.copyOf(history);
         return events.iterator();
+    }
+
+    public Stream<Event> stream() {
+        ImmutableList<Event> events = ImmutableList.copyOf(history);
+        return events.stream();
     }
 
     /**

@@ -24,10 +24,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.core.EventId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -35,7 +32,6 @@ import io.spine.server.entity.LifecycleFlags;
 
 import java.util.function.UnaryOperator;
 
-import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.Timestamps.compare;
 
 /**
@@ -168,16 +164,19 @@ final class EntityHistoryAggregate
 
     @Apply
     void on(EventDispatchedToSubscriber event) {
+        getBuilder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
     void on(EventDispatchedToReactor event) {
+        getBuilder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
     void on(CommandDispatchedToHandler event) {
+        getBuilder().setId(event.getReceiver());
         updateLastCommandTime(event.getWhenDispatched());
     }
 
@@ -215,24 +214,16 @@ final class EntityHistoryAggregate
     }
 
     private void checkNotDuplicate(Event event) throws CannotDispatchEventTwice {
-        EventId eventId = event.getId();
-        boolean duplicate = stream(recentHistory().iterator())
-                .map(Event::getContext)
-                .filter(EventContext::hasEventId)
-                .map(EventContext::getEventId)
-                .anyMatch(eventId::equals);
+        DuplicateGuard guard = DuplicateGuard.atopOf(recentHistory());
+        boolean duplicate = guard.isDuplicate(event);
         if (duplicate) {
             throw new CannotDispatchEventTwice(getId(), event, now());
         }
     }
 
     private void checkNotDuplicate(Command command) throws CannotDispatchCommandTwice {
-        CommandId commandId = command.getId();
-        boolean duplicate = stream(recentHistory().iterator())
-                .map(Event::getContext)
-                .filter(EventContext::hasCommandId)
-                .map(EventContext::getCommandId)
-                .anyMatch(commandId::equals);
+        DuplicateGuard guard = DuplicateGuard.atopOf(recentHistory());
+        boolean duplicate = guard.isDuplicate(command);
         if (duplicate) {
             throw new CannotDispatchCommandTwice(getId(), command, now());
         }
