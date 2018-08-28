@@ -123,6 +123,9 @@ public interface CommandingMethod<T,
             checkNotNull(event);
             checkNotNull(bus);
             List<? extends Message> messages = asMessages();
+            if (optional && messages.isEmpty()) {
+                return;
+            }
             if (messages.size() == 1) {
                 SingleCommand seq = inResponseTo(event).produce(messages.get(0));
                 seq.post(bus);
