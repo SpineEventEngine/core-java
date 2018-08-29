@@ -34,7 +34,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
-import io.spine.system.server.given.CommandLifecycleTestEnv.TestAggregateRepository;
+import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.system.server.given.ScheduledCommandTestEnv.TestCommandScheduler;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +75,7 @@ class ScheduledCommandTest {
         context = BoundedContext.newBuilder()
                                 .setCommandBus(commandBus)
                                 .build();
-        context.register(new TestAggregateRepository());
+        context.register(new CompanyRepository());
         BoundedContext system = systemOf(this.context);
         Optional<Repository> found = system.findRepository(ScheduledCommandRecord.class);
         assertTrue(found.isPresent());

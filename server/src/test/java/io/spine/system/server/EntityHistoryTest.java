@@ -164,13 +164,13 @@ class EntityHistoryTest {
             hidePerson();
             eventAccumulator.assertEventCount(6);
 
-            eventAccumulator.nextEvent(EntityCreated.class);
-            eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
+            eventAccumulator.assertNextEventIs(EntityCreated.class);
+            eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
 
             checkEntityArchived();
 
-            eventAccumulator.nextEvent(EntityCreated.class);
-            eventAccumulator.nextEvent(EventDispatchedToSubscriber.class);
+            eventAccumulator.assertNextEventIs(EntityCreated.class);
+            eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
 
             checkEntityDeleted();
         }
@@ -189,11 +189,11 @@ class EntityHistoryTest {
 
             eventAccumulator.assertEventCount(4);
 
-            eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
+            eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
 
             checkEntityExtracted();
 
-            eventAccumulator.nextEvent(EventDispatchedToSubscriber.class);
+            eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
 
             checkEntityRestored();
         }
@@ -226,8 +226,8 @@ class EntityHistoryTest {
             postCommand(startCommand);
 
             checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
-            eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
-            EntityStateChanged stateChanged = eventAccumulator.nextEvent(EntityStateChanged.class);
+            eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+            EntityStateChanged stateChanged = eventAccumulator.assertNextEventIs(EntityStateChanged.class);
             assertId(stateChanged.getId());
             PersonCreation startedState = unpack(stateChanged.getNewState());
             assertFalse(startedState.getCreated());
@@ -239,8 +239,8 @@ class EntityHistoryTest {
                     .build();
             postCommand(domainCommand);
 
-            eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
-            EntityStateChanged stateChangedAgain = eventAccumulator.nextEvent(EntityStateChanged.class);
+            eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+            EntityStateChanged stateChangedAgain = eventAccumulator.assertNextEventIs(EntityStateChanged.class);
             assertId(stateChangedAgain.getId());
             PersonCreation completedState = unpack(stateChangedAgain.getNewState());
             assertTrue(completedState.getCreated());
@@ -251,20 +251,20 @@ class EntityHistoryTest {
         void eventToReactorInProcman() {
             createPersonName();
 
-            eventAccumulator.nextEvent(EntityCreated.class);
-            eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
-            eventAccumulator.nextEvent(EntityStateChanged.class);
+            eventAccumulator.assertNextEventIs(EntityCreated.class);
+            eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+            eventAccumulator.assertNextEventIs(EntityStateChanged.class);
 
             checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
             EventDispatchedToReactor dispatchedToReactor =
-                    eventAccumulator.nextEvent(EventDispatchedToReactor.class);
+                    eventAccumulator.assertNextEventIs(EventDispatchedToReactor.class);
             assertId(dispatchedToReactor.getReceiver());
 
             TypeUrl expectedType = TypeUrl.of(PersonNameCreated.class);
             TypeUrl actualType = TypeUrl.of(findEvent(dispatchedToReactor.getPayload()));
             assertEquals(expectedType, actualType);
 
-            EntityStateChanged stateChanged = eventAccumulator.nextEvent(EntityStateChanged.class);
+            EntityStateChanged stateChanged = eventAccumulator.assertNextEventIs(EntityStateChanged.class);
             PersonCreation processState = unpack(stateChanged.getNewState());
             assertEquals(id, processState.getId());
             assertTrue(processState.getCreated());
@@ -284,11 +284,11 @@ class EntityHistoryTest {
                     .build();
             postCommand(domainCommand);
 
-            eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
-            eventAccumulator.nextEvent(EntityStateChanged.class);
+            eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+            eventAccumulator.assertNextEventIs(EntityStateChanged.class);
 
             EventDispatchedToReactor dispatched =
-                    eventAccumulator.nextEvent(EventDispatchedToReactor.class);
+                    eventAccumulator.assertNextEventIs(EventDispatchedToReactor.class);
             assertId(dispatched.getReceiver());
             TypeUrl expectedType = TypeUrl.of(PersonRenamed.class);
             TypeUrl actualType = TypeUrl.of(findEvent(dispatched.getPayload()));
@@ -323,28 +323,28 @@ class EntityHistoryTest {
         }
 
         private void assertCommandDispatched(Message command) {
-            CommandDispatchedToHandler commandDispatched =
-                    eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
-            assertId(commandDispatched.getReceiver());
-            Message commandMessage = findCommand(commandDispatched.getPayload());
+            CommandDispatchedToHandler event =
+                    eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+            assertId(event.getReceiver());
+            Message commandMessage = findCommand(event.getPayload());
             assertEquals(command, commandMessage);
         }
 
         private void checkEntityCreated(EntityOption.Kind entityKind,
                                         TypeUrl entityType) {
-            EntityCreated entityCreatedEvent = eventAccumulator.nextEvent(EntityCreated.class);
-            assertId(entityCreatedEvent.getId());
-            assertEquals(entityType.value(), entityCreatedEvent.getId()
-                                                               .getTypeUrl());
-            assertEquals(entityKind, entityCreatedEvent.getKind());
+            EntityCreated event = eventAccumulator.assertNextEventIs(EntityCreated.class);
+            assertId(event.getId());
+            assertEquals(entityType.value(), event.getId()
+                                                  .getTypeUrl());
+            assertEquals(entityKind, event.getKind());
         }
 
         private void checkEventDispatchedToSubscriber() {
-            EventDispatchedToSubscriber eventDispatchedEvent =
-                    eventAccumulator.nextEvent(EventDispatchedToSubscriber.class);
-            EntityHistoryId receiver = eventDispatchedEvent.getReceiver();
+            EventDispatchedToSubscriber event =
+                    eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
+            EntityHistoryId receiver = event.getReceiver();
             PersonId actualIdValue = unpack(receiver.getEntityId().getId());
-            DispatchedEvent dispatchedEvent = eventDispatchedEvent.getPayload();
+            DispatchedEvent dispatchedEvent = event.getPayload();
             PersonCreated payload = findEvent(dispatchedEvent, PersonCreated.class);
             assertEquals(id, actualIdValue);
             assertEquals(TestProjection.TYPE.value(), receiver.getTypeUrl());
@@ -352,7 +352,7 @@ class EntityHistoryTest {
         }
 
         private void checkEntityStateChanged(Message state) {
-            EntityStateChanged event = eventAccumulator.nextEvent(EntityStateChanged.class);
+            EntityStateChanged event = eventAccumulator.assertNextEventIs(EntityStateChanged.class);
             assertId(event.getId());
             assertEquals(state, unpack(event.getNewState()));
             assertFalse(event.getMessageIdList().isEmpty());
@@ -360,7 +360,7 @@ class EntityHistoryTest {
 
         private void checkCommandDispatchedToAggregateHandler() {
             CommandDispatchedToHandler commandDispatchedEvent =
-                    eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
+                    eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
             PersonId actualIdValue = unpack(receiver.getEntityId().getId());
             DispatchedCommand dispatchedCommand = commandDispatchedEvent.getPayload();
@@ -371,89 +371,90 @@ class EntityHistoryTest {
         }
 
         private void checkEntityArchived() {
-            EntityArchived archivedEvent = eventAccumulator.nextEvent(EntityArchived.class);
+            EntityArchived event = eventAccumulator.assertNextEventIs(EntityArchived.class);
 
             assertEquals(TestAggregate.TYPE.value(),
-                         archivedEvent.getId().getTypeUrl());
-            assertId(archivedEvent.getId());
+                         event.getId()
+                              .getTypeUrl());
+            assertId(event.getId());
         }
 
         private void checkEntityDeleted() {
-            EntityDeleted deletedEvent = eventAccumulator.nextEvent(EntityDeleted.class);
+            EntityDeleted event = eventAccumulator.assertNextEventIs(EntityDeleted.class);
 
             assertEquals(TestProjection.TYPE.value(),
-                         deletedEvent.getId()
-                                     .getTypeUrl());
-            assertId(deletedEvent.getId());
+                         event.getId()
+                              .getTypeUrl());
+            assertId(event.getId());
         }
 
         private void checkEntityExtracted() {
-            EntityExtractedFromArchive extractedEvent =
-                    eventAccumulator.nextEvent(EntityExtractedFromArchive.class);
+            EntityExtractedFromArchive event =
+                    eventAccumulator.assertNextEventIs(EntityExtractedFromArchive.class);
 
             assertEquals(TestAggregate.TYPE.value(),
-                         extractedEvent.getId()
-                                       .getTypeUrl());
-            PersonId actualId = Identifier.unpack(extractedEvent.getId()
-                                                                .getEntityId()
-                                                                .getId());
+                         event.getId()
+                              .getTypeUrl());
+            PersonId actualId = Identifier.unpack(event.getId()
+                                                       .getEntityId()
+                                                       .getId());
             assertEquals(id, actualId);
         }
 
         private void checkEntityRestored() {
-            EntityRestored restoredEvent = eventAccumulator.nextEvent(EntityRestored.class);
+            EntityRestored event = eventAccumulator.assertNextEventIs(EntityRestored.class);
 
             assertEquals(TestProjection.TYPE.value(),
-                         restoredEvent.getId()
-                                      .getTypeUrl());
-            assertId(restoredEvent.getId());
+                         event.getId()
+                              .getTypeUrl());
+            assertId(event.getId());
         }
 
         private void assertId(EntityHistoryId actual) {
             PersonId actualId = Identifier.unpack(actual.getEntityId().getId());
             assertEquals(id, actualId);
         }
-    }
 
-    private void postCommand(Message commandMessage) {
-        Command command = requestFactory.createCommand(commandMessage);
-        context.getCommandBus().post(command, noOpObserver());
-    }
+        private void postCommand(Message commandMessage) {
+            Command command = requestFactory.createCommand(commandMessage);
+            context.getCommandBus().post(command, noOpObserver());
+        }
 
-    private Message findCommand(DispatchedCommand dispatchedCommand) {
-        return findCommand(dispatchedCommand, Message.class);
-    }
+        private Message findCommand(DispatchedCommand dispatchedCommand) {
+            return findCommand(dispatchedCommand, Message.class);
+        }
 
-    private <M extends Message> M findCommand(DispatchedCommand dispatchedCommand,
-                                              Class<M> commandClass) {
-        CommandId commandId = dispatchedCommand.getCommand();
-        Optional<M> found = commandMemoizingTap.find(commandId, commandClass);
-        assertTrue(found.isPresent());
-        return found.get();
-    }
+        private <M extends Message> M findCommand(DispatchedCommand dispatchedCommand,
+                                                  Class<M> commandClass) {
+            CommandId commandId = dispatchedCommand.getCommand();
+            Optional<M> found = commandMemoizingTap.find(commandId, commandClass);
+            assertTrue(found.isPresent());
+            return found.get();
+        }
 
-    private Message findEvent(DispatchedEvent dispatchedEvent) {
-        return findEvent(dispatchedEvent, Message.class);
-    }
+        private Message findEvent(DispatchedEvent dispatchedEvent) {
+            return findEvent(dispatchedEvent, Message.class);
+        }
 
-    private <M extends Message> M findEvent(DispatchedEvent dispatchedEvent,
-                                            Class<M> eventClass) {
-        MemoizingObserver<Event> eventObserver = memoizingObserver();
-        context.getEventBus()
-               .getEventStore()
-               .read(EventStreamQuery.getDefaultInstance(), eventObserver);
-        EventId expectedId = dispatchedEvent.getEvent();
-        String errorMessage = format("Event with ID %s not found.", expectedId.getValue());
-        Any eventAny = eventObserver.responses()
-                                  .stream()
-                                  .filter(event -> expectedId.equals(event.getId()))
-                                  .findAny()
-                                  .map(Event::getMessage)
-                                  .orElseThrow(() -> newIllegalStateException(errorMessage));
-        Message eventMessage = unpack(eventAny);
-        assertThat(eventMessage, instanceOf(eventClass));
-        @SuppressWarnings("unchecked") // Checked with an assertion.
-        M result = (M) eventMessage;
-        return result;
+        private <M extends Message> M findEvent(DispatchedEvent dispatchedEvent,
+                                                Class<M> eventClass) {
+            MemoizingObserver<Event> eventObserver = memoizingObserver();
+            context.getEventBus()
+                   .getEventStore()
+                   .read(EventStreamQuery.getDefaultInstance(), eventObserver);
+            EventId expectedId = dispatchedEvent.getEvent();
+            String errorMessage = format("Event with ID %s not found.", expectedId.getValue());
+            Any eventAny = eventObserver.responses()
+                                        .stream()
+                                        .filter(event -> expectedId.equals(event.getId()))
+                                        .findAny()
+                                        .map(Event::getMessage)
+                                        .orElseThrow(() -> newIllegalStateException(errorMessage));
+            Message eventMessage = unpack(eventAny);
+            assertThat(eventMessage, instanceOf(eventClass));
+            @SuppressWarnings("unchecked") // Checked with an assertion.
+                    M result = (M) eventMessage;
+            return result;
+        }
     }
 }
