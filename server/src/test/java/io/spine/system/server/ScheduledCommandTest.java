@@ -35,7 +35,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.system.server.given.command.CompanyRepository;
-import io.spine.system.server.given.ScheduledCommandTestEnv.TestCommandScheduler;
+import io.spine.system.server.given.schedule.TestCommandScheduler;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
