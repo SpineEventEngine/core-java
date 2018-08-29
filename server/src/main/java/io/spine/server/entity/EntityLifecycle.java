@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.EntityId;
+import io.spine.client.EntityIdVBuilder;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -40,7 +41,9 @@ import io.spine.system.server.DispatchCommandToHandler;
 import io.spine.system.server.DispatchEventToReactor;
 import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchedMessageId;
+import io.spine.system.server.DispatchedMessageIdVBuilder;
 import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityHistoryIdVBuilder;
 import io.spine.system.server.ExtractEntityFromArchive;
 import io.spine.system.server.MarkCommandAsHandled;
 import io.spine.system.server.RestoreEntity;
@@ -343,11 +346,11 @@ public class EntityLifecycle {
     }
 
     private static EntityHistoryId historyId(Object id, TypeUrl entityType) {
-        EntityId entityId = EntityId
+        EntityId entityId = EntityIdVBuilder
                 .newBuilder()
                 .setId(pack(id))
                 .build();
-        EntityHistoryId historyId = EntityHistoryId
+        EntityHistoryId historyId = EntityHistoryIdVBuilder
                 .newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(entityType.value())
@@ -358,16 +361,15 @@ public class EntityLifecycle {
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static DispatchedMessageId dispatchedMessageId(Message messageId) {
         checkNotNull(messageId);
+        DispatchedMessageIdVBuilder builder = DispatchedMessageIdVBuilder.newBuilder();
         if (messageId instanceof EventId) {
             EventId eventId = (EventId) messageId;
-            return DispatchedMessageId.newBuilder()
-                                      .setEventId(eventId)
-                                      .build();
+            return builder.setEventId(eventId)
+                          .build();
         } else if (messageId instanceof CommandId) {
             CommandId commandId = (CommandId) messageId;
-            return DispatchedMessageId.newBuilder()
-                                      .setCommandId(commandId)
-                                      .build();
+            return builder.setCommandId(commandId)
+                          .build();
         } else {
             throw newIllegalArgumentException(
                     "Unexpected message ID of type %s. Expected EventId or CommandId.",

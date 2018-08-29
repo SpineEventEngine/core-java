@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
@@ -40,22 +39,6 @@ import static io.spine.base.Time.getCurrentTime;
  * <p>All the commands in the system (except the commands in the {@code System} bounded context)
  * have an associated {@code CommandLifecycle}.
  *
- * <p>Emits events:
- * <ul>
- *     <li>{@link CommandReceived} - when a command is received by the
- *         {@link io.spine.server.commandbus.CommandBus CommandBus};
- *     <li>{@link CommandAcknowledged} - when the command passes
- *         the {@linkplain io.spine.server.bus.BusFilter bus filters} successfully;
- *     <li>{@link CommandErrored} - when the command causes an error in
- *         the {@linkplain io.spine.server.bus.BusFilter bus filters};
- *     <li>{@link CommandDispatched} - when the command is passed to a dispatcher after
- *         being acknowledged;
- *     <li>{@link TargetAssignedToCommand} - when the command target is determined;
- *     <li>{@link CommandHandled} - after a successful command handling;
- *     <li>{@link CommandErrored} - if the command caused a runtime error during handling;
- *     <li>{@link CommandRejected} - if the command handler rejected the command.
- * </ul>
-
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an aggregate class.
@@ -68,42 +51,33 @@ final class CommandLifecycleAggregate
 
     @Assign
     CommandScheduled handle(ScheduleCommand command) {
-        Timestamp when = getCurrentTime();
         return CommandScheduled.newBuilder()
                                .setId(command.getId())
                                .setSchedule(command.getSchedule())
-                               .setWhen(when)
                                .build();
     }
 
     @Assign
-    CommandDispatched handle(MarkCommandAsDispatched command) {
-        Timestamp when = getCurrentTime();
-        return CommandDispatched.newBuilder()
-                                .setId(command.getId())
-                                .setWhen(when)
-                                .build();
-    }
-
-    @Assign
     TargetAssignedToCommand on(AssignTargetToCommand event) {
-        Timestamp when = getCurrentTime();
         return TargetAssignedToCommand.newBuilder()
                                       .setId(event.getId())
                                       .setTarget(event.getTarget())
-                                      .setWhen(when)
                                       .build();
     }
 
     @Assign
     CommandHandled handle(MarkCommandAsHandled command) {
-        Timestamp when = getCurrentTime();
         return CommandHandled.newBuilder()
                              .setId(command.getId())
-                             .setWhen(when)
                              .build();
     }
 
+    /**
+     * Imports the event {@link CommandReceived}.
+     *
+     * <p>The event is generated when a command is received by the
+     * {@link io.spine.server.commandbus.CommandBus CommandBus}.
+     */
     @Apply(allowImport = true)
     void on(CommandReceived event) {
         CommandTimeline status = CommandTimeline
@@ -115,6 +89,12 @@ final class CommandLifecycleAggregate
                     .setStatus(status);
     }
 
+    /**
+     * Imports the event {@link CommandAcknowledged}.
+     *
+     * <p>The event is generated when the command passes
+     * {@linkplain io.spine.server.bus.BusFilter bus filters} successfully;
+     */
     @Apply(allowImport = true)
     void on(CommandAcknowledged event) {
         CommandTimeline status = statusBuilder()
@@ -133,6 +113,11 @@ final class CommandLifecycleAggregate
                     .setStatus(status);
     }
 
+    /**
+     * Imports the event {@link CommandDispatched}.
+     *
+     * <p>The event is generated when the command is passed to a dispatcher after acknowledgement.
+     */
     @Apply(allowImport = true)
     void on(CommandDispatched event) {
         CommandTimeline status = statusBuilder()
@@ -141,6 +126,11 @@ final class CommandLifecycleAggregate
         getBuilder().setStatus(status);
     }
 
+    /**
+     * Imports the event {@link TargetAssignedToCommand}.
+     *
+     * <p>The event is generatef when the command target is determined.
+     */
     @Apply(allowImport = true)
     void on(TargetAssignedToCommand event) {
         CommandTarget target = event.getTarget();
@@ -154,11 +144,21 @@ final class CommandLifecycleAggregate
                 .setTarget(target);
     }
 
+    /**
+     * Imports the event {@link CommandHandled}.
+     *
+     * <p>The event is generated after a command is successfully handled.
+     */
     @Apply(allowImport = true)
     void on(CommandHandled event) {
         setStatus(Responses.statusOk());
     }
 
+    /**
+     * Imports the event {@link CommandErrored}.
+     *
+     * <p>The event is generated if the command caused a runtime error during handling.
+     */
     @Apply(allowImport = true)
     void on(CommandErrored event) {
         Status status = Status
@@ -168,6 +168,11 @@ final class CommandLifecycleAggregate
         setStatus(status);
     }
 
+    /**
+     * Imports the event {@link CommandRejected}.
+     *
+     * <p>The event is generated if the command handler rejected the command.
+     */
     @Apply(allowImport = true)
     void on(CommandRejected event) {
         Status status = Status

@@ -38,7 +38,7 @@ import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/system/server/command_lifecycle.proto";
 
-// An event emitted when a new command is received.
+// An event emitted when a new command is received by the `CommandBus`.
 //
 message CommandReceived {
 
@@ -67,20 +67,14 @@ message CommandScheduled {
 
     // The schedule to execute the command.
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
-// An event emitted when a command is dispatched to a handler
+// An event emitted when a command is passed to a dispatcher after being acknowledged.
 //
 message CommandDispatched {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
 // An event emitted when the command target is determined.
@@ -94,9 +88,6 @@ message TargetAssignedToCommand {
 
     // The target of the command.
     CommandTarget target = 2 [(valid) = true];
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted when a command is successfully handled.
@@ -105,9 +96,6 @@ message CommandHandled {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
 // An event emitted if the handler fails to process the command.

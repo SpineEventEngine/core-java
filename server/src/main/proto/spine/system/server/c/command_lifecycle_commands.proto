@@ -50,14 +50,6 @@ message ScheduleCommand {
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
 }
 
-// Marks a domain command as dispatched.
-//
-message MarkCommandAsDispatched {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-}
-
 // Assigns a target to a command.
 //
 // This command is posted when the command target is determined, but before the command is delivered
