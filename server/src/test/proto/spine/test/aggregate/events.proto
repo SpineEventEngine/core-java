@@ -78,6 +78,7 @@ message AggTaskAssigned {
 
 message AggTaskStarted {
     AggTaskId task_id = 1;
+    ProjectId project_id = 2;
 }
 
 message AggUserNotified {
