@@ -32,20 +32,26 @@ import io.spine.core.EventId;
 import io.spine.option.EntityOption;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.AssignTargetToCommand;
+import io.spine.system.server.AssignTargetToCommandVBuilder;
 import io.spine.system.server.ChangeEntityState;
+import io.spine.system.server.CommandHandled;
+import io.spine.system.server.CommandHandledVBuilder;
 import io.spine.system.server.CommandRejected;
+import io.spine.system.server.CommandRejectedVBuilder;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.CreateEntity;
+import io.spine.system.server.CreateEntityVBuilder;
 import io.spine.system.server.DeleteEntity;
 import io.spine.system.server.DispatchCommandToHandler;
+import io.spine.system.server.DispatchCommandToHandlerVBuilder;
 import io.spine.system.server.DispatchEventToReactor;
 import io.spine.system.server.DispatchEventToSubscriber;
+import io.spine.system.server.DispatchEventToSubscriberVBuilder;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.DispatchedMessageIdVBuilder;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityHistoryIdVBuilder;
 import io.spine.system.server.ExtractEntityFromArchive;
-import io.spine.system.server.MarkCommandAsHandled;
 import io.spine.system.server.RestoreEntity;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
@@ -118,7 +124,7 @@ public class EntityLifecycle {
      * @param entityKind the {@link EntityOption.Kind} of the created entity
      */
     public void onEntityCreated(EntityOption.Kind entityKind) {
-        CreateEntity command = CreateEntity
+        CreateEntity command = CreateEntityVBuilder
                 .newBuilder()
                 .setId(historyId)
                 .setKind(entityKind)
@@ -138,7 +144,7 @@ public class EntityLifecycle {
                 .setEntityId(historyId.getEntityId())
                 .setTypeUrl(historyId.getTypeUrl())
                 .build();
-        AssignTargetToCommand command = AssignTargetToCommand
+        AssignTargetToCommand command = AssignTargetToCommandVBuilder
                 .newBuilder()
                 .setId(commandId)
                 .setTarget(target)
@@ -152,7 +158,7 @@ public class EntityLifecycle {
      * @param command the dispatched command
      */
     public void onDispatchCommand(Command command) {
-        DispatchCommandToHandler systemCommand = DispatchCommandToHandler
+        DispatchCommandToHandler systemCommand = DispatchCommandToHandlerVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
                 .setCommandId(command.getId())
@@ -161,16 +167,16 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link MarkCommandAsHandled} system command.
+     * Posts the {@link CommandHandled} system event.
      *
      * @param command the handled command
      */
     public void onCommandHandled(Command command) {
-        MarkCommandAsHandled systemCommand = MarkCommandAsHandled
+        CommandHandled systemEvent = CommandHandledVBuilder
                 .newBuilder()
                 .setId(command.getId())
                 .build();
-        systemGateway.postCommand(systemCommand);
+        systemGateway.postEvent(systemEvent);
     }
 
     /**
@@ -180,7 +186,7 @@ public class EntityLifecycle {
      * @param rejection the rejection event
      */
     public void onCommandRejected(CommandId commandId, Event rejection) {
-        CommandRejected systemCommand = CommandRejected
+        CommandRejected systemCommand = CommandRejectedVBuilder
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
@@ -194,7 +200,7 @@ public class EntityLifecycle {
      * @param event the dispatched event
      */
     public void onDispatchEventToSubscriber(Event event) {
-        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
+        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriberVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEventId(event.getId())

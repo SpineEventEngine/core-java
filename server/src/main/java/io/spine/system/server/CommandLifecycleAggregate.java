@@ -65,13 +65,6 @@ final class CommandLifecycleAggregate
                                       .build();
     }
 
-    @Assign
-    CommandHandled handle(MarkCommandAsHandled command) {
-        return CommandHandled.newBuilder()
-                             .setId(command.getId())
-                             .build();
-    }
-
     /**
      * Imports the event {@link CommandReceived}.
      *

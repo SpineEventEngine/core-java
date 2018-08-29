@@ -64,16 +64,6 @@ message AssignTargetToCommand {
     CommandTarget target = 2 [(valid) = true];
 }
 
-// Marks a domain command as handled.
-//
-// Posted only after a successful command handling.
-//
-message MarkCommandAsHandled {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-}
-
 // Marks a command as one which was transformed into another command.
 //
 // Posted when a commanding method created one command in response to an incoming one.
