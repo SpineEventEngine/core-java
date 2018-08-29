@@ -60,9 +60,10 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 @SuppressWarnings("ClassReferencesSubclass")
 @Internal
-public abstract
-class CommandSequence<O extends Message, R extends Message, B extends Message.Builder,
-        S extends CommandSequence<O, R, B, S>> {
+public abstract class CommandSequence<O extends Message,
+                                      R extends Message,
+                                      B extends Message.Builder,
+                                      S extends CommandSequence<O, R, B, S>> {
 
     /** The ID of the message which caused the sequence. */
     private final O origin;
@@ -127,8 +128,7 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
     /**
      * Adds the posted command to the result builder.
      */
-    protected abstract void addPosted(B builder, Command command,
-                                      SystemGateway gateway);
+    protected abstract void addPosted(B builder, Command command, SystemGateway gateway);
 
     /**
      * Adds a command message to the sequence of commands to be posted.
