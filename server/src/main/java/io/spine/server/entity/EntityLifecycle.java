@@ -32,6 +32,7 @@ import io.spine.option.EntityOption;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.AssignTargetToCommand;
 import io.spine.system.server.ChangeEntityState;
+import io.spine.system.server.CommandRejected;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.CreateEntity;
 import io.spine.system.server.DeleteEntity;
@@ -42,7 +43,6 @@ import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.ExtractEntityFromArchive;
 import io.spine.system.server.MarkCommandAsHandled;
-import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.RestoreEntity;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
@@ -171,18 +171,18 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link MarkCommandAsRejected} system command.
+     * Posts the {@link CommandRejected} system event.
      *
      * @param commandId the ID of the rejected command
      * @param rejection the rejection event
      */
     public void onCommandRejected(CommandId commandId, Event rejection) {
-        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
+        CommandRejected systemCommand = CommandRejected
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
                 .build();
-        systemGateway.postCommand(systemCommand);
+        systemGateway.postEvent(systemCommand);
     }
 
     /**

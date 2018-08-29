@@ -30,8 +30,8 @@ import io.spine.core.CommandId;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.system.server.MarkCommandAsErrored;
-import io.spine.system.server.MarkCommandAsRejected;
+import io.spine.system.server.CommandErrored;
+import io.spine.system.server.CommandRejected;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -132,26 +132,26 @@ public final class CommandErrorHandler implements Logging {
 
     private void markErrored(CommandEnvelope command, Error error) {
         CommandId commandId = command.getId();
-        MarkCommandAsErrored systemCommand = MarkCommandAsErrored
+        CommandErrored systemEvent = CommandErrored
                 .newBuilder()
                 .setId(commandId)
                 .setError(error)
                 .build();
-        postSystem(systemCommand);
+        postSystem(systemEvent);
     }
 
     private void markRejected(CommandEnvelope command, RejectionEnvelope rejection) {
         CommandId commandId = command.getId();
 
-        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
+        CommandRejected systemEvent = CommandRejected
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection.getOuterObject())
                 .build();
-        postSystem(systemCommand);
+        postSystem(systemEvent);
     }
 
-    private void postSystem(Message systemCommand) {
-        systemGateway.postCommand(systemCommand);
+    private void postSystem(Message systemEvent) {
+        systemGateway.postEvent(systemEvent);
     }
 }

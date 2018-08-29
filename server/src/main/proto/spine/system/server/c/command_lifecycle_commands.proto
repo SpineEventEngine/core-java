@@ -36,14 +36,6 @@ import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/system/server/command_lifecycle.proto";
 
-// Marks a domain command as acknowledged.
-//
-message MarkCommandAsAcknowledged {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-}
-
 // Schedules a domain command.
 //
 // See `spine.system.server.ScheduledCommandRecord` projection for the scheduled command
@@ -88,32 +80,6 @@ message MarkCommandAsHandled {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
-}
-
-// Marks a domain command as handled.
-//
-// Posted if command processing caused a runtime error at any point.
-//
-message MarkCommandAsErrored {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-
-    // The runtime error.
-    spine.base.Error error = 2 [(required) = true];
-}
-
-// Marks a domain command as rejected.
-//
-// Posted if the command handler has rejected the command.
-//
-message MarkCommandAsRejected {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-
-    // The command rejection event.
-    spine.core.Event rejection_event = 2 [(valid) = true];
 }
 
 // Marks a command as one which was transformed into another command.

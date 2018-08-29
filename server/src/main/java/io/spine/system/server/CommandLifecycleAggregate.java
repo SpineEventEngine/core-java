@@ -67,15 +67,6 @@ final class CommandLifecycleAggregate
     }
 
     @Assign
-    CommandAcknowledged handle(MarkCommandAsAcknowledged command) {
-        Timestamp when = getCurrentTime();
-        return CommandAcknowledged.newBuilder()
-                                  .setId(command.getId())
-                                  .setWhen(when)
-                                  .build();
-    }
-
-    @Assign
     CommandScheduled handle(ScheduleCommand command) {
         Timestamp when = getCurrentTime();
         return CommandScheduled.newBuilder()
@@ -113,26 +104,6 @@ final class CommandLifecycleAggregate
                              .build();
     }
 
-    @Assign
-    CommandErrored handle(MarkCommandAsErrored command) {
-        Timestamp when = getCurrentTime();
-        return CommandErrored.newBuilder()
-                             .setId(command.getId())
-                             .setError(command.getError())
-                             .setWhen(when)
-                             .build();
-    }
-
-    @Assign
-    CommandRejected handle(MarkCommandAsRejected command) {
-        Timestamp when = getCurrentTime();
-        return CommandRejected.newBuilder()
-                              .setId(command.getId())
-                              .setRejectionEvent(command.getRejectionEvent())
-                              .setWhen(when)
-                              .build();
-    }
-
     @Apply(allowImport = true)
     void on(CommandReceived event) {
         CommandTimeline status = CommandTimeline
@@ -144,71 +115,66 @@ final class CommandLifecycleAggregate
                     .setStatus(status);
     }
 
-    private CommandTimeline.Builder statusBuilder() {
-        return getBuilder().getStatus()
-                           .toBuilder();
-    }
-
-    @Apply
+    @Apply(allowImport = true)
     void on(CommandAcknowledged event) {
         CommandTimeline status = statusBuilder()
-                .setWhenAcknowledged(event.getWhen())
+                .setWhenAcknowledged(getCurrentTime())
                 .build();
         getBuilder().setStatus(status);
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(CommandScheduled event) {
         Command updatedCommand = updateSchedule(event.getSchedule());
         CommandTimeline status = statusBuilder()
-                .setWhenScheduled(event.getWhen())
+                .setWhenScheduled(getCurrentTime())
                 .build();
         getBuilder().setCommand(updatedCommand)
                     .setStatus(status);
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(CommandDispatched event) {
         CommandTimeline status = statusBuilder()
-                .setWhenDispatched(event.getWhen())
+                .setWhenDispatched(getCurrentTime())
                 .build();
         getBuilder().setStatus(status);
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(TargetAssignedToCommand event) {
         CommandTarget target = event.getTarget();
         CommandTimeline status = getBuilder()
                 .getStatus()
                 .toBuilder()
-                .setWhenTargetAssgined(event.getWhen())
+                .setWhenTargetAssgined(getCurrentTime())
                 .build();
         getBuilder()
                 .setStatus(status)
                 .setTarget(target);
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(CommandHandled event) {
-        setStatus(Responses.statusOk(), event.getWhen());
+        setStatus(Responses.statusOk());
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(CommandErrored event) {
         Status status = Status
                 .newBuilder()
                 .setError(event.getError())
                 .build();
-        setStatus(status, event.getWhen());
+        setStatus(status);
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(CommandRejected event) {
         Status status = Status
                 .newBuilder()
                 .setRejection(event.getRejectionEvent())
                 .build();
-        setStatus(status, event.getWhen());
+        setStatus(status);
     }
 
     @Assign
@@ -219,7 +185,7 @@ final class CommandLifecycleAggregate
                                  .build();
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void event(CommandTransformed event) {
         Substituted.Builder substituted = Substituted
                 .newBuilder()
@@ -239,7 +205,7 @@ final class CommandLifecycleAggregate
                            .build();
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void event(CommandSplit event) {
         Substituted.Builder substituted = Substituted
                 .newBuilder()
@@ -266,9 +232,14 @@ final class CommandLifecycleAggregate
         return updatedCommand;
     }
 
-    private void setStatus(Status status, Timestamp whenProcessed) {
+    private CommandTimeline.Builder statusBuilder() {
+        return getBuilder().getStatus()
+                           .toBuilder();
+    }
+
+    private void setStatus(Status status) {
         CommandTimeline commandStatus = statusBuilder()
-                .setWhenHandled(whenProcessed)
+                .setWhenHandled(getCurrentTime())
                 .setHowHandled(status)
                 .build();
         getBuilder().setStatus(commandStatus);
