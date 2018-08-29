@@ -39,7 +39,7 @@ import "spine/system/server/entity_history.proto";
 
 // A command to create a new entity.
 //
-// This command is sent when the first messag is dispatched to the entity.
+// This command is sent when the first message is dispatched to the entity.
 //
 message CreateEntity {
 
