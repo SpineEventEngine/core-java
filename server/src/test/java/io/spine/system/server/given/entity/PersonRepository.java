@@ -18,26 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.system.server.given.entity;
 
-import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.system.server.PersonId;
 
 /**
- * Provides information on model classes for entities of {@link io.spine.system.server} package.
+ * A repository of {@link PersonAggregate}.
  *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public class ModelInfo {
-
-    /** Prevents instantiation of this utility class. */
-    private ModelInfo() {
-    }
-
-    public static AggregateClass<?> commandLifecycle() {
-        return AggregateClass.asAggregateClass(CommandLifecycleAggregate.class);
-    }
-
-    public static AggregateClass<?> eventLifecycle() {
-        return AggregateClass.asAggregateClass(EntityHistoryAggregate.class);
-    }
+public class PersonRepository
+        extends AggregateRepository<PersonId, PersonAggregate> {
 }

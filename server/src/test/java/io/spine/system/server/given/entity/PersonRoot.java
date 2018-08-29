@@ -18,26 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.system.server.given.entity;
 
-import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.AggregateRoot;
+import io.spine.system.server.PersonId;
 
 /**
- * Provides information on model classes for entities of {@link io.spine.system.server} package.
+ * A root of the person aggregate.
  *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public class ModelInfo {
+public class PersonRoot extends AggregateRoot<PersonId> {
 
-    /** Prevents instantiation of this utility class. */
-    private ModelInfo() {
-    }
-
-    public static AggregateClass<?> commandLifecycle() {
-        return AggregateClass.asAggregateClass(CommandLifecycleAggregate.class);
-    }
-
-    public static AggregateClass<?> eventLifecycle() {
-        return AggregateClass.asAggregateClass(EntityHistoryAggregate.class);
+    protected PersonRoot(BoundedContext boundedContext, PersonId id) {
+        super(boundedContext, id);
     }
 }

@@ -22,4 +22,9 @@
  * This package provides the environment for the
  * {@link io.spine.system.server.CommandLifecycleAggregate CommandLifecycle} tests.
  */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
 package io.spine.system.server.given.command;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.ParametersAreNonnullByDefault;

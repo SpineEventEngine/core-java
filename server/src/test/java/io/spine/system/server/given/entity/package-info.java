@@ -18,26 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
-
-import io.spine.server.aggregate.model.AggregateClass;
-
 /**
- * Provides information on model classes for entities of {@link io.spine.system.server} package.
- *
- * @author Alexander Yevsyukov
+ * This package provides test environment classes for
+ * {@link io.spine.system.server.EntityHistoryTest}.
  */
-public class ModelInfo {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.system.server.given.entity;
 
-    /** Prevents instantiation of this utility class. */
-    private ModelInfo() {
-    }
-
-    public static AggregateClass<?> commandLifecycle() {
-        return AggregateClass.asAggregateClass(CommandLifecycleAggregate.class);
-    }
-
-    public static AggregateClass<?> eventLifecycle() {
-        return AggregateClass.asAggregateClass(EntityHistoryAggregate.class);
-    }
-}
+import javax.annotation.CheckReturnValue;
+import javax.annotation.ParametersAreNonnullByDefault;

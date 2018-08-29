@@ -18,26 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.system.server.given.entity;
 
-import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.core.EventClass;
+import io.spine.system.server.ModelInfo;
+import io.spine.system.server.given.AbstractEventAccumulator;
+
+import java.util.Set;
 
 /**
- * Provides information on model classes for entities of {@link io.spine.system.server} package.
+ * Accumulates the entity history events.
  *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public class ModelInfo {
+public class HistoryEventWatcher extends AbstractEventAccumulator {
 
-    /** Prevents instantiation of this utility class. */
-    private ModelInfo() {
-    }
-
-    public static AggregateClass<?> commandLifecycle() {
-        return AggregateClass.asAggregateClass(CommandLifecycleAggregate.class);
-    }
-
-    public static AggregateClass<?> eventLifecycle() {
-        return AggregateClass.asAggregateClass(EntityHistoryAggregate.class);
+    @Override
+    public Set<EventClass> getEventClasses() {
+        return ModelInfo.eventLifecycle()
+                        .getStateEventClasses();
     }
 }
