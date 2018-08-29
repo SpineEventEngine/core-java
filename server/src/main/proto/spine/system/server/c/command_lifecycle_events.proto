@@ -47,9 +47,6 @@ message CommandReceived {
 
     // The command.
     spine.core.Command payload = 2 [(required) = true];
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted when the command is acknowledged by the `CommandBus`.

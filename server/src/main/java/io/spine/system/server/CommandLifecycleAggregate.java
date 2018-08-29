@@ -67,16 +67,6 @@ final class CommandLifecycleAggregate
     }
 
     @Assign
-    CommandReceived handle(MarkCommandAsReceived command) {
-        Timestamp when = getCurrentTime();
-        return CommandReceived.newBuilder()
-                              .setId(command.getId())
-                              .setPayload(command.getPayload())
-                              .setWhen(when)
-                              .build();
-    }
-
-    @Assign
     CommandAcknowledged handle(MarkCommandAsAcknowledged command) {
         Timestamp when = getCurrentTime();
         return CommandAcknowledged.newBuilder()
@@ -143,11 +133,11 @@ final class CommandLifecycleAggregate
                               .build();
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(CommandReceived event) {
         CommandTimeline status = CommandTimeline
                 .newBuilder()
-                .setWhenReceived(event.getWhen())
+                .setWhenReceived(getCurrentTime())
                 .build();
         getBuilder().setId(event.getId())
                     .setCommand(event.getPayload())

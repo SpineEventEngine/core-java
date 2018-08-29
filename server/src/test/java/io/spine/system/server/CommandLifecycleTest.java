@@ -38,9 +38,9 @@ import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.system.server.given.command.CommandLifecycleWatcher;
 import io.spine.system.server.given.command.CompanyAggregate;
-import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.system.server.given.command.CompanyNameProcman;
 import io.spine.system.server.given.command.CompanyNameProcmanRepo;
+import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -263,16 +263,16 @@ class CommandLifecycleTest {
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }
-    }
 
-    private CommandId postCommand(Message commandMessage) {
-        Command command = requestFactory.createCommand(commandMessage);
-        return postBuiltCommand(command);
-    }
+        private CommandId postCommand(Message commandMessage) {
+            Command command = requestFactory.createCommand(commandMessage);
+            return postBuiltCommand(command);
+        }
 
-    private CommandId postBuiltCommand(Command command) {
-        CommandBus commandBus = context.getCommandBus();
-        commandBus.post(command, noOpObserver());
-        return command.getId();
+        private CommandId postBuiltCommand(Command command) {
+            CommandBus commandBus = context.getCommandBus();
+            commandBus.post(command, noOpObserver());
+            return command.getId();
+        }
     }
 }
