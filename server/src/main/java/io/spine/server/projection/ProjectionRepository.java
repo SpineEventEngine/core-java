@@ -46,7 +46,6 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRoute;
-import io.spine.server.route.EventRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -264,6 +263,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         lifecycleOf(id).onDispatchEventToSubscriber(event);
     }
 
+    /**
+     * Dispatches the given event to the projection with the given ID.
+     *
+     * @param id
+     *         the ID of the target projection
+     * @param envelope
+     *         the event to dispatch
+     */
     @Internal
     protected final void dispatchNowTo(I id, EventEnvelope envelope) {
         ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
@@ -309,11 +316,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @SPI
     protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
         return eventDeliverySupplier.get();
-    }
-
-    /** Exposes routing to the package. */
-    EventRouting<I> eventRouting() {
-        return getEventRouting();
     }
 
     @Override

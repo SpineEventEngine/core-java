@@ -105,6 +105,12 @@ public abstract class EventDispatchingRepository<I,
 
     protected abstract void produceCommandToDispatch(I id, Event event);
 
+    /**
+     * Determines the targets of the given event.
+     *
+     * @param envelope the event to find targets for
+     * @return a set of IDs of projections to dispatch the given event to
+     */
     @Internal
     protected final Set<I> route(EventEnvelope envelope) {
         EventRouting<I> routing = getEventRouting();

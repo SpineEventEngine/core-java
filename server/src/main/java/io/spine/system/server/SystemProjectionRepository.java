@@ -30,11 +30,23 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A repository for projections in a system bounded context.
+ *
+ * <p>Unlike an arbitrary {@link ProjectionRepository}, a {@code SystemProjectionRepository}
+ * dispatches the events directly to the target projections.
+ *
  * @author Dmytro Dashenkov
  */
 public class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends ProjectionRepository<I, P, S> {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @implNote
+     * A {@code SystemProjectionRepository} dispatches the given event directly to its targets,
+     * whereas a domain repository would send a command to the system context.
+     */
     @Override
     public final Set<I> dispatch(EventEnvelope envelope) {
         checkNotNull(envelope);
