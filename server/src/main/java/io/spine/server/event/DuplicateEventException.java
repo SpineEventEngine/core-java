@@ -20,7 +20,9 @@
 
 package io.spine.server.event;
 
+import com.google.protobuf.Message;
 import io.spine.core.Event;
+import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.type.TypeName;
 
@@ -42,6 +44,14 @@ public final class DuplicateEventException extends RuntimeException {
     private static final long serialVersionUID = 0L;
 
     public DuplicateEventException(Event event) {
-        super(format(MESSAGE, TypeName.of(Events.getMessage(event)), event.getId().getValue()));
+        super(messageFrom(event));
+    }
+
+    private static String messageFrom(Event event) {
+        EventId eventId = event.getId();
+        Message eventMessage = Events.getMessage(event);
+        TypeName eventType = TypeName.of(eventMessage);
+        String result = format(MESSAGE, eventType, eventId.getValue());
+        return result;
     }
 }

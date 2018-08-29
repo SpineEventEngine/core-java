@@ -42,16 +42,6 @@ public final class TenantAwareExecutor {
         return new TenantAwareExecutor(tenant);
     }
 
-    public void run(Runnable operation) {
-        checkNotNull(operation);
-        new TenantAwareOperation(tenant) {
-            @Override
-            public void run() {
-                operation.run();
-            }
-        }.execute();
-    }
-
     public <T> T evaluate(Supplier<T> operation) {
         checkNotNull(operation);
         T result = new TenantAwareFunction0<T>(tenant) {

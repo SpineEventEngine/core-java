@@ -241,7 +241,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return target;
     }
 
-
     private I route(CommandEnvelope envelope) {
         CommandRouting<I> routing = getCommandRouting();
         I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
@@ -345,7 +344,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 envelope.getEventContext(),
                 envelope.getMessageClass()
         );
-
         checkState(
                 numberOfTargets == 1,
                 "Expected one aggregate ID, but got %s (`%s`). Event class: `%s`, context: `%s`.",
@@ -354,7 +352,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 envelope.getMessageClass(),
                 envelope.getEventContext()
         );
-
         I id = ids.stream()
                   .findFirst()
                   .get();

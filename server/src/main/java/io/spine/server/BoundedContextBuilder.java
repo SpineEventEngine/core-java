@@ -271,8 +271,8 @@ public final class BoundedContextBuilder implements Logging {
                 (builder, systemGateway) -> SystemContext.newInstance(builder);
         NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
         SystemContext result = system.buildPartial(instanceFactory,
-                                                          systemGateway,
-                                                          transport);
+                                                   systemGateway,
+                                                   transport);
         return result;
     }
 

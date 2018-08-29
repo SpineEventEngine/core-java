@@ -61,7 +61,7 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
-     * Attempts the message to the entity with the passed ID according to the delivery strategy.
+     * Dispatches the message to the entity with the passed ID according to the delivery strategy.
      *
      * @param entityId the ID of the entity for which to dispatch the message
      */
