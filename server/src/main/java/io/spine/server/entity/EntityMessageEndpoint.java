@@ -63,7 +63,7 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Dispatches the message to the entity with the passed ID according to the delivery strategy.
      *
-     * @param entityId the ID of the entity for which to dispatch the message
+     * @param entityId the ID of the entity which to dispatch the message to
      */
     public void dispatchTo(I entityId) {
         checkNotNull(entityId);
@@ -88,7 +88,7 @@ public abstract class EntityMessageEndpoint<I,
      * <p>Performs the delivery directly to the entity not taking
      * the delivery strategy into account.
      *
-     * @param entityId the ID of the entity for which to dispatch the message
+     * @param entityId the ID of the entity which to dispatch the message to
      */
     protected abstract void deliverNowTo(I entityId);
 

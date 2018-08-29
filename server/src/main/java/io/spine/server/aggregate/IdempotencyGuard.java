@@ -48,7 +48,8 @@ final class IdempotencyGuard {
 
     /**
      * Checks that the command was not dispatched to the aggregate.
-     * If it was a {@link DuplicateCommandException} is thrown.
+     *
+     * <p>If it was a {@link DuplicateCommandException} is thrown.
      *
      * @param envelope an envelope with a command to check
      * @throws DuplicateCommandException if the command was dispatched to the aggregate
@@ -62,7 +63,8 @@ final class IdempotencyGuard {
 
     /**
      * Checks that the event was not dispatched to the aggregate.
-     * If it was a {@link DuplicateEventException} is thrown.
+     *
+     * <p>If it was a {@link DuplicateEventException} is thrown.
      *
      * @param envelope an envelope with an event to check
      * @throws DuplicateEventException if the event was dispatched to the aggregate

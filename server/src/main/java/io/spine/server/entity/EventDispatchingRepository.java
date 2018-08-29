@@ -80,7 +80,7 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Dispatches the event to a corresponding entities.
+     * Dispatches the event to the corresponding entities.
      *
      * <p>If there is no stored entity with such an ID, a new one is created and stored after it
      * handles the passed event.

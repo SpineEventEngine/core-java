@@ -147,11 +147,9 @@ message EventContext {
     oneof origin_id {
 
         // The ID of the origin command.
-        //
         CommandId command_id = 12;
 
         // The ID of the origin event.
-        //
         EventId event_id = 13;
     }
 

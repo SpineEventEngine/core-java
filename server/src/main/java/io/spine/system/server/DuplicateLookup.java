@@ -55,12 +55,12 @@ final class DuplicateLookup {
     }
 
     /**
-     * Creates a new lookup for the given {@link RecentHistory}.
+     * Creates a new lookup through the given {@link RecentHistory}.
      *
      * @param history the history of entity to search for duplicates in
      * @return new instance of {@code DuplicateLookup}
      */
-    static DuplicateLookup forHistory(RecentHistory history) {
+    static DuplicateLookup through(RecentHistory history) {
         checkNotNull(history);
         return new DuplicateLookup(history);
     }

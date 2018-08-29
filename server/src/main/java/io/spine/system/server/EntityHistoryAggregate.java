@@ -214,7 +214,7 @@ final class EntityHistoryAggregate
     }
 
     private void checkNotDuplicate(Event event) throws CannotDispatchEventTwice {
-        DuplicateLookup lookup = DuplicateLookup.forHistory(recentHistory());
+        DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
         boolean duplicate = lookup.isDuplicate(event);
         if (duplicate) {
             throw new CannotDispatchEventTwice(getId(), event, now());
@@ -222,7 +222,7 @@ final class EntityHistoryAggregate
     }
 
     private void checkNotDuplicate(Command command) throws CannotDispatchCommandTwice {
-        DuplicateLookup lookup = DuplicateLookup.forHistory(recentHistory());
+        DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
         boolean duplicate = lookup.isDuplicate(command);
         if (duplicate) {
             throw new CannotDispatchCommandTwice(getId(), command, now());

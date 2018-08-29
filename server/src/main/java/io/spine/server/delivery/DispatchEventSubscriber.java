@@ -31,8 +31,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.unpack;
 
 /**
- * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
- * related to message dispatching.
+ * An {@link AbstractEventSubscriber EventSubscriber} for system events related to message
+ * dispatching.
  *
  * <p>It is expected that a {@code DispatchEventSubscriber} performs actions only for events related
  * to a certain type of entity.
