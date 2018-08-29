@@ -20,6 +20,7 @@
 
 package io.spine.server.tenant;
 
+import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 
 import java.util.function.Supplier;
@@ -27,21 +28,41 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A convenience API for {@code TenantAware} operations.
+ *
  * @author Dmytro Dashenkov
  */
-public final class TenantAwareExecutor {
+@Internal
+public final class TenantAwareRunner {
 
     private final TenantId tenant;
 
-    private TenantAwareExecutor(TenantId tenant) {
+    private TenantAwareRunner(TenantId tenant) {
         this.tenant = tenant;
     }
 
-    public static TenantAwareExecutor with(TenantId tenant) {
+    /**
+     * Creates a new {@code TenantAwareRunner}, which runs all the given operations for the given
+     * {@code tenant}.
+     *
+     * @param tenant
+     *         the target tenant
+     * @return new instance of {@code TenantAwareRunner}
+     */
+    public static TenantAwareRunner with(TenantId tenant) {
         checkNotNull(tenant);
-        return new TenantAwareExecutor(tenant);
+        return new TenantAwareRunner(tenant);
     }
 
+    /**
+     * Runs the given {@code operation} for the given tenant and returns the result of
+     * the operation.
+     *
+     * @param operation
+     *         the operation to run
+     * @param <T> the type of the operation result
+     * @return the result of the operation
+     */
     public <T> T evaluate(Supplier<T> operation) {
         checkNotNull(operation);
         T result = new TenantAwareFunction0<T>(tenant) {

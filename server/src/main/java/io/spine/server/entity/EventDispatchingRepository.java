@@ -34,7 +34,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.tenant.TenantAwareExecutor.with;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.

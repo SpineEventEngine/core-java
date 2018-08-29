@@ -63,7 +63,7 @@ import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.server.tenant.TenantAwareExecutor.with;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
