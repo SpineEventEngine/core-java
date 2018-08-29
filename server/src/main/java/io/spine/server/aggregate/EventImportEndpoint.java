@@ -21,16 +21,12 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.delivery.Delivery;
 
 import java.util.List;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * The endpoint for importing events into aggregates.
@@ -48,39 +44,6 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
     EventImportEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
         super(repository, envelope);
     }
-
-    /**
-     * Returns a set with one element of the target aggregate.
-     */
-    @Override
-    protected Set<I> getTargets() {
-        EventEnvelope envelope = envelope();
-        Set<I> ids = repository().getEventImportRouting()
-                                 .apply(envelope.getMessage(), envelope.getEventContext());
-        int numberOfTargets = ids.size();
-        checkState(
-                numberOfTargets > 0,
-                "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
-                envelope.getEventContext(),
-                envelope.getMessageClass()
-        );
-
-        checkState(
-                numberOfTargets == 1,
-                "Expected one aggregate ID, but got %s (`%s`). Event class: `%s`, context: `%s`.",
-                String.valueOf(numberOfTargets),
-                ids,
-                envelope.getMessageClass(),
-                envelope.getEventContext()
-        );
-
-        I id = ids.stream()
-                  .findFirst()
-                  .get();
-        repository().onImportTargetSet(id, envelope.getId());
-        return ImmutableSet.of(id);
-    }
-
 
     @Override
     protected Delivery<I, A, EventEnvelope, ?, ?> getEndpointDelivery() {
