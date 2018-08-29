@@ -26,20 +26,24 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.commandbus.DuplicateCommandException;
-import io.spine.server.delivery.DeliveryEventSubscriber;
+import io.spine.server.delivery.DispatchEventSubscriber;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.CommandDispatchedToHandler;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.HistoryRejections;
 
 /**
+ * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
+ * related to dispatching commands and events to {@link ProcessManager}s of a given type.
+ *
  * @author Dmytro Dashenkov
+ * @see DispatchEventSubscriber
  */
-final class PmDeliveryEventSubscriber<I> extends DeliveryEventSubscriber<I> {
+final class PmDispatchEventSubscriber<I> extends DispatchEventSubscriber<I> {
 
     private final ProcessManagerRepository<I, ?, ?> repository;
 
-    PmDeliveryEventSubscriber(ProcessManagerRepository<I, ?, ?> repository) {
+    PmDispatchEventSubscriber(ProcessManagerRepository<I, ?, ?> repository) {
         super(repository.getEntityStateType());
         this.repository = repository;
     }

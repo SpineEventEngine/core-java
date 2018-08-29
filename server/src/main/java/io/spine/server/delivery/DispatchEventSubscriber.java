@@ -21,6 +21,7 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
+import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.system.server.EntityHistoryId;
@@ -30,29 +31,60 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.unpack;
 
 /**
+ * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
+ * related to message dispatching.
+ *
+ * <p>It is expected that a {@code DispatchEventSubscriber} performs actions only for events related
+ * to a certain type of entity.
+ *
+ * <p>It is also expected that this subscriber is used <b>only</b> to subscribe to
+ * {@linkplain io.spine.core.Subscribe#external() external} events.
+ *
  * @author Dmytro Dashenkov
  */
-public abstract class DeliveryEventSubscriber<I> extends AbstractEventSubscriber {
+@Internal
+public abstract class DispatchEventSubscriber<I> extends AbstractEventSubscriber {
 
     private final TypeUrl targetType;
 
-    protected DeliveryEventSubscriber(TypeUrl targetType) {
+    protected DispatchEventSubscriber(TypeUrl targetType) {
         super();
         this.targetType = checkNotNull(targetType);
     }
 
+    /**
+     * Tells whether or not the given {@link io.spine.system.server.EntityHistoryId EntityHistoryId}
+     * belongs to an entity of the {@link #targetType}.
+     *
+     * @param historyId
+     *         the entity history ID to check
+     * @return {@code true} if the type of the entity with given ID is the target type of this
+     *         subscriber, {@code false} otherwise
+     */
     protected boolean correctType(EntityHistoryId historyId) {
         String typeUrlRaw = historyId.getTypeUrl();
         TypeUrl typeUrl = TypeUrl.parse(typeUrlRaw);
         return typeUrl.equals(targetType);
     }
 
+    /**
+     * Unpacks the generic entity ID from the given {@link io.spine.system.server.EntityHistoryId
+     * EntityHistoryId}.
+     */
     protected I idFrom(EntityHistoryId historyId) {
         Any id = historyId.getEntityId()
                           .getId();
         return unpack(id);
     }
 
+    /**
+     * Registers itself in the given domain {@link BoundedContext}.
+     *
+     * <p>Registers this {@link AbstractEventSubscriber} in
+     * the {@link io.spine.server.integration.IntegrationBus} of the given context.
+     *
+     * @param context the domain bounded context to register the subscriber in
+     */
     public final void registerAt(BoundedContext context) {
         context.getIntegrationBus()
                .register(this);
