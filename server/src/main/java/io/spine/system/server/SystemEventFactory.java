@@ -20,17 +20,12 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.core.ActorContext;
-import io.spine.core.EmptyClass;
-import io.spine.core.EventContext;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.aggregate.ImportOrigin;
 import io.spine.server.event.EventFactory;
-import io.spine.type.MessageClass;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.system.server.SystemCommandFactory.requestFactory;
 
 /**
@@ -41,57 +36,11 @@ import static io.spine.system.server.SystemCommandFactory.requestFactory;
 final class SystemEventFactory extends EventFactory {
 
     SystemEventFactory(Message aggregateId, boolean multitenant) {
-        super(ImportOrigin.newInstance(multitenant), Identifier.pack(aggregateId));
+        super(newOrigin(multitenant), Identifier.pack(aggregateId));
     }
 
-    /**
-     * A rudimentary implementation of {@link MessageEnvelope} with the sole purpose
-     * of setting {@link EventContext.Builder#setImportContext(ActorContext) import context}
-     * in events created for import into system aggregates.
-     */
-    private static final class ImportOrigin
-            implements MessageEnvelope<Empty, Empty, Empty> {
-
-        private final ActorContext actorContext;
-
-        private ImportOrigin(ActorContext context) {
-            this.actorContext = checkNotNull(context);
-        }
-
-        static ImportOrigin newInstance(boolean multitenant) {
-            ActorContext actorContext = requestFactory(multitenant).newActorContext();
-            return new ImportOrigin(actorContext);
-        }
-
-        @Override
-        @SuppressWarnings("CheckReturnValue") // calling builder
-        public void setOriginFields(EventContext.Builder builder) {
-            builder.setImportContext(actorContext);
-        }
-
-        @Override
-        public Empty getId() {
-            return Empty.getDefaultInstance();
-        }
-
-        @Override
-        public Empty getOuterObject() {
-            return Empty.getDefaultInstance();
-        }
-
-        @Override
-        public Message getMessage() {
-            return Empty.getDefaultInstance();
-        }
-
-        @Override
-        public MessageClass getMessageClass() {
-            return EmptyClass.instance();
-        }
-
-        @Override
-        public Empty getMessageContext() {
-            return Empty.getDefaultInstance();
-        }
+    private static ImportOrigin newOrigin(boolean multitenant) {
+        ActorContext actorContext = requestFactory(multitenant).newActorContext();
+        return ImportOrigin.newInstance(actorContext);
     }
 }
