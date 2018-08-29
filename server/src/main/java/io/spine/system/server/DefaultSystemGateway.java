@@ -85,9 +85,8 @@ final class DefaultSystemGateway implements SystemGateway {
                           .apply(systemEvent, EventContext.getDefaultInstance());
         checkArgument(routingOut.size() == 1,
                       "System event message must have aggregate ID in the first field.");
-        Object id = routingOut.stream()
-                              .findFirst()
-                              .get();
+        Object id = routingOut.iterator()
+                              .next();
         checkArgument(id instanceof Message, "System aggregate ID must be a Message");
         return (Message) id;
     }
