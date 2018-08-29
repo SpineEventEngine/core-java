@@ -26,8 +26,6 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.delivery.Delivery;
-import io.spine.string.Stringifiers;
-import io.spine.server.tenant.TenantAwareFunction0;
 
 import java.util.List;
 
