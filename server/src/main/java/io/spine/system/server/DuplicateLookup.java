@@ -32,9 +32,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.type.TypeUrl.parse;
 
 /**
+ * Performs a lookup over a given recent history to tell whether or not a given message has already
+ * been dispatched to the given entity.
+ *
  * @author Dmytro Dashenkov
  */
-final class DuplicateGuard {
+final class DuplicateLookup {
 
     private static final TypeUrl COMMAND_DISPATCHED_EVENT_TYPE =
             TypeUrl.from(CommandDispatchedToHandler.getDescriptor());
@@ -47,15 +50,28 @@ final class DuplicateGuard {
 
     private final RecentHistory history;
 
-    private DuplicateGuard(RecentHistory history) {
+    private DuplicateLookup(RecentHistory history) {
         this.history = history;
     }
 
-    static DuplicateGuard atopOf(RecentHistory history) {
+    /**
+     * Creates a new lookup for the given {@link RecentHistory}.
+     *
+     * @param history the history of entity to search for duplicates in
+     * @return new instance of {@code DuplicateLookup}
+     */
+    static DuplicateLookup forHistory(RecentHistory history) {
         checkNotNull(history);
-        return new DuplicateGuard(history);
+        return new DuplicateLookup(history);
     }
 
+    /**
+     * Tells if the given event has already been dispatched to the given entity.
+     *
+     * @param candidate
+     *         the event to check
+     * @return {@code true} if the given event is a duplicate, {@code false} otherwise
+     */
     boolean isDuplicate(Event candidate) {
         return isDuplicateOfReact(candidate) || isDuplicateOfSubscribe(candidate);
     }
@@ -63,7 +79,7 @@ final class DuplicateGuard {
     private boolean isDuplicateOfReact(Event candidate) {
         EventId candidateId = candidate.getId();
         boolean duplicate = history.stream()
-                                   .filter(DuplicateGuard::isEventDispatchedToReactor)
+                                   .filter(DuplicateLookup::isEventDispatchedToReactor)
                                    .map(Events::getMessage)
                                    .map(EventDispatchedToReactor.class::cast)
                                    .map(EventDispatchedToReactor::getPayload)
@@ -75,7 +91,7 @@ final class DuplicateGuard {
     private boolean isDuplicateOfSubscribe(Event candidate) {
         EventId candidateId = candidate.getId();
         boolean duplicate = history.stream()
-                                   .filter(DuplicateGuard::isEventDispatchedToSubscriber)
+                                   .filter(DuplicateLookup::isEventDispatchedToSubscriber)
                                    .map(Events::getMessage)
                                    .map(EventDispatchedToSubscriber.class::cast)
                                    .map(EventDispatchedToSubscriber::getPayload)
@@ -84,10 +100,17 @@ final class DuplicateGuard {
         return duplicate;
     }
 
+    /**
+     * Tells if the given command has already been dispatched to the given entity.
+     *
+     * @param candidate
+     *         the command to check
+     * @return {@code true} if the given command is a duplicate, {@code false} otherwise
+     */
     boolean isDuplicate(Command candidate) {
         CommandId candidateId = candidate.getId();
         boolean duplicate = history.stream()
-                                   .filter(DuplicateGuard::isCommandDispatchedToHanlder)
+                                   .filter(DuplicateLookup::isCommandDispatchedToHanlder)
                                    .map(Events::getMessage)
                                    .map(CommandDispatchedToHandler.class::cast)
                                    .map(CommandDispatchedToHandler::getPayload)

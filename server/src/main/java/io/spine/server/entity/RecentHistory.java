@@ -85,6 +85,14 @@ public final class RecentHistory {
         return events.iterator();
     }
 
+    /**
+     * Create a new {@link Stream} of the recent history items.
+     *
+     * <p>The produced stream is sequential and emits items in the reverse chronological order.
+     * That is, most recent event would be returned first.
+     *
+     * @return a stream of the recent events
+     */
     public Stream<Event> stream() {
         ImmutableList<Event> events = ImmutableList.copyOf(history);
         return events.stream();
