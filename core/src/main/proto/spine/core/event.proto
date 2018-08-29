@@ -140,9 +140,9 @@ message EventContext {
     // TODO:2018-08-25:dmytro.dashenkov: Merge with `origin`?
     oneof origin_id {
 
-        CommandId command_id = 11;
+        CommandId command_id = 12;
 
-        EventId event_id = 12;
+        EventId event_id = 13;
     }
 
     // Deleted fields.
