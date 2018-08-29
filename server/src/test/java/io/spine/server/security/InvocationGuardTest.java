@@ -22,6 +22,7 @@ package io.spine.server.security;
 
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -35,22 +36,34 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
         super(InvocationGuard.class);
     }
 
-    @Test
-    @DisplayName("throw SecurityException if no classes are allowed")
-    void nobodyAllowed() {
-        assertThrowsOn(() -> InvocationGuard.allowOnly(""));
+    @Nested
+    @DisplayName("throw SecurityException")
+    class Throwing {
+
+        @Test
+        @DisplayName("if no classes are allowed")
+        void nobodyAllowed() {
+            assertThrowsOn(() -> InvocationGuard.allowOnly(""));
+        }
+
+        @Test
+        @DisplayName("if a calling class is not that allowed")
+        void notAllowed() {
+            assertThrowsOn(() -> InvocationGuard.allowOnly("java.lang.Boolean"));
+        }
+
+        @Test
+        @DisplayName("if a calling class is not among allowed")
+        void notAllowedFromMany() {
+            assertThrowsOn(() -> InvocationGuard.allowOnly(
+                    "java.lang.String",
+                    "org.junit.jupiter.api.Test")
+            );
+        }
     }
 
     @Test
-    @DisplayName("throw SecurityException for not allowed class")
-    void notAllowed() {
-        assertThrowsOn(() -> InvocationGuard.allowOnly(
-                "java.lang.String", "org.junit.jupiter.api.Test")
-        );
-    }
-
-    @Test
-    @DisplayName("does not throw on allowed class")
+    @DisplayName("do not throw on allowed class")
     void pass() {
         String callingClass = CallerProvider.instance()
                                             .getCallerClass()
