@@ -58,6 +58,7 @@ message EventDispatchedToSubscriber {
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1 [(required) = true];
 
+    // The dispatched event.
     core.Event payload = 2 [(valid) = true];
 
     // The time when the event was dispatched.
@@ -77,6 +78,7 @@ message EventDispatchedToReactor {
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1 [(required) = true];
 
+    // The dispatched event.
     core.Event payload = 2 [(valid) = true];
 
     // The time when the event was dispatched.
@@ -96,6 +98,7 @@ message CommandDispatchedToHandler {
     // The ID of the entity, which the command is dispatched to.
     EntityHistoryId receiver = 1 [(required) = true];
 
+    // The dispatched command.
     core.Command payload = 2 [(valid) = true];
 
     // The time when the command was dispatched.

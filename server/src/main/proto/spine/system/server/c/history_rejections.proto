@@ -36,10 +36,14 @@ import "spine/core/event.proto";
 import "spine/core/command.proto";
 import "spine/system/server/entity_history.proto";
 
+// A rejection to dispatch a duplicate event to an entity.
+//
 message CannotDispatchEventTwice {
 
+    // The receiver of the event.
     EntityHistoryId receiver = 1 [(valid) = true];
 
+    // The duplicate event.
     core.Event payload = 2 [(valid) = true];
 
     // The time when the event was dispatched.
@@ -50,10 +54,14 @@ message CannotDispatchEventTwice {
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
 
+// A rejection to dispatch a duplicate command to an entity.
+//
 message CannotDispatchCommandTwice {
 
+    // The receiver of the command.
     EntityHistoryId receiver = 1 [(valid) = true];
 
+    // The duplicate command.
     core.Command payload = 2 [(valid) = true];
 
     // The time when the event was dispatched.
