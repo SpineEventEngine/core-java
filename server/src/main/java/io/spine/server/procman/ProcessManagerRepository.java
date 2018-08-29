@@ -52,7 +52,6 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
-import io.spine.server.route.EventRouting;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -244,8 +243,13 @@ public abstract class ProcessManagerRepository<I,
         endpoint.dispatchTo(id);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sends a system command to dispatch the given event to a reactor.
+     */
     @Override
-    protected final void produceCommandToDispatch(I id, Event event) {
+    protected final void dispatchTo(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
@@ -310,11 +314,6 @@ public abstract class ProcessManagerRepository<I,
         P procman = super.create(id);
         lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
         return procman;
-    }
-
-    /** Open access to the event routing to the package. */
-    EventRouting<I> eventRouting() {
-        return getEventRouting();
     }
 
     /**

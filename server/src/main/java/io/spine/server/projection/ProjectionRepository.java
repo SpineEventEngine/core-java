@@ -258,8 +258,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projectionClass().getExternalEventClasses();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sends a system command to dispatch the given event to a subscriber.
+     */
     @Override
-    protected final void produceCommandToDispatch(I id, Event event) {
+    protected void dispatchTo(I id, Event event) {
         lifecycleOf(id).onDispatchEventToSubscriber(event);
     }
 

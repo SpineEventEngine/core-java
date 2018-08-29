@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
@@ -89,7 +88,7 @@ public abstract class EventDispatchingRepository<I,
      * @param envelope the event to dispatch
      */
     @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
+    public final Set<I> dispatch(EventEnvelope envelope) {
         checkNotNull(envelope);
         Set<I> targets = with(envelope.getTenantId())
                 .evaluate(() -> doDispatch(envelope));
@@ -99,11 +98,19 @@ public abstract class EventDispatchingRepository<I,
     private Set<I> doDispatch(EventEnvelope envelope) {
         Set<I> targets = route(envelope);
         Event event = envelope.getOuterObject();
-        targets.forEach(id -> produceCommandToDispatch(id, event));
+        targets.forEach(id -> dispatchTo(id, event));
         return targets;
     }
 
-    protected abstract void produceCommandToDispatch(I id, Event event);
+    /**
+     * Dispatches the given event to an entity with the given ID.
+     *
+     * @param id
+     *         the target entity ID
+     * @param event
+     *         the event to dispatch
+     */
+    protected abstract void dispatchTo(I id, Event event);
 
     /**
      * Determines the targets of the given event.
@@ -111,8 +118,7 @@ public abstract class EventDispatchingRepository<I,
      * @param envelope the event to find targets for
      * @return a set of IDs of projections to dispatch the given event to
      */
-    @Internal
-    protected final Set<I> route(EventEnvelope envelope) {
+    private Set<I> route(EventEnvelope envelope) {
         EventRouting<I> routing = getEventRouting();
         Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
         return targets;

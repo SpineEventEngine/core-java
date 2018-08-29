@@ -21,13 +21,10 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Message;
+import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A repository for projections in a system bounded context.
@@ -48,10 +45,7 @@ public class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S exte
      * whereas a domain repository would send a command to the system context.
      */
     @Override
-    public final Set<I> dispatch(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        Set<I> ids = route(envelope);
-        ids.forEach(id -> dispatchNowTo(id, envelope));
-        return ids;
+    protected void dispatchTo(I id, Event event) {
+        dispatchNowTo(id, EventEnvelope.of(event));
     }
 }
