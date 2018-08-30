@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
@@ -34,11 +33,10 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  * @see React
  */
-@Internal
-public class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
+class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEventEndpoint<I, A> {
 
-    protected AggregateEventReactionEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
+    AggregateEventReactionEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
         super(repo, event);
     }
 
