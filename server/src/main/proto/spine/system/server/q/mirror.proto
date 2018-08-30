@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package spine.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "MirrorProto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+import "spine/server/entity/entity.proto";
+
+message Mirror {
+
+    MirrorId id = 1 [(required) = true, (valid) = true];
+
+    google.protobuf.Any state = 2 [(required) = true, (valid) = true];
+
+    spine.server.entity.LifecycleFlags lifecycle = 3;
+
+    EntityColumns columns = 4;
+}
+
+message MirrorId {
+
+    google.protobuf.Any value = 1 [(required) = true, (valid) = true];
+}
+
+message EntityColumns {
+
+    map<string, google.protobuf.Any> columns = 1;
+}
