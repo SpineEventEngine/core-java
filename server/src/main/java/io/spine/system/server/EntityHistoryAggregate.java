@@ -214,6 +214,12 @@ final class EntityHistoryAggregate
         updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));
     }
 
+    @Apply(allowImport = true)
+    void on(EventImported event) {
+        updateLastEventTime(event.getPayload()
+                                 .getWhenDispatched());
+    }
+
     private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
         LifecycleHistory oldLifecycleHistory = getBuilder().getLifecycle();
         LifecycleFlags.Builder flagsBuilder = oldLifecycleHistory.getLifecycleFlags()
