@@ -61,7 +61,7 @@ public abstract class DispatchEventSubscriber<I> extends AbstractEventSubscriber
      * @return {@code true} if the type of the entity with given ID is the target type of this
      *         subscriber, {@code false} otherwise
      */
-    protected boolean correctType(EntityHistoryId historyId) {
+    protected boolean isCorrectType(EntityHistoryId historyId) {
         String typeUrlRaw = historyId.getTypeUrl();
         TypeUrl typeUrl = TypeUrl.parse(typeUrlRaw);
         return typeUrl.equals(targetType);
@@ -85,7 +85,7 @@ public abstract class DispatchEventSubscriber<I> extends AbstractEventSubscriber
      *
      * @param context the domain bounded context to register the subscriber in
      */
-    public final void registerAt(BoundedContext context) {
+    public final void registerIn(BoundedContext context) {
         context.getIntegrationBus()
                .register(this);
     }

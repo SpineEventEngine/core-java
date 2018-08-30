@@ -50,7 +50,7 @@ final class PmDispatchEventSubscriber<I> extends DispatchEventSubscriber<I> {
 
     @Subscribe(external = true)
     public void on(CommandDispatchedToHandler event) {
-        if (correctType(event.getReceiver())) {
+        if (isCorrectType(event.getReceiver())) {
             I id = idFrom(event.getReceiver());
             CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
             repository.dispatchNowTo(id, envelope);
@@ -59,7 +59,7 @@ final class PmDispatchEventSubscriber<I> extends DispatchEventSubscriber<I> {
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchCommandTwice event) {
-        if (correctType(event.getReceiver())) {
+        if (isCorrectType(event.getReceiver())) {
             Command command = event.getPayload();
             DuplicateCommandException exception = DuplicateCommandException.of(command);
             CommandEnvelope envelope = CommandEnvelope.of(command);
@@ -69,7 +69,7 @@ final class PmDispatchEventSubscriber<I> extends DispatchEventSubscriber<I> {
 
     @Subscribe(external = true)
     public void on(EventDispatchedToReactor event) {
-        if (correctType(event.getReceiver())) {
+        if (isCorrectType(event.getReceiver())) {
             I id = idFrom(event.getReceiver());
             EventEnvelope envelope = EventEnvelope.of(event.getPayload());
             repository.dispatchNowTo(id, envelope);
@@ -78,7 +78,7 @@ final class PmDispatchEventSubscriber<I> extends DispatchEventSubscriber<I> {
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchEventTwice event) {
-        if (correctType(event.getReceiver())) {
+        if (isCorrectType(event.getReceiver())) {
             Event payload = event.getPayload();
             DuplicateEventException exception = new DuplicateEventException(payload);
             EventEnvelope envelope = EventEnvelope.of(payload);

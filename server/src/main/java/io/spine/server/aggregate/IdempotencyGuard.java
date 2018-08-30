@@ -55,7 +55,7 @@ final class IdempotencyGuard {
      * @throws DuplicateCommandException if the command was dispatched to the aggregate
      */
     void check(CommandEnvelope envelope) {
-        if (didHandleSinceLastSnapshot(envelope)) {
+        if (didHandleRecently(envelope)) {
             Command command = envelope.getOuterObject();
             throw DuplicateCommandException.of(command);
         }
@@ -70,7 +70,7 @@ final class IdempotencyGuard {
      * @throws DuplicateEventException if the event was dispatched to the aggregate
      */
     void check(EventEnvelope envelope) {
-        if (didHandleSinceLastSnapshot(envelope)) {
+        if (didHandleRecently(envelope)) {
             Event event = envelope.getOuterObject();
             throw new DuplicateEventException(event);
         }
@@ -88,7 +88,7 @@ final class IdempotencyGuard {
      * @param envelope the event to check
      * @return {@code true} if the event was handled since last snapshot, {@code false} otherwise
      */
-    private boolean didHandleSinceLastSnapshot(EventEnvelope envelope) {
+    private boolean didHandleRecently(EventEnvelope envelope) {
         EventId eventId = envelope.getId();
         Iterator<Event> iterator = aggregate.historyBackward();
         while (iterator.hasNext()) {
@@ -113,7 +113,7 @@ final class IdempotencyGuard {
      * @param envelope the command to check
      * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
      */
-    private boolean didHandleSinceLastSnapshot(CommandEnvelope envelope) {
+    private boolean didHandleRecently(CommandEnvelope envelope) {
         CommandId newCommandId = envelope.getId();
         Iterator<Event> iterator = aggregate.historyBackward();
         while (iterator.hasNext()) {

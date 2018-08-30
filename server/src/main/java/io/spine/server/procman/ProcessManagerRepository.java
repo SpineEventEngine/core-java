@@ -163,7 +163,7 @@ public abstract class ProcessManagerRepository<I,
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         PmDispatchEventSubscriber<I> systemSubscriber = new PmDispatchEventSubscriber<>(this);
-        systemSubscriber.registerAt(boundedContext);
+        systemSubscriber.registerIn(boundedContext);
 
         registerWithSharding();
     }

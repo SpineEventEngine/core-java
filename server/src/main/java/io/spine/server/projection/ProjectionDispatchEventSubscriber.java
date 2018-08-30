@@ -48,7 +48,7 @@ final class ProjectionDispatchEventSubscriber<I> extends DispatchEventSubscriber
     @Subscribe(external = true)
     public void on(EventDispatchedToSubscriber event) {
         EntityHistoryId receiver = event.getReceiver();
-        if (correctType(receiver)) {
+        if (isCorrectType(receiver)) {
             I id = idFrom(receiver);
             EventEnvelope envelope = EventEnvelope.of(event.getPayload());
             repository.dispatchNowTo(id, envelope);
@@ -57,7 +57,7 @@ final class ProjectionDispatchEventSubscriber<I> extends DispatchEventSubscriber
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchEventTwice event) {
-        if (correctType(event.getReceiver())) {
+        if (isCorrectType(event.getReceiver())) {
             onError(event.getPayload());
         }
     }
