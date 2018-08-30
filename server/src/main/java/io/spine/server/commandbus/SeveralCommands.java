@@ -81,7 +81,7 @@ public class SeveralCommands
 
     /**
      * {@inheritDoc}
-     * &nbsp;
+     * ­
      * @apiNote Overrides to open the method for outside use.
      */
     @Override
