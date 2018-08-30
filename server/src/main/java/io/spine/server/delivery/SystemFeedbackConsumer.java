@@ -34,7 +34,7 @@ import static io.spine.base.Identifier.unpack;
  * An {@link AbstractEventSubscriber EventSubscriber} for system events related to message
  * dispatching.
  *
- * <p>It is expected that a {@code DispatchEventSubscriber} performs actions only for events related
+ * <p>It is expected that a {@code SystemFeedbackConsumer} performs actions only for events related
  * to a certain type of entity.
  *
  * <p>It is also expected that this subscriber is used <b>only</b> to subscribe to
@@ -43,11 +43,11 @@ import static io.spine.base.Identifier.unpack;
  * @author Dmytro Dashenkov
  */
 @Internal
-public abstract class DispatchEventSubscriber<I> extends AbstractEventSubscriber {
+public abstract class SystemFeedbackConsumer<I> extends AbstractEventSubscriber {
 
     private final TypeUrl targetType;
 
-    protected DispatchEventSubscriber(TypeUrl targetType) {
+    protected SystemFeedbackConsumer(TypeUrl targetType) {
         super();
         this.targetType = checkNotNull(targetType);
     }

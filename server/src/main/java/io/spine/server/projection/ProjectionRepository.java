@@ -148,8 +148,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             }
         }
 
-        ProjectionDispatchEventSubscriber<I> systemSubscriber =
-                new ProjectionDispatchEventSubscriber<>(this);
+        ProjectionSystemFeedbackConsumer<I> systemSubscriber =
+                new ProjectionSystemFeedbackConsumer<>(this);
         BoundedContext boundedContext = getBoundedContext();
         systemSubscriber.registerIn(boundedContext);
 
