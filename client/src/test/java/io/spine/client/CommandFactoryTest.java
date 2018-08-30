@@ -43,15 +43,19 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @DisplayName("create command")
     class CreateCommand {
 
+        /**
+         * Tests that a command is created with the current time.
+         *
+         * @implNote
+         * We are creating a range of +/- second between the call to make sure the timestamp
+         * would fit into this range. This way the test the test ensures the sub-second precision
+         * of timestamps, which is enough for the purpose of this test.
+         */
         @Test
         @DisplayName("with current time")
         void withTimestamp() {
-            // We are creating a range of +/- second between the call to make sure the timestamp
-            // would fit into this range. The purpose of this test is to make sure it works with
-            // this precision and to add coverage.
             Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
-            Command command = factory().command()
-                                       .create(StringValue.getDefaultInstance());
+            Command command = command().create(StringValue.getDefaultInstance());
             Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
             assertTrue(Timestamps2.isBetween(
@@ -64,8 +68,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("with given entity version")
         void withEntityVersion() {
-            Command command = factory().command()
-                                       .create(StringValue.getDefaultInstance(), 2);
+            Command command = command().create(StringValue.getDefaultInstance(), 2);
 
             assertEquals(2, command.getContext()
                                    .getTargetVersion());
@@ -90,30 +93,30 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
                                           .getActorContext()
                                           .getTenantId());
         }
-    }
 
+    }
     @Nested
     @DisplayName("throw ValidationException when creating command")
     class NotAccept {
 
-        @SuppressWarnings("unused")
-        private final RequiredFieldCommand invalidCommand =
-                RequiredFieldCommand.getDefaultInstance();
+        private final 
+        RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
 
         @Test
         @DisplayName("from invalid Message")
         void invalidMessage() {
-            RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-            assertThrows(ValidationException.class, () -> factory().command()
-                                                                   .create(invalidCommand));
+            assertThrows(ValidationException.class, () -> command().create(invalidCommand));
         }
 
         @Test
         @DisplayName("from invalid Message with version")
         void invalidMessageWithVersion() {
-            RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-            assertThrows(ValidationException.class, () -> factory().command()
-                                                                   .create(invalidCommand, 42));
+            assertThrows(ValidationException.class, () -> command().create(invalidCommand, 42));
         }
+
+    }
+
+    private CommandFactory command() {
+        return factory().command();
     }
 }
