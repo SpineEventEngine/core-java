@@ -32,8 +32,6 @@ import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.naming.event.EventContext;
-
 import static io.spine.validate.Validate.checkValid;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
