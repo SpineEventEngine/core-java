@@ -27,7 +27,7 @@ import io.spine.server.aggregate.model.AggregateClass;
  *
  * @author Alexander Yevsyukov
  */
-public class ModelInfo {
+public final class ModelInfo {
 
     /** Prevents instantiation of this utility class. */
     private ModelInfo() {
