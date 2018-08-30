@@ -175,14 +175,6 @@ final class CommandLifecycleAggregate
         setStatus(status);
     }
 
-    @Assign
-    CommandTransformed on(MarkTransformed cmd) {
-        return CommandTransformed.newBuilder()
-                                 .setId(cmd.getId())
-                                 .setProduced(cmd.getProduced())
-                                 .build();
-    }
-
     @Apply(allowImport = true)
     void event(CommandTransformed event) {
         Substituted.Builder substituted = Substituted
@@ -193,14 +185,6 @@ final class CommandLifecycleAggregate
                           .toBuilder()
                           .setSubstitued(substituted);
         getBuilder().setStatus(newStatus.build());
-    }
-
-    @Assign
-    CommandSplit on(MarkSplit cmd) {
-        return CommandSplit.newBuilder()
-                           .setId(cmd.getId())
-                           .addAllProduced(cmd.getProducedList())
-                           .build();
     }
 
     @Apply(allowImport = true)

@@ -26,6 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.system.server.MarkCausedCommands;
 import io.spine.system.server.SystemGateway;
@@ -43,8 +44,15 @@ import static com.google.common.base.Preconditions.checkState;
 public class SeveralCommands
         extends OnEvent<MarkCausedCommands, MarkCausedCommands.Builder, SeveralCommands> {
 
-    SeveralCommands(EventId origin, ActorContext actorContext) {
+    private SeveralCommands(EventId origin, ActorContext actorContext) {
         super(origin, actorContext);
+    }
+
+    /**
+     * Creates an empty sequence for creating two or more commands in response to the passed event.
+     */
+    public static SeveralCommands respondMany(EventEnvelope event) {
+        return new SeveralCommands(event.getId(), event.getActorContext());
     }
 
     @CanIgnoreReturnValue
@@ -74,7 +82,7 @@ public class SeveralCommands
 
     /**
      * {@inheritDoc}
-     *
+     * &nbsp;
      * @apiNote Overrides to open the method for outside use.
      */
     @Override

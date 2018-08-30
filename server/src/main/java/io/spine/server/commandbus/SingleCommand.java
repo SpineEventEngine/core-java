@@ -26,6 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.system.server.MarkCausedCommand;
 import io.spine.system.server.SystemGateway;
@@ -43,8 +44,15 @@ import static com.google.common.base.Preconditions.checkState;
 public class SingleCommand
         extends OnEvent<MarkCausedCommand, MarkCausedCommand.Builder, SingleCommand> {
 
-    SingleCommand(EventId origin, ActorContext actorContext) {
+    private SingleCommand(EventId origin, ActorContext actorContext) {
         super(origin, actorContext);
+    }
+
+    /**
+     * Creates an empty sequence for creating a command in response to the passed event.
+     */
+    public static SingleCommand inResponseTo(EventEnvelope event) {
+        return new SingleCommand(event.getId(), event.getActorContext());
     }
 
     public SingleCommand produce(Message commandMessage) {

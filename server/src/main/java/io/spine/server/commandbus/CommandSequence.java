@@ -33,9 +33,7 @@ import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.system.server.SystemGateway;
@@ -58,7 +56,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * @param <S> the type of the sequence for the return type covariance
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ClassReferencesSubclass")
 @Internal
 public abstract class CommandSequence<O extends Message,
                                       R extends Message,
@@ -90,34 +87,6 @@ public abstract class CommandSequence<O extends Message,
 
     protected O origin() {
         return origin;
-    }
-
-    /**
-     * Creates an empty sequence for splitting the source command into several ones.
-     */
-    public static Split split(CommandEnvelope command) {
-        return new Split(command);
-    }
-
-    /**
-     * Creates an empty sequence for transforming incoming command into another one.
-     */
-    public static Transform transform(CommandEnvelope command) {
-        return new Transform(command);
-    }
-
-    /**
-     * Creates an empty sequence for creating a command in response to the passed event.
-     */
-    public static SingleCommand inResponseTo(EventEnvelope event) {
-        return new SingleCommand(event.getId(), event.getActorContext());
-    }
-
-    /**
-     * Creates an empty sequence for creating two or more commands in response to the passed event.
-     */
-    public static SeveralCommands respondMany(EventEnvelope event) {
-        return new SeveralCommands(event.getId(), event.getActorContext());
     }
 
     /**
@@ -199,7 +168,7 @@ public abstract class CommandSequence<O extends Message,
         @SuppressWarnings("unchecked") /* The type is ensured by correct couples of R,B types passed
             to in the classes derived from `CommandSequence` that are limited to this package. */
         R result = (R) builder.build();
-        gateway.postCommand(result);
+        gateway.postEvent(result);
         return result;
     }
 
