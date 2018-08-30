@@ -46,7 +46,7 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 final class DefaultSystemGateway implements SystemGateway {
 
     /**
-     * The ID of the user used for generating system commands and events.
+     * The ID of the user which is used for generating system commands and events.
      */
     static final UserId SYSTEM_USER = UserId
             .newBuilder()
