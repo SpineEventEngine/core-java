@@ -72,7 +72,6 @@ public class SingleCommand
     void addPosted(MarkCausedCommand.Builder builder, Command command, SystemGateway gateway) {
         CommandId commandId = command.getId();
         builder.setProduced(commandId);
-        markReacted(gateway, commandId);
     }
 
     @CanIgnoreReturnValue

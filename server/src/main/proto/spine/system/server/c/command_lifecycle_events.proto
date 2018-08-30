@@ -140,13 +140,3 @@ message CommandSplit {
     // Identifiers of the command generated in response to the received command.
     repeated spine.core.CommandId produced = 2 [(required) = true];
 }
-
-// An event emitted when a command was generated in response to an event.
-message CommandCausedByEvent {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-
-    // The ID of the event which cased the command.
-    spine.core.EventId origin = 2;
-}

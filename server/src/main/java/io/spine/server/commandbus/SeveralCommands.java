@@ -77,7 +77,6 @@ public class SeveralCommands
     addPosted(MarkCausedCommands.Builder builder, Command command, SystemGateway gateway) {
         CommandId commandId = command.getId();
         builder.addProduced(commandId);
-        markReacted(gateway, commandId);
     }
 
     /**
