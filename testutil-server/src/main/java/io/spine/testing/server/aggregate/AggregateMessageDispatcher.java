@@ -25,9 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateCommandEndpointTestSupport;
-import io.spine.server.aggregate.AggregateEventEndpointTestSupport;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.AggregateTestSupport;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.testing.server.NoOpLifecycle;
 
@@ -61,7 +60,7 @@ public class AggregateMessageDispatcher {
     dispatchCommand(Aggregate<?, ?, ?> aggregate, CommandEnvelope command) {
         checkNotNull(aggregate);
         checkNotNull(command);
-        return AggregateCommandEndpointTestSupport.dispatch(mockRepository(), aggregate, command);
+        return AggregateTestSupport.dispatchCommand(mockRepository(), aggregate, command);
     }
 
     /**
@@ -75,7 +74,7 @@ public class AggregateMessageDispatcher {
     dispatchEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
         checkNotNull(aggregate);
         checkNotNull(event);
-        return AggregateEventEndpointTestSupport.dispatch(mockRepository(), aggregate, event);
+        return AggregateTestSupport.dispatchEvent(mockRepository(), aggregate, event);
     }
 
     @SuppressWarnings("unchecked") // It is OK when mocking

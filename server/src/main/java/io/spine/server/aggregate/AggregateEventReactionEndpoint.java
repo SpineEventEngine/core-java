@@ -33,7 +33,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  * @see React
  */
-class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
+final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEventEndpoint<I, A> {
 
     AggregateEventReactionEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
