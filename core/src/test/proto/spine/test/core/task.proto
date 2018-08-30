@@ -25,23 +25,8 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.core";
-option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
-import "spine/test/core/project.proto";
-import "spine/test/core/task.proto";
-
-// A test event for the `io.spine.core.MessageEnvelope` tests.
-message ProjectCreated {
-    ProjectId project_id = 1;
-}
-
-// A test event for the event validation tests.
-message TaskAssigned {
-
-    TaskId id = 1;
-
-    ProjectId project_id = 2 [(required) = true];
-
-    string user_name = 3 [(pattern).regex = ".{3,}"];
+message TaskId {
+    string id = 1;
 }
