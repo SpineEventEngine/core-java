@@ -37,18 +37,39 @@ public final class InvocationGuard {
     }
 
     /**
-     * Throws {@link SecurityException} of the calling class is not among the named.
+     * Throws {@link SecurityException} of the calling class is not that passed.
      */
-    public static void allowOnly(String... allowedCallerClass) {
+    public static void allowOnly(String allowedCallerClass) {
         checkNotNull(allowedCallerClass);
         Class callingClass = CallerProvider.instance()
                                            .getPreviousCallerClass();
-        ImmutableSet<String> allowedCallers = ImmutableSet.copyOf(allowedCallerClass);
-        if (!allowedCallers.contains(callingClass.getName())) {
-            String msg = format(
-                    "The class %s is not allowed to perform this operation.", callingClass
-            );
-            throw new SecurityException(msg);
+        if (!allowedCallerClass.equals(callingClass.getName())) {
+            throw nonAllowedCaller(callingClass);
         }
+    }
+
+    /**
+     * Throws {@link SecurityException} of the calling class is not among the named.
+     */
+    public static void allowOnly(String firstClass, String... otherClasses) {
+        checkNotNull(firstClass);
+        checkNotNull(otherClasses);
+        Class callingClass = CallerProvider.instance()
+                                           .getPreviousCallerClass();
+        ImmutableSet<String> allowedCallers = ImmutableSet
+                .<String>builder()
+                .add(firstClass)
+                .add(otherClasses)
+                .build();
+        if (!allowedCallers.contains(callingClass.getName())) {
+            throw nonAllowedCaller(callingClass);
+        }
+    }
+
+    private static SecurityException nonAllowedCaller(Class callingClass) {
+        String msg = format(
+                "The class %s is not allowed to perform this operation.", callingClass
+        );
+        throw new SecurityException(msg);
     }
 }

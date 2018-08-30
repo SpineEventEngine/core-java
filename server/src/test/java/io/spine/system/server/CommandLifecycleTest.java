@@ -36,11 +36,11 @@ import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.system.server.given.CommandLifecycleTestEnv.CommandLifecycleWatcher;
-import io.spine.system.server.given.CommandLifecycleTestEnv.TestAggregate;
-import io.spine.system.server.given.CommandLifecycleTestEnv.TestAggregateRepository;
-import io.spine.system.server.given.CommandLifecycleTestEnv.TestProcman;
-import io.spine.system.server.given.CommandLifecycleTestEnv.TestProcmanRepository;
+import io.spine.system.server.given.command.CommandLifecycleWatcher;
+import io.spine.system.server.given.command.CompanyAggregate;
+import io.spine.system.server.given.command.CompanyNameProcman;
+import io.spine.system.server.given.command.CompanyNameProcmanRepo;
+import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +54,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.system.server.given.CommandLifecycleTestEnv.TestProcman.FAULTY_NAME;
+import static io.spine.system.server.given.command.CompanyNameProcman.FAULTY_NAME;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -84,8 +84,8 @@ class CommandLifecycleTest {
                 .build();
         system = systemOf(context);
 
-        context.register(new TestAggregateRepository());
-        context.register(new TestProcmanRepository());
+        context.register(new CompanyRepository());
+        context.register(new CompanyNameProcmanRepo());
     }
 
     @DisplayName("produce system events when command")
@@ -116,7 +116,7 @@ class CommandLifecycleTest {
             checkReceived(successfulCommand);
             checkAcknowledged(commandId);
             checkDispatched(commandId);
-            checkTargetAssigned(commandId, TestAggregate.TYPE);
+            checkTargetAssigned(commandId, CompanyAggregate.TYPE);
             checkHandled(commandId);
         }
 
@@ -140,14 +140,14 @@ class CommandLifecycleTest {
             EstablishCompany rejectedCommand = EstablishCompany
                     .newBuilder()
                     .setId(id)
-                    .setFinalName(TestAggregate.TAKEN_NAME)
+                    .setFinalName(CompanyAggregate.TAKEN_NAME)
                     .build();
             CommandId commandId = postCommand(rejectedCommand);
             checkReceived(rejectedCommand);
 
-            eventAccumulator.nextEvent(CommandAcknowledged.class);
-            eventAccumulator.nextEvent(CommandDispatched.class);
-            eventAccumulator.nextEvent(TargetAssignedToCommand.class);
+            eventAccumulator.assertNextEventIs(CommandAcknowledged.class);
+            eventAccumulator.assertNextEventIs(CommandDispatched.class);
+            eventAccumulator.assertNextEventIs(TargetAssignedToCommand.class);
 
             checkRejected(commandId, Rejections.CompanyNameAlreadyTaken.class);
         }
@@ -166,7 +166,7 @@ class CommandLifecycleTest {
             checkReceived(start);
             checkAcknowledged(startId);
             checkDispatched(startId);
-            checkTargetAssigned(startId, TestProcman.TYPE);
+            checkTargetAssigned(startId, CompanyNameProcman.TYPE);
             checkHandled(startId);
 
             eventAccumulator.forgetEvents();
@@ -183,7 +183,7 @@ class CommandLifecycleTest {
             checkReceived(propose);
             checkAcknowledged(proposeId);
             checkDispatched(proposeId);
-            checkTargetAssigned(proposeId, TestProcman.TYPE);
+            checkTargetAssigned(proposeId, CompanyNameProcman.TYPE);
             checkErrored(proposeId);
         }
 
@@ -217,24 +217,24 @@ class CommandLifecycleTest {
         }
 
         private void checkReceived(Message expectedCommand) {
-            CommandReceived received = eventAccumulator.nextEvent(CommandReceived.class);
+            CommandReceived received = eventAccumulator.assertNextEventIs(CommandReceived.class);
             Message actualCommand = unpack(received.getPayload().getMessage());
             assertEquals(expectedCommand, actualCommand);
         }
 
         private void checkAcknowledged(CommandId commandId) {
-            CommandAcknowledged acknowledged = eventAccumulator.nextEvent(CommandAcknowledged.class);
+            CommandAcknowledged acknowledged = eventAccumulator.assertNextEventIs(CommandAcknowledged.class);
             assertEquals(commandId, acknowledged.getId());
         }
 
         private void checkDispatched(CommandId commandId) {
-            CommandDispatched dispatched = eventAccumulator.nextEvent(CommandDispatched.class);
+            CommandDispatched dispatched = eventAccumulator.assertNextEventIs(CommandDispatched.class);
             assertEquals(commandId, dispatched.getId());
         }
 
         private void checkTargetAssigned(CommandId commandId, TypeUrl entityType) {
             TargetAssignedToCommand assigned =
-                    eventAccumulator.nextEvent(TargetAssignedToCommand.class);
+                    eventAccumulator.assertNextEventIs(TargetAssignedToCommand.class);
             CommandTarget target = assigned.getTarget();
             Any actualId = target.getEntityId().getId();
             assertEquals(commandId, assigned.getId());
@@ -243,36 +243,36 @@ class CommandLifecycleTest {
         }
 
         private void checkHandled(CommandId commandId) {
-            CommandHandled handled = eventAccumulator.nextEvent(CommandHandled.class);
+            CommandHandled handled = eventAccumulator.assertNextEventIs(CommandHandled.class);
             assertEquals(commandId, handled.getId());
         }
 
         @CanIgnoreReturnValue
         private Error checkErrored(CommandId commandId) {
-            CommandErrored errored = eventAccumulator.nextEvent(CommandErrored.class);
+            CommandErrored errored = eventAccumulator.assertNextEventIs(CommandErrored.class);
             assertEquals(commandId, errored.getId());
             return errored.getError();
         }
 
         private void checkRejected(CommandId commandId,
                                    Class<? extends Message> expectedRejectionClass) {
-            CommandRejected rejected = eventAccumulator.nextEvent(CommandRejected.class);
+            CommandRejected rejected = eventAccumulator.assertNextEventIs(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Event rejectionEvent = rejected.getRejectionEvent();
             TypeUrl rejectionType = TypeUrl.ofEnclosed(rejectionEvent.getMessage());
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }
-    }
 
-    private CommandId postCommand(Message commandMessage) {
-        Command command = requestFactory.createCommand(commandMessage);
-        return postBuiltCommand(command);
-    }
+        private CommandId postCommand(Message commandMessage) {
+            Command command = requestFactory.createCommand(commandMessage);
+            return postBuiltCommand(command);
+        }
 
-    private CommandId postBuiltCommand(Command command) {
-        CommandBus commandBus = context.getCommandBus();
-        commandBus.post(command, noOpObserver());
-        return command.getId();
+        private CommandId postBuiltCommand(Command command) {
+            CommandBus commandBus = context.getCommandBus();
+            commandBus.post(command, noOpObserver());
+            return command.getId();
+        }
     }
 }

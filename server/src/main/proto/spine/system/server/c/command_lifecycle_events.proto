@@ -38,7 +38,7 @@ import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/system/server/command_lifecycle.proto";
 
-// An event emitted when a new command is received.
+// An event emitted when a new command is received by the `CommandBus`.
 //
 message CommandReceived {
 
@@ -47,9 +47,6 @@ message CommandReceived {
 
     // The command.
     spine.core.Command payload = 2 [(required) = true];
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted when the command is acknowledged by the `CommandBus`.
@@ -58,9 +55,6 @@ message CommandAcknowledged {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
 // An event emitted when the command is scheduled.
@@ -73,20 +67,14 @@ message CommandScheduled {
 
     // The schedule to execute the command.
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
-// An event emitted when a command is dispatched to a handler
+// An event emitted when a command is passed to a dispatcher after being acknowledged.
 //
 message CommandDispatched {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
 // An event emitted when the command target is determined.
@@ -100,9 +88,6 @@ message TargetAssignedToCommand {
 
     // The target of the command.
     CommandTarget target = 2 [(valid) = true];
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted when a command is successfully handled.
@@ -111,9 +96,6 @@ message CommandHandled {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
 // An event emitted if the handler fails to process the command.
@@ -125,9 +107,6 @@ message CommandErrored {
 
     // The runtime error.
     spine.base.Error error = 2 [(valid) = true];
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted if the handler rejects the command.
@@ -139,9 +118,6 @@ message CommandRejected {
 
     // The command rejection event.
     spine.core.Event rejection_event = 2 [(valid) = true];
-
-    // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted when another command was generated in response to a received command.
@@ -163,14 +139,4 @@ message CommandSplit {
 
     // Identifiers of the command generated in response to the received command.
     repeated spine.core.CommandId produced = 2 [(required) = true];
-}
-
-// An event emitted when a command was generated in response to an event.
-message CommandCausedByEvent {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-
-    // The ID of the event which cased the command.
-    spine.core.EventId origin = 2;
 }

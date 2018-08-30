@@ -31,7 +31,6 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.integration.IntegrationEvent;
 import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -155,33 +154,22 @@ public class EventFactory {
         return result;
     }
 
-    /**
-     * Creates an event based on the passed integration event.
-     */
-    public static Event toEvent(IntegrationEvent ie) {
-        checkNotNull(ie);
-        Event result = IntegrationEventConverter.getInstance()
-                                                .convert(ie);
-        checkNotNull(result);
-        return result;
-    }
-
     private EventContext createContext(@Nullable Version version) {
-        EventContext result = buildContext(version)
-                .build();
+        EventContext result = newContext(version).build();
         return result;
     }
 
     private EventContext createContext(@Nullable Version version,
                                        RejectionEventContext rejectionContext) {
-        EventContext result = buildContext(version)
-                .setRejection(rejectionContext)
-                .build();
+        EventContext result =
+                newContext(version)
+                        .setRejection(rejectionContext)
+                        .build();
         return result;
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    private EventContext.Builder buildContext(@Nullable Version version) {
+    private EventContext.Builder newContext(@Nullable Version version) {
         Timestamp timestamp = getCurrentTime();
         EventContext.Builder builder = EventContext
                 .newBuilder()

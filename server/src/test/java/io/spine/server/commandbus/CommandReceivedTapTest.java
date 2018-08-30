@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
+import io.spine.system.server.CommandReceived;
 import io.spine.system.server.GatewayFunction;
-import io.spine.system.server.MarkCommandAsReceived;
 import io.spine.system.server.MemoizingGateway;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -84,7 +84,8 @@ class CommandReceivedTapTest {
         Command command = command(commandMessage(), expectedTenant);
         postAndCheck(command);
 
-        TenantId actualTenant = gateway.lastSeen().tenant();
+        TenantId actualTenant = gateway.lastSeenEvent()
+                                       .tenant();
         assertEquals(expectedTenant, actualTenant);
     }
 
@@ -94,8 +95,9 @@ class CommandReceivedTapTest {
         Optional<?> ack = filter.accept(envelope);
         assertFalse(ack.isPresent());
 
-        MarkCommandAsReceived systemCommand = (MarkCommandAsReceived) gateway.lastSeen().command();
-        assertEquals(envelope.getId(), systemCommand.getId());
+        CommandReceived systemEvent = (CommandReceived) gateway.lastSeenEvent()
+                                                               .message();
+        assertEquals(envelope.getId(), systemEvent.getId());
     }
 
     private static TenantId tenantId() {

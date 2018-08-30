@@ -23,7 +23,7 @@ package io.spine.system.server;
 import com.google.protobuf.Message;
 
 /**
- * A gateway for sending messages into a system bounded context.
+ * A gateway for sending messages into a {@link SystemContext}.
  *
  * @author Dmytro Dashenkov
  */
@@ -39,6 +39,17 @@ public interface SystemGateway {
      * @param systemCommand command message
      */
     void postCommand(Message systemCommand);
+
+    /**
+     * Posts a system event.
+     *
+     * <p>If the associated bounded context is
+     * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the event is
+     * posted for the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
+     *
+     * @param systemEvent event message
+     */
+    void postEvent(Message systemEvent);
 
     /**
      * Creates new instance of the gateway which serves the passed System Bounded Context.
