@@ -214,7 +214,7 @@ public class EntityLifecycle {
     }
 
     public void onImportTargetSet(EventId id) {
-        //TODO:2018-08-22:alexander.yevsyukov: Implement as posting event when import is finished.
+        //TODO:2018-08-22:alexander.yevsyukov: Post a system event when EventLifecycleAggregate is available.
     }
 
     public void onEventImported(Event event) {
