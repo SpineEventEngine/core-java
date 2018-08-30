@@ -58,8 +58,8 @@ final class SystemCommandFactory {
 
     static ActorRequestFactory requestFactory(boolean multitenant) {
         return multitenant
-        ? newForCurrentTenant()
-        : SINGLE_TENANT;
+               ? newForCurrentTenant()
+               : SINGLE_TENANT;
     }
 
     private static ActorRequestFactory newForCurrentTenant() {
