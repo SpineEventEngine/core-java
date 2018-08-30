@@ -44,7 +44,7 @@ public final class InvocationGuard {
         Class callingClass = CallerProvider.instance()
                                            .getPreviousCallerClass();
         if (!allowedCallerClass.equals(callingClass.getName())) {
-            throw notAllowedCaller(callingClass);
+            throw nonAllowedCaller(callingClass);
         }
     }
 
@@ -62,11 +62,11 @@ public final class InvocationGuard {
                 .add(otherClasses)
                 .build();
         if (!allowedCallers.contains(callingClass.getName())) {
-            throw notAllowedCaller(callingClass);
+            throw nonAllowedCaller(callingClass);
         }
     }
 
-    private static SecurityException notAllowedCaller(Class callingClass) {
+    private static SecurityException nonAllowedCaller(Class callingClass) {
         String msg = format(
                 "The class %s is not allowed to perform this operation.", callingClass
         );
