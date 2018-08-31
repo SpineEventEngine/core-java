@@ -90,7 +90,7 @@ public final class AggregateTestSupport {
     }
 
     private static <I, A extends Aggregate<I, ?, ?>> List<Message>
-    dispatchAndCollect(AggregateEndpoint<I, A, ?, ?> endpoint, A aggregate) {
+    dispatchAndCollect(AggregateEndpoint<I, A, ?> endpoint, A aggregate) {
         List<Message> result =
                 endpoint.dispatchInTx(aggregate)
                         .stream()
