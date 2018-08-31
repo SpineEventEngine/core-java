@@ -68,13 +68,13 @@ public abstract class EntityMessageEndpoint<I,
     public void dispatchTo(I entityId) {
         checkNotNull(entityId);
         try {
-            doDispatchToOne(entityId);
+            doDispatchTo(entityId);
         } catch (RuntimeException exception) {
             onError(envelope(), exception);
         }
     }
 
-    private void doDispatchToOne(I entityId) {
+    private void doDispatchTo(I entityId) {
         M envelope = envelope();
         Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
         delivery.getSender()

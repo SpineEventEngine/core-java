@@ -44,9 +44,9 @@ public abstract class Consumer<I,
                         implements ShardedStreamConsumer<I, M> {
 
     private final Repository<I, E> repository;
-    private final DeliveryTag<M> deliveryTag;
+    private final DeliveryTag deliveryTag;
 
-    protected Consumer(DeliveryTag<M> tag, Repository<I, E> repository) {
+    protected Consumer(DeliveryTag tag, Repository<I, E> repository) {
         this.deliveryTag = tag;
         this.repository = repository;
     }
@@ -102,7 +102,7 @@ public abstract class Consumer<I,
     protected abstract B newShardedStreamBuilder();
 
     @Override
-    public DeliveryTag<M> getTag() {
+    public DeliveryTag getTag() {
         return deliveryTag;
     }
 

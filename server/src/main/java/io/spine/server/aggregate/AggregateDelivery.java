@@ -58,7 +58,7 @@ public abstract class AggregateDelivery<I,
                                    B extends ShardedStream.AbstractBuilder<I, E, B, S>>
             extends Consumer<I, A, E, S, B> {
 
-        protected AggregateMessageConsumer(DeliveryTag<E> tag, Repository<I, A> repository) {
+        protected AggregateMessageConsumer(DeliveryTag tag, Repository<I, A> repository) {
             super(tag, repository);
         }
 
