@@ -47,8 +47,6 @@ import io.spine.system.server.DispatchCommandToHandlerVBuilder;
 import io.spine.system.server.DispatchEventToReactor;
 import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchEventToSubscriberVBuilder;
-import io.spine.system.server.DispatchedEvent;
-import io.spine.system.server.DispatchedEventVBuilder;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.DispatchedMessageIdVBuilder;
 import io.spine.system.server.EntityHistoryId;
@@ -65,7 +63,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.pack;
-import static io.spine.base.Time.getCurrentTime;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
@@ -218,15 +215,10 @@ public class EntityLifecycle {
     }
 
     public void onEventImported(Event event) {
-        DispatchedEvent dispatchedEvent = DispatchedEventVBuilder
-                .newBuilder()
-                .setEvent(event.getId())
-                .setWhenDispatched(getCurrentTime())
-                .build();
         EventImported systemEvent = EventImportedVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
-                .setPayload(dispatchedEvent)
+                .setEventId(event.getId())
                 .build();
         systemGateway.postEvent(systemEvent);
     }

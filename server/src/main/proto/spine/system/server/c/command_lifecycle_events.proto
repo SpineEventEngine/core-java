@@ -31,8 +31,6 @@ option java_package = "io.spine.system.server";
 option java_outer_classname = "CommandLifecycleEventsProto";
 option java_multiple_files = true;
 
-import "google/protobuf/timestamp.proto";
-
 import "spine/base/error.proto";
 import "spine/core/command.proto";
 import "spine/core/event.proto";

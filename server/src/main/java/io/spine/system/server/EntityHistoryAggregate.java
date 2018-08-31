@@ -215,8 +215,7 @@ final class EntityHistoryAggregate
 
     @Apply(allowImport = true)
     void on(EventImported event) {
-        updateLastEventTime(event.getPayload()
-                                 .getWhenDispatched());
+        updateLastEventTime(event.getWhenImported());
     }
 
     private void checkNotDuplicate(Event event) throws CannotDispatchEventTwice {

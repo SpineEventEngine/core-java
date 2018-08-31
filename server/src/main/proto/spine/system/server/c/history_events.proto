@@ -116,7 +116,10 @@ message EventImported {
     EntityHistoryId receiver = 1 [(required) = true];
 
     // The info about the event.
-    DispatchedEvent payload = 2 [(required) = true, (valid) = true];
+    spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
+
+    // The time when the event was imported.
+    google.protobuf.Timestamp when_imported = 3 [(required) = true, (valid) = true];
 }
 
 // An event emitted when an entity state is changed.

@@ -605,7 +605,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     void onImportEvent(I id, Event event) {
-        lifecycleOf(id).onImportEvent(event);
+        lifecycleOf(id).onEventImported(event);
     }
 
     private void onCommandTargetSet(I id, CommandId commandId) {
