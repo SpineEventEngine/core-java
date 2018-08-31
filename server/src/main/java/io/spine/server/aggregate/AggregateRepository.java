@@ -553,8 +553,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onImportTargetSet(eventId);
     }
 
-    void onImportEvent(I id, Event event) {
-        lifecycleOf(id).onImportEvent(event);
+    void onEventImported(I id, Event event) {
+        lifecycleOf(id).onEventImported(event);
     }
 
     private AggregateEventDelivery<I, A> createEventDelivery() {

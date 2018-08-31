@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 
 import java.util.Optional;
@@ -36,8 +35,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  * @see <a href="http://ramblingsofraju.com/wp-content/uploads/2016/08/Multi-Tenant-Data-Architecture.pdf">Multi-Tenant Data Architecture</a>
  */
-@Internal
-public class CurrentTenant {
+final class CurrentTenant {
 
     private static final ThreadLocal<TenantId> threadLocal = new ThreadLocal<>();
 
@@ -51,7 +49,7 @@ public class CurrentTenant {
      * @return ID of the tenant or {@linkplain Optional#empty() empty Optional} if
      *         the current thread works not in a multi-tenant context
      */
-    public static Optional<TenantId> get() {
+    static Optional<TenantId> get() {
         TenantId result = threadLocal.get();
         return Optional.ofNullable(result);
     }
@@ -78,7 +76,7 @@ public class CurrentTenant {
      *
      * @param tenantId a non-null and non-default instance of {@code TenantId}
      */
-    public static void set(TenantId tenantId) {
+    static void set(TenantId tenantId) {
         checkNotNull(tenantId);
         checkArgument(isNotDefault(tenantId));
         threadLocal.set(tenantId);
@@ -87,7 +85,7 @@ public class CurrentTenant {
     /**
      * Clears the stored value.
      */
-    public static void clear() {
+    static void clear() {
         threadLocal.set(null);
     }
 }

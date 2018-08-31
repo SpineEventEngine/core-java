@@ -20,33 +20,24 @@
 
 package io.spine.server.bc;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Ack;
-import io.spine.core.Responses;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.option.EntityOption;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
-import io.spine.server.bc.given.BoundedContextTestEnv.AnotherProjectAggregateRepository;
-import io.spine.server.bc.given.BoundedContextTestEnv.ProjectAggregateRepository;
-import io.spine.server.bc.given.BoundedContextTestEnv.ProjectPmRepo;
-import io.spine.server.bc.given.BoundedContextTestEnv.ProjectReportRepository;
-import io.spine.server.bc.given.BoundedContextTestEnv.SecretProjectRepository;
-import io.spine.server.bc.given.BoundedContextTestEnv.TestEventSubscriber;
-import io.spine.server.bc.given.Given;
+import io.spine.server.bc.given.AnotherProjectAggregateRepository;
+import io.spine.server.bc.given.ProjectAggregateRepository;
+import io.spine.server.bc.given.ProjectPmRepo;
+import io.spine.server.bc.given.ProjectReportRepository;
+import io.spine.server.bc.given.SecretProjectRepository;
+import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStore;
-import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemGateway;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
-import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,9 +45,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.Status.StatusCase.ERROR;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -242,48 +230,6 @@ class BoundedContextTest {
                                           .build();
         assertEquals(eventStore, bc.getEventBus()
                                    .getEventStore());
-    }
-
-    @Nested
-    @DisplayName("manage event subscriber notifications")
-    class ManageEventSubscriberNotifications {
-
-        @Test
-        @DisplayName("when event is valid")
-        void forValidEvent() {
-            registerAll();
-            MemoizingObserver<Ack> observer = memoizingObserver();
-            IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
-            Message msg = unpack(event.getMessage());
-
-            boundedContext.notify(event, observer);
-
-            assertEquals(Responses.statusOk(), observer.firstResponse()
-                                                       .getStatus());
-            assertEquals(subscriber.getHandledEvent(), msg);
-        }
-
-        @Test
-        @DisplayName("when event is invalid")
-        void forInvalidEvent() {
-            BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                          .setMultitenant(true)
-                                                          .build();
-
-            // Unsupported message.
-            Any invalidMsg = AnyPacker.pack(BcProjectCreated.getDefaultInstance());
-            IntegrationEvent event = Given.AnIntegrationEvent.projectCreated()
-                                                             .toBuilder()
-                                                             .setMessage(invalidMsg)
-                                                             .build();
-
-            MemoizingObserver<Ack> observer = memoizingObserver();
-            boundedContext.notify(event, observer);
-
-            assertEquals(ERROR, observer.firstResponse()
-                                        .getStatus()
-                                        .getStatusCase());
-        }
     }
 
     @Nested

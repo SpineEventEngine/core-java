@@ -36,8 +36,8 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Buses;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.system.server.MarkCommandAsAcknowledged;
-import io.spine.system.server.MarkCommandAsErrored;
+import io.spine.system.server.CommandAcknowledged;
+import io.spine.system.server.CommandErrored;
 import io.spine.system.server.MemoizingGateway;
 import io.spine.system.server.NoOpSystemGateway;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,11 +46,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -140,10 +139,13 @@ class CommandAckMonitorTest {
             Ack ack = okAck(commandId);
             monitor.onNext(ack);
 
-            Message actualCommand = gateway.lastSeen().command();
-            assertThat(actualCommand, instanceOf(MarkCommandAsAcknowledged.class));
-            MarkCommandAsAcknowledged markAsAcknowledged = (MarkCommandAsAcknowledged) actualCommand;
-            assertEquals(commandId, markAsAcknowledged.getId());
+            Message lastSeenEvent = gateway.lastSeenEvent()
+                                           .message();
+
+            assertThat(lastSeenEvent).isInstanceOf(CommandAcknowledged.class);
+
+            CommandAcknowledged actualEvent = (CommandAcknowledged) lastSeenEvent;
+            assertThat(actualEvent.getId()).isEqualTo(commandId);
         }
 
         @Test
@@ -152,11 +154,16 @@ class CommandAckMonitorTest {
             Ack ack = errorAck(commandId);
             monitor.onNext(ack);
 
-            Message actualCommand = gateway.lastSeen().command();
-            assertThat(actualCommand, instanceOf(MarkCommandAsErrored.class));
-            MarkCommandAsErrored markCommandAsErrored = (MarkCommandAsErrored) actualCommand;
-            assertEquals(commandId, markCommandAsErrored.getId());
-            assertEquals(ack.getStatus().getError(), markCommandAsErrored.getError());
+            Message lastSeenEvent = gateway.lastSeenEvent()
+                                           .message();
+
+            assertThat(lastSeenEvent).isInstanceOf(CommandErrored.class);
+
+            CommandErrored actualEvent = (CommandErrored) lastSeenEvent;
+
+            assertThat(actualEvent.getId()).isEqualTo(commandId);
+            assertThat(actualEvent.getError()).isEqualTo(ack.getStatus()
+                                                            .getError());
         }
 
         @Test
