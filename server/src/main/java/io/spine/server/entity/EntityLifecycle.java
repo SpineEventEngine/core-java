@@ -63,6 +63,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.pack;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
@@ -219,6 +220,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEventId(event.getId())
+                .setWhenImported(getCurrentTime())
                 .build();
         systemGateway.postEvent(systemEvent);
     }
