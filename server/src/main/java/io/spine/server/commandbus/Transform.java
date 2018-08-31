@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.system.server.MarkTransformed;
+import io.spine.system.server.CommandTransformed;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -37,11 +37,18 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @Internal
 public final class Transform
-        extends OnCommand<MarkTransformed, MarkTransformed.Builder, Transform> {
+        extends OnCommand<CommandTransformed, CommandTransformed.Builder, Transform> {
 
-    Transform(CommandEnvelope command) {
+    private Transform(CommandEnvelope command) {
         super(command.getId(), command.getCommandContext()
                                       .getActorContext());
+    }
+
+    /**
+     * Creates an empty sequence for transforming incoming command into another one.
+     */
+    public static Transform transform(CommandEnvelope command) {
+        return new Transform(command);
     }
 
     /**
@@ -55,15 +62,15 @@ public final class Transform
      * Posts the command to the bus and returns resulting event.
      */
     @CanIgnoreReturnValue
-    public MarkTransformed post(CommandBus bus) {
+    public CommandTransformed post(CommandBus bus) {
         checkState(size() == 1, "The transformation sequence must have exactly one command.");
-        MarkTransformed result = postAll(bus);
+        CommandTransformed result = postAll(bus);
         return result;
     }
 
     @Override
-    protected MarkTransformed.Builder newBuilder() {
-        MarkTransformed.Builder result = MarkTransformed
+    protected CommandTransformed.Builder newBuilder() {
+        CommandTransformed.Builder result = CommandTransformed
                 .newBuilder()
                 .setId(origin());
         return result;
@@ -71,8 +78,8 @@ public final class Transform
 
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
-    protected void addPosted(MarkTransformed.Builder builder, Command command,
-                             SystemGateway gateway) {
+    protected
+    void addPosted(CommandTransformed.Builder builder, Command command, SystemGateway gateway) {
         builder.setProduced(command.getId());
     }
 }

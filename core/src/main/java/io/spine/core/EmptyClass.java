@@ -31,21 +31,25 @@ import io.spine.type.MessageClass;
 public final class EmptyClass extends MessageClass {
 
     private static final long serialVersionUID = 0L;
+    private static final EmptyClass INSTANCE = new EmptyClass();
 
     private EmptyClass() {
         super(Empty.class);
     }
 
     /**
-     * @return the single instance of the {@code EmptyClass}
+     * Return the single instance of the {@code EmptyClass}.
      */
     public static EmptyClass instance() {
-        return Singleton.INSTANCE.value;
+        return INSTANCE;
     }
 
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final EmptyClass value = new EmptyClass();
+    @Override
+    public String toString() {
+        return "EmptyClass.instance()";
+    }
+
+    private Object readResolve() {
+        return INSTANCE;
     }
 }

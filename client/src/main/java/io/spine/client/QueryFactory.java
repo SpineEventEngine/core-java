@@ -23,8 +23,8 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Arrays;
 import java.util.Set;
 
@@ -55,7 +55,7 @@ public final class QueryFactory {
 
     QueryFactory(ActorRequestFactory actorRequestFactory) {
         checkNotNull(actorRequestFactory);
-        this.actorContext = actorRequestFactory.actorContext();
+        this.actorContext = actorRequestFactory.newActorContext();
     }
 
     private static QueryId newQueryId() {

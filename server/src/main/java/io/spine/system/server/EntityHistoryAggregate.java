@@ -213,6 +213,12 @@ final class EntityHistoryAggregate
         updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));
     }
 
+    @Apply(allowImport = true)
+    void on(EventImported event) {
+        updateLastEventTime(event.getPayload()
+                                 .getWhenDispatched());
+    }
+
     private void checkNotDuplicate(Event event) throws CannotDispatchEventTwice {
         DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
         boolean duplicate = lookup.isDuplicate(event);

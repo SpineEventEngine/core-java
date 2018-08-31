@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.EntityId;
+import io.spine.client.EntityIdVBuilder;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -31,18 +32,30 @@ import io.spine.core.EventId;
 import io.spine.option.EntityOption;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.AssignTargetToCommand;
+import io.spine.system.server.AssignTargetToCommandVBuilder;
 import io.spine.system.server.ChangeEntityState;
+import io.spine.system.server.CommandHandled;
+import io.spine.system.server.CommandHandledVBuilder;
+import io.spine.system.server.CommandRejected;
+import io.spine.system.server.CommandRejectedVBuilder;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.CreateEntity;
+import io.spine.system.server.CreateEntityVBuilder;
 import io.spine.system.server.DeleteEntity;
 import io.spine.system.server.DispatchCommandToHandler;
+import io.spine.system.server.DispatchCommandToHandlerVBuilder;
 import io.spine.system.server.DispatchEventToReactor;
 import io.spine.system.server.DispatchEventToSubscriber;
+import io.spine.system.server.DispatchEventToSubscriberVBuilder;
+import io.spine.system.server.DispatchedEvent;
+import io.spine.system.server.DispatchedEventVBuilder;
 import io.spine.system.server.DispatchedMessageId;
+import io.spine.system.server.DispatchedMessageIdVBuilder;
 import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityHistoryIdVBuilder;
+import io.spine.system.server.EventImported;
+import io.spine.system.server.EventImportedVBuilder;
 import io.spine.system.server.ExtractEntityFromArchive;
-import io.spine.system.server.MarkCommandAsHandled;
-import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.RestoreEntity;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
@@ -52,6 +65,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.pack;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
@@ -115,7 +129,7 @@ public class EntityLifecycle {
      * @param entityKind the {@link EntityOption.Kind} of the created entity
      */
     public void onEntityCreated(EntityOption.Kind entityKind) {
-        CreateEntity command = CreateEntity
+        CreateEntity command = CreateEntityVBuilder
                 .newBuilder()
                 .setId(historyId)
                 .setKind(entityKind)
@@ -135,7 +149,7 @@ public class EntityLifecycle {
                 .setEntityId(historyId.getEntityId())
                 .setTypeUrl(historyId.getTypeUrl())
                 .build();
-        AssignTargetToCommand command = AssignTargetToCommand
+        AssignTargetToCommand command = AssignTargetToCommandVBuilder
                 .newBuilder()
                 .setId(commandId)
                 .setTarget(target)
@@ -149,7 +163,7 @@ public class EntityLifecycle {
      * @param command the dispatched command
      */
     public void onDispatchCommand(Command command) {
-        DispatchCommandToHandler systemCommand = DispatchCommandToHandler
+        DispatchCommandToHandler systemCommand = DispatchCommandToHandlerVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
                 .setCommand(command)
@@ -158,31 +172,31 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link MarkCommandAsHandled} system command.
+     * Posts the {@link CommandHandled} system event.
      *
      * @param command the handled command
      */
     public void onCommandHandled(Command command) {
-        MarkCommandAsHandled systemCommand = MarkCommandAsHandled
+        CommandHandled systemEvent = CommandHandledVBuilder
                 .newBuilder()
                 .setId(command.getId())
                 .build();
-        systemGateway.postCommand(systemCommand);
+        systemGateway.postEvent(systemEvent);
     }
 
     /**
-     * Posts the {@link MarkCommandAsRejected} system command.
+     * Posts the {@link CommandRejected} system event.
      *
      * @param commandId the ID of the rejected command
      * @param rejection the rejection event
      */
     public void onCommandRejected(CommandId commandId, Event rejection) {
-        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
+        CommandRejected systemCommand = CommandRejectedVBuilder
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
                 .build();
-        systemGateway.postCommand(systemCommand);
+        systemGateway.postEvent(systemCommand);
     }
 
     /**
@@ -191,7 +205,7 @@ public class EntityLifecycle {
      * @param event the dispatched event
      */
     public void onDispatchEventToSubscriber(Event event) {
-        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
+        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriberVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEvent(event)
@@ -200,11 +214,21 @@ public class EntityLifecycle {
     }
 
     public void onImportTargetSet(EventId id) {
-        //TODO:2018-08-22:alexander.yevsyukov: Implement as posting event when import is finished.
+        //TODO:2018-08-22:alexander.yevsyukov: Post a system event when EventLifecycleAggregate is available.
     }
 
-    public void onImportEvent(Event event) {
-        //TODO:2018-08-22:alexander.yevsyukov: Implement as posting event when import is finished.
+    public void onEventImported(Event event) {
+        DispatchedEvent dispatchedEvent = DispatchedEventVBuilder
+                .newBuilder()
+                .setEvent(event.getId())
+                .setWhenDispatched(getCurrentTime())
+                .build();
+        EventImported systemEvent = EventImportedVBuilder
+                .newBuilder()
+                .setReceiver(historyId)
+                .setPayload(dispatchedEvent)
+                .build();
+        systemGateway.postEvent(systemEvent);
     }
 
     /**
@@ -343,11 +367,11 @@ public class EntityLifecycle {
     }
 
     private static EntityHistoryId historyId(Object id, TypeUrl entityType) {
-        EntityId entityId = EntityId
+        EntityId entityId = EntityIdVBuilder
                 .newBuilder()
                 .setId(pack(id))
                 .build();
-        EntityHistoryId historyId = EntityHistoryId
+        EntityHistoryId historyId = EntityHistoryIdVBuilder
                 .newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(entityType.value())
@@ -358,16 +382,15 @@ public class EntityLifecycle {
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static DispatchedMessageId dispatchedMessageId(Message messageId) {
         checkNotNull(messageId);
+        DispatchedMessageIdVBuilder builder = DispatchedMessageIdVBuilder.newBuilder();
         if (messageId instanceof EventId) {
             EventId eventId = (EventId) messageId;
-            return DispatchedMessageId.newBuilder()
-                                      .setEventId(eventId)
-                                      .build();
+            return builder.setEventId(eventId)
+                          .build();
         } else if (messageId instanceof CommandId) {
             CommandId commandId = (CommandId) messageId;
-            return DispatchedMessageId.newBuilder()
-                                      .setCommandId(commandId)
-                                      .build();
+            return builder.setCommandId(commandId)
+                          .build();
         } else {
             throw newIllegalArgumentException(
                     "Unexpected message ID of type %s. Expected EventId or CommandId.",

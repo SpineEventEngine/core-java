@@ -109,6 +109,16 @@ message CommandDispatchedToHandler {
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
 
+// An event emitted when an event was imported into an aggregate.
+message EventImported {
+
+    // The ID of the aggregate, which imported the event.
+    EntityHistoryId receiver = 1 [(required) = true];
+
+    // The info about the event.
+    DispatchedEvent payload = 2 [(required) = true, (valid) = true];
+}
+
 // An event emitted when an entity state is changed.
 //
 // The event contains the new state of the entity.
