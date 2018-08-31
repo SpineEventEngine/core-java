@@ -23,7 +23,7 @@ package io.spine.server.projection;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.server.delivery.SystemFeedbackConsumer;
+import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
@@ -34,13 +34,13 @@ import io.spine.system.server.HistoryRejections;
  * related to dispatching events to {@link Projection}s of a given type.
  *
  * @author Dmytro Dashenkov
- * @see io.spine.server.delivery.SystemFeedbackConsumer
+ * @see SystemEventWatcher
  */
-final class ProjectionSystemFeedbackConsumer<I> extends SystemFeedbackConsumer<I> {
+final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     private final ProjectionRepository<I, ?, ?> repository;
 
-    ProjectionSystemFeedbackConsumer(ProjectionRepository<I, ?, ?> repository) {
+    ProjectionSystemEventWatcher(ProjectionRepository<I, ?, ?> repository) {
         super(repository.getEntityStateType());
         this.repository = repository;
     }
