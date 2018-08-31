@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
@@ -37,11 +36,10 @@ import static io.spine.server.command.DispatchCommand.operationFor;
  * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-@Internal
-public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
+final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, CommandEnvelope> {
 
-    protected AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
+    AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
         super(repo, command);
     }
 
