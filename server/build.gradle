@@ -33,7 +33,12 @@ dependencies {
 }
 
 apply from: testArtifactsScript
-apply from: "$rootDir/config/gradle/test-output.gradle"
+
+test {
+    afterSuite { final testDescriptor, final result ->
+        println "$testDescriptor.name: $result"
+    }
+}
 
 
 // Copies the documentation files to the Javadoc output folder.
