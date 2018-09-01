@@ -36,7 +36,16 @@ apply from: testArtifactsScript
 
 test {
     afterSuite { final testDescriptor, final result ->
-        println "$testDescriptor.name: $result"
+        if (result.resultType == TestResult.ResultType.FAILURE) {
+            println "-------"
+            println "-------"
+            println "-------"
+            println "$testDescriptor.className: $testDescriptor.name"
+            println "-------"
+            println "-------"
+            println "-------"
+            println "-------"
+        }
     }
 }
 
