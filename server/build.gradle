@@ -34,22 +34,6 @@ dependencies {
 
 apply from: testArtifactsScript
 
-test {
-    afterSuite { final testDescriptor, final result ->
-        if (result.resultType == TestResult.ResultType.FAILURE) {
-            println "-------"
-            println "-------"
-            println "-------"
-            println "$testDescriptor.className: $testDescriptor.name"
-            println "-------"
-            println "-------"
-            println "-------"
-            println "-------"
-        }
-    }
-}
-
-
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
 javadoc {

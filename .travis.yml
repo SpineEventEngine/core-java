@@ -25,7 +25,7 @@ before_install:
   - chmod 600 deploy_key_rsa
 
 script:
-  - ./gradlew check --stacktrace
+  - ./gradlew check --debug
 
   # The publishing script should be executed in `script` section in order to
   # fail the Travis build if execution of this script is failed.
