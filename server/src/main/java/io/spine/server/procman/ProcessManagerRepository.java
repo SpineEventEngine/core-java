@@ -246,7 +246,7 @@ public abstract class ProcessManagerRepository<I,
      * @param command
      *         the command to dispatch
      */
-    final void dispatchNowTo(I id, CommandEnvelope command) {
+    void dispatchNowTo(I id, CommandEnvelope command) {
         PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
         endpoint.dispatchTo(id);
     }
@@ -269,7 +269,7 @@ public abstract class ProcessManagerRepository<I,
      * @param event
      *         the event to dispatch
      */
-    final void dispatchNowTo(I id, EventEnvelope event) {
+    void dispatchNowTo(I id, EventEnvelope event) {
         PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, event);
         endpoint.dispatchTo(id);
     }
