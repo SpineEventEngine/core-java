@@ -33,6 +33,8 @@ dependencies {
 }
 
 apply from: testArtifactsScript
+apply from: "$rootDir/config/gradle/test-output.gradle"
+
 
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
