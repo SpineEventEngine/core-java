@@ -20,11 +20,21 @@
 
 package io.spine.system.server;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors.Descriptor;
+import io.spine.option.EntityOption;
+import io.spine.option.EntityOption.Kind;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.type.TypeUrl;
 
+import java.util.Optional;
 import java.util.Set;
+
+import static com.google.common.collect.ImmutableSet.of;
+import static io.spine.option.EntityOption.Kind.AGGREGATE;
+import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
+import static io.spine.option.Options.option;
+import static io.spine.option.OptionsProto.entity;
 
 /**
  * @author Dmytro Dashenkov
@@ -52,7 +62,21 @@ public class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProje
     }
 
     private static Set<MirrorId> targetsFrom(EntityHistoryId historyId) {
-        return ImmutableSet.of(idFrom(historyId));
+        TypeUrl type = TypeUrl.parse(historyId.getTypeUrl());
+        boolean shouldMirror = shouldMirror(type);
+        return shouldMirror
+               ? of(idFrom(historyId))
+               : of();
+    }
+
+    private static boolean shouldMirror(TypeUrl type) {
+        Descriptor descriptor = type.toName()
+                                    .getMessageDescriptor();
+        Optional<EntityOption> option = option(descriptor, entity);
+        Kind kind = option.map(EntityOption::getKind)
+                          .orElse(KIND_UNKNOWN);
+        boolean aggregate = kind == AGGREGATE;
+        return aggregate;
     }
 
     private static MirrorId idFrom(EntityHistoryId historyId) {
