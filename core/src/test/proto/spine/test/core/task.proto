@@ -19,24 +19,14 @@
 //
 syntax = "proto3";
 
-package spine.server.integration.grpc;
+package spine.test.envelope;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.integration.grpc";
+option java_package="io.spine.test.core";
 option java_multiple_files = true;
-option java_outer_classname = "IntegrationEventSubscriberProto";
 
-import "spine/core/ack.proto";
-import "spine/server/integration/integration_event.proto";
-
-// A service for notifying integration event subscribers.
-// A Bounded Context is a typical integration event subscriber.
-service IntegrationEventSubscriber {
-    // Notifies a subscriber about an integration event.
-    // The response is `ok` if the event is successfully received by the subscriber.
-    // If the event is not handled because of a technical error, the response is `error`.
-    // If the event cannot be handled because of business conditions, the response is `rejection`.
-    rpc Notify(server.integration.IntegrationEvent) returns (core.Ack);
+message TaskId {
+    string id = 1;
 }

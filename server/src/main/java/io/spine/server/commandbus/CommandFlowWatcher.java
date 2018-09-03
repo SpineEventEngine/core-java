@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
+import io.spine.system.server.CommandDispatched;
 import io.spine.system.server.GatewayFunction;
-import io.spine.system.server.MarkCommandAsDispatched;
 import io.spine.system.server.ScheduleCommand;
 import io.spine.system.server.SystemGateway;
 
@@ -45,16 +45,16 @@ final class CommandFlowWatcher {
     }
 
     /**
-     * Posts the {@link MarkCommandAsDispatched} system command.
+     * Posts the {@link CommandDispatched} system event.
      *
      * @param command the dispatched command
      */
     void onDispatchCommand(CommandEnvelope command) {
-        MarkCommandAsDispatched systemCommand = MarkCommandAsDispatched
+        CommandDispatched systemEvent = CommandDispatched
                 .newBuilder()
                 .setId(command.getId())
                 .build();
-        postSystem(systemCommand, command.getTenantId());
+        postSystemEvent(systemEvent, command.getTenantId());
     }
 
     /**
@@ -70,10 +70,15 @@ final class CommandFlowWatcher {
                 .setId(command.getId())
                 .setSchedule(schedule)
                 .build();
-        postSystem(systemCommand, command.getTenantId());
+        postSystemCommand(systemCommand, command.getTenantId());
     }
 
-    private void postSystem(Message systemCommand, TenantId tenantId) {
+    private void postSystemEvent(Message systemEvent, TenantId tenantId) {
+        SystemGateway gateway = this.gateway.get(tenantId);
+        gateway.postEvent(systemEvent);
+    }
+
+    private void postSystemCommand(Message systemCommand, TenantId tenantId) {
         SystemGateway gateway = this.gateway.get(tenantId);
         gateway.postCommand(systemCommand);
     }

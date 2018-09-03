@@ -40,11 +40,17 @@ import java.util.Set;
  */
 public final class NoOpLifecycle extends EntityLifecycle {
 
+    private static final NoOpLifecycle INSTANCE = new NoOpLifecycle();
+
     @SuppressWarnings("TestOnlyProblems") // OK for a test utility.
     private NoOpLifecycle() {
         super(NoOpLifecycle.class.getSimpleName(),
               TypeUrl.of(Any.class),
               NoOpSystemGateway.INSTANCE);
+    }
+
+    public static NoOpLifecycle instance() {
+        return INSTANCE;
     }
 
     @Override
@@ -85,15 +91,5 @@ public final class NoOpLifecycle extends EntityLifecycle {
     @Override
     public void onTargetAssignedToCommand(CommandId id) {
         // NoOp.
-    }
-
-    public static NoOpLifecycle instance() {
-        return Singleton.INSTANCE.value;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final NoOpLifecycle value = new NoOpLifecycle();
     }
 }

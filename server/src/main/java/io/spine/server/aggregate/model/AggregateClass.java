@@ -69,21 +69,32 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public final Set<EventClass> getEventClasses() {
         return delegate.getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public final Set<EventClass> getExternalEventClasses() {
         return delegate.getExternalEventClasses();
+    }
+
+    /**
+     * Obtains set of classes of events used as arguments of applier methods.
+     *
+     * @see #getImportableEventClasses()
+     */
+    public final Set<EventClass> getStateEventClasses() {
+        return stateEvents.getMessageClasses();
     }
 
     /**
      * Obtains a set of event classes that are
      * {@linkplain io.spine.server.aggregate.Apply#allowImport() imported}
      * by the aggregates of this class.
+     *
+     * @see #getStateEventClasses()
      */
-    public Set<EventClass> getImportableEventClasses() {
+    public final Set<EventClass> getImportableEventClasses() {
         return importableEvents;
     }
 
@@ -97,14 +108,14 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
+    public final EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
         return delegate.getReactor(eventClass, commandClass);
     }
 
     /**
      * Obtains event applier method for the passed class of events.
      */
-    public EventApplier getApplier(EventClass eventClass) {
+    public final EventApplier getApplier(EventClass eventClass) {
         return stateEvents.getMethod(eventClass);
     }
 }

@@ -35,18 +35,18 @@ import io.spine.system.server.SystemGateway;
  * {@linkplain BoundedContext#findRepository(Class) query processing}, etc.) happen through
  * an instance of this class.
  *
- * <p>Each {@code DomainBoundedContext} has an associated {@link io.spine.system.server.SystemContext}, which
- * manages the meta information about this bounded context entities.
+ * <p>Each {@code DomainContext} has an associated
+ * {@link io.spine.system.server.SystemContext SystemContext}, which manages the meta information
+ * about entities of this Bounded Context.
  *
  * @author Dmytro Dashenkov
- * @see io.spine.system.server.SystemContext
+ * @see io.spine.system.server.SystemContext SystemContext
  */
 final class DomainContext extends BoundedContext {
 
     private final SystemGateway systemGateway;
 
-    private DomainContext(BoundedContextBuilder builder,
-                          SystemGateway gateway) {
+    private DomainContext(BoundedContextBuilder builder, SystemGateway gateway) {
         super(builder);
         this.systemGateway = gateway;
     }

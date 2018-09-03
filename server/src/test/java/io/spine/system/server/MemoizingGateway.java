@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,7 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class MemoizingGateway implements SystemGateway {
 
-    private @MonotonicNonNull MemoizedCommand lastSeenCommand;
+    private @MonotonicNonNull MemoizedMessage lastSeenCommand;
+    private @MonotonicNonNull MemoizedMessage lastSeenEvent;
 
     private final boolean multitenant;
 
@@ -66,35 +68,53 @@ public final class MemoizingGateway implements SystemGateway {
      *
      * <p>Memoizes the given command message and the {@link TenantId} which it was posted for.
      *
-     * @see #lastSeen()
+     * @see #lastSeenCommand()
      */
     @Override
     public void postCommand(Message systemCommand) {
-        TenantId tenantId = new TenantFunction<TenantId>(multitenant) {
+        TenantId tenantId = currentTenant();
+        lastSeenCommand = new MemoizedMessage(systemCommand, tenantId);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Memoizes the given event message and the {@link TenantId} which it was posted for.
+     *
+     * @see #lastSeenEvent()
+     */
+    @Override
+    public void postEvent(Message systemEvent) {
+        TenantId tenantId = currentTenant();
+        lastSeenEvent = new MemoizedMessage(systemEvent, tenantId);
+    }
+
+    /** Obtains the ID of the current tenant. */
+    private TenantId currentTenant() {
+        TenantId result = new TenantFunction<TenantId>(multitenant) {
             @Override
             public TenantId apply(TenantId id) {
                 return id;
             }
         }.execute();
-        checkNotNull(tenantId);
-        lastSeenCommand = new MemoizedCommand(systemCommand, tenantId);
+        return checkNotNull(result);
     }
 
     /**
      * A command received by the {@code MemoizingGateway}.
      */
-    public static final class MemoizedCommand {
+    public static final class MemoizedMessage {
 
-        private final Message commandMessage;
+        private final Message message;
         private final TenantId tenantId;
 
-        private MemoizedCommand(Message message, TenantId id) {
-            commandMessage = message;
+        private MemoizedMessage(Message message, TenantId id) {
+            this.message = message;
             tenantId = id;
         }
 
-        public Message command() {
-            return commandMessage;
+        public Message message() {
+            return message;
         }
 
         public TenantId tenant() {
@@ -103,9 +123,20 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     /**
-     * Obtains the last seen by the gateway system command.
+     * Obtains the last command message posted to {@link SystemGateway}.
+     *
+     * @return {@code null} if no commands were posted yet
      */
-    public MemoizedCommand lastSeen() {
+    public @Nullable MemoizedMessage lastSeenCommand() {
         return lastSeenCommand;
+    }
+
+    /**
+     * Obtains the last event message posted to {@link SystemGateway}.
+     *
+     * @return {@code null} if no events were posted yet
+     */
+    public @Nullable MemoizedMessage lastSeenEvent() {
+        return lastSeenEvent;
     }
 }

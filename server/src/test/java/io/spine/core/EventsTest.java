@@ -49,7 +49,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.getActor;
-import static io.spine.core.Events.getActorContextOrThrow;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Events.getProducer;
 import static io.spine.core.Events.getTimestamp;
@@ -146,22 +145,6 @@ public class EventsTest {
             String id = (String) getProducer(context);
 
             assertEquals(msg.getValue(), id);
-        }
-
-        @Test
-        @DisplayName("actor context")
-        void actorContext() {
-            assertEquals(context.getCommandContext().getActorContext(),
-                         Events.getActorContextOrThrow(context));
-        }
-
-        @Test
-        @DisplayName("throw of no ActorContext found")
-        void throwIfNoActorContext() {
-            assertThrows(
-                    IllegalStateException.class,
-                    () -> getActorContextOrThrow(EventContext.getDefaultInstance())
-            );
         }
     }
 
