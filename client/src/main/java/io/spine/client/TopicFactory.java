@@ -20,14 +20,15 @@
 
 package io.spine.client;
 
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorContext;
-
-import java.util.Set;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Targets.composeTarget;
+import static io.spine.client.Topics.generateId;
 
 /**
  * A factory of {@link Topic} instances.
@@ -47,52 +48,74 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for the entity states with the given IDs.
+     * Creates a new instance of {@link TopicBuilder} for the further {@link Topic}
+     * construction.
      *
-     * @param entityClass the class of a target entity
-     * @param ids         the IDs of interest
-     * @return the instance of {@code Topic} assembled according to the parameters
+     * @param targetType
+     *         a class of target entities
+     * @return new {@link TopicBuilder} instance
      */
-    public Topic someOf(Class<? extends Message> entityClass, Set<? extends Message> ids) {
-        checkNotNull(entityClass);
-        checkNotNull(ids);
-
-        Target target = composeTarget(entityClass, ids, null);
-        Topic result = forTarget(target);
-        return result;
+    public TopicBuilder select(Class<? extends Message> targetType) {
+        checkNotNull(targetType);
+        TopicBuilder builder = new TopicBuilder(targetType, this);
+        return builder;
     }
 
     /**
      * Creates a {@link Topic} for all of the specified entity states.
      *
-     * @param entityClass the class of a target entity
+     * @param targetType
+     *         a class of target entities
      * @return the instance of {@code Topic} assembled according to the parameters
      */
-    public Topic allOf(Class<? extends Message> entityClass) {
-        checkNotNull(entityClass);
+    public Topic allOf(Class<? extends Message> targetType) {
+        checkNotNull(targetType);
 
-        Target target = composeTarget(entityClass, null, null);
+        Target target = composeTarget(targetType, null, null);
         Topic result = forTarget(target);
         return result;
+    }
+
+    /**
+     * Creates a {@link Topic} for the specified {@link Target}, updates for which will include
+     * only the columns specified by the {@link FieldMask}.
+     *
+     * @param target
+     *         a {@code Target} to create a topic for
+     * @param fieldMask
+     *         a {@code FieldMask} defining¬ fields to be included in updates
+     * @return an instance of {@code Topic}
+     */
+    Topic composeTopic(Target target, @Nullable FieldMask fieldMask) {
+        checkNotNull(target, "Target must be specified to compose a Topic.");
+        TopicVBuilder builder = builderForTarget(target);
+        if (fieldMask != null) {
+            builder.setFieldMask(fieldMask);
+        }
+        Topic query = builder.build();
+        return query;
     }
 
     /**
      * Creates a {@link Topic} for the specified {@link Target}.
      *
      * <p>This method is intended for internal use only. To achieve the similar result use
-     * {@linkplain #allOf(Class)} and {@linkplain #someOf(Class, Set)}.
+     * {@linkplain #allOf(Class)}.
      *
-     * @param target the {@code Target} to create a topic for
-     * @return the instance of {@code Topic}
+     * @param target
+     *         a {@code Target} to create a topic for
+     * @return an instance of {@code Topic}
      */
     @Internal
     public Topic forTarget(Target target) {
         checkNotNull(target);
-        TopicId id = Topics.generateId();
-        return Topic.newBuilder()
-                    .setId(id)
-                    .setContext(actorContext)
-                    .setTarget(target)
-                    .build();
+        return builderForTarget(target).build();
+    }
+
+    private TopicVBuilder builderForTarget(Target target) {
+        return TopicVBuilder.newBuilder()
+                            .setId(generateId())
+                            .setContext(actorContext)
+                            .setTarget(target);
     }
 }

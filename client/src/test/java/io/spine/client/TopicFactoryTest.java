@@ -39,6 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * Tests for {@link io.spine.client.TopicFactory}.
+ *
  * @author Alex Tymchenko
  */
 @DisplayName("Topic factory should")
@@ -57,7 +59,8 @@ class TopicFactoryTest
         @DisplayName("for all entities of kind")
         void forAllOfKind() {
             Topic topic = factory().topic()
-                                   .allOf(TARGET_ENTITY_CLASS);
+                                   .select(TARGET_ENTITY_CLASS)
+                                   .build();
 
             verifyTargetAndContext(topic);
 
@@ -73,7 +76,9 @@ class TopicFactoryTest
 
             Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
             Topic topic = factory().topic()
-                                   .someOf(TARGET_ENTITY_CLASS, ids);
+                                   .select(TARGET_ENTITY_CLASS)
+                                   .byId(ids)
+                                   .build();
 
             verifyTargetAndContext(topic);
 

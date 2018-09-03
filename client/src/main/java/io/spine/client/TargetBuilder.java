@@ -22,6 +22,7 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -36,12 +37,32 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.Targets.composeTarget;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
 /**
  * An abstract base for builders that create {@link com.google.protobuf.Message} instances
  * including a {@link io.spine.client.Target Target}.
+ *
+ * <p>This classes API is inspired by the SQL syntax.
+ *
+ * <p>Calling any of the builder methods overrides the previous call of the given method or
+ * any of its overloads. For example, calling sequentially
+ * <pre>
+ *     {@code
+ *     builder.withMask(mask1)
+ *            .withMask(mask2)
+ *            // optionally some other invocations
+ *            .withMask(mask3)
+ *            .build();
+ *     }
+ * </pre>
+ * is equivalent to calling
+ * <pre>
+ *     {@code
+ *     builder.withMask(mask3)
+ *            .build();
+ *     }
+ * </pre>
  *
  * @author Mykhailo Drachuk
  */
@@ -57,6 +78,7 @@ abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
 
     private @Nullable Set<?> ids;
     private @Nullable Set<CompositeColumnFilter> columns;
+    private @Nullable Set<String> fieldMask;
 
     TargetBuilder(Class<? extends Message> targetType) {
         this.targetType = checkNotNull(targetType);
@@ -72,6 +94,16 @@ abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
     Target buildTarget() {
         Set<Any> ids = composeIdPredicate();
         return composeTarget(targetType, ids, columns);
+    }
+
+    @Nullable FieldMask composeMask() {
+        if (fieldMask == null || fieldMask.isEmpty()) {
+            return null;
+        }
+        FieldMask mask = FieldMask.newBuilder()
+                                  .addAllPaths(fieldMask)
+                                  .build();
+        return mask;
     }
 
     private @Nullable Set<Any> composeIdPredicate() {
@@ -268,23 +300,63 @@ abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
         return self();
     }
 
+    /**
+     * Sets the entity fields to retrieve.
+     *
+     * <p>The names of the fields must be formatted according to the {@link FieldMask}
+     * specification.
+     *
+     * <p>If there are no fields (i.e. an empty {@link Iterable} is passed), all the fields will
+     * be retrieved.
+     *
+     * @param fieldNames
+     *         the fields to query
+     * @return self for method chaining
+     */
+    public B withMask(Iterable<String> fieldNames) {
+        checkNotNull(fieldNames);
+        this.fieldMask = ImmutableSet.copyOf(fieldNames);
+        return self();
+    }
+
+    /**
+     * Sets the entity fields to retrieve.
+     *
+     * <p>The names of the fields must be formatted according to the {@link FieldMask}
+     * specification.
+     *
+     * <p>If there are no fields (i.e. an empty array is passed), all the fields will
+     * be retrieved.
+     *
+     * @param fieldNames
+     *         the fields to query
+     * @return self for method chaining
+     */
+    public B withMask(String... fieldNames) {
+        this.fieldMask = ImmutableSet.<String>builder()
+                .add(fieldNames)
+                .build();
+        return self();
+    }
+
     public abstract T build();
 
     @Override
     public String toString() {
-        return queryStringForFields(emptySet());
+        return queryString();
     }
 
     @SuppressWarnings("MethodWithMoreThanThreeNegations")
-        // OK for this method as it's used primarily for debugging
-    String queryStringForFields(@Nullable Set<String> fields) {
+    // OK for this method as it's used primarily for debugging
+    private String queryString() {
         String valueSeparator = "; ";
         StringBuilder sb = new StringBuilder();
 
-        sb.append(TargetBuilder.class.getSimpleName())
+        Class<? extends TargetBuilder> builderCls = self().getClass();
+        sb.append(builderCls.getSimpleName())
           .append('(')
           .append("SELECT ")
-          .append(fields == null || fields.isEmpty() ? '*' : fields)
+          .append(fieldMask == null || fieldMask.isEmpty() ? '*' : fieldMask)
           .append(" FROM ")
           .append(targetType.getSimpleName())
           .append(" WHERE (");
