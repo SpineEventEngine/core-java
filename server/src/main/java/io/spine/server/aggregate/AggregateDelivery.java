@@ -68,7 +68,7 @@ public abstract class AggregateDelivery<I,
                                                             MessageClass targetMessageClass);
 
         @Override
-        protected void passToEndpoint(I id, E message) {
+        protected void passMessage(I id, E message) {
             proxyFor(id, message.getMessageClass()).deliverNow(message);
         }
 

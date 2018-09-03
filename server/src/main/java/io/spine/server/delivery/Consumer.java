@@ -85,7 +85,7 @@ public abstract class Consumer<I,
         TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                passToEndpoint(id, envelopeMessage);
+                passMessage(id, envelopeMessage);
             }
         };
 
@@ -108,23 +108,25 @@ public abstract class Consumer<I,
     }
 
     /**
-     * Calls the dispatching method of endpoint directly.
+     * Passes the given message to the entity.
+     *
+     * <p>This step passes the message directly, i.e. without any delivery invocations.
      *
      * @param id
      *         an ID of an entity to deliver th envelope to
      * @param message
      *         an envelope to delivery
      */
-    protected void passToEndpoint(I id, M message) {
+    protected void passMessage(I id, M message) {
         MessageClass targetMessageClass = message.getMessageClass();
         proxyFor(id, targetMessageClass).dispatch(message);
     }
 
     /**
-     * Obtains an endpoint to dispatch the given envelope.
+     * Obtains a proxy to dispatch the given envelope.
      *
-     * @param entityId the envelope to obtain the endpoint for
-     * @return the message endpoint
+     * @param entityId the envelope to obtain the proxy for
+     * @return the entity proxy
      */
     protected abstract EntityProxy<I, E, M> proxyFor(I entityId, MessageClass targetMessageClass);
 

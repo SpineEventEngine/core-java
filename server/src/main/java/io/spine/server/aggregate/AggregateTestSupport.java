@@ -89,9 +89,9 @@ public final class AggregateTestSupport {
     }
 
     private static <I, A extends Aggregate<I, ?, ?>, M extends ActorMessageEnvelope<?, ?, ?>>
-    List<Message> dispatchAndCollect(AggregateProxy<I, A, M> endpoint, A aggregate, M envelope) {
+    List<Message> dispatchAndCollect(AggregateProxy<I, A, M> proxy, A aggregate, M envelope) {
         List<Message> result =
-                endpoint.dispatchInTx(aggregate, envelope)
+                proxy.dispatchInTx(aggregate, envelope)
                         .stream()
                         .map(Events::getMessage)
                         .collect(toList());

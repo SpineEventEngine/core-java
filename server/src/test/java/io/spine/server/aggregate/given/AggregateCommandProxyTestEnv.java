@@ -40,10 +40,10 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 /**
  * @author Alexander Yevsyukov
  */
-public class AggregateCommandEndpointTestEnv {
+public class AggregateCommandProxyTestEnv {
 
     /** Prevent instantiation of this utility class. */
-    private AggregateCommandEndpointTestEnv() {
+    private AggregateCommandProxyTestEnv() {
     }
 
     public static class ProjectAggregate

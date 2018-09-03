@@ -89,8 +89,8 @@ public class ProjectionEventDispatcher {
         private static <I, P extends Projection<I, S, ?>, S extends Message> void
         dispatch(P projection, EventEnvelope envelope) {
             I id = projection.getId();
-            TestProjectionProxy<I, P, S> endpoint = new TestProjectionProxy<>(id);
-            endpoint.dispatchInTx(projection, envelope);
+            TestProjectionProxy<I, P, S> proxy = new TestProjectionProxy<>(id);
+            proxy.dispatchInTx(projection, envelope);
         }
     }
 

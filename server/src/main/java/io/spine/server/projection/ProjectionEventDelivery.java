@@ -76,7 +76,7 @@ public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
         }
 
         @Override
-        protected void passToEndpoint(I id, EventEnvelope message) {
+        protected void passMessage(I id, EventEnvelope message) {
             proxyFor(id, message.getMessageClass()).deliverNow(message);
         }
     }

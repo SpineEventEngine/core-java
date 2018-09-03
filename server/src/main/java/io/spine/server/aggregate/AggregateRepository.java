@@ -249,8 +249,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private void dispatchTo(I id, CommandEnvelope envelope) {
-        AggregateCommandProxy<I, A> endpoint = new AggregateCommandProxy<>(this, id);
-        endpoint.dispatch(envelope);
+        AggregateCommandProxy<I, A> proxy = new AggregateCommandProxy<>(this, id);
+        proxy.dispatch(envelope);
     }
 
     /**
@@ -312,8 +312,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private void dispatchTo(I id, EventEnvelope envelope) {
-        AggregateEventProxy<I, A> endpoint = new AggregateEventReactionProxy<>(this, id);
-        endpoint.dispatch(envelope);
+        AggregateEventProxy<I, A> proxy = new AggregateEventReactionProxy<>(this, id);
+        proxy.dispatch(envelope);
     }
 
     boolean importsEvent(EventClass eventClass) {
@@ -328,8 +328,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     I importEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
         I target = routeImport(envelope);
-        EventImportProxy<I, A> endpoint = new EventImportProxy<>(this, target);
-        endpoint.dispatch(envelope);
+        EventImportProxy<I, A> proxy = new EventImportProxy<>(this, target);
+        proxy.dispatch(envelope);
         return target;
     }
 
@@ -523,7 +523,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Invoked by an endpoint after a message was dispatched to the aggregate.
+     * Invoked by a {@linkplain AggregateProxy proxy} after a message was dispatched to
+     * the aggregate.
      *
      * @param tenantId  the tenant associated with the processed message
      * @param aggregate the updated aggregate

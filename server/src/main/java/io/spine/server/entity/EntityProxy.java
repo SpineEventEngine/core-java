@@ -59,7 +59,7 @@ public abstract class EntityProxy<I,
                                   E extends Entity<I, ?>,
                                   M extends ActorMessageEnvelope<?, ?, ?>> {
 
-    /** The repository which created this endpoint. */
+    /** The repository which stores the proxied entity. */
     private final Repository<I, E> repository;
 
     /** The ID of the entity to dispatch messages to. */
@@ -104,9 +104,9 @@ public abstract class EntityProxy<I,
     protected abstract void deliverNow(M message);
 
     /**
-     * Obtains an instance of endpoint delivery.
+     * Obtains an instance of the delivery.
      *
-     * @return the instance of endpoint delivery
+     * @return the instance of the delivery
      */
     protected abstract Delivery<I, E, M, ?, ?> getEndpointDelivery();
 
@@ -152,7 +152,7 @@ public abstract class EntityProxy<I,
     protected abstract void onError(M envelope, RuntimeException exception);
 
     /**
-     * Obtains the parent repository of this endpoint.
+     * Obtains the repository which stores the proxied entity.
      */
     protected Repository<I, E> repository() {
         return repository;

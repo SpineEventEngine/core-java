@@ -73,7 +73,7 @@ public abstract class PmDelivery<I,
         }
 
         @Override
-        protected void passToEndpoint(I id, M message) {
+        protected void passMessage(I id, M message) {
             proxyFor(id, message.getMessageClass()).deliverNow(message);
         }
     }

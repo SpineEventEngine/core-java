@@ -247,8 +247,8 @@ public abstract class ProcessManagerRepository<I,
      *         the command to dispatch
      */
     void dispatchNowTo(I id, CommandEnvelope command) {
-        PmCommandProxy<I, P> endpoint = new PmCommandProxy<>(this, id);
-        endpoint.dispatch(command);
+        PmCommandProxy<I, P> proxy = new PmCommandProxy<>(this, id);
+        proxy.dispatch(command);
     }
 
     /**
@@ -270,8 +270,8 @@ public abstract class ProcessManagerRepository<I,
      *         the event to dispatch
      */
     void dispatchNowTo(I id, EventEnvelope event) {
-        PmEventProxy<I, P> endpoint = new PmEventProxy<>(this, id);
-        endpoint.dispatch(event);
+        PmEventProxy<I, P> proxy = new PmEventProxy<>(this, id);
+        proxy.dispatch(event);
     }
 
     @Override

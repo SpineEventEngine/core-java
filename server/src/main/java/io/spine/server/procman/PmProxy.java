@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
- * @param <M> the type of message envelopes processed by the endpoint
+ * @param <M> the type of message envelopes processed by the proxy
  * @author Alexander Yevsyukov
  */
 abstract class PmProxy<I,

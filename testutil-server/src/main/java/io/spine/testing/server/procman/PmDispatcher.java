@@ -53,8 +53,8 @@ public class PmDispatcher {
 
     @SuppressWarnings("unchecked") // casts are ensured by type matching in key-value pairs
     private static final
-    ImmutableMap<Class<? extends MessageEnvelope>, EndpointFn> endpoints =
-            ImmutableMap.<Class<? extends MessageEnvelope>, EndpointFn>
+    ImmutableMap<Class<? extends MessageEnvelope>, ProxyFn> proxies =
+            ImmutableMap.<Class<? extends MessageEnvelope>, ProxyFn>
                     builder()
                     .put(CommandEnvelope.class,
                          (p, m) -> TestPmCommandProxy.dispatch(p, (CommandEnvelope) m))
@@ -75,17 +75,17 @@ public class PmDispatcher {
     public static List<Event> dispatch(ProcessManager<?, ?, ?> pm, MessageEnvelope envelope) {
         checkNotNull(pm);
         checkNotNull(envelope);
-        EndpointFn fn = endpoints.get(envelope.getClass());
+        ProxyFn fn = proxies.get(envelope.getClass());
         List<Event> events = fn.apply(pm, envelope);
         return events;
     }
 
     /**
      * Functional interface for an entry in the map matching message envelope
-     * class with a test endpoint which dispatches such envelopes.
-     * @see #endpoints
+     * class with a test proxy which dispatches such envelopes.
+     * @see #proxies
      */
-    private interface EndpointFn
+    private interface ProxyFn
             extends BiFunction<ProcessManager<?, ?, ?>, MessageEnvelope, List<Event>> {
     }
 
@@ -108,8 +108,8 @@ public class PmDispatcher {
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, CommandEnvelope envelope) {
-            TestPmCommandProxy<I, P, S> endpoint = new TestPmCommandProxy<>(manager.getId());
-            List<Event> events = endpoint.dispatchInTx(manager, envelope);
+            TestPmCommandProxy<I, P, S> proxy = new TestPmCommandProxy<>(manager.getId());
+            List<Event> events = proxy.dispatchInTx(manager, envelope);
             return events;
         }
     }
@@ -133,8 +133,8 @@ public class PmDispatcher {
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, EventEnvelope envelope) {
-            TestPmEventProxy<I, P, S> endpoint = new TestPmEventProxy<>(manager.getId());
-            List<Event> events = endpoint.dispatchInTx(manager, envelope);
+            TestPmEventProxy<I, P, S> proxy = new TestPmEventProxy<>(manager.getId());
+            List<Event> events = proxy.dispatchInTx(manager, envelope);
             return events;
         }
     }
