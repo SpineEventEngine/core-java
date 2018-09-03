@@ -62,6 +62,12 @@ public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
             return EventShardedStream.newBuilder();
         }
 
+        /**
+         * {@inheritDoc}
+         * ­
+         * @implSpec
+         * This method expects that the {@code targetMessageClass} is an {@link EventClass}.
+         */
         @Override
         protected AggregateEventProxy<I, A> proxyFor(I envelope, MessageClass targetMessageClass) {
             EventClass eventClass = (EventClass) targetMessageClass;
