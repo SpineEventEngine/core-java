@@ -48,6 +48,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * which must be performed under the context of the tenant ID in which
  * the message we dispatch was originated.
  *
+ * <p>The {@code EntityProxy} is inspired by
+ * the <a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/SmartProxy.html">Smart Proxy</a>
+ * enterprise pattern, however, should not be evaluated as a canonical implementation.
+ *
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <M> the type of message envelopes

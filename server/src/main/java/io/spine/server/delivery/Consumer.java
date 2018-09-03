@@ -110,12 +110,12 @@ public abstract class Consumer<I,
     /**
      * Passes the given message to the entity.
      *
-     * <p>This step passes the message directly, i.e. without any delivery invocations.
+     * <p>Passes the message directly, i.e. without any {@link Delivery} invocations.
      *
      * @param id
-     *         an ID of an entity to deliver th envelope to
+     *         an ID of an entity to deliver the envelope to
      * @param message
-     *         an envelope to delivery
+     *         an envelope to deliver
      */
     protected void passMessage(I id, M message) {
         MessageClass targetMessageClass = message.getMessageClass();
