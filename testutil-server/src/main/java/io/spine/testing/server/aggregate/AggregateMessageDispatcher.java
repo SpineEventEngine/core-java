@@ -24,18 +24,15 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateCommandEndpoint;
-import io.spine.server.aggregate.AggregateEventReactionEndpoint;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.AggregateTestSupport;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.testing.server.NoOpLifecycle;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -63,7 +60,7 @@ public class AggregateMessageDispatcher {
     dispatchCommand(Aggregate<?, ?, ?> aggregate, CommandEnvelope command) {
         checkNotNull(aggregate);
         checkNotNull(command);
-        return TestAggregateCommandEndpoint.dispatch(aggregate, command);
+        return AggregateTestSupport.dispatchCommand(mockRepository(), aggregate, command);
     }
 
     /**
@@ -77,60 +74,7 @@ public class AggregateMessageDispatcher {
     dispatchEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
         checkNotNull(aggregate);
         checkNotNull(event);
-        return TestAggregateEventEndpoint.dispatch(aggregate, event);
-    }
-
-    /**
-     * A test-only implementation of an {@link AggregateEventReactionEndpoint}, that dispatches
-     * events to an instance of {@code Aggregate} into its reactor methods and returns
-     * the list of produced events.
-     *
-     * @param <I> the type of {@code Aggregate} identifier
-     * @param <A> the type of {@code Aggregate}
-     */
-    private static class TestAggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateEventReactionEndpoint<I, A> {
-
-        private TestAggregateEventEndpoint(EventEnvelope envelope) {
-            super(mockRepository(), envelope);
-        }
-
-        private static <I, A extends Aggregate<I, ?, ?>>
-        List<? extends Message> dispatch(A aggregate, EventEnvelope envelope) {
-            TestAggregateEventEndpoint<I, A> endpoint =
-                    new TestAggregateEventEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
-                                                     .stream()
-                                                     .map(Events::getMessage)
-                                                     .collect(toList());
-            return result;
-        }
-    }
-
-    /**
-     * A test-only implementation of an {@link AggregateCommandEndpoint}, that dispatches
-     * commands to an instance of {@code Aggregate} and returns the list of produced events.
-     *
-     * @param <I> the type of {@code Aggregate} identifier
-     * @param <A> the type of {@code Aggregate}
-     */
-    private static class TestAggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateCommandEndpoint<I, A> {
-
-        private TestAggregateCommandEndpoint(CommandEnvelope envelope) {
-            super(mockRepository(), envelope);
-        }
-
-        private static <I, A extends Aggregate<I, ?, ?>>
-        List<? extends Message> dispatch(A aggregate, CommandEnvelope envelope) {
-            TestAggregateCommandEndpoint<I, A> endpoint =
-                    new TestAggregateCommandEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
-                                                     .stream()
-                                                     .map(Events::getMessage)
-                                                     .collect(toList());
-            return result;
-        }
+        return AggregateTestSupport.dispatchEvent(mockRepository(), aggregate, event);
     }
 
     @SuppressWarnings("unchecked") // It is OK when mocking
