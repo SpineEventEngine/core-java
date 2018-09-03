@@ -33,7 +33,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Abstract base for endpoints handling messages sent to entities.
+ * A smart proxy of an entity for incoming messages.
+ *
+ * <p>The typical flow for a proxy is:
+ * <ol>
+ *     <li>receives a message;
+ *     <li>sends the message over the {@link Delivery};
+ *     <li>receives the message from delivery (on the same or on another instance);
+ *     <li>loads the target entity and passes the message to the entity;
+ *     <li>stores the entity and publishes the results of the message handling, if any.
+ * </ol>
  *
  * <p>Loading and storing an entity is a tenant-sensitive operation,
  * which must be performed under the context of the tenant ID in which
