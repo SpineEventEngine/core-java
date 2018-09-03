@@ -4,7 +4,7 @@ package spine.system.server;
 
 import "spine/options.proto";
 
-option (type_url_prefix) = "";
+option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.system.server";
 option java_outer_classname = "MirrorProto";
 option java_multiple_files = true;
@@ -20,7 +20,6 @@ message Mirror {
     google.protobuf.Any state = 2 [(required) = true, (valid) = true];
 
     spine.server.entity.LifecycleFlags lifecycle = 3;
-
     EntityColumns columns = 4;
 }
 
