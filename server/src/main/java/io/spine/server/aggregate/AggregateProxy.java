@@ -23,8 +23,9 @@ package io.spine.server.aggregate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
+import io.spine.core.TenantId;
 import io.spine.server.entity.EntityLifecycleMonitor;
-import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.entity.EntityProxy;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TransactionListener;
 
@@ -38,21 +39,22 @@ import java.util.List;
  * @param <M> the type of message envelopes
  * @author Alexander Yevsyukov
  */
-abstract class AggregateEndpoint<I,
-                                 A extends Aggregate<I, ?, ?>,
-                                 M extends ActorMessageEnvelope<?, ?, ?>>
-        extends EntityMessageEndpoint<I, A, M> {
+abstract class AggregateProxy<I,
+                              A extends Aggregate<I, ?, ?>,
+                              M extends ActorMessageEnvelope<?, ?, ?>>
+        extends EntityProxy<I, A, M> {
 
-    AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
-        super(repository, envelope);
+    AggregateProxy(AggregateRepository<I, A> repository, I aggregateId) {
+        super(repository, aggregateId);
     }
 
     @Override
-    protected final void deliverNowTo(I aggregateId) {
+    protected final void deliverNow(M message) {
+        I aggregateId = entityId();
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        List<Event> produced = dispatchInTx(aggregate);
+        List<Event> produced = dispatchInTx(aggregate, message);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
         LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
@@ -60,7 +62,7 @@ abstract class AggregateEndpoint<I,
             storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }
 
-        store(aggregate);
+        store(aggregate, message);
         repository().postEvents(produced);
     }
 
@@ -69,12 +71,12 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    protected final List<Event> dispatchInTx(A aggregate) {
-        List<Event> events = doDispatch(aggregate, envelope());
+    protected final List<Event> dispatchInTx(A aggregate, M messsage) {
+        List<Event> events = doDispatch(aggregate, messsage);
         AggregateTransaction tx = startTransaction(aggregate);
-        List<Event> producedEvents = aggregate.apply(events, envelope());
+        List<Event> producedEvents = aggregate.apply(events, messsage);
         tx.commit();
-        onDispatched(aggregate, envelope(), producedEvents);
+        onDispatched(aggregate, messsage, producedEvents);
         return producedEvents;
     }
 
@@ -105,8 +107,9 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected final void onModified(A entity) {
-        repository().onModifiedAggregate(envelope().getTenantId(), entity);
+    protected final void onModified(A entity, M message) {
+        TenantId tenantId = message.getTenantId();
+        repository().onModifiedAggregate(tenantId, entity);
     }
 
     @Override

@@ -32,11 +32,11 @@ import java.util.List;
  * @author Alexander Yevsyukov
  * @see React
  */
-final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEventEndpoint<I, A> {
+final class AggregateEventReactionProxy<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateEventProxy<I, A> {
 
-    AggregateEventReactionEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
-        super(repo, event);
+    AggregateEventReactionProxy(AggregateRepository<I, A> repo, I aggregateId) {
+        super(repo, aggregateId);
     }
 
     @Override

@@ -23,6 +23,7 @@ import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.delivery.CommandShardedStream;
 import io.spine.server.delivery.DeliveryTag;
+import io.spine.type.MessageClass;
 
 /**
  * A strategy on delivering the commands to the instances of a certain aggregate type.
@@ -59,8 +60,8 @@ public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
         }
 
         @Override
-        protected AggregateCommandEndpoint<I, A> getEndpoint(CommandEnvelope envelope) {
-            return new AggregateCommandEndpoint<>(repository(), envelope);
+        protected AggregateCommandProxy<I, A> proxyFor(I entityId, MessageClass targetClass) {
+            return new AggregateCommandProxy<>(repository(), entityId);
         }
     }
 }

@@ -33,10 +33,10 @@ import io.spine.core.EventEnvelope;
  *
  * @author Alexander Yevsyukov
  */
-abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, EventEnvelope> {
+abstract class AggregateEventProxy<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateProxy<I, A, EventEnvelope> {
 
-    AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
-        super(repository, envelope);
+    AggregateEventProxy(AggregateRepository<I, A> repository, I aggregateId) {
+        super(repository, aggregateId);
     }
 }

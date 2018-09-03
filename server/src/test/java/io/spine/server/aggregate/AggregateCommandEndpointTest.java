@@ -45,7 +45,7 @@ import static io.spine.server.aggregate.given.Given.ACommand.startProject;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("AggregateCommandEndpoint should")
+@DisplayName("AggregateCommandProxy should")
 class AggregateCommandEndpointTest {
 
     private BoundedContext boundedContext;

@@ -82,14 +82,15 @@ public class ProjectionEventDispatcher {
     private static class TestProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Message>
             extends ProjectionEndpoint<I, P> {
 
-        private TestProjectionEndpoint(EventEnvelope event) {
-            super(mockRepository(), event);
+        private TestProjectionEndpoint(I entityId) {
+            super(mockRepository(), entityId);
         }
 
         private static <I, P extends Projection<I, S, ?>, S extends Message> void
         dispatch(P projection, EventEnvelope envelope) {
-            TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(envelope);
-            endpoint.dispatchInTx(projection);
+            I id = projection.getId();
+            TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(id);
+            endpoint.dispatchInTx(projection, envelope);
         }
     }
 

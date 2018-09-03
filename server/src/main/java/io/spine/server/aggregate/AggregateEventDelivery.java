@@ -24,6 +24,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.DeliveryTag;
 import io.spine.server.delivery.EventShardedStream;
+import io.spine.type.MessageClass;
 
 /**
  * A strategy on delivering the events to the instances of a certain aggregate type.
@@ -62,12 +63,13 @@ public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
         }
 
         @Override
-        protected AggregateEventEndpoint<I, A> getEndpoint(EventEnvelope envelope) {
-            EventClass eventClass = envelope.getMessageClass();
-            if (repository().importsEvent(eventClass)) {
-                return new EventImportEndpoint<>(repository(), envelope);
+        protected AggregateEventProxy<I, A> proxyFor(I envelope, MessageClass targetMessageClass) {
+            EventClass eventClass = (EventClass) targetMessageClass;
+            boolean importEvent = repository().importsEvent(eventClass);
+            if (importEvent) {
+                return new EventImportProxy<>(repository(), envelope);
             }
-            return new AggregateEventReactionEndpoint<>(repository(), envelope);
+            return new AggregateEventReactionProxy<>(repository(), envelope);
         }
     }
 }

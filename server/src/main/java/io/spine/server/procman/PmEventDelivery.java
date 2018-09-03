@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.DeliveryTag;
 import io.spine.server.delivery.EventShardedStream;
+import io.spine.type.MessageClass;
 
 /**
  * A strategy on delivering the events to the instances of a certain process manager type.
@@ -58,8 +59,8 @@ public class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
         }
 
         @Override
-        protected PmEventEndpoint<I, P> getEndpoint(EventEnvelope envelope) {
-            return PmEventEndpoint.of(repository(), envelope);
+        protected PmEventEndpoint<I, P> proxyFor(I entityId, MessageClass targetClass) {
+            return new PmEventEndpoint<>(repository(), entityId);
         }
     }
 }

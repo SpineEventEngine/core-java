@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
+import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
@@ -38,11 +39,11 @@ import java.util.List;
  * @author Alexander Yevsyukov
  * @see io.spine.server.aggregate.Apply#allowImport()
  */
-class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
-    extends AggregateEventEndpoint<I, A> implements Logging {
+class EventImportProxy<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateEventProxy<I, A> implements Logging {
 
-    EventImportEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
-        super(repository, envelope);
+    EventImportProxy(AggregateRepository<I, A> repository, I aggregateId) {
+        super(repository, aggregateId);
     }
 
     @Override
@@ -57,7 +58,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      * @return the list with one {@code Event} which is being imported
      * @implNote We do not need to perform anything with the aggregate and the passed event.
      * The aggregate would consume the passed event when dispatching result is
-     * {@link io.spine.server.aggregate.AggregateEndpoint#dispatchInTx(Aggregate) applied}.
+     * {@link AggregateProxy#dispatchInTx(Aggregate, ActorMessageEnvelope) applied}.
      */
     @Override
     protected List<Event> doDispatch(A aggregate, EventEnvelope envelope) {

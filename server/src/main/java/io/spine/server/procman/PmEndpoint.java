@@ -22,7 +22,7 @@ package io.spine.server.procman;
 
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
-import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.entity.EntityProxy;
 
 import java.util.List;
 
@@ -37,10 +37,10 @@ import java.util.List;
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
                           M extends ActorMessageEnvelope<?, ?, ?>>
-        extends EntityMessageEndpoint<I, P, M> {
+        extends EntityProxy<I, P, M> {
 
-    PmEndpoint(ProcessManagerRepository<I, P, ?> repository, M envelope) {
-        super(repository, envelope);
+    PmEndpoint(ProcessManagerRepository<I, P, ?> repository, I procmanId) {
+        super(repository, procmanId);
     }
 
     @Override
@@ -50,7 +50,7 @@ abstract class PmEndpoint<I,
     }
 
     @Override
-    protected void onModified(P processManager) {
+    protected void onModified(P processManager, M message) {
         repository().store(processManager);
     }
 
@@ -60,17 +60,17 @@ abstract class PmEndpoint<I,
     }
 
     @Override
-    protected void deliverNowTo(I id) {
+    protected void deliverNow(M message) {
         ProcessManagerRepository<I, P, ?> repository = repository();
-        P manager = repository.findOrCreate(id);
-        List<Event> events = dispatchInTx(manager);
-        store(manager);
+        P manager = repository.findOrCreate(entityId());
+        List<Event> events = dispatchInTx(manager, message);
+        store(manager, message);
         repository.postEvents(events);
     }
 
-    protected List<Event> dispatchInTx(P processManager) {
+    protected List<Event> dispatchInTx(P processManager, M message) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        List<Event> events = doDispatch(processManager, envelope());
+        List<Event> events = doDispatch(processManager, message);
         tx.commit();
         return events;
     }

@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.delivery.CommandShardedStream;
 import io.spine.server.delivery.DeliveryTag;
+import io.spine.type.MessageClass;
 
 /**
  * A strategy on delivering the ecommandsvents to the instances of a certain process manager type.
@@ -58,8 +59,8 @@ public class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
         }
 
         @Override
-        protected PmCommandEndpoint<I, P> getEndpoint(CommandEnvelope envelope) {
-            return PmCommandEndpoint.of(repository(), envelope);
+        protected PmCommandEndpoint<I, P> proxyFor(I procmanId, MessageClass targetClass) {
+            return new PmCommandEndpoint<>(repository(), procmanId);
         }
     }
 }

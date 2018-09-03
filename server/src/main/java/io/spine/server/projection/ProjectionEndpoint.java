@@ -29,7 +29,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.EntityLifecycleMonitor;
-import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.entity.EntityProxy;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
 
@@ -40,15 +40,10 @@ import java.util.List;
  */
 @Internal
 public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
-        extends EntityMessageEndpoint<I, P, EventEnvelope> {
+        extends EntityProxy<I, P, EventEnvelope> {
 
-    protected ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
-        super(repository, event);
-    }
-
-    static <I, P extends Projection<I, ?, ?>>
-    ProjectionEndpoint<I, P> of(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
-        return new ProjectionEndpoint<>(repository, event);
+    protected ProjectionEndpoint(Repository<I, P> repository, I projectionId) {
+        super(repository, projectionId);
     }
 
     @Override
@@ -57,19 +52,19 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected void deliverNowTo(I entityId) {
+    protected void deliverNow(EventEnvelope envelope) {
         ProjectionRepository<I, P, ?> repository = repository();
-        P projection = repository.findOrCreate(entityId);
-        dispatchInTx(projection);
-        store(projection);
+        P projection = repository.findOrCreate(entityId());
+        dispatchInTx(projection, envelope);
+        store(projection, envelope);
     }
 
-    protected void dispatchInTx(P projection) {
+    protected void dispatchInTx(P projection, EventEnvelope envelope) {
         ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
-        doDispatch(projection, envelope());
+        doDispatch(projection, envelope);
         tx.commit();
     }
 
@@ -92,11 +87,11 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected void onModified(P projection) {
+    protected void onModified(P projection, EventEnvelope envelope) {
         ProjectionRepository<I, P, ?> repository = repository();
         repository.store(projection);
 
-        EventContext eventContext = envelope().getEventContext();
+        EventContext eventContext = envelope.getEventContext();
         Timestamp eventTime = eventContext.getTimestamp();
         repository.projectionStorage()
                   .writeLastHandledEventTime(eventTime);

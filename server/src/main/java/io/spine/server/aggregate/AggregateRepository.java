@@ -249,8 +249,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private void dispatchTo(I id, CommandEnvelope envelope) {
-        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, envelope);
-        endpoint.dispatchTo(id);
+        AggregateCommandProxy<I, A> endpoint = new AggregateCommandProxy<>(this, id);
+        endpoint.dispatch(envelope);
     }
 
     /**
@@ -312,9 +312,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private void dispatchTo(I id, EventEnvelope envelope) {
-        AggregateEventEndpoint<I, A> endpoint =
-                new AggregateEventReactionEndpoint<>(this, envelope);
-        endpoint.dispatchTo(id);
+        AggregateEventProxy<I, A> endpoint = new AggregateEventReactionProxy<>(this, id);
+        endpoint.dispatch(envelope);
     }
 
     boolean importsEvent(EventClass eventClass) {
@@ -329,8 +328,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     I importEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
         I target = routeImport(envelope);
-        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, envelope);
-        endpoint.dispatchTo(target);
+        EventImportProxy<I, A> endpoint = new EventImportProxy<>(this, target);
+        endpoint.dispatch(envelope);
         return target;
     }
 

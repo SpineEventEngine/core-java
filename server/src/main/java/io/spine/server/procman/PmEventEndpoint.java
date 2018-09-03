@@ -37,14 +37,8 @@ import java.util.List;
 public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, EventEnvelope> {
 
-    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository,
-                              EventEnvelope envelope) {
-        super(repository, envelope);
-    }
-
-    static <I, P extends ProcessManager<I, ?, ?>>
-    PmEventEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
-        return new PmEventEndpoint<>(repository, event);
+    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository, I procmanId) {
+        super(repository, procmanId);
     }
 
     @Override

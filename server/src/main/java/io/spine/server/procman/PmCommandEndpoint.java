@@ -41,14 +41,8 @@ import static io.spine.server.command.DispatchCommand.operationFor;
 public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, CommandEnvelope> {
 
-    protected PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
-        super(repository, cmd);
-    }
-
-    static <I, P extends ProcessManager<I, ?, ?>>
-    PmCommandEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository,
-                               CommandEnvelope event) {
-        return new PmCommandEndpoint<>(repository, event);
+    protected PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, I procmanId) {
+        super(repository, procmanId);
     }
 
     @Override

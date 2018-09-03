@@ -102,14 +102,14 @@ public class PmDispatcher {
                                                S extends Message>
             extends PmCommandEndpoint<I, P> {
 
-        private TestPmCommandEndpoint(CommandEnvelope envelope) {
-            super(mockRepository(), envelope);
+        private TestPmCommandEndpoint(I entityId) {
+            super(mockRepository(), entityId);
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, CommandEnvelope envelope) {
-            TestPmCommandEndpoint<I, P, S> endpoint = new TestPmCommandEndpoint<>(envelope);
-            List<Event> events = endpoint.dispatchInTx(manager);
+            TestPmCommandEndpoint<I, P, S> endpoint = new TestPmCommandEndpoint<>(manager.getId());
+            List<Event> events = endpoint.dispatchInTx(manager, envelope);
             return events;
         }
     }
@@ -127,14 +127,14 @@ public class PmDispatcher {
                                              S extends Message>
             extends PmEventEndpoint<I, P> {
 
-        private TestPmEventEndpoint(EventEnvelope envelope) {
-            super(mockRepository(), envelope);
+        private TestPmEventEndpoint(I entityId) {
+            super(mockRepository(), entityId);
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, EventEnvelope envelope) {
-            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(envelope);
-            List<Event> events = endpoint.dispatchInTx(manager);
+            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(manager.getId());
+            List<Event> events = endpoint.dispatchInTx(manager, envelope);
             return events;
         }
     }

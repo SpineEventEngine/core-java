@@ -36,11 +36,11 @@ import static io.spine.server.command.DispatchCommand.operationFor;
  * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, CommandEnvelope> {
+final class AggregateCommandProxy<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateProxy<I, A, CommandEnvelope> {
 
-    AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
-        super(repo, command);
+    AggregateCommandProxy(AggregateRepository<I, A> repo, I aggregateId) {
+        super(repo, aggregateId);
     }
 
     @Override

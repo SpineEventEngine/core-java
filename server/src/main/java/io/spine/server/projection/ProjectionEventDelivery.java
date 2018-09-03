@@ -26,6 +26,7 @@ import io.spine.server.delivery.Consumer;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.DeliveryTag;
 import io.spine.server.delivery.EventShardedStream;
+import io.spine.type.MessageClass;
 
 /**
  * A strategy on delivering the events to the instances of a certain projection type.
@@ -70,13 +71,13 @@ public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
         }
 
         @Override
-        protected ProjectionEndpoint<I, P> getEndpoint(EventEnvelope envelope) {
-            return ProjectionEndpoint.of(repository(), envelope);
+        protected ProjectionEndpoint<I, P> proxyFor(I entityId, MessageClass targetClass) {
+            return new ProjectionEndpoint<>(repository(), entityId);
         }
 
         @Override
-        protected void passToEndpoint(I id, EventEnvelope event) {
-            getEndpoint(event).deliverNowTo(id);
+        protected void passToEndpoint(I id, EventEnvelope message) {
+            proxyFor(id, message.getMessageClass()).deliverNow(message);
         }
     }
 }
