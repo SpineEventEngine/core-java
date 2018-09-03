@@ -27,19 +27,19 @@ import io.spine.server.entity.EntityProxy;
 import java.util.List;
 
 /**
- * Common base message for endpoints of Process Managers.
+ * Implementation base for Process Managers proxies.
  *
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
  * @param <M> the type of message envelopes processed by the endpoint
  * @author Alexander Yevsyukov
  */
-abstract class PmEndpoint<I,
+abstract class PmProxy<I,
                           P extends ProcessManager<I, ?, ?>,
                           M extends ActorMessageEnvelope<?, ?, ?>>
         extends EntityProxy<I, P, M> {
 
-    PmEndpoint(ProcessManagerRepository<I, P, ?> repository, I procmanId) {
+    PmProxy(ProcessManagerRepository<I, P, ?> repository, I procmanId) {
         super(repository, procmanId);
     }
 

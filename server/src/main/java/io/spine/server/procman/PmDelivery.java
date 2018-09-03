@@ -64,8 +64,8 @@ public abstract class PmDelivery<I,
         }
 
         @Override
-        protected abstract PmEndpoint<I, P, M> proxyFor(I entityId,
-                                                        MessageClass targetMessageClass);
+        protected abstract PmProxy<I, P, M> proxyFor(I entityId,
+                                                     MessageClass targetMessageClass);
 
         @Override
         protected ProcessManagerRepository<I, P, ?> repository() {

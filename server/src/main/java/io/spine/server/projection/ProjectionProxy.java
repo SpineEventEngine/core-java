@@ -39,10 +39,10 @@ import java.util.List;
  * Dispatches an event to projections.
  */
 @Internal
-public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
+public class ProjectionProxy<I, P extends Projection<I, ?, ?>>
         extends EntityProxy<I, P, EventEnvelope> {
 
-    protected ProjectionEndpoint(Repository<I, P> repository, I projectionId) {
+    protected ProjectionProxy(Repository<I, P> repository, I projectionId) {
         super(repository, projectionId);
     }
 

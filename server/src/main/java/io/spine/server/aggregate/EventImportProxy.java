@@ -30,7 +30,7 @@ import io.spine.server.delivery.Delivery;
 import java.util.List;
 
 /**
- * The endpoint for importing events into aggregates.
+ * The proxy for importing events into aggregates.
  *
  * <p>Importing events one by one uses the same delivery mechanism as in event reaction of
  * aggregates. But unlike for event reaction, only one aggregate can be a target for event

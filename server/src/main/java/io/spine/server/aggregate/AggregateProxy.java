@@ -32,7 +32,7 @@ import io.spine.server.entity.TransactionListener;
 import java.util.List;
 
 /**
- * Abstract base for endpoints handling messages sent to aggregates.
+ * Abstract base for proxies handling messages on behalf of aggregates.
  *
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
@@ -81,7 +81,7 @@ abstract class AggregateProxy<I,
     }
 
     /**
-     * Called after the message was successfully dispatched to the passed aggregate,
+     * Called after the message was successfully dispatched to the {@code aggregate},
      * and the transaction successfully committed.
      *
      * <p>Default implementation does nothing.

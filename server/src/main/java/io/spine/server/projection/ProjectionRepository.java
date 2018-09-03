@@ -278,7 +278,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Internal
     protected void dispatchNowTo(I id, EventEnvelope envelope) {
-        ProjectionEndpoint<I, P> endpoint = new ProjectionEndpoint<>(this, id);
+        ProjectionProxy<I, P> endpoint = new ProjectionProxy<>(this, id);
         endpoint.dispatch(envelope);
     }
 

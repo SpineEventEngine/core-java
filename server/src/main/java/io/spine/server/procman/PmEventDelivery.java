@@ -59,8 +59,8 @@ public class PmEventDelivery<I, P extends ProcessManager<I, ?, ?>>
         }
 
         @Override
-        protected PmEventEndpoint<I, P> proxyFor(I entityId, MessageClass targetClass) {
-            return new PmEventEndpoint<>(repository(), entityId);
+        protected PmEventProxy<I, P> proxyFor(I entityId, MessageClass targetClass) {
+            return new PmEventProxy<>(repository(), entityId);
         }
     }
 }

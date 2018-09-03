@@ -71,8 +71,8 @@ public class ProjectionEventDelivery<I, P extends Projection<I, ?, ?>>
         }
 
         @Override
-        protected ProjectionEndpoint<I, P> proxyFor(I entityId, MessageClass targetClass) {
-            return new ProjectionEndpoint<>(repository(), entityId);
+        protected ProjectionProxy<I, P> proxyFor(I entityId, MessageClass targetClass) {
+            return new ProjectionProxy<>(repository(), entityId);
         }
 
         @Override

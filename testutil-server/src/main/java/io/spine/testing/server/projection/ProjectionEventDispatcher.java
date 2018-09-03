@@ -27,7 +27,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionEndpoint;
+import io.spine.server.projection.ProjectionProxy;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.testing.server.NoOpLifecycle;
 
@@ -57,7 +57,7 @@ public class ProjectionEventDispatcher {
         checkNotNull(projection);
         checkNotNull(event);
         EventEnvelope envelope = EventEnvelope.of(event);
-        TestProjectionEndpoint.dispatch(projection, envelope);
+        TestProjectionProxy.dispatch(projection, envelope);
     }
 
     /**
@@ -76,20 +76,20 @@ public class ProjectionEventDispatcher {
                            .setMessage(pack(eventMessage))
                            .setContext(eventContext)
                            .build();
-        TestProjectionEndpoint.dispatch(projection, EventEnvelope.of(event));
+        TestProjectionProxy.dispatch(projection, EventEnvelope.of(event));
     }
 
-    private static class TestProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Message>
-            extends ProjectionEndpoint<I, P> {
+    private static class TestProjectionProxy<I, P extends Projection<I, S, ?>, S extends Message>
+            extends ProjectionProxy<I, P> {
 
-        private TestProjectionEndpoint(I entityId) {
+        private TestProjectionProxy(I entityId) {
             super(mockRepository(), entityId);
         }
 
         private static <I, P extends Projection<I, S, ?>, S extends Message> void
         dispatch(P projection, EventEnvelope envelope) {
             I id = projection.getId();
-            TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(id);
+            TestProjectionProxy<I, P, S> endpoint = new TestProjectionProxy<>(id);
             endpoint.dispatchInTx(projection, envelope);
         }
     }

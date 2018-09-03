@@ -59,8 +59,8 @@ public class PmCommandDelivery<I, P extends ProcessManager<I, ?, ?>>
         }
 
         @Override
-        protected PmCommandEndpoint<I, P> proxyFor(I procmanId, MessageClass targetClass) {
-            return new PmCommandEndpoint<>(repository(), procmanId);
+        protected PmCommandProxy<I, P> proxyFor(I procmanId, MessageClass targetClass) {
+            return new PmCommandProxy<>(repository(), procmanId);
         }
     }
 }

@@ -21,48 +21,53 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.server.command.DispatchCommand;
+import io.spine.server.entity.EntityLifecycle;
 
 import java.util.List;
 
+import static io.spine.server.command.DispatchCommand.operationFor;
+
 /**
- * Dispatches event to reacting process managers.
+ * Dispatches command to process managers.
  *
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
  * @author Alexander Yevsyukov
  */
 @Internal
-public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, EventEnvelope> {
+public class PmCommandProxy<I, P extends ProcessManager<I, ?, ?>>
+        extends PmProxy<I, P, CommandEnvelope> {
 
-    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository, I procmanId) {
+    protected PmCommandProxy(ProcessManagerRepository<I, P, ?> repository, I procmanId) {
         super(repository, procmanId);
     }
 
     @Override
-    protected PmEventDelivery<I, P> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
+    protected PmCommandDelivery<I, P> getEndpointDelivery() {
+        return repository().getCommandEndpointDelivery();
     }
 
     @Override
-    protected List<Event> doDispatch(P processManager, EventEnvelope envelope) {
-        List<Event> events = processManager.dispatchEvent(envelope);
-        return events;
+    protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
+        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
+        DispatchCommand dispatch = operationFor(lifecycle, processManager, envelope);
+        return dispatch.perform();
+    }
+
+    @Override
+    protected void onError(CommandEnvelope envelope, RuntimeException exception) {
+        repository().onError(envelope, exception);
     }
 
     /**
      * Does nothing since a state of a process manager should not be necessarily
-     * updated upon reacting on an event.
+     * updated during the command handling.
      */
     @Override
-    protected void onEmptyResult(P pm, EventEnvelope envelope) {
+    protected void onEmptyResult(P processManager, CommandEnvelope cmd) {
         // Do nothing.
-    }
-
-    @Override
-    protected void onError(EventEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
     }
 }

@@ -28,8 +28,8 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.procman.PmCommandEndpoint;
-import io.spine.server.procman.PmEventEndpoint;
+import io.spine.server.procman.PmCommandProxy;
+import io.spine.server.procman.PmEventProxy;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.testing.server.NoOpLifecycle;
@@ -57,9 +57,9 @@ public class PmDispatcher {
             ImmutableMap.<Class<? extends MessageEnvelope>, EndpointFn>
                     builder()
                     .put(CommandEnvelope.class,
-                         (p, m) -> TestPmCommandEndpoint.dispatch(p, (CommandEnvelope) m))
+                         (p, m) -> TestPmCommandProxy.dispatch(p, (CommandEnvelope) m))
                     .put(EventEnvelope.class,
-                         (p, m) -> TestPmEventEndpoint.dispatch(p, (EventEnvelope) m))
+                         (p, m) -> TestPmEventProxy.dispatch(p, (EventEnvelope) m))
                     .build();
 
     /** Prevents this utility class from instantiation. */
@@ -90,50 +90,50 @@ public class PmDispatcher {
     }
 
     /**
-     * A test-only implementation of an {@link PmCommandEndpoint}, that dispatches
+     * A test-only implementation of an {@link PmCommandProxy}, that dispatches
      * commands to an instance of {@code ProcessManager} and returns the list of events.
      *
      * @param <I> the type of {@code ProcessManager} identifier
      * @param <P> the type of {@code ProcessManager}
      * @param <S> the type of {@code ProcessManager} state object
      */
-    private static class TestPmCommandEndpoint<I,
+    private static class TestPmCommandProxy<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
-            extends PmCommandEndpoint<I, P> {
+            extends PmCommandProxy<I, P> {
 
-        private TestPmCommandEndpoint(I entityId) {
+        private TestPmCommandProxy(I entityId) {
             super(mockRepository(), entityId);
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, CommandEnvelope envelope) {
-            TestPmCommandEndpoint<I, P, S> endpoint = new TestPmCommandEndpoint<>(manager.getId());
+            TestPmCommandProxy<I, P, S> endpoint = new TestPmCommandProxy<>(manager.getId());
             List<Event> events = endpoint.dispatchInTx(manager, envelope);
             return events;
         }
     }
 
     /**
-     * A test-only implementation of an {@link PmEventEndpoint}, that dispatches
+     * A test-only implementation of an {@link PmEventProxy}, that dispatches
      * events to an instance of {@code ProcessManager} and returns the list of events.
      *
      * @param <I> the type of {@code ProcessManager} identifier
      * @param <P> the type of {@code ProcessManager}
      * @param <S> the type of {@code ProcessManager} state object
      */
-    private static class TestPmEventEndpoint<I,
-                                             P extends ProcessManager<I, S, ?>,
-                                             S extends Message>
-            extends PmEventEndpoint<I, P> {
+    private static class TestPmEventProxy<I,
+                                          P extends ProcessManager<I, S, ?>,
+                                          S extends Message>
+            extends PmEventProxy<I, P> {
 
-        private TestPmEventEndpoint(I entityId) {
+        private TestPmEventProxy(I entityId) {
             super(mockRepository(), entityId);
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, EventEnvelope envelope) {
-            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(manager.getId());
+            TestPmEventProxy<I, P, S> endpoint = new TestPmEventProxy<>(manager.getId());
             List<Event> events = endpoint.dispatchInTx(manager, envelope);
             return events;
         }
