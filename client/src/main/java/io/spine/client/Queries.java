@@ -90,11 +90,18 @@ public final class Queries {
         checkNotNull(entityClass);
 
         Target target = composeTarget(entityClass, ids, columnFilters);
-        Query.Builder queryBuilder = Query.newBuilder()
-                                          .setTarget(target);
+        Query.Builder builder = queryBuilderFor(target, fieldMask);
+        return builder;
+    }
+
+    static Query.Builder queryBuilderFor(Target target, @Nullable FieldMask fieldMask) {
+        checkNotNull(target);
+
+        Query.Builder builder = Query.newBuilder()
+                                     .setTarget(target);
         if (fieldMask != null) {
-            queryBuilder.setFieldMask(fieldMask);
+            builder.setFieldMask(fieldMask);
         }
-        return queryBuilder;
+        return builder;
     }
 }
