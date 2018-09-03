@@ -23,8 +23,8 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Arrays;
 import java.util.Set;
 
@@ -180,11 +180,21 @@ public final class QueryFactory {
                        @Nullable Set<CompositeColumnFilter> columnFilters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
+        Query.Builder builder = queryBuilderFor(entityClass, ids, columnFilters, fieldMask);
+        Query query = newQuery(builder);
+        return query;
+    }
 
-        Query.Builder builder =
-                queryBuilderFor(entityClass, ids, columnFilters, fieldMask)
-                        .setId(newQueryId())
-                        .setContext(actorContext);
-        return builder.build();
+    Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
+        checkNotNull(target, "Target must be specified to compose a Query");
+        Query.Builder builder = queryBuilderFor(target, fieldMask);
+        Query query = newQuery(builder);
+        return query;
+    }
+
+    private Query newQuery(Query.Builder builder) {
+        return builder.setId(newQueryId())
+                      .setContext(actorContext)
+                      .build();
     }
 }
