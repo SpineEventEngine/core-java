@@ -82,7 +82,7 @@ message Event {
     EventId id = 1 [(required) = true];
 
     // The message of the event wrapped into `Any`.
-    google.protobuf.Any message = 2 [(required) = true];
+    google.protobuf.Any message = 2 [(required) = true, (valid) = true];
 
     // The context of the event.
     EventContext context = 3 [(required) = true];
