@@ -84,22 +84,22 @@ public final class Queries {
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
+    static QueryVBuilder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<? extends Message> ids,
                                          @Nullable Set<CompositeColumnFilter> columnFilters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
         Target target = composeTarget(entityClass, ids, columnFilters);
-        Query.Builder builder = queryBuilderFor(target, fieldMask);
+        QueryVBuilder builder = queryBuilderFor(target, fieldMask);
         return builder;
     }
 
-    static Query.Builder queryBuilderFor(Target target, @Nullable FieldMask fieldMask) {
+    static QueryVBuilder queryBuilderFor(Target target, @Nullable FieldMask fieldMask) {
         checkNotNull(target);
 
-        Query.Builder builder = Query.newBuilder()
-                                     .setTarget(target);
+        QueryVBuilder builder = QueryVBuilder.newBuilder()
+                                             .setTarget(target);
         if (fieldMask != null) {
             builder.setFieldMask(fieldMask);
         }

@@ -189,19 +189,19 @@ public final class QueryFactory {
                        @Nullable Set<CompositeColumnFilter> columnFilters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
-        Query.Builder builder = queryBuilderFor(entityClass, ids, columnFilters, fieldMask);
+        QueryVBuilder builder = queryBuilderFor(entityClass, ids, columnFilters, fieldMask);
         Query query = newQuery(builder);
         return query;
     }
 
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkNotNull(target, "Target must be specified to compose a Query");
-        Query.Builder builder = queryBuilderFor(target, fieldMask);
+        QueryVBuilder builder = queryBuilderFor(target, fieldMask);
         Query query = newQuery(builder);
         return query;
     }
 
-    private Query newQuery(Query.Builder builder) {
+    private Query newQuery(QueryVBuilder builder) {
         return builder.setId(newQueryId())
                       .setContext(actorContext)
                       .build();
