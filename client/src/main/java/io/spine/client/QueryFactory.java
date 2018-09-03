@@ -69,7 +69,8 @@ public final class QueryFactory {
      * Creates a new instance of {@link QueryBuilder} for the further {@link Query}
      * construction.
      *
-     * @param targetType the {@linkplain Query query} target type
+     * @param targetType
+     *         the {@linkplain Query query} target type
      * @return new instance of {@link QueryBuilder}
      */
     public QueryBuilder select(Class<? extends Message> targetType) {
@@ -94,10 +95,13 @@ public final class QueryFactory {
      * (e.g. a {@code path} references a missing field),
      * such invalid paths are silently ignored.
      *
-     * @param entityClass the class of a target entity
-     * @param ids         the entity IDs of interest
-     * @param maskPaths   the property paths for the {@code FieldMask} applied
-     *                    to each of results
+     * @param entityClass
+     *         the class of a target entity
+     * @param ids
+     *         the entity IDs of interest
+     * @param maskPaths
+     *         the property paths for the {@code FieldMask} applied
+     *         to each of results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query byIdsWithMask(Class<? extends Message> entityClass,
@@ -123,8 +127,10 @@ public final class QueryFactory {
      * <p>Unlike {@link #byIdsWithMask(Class, Set, String...)}, the {@code Query} processing
      * will not change the resulting entities.
      *
-     * @param entityClass the class of a target entity
-     * @param ids         the entity IDs of interest
+     * @param entityClass
+     *         the class of a target entity
+     * @param ids
+     *         the entity IDs of interest
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query byIds(Class<? extends Message> entityClass,
@@ -147,9 +153,11 @@ public final class QueryFactory {
      * (e.g. a {@code path} references a missing field), such invalid paths
      * are silently ignored.
      *
-     * @param entityClass the class of a target entity
-     * @param maskPaths   the property paths for the {@code FieldMask} applied
-     *                    to each of results
+     * @param entityClass
+     *         the class of a target entity
+     * @param maskPaths
+     *         the property paths for the {@code FieldMask} applied
+     *         to each of results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
@@ -166,7 +174,8 @@ public final class QueryFactory {
      * <p>Unlike {@link #allWithMask(Class, String...)}, the {@code Query} processing will
      * not change the resulting entities.
      *
-     * @param entityClass the class of a target entity
+     * @param entityClass
+     *         the class of a target entity
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query all(Class<? extends Message> entityClass) {

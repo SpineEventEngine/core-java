@@ -67,7 +67,8 @@ public final class Queries {
      * <p>Throws an {@link IllegalStateException} if the {@code Target} type is unknown to
      * the application.
      *
-     * @param query the query of interest.
+     * @param query
+     *         the query of interest.
      * @return the URL of the type of the query {@linkplain Query#getTarget() target}
      */
     public static TypeUrl typeOf(Query query) {

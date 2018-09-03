@@ -270,7 +270,8 @@ public final class QueryBuilder {
      * <p>If there are no fields (i.e. an empty {@link Iterable} is passed), all the fields will
      * be retrieved.
      *
-     * @param fieldNames the fields to query
+     * @param fieldNames
+     *         the fields to query
      * @return self for method chaining
      */
     public QueryBuilder withMask(Iterable<String> fieldNames) {
@@ -288,7 +289,8 @@ public final class QueryBuilder {
      * <p>If there are no fields (i.e. an empty array is passed), all the fields will
      * be retrieved.
      *
-     * @param fieldNames the fields to query
+     * @param fieldNames
+     *         the fields to query
      * @return self for method chaining
      */
     public QueryBuilder withMask(String... fieldNames) {
@@ -299,7 +301,7 @@ public final class QueryBuilder {
     }
 
     /**
-     * Generates a new instance of {@link Query} regarding all the set parameters.
+     * Generates a new {@link Query} instance with current builder configuration.
      *
      * @return the built {@link Query}
      */
