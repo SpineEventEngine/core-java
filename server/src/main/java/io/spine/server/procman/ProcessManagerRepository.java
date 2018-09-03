@@ -344,7 +344,7 @@ public abstract class ProcessManagerRepository<I,
      * @return delivery strategy for events applied to the instances managed by this repository
      */
     @SPI
-    protected PmEventDelivery<I, P> getEventEndpointDelivery() {
+    protected PmEventDelivery<I, P> getEventDelivery() {
         return eventDeliverySupplier.get();
     }
 
@@ -360,7 +360,7 @@ public abstract class ProcessManagerRepository<I,
      * @return delivery strategy for rejections
      */
     @SPI
-    protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
+    protected PmCommandDelivery<I, P> getCommandDelivery() {
         return commandDeliverySupplier.get();
     }
 
@@ -381,8 +381,8 @@ public abstract class ProcessManagerRepository<I,
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         Iterable<ShardedStreamConsumer<?, ?>> result =
                 of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
+                        getCommandDelivery().getConsumer(),
+                        getEventDelivery().getConsumer()
                 );
         return result;
     }

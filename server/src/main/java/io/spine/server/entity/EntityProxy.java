@@ -86,7 +86,7 @@ public abstract class EntityProxy<I,
     }
 
     private void doDispatch(M message) {
-        Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
+        Delivery<I, E, M, ?, ?> delivery = getDelivery();
         delivery.getSender()
                 .send(entityId, message);
     }
@@ -108,7 +108,7 @@ public abstract class EntityProxy<I,
      *
      * @return the instance of the delivery
      */
-    protected abstract Delivery<I, E, M, ?, ?> getEndpointDelivery();
+    protected abstract Delivery<I, E, M, ?, ?> getDelivery();
 
     /**
      * Invokes entity-specific method for dispatching the message.

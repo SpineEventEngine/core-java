@@ -51,8 +51,8 @@ final class AggregateCommandProxy<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getCommandEndpointDelivery();
+    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getDelivery() {
+        return repository().getCommandDelivery();
     }
 
     @Override

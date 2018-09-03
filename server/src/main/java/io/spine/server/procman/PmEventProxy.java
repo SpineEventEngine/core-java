@@ -42,8 +42,8 @@ public class PmEventProxy<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected PmEventDelivery<I, P> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
+    protected PmEventDelivery<I, P> getDelivery() {
+        return repository().getEventDelivery();
     }
 
     @Override

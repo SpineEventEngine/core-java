@@ -47,8 +47,8 @@ class EventImportProxy<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected Delivery<I, A, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
+    protected Delivery<I, A, EventEnvelope, ?, ?> getDelivery() {
+        return repository().getEventDelivery();
     }
 
     /**

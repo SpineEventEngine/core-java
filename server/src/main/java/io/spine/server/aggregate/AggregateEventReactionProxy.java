@@ -40,8 +40,8 @@ final class AggregateEventReactionProxy<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
+    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getDelivery() {
+        return repository().getEventDelivery();
     }
 
     @Override

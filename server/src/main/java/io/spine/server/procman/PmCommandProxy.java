@@ -46,8 +46,8 @@ public class PmCommandProxy<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected PmCommandDelivery<I, P> getEndpointDelivery() {
-        return repository().getCommandEndpointDelivery();
+    protected PmCommandDelivery<I, P> getDelivery() {
+        return repository().getCommandDelivery();
     }
 
     @Override

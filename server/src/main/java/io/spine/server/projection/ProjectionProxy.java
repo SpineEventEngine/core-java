@@ -69,8 +69,8 @@ public class ProjectionProxy<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected Delivery<I, P, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEndpointDelivery();
+    protected Delivery<I, P, EventEnvelope, ?, ?> getDelivery() {
+        return repository().getDelivery();
     }
 
     @CanIgnoreReturnValue

@@ -319,7 +319,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @return delivery strategy for events applied to the instances managed by this repository
      */
     @SPI
-    protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
+    protected ProjectionEventDelivery<I, P> getDelivery() {
         return eventDeliverySupplier.get();
     }
 
@@ -331,7 +331,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.of(getEndpointDelivery().getConsumer());
+                ImmutableList.of(getDelivery().getConsumer());
         return result;
     }
 

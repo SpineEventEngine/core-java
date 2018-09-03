@@ -575,7 +575,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for events applied to the instances managed by this repository
      */
     @SPI
-    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
+    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEventDelivery() {
         return eventDeliverySupplier.get();
     }
 
@@ -591,7 +591,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for rejections
      */
     @SPI
-    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
+    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandDelivery() {
         return commandDeliverySupplier.get();
     }
 
@@ -637,8 +637,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         Iterable<ShardedStreamConsumer<?, ?>> result =
                 of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
+                        getCommandDelivery().getConsumer(),
+                        getEventDelivery().getConsumer()
                 );
         return result;
     }
