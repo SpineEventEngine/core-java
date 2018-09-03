@@ -95,5 +95,4 @@ public final class TopicFactory {
                     .setTarget(target)
                     .build();
     }
-
 }
