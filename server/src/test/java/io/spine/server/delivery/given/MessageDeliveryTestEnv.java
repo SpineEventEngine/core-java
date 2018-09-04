@@ -65,7 +65,7 @@ public class MessageDeliveryTestEnv {
      * The alternatives would imply injecting multiple mocks that would send reports
      * down the dispatching route. Which seems to be much more complex.
      */
-    private static final int DISPATCH_WAIT_TIME = 3_500;
+    private static final int DISPATCH_WAIT_TIME = 4_000;
 
     /** Prevents instantiation of this test environment class. */
     private MessageDeliveryTestEnv() {
