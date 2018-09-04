@@ -25,6 +25,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
+import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
@@ -84,5 +85,10 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
             EventEnvelope envelope = EventEnvelope.of(payload);
             repository.onError(envelope, exception);
         }
+    }
+
+    @Override // Exposes the method to this package.
+    protected void registerIn(BoundedContext context) {
+        super.registerIn(context);
     }
 }

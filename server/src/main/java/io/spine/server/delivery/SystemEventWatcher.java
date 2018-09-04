@@ -85,7 +85,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
      *
      * @param context the domain bounded context to register the subscriber in
      */
-    public final void registerIn(BoundedContext context) {
+    protected void registerIn(BoundedContext context) {
         context.getIntegrationBus()
                .register(this);
     }
