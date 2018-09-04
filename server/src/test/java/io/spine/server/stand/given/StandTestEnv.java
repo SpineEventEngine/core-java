@@ -25,8 +25,15 @@ import io.grpc.stub.StreamObserver;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.server.Given;
+import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.stand.Stand;
+import io.spine.server.stand.given.Given.StandTestProjectionRepository;
+import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Collection;
 
 /**
  * @author Alexander Yevsyukov
@@ -36,6 +43,29 @@ public class StandTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private StandTestEnv() {
+    }
+
+    public static Stand standWithStates(Collection<Any> states, boolean multitenant) {
+        SystemGateway gateway = new FakeSystemGateway(states);
+        Stand stand = Stand
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setSystemGateway(gateway)
+                .build();
+        return stand;
+    }
+
+    public static Stand newStand(boolean multitenant) {
+        Stand stand = Stand
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setSystemGateway(NoOpSystemGateway.INSTANCE)
+                .build();
+        CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository();
+        stand.registerTypeSupplier(customerAggregateRepo);
+        StandTestProjectionRepository projectProjectionRepo = new StandTestProjectionRepository();
+        stand.registerTypeSupplier(projectProjectionRepo);
+        return stand;
     }
 
     /**
