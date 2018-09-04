@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A builder for the {@link Query} instances.
  *
  * <p>None of the parameters set by builder methods are required. Call {@link #build()} to retrieve
- * the resulting instance of {@link Query}.
+ * the resulting {@link Query} instance.
  *
  * <p>Usage example:
  * <pre>

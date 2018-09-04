@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A builder for the {@link io.spine.client.Topic Topic} instances.
  *
  * <p>None of the parameters set by builder methods are required. Call {@link #build()} to retrieve
- * the resulting instance of {@link io.spine.client.Topic Topic}.
+ * the resulting {@link io.spine.client.Topic Topic} instance.
  *
  * <p>Usage example:
  * <pre>
