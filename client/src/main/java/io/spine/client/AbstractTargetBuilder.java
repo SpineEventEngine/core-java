@@ -105,7 +105,6 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      *         target
      */
     Target buildTarget() {
-        Set<Any> ids = composeIdPredicate();
         return composeTarget(targetType, ids, columns);
     }
 
@@ -117,24 +116,6 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
                                   .addAllPaths(fieldMask)
                                   .build();
         return mask;
-    }
-
-    private @Nullable Set<Any> composeIdPredicate() {
-        if (ids == null || ids.isEmpty()) {
-            return null;
-        }
-        Function<Object, Any> transformFn = new Function<Object, Any>() {
-            @Override
-            public @Nullable Any apply(@Nullable Object o) {
-                checkNotNull(o);
-                return pack(o);
-            }
-        };
-        Collection<Any> entityIds = ids.stream()
-                                       .map(transformFn)
-                                       .collect(Collectors.toList());
-        Set<Any> result = newHashSet(entityIds);
-        return result;
     }
 
     /**

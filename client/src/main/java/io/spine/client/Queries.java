@@ -85,7 +85,7 @@ public final class Queries {
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     static QueryVBuilder queryBuilderFor(Class<? extends Message> entityClass,
-                                         @Nullable Set<? extends Message> ids,
+                                         @Nullable Set<?> ids,
                                          @Nullable Set<CompositeColumnFilter> columnFilters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);

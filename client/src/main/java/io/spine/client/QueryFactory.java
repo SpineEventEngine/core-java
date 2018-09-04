@@ -98,14 +98,15 @@ public final class QueryFactory {
      * @param entityClass
      *         the class of a target entity
      * @param ids
-     *         the entity IDs of interest
+     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
+     *         which is supported as identifier}
      * @param maskPaths
      *         the property paths for the {@code FieldMask} applied
      *         to each of results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query byIdsWithMask(Class<? extends Message> entityClass,
-                               Set<? extends Message> ids,
+                               Set<?> ids,
                                String... maskPaths) {
         checkNotNull(ids);
         checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
@@ -130,11 +131,14 @@ public final class QueryFactory {
      * @param entityClass
      *         the class of a target entity
      * @param ids
-     *         the entity IDs of interest
+     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
+     *         which is supported as identifier}
      * @return an instance of {@code Query} formed according to the passed parameters
+     * @throws IllegalArgumentException
+     *         if any of IDs have invalid type or are {@code null}
      */
     public Query byIds(Class<? extends Message> entityClass,
-                       Set<? extends Message> ids) {
+                       Set<?> ids) {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
@@ -185,7 +189,7 @@ public final class QueryFactory {
     }
 
     Query composeQuery(Class<? extends Message> entityClass,
-                       @Nullable Set<? extends Message> ids,
+                       @Nullable Set<?> ids,
                        @Nullable Set<CompositeColumnFilter> columnFilters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
