@@ -281,7 +281,6 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("operate with storage provided through builder")
     void operateWithStorage() {
-        StandStorage standStorageMock = mock(StandStorage.class);
         BoundedContext boundedContext =
                 BoundedContext.newBuilder()
                               .setStand(Stand.newBuilder()
@@ -1084,14 +1083,6 @@ class StandTest extends TenantAwareTest {
 
         assertNotNull(subscription);
         return subscription;
-    }
-
-    private StandStorage createStandStorage() {
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .setMultitenant(multitenant)
-                                          .build();
-        return bc.getStorageFactory()
-                 .createStandStorage();
     }
 
     private static void verifyObserver(MemoizeQueryResponseObserver observer) {
