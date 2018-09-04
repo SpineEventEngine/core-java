@@ -86,7 +86,7 @@ public final class RecentHistory {
     }
 
     /**
-     * Create a new {@link Stream} of the recent history items.
+     * Creates a new {@link Stream} of the recent history items.
      *
      * <p>The produced stream is sequential and emits items in the reverse chronological order.
      * That is, most recent event would be returned first.
