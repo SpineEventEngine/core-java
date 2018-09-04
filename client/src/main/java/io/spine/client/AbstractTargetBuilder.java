@@ -21,19 +21,13 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.base.Identifier.pack;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.Targets.composeTarget;
 import static java.util.Arrays.asList;
