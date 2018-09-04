@@ -33,7 +33,7 @@ import io.spine.type.TypeUrl;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.type.TypeUrl.parse;
 import static java.util.Collections.emptySet;
 
 /**
@@ -84,16 +84,17 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     private boolean producerOfCorrectType(EventEnvelope event) {
         EventContext context = event.getEventContext();
         Any anyId = context.getProducerId();
-        boolean idTypeMatches = anyId.is(EntityHistoryId.class);
-        if (!idTypeMatches) {
-            _warn("Event %s is produced by an entity with ID %s.",
-                  event.getMessageClass(), unpack(anyId));
-            return false;
-        } else {
-            EntityHistoryId producerId = unpack(anyId);
-            String typeUrlRaw = producerId.getTypeUrl();
-            TypeUrl typeUrl = TypeUrl.parse(typeUrlRaw);
+        Object producerId = Identifier.unpack(anyId);
+        boolean idTypeMatches = producerId instanceof EntityHistoryId;
+        if (idTypeMatches) {
+            EntityHistoryId historyId = (EntityHistoryId) producerId;
+            String typeUrlRaw = historyId.getTypeUrl();
+            TypeUrl typeUrl = parse(typeUrlRaw);
             return typeUrl.equals(targetType);
+        } else {
+            _warn("Event %s is produced by an entity with ID '%s'.",
+                  event.getMessageClass(), producerId);
+            return false;
         }
     }
 
