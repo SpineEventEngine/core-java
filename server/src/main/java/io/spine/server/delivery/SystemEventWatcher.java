@@ -22,13 +22,19 @@ package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.type.TypeUrl;
 
+import java.util.Set;
+
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.unpack;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static java.util.Collections.emptySet;
 
 /**
  * An {@link AbstractEventSubscriber EventSubscriber} for system events related to message
@@ -47,24 +53,48 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
 
     private final TypeUrl targetType;
 
+    /**
+     * Crates a new instance of {@code SystemEventWatcher}.
+     *
+     * @param targetType
+     *         the type of the entity to watch the events for
+     */
     protected SystemEventWatcher(TypeUrl targetType) {
         super();
         this.targetType = checkNotNull(targetType);
     }
 
+    @Override
+    public Set<String> dispatch(EventEnvelope envelope) {
+        return producerOfCorrectType(envelope)
+               ? super.dispatch(envelope)
+               : emptySet();
+    }
+
     /**
-     * Tells whether or not the given {@link io.spine.system.server.EntityHistoryId EntityHistoryId}
-     * belongs to an entity of the {@link #targetType}.
+     * Checks if the given system event belongs to an entity history of an entity with
+     * the {@link #targetType}.
      *
-     * @param historyId
-     *         the entity history ID to check
-     * @return {@code true} if the type of the entity with given ID is the target type of this
-     *         subscriber, {@code false} otherwise
+     * @param event
+     *         the event to check
+     * @return {@code true} if the given event producer ID is an {@link EntityHistoryId} and
+     *         the {@linkplain EntityHistoryId#getTypeUrl() domain entity type} is the target type
+     *         of this watcher
      */
-    protected boolean isCorrectType(EntityHistoryId historyId) {
-        String typeUrlRaw = historyId.getTypeUrl();
-        TypeUrl typeUrl = TypeUrl.parse(typeUrlRaw);
-        return typeUrl.equals(targetType);
+    private boolean producerOfCorrectType(EventEnvelope event) {
+        EventContext context = event.getEventContext();
+        Any anyId = context.getProducerId();
+        boolean idTypeMatches = anyId.is(EntityHistoryId.class);
+        if (!idTypeMatches) {
+            _warn("Event %s is produced by an entity with ID %s.",
+                  event.getMessageClass(), unpack(anyId));
+            return false;
+        } else {
+            EntityHistoryId producerId = unpack(anyId);
+            String typeUrlRaw = producerId.getTypeUrl();
+            TypeUrl typeUrl = TypeUrl.parse(typeUrlRaw);
+            return typeUrl.equals(targetType);
+        }
     }
 
     /**
@@ -74,7 +104,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     protected I idFrom(EntityHistoryId historyId) {
         Any id = historyId.getEntityId()
                           .getId();
-        return unpack(id);
+        return Identifier.unpack(id);
     }
 
     /**
@@ -83,7 +113,8 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
      * <p>Registers this {@link AbstractEventSubscriber} in
      * the {@link io.spine.server.integration.IntegrationBus} of the given context.
      *
-     * @param context the domain bounded context to register the subscriber in
+     * @param context
+     *         the domain bounded context to register the subscriber in
      */
     protected void registerIn(BoundedContext context) {
         context.getIntegrationBus()

@@ -23,6 +23,7 @@ package io.spine.server.procman;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
@@ -37,6 +38,7 @@ import io.spine.system.server.CommandDispatchedToHandlerVBuilder;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.EventDispatchedToReactorVBuilder;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,11 +70,14 @@ class PmSystemEventWatcherTest {
     private static final TypeUrl ANOTHER_TYPE = TypeUrl.of(Duration.class);
 
     private ProcessManagerRepository<?, ?, ?> repository;
+    private PmSystemEventWatcher<?> watcher;
 
     @BeforeEach
     void setUp() {
         repository = mock(ProcessManagerRepository.class);
         when(repository.getEntityStateType()).thenReturn(REPOSITORY_TYPE);
+
+        watcher = new PmSystemEventWatcher<>(repository);
     }
 
     @Test
@@ -104,7 +109,6 @@ class PmSystemEventWatcherTest {
         @Test
         @DisplayName("event")
         void event() {
-            PmSystemEventWatcher<?> watcher = new PmSystemEventWatcher<>(repository);
             Event payload = GivenMessage.projectStarted();
             EventDispatchedToReactor systemEvent = EventDispatchedToReactorVBuilder
                     .newBuilder()
@@ -120,7 +124,6 @@ class PmSystemEventWatcherTest {
         @Test
         @DisplayName("command")
         void command() {
-            PmSystemEventWatcher<?> watcher = new PmSystemEventWatcher<>(repository);
             Command payload = GivenMessage.createProject();
             CommandDispatchedToHandler systemEvent = CommandDispatchedToHandlerVBuilder
                     .newBuilder()
@@ -141,7 +144,6 @@ class PmSystemEventWatcherTest {
         @Test
         @DisplayName("DuplicateEventException")
         void event() {
-            PmSystemEventWatcher<?> watcher = new PmSystemEventWatcher<>(repository);
             Event payload = GivenMessage.projectStarted();
             CannotDispatchEventTwice rejection = CannotDispatchEventTwice
                     .newBuilder()
@@ -160,7 +162,6 @@ class PmSystemEventWatcherTest {
         @Test
         @DisplayName("DuplicateCommandException")
         void command() {
-            PmSystemEventWatcher<?> watcher = new PmSystemEventWatcher<>(repository);
             Command payload = GivenMessage.createProject();
             CannotDispatchCommandTwice rejection = CannotDispatchCommandTwice
                     .newBuilder()
@@ -181,12 +182,9 @@ class PmSystemEventWatcherTest {
     @DisplayName("perform no action if type is wrong")
     class WrongType {
 
-        private PmSystemEventWatcher<?> watcher;
-
-        @SuppressWarnings("unchecked") // `clearInvocations` expects a vararg. OK for tests.
+        @SuppressWarnings("unchecked") // `clearInvocations(...)` expects a vararg.
         @BeforeEach
         void setUp() {
-            watcher = new PmSystemEventWatcher<>(repository);
             clearInvocations(repository);
         }
 
@@ -200,7 +198,7 @@ class PmSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            watcher.on(systemEvent);
+            dispatch(systemEvent, systemEvent.getReceiver());
 
             checkNothingHappened();
         }
@@ -215,7 +213,7 @@ class PmSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            watcher.on(systemEvent);
+            dispatch(systemEvent, systemEvent.getReceiver());
 
             checkNothingHappened();
         }
@@ -230,7 +228,7 @@ class PmSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            watcher.on(rejection);
+            dispatch(rejection, rejection.getReceiver());
 
             checkNothingHappened();
         }
@@ -245,8 +243,7 @@ class PmSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            watcher.on(rejection);
-
+            dispatch(rejection, rejection.getReceiver());
             checkNothingHappened();
         }
 
@@ -258,6 +255,15 @@ class PmSystemEventWatcherTest {
             return historyId().toBuilder()
                               .setTypeUrl(ANOTHER_TYPE.value())
                               .build();
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        private void dispatch(Message eventMessage, EntityHistoryId producer) {
+            TestEventFactory eventFactory =
+                    TestEventFactory.newInstance(producer, PmSystemEventWatcher.class);
+            Event event = eventFactory.createEvent(eventMessage);
+            EventEnvelope envelope = EventEnvelope.of(event);
+            watcher.dispatch(envelope);
         }
     }
 

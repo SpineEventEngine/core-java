@@ -23,6 +23,7 @@ package io.spine.server.projection;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
@@ -32,6 +33,7 @@ import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
 import io.spine.system.server.EventDispatchedToSubscriberVBuilder;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -149,7 +151,7 @@ class ProjectionSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            watcher.on(systemEvent);
+            dispatch(systemEvent, systemEvent.getReceiver());
 
             checkNothingHappened();
         }
@@ -164,7 +166,7 @@ class ProjectionSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            watcher.on(rejection);
+            dispatch(rejection, rejection.getReceiver());
 
             checkNothingHappened();
         }
@@ -177,6 +179,15 @@ class ProjectionSystemEventWatcherTest {
             return historyId().toBuilder()
                               .setTypeUrl(ANOTHER_TYPE.value())
                               .build();
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        private void dispatch(Message eventMessage, EntityHistoryId producer) {
+            TestEventFactory eventFactory =
+                    TestEventFactory.newInstance(producer, ProjectionSystemEventWatcherTest.class);
+            Event event = eventFactory.createEvent(eventMessage);
+            EventEnvelope envelope = EventEnvelope.of(event);
+            watcher.dispatch(envelope);
         }
     }
 

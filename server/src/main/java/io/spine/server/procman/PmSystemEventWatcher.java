@@ -51,40 +51,33 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe(external = true)
     public void on(CommandDispatchedToHandler event) {
-        if (isCorrectType(event.getReceiver())) {
-            I id = idFrom(event.getReceiver());
-            CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
-            repository.dispatchNowTo(id, envelope);
-        }
+        I id = idFrom(event.getReceiver());
+        CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
+        repository.dispatchNowTo(id, envelope);
+
     }
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchCommandTwice event) {
-        if (isCorrectType(event.getReceiver())) {
-            Command command = event.getPayload();
-            DuplicateCommandException exception = DuplicateCommandException.of(command);
-            CommandEnvelope envelope = CommandEnvelope.of(command);
-            repository.onError(envelope, exception);
-        }
+        Command command = event.getPayload();
+        DuplicateCommandException exception = DuplicateCommandException.of(command);
+        CommandEnvelope envelope = CommandEnvelope.of(command);
+        repository.onError(envelope, exception);
     }
 
     @Subscribe(external = true)
     public void on(EventDispatchedToReactor event) {
-        if (isCorrectType(event.getReceiver())) {
-            I id = idFrom(event.getReceiver());
-            EventEnvelope envelope = EventEnvelope.of(event.getPayload());
-            repository.dispatchNowTo(id, envelope);
-        }
+        I id = idFrom(event.getReceiver());
+        EventEnvelope envelope = EventEnvelope.of(event.getPayload());
+        repository.dispatchNowTo(id, envelope);
     }
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchEventTwice event) {
-        if (isCorrectType(event.getReceiver())) {
-            Event payload = event.getPayload();
-            DuplicateEventException exception = new DuplicateEventException(payload);
-            EventEnvelope envelope = EventEnvelope.of(payload);
-            repository.onError(envelope, exception);
-        }
+        Event payload = event.getPayload();
+        DuplicateEventException exception = new DuplicateEventException(payload);
+        EventEnvelope envelope = EventEnvelope.of(payload);
+        repository.onError(envelope, exception);
     }
 
     @Override // Exposes the method to this package.

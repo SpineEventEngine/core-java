@@ -49,18 +49,14 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     @Subscribe(external = true)
     public void on(EventDispatchedToSubscriber event) {
         EntityHistoryId receiver = event.getReceiver();
-        if (isCorrectType(receiver)) {
-            I id = idFrom(receiver);
-            EventEnvelope envelope = EventEnvelope.of(event.getPayload());
-            repository.dispatchNowTo(id, envelope);
-        }
+        I id = idFrom(receiver);
+        EventEnvelope envelope = EventEnvelope.of(event.getPayload());
+        repository.dispatchNowTo(id, envelope);
     }
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchEventTwice event) {
-        if (isCorrectType(event.getReceiver())) {
-            onError(event.getPayload());
-        }
+        onError(event.getPayload());
     }
 
     private void onError(Event event) {
