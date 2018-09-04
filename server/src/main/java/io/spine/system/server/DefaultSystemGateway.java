@@ -21,8 +21,10 @@
 package io.spine.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.CommandFactory;
+import io.spine.client.Query;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -35,6 +37,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The point of integration of the domain and the system bounded context.
@@ -77,6 +80,21 @@ final class DefaultSystemGateway implements SystemGateway {
         Event event = factory.createEvent(systemEvent, null);
         system.getImportBus()
               .post(event, noOpObserver());
+    }
+
+    @Override
+    public Iterable<Any> read(Query query) {
+        @SuppressWarnings("unchecked") // Logically checked.
+        MirrorRepository repository = (MirrorRepository)
+                system.findRepository(Mirror.class)
+                      .orElseThrow(
+                              () -> newIllegalStateException(
+                                      "Mirror projection repository is not registered in %s.",
+                                      system.getName().getValue()
+                              )
+                      );
+        Iterable<Any> result = repository.execute(query);
+        return result;
     }
 
     private static Message getAggregateId(Message systemEvent) {

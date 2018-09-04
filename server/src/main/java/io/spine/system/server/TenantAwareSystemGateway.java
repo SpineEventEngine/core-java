@@ -21,9 +21,14 @@
 package io.spine.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.client.Query;
 import io.spine.core.TenantId;
+import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
+
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -76,9 +81,24 @@ final class TenantAwareSystemGateway implements SystemGateway {
         run(() -> delegate.postEvent(systemEvent));
     }
 
+    @Override
+    public Iterable<Any> read(Query query) {
+        return run(() -> delegate.read(query));
+    }
+
     private void run(Runnable action) {
         TenantAwareOperation operation = new Operation(tenantId, action);
         operation.execute();
+    }
+
+    private <T> T run(Supplier<T> action) {
+        T result = new TenantAwareFunction0<T>(tenantId) {
+            @Override
+            public T apply() {
+                return action.get();
+            }
+        }.execute();
+        return result;
     }
 
     @VisibleForTesting

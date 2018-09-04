@@ -20,13 +20,20 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collections;
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyList;
 
 /**
  * A {@link SystemGateway} which memoizes the posted system commands.
@@ -38,6 +45,7 @@ public final class MemoizingGateway implements SystemGateway {
 
     private @MonotonicNonNull MemoizedMessage lastSeenCommand;
     private @MonotonicNonNull MemoizedMessage lastSeenEvent;
+    private @MonotonicNonNull MemoizedMessage lastSeenQuery;
 
     private final boolean multitenant;
 
@@ -89,6 +97,13 @@ public final class MemoizingGateway implements SystemGateway {
         lastSeenEvent = new MemoizedMessage(systemEvent, tenantId);
     }
 
+    @Override
+    public Iterable<Any> read(Query query) {
+        TenantId tenantId = currentTenant();
+        lastSeenQuery = new MemoizedMessage(query, tenantId);
+        return emptyList();
+    }
+
     /** Obtains the ID of the current tenant. */
     private TenantId currentTenant() {
         TenantId result = new TenantFunction<TenantId>(multitenant) {
@@ -138,5 +153,9 @@ public final class MemoizingGateway implements SystemGateway {
      */
     public @Nullable MemoizedMessage lastSeenEvent() {
         return lastSeenEvent;
+    }
+
+    public @Nullable MemoizedMessage lastSeenQuery() {
+        return lastSeenQuery;
     }
 }

@@ -20,10 +20,13 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
+import io.spine.client.Query;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.type.TypeUrl;
 
@@ -40,6 +43,10 @@ import static io.spine.option.OptionsProto.entity;
  * @author Dmytro Dashenkov
  */
 public class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
+
+    Iterable<Any> execute(Query query) {
+        return ImmutableList.of();
+    }
 
     @Override
     public void onRegistered() {

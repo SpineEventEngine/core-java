@@ -38,7 +38,6 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
-import io.spine.server.stand.StandStorage;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

@@ -20,7 +20,9 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.client.Query;
 
 /**
  * A gateway for sending messages into a {@link SystemContext}.
@@ -57,4 +59,6 @@ public interface SystemGateway {
     static SystemGateway newInstance(SystemContext system) {
         return new DefaultSystemGateway(system);
     }
+
+    Iterable<Any> read(Query query);
 }

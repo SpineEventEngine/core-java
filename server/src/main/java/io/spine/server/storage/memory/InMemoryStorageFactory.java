@@ -30,7 +30,6 @@ import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.model.ProjectionClass;
-import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
@@ -76,15 +75,6 @@ public class InMemoryStorageFactory implements StorageFactory {
                                  .build();
     }
 
-    @Override
-    public StandStorage createStandStorage() {
-        InMemoryStandStorage result = InMemoryStandStorage.newBuilder()
-                                                          .setBoundedContextName(boundedContextName)
-                                                          .setMultitenant(isMultitenant())
-                                                          .build();
-        return result;
-    }
-
     /** NOTE: the parameter is unused. */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(
@@ -92,9 +82,6 @@ public class InMemoryStorageFactory implements StorageFactory {
         return new InMemoryAggregateStorage<>(isMultitenant());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <I> RecordStorage<I>
     createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
