@@ -40,10 +40,23 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
 /**
- * An abstract base for builders that create {@link com.google.protobuf.Message} instances
- * including a {@link io.spine.client.Target Target}.
+ * An abstract base for builders that create {@link com.google.protobuf.Message Message instances}
+ * which have a {@link Target} and a {@link FieldMask} as attributes.
  *
- * <p>This classes API is inspired by the SQL syntax.
+ * <p>The {@link Target} matching the builder configuration is created with {@link #buildTarget()},
+ * while the {@link FieldMask} is composed with {@link #composeMask()}.
+ *
+ * <p>This classes public API is inspired by the SQL syntax.
+ * <pre>
+ *     {@code
+ *     select(Customer.class) // returning <AbstractTargetBuilder> instance
+ *         .byId(getWestCoastCustomerIds())
+ *         .withMask("name", "address", "email")
+ *         .where(eq("type", "permanent"),
+ *                eq("discountPercent", 10),
+ *                eq("companySize", Company.Size.SMALL))
+ *     }
+ * </pre>
  *
  * <p>Calling any of the builder methods overrides the previous call of the given method or
  * any of its overloads. For example, calling sequentially
