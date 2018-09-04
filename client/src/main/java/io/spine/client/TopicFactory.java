@@ -44,7 +44,7 @@ public final class TopicFactory {
 
     TopicFactory(ActorRequestFactory actorRequestFactory) {
         checkNotNull(actorRequestFactory);
-        this.actorContext = actorRequestFactory.actorContext();
+        this.actorContext = actorRequestFactory.newActorContext();
     }
 
     /**

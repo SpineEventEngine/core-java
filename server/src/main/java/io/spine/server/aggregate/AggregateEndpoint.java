@@ -77,7 +77,26 @@ abstract class AggregateEndpoint<I,
         AggregateTransaction tx = startTransaction(aggregate);
         List<Event> producedEvents = aggregate.apply(events, envelope());
         tx.commit();
+        onDispatched(aggregate, envelope(), producedEvents);
         return producedEvents;
+    }
+
+    /**
+     * Called after the message was successfully dispatched to the passed aggregate,
+     * and the transaction successfully committed.
+     *
+     * <p>Default implementation does nothing.
+     *
+     * @param aggregate
+     *        the aggregate that handled the message
+     * @param envelope
+     *        the envelope with the message
+     * @param producedEvents
+     *        events produced by the aggregate
+     */
+    @SuppressWarnings({"NoopMethodInAbstractClass", "unused"}) // see Javadoc.
+    protected void onDispatched(A aggregate, M envelope, List<Event> producedEvents) {
+        // No op. by default.
     }
 
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.

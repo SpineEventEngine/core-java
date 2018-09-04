@@ -55,7 +55,7 @@ class TenantAwareSystemGatewayTest {
                 .setValue(TenantAwareSystemGatewayTest.class.getName())
                 .build();
         postAndCheck(delegate, tenantId);
-        assertEquals(tenantId, delegate.lastSeen()
+        assertEquals(tenantId, delegate.lastSeenCommand()
                                        .tenant());
     }
 
@@ -64,6 +64,6 @@ class TenantAwareSystemGatewayTest {
         SystemGateway gateway = delegatingTo(delegate).get(tenantId);
         gateway.postCommand(command);
 
-        assertEquals(command, delegate.lastSeen().command());
+        assertEquals(command, delegate.lastSeenCommand().message());
     }
 }

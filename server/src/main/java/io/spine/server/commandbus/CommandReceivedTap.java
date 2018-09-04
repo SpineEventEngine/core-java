@@ -25,8 +25,8 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.BusFilter;
+import io.spine.system.server.CommandReceived;
 import io.spine.system.server.GatewayFunction;
-import io.spine.system.server.MarkCommandAsReceived;
 import io.spine.system.server.SystemGateway;
 
 import java.util.Optional;
@@ -36,8 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A {@link CommandBus} filter which watches the commands as they appear in the bus.
  *
- * <p>The filter notifies the System bounded context about new commands with
- * a {@link MarkCommandAsReceived} system command.
+ * <p>The filter notifies the {@link io.spine.system.server.SystemContext SystemContext} about
+ * new commands with a {@link CommandReceived} system event.
  *
  * <p>The filter never terminates the command processing, i.e. {@link #accept(CommandEnvelope)}
  * always returns an empty value.
@@ -54,15 +54,15 @@ final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        MarkCommandAsReceived systemCommand = systemCommand(envelope.getCommand());
+        CommandReceived systemEvent = systemEvent(envelope.getCommand());
         TenantId tenantId = envelope.getTenantId();
         SystemGateway gateway = this.gateway.get(tenantId);
-        gateway.postCommand(systemCommand);
+        gateway.postEvent(systemEvent);
         return Optional.empty();
     }
 
-    private static MarkCommandAsReceived systemCommand(Command domainCommand) {
-        MarkCommandAsReceived result = MarkCommandAsReceived
+    private static CommandReceived systemEvent(Command domainCommand) {
+        CommandReceived result = CommandReceived
                 .newBuilder()
                 .setId(domainCommand.getId())
                 .setPayload(domainCommand)

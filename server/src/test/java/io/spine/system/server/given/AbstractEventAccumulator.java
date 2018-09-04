@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author Dmytro Dashenkov
  */
-abstract class AbstractEventAccumulator implements EventDispatcher<String> {
+public abstract class AbstractEventAccumulator implements EventDispatcher<String> {
 
     private final String id = getClass().getName();
 
@@ -107,7 +107,7 @@ abstract class AbstractEventAccumulator implements EventDispatcher<String> {
     }
 
     @CanIgnoreReturnValue
-    public <E extends Message> E nextEvent(Class<E> eventType) {
+    public <E extends Message> E assertNextEventIs(Class<E> eventType) {
         if (eventIterator == null) {
             eventIterator = copyOf(events).iterator();
         }

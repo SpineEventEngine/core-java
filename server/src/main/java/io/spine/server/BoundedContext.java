@@ -20,13 +20,9 @@
 package io.spine.server;
 
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
-import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
-import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
-import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.ImportBus;
@@ -42,12 +38,9 @@ import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.EventFactory;
 import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
-import io.spine.server.integration.IntegrationEvent;
-import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -91,9 +84,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *     Martin Fowler on BoundedContext</a>
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
-public abstract class BoundedContext
-        extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
-        implements AutoCloseable, Logging {
+public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
@@ -308,15 +299,6 @@ public abstract class BoundedContext
         SystemGateway systemGateway = getSystemGateway();
         CommandErrorHandler result = CommandErrorHandler.with(systemGateway);
         return result;
-    }
-    /**
-     * Sends an integration event to this {@code BoundedContext}.
-     */
-    @Experimental
-    @Override
-    public void notify(IntegrationEvent integrationEvent, StreamObserver<Ack> observer) {
-        Event event = EventFactory.toEvent(integrationEvent);
-        eventBus.post(event, observer);
     }
 
     /**

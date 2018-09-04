@@ -160,7 +160,7 @@ public final class EventEnvelope
     }
 
     /**
-     * @return {@code true} if the wrapped event is a rejection, {@code false} otherwise
+     * Returns {@code true} if the wrapped event is a rejection, {@code false} otherwise.
      */
     public boolean isRejection() {
         return rejection;

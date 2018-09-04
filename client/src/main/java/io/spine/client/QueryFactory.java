@@ -55,7 +55,7 @@ public final class QueryFactory {
 
     QueryFactory(ActorRequestFactory actorRequestFactory) {
         checkNotNull(actorRequestFactory);
-        this.actorContext = actorRequestFactory.actorContext();
+        this.actorContext = actorRequestFactory.newActorContext();
     }
 
     private static QueryId newQueryId() {

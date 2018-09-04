@@ -81,7 +81,7 @@ abstract class ActorRequestFactoryTest {
     }
 
     private ActorContext actorContext() {
-        return factory().actorContext();
+        return factory().newActorContext();
     }
 
     @BeforeEach
