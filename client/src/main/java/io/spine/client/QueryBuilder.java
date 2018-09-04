@@ -73,7 +73,7 @@ public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
     }
 
     @Override
-    protected QueryBuilder self() {
+    QueryBuilder self() {
         return this;
     }
 }

@@ -381,5 +381,5 @@ abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
      *
      * @return {@code this} with the required compile-time type
      */
-    protected abstract B self();
+    abstract B self();
 }

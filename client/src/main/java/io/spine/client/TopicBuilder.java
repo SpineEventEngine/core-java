@@ -73,7 +73,7 @@ public final class TopicBuilder extends TargetBuilder<Topic, TopicBuilder> {
     }
 
     @Override
-    protected TopicBuilder self() {
+    TopicBuilder self() {
         return this;
     }
 }
