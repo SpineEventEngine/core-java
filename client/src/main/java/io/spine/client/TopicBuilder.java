@@ -60,9 +60,10 @@ public final class TopicBuilder extends TargetBuilder<Topic, TopicBuilder> {
     }
 
     /**
-     * Generates a new {@link io.spine.client.Query} instance with current builder configuration.
+     * Generates a new {@link io.spine.client.Topic Topic} instance with current builder 
+     * configuration.
      *
-     * @return the built {@link io.spine.client.Query}
+     * @return a new {@link io.spine.client.Topic Topic}
      */
     @Override
     public Topic build() {
