@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *     {@code
  *     Topic topic = factory().topic()
  *                            .select(Customer.class)
- *                            .byId(getWestCostCustomerIds())
+ *                            .byId(getWestCoastCustomerIds())
  *                            .withMask("name", "address", "email")
  *                            .where(eq("type", "permanent"),
  *                                   eq("discountPercent", 10),
