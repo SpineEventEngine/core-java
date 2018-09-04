@@ -66,7 +66,7 @@ import static java.util.Collections.singleton;
  *
  * @author Mykhailo Drachuk
  */
-abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
+abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTargetBuilder> {
 
     private final Class<? extends Message> targetType;
 
@@ -80,7 +80,7 @@ abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
     private @Nullable Set<CompositeColumnFilter> columns;
     private @Nullable Set<String> fieldMask;
 
-    TargetBuilder(Class<? extends Message> targetType) {
+    AbstractTargetBuilder(Class<? extends Message> targetType) {
         this.targetType = checkNotNull(targetType);
     }
 
@@ -352,7 +352,7 @@ abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
         String valueSeparator = "; ";
         StringBuilder sb = new StringBuilder();
 
-        Class<? extends TargetBuilder> builderCls = self().getClass();
+        Class<? extends AbstractTargetBuilder> builderCls = self().getClass();
         sb.append(builderCls.getSimpleName())
           .append('(')
           .append("SELECT ")

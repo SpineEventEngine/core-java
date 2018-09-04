@@ -48,9 +48,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov
  * @see QueryFactory#select(Class) to start query building
  * @see io.spine.client.ColumnFilters for filter creation shortcuts
- * @see io.spine.client.TargetBuilder for more details on this builders API
+ * @see AbstractTargetBuilder for more details on this builders API
  */
-public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
+public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilder> {
 
     private final QueryFactory queryFactory;
 
