@@ -23,17 +23,23 @@ package io.spine.server.delivery;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.integration.IntegrationBus;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.type.TypeUrl;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.type.TypeUrl.parse;
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.emptySet;
 
 /**
@@ -44,12 +50,14 @@ import static java.util.Collections.emptySet;
  * to a certain type of entity.
  *
  * <p>It is also expected that this subscriber is used <b>only</b> to subscribe to
- * {@linkplain io.spine.core.Subscribe#external() external} events.
+ * {@linkplain Subscribe#external() external} events.
  *
  * @author Dmytro Dashenkov
  */
 @Internal
 public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
+
+    private static final String SYSTEM_TYPE_PACKAGE = "spine.system.server";
 
     private final TypeUrl targetType;
 
@@ -71,6 +79,38 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
                : emptySet();
     }
 
+    @Override
+    public final Set<EventClass> getMessageClasses() {
+        Set<EventClass> classes = super.getMessageClasses();
+        checkState(classes.isEmpty(),
+                   "A %s subclass cannot subscribe to domestic events.",
+                   SystemEventWatcher.class.getSimpleName());
+        return emptySet();
+    }
+
+    @Override
+    public final Set<EventClass> getExternalEventClasses() {
+        Set<EventClass> classes = super.getExternalEventClasses();
+        Predicate<EventClass> systemEvent = SystemEventWatcher::isSystemEvent;
+        Optional<EventClass> invalidEventType =
+                classes.stream()
+                       .filter(systemEvent.negate())
+                       .findAny();
+        if (invalidEventType.isPresent()) {
+            throw newIllegalStateException(
+                    "A %s should only subscribe to system events. %s is not a system event type.",
+                    SystemEventWatcher.class, invalidEventType.get()
+            );
+        }
+        return classes;
+    }
+
+    private static boolean isSystemEvent(EventClass eventClass) {
+        return eventClass.getTypeName()
+                         .value()
+                         .startsWith(SYSTEM_TYPE_PACKAGE);
+    }
+
     /**
      * Checks if the given system event belongs to an entity history of an entity with
      * the {@link #targetType}.
@@ -85,21 +125,13 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
         EventContext context = event.getEventContext();
         Any anyId = context.getProducerId();
         Object producerId = Identifier.unpack(anyId);
-        boolean idTypeMatches = producerId instanceof EntityHistoryId;
-        if (idTypeMatches) {
-            EntityHistoryId historyId = (EntityHistoryId) producerId;
-            String typeUrlRaw = historyId.getTypeUrl();
-            TypeUrl typeUrl = parse(typeUrlRaw);
-            return typeUrl.equals(targetType);
-        } else {
-            _warn("Event %s is produced by an entity with ID '%s'.",
-                  event.getMessageClass(), producerId);
-            return false;
-        }
+        EntityHistoryId historyId = (EntityHistoryId) producerId;
+        String typeUrlRaw = historyId.getTypeUrl();
+        return typeUrlRaw.equals(targetType.value());
     }
 
     /**
-     * Unpacks the generic entity ID from the given {@link io.spine.system.server.EntityHistoryId
+     * Unpacks the generic entity ID from the given {@link EntityHistoryId
      * EntityHistoryId}.
      */
     protected I idFrom(EntityHistoryId historyId) {
@@ -112,7 +144,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
      * Registers itself in the given domain {@link BoundedContext}.
      *
      * <p>Registers this {@link AbstractEventSubscriber} in
-     * the {@link io.spine.server.integration.IntegrationBus} of the given context.
+     * the {@link IntegrationBus} of the given context.
      *
      * @param context
      *         the domain bounded context to register the subscriber in
