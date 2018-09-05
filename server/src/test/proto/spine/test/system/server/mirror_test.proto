@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package spine.test.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.system.server";
+option java_outer_classname = "MirrorTestProto";
+option java_multiple_files = true;
+
+import "spine/net/url.proto";
+
+message PhotoId {
+
+    string uuid = 1;
+}
+
+message VideoId {
+
+    string uuid = 1;
+}
+
+message Photo {
+    option (entity).kind = AGGREGATE;
+
+    PhotoId id = 1;
+
+    spine.net.Url full_size_url = 2 [(valid) = true];
+
+    spine.net.Url thumbnail_url = 3 [(valid) = true, (required) = false];
+
+    string alt_text = 4;
+}
+
+message Video {
+    option (entity).kind = AGGREGATE;
+
+    VideoId id = 1;
+
+    PhotoId title_shot = 2 [(valid) = true];
+
+    spine.net.Url file_url = 3 [(valid) = true];
+
+    map<string, spine.net.Url> soundtrack_url = 4 [(valid) = true, (required) = false];
+
+    map<string, spine.net.Url> subtitles_url = 5 [(valid) = true, (required) = false];
+}
+
+message LocalizedVideo {
+    option (entity).kind = PROJECTION;
+
+    VideoId id = 1;
+
+    PhotoId title_shot = 2 [(valid) = true];
+
+    spine.net.Url file_url = 3 [(valid) = true];
+
+    spine.net.Url sound_track_url = 4 [(valid) = true, (required) = false];
+
+    spine.net.Url subtitles_url = 5 [(valid) = true, (required) = false];
+}
+
+// This aggregate type is not finished, so the `(entity)` option is absent.
+message UncompleteAudio {
+
+    string id = 1;
+
+    spine.net.Url url = 2;
+
+    reserved 3 to 42;
+}
