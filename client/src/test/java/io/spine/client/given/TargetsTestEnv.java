@@ -42,7 +42,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class TargetsTestEnv {
 
-    /** Prevents instantiation of this utility class. */
+    /** Prevents instantiation of this test environment class. */
     private TargetsTestEnv() {
     }
 

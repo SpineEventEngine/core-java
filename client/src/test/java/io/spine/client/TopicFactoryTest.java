@@ -22,10 +22,8 @@ package io.spine.client;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import io.spine.core.ActorContext;
-import io.spine.protobuf.AnyPacker;
-import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
-import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,6 +32,12 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
+import static io.spine.client.given.TopicFactoryTestEnv.verifyContext;
+import static io.spine.client.given.TopicFactoryTestEnv.TEST_ENTITY_TYPE;
+import static io.spine.client.given.TopicFactoryTestEnv.TARGET_ENTITY_TYPE_URL;
+import static io.spine.client.given.TopicFactoryTestEnv.entityId;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,12 +48,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Alex Tymchenko
  */
 @DisplayName("Topic factory should")
-class TopicFactoryTest
-        extends ActorRequestFactoryTest {
+class TopicFactoryTest {
 
-    // See {@code client_requests.proto} for declaration.
-    private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
-    private static final TypeUrl TARGET_ENTITY_TYPE_NAME = TypeUrl.of(TARGET_ENTITY_CLASS);
+    private ActorRequestFactory requestFactory;
+    private TopicFactory factory;
+
+    @BeforeEach
+    void createFactory() {
+        requestFactory = requestFactory();
+        factory = requestFactory.topic();
+    }
 
     @Nested
     @DisplayName("create topic")
@@ -58,9 +66,8 @@ class TopicFactoryTest
         @Test
         @DisplayName("for all entities of kind")
         void forAllOfKind() {
-            Topic topic = factory().topic()
-                                   .select(TARGET_ENTITY_CLASS)
-                                   .build();
+            Topic topic = factory.select(TEST_ENTITY_TYPE)
+                                 .build();
 
             verifyTargetAndContext(topic);
 
@@ -73,12 +80,10 @@ class TopicFactoryTest
         @Test
         @DisplayName("for specified entities of kind")
         void forSomeOfKind() {
-
             Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
-            Topic topic = factory().topic()
-                                   .select(TARGET_ENTITY_CLASS)
-                                   .byId(ids)
-                                   .build();
+            Topic topic = factory.select(TEST_ENTITY_TYPE)
+                                 .byId(ids)
+                                 .build();
 
             verifyTargetAndContext(topic);
 
@@ -89,7 +94,7 @@ class TopicFactoryTest
             assertEquals(ids.size(), actualIds.size());
             for (EntityId actualId : actualIds) {
                 Any rawId = actualId.getId();
-                TestEntityId unpackedId = AnyPacker.unpack(rawId);
+                TestEntityId unpackedId = unpack(rawId);
                 assertTrue(ids.contains(unpackedId));
             }
         }
@@ -97,9 +102,8 @@ class TopicFactoryTest
         @Test
         @DisplayName("for given target")
         void forTarget() {
-            Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
-            Topic topic = factory().topic()
-                                   .forTarget(givenTarget);
+            Target givenTarget = Targets.allOf(TEST_ENTITY_TYPE);
+            Topic topic = factory.forTarget(givenTarget);
 
             verifyTargetAndContext(topic);
         }
@@ -108,19 +112,12 @@ class TopicFactoryTest
             assertNotNull(topic);
             assertNotNull(topic.getId());
 
-            assertEquals(TARGET_ENTITY_TYPE_NAME.value(), topic.getTarget()
-                                                               .getType());
+            assertEquals(TARGET_ENTITY_TYPE_URL.value(), topic.getTarget()
+                                                              .getType());
             assertEquals(FieldMask.getDefaultInstance(), topic.getFieldMask());
 
             ActorContext actualContext = topic.getContext();
-            verifyContext(actualContext);
-
-        }
-
-        private TestEntityId entityId(int idValue) {
-            return TestEntityId.newBuilder()
-                               .setValue(idValue)
-                               .build();
+            verifyContext(requestFactory.newActorContext(), actualContext);
         }
     }
 }
