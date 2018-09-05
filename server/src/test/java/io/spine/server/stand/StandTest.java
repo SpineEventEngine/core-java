@@ -102,6 +102,7 @@ import static io.spine.server.stand.given.Given.StandTestProjection;
 import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.testing.core.given.GivenUserId.of;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -352,11 +353,10 @@ class StandTest extends TenantAwareTest {
             subscribeAndActivate(stand, allCustomers, memoizeCallback);
             assertNull(memoizeCallback.newEntityState());
 
-            Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                               .iterator()
-                                                                               .next();
-            CustomerId customerId = sampleData.getKey();
-            Customer customer = sampleData.getValue();
+            Customer customer = fillSampleCustomers(1)
+                    .iterator()
+                    .next();
+            CustomerId customerId = customer.getId();
             Version stateVersion = GivenVersion.withNumber(1);
             stand.update(asEnvelope(customerId, customer, stateVersion));
 
@@ -375,11 +375,10 @@ class StandTest extends TenantAwareTest {
             subscribeAndActivate(stand, allProjects, memoizeCallback);
             assertNull(memoizeCallback.newEntityState());
 
-            Map.Entry<ProjectId, Project> sampleData = fillSampleProjects(1).entrySet()
-                                                                            .iterator()
-                                                                            .next();
-            ProjectId projectId = sampleData.getKey();
-            Project project = sampleData.getValue();
+            Project project = fillSampleProjects(1)
+                    .iterator()
+                    .next();
+            ProjectId projectId = project.getId();
             Version stateVersion = GivenVersion.withNumber(1);
             stand.update(asEnvelope(projectId, project, stateVersion));
 
@@ -393,31 +392,29 @@ class StandTest extends TenantAwareTest {
     void triggerSubscriptionsMatchingById() {
         Stand stand = newStand(isMultitenant());
 
-        Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
+        Collection<Customer> sampleCustomers = fillSampleCustomers(10);
 
         Topic someCustomers = requestFactory.topic()
                                             .someOf(Customer.class,
-                                                    sampleCustomers.keySet());
-        Map<CustomerId, Customer> callbackStates = newHashMap();
+                                                    ids(sampleCustomers));
+        Collection<Customer> callbackStates = newHashSet();
         MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
             public void onStateChanged(EntityStateUpdate update) {
                 super.onStateChanged(update);
                 Customer customerInCallback = unpack(update.getState());
-                CustomerId customerIdInCallback = unpack(update.getId());
-                callbackStates.put(customerIdInCallback, customerInCallback);
+                callbackStates.add(customerInCallback);
             }
         };
         subscribeAndActivate(stand, someCustomers, callback);
 
-        for (Map.Entry<CustomerId, Customer> sampleEntry : sampleCustomers.entrySet()) {
-            CustomerId customerId = sampleEntry.getKey();
-            Customer customer = sampleEntry.getValue();
+        for (Customer customer : sampleCustomers) {
+            CustomerId customerId = customer.getId();
             Version stateVersion = GivenVersion.withNumber(1);
             stand.update(asEnvelope(customerId, customer, stateVersion));
         }
 
-        assertEquals(newHashMap(sampleCustomers), callbackStates);
+        assertEquals(newHashSet(sampleCustomers), callbackStates);
     }
 
     @Test
@@ -433,11 +430,10 @@ class StandTest extends TenantAwareTest {
 
         stand.cancel(subscription, noOpObserver());
 
-        Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                           .iterator()
-                                                                           .next();
-        CustomerId customerId = sampleData.getKey();
-        Customer customer = sampleData.getValue();
+        Customer customer = fillSampleCustomers(1)
+                .iterator()
+                .next();
+        CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
@@ -471,11 +467,10 @@ class StandTest extends TenantAwareTest {
             callbacks.add(callback);
         }
 
-        Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                           .iterator()
-                                                                           .next();
-        CustomerId customerId = sampleData.getKey();
-        Customer customer = sampleData.getValue();
+        Customer customer = fillSampleCustomers(1)
+                .iterator()
+                .next();
+        CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
@@ -492,12 +487,10 @@ class StandTest extends TenantAwareTest {
         Stand stand = newStand(isMultitenant());
         Target allProjects = Targets.allOf(Project.class);
         MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
-
-        Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                           .iterator()
-                                                                           .next();
-        CustomerId customerId = sampleData.getKey();
-        Customer customer = sampleData.getValue();
+        Customer customer = fillSampleCustomers(1)
+                .iterator()
+                .next();
+        CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
@@ -557,7 +550,7 @@ class StandTest extends TenantAwareTest {
     void readAllIfMaskNotSet() {
         Stand stand = newStand(isMultitenant());
 
-        Customer sampleCustomer = getSam6pleCustomer();
+        Customer sampleCustomer = getSampleCustomer();
         Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
@@ -1138,24 +1131,23 @@ class StandTest extends TenantAwareTest {
 
     @CanIgnoreReturnValue
     Stand doCheckReadingCustomersById(int numberOfCustomers) {
-        Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(numberOfCustomers);
+        Collection<Customer> sampleCustomers = fillSampleCustomers(numberOfCustomers);
         Stand stand = newStand(isMultitenant());
 
         triggerMultipleUpdates(sampleCustomers, stand);
 
         Query readMultipleCustomers = requestFactory.query()
                                                     .byIds(Customer.class,
-                                                           sampleCustomers.keySet());
+                                                           ids(sampleCustomers));
 
         MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleCustomers, responseObserver);
 
         List<Any> messageList = checkAndGetMessageList(responseObserver);
         assertEquals(sampleCustomers.size(), messageList.size());
-        Collection<Customer> allCustomers = sampleCustomers.values();
         for (Any singleRecord : messageList) {
             Customer unpackedSingleResult = unpack(singleRecord);
-            assertTrue(allCustomers.contains(unpackedSingleResult));
+            assertTrue(sampleCustomers.contains(unpackedSingleResult));
         }
         return stand;
     }
@@ -1233,12 +1225,10 @@ class StandTest extends TenantAwareTest {
         };
     }
 
-    private void triggerMultipleUpdates(Map<CustomerId, Customer> sampleCustomers, Stand stand) {
-        // Trigger the aggregate state updates.
-        for (CustomerId id : sampleCustomers.keySet()) {
-            Customer sampleCustomer = sampleCustomers.get(id);
+    private void triggerMultipleUpdates(Collection<Customer> sampleCustomers, Stand stand) {
+        for (Customer customer : sampleCustomers) {
             Version stateVersion = GivenVersion.withNumber(1);
-            stand.update(asEnvelope(id, sampleCustomer, stateVersion));
+            stand.update(asEnvelope(customer.getId(), customer, stateVersion));
         }
     }
 
@@ -1347,5 +1337,11 @@ class StandTest extends TenantAwareTest {
                                              Version entityVersion) {
         TenantId tenantId = isMultitenant() ? tenantId() : TenantId.getDefaultInstance();
         return EntityStateEnvelope.of(entityId, entityState, entityVersion, tenantId);
+    }
+
+    private static Set<CustomerId> ids(Collection<Customer> customers) {
+        return customers.stream()
+                        .map(Customer::getId)
+                        .collect(toSet());
     }
 }
