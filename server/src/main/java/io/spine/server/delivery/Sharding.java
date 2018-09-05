@@ -77,5 +77,5 @@ public interface Sharding {
      * @return the message streams matching the search criteria
      */
     <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(DeliveryTag<E> tag, I targetId);
+    find(DeliveryTag tag, I targetId);
 }

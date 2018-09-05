@@ -63,6 +63,7 @@ import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -228,9 +229,28 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope envelope) {
         checkNotNull(envelope);
+        I target = with(envelope.getTenantId())
+                .evaluate(() -> doDispatch(envelope));
+        return target;
+    }
+
+    private I doDispatch(CommandEnvelope envelope) {
+        I target = route(envelope);
+        lifecycleOf(target).onDispatchCommand(envelope.getCommand());
+        dispatchTo(target, envelope);
+        return target;
+    }
+
+    private I route(CommandEnvelope envelope) {
+        CommandRouting<I> routing = getCommandRouting();
+        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
+        onCommandTargetSet(target, envelope.getId());
+        return target;
+    }
+
+    private void dispatchTo(I id, CommandEnvelope envelope) {
         AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, envelope);
-        I result = endpoint.handle();
-        return result;
+        endpoint.dispatchTo(id);
     }
 
     /**
@@ -274,10 +294,27 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
-        AggregateEventReactionEndpoint<I, A> endpoint =
+        Set<I> targets = with(envelope.getTenantId())
+                .evaluate(() -> doDispatch(envelope));
+        return targets;
+    }
+
+    private Set<I> doDispatch(EventEnvelope envelope) {
+        Set<I> targets = route(envelope);
+        targets.forEach(id -> dispatchTo(id, envelope));
+        return targets;
+    }
+
+    private Set<I> route(EventEnvelope envelope) {
+        EventRouting<I> routing = getEventRouting();
+        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        return targets;
+    }
+
+    private void dispatchTo(I id, EventEnvelope envelope) {
+        AggregateEventEndpoint<I, A> endpoint =
                 new AggregateEventReactionEndpoint<>(this, envelope);
-        Set<I> result = endpoint.handle();
-        return result;
+        endpoint.dispatchTo(id);
     }
 
     boolean importsEvent(EventClass eventClass) {
@@ -291,13 +328,35 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     I importEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
+        I target = routeImport(envelope);
         EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, envelope);
-        Set<I> singleSet = endpoint.handle();
-        checkState(singleSet.size() == 1);
-        I result = singleSet.stream()
-                            .findFirst()
-                            .get();
-        return result;
+        endpoint.dispatchTo(target);
+        return target;
+    }
+
+    private I routeImport(EventEnvelope envelope) {
+        Set<I> ids = getEventImportRouting().apply(envelope.getMessage(),
+                                                   envelope.getEventContext());
+        int numberOfTargets = ids.size();
+        checkState(
+                numberOfTargets > 0,
+                "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
+                envelope.getEventContext(),
+                envelope.getMessageClass()
+        );
+        checkState(
+                numberOfTargets == 1,
+                "Expected one aggregate ID, but got %s (`%s`). Event class: `%s`, context: `%s`.",
+                String.valueOf(numberOfTargets),
+                ids,
+                envelope.getMessageClass(),
+                envelope.getEventContext()
+        );
+        I id = ids.stream()
+                  .findFirst()
+                  .get();
+        onImportTargetSet(id, envelope.getId());
+        return id;
     }
 
     @Override
@@ -545,11 +604,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
-    void onCommandTargetSet(I id, CommandId commandId) {
+    void onImportEvent(I id, Event event) {
+        lifecycleOf(id).onEventImported(event);
+    }
+
+    private void onCommandTargetSet(I id, CommandId commandId) {
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
-    void onImportTargetSet(I id, EventId eventId) {
+    private void onImportTargetSet(I id, EventId eventId) {
         lifecycleOf(id).onImportTargetSet(eventId);
     }
 

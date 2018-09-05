@@ -43,7 +43,7 @@ final class ShardingRegistry {
     void register(ShardingStrategy strategy, Set<ShardedStream<?, ?, ?>> streams) {
         for (ShardedStream<?, ?, ?> stream : streams) {
             Entry entry = new Entry(strategy, stream);
-            DeliveryTag<?> tag = stream.getTag();
+            DeliveryTag tag = stream.getTag();
             entries.put(tag, entry);
         }
     }
@@ -58,7 +58,7 @@ final class ShardingRegistry {
     }
 
     <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(DeliveryTag<E> tag, I targetId) {
+    find(DeliveryTag tag, I targetId) {
 
         Collection<Entry> entriesForTag = entries.get(tag);
 

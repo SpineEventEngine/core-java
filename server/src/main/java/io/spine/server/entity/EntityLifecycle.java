@@ -47,8 +47,6 @@ import io.spine.system.server.DispatchCommandToHandlerVBuilder;
 import io.spine.system.server.DispatchEventToReactor;
 import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchEventToSubscriberVBuilder;
-import io.spine.system.server.DispatchedEvent;
-import io.spine.system.server.DispatchedEventVBuilder;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.DispatchedMessageIdVBuilder;
 import io.spine.system.server.EntityHistoryId;
@@ -166,7 +164,7 @@ public class EntityLifecycle {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandlerVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
-                .setCommandId(command.getId())
+                .setCommand(command)
                 .build();
         systemGateway.postCommand(systemCommand);
     }
@@ -208,7 +206,7 @@ public class EntityLifecycle {
         DispatchEventToSubscriber systemCommand = DispatchEventToSubscriberVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
-                .setEventId(event.getId())
+                .setEvent(event)
                 .build();
         systemGateway.postCommand(systemCommand);
     }
@@ -218,15 +216,11 @@ public class EntityLifecycle {
     }
 
     public void onEventImported(Event event) {
-        DispatchedEvent dispatchedEvent = DispatchedEventVBuilder
-                .newBuilder()
-                .setEvent(event.getId())
-                .setWhenDispatched(getCurrentTime())
-                .build();
         EventImported systemEvent = EventImportedVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
-                .setPayload(dispatchedEvent)
+                .setEventId(event.getId())
+                .setWhenImported(getCurrentTime())
                 .build();
         systemGateway.postEvent(systemEvent);
     }
@@ -240,7 +234,7 @@ public class EntityLifecycle {
         DispatchEventToReactor systemCommand = DispatchEventToReactor
                 .newBuilder()
                 .setReceiver(historyId)
-                .setEventId(event.getId())
+                .setEvent(event)
                 .build();
         systemGateway.postCommand(systemCommand);
     }

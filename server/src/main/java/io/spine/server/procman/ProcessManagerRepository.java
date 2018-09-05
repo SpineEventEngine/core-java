@@ -26,7 +26,6 @@ import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -53,7 +52,6 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
-import io.spine.server.route.EventRouting;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -65,6 +63,7 @@ import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -163,6 +162,9 @@ public abstract class ProcessManagerRepository<I,
         }
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
+        systemSubscriber.registerIn(boundedContext);
+
         registerWithSharding();
     }
 
@@ -219,22 +221,57 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        return PmCommandEndpoint.handle(this, command);
+        I target = with(command.getTenantId()).evaluate(() -> doDispatch(command));
+        return target;
+    }
+
+    private I doDispatch(CommandEnvelope command) {
+        I target = route(command);
+        lifecycleOf(target).onDispatchCommand(command.getCommand());
+        return target;
+    }
+
+    private I route(CommandEnvelope envelope) {
+        CommandRouting<I> routing = getCommandRouting();
+        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
+        lifecycleOf(target).onTargetAssignedToCommand(envelope.getId());
+        return target;
     }
 
     /**
-     * Dispatches the event to a corresponding process manager.
+     * Dispatches the given command to the {@link ProcessManager} with the given ID.
      *
-     * <p>If there is no stored process manager with such an ID, a new process manager is created
-     * and stored after it handles the passed event.
+     * @param id
+     *         the target entity ID
+     * @param command
+     *         the command to dispatch
+     */
+    void dispatchNowTo(I id, CommandEnvelope command) {
+        PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
+        endpoint.dispatchTo(id);
+    }
+
+    /**
+     * {@inheritDoc}
      *
-     * @param event the event to dispatch
-     * @see ProcessManager#dispatchEvent(EventEnvelope)
+     * <p>Sends a system command to dispatch the given event to a reactor.
      */
     @Override
-    public Set<I> dispatch(EventEnvelope event) {
-        Set<I> result = PmEventEndpoint.handle(this, event);
-        return result;
+    protected final void dispatchTo(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToReactor(event);
+    }
+
+    /**
+     * Dispatches the given event to the {@link ProcessManager} with the given ID.
+     *
+     * @param id
+     *         the target entity ID
+     * @param event
+     *         the event to dispatch
+     */
+    void dispatchNowTo(I id, EventEnvelope event) {
+        PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, event);
+        endpoint.dispatchTo(id);
     }
 
     @Override
@@ -269,14 +306,6 @@ public abstract class ProcessManagerRepository<I,
         return super.lifecycleOf(id);
     }
 
-    void onDispatchEvent(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToReactor(event);
-    }
-
-    void onCommandTargetSet(I id, CommandId commandId) {
-        lifecycleOf(id).onTargetAssignedToCommand(commandId);
-    }
-
     /**
      * Loads or creates a process manager by the passed ID.
      *
@@ -301,11 +330,6 @@ public abstract class ProcessManagerRepository<I,
         P procman = super.create(id);
         lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
         return procman;
-    }
-
-    /** Open access to the event routing to the package. */
-    EventRouting<I> eventRouting() {
-        return getEventRouting();
     }
 
     /**

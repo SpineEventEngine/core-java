@@ -18,24 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.system.server;
+
+import com.google.protobuf.Message;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionRepository;
+
 /**
- *  The versions of the libraries used.
+ * A repository for projections in a system bounded context.
  *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * <p>Unlike an arbitrary {@link ProjectionRepository}, a {@code SystemProjectionRepository}
+ * dispatches the events directly to the target projections.
+ *
+ * @author Dmytro Dashenkov
  */
- 
-def final SPINE_VERSION = '0.10.86-SNAPSHOT'
+public class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
+        extends ProjectionRepository<I, P, S> {
 
-ext {
-
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.69-SNAPSHOT'
-
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.14.0'
+    /**
+     * {@inheritDoc}
+     *
+     * @implNote
+     * A {@code SystemProjectionRepository} dispatches the given event directly to its targets,
+     * whereas a domain repository would send a command to the system context.
+     */
+    @Override
+    protected void dispatchTo(I id, Event event) {
+        dispatchNowTo(id, EventEnvelope.of(event));
+    }
 }

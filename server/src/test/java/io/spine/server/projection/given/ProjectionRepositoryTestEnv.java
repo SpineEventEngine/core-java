@@ -146,8 +146,7 @@ public class ProjectionRepositoryTestEnv {
         public static Set<ProjectId> whoProcessed(Message eventMessage) {
             ImmutableSet.Builder<ProjectId> builder = ImmutableSet.builder();
             for (ProjectId projectId : eventMessagesDelivered.keySet()) {
-                if(eventMessagesDelivered.get(projectId)
-                                         .contains(eventMessage)) {
+                if (eventMessagesDelivered.get(projectId).contains(eventMessage)) {
                     builder.add(projectId);
                 }
             }
@@ -163,7 +162,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        void on(PrjProjectCreated event) {
+        public void on(PrjProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -175,7 +174,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        void on(PrjTaskAdded event) {
+        public void on(PrjTaskAdded event) {
             keep(event);
             Project newState = getState().toBuilder()
                                          .addTask(event.getTask())
@@ -186,12 +185,14 @@ public class ProjectionRepositoryTestEnv {
         /**
          * Handles the {@link PrjProjectStarted} event.
          *
-         * @param event   the event message
-         * @param ignored this parameter is left to show that a projection subscriber
-         *                can have two parameters
+         * @param event
+         *         the event message
+         * @param ignored
+         *         this parameter is left to show that a projection subscriber
+         *         can have two parameters
          */
         @Subscribe
-        void on(PrjProjectStarted event,
+        public void on(PrjProjectStarted event,
                        @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
             Project newState = getState().toBuilder()
@@ -201,13 +202,13 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        void on(PrjProjectArchived event) {
+        public void on(PrjProjectArchived event) {
             keep(event);
             setArchived(true);
         }
 
         @Subscribe
-        void on(PrjProjectDeleted event) {
+        public void on(PrjProjectDeleted event) {
             keep(event);
             setDeleted(true);
         }

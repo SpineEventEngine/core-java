@@ -54,7 +54,7 @@ public class CommandAcksTestEnv {
     public static final String UNIQUE_ERROR_TYPE = "unique-error";
     public static final String DUPLICATE_ERROR_TYPE = "duplicate-error";
     public static final String PRESENT_ERROR_TYPE = "present-error";
-    public static final String UNIQUE_TASK_TITLEE = "single-title";
+    public static final String UNIQUE_TASK_TITLE = "single-title";
     public static final String DUPLICATE_TASK_TITLE = "duplicate-title";
     public static final String MISSING_TASK_TITLE = "missing-title";
     public static final String PRESENT_TASK_TITLE = "present-title";

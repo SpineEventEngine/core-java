@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * Abstract base for classes implementing {@link MessageEnvelope}.
@@ -68,11 +69,8 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
         return Objects.equals(this.object, other.object);
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("object", getOuterObject())
-                          .toString();
+        return format("%s(%s)", getClass().getSimpleName(), getMessageClass().getTypeName());
     }
 }

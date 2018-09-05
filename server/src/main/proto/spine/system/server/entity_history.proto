@@ -129,36 +129,6 @@ message DispatchingHistory {
     google.protobuf.Timestamp when_event = 2;
 }
 
-// A record of an event dispatched to a certain entity.
-//
-message DispatchedEvent {
-
-    // The ID of the event.
-    spine.core.EventId event = 1;
-
-    // The time when the event was dispatched.
-    //
-    // This timestamp may differ from the one in the context of the event, since the time of
-    // dispatching may not be the same as the time of creation.
-    //
-    google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
-}
-
-// A record of a command dispatched to a certain entity.
-//
-message DispatchedCommand {
-
-    // The ID of the command.
-    spine.core.CommandId command = 1;
-
-    // The time when the command was dispatched.
-    //
-    // This timestamp may differ from the one in the context of the event, since the time of
-    // dispatching may not be the same as the time of creation.
-    //
-    google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
-}
-
 // An identifier of a message dispatched to an entity.
 //
 // May represent either an event or a command.

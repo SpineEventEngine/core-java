@@ -25,7 +25,6 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Dispatches event to reacting process managers.
@@ -36,7 +35,7 @@ import java.util.Set;
  */
 @Internal
 public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, EventEnvelope, Set<I>> {
+        extends PmEndpoint<I, P, EventEnvelope> {
 
     protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository,
                               EventEnvelope envelope) {
@@ -48,29 +47,13 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         return new PmEventEndpoint<>(repository, event);
     }
 
-    static <I, P extends ProcessManager<I, ?, ?>>
-    Set<I> handle(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
-        PmEventEndpoint<I, P> endpoint = of(repository, event);
-        Set<I> result = endpoint.handle();
-        return result;
-    }
-
     @Override
     protected PmEventDelivery<I, P> getEndpointDelivery() {
         return repository().getEventEndpointDelivery();
     }
 
     @Override
-    protected Set<I> getTargets() {
-        EventEnvelope event = envelope();
-        Set<I> ids = repository().eventRouting()
-                                 .apply(event.getMessage(), event.getEventContext());
-        return ids;
-    }
-
-    @Override
     protected List<Event> doDispatch(P processManager, EventEnvelope envelope) {
-        repository().onDispatchEvent(processManager.getId(), envelope.getOuterObject());
         List<Event> events = processManager.dispatchEvent(envelope);
         return events;
     }

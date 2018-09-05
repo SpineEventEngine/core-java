@@ -55,12 +55,13 @@ message CreateEntity {
 // This command is relevant only to histories of Projections.
 //
 message DispatchEventToSubscriber {
+    option (rejections) = "CannotDispatchEventTwice";
 
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1;
 
-    // The ID of the event to dispatch.
-    spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
+    // The event to dispatch.
+    core.Event event = 2 [(valid) = true];
 }
 
 // A command to dispatch an event to a reactor.
@@ -68,12 +69,13 @@ message DispatchEventToSubscriber {
 // This command is relevant to histories of Aggregates and ProcessManagers.
 //
 message DispatchEventToReactor {
+    option (rejections) = "CannotDispatchEventTwice";
 
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1;
 
-    // The ID of the event to dispatch.
-    spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
+    // The event to dispatch.
+    core.Event event = 2 [(valid) = true];
 }
 
 // A command to dispatch a command to a command handler.
@@ -81,12 +83,13 @@ message DispatchEventToReactor {
 // This command is relevant to histories of Aggregates and ProcessManagers.
 //
 message DispatchCommandToHandler {
+    option (rejections) = "CannotDispatchCommandTwice";
 
     // The ID of the entity, which the command is dispatched to.
     EntityHistoryId receiver = 1;
 
-    // The ID of the command to dispatch.
-    spine.core.CommandId command_id = 2 [(required) = true, (valid) = true];
+    // The command to dispatch.
+    core.Command command = 2 [(valid) = true];
 }
 
 // A command to change the state of the entity.

@@ -75,9 +75,9 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     private final ShardingKey key;
 
     /**
-     * A tag which defines a type
+     * A tag which defines a type.
      */
-    private final DeliveryTag<E> tag;
+    private final DeliveryTag tag;
     private final Class<I> targetIdClass;
     private final Subscriber subscriber;
     private final Publisher publisher;
@@ -135,7 +135,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
      *
      * @return the delivery tag for this stream
      */
-    public DeliveryTag<E> getTag() {
+    public DeliveryTag getTag() {
         return tag;
     }
 
@@ -354,7 +354,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
 
         private BoundedContextName boundedContextName;
         private ShardingKey key;
-        private DeliveryTag<E> tag;
+        private DeliveryTag tag;
         private TransportFactory transportFactory;
         private Class<I> targetIdClass;
         private ShardedStreamConsumer<I, E> consumer;
@@ -385,12 +385,12 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return thisAsB();
         }
 
-        public DeliveryTag<E> getTag() {
+        public DeliveryTag getTag() {
             return tag;
         }
 
         @CanIgnoreReturnValue
-        public B setTag(DeliveryTag<E> tag) {
+        public B setTag(DeliveryTag tag) {
             checkNotNull(tag);
             this.tag = tag;
             return thisAsB();
