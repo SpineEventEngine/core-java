@@ -71,6 +71,10 @@ import static java.util.Collections.singleton;
  *     }
  * </pre>
  *
+ * @param <T>
+ *         a type of the message which is returned by the implementations {@link #build()}
+ * @param <B>
+ *         a type of the builder implementations
  * @author Mykhailo Drachuk
  */
 abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTargetBuilder> {
