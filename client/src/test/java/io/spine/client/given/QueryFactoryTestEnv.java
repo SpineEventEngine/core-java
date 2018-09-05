@@ -20,6 +20,7 @@
 
 package io.spine.client.given;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.ProtocolStringList;
 import io.spine.client.EntityFilters;
@@ -102,6 +103,7 @@ public class QueryFactoryTestEnv {
         }
     }
 
+    @CanIgnoreReturnValue
     public static Target checkTargetIsTestEntity(Query query) {
         Target entityTarget = query.getTarget();
         assertNotNull(entityTarget);
