@@ -65,13 +65,14 @@ class ActorRequestFactoryTest {
     }
 
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-            "SerializableInnerClassWithNonSerializableOuterClass"})
+                       "SerializableInnerClassWithNonSerializableOuterClass"})
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, TestEntity.getDefaultInstance())
-                .setDefault((new TypeToken<Class<? extends Message>>() {}).getRawType(),
+                .setDefault((new TypeToken<Class<? extends Message>>() {
+                            }).getRawType(),
                             TestEntity.class)
                 .setDefault((new TypeToken<Set<? extends Message>>() {
                             }).getRawType(),
