@@ -31,11 +31,11 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.system.server.EntityHistoryId;
+import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -91,24 +91,19 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     @Override
     public final Set<EventClass> getExternalEventClasses() {
         Set<EventClass> classes = super.getExternalEventClasses();
-        Predicate<EventClass> systemEvent = SystemEventWatcher::isSystemEvent;
-        Optional<EventClass> invalidEventType =
+        Optional<String> invalidEventTypeName =
                 classes.stream()
-                       .filter(systemEvent.negate())
+                       .map(EventClass::getTypeName)
+                       .map(TypeName::value)
+                       .filter(typeName -> !typeName.startsWith(SYSTEM_TYPE_PACKAGE))
                        .findAny();
-        if (invalidEventType.isPresent()) {
+        if (invalidEventTypeName.isPresent()) {
             throw newIllegalStateException(
                     "A %s should only subscribe to system events. %s is not a system event type.",
-                    SystemEventWatcher.class, invalidEventType.get()
+                    SystemEventWatcher.class, invalidEventTypeName.get()
             );
         }
         return classes;
-    }
-
-    private static boolean isSystemEvent(EventClass eventClass) {
-        return eventClass.getTypeName()
-                         .value()
-                         .startsWith(SYSTEM_TYPE_PACKAGE);
     }
 
     /**
