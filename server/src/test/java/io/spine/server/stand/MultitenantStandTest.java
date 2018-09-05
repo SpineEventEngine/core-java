@@ -69,24 +69,6 @@ class MultitenantStandTest extends StandTest {
     }
 
     @Test
-    @DisplayName("not allow reading aggregate records from another tenant")
-    void readOnlySameTenant() {
-        Stand stand = doCheckReadingCustomersById(15);
-
-        TenantId anotherTenant = newUuid();
-        ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
-
-        Query readAllCustomers = requestFactory.query()
-                                               .all(Customer.class);
-
-        MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
-        stand.execute(readAllCustomers, responseObserver);
-        QueryResponse response = responseObserver.responseHandled();
-        assertTrue(Responses.isOk(response.getResponse()));
-        assertEquals(0, response.getMessagesCount());
-    }
-
-    @Test
     @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
     void updateOnlySameTenant() {
         Stand stand = newStand(isMultitenant());

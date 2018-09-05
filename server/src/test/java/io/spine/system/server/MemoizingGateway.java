@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
@@ -28,9 +27,6 @@ import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.Collections;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
