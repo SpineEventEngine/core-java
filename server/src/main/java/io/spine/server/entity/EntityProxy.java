@@ -33,52 +33,66 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Abstract base for endpoints handling messages sent to entities.
+ * A smart proxy of an entity for incoming messages.
+ *
+ * <p>The typical flow for a proxy is:
+ * <ol>
+ *     <li>receives a message;
+ *     <li>sends the message over the {@link Delivery};
+ *     <li>receives the message from delivery (on the same or on another instance);
+ *     <li>loads the target entity and passes the message to the entity;
+ *     <li>stores the entity and publishes the results of the message handling, if any.
+ * </ol>
  *
  * <p>Loading and storing an entity is a tenant-sensitive operation,
  * which must be performed under the context of the tenant ID in which
  * the message we dispatch was originated.
  *
+ * <p>The {@code EntityProxy} is inspired by
+ * the <a href="https://www.enterpriseintegrationpatterns.com/patterns/messaging/SmartProxy.html">Smart Proxy</a>
+ * enterprise pattern, however, should not be evaluated as a canonical implementation.
+ *
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <M> the type of message envelopes
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
 @Internal
-public abstract class EntityMessageEndpoint<I,
-                                            E extends Entity<I, ?>,
-                                            M extends ActorMessageEnvelope<?, ?, ?>> {
+public abstract class EntityProxy<I,
+                                  E extends Entity<I, ?>,
+                                  M extends ActorMessageEnvelope<?, ?, ?>> {
 
-    /** The repository which created this endpoint. */
+    /** The repository which stores the proxied entity. */
     private final Repository<I, E> repository;
 
-    /** The message which needs to handled. */
-    private final M envelope;
+    /** The ID of the entity to dispatch messages to. */
+    private final I entityId;
 
-    protected EntityMessageEndpoint(Repository<I, E> repository, M envelope) {
+    protected EntityProxy(Repository<I, E> repository, I id) {
         this.repository = repository;
-        this.envelope = envelope;
+        this.entityId = id;
     }
 
     /**
      * Dispatches the message to the entity with the passed ID according to the delivery strategy.
      *
-     * @param entityId the ID of the entity which to dispatch the message to
+     * @param message
+     *         message to dispatch
      */
-    public void dispatchTo(I entityId) {
-        checkNotNull(entityId);
+    public void dispatch(M message) {
+        checkNotNull(message);
         try {
-            doDispatchTo(entityId);
+            doDispatch(message);
         } catch (RuntimeException exception) {
-            onError(envelope(), exception);
+            onError(message, exception);
         }
     }
 
-    private void doDispatchTo(I entityId) {
-        M envelope = envelope();
-        Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
+    private void doDispatch(M message) {
+        Delivery<I, E, M, ?, ?> delivery = getDelivery();
         delivery.getSender()
-                .send(entityId, envelope);
+                .send(entityId, message);
     }
 
     /**
@@ -88,16 +102,17 @@ public abstract class EntityMessageEndpoint<I,
      * <p>Performs the delivery directly to the entity not taking
      * the delivery strategy into account.
      *
-     * @param entityId the ID of the entity which to dispatch the message to
+     * @param message
+     *         message to dispatch
      */
-    protected abstract void deliverNowTo(I entityId);
+    protected abstract void deliverNow(M message);
 
     /**
-     * Obtains an instance of endpoint delivery.
+     * Obtains an instance of the delivery.
      *
-     * @return the instance of endpoint delivery
+     * @return the instance of the delivery
      */
-    protected abstract Delivery<I, E, M, ?, ?> getEndpointDelivery();
+    protected abstract Delivery<I, E, M, ?, ?> getDelivery();
 
     /**
      * Invokes entity-specific method for dispatching the message.
@@ -107,14 +122,15 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Stores the entity if it was modified during message dispatching.
      *
-     * @param entity the entity to store
+     * @param entity
+     *         the entity to store
      */
-    protected final void store(E entity) {
+    protected final void store(E entity, M dispatchedMessage) {
         boolean isModified = isModified(entity);
         if (isModified) {
-            onModified(entity);
+            onModified(entity, dispatchedMessage);
         } else {
-            onEmptyResult(entity, envelope());
+            onEmptyResult(entity, dispatchedMessage);
         }
     }
 
@@ -126,7 +142,7 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Callback to perform operations if the entity was modified during message dispatching.
      */
-    protected abstract void onModified(E entity);
+    protected abstract void onModified(E entity, M message);
 
     /**
      * Allows derived classes to handle empty list of uncommitted events returned by
@@ -140,32 +156,36 @@ public abstract class EntityMessageEndpoint<I,
     protected abstract void onError(M envelope, RuntimeException exception);
 
     /**
-     * Obtains the envelope of the message processed by this endpoint.
-     */
-    protected final M envelope() {
-        return envelope;
-    }
-
-    /**
-     * Obtains the parent repository of this endpoint.
+     * Obtains the repository which stores the proxied entity.
      */
     protected Repository<I, E> repository() {
         return repository;
     }
 
     /**
+     * Obtains the ID of the entity to dispatch messages to.
+     */
+    protected final I entityId() {
+        return entityId;
+    }
+
+    /**
      * Throws {@link IllegalStateException} with the diagnostics message on the unhandled command.
      *
-     * @param  entity the entity which failed to handle the command
-     * @param  cmd    the envelope with the command
-     * @param  format the format string with the following parameters
-     *                <ol>
-     *                   <li>the name of the entity class
-     *                   <li>the ID of the entity
-     *                   <li>the name of the command class
-     *                   <li>the ID of the command
-     *                </ol>
-     * @throws IllegalStateException always
+     * @param entity
+     *         the entity which failed to handle the command
+     * @param cmd
+     *         the envelope with the command
+     * @param format
+     *         the format string with the following parameters
+     *         <ol>
+     *             <li>the name of the entity class
+     *             <li>the ID of the entity
+     *             <li>the name of the command class
+     *             <li>the ID of the command
+     *             </ol>
+     * @throws IllegalStateException
+     *         always
      */
     protected void onUnhandledCommand(Entity<I, ?> entity, CommandEnvelope cmd, String format) {
         String entityId = entity.idAsString();

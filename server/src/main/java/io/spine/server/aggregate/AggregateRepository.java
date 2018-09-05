@@ -249,8 +249,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private void dispatchTo(I id, CommandEnvelope envelope) {
-        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, envelope);
-        endpoint.dispatchTo(id);
+        AggregateCommandProxy<I, A> proxy = new AggregateCommandProxy<>(this, id);
+        proxy.dispatch(envelope);
     }
 
     /**
@@ -312,9 +312,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private void dispatchTo(I id, EventEnvelope envelope) {
-        AggregateEventEndpoint<I, A> endpoint =
-                new AggregateEventReactionEndpoint<>(this, envelope);
-        endpoint.dispatchTo(id);
+        AggregateEventProxy<I, A> proxy = new AggregateEventReactionProxy<>(this, id);
+        proxy.dispatch(envelope);
     }
 
     boolean importsEvent(EventClass eventClass) {
@@ -329,8 +328,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     I importEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
         I target = routeImport(envelope);
-        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, envelope);
-        endpoint.dispatchTo(target);
+        EventImportProxy<I, A> proxy = new EventImportProxy<>(this, target);
+        proxy.dispatch(envelope);
         return target;
     }
 
@@ -524,7 +523,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Invoked by an endpoint after a message was dispatched to the aggregate.
+     * Invoked by a {@linkplain AggregateProxy proxy} after a message was dispatched to
+     * the aggregate.
      *
      * @param tenantId  the tenant associated with the processed message
      * @param aggregate the updated aggregate
@@ -575,7 +575,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for events applied to the instances managed by this repository
      */
     @SPI
-    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
+    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEventDelivery() {
         return eventDeliverySupplier.get();
     }
 
@@ -591,7 +591,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return delivery strategy for rejections
      */
     @SPI
-    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
+    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandDelivery() {
         return commandDeliverySupplier.get();
     }
 
@@ -637,8 +637,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         Iterable<ShardedStreamConsumer<?, ?>> result =
                 of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
+                        getCommandDelivery().getConsumer(),
+                        getEventDelivery().getConsumer()
                 );
         return result;
     }

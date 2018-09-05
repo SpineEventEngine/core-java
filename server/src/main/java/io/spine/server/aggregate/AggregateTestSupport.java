@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
@@ -65,10 +66,9 @@ public final class AggregateTestSupport {
     dispatchCommand(AggregateRepository<I, A> repository, A aggregate, CommandEnvelope command) {
         checkArguments(repository, aggregate, command);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
-        return dispatchAndCollect(
-                new AggregateCommandEndpoint<>(repository, command),
-                aggregate
-        );
+        AggregateCommandProxy<I, A> proxy = new AggregateCommandProxy<>(repository,
+                                                                           aggregate.getId());
+        return dispatchAndCollect(proxy, aggregate, command);
     }
 
     /**
@@ -83,16 +83,15 @@ public final class AggregateTestSupport {
     dispatchEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
         checkArguments(repository, aggregate, event);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
-        return dispatchAndCollect(
-                new AggregateEventReactionEndpoint<>(repository, event),
-                aggregate
-        );
+        AggregateEventReactionProxy<I, A> proxy =
+                new AggregateEventReactionProxy<>(repository, aggregate.getId());
+        return dispatchAndCollect(proxy, aggregate, event);
     }
 
-    private static <I, A extends Aggregate<I, ?, ?>> List<Message>
-    dispatchAndCollect(AggregateEndpoint<I, A, ?> endpoint, A aggregate) {
+    private static <I, A extends Aggregate<I, ?, ?>, M extends ActorMessageEnvelope<?, ?, ?>>
+    List<Message> dispatchAndCollect(AggregateProxy<I, A, M> proxy, A aggregate, M envelope) {
         List<Message> result =
-                endpoint.dispatchInTx(aggregate)
+                proxy.dispatchInTx(aggregate, envelope)
                         .stream()
                         .map(Events::getMessage)
                         .collect(toList());

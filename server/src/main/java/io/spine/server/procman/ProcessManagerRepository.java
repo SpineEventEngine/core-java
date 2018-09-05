@@ -247,8 +247,8 @@ public abstract class ProcessManagerRepository<I,
      *         the command to dispatch
      */
     void dispatchNowTo(I id, CommandEnvelope command) {
-        PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
-        endpoint.dispatchTo(id);
+        PmCommandProxy<I, P> proxy = new PmCommandProxy<>(this, id);
+        proxy.dispatch(command);
     }
 
     /**
@@ -270,8 +270,8 @@ public abstract class ProcessManagerRepository<I,
      *         the event to dispatch
      */
     void dispatchNowTo(I id, EventEnvelope event) {
-        PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, event);
-        endpoint.dispatchTo(id);
+        PmEventProxy<I, P> proxy = new PmEventProxy<>(this, id);
+        proxy.dispatch(event);
     }
 
     @Override
@@ -344,7 +344,7 @@ public abstract class ProcessManagerRepository<I,
      * @return delivery strategy for events applied to the instances managed by this repository
      */
     @SPI
-    protected PmEventDelivery<I, P> getEventEndpointDelivery() {
+    protected PmEventDelivery<I, P> getEventDelivery() {
         return eventDeliverySupplier.get();
     }
 
@@ -360,7 +360,7 @@ public abstract class ProcessManagerRepository<I,
      * @return delivery strategy for rejections
      */
     @SPI
-    protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
+    protected PmCommandDelivery<I, P> getCommandDelivery() {
         return commandDeliverySupplier.get();
     }
 
@@ -381,8 +381,8 @@ public abstract class ProcessManagerRepository<I,
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         Iterable<ShardedStreamConsumer<?, ?>> result =
                 of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
+                        getCommandDelivery().getConsumer(),
+                        getEventDelivery().getConsumer()
                 );
         return result;
     }

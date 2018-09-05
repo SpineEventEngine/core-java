@@ -27,7 +27,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionEndpoint;
+import io.spine.server.projection.ProjectionProxy;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.testing.server.NoOpLifecycle;
 
@@ -57,7 +57,7 @@ public class ProjectionEventDispatcher {
         checkNotNull(projection);
         checkNotNull(event);
         EventEnvelope envelope = EventEnvelope.of(event);
-        TestProjectionEndpoint.dispatch(projection, envelope);
+        TestProjectionProxy.dispatch(projection, envelope);
     }
 
     /**
@@ -76,20 +76,21 @@ public class ProjectionEventDispatcher {
                            .setMessage(pack(eventMessage))
                            .setContext(eventContext)
                            .build();
-        TestProjectionEndpoint.dispatch(projection, EventEnvelope.of(event));
+        TestProjectionProxy.dispatch(projection, EventEnvelope.of(event));
     }
 
-    private static class TestProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Message>
-            extends ProjectionEndpoint<I, P> {
+    private static class TestProjectionProxy<I, P extends Projection<I, S, ?>, S extends Message>
+            extends ProjectionProxy<I, P> {
 
-        private TestProjectionEndpoint(EventEnvelope event) {
-            super(mockRepository(), event);
+        private TestProjectionProxy(I entityId) {
+            super(mockRepository(), entityId);
         }
 
         private static <I, P extends Projection<I, S, ?>, S extends Message> void
         dispatch(P projection, EventEnvelope envelope) {
-            TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(envelope);
-            endpoint.dispatchInTx(projection);
+            I id = projection.getId();
+            TestProjectionProxy<I, P, S> proxy = new TestProjectionProxy<>(id);
+            proxy.dispatchInTx(projection, envelope);
         }
     }
 

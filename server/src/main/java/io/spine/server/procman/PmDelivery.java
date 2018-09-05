@@ -26,6 +26,7 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.DeliveryTag;
 import io.spine.server.delivery.ShardedStream;
 import io.spine.server.entity.Repository;
+import io.spine.type.MessageClass;
 
 /**
  * A strategy on delivering the messages to the instances of a certain process manager type.
@@ -63,7 +64,8 @@ public abstract class PmDelivery<I,
         }
 
         @Override
-        protected abstract PmEndpoint<I, P, M> getEndpoint(M messageEnvelope);
+        protected abstract PmProxy<I, P, M> proxyFor(I entityId,
+                                                     MessageClass targetMessageClass);
 
         @Override
         protected ProcessManagerRepository<I, P, ?> repository() {
@@ -71,8 +73,8 @@ public abstract class PmDelivery<I,
         }
 
         @Override
-        protected void passToEndpoint(I id, M envelopeMessage) {
-            getEndpoint(envelopeMessage).deliverNowTo(id);
+        protected void passMessage(I id, M message) {
+            proxyFor(id, message.getMessageClass()).deliverNow(message);
         }
     }
 }

@@ -26,6 +26,7 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.DeliveryTag;
 import io.spine.server.delivery.ShardedStream;
 import io.spine.server.entity.Repository;
+import io.spine.type.MessageClass;
 
 /**
  * A strategy on delivering the messages to the instances of a certain aggregate type.
@@ -63,11 +64,12 @@ public abstract class AggregateDelivery<I,
         }
 
         @Override
-        protected abstract AggregateEndpoint<I, A, E> getEndpoint(E messageEnvelope);
+        protected abstract AggregateProxy<I, A, E> proxyFor(I entityId,
+                                                            MessageClass targetMessageClass);
 
         @Override
-        protected void passToEndpoint(I id, E envelopeMessage) {
-            getEndpoint(envelopeMessage).deliverNowTo(id);
+        protected void passMessage(I id, E message) {
+            proxyFor(id, message.getMessageClass()).deliverNow(message);
         }
 
         @Override

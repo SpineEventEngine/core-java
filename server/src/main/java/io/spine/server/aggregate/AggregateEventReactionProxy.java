@@ -18,57 +18,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman;
+package io.spine.server.aggregate;
 
-import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.server.event.React;
 
 import java.util.List;
 
 /**
- * Dispatches event to reacting process managers.
+ * Dispatches an event to aggregates of the associated {@code AggregateRepository}.
  *
- * @param <I> the type of process manager IDs
- * @param <P> the type of process managers
  * @author Alexander Yevsyukov
+ * @see React
  */
-@Internal
-public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, EventEnvelope> {
+final class AggregateEventReactionProxy<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateEventProxy<I, A> {
 
-    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository,
-                              EventEnvelope envelope) {
-        super(repository, envelope);
-    }
-
-    static <I, P extends ProcessManager<I, ?, ?>>
-    PmEventEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
-        return new PmEventEndpoint<>(repository, event);
+    AggregateEventReactionProxy(AggregateRepository<I, A> repo, I aggregateId) {
+        super(repo, aggregateId);
     }
 
     @Override
-    protected PmEventDelivery<I, P> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
+    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getDelivery() {
+        return repository().getEventDelivery();
     }
 
     @Override
-    protected List<Event> doDispatch(P processManager, EventEnvelope envelope) {
-        List<Event> events = processManager.dispatchEvent(envelope);
-        return events;
-    }
-
-    /**
-     * Does nothing since a state of a process manager should not be necessarily
-     * updated upon reacting on an event.
-     */
-    @Override
-    protected void onEmptyResult(P pm, EventEnvelope envelope) {
-        // Do nothing.
+    protected List<Event> doDispatch(A aggregate, EventEnvelope envelope) {
+        repository().onDispatchEvent(aggregate.getId(), envelope.getOuterObject());
+        return aggregate.reactOn(envelope);
     }
 
     @Override
     protected void onError(EventEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
+    }
+
+    /**
+     * Does nothing since a state of an aggregate should not be necessarily
+     * updated upon reacting on an event.
+     */
+    @Override
+    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
+        // Do nothing.
     }
 }

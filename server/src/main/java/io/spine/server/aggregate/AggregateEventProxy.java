@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import io.spine.core.EventEnvelope;
 
 /**
- * Abstract base for endpoints that dispatch events to aggregates.
+ * Abstract base for proxies that dispatch events to aggregates.
  *
  * <p>An aggregate may receive an event if it {@linkplain io.spine.server.event.React reacts} on it,
  * or if it {@linkplain io.spine.server.aggregate.Apply#allowImport() imports} it.
@@ -33,10 +33,10 @@ import io.spine.core.EventEnvelope;
  *
  * @author Alexander Yevsyukov
  */
-abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, EventEnvelope> {
+abstract class AggregateEventProxy<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateProxy<I, A, EventEnvelope> {
 
-    AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
-        super(repository, envelope);
+    AggregateEventProxy(AggregateRepository<I, A> repository, I aggregateId) {
+        super(repository, aggregateId);
     }
 }

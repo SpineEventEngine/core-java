@@ -25,8 +25,8 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregate;
-import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
+import io.spine.server.aggregate.given.AggregateCommandProxyTestEnv.ProjectAggregate;
+import io.spine.server.aggregate.given.AggregateCommandProxyTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
@@ -45,8 +45,8 @@ import static io.spine.server.aggregate.given.Given.ACommand.startProject;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("AggregateCommandEndpoint should")
-class AggregateCommandEndpointTest {
+@DisplayName("AggregateCommandProxy should")
+class AggregateCommandProxyTest {
 
     private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;

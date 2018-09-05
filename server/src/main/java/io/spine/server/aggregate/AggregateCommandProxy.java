@@ -18,9 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman;
+package io.spine.server.aggregate;
 
-import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
@@ -31,36 +30,29 @@ import java.util.List;
 import static io.spine.server.command.DispatchCommand.operationFor;
 
 /**
- * Dispatches command to process managers.
+ * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
  *
- * @param <I> the type of process manager IDs
- * @param <P> the type of process managers
+ * @param <I> the type of the aggregate IDs
+ * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-@Internal
-public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, CommandEnvelope> {
+final class AggregateCommandProxy<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateProxy<I, A, CommandEnvelope> {
 
-    protected PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
-        super(repository, cmd);
-    }
-
-    static <I, P extends ProcessManager<I, ?, ?>>
-    PmCommandEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository,
-                               CommandEnvelope event) {
-        return new PmCommandEndpoint<>(repository, event);
+    AggregateCommandProxy(AggregateRepository<I, A> repo, I aggregateId) {
+        super(repo, aggregateId);
     }
 
     @Override
-    protected PmCommandDelivery<I, P> getEndpointDelivery() {
-        return repository().getCommandEndpointDelivery();
-    }
-
-    @Override
-    protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
-        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
-        DispatchCommand dispatch = operationFor(lifecycle, processManager, envelope);
+    protected List<Event> doDispatch(A aggregate, CommandEnvelope envelope) {
+        EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.getId());
+        DispatchCommand dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();
+    }
+
+    @Override
+    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getDelivery() {
+        return repository().getCommandDelivery();
     }
 
     @Override
@@ -69,11 +61,15 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     /**
-     * Does nothing since a state of a process manager should not be necessarily
-     * updated during the command handling.
+     * Throws {@link IllegalStateException} with the message containing details of the aggregate and
+     * the command in response to which the aggregate generated empty set of event messages.
+     *
+     * @throws IllegalStateException always
      */
     @Override
-    protected void onEmptyResult(P processManager, CommandEnvelope cmd) {
-        // Do nothing.
+    protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
+        String format = "The aggregate (class: %s, id: %s) produced empty response for " +
+                        "the command (class: %s, id: %s).";
+        onUnhandledCommand(aggregate, cmd, format);
     }
 }

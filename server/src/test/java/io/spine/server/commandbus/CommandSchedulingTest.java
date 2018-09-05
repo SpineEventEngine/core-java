@@ -99,8 +99,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("reject previously scheduled command if no endpoint is found")
-    void rejectPreviouslyScheduledWithoutEndpoint() {
+    @DisplayName("reject previously scheduled command if no proxy is found")
+    void rejectPreviouslyScheduledWithoutProxy() {
         Command command = createScheduledCommand();
         assertThrows(IllegalStateException.class,
                      () -> commandBus.postPreviouslyScheduled(command));

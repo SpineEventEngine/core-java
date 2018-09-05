@@ -23,10 +23,11 @@ import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.BoundedContextName;
 import io.spine.core.TenantId;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.entity.EntityProxy;
 import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.transport.TransportFactory;
+import io.spine.type.MessageClass;
 
 /**
  * The consuming part of the {@linkplain Delivery}.
@@ -84,7 +85,7 @@ public abstract class Consumer<I,
         TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                passToEndpoint(id, envelopeMessage);
+                passMessage(id, envelopeMessage);
             }
         };
 
@@ -107,20 +108,27 @@ public abstract class Consumer<I,
     }
 
     /**
-     * Calls the dispatching method of endpoint directly.
+     * Passes the given message to the entity.
      *
-     * @param id              an ID of an entity to deliver th envelope to
-     * @param envelopeMessage an envelope to delivery
+     * <p>Passes the message directly, i.e. without any {@link Delivery} invocations.
+     *
+     * @param id
+     *         an ID of an entity to deliver the envelope to
+     * @param message
+     *         an envelope to deliver
      */
-    protected abstract void passToEndpoint(I id, M envelopeMessage);
+    protected void passMessage(I id, M message) {
+        MessageClass targetMessageClass = message.getMessageClass();
+        proxyFor(id, targetMessageClass).dispatch(message);
+    }
 
     /**
-     * Obtains an endpoint to dispatch the given envelope.
+     * Obtains a proxy to dispatch the given envelope.
      *
-     * @param messageEnvelope the envelope to obtain the endpoint for
-     * @return the message endpoint
+     * @param entityId the envelope to obtain the proxy for
+     * @return the entity proxy
      */
-    protected abstract EntityMessageEndpoint<I, E, M> getEndpoint(M messageEnvelope);
+    protected abstract EntityProxy<I, E, M> proxyFor(I entityId, MessageClass targetMessageClass);
 
     protected Repository<I, E> repository() {
         return repository;
