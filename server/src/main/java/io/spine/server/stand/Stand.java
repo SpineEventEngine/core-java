@@ -300,10 +300,11 @@ public class Stand implements AutoCloseable {
             @Override
             public void run() {
                 Collection<Any> readResult = queryProcessor.process(query());
-                QueryResponse response = QueryResponse.newBuilder()
-                                                      .addAllMessages(readResult)
-                                                      .setResponse(Responses.ok())
-                                                      .build();
+                QueryResponse response = QueryResponse
+                        .newBuilder()
+                        .addAllMessages(readResult)
+                        .setResponse(Responses.ok())
+                        .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
             }
