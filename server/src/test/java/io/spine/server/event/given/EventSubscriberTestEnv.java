@@ -22,6 +22,7 @@ package io.spine.server.event.given;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.FloatValue;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -61,6 +62,11 @@ public class EventSubscriberTestEnv {
         @Subscribe
         void on(UInt32Value message) {
             // Do nothing. Just expose the method.
+        }
+
+        @Subscribe(external = true)
+        void on(StringValue message) {
+
         }
 
         public boolean isMethodCalled() {
