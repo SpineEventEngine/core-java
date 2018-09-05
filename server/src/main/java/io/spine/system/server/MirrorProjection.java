@@ -20,14 +20,30 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.EntityFilters;
+import io.spine.client.Target;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
+import io.spine.type.TypeUrl;
+
+import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.FieldMasks.applyMask;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
+
+    private static final String AGGREGATE_TYPE_FIELD = "aggregate_type";
 
     private MirrorProjection(MirrorId id) {
         super(id);
@@ -85,5 +101,31 @@ public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilde
         getBuilder().setId(getId())
                     .setLifecycle(flags);
         setDeleted(false);
+    }
+
+    static EntityFilters buildFilters(Target target) {
+        EntityFilters filters = target.getFilters();
+        CompositeColumnFilter typeFilter = all(eq(AGGREGATE_TYPE_FIELD, target.getType()));
+        EntityFilters appendedFilters = filters.toBuilder()
+                                               .addFilter(typeFilter)
+                                               .build();
+        return appendedFilters;
+    }
+
+    final Any aggregateState(FieldMask fields) {
+        Any completeState = aggregateState();
+        Message unpacked = unpack(completeState);
+        Message trimmedState = applyMask(fields, unpacked, TypeUrl.ofEnclosed(completeState));
+        Any result = pack(trimmedState);
+        return result;
+    }
+
+    private Any aggregateState() {
+        return getState().getState();
+    }
+
+    @Column(name = AGGREGATE_TYPE_FIELD)
+    public String getTypeUrl() {
+        return aggregateState().getTypeUrl();
     }
 }

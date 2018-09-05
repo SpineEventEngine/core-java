@@ -24,6 +24,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
 
+import java.util.Iterator;
+
+import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptyList;
 
 /**
@@ -51,7 +54,7 @@ public enum NoOpSystemGateway implements SystemGateway {
     }
 
     @Override
-    public Iterable<Any> read(Query query) {
-        return emptyList();
+    public Iterator<Any> read(Query query) {
+        return emptyIterator();
     }
 }

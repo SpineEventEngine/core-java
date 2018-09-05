@@ -20,33 +20,40 @@
 
 package io.spine.system.server;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.FieldMask;
+import io.spine.client.EntityFilters;
+import io.spine.client.Queries;
 import io.spine.client.Query;
+import io.spine.client.Target;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
-import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.type.TypeUrl;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.collect.Streams.stream;
+import static io.spine.client.Queries.typeOf;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.option.Options.option;
 import static io.spine.option.OptionsProto.entity;
+import static io.spine.server.entity.FieldMasks.maskOf;
+import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
+import static io.spine.system.server.MirrorProjection.buildFilters;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
-    Iterable<Any> execute(Query query) {
-        return ImmutableList.of();
-    }
+    private static final FieldMask AGGREGATE_STATE_FIELD =
+            maskOf(Mirror.getDescriptor(), STATE_FIELD_NUMBER);
 
     @Override
     public void onRegistered() {
@@ -93,6 +100,29 @@ public class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProje
                 .newBuilder()
                 .setValue(any)
                 .build();
+        return result;
+    }
+
+    /**
+     * Executes the given query upon the aggregate states of the target type.
+     *
+     * @param query an aggregate query
+     * @return an {@code Iterator} over the result aggregate states
+     */
+    Iterator<Any> execute(Query query) {
+        FieldMask aggregateFields = query.getFieldMask();
+        Target target = query.getTarget();
+        EntityFilters filters = buildFilters(target);
+        Iterator<MirrorProjection> mirrors = find(filters, AGGREGATE_STATE_FIELD);
+        Iterator<Any> result = aggregateStates(mirrors, aggregateFields);
+        return result;
+    }
+
+    private static Iterator<Any> aggregateStates(Iterator<MirrorProjection> projections,
+                                                 FieldMask requiredFields) {
+        Iterator<Any> result = stream(projections)
+                .map(mirror -> mirror.aggregateState(requiredFields))
+                .iterator();
         return result;
     }
 }

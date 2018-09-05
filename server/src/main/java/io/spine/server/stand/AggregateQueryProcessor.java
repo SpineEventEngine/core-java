@@ -26,6 +26,8 @@ import io.spine.client.Query;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.system.server.SystemGateway;
 
+import java.util.Iterator;
+
 import static com.google.common.collect.ImmutableList.copyOf;
 
 /**
@@ -43,7 +45,7 @@ class AggregateQueryProcessor implements QueryProcessor {
 
     @Override
     public ImmutableCollection<Any> process(Query query) {
-        Iterable<Any> read = systemGateway.read(query);
+        Iterator<Any> read = systemGateway.read(query);
         ImmutableList<Any> result = copyOf(read);
         return result;
     }

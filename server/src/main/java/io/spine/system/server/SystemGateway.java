@@ -24,6 +24,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
 
+import java.util.Iterator;
+
 /**
  * A gateway for sending messages into a {@link SystemContext}.
  *
@@ -60,5 +62,5 @@ public interface SystemGateway {
         return new DefaultSystemGateway(system);
     }
 
-    Iterable<Any> read(Query query);
+    Iterator<Any> read(Query query);
 }

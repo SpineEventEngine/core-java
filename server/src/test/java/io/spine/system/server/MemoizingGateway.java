@@ -28,7 +28,10 @@ import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptyList;
 
 /**
@@ -94,10 +97,10 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     @Override
-    public Iterable<Any> read(Query query) {
+    public Iterator<Any> read(Query query) {
         TenantId tenantId = currentTenant();
         lastSeenQuery = new MemoizedMessage(query, tenantId);
-        return emptyList();
+        return emptyIterator();
     }
 
     /** Obtains the ID of the current tenant. */

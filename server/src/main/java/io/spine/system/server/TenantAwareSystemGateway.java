@@ -28,6 +28,7 @@ import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 
+import java.util.Iterator;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -82,7 +83,7 @@ final class TenantAwareSystemGateway implements SystemGateway {
     }
 
     @Override
-    public Iterable<Any> read(Query query) {
+    public Iterator<Any> read(Query query) {
         return run(() -> delegate.read(query));
     }
 

@@ -32,6 +32,7 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.route.EventRoute;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -83,7 +84,7 @@ final class DefaultSystemGateway implements SystemGateway {
     }
 
     @Override
-    public Iterable<Any> read(Query query) {
+    public Iterator<Any> read(Query query) {
         @SuppressWarnings("unchecked") // Logically checked.
         MirrorRepository repository = (MirrorRepository)
                 system.findRepository(Mirror.class)
@@ -93,7 +94,7 @@ final class DefaultSystemGateway implements SystemGateway {
                                       system.getName().getValue()
                               )
                       );
-        Iterable<Any> result = repository.execute(query);
+        Iterator<Any> result = repository.execute(query);
         return result;
     }
 
