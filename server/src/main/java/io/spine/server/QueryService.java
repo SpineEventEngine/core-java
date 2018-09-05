@@ -55,8 +55,6 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         return new Builder();
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-        // as we override default implementation with `unimplemented` status.
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
         log().debug("Incoming query: {}", query);
