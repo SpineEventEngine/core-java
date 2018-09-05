@@ -22,8 +22,6 @@ package io.spine.server.aggregate;
 
 import io.spine.core.EventEnvelope;
 
-import java.util.Set;
-
 /**
  * Abstract base for endpoints that dispatch events to aggregates.
  *
@@ -36,7 +34,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, EventEnvelope, Set<I>> {
+        extends AggregateEndpoint<I, A, EventEnvelope> {
 
     AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
         super(repository, envelope);

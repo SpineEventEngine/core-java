@@ -39,7 +39,7 @@ import static io.spine.server.command.DispatchCommand.operationFor;
  */
 @Internal
 public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, CommandEnvelope, I> {
+        extends PmEndpoint<I, P, CommandEnvelope> {
 
     protected PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
         super(repository, cmd);
@@ -49,22 +49,6 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     PmCommandEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository,
                                CommandEnvelope event) {
         return new PmCommandEndpoint<>(repository, event);
-    }
-
-    static <I, P extends ProcessManager<I, ?, ?>>
-    I handle(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
-        PmCommandEndpoint<I, P> endpoint = of(repository, cmd);
-        I result = endpoint.handle();
-        return result;
-    }
-
-    @Override
-    protected I getTargets() {
-        CommandEnvelope envelope = envelope();
-        I id = repository().getCommandRouting()
-                           .apply(envelope.getMessage(), envelope.getCommandContext());
-        repository().onCommandTargetSet(id, envelope.getId());
-        return id;
     }
 
     @Override

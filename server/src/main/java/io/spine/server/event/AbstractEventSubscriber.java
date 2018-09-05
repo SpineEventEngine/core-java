@@ -132,7 +132,7 @@ public abstract class AbstractEventSubscriber
 
         @Override
         public Set<ExternalMessageClass> getMessageClasses() {
-            return ExternalMessageClass.fromEventClasses(thisClass.getExternalEventClasses());
+            return ExternalMessageClass.fromEventClasses(getExternalEventClasses());
         }
 
         @CanIgnoreReturnValue

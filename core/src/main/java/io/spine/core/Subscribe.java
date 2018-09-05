@@ -49,7 +49,7 @@ import java.lang.annotation.Target;
  * <p>A rejection subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
- *     <li>is package-private;
+ *     <li>is {@code public};
  *     <li>returns {@code void};
  *     <li>accepts a rejection message derived from {@link com.google.protobuf.Message Message}
  *          as the first parameter;

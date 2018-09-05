@@ -81,10 +81,8 @@ public final class DispatchCommand {
      * @return the produced events including the rejections thrown by the command handler
      */
     public List<Event> perform() {
-        Command cmd = command.getCommand();
-        lifecycle.onDispatchCommand(cmd);
         List<Event> result = entity.dispatchCommand(command);
-        onCommandResult(cmd, result);
+        onCommandResult(command.getCommand(), result);
         return result;
     }
 

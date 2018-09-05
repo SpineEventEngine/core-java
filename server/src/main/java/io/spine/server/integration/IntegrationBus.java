@@ -35,7 +35,6 @@ import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
 
 import java.util.Optional;
@@ -425,16 +424,9 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                        "`eventBus` must be set for IntegrationBus.");
             checkNotDefault(boundedContextName,
                             "`boundedContextName` must be set for IntegrationBus.");
-
-            if (transportFactory == null) {
-                transportFactory = initTransportFactory();
-            }
-
+            checkState(transportFactory != null,
+                       "`TransportFactory` must be set for IntegrationBus.");
             return new IntegrationBus(this);
-        }
-
-        private static TransportFactory initTransportFactory() {
-            return InMemoryTransportFactory.newInstance();
         }
 
         @Override

@@ -30,7 +30,9 @@ import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
+import io.spine.server.integration.given.IntegrationBusTestEnv.MemoizingProjectDetails1Repository;
+import io.spine.server.integration.given.IntegrationBusTestEnv.MemoizingProjectDetails2Repository;
+import io.spine.server.integration.given.IntegrationBusTestEnv.MemoizingProjection;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
@@ -43,11 +45,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
-import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithContextAwareEntitySubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithProjectCreatedNeeds;
@@ -75,7 +73,7 @@ class IntegrationBusTest {
         ProjectDetails.clear();
         ProjectWizard.clear();
         ProjectCountAggregate.clear();
-        ContextAwareProjectDetails.clear();
+        MemoizingProjection.clear();
         ProjectEventsSubscriber.clear();
         ProjectStartedExtSubscriber.clear();
     }
@@ -126,32 +124,22 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to entities with external subscribers of multiple BCs")
         void toEntitiesOfMultipleBcs() {
-            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
 
-            Set<BoundedContextName> destinationNames = newHashSet();
-            BoundedContext sourceContext = contextWithTransport(transportFactory);
-            for (int i = 0; i < 42; i++) {
-                BoundedContext destinationCtx =
-                        contextWithContextAwareEntitySubscriber(transportFactory);
-                BoundedContextName name = destinationCtx.getName();
-                destinationNames.add(name);
-            }
+            BoundedContext sourceContext = contextWithTransport(transport);
 
-            assertTrue(ContextAwareProjectDetails.getExternalContexts()
-                                                 .isEmpty());
+            BoundedContext destination1 = contextWithTransport(transport);
+            destination1.register(new MemoizingProjectDetails1Repository());
 
+            BoundedContext destination2 = contextWithTransport(transport);
+            destination2.register(new MemoizingProjectDetails2Repository());
+
+            assertTrue(MemoizingProjection.events()
+                                          .isEmpty());
             Event event = projectCreated();
             sourceContext.getEventBus()
                          .post(event);
-
-            assertEquals(destinationNames.size(),
-                         ContextAwareProjectDetails.getExternalContexts()
-                                                   .size());
-
-            assertEquals(destinationNames.size(),
-                         ContextAwareProjectDetails.getExternalEvents()
-                                                   .size());
-
+            assertEquals(2, MemoizingProjection.events().size());
         }
 
         @SuppressWarnings("unused") // Variables declared for readability.

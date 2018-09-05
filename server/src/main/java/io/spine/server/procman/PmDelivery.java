@@ -58,12 +58,12 @@ public abstract class PmDelivery<I,
                             B extends ShardedStream.AbstractBuilder<I, M, B, S>>
             extends Consumer<I, P, M, S, B> {
 
-        protected PmMessageConsumer(DeliveryTag<M> tag, Repository<I, P> repository) {
+        protected PmMessageConsumer(DeliveryTag tag, Repository<I, P> repository) {
             super(tag, repository);
         }
 
         @Override
-        protected abstract PmEndpoint<I, P, M, ?> getEndpoint(M messageEnvelope);
+        protected abstract PmEndpoint<I, P, M> getEndpoint(M messageEnvelope);
 
         @Override
         protected ProcessManagerRepository<I, P, ?> repository() {

@@ -21,7 +21,10 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -30,7 +33,6 @@ import io.spine.server.entity.LifecycleFlags;
 import java.util.function.UnaryOperator;
 
 import static com.google.protobuf.util.Timestamps.compare;
-import static io.spine.base.Time.getCurrentTime;
 
 /**
  * The aggregate which manages the history of a single entity.
@@ -47,8 +49,8 @@ import static io.spine.base.Time.getCurrentTime;
  * of {@code EntityHistory} the history of a record-based entity can be investigated and
  * manipulated. The major use case for this facility is implementing idempotent message handlers.
  *
- * <p>This aggregate belongs to the {@code System} bounded context. The aggregate doesn't have
- * an own entity history.
+ * <p>This aggregate belongs to the {@code System} bounded context. This aggregate doesn't have
+ * an entity history of its own.
  *
  * @author Dmytro Dashenkov
  */
@@ -69,41 +71,38 @@ final class EntityHistoryAggregate
     }
 
     @Assign
-    EventDispatchedToSubscriber handle(DispatchEventToSubscriber command) {
-        DispatchedEvent dispatchedEvent = DispatchedEvent
-                .newBuilder()
-                .setEvent(command.getEventId())
-                .setWhenDispatched(getCurrentTime())
-                .build();
+    EventDispatchedToSubscriber handle(DispatchEventToSubscriber command)
+            throws CannotDispatchEventTwice {
+        Event event = command.getEvent();
+        checkNotDuplicate(event);
         return EventDispatchedToSubscriber.newBuilder()
                                           .setReceiver(command.getReceiver())
-                                          .setPayload(dispatchedEvent)
+                                          .setPayload(event)
+                                          .setWhenDispatched(now())
                                           .build();
     }
 
     @Assign
-    EventDispatchedToReactor handle(DispatchEventToReactor command) {
-        DispatchedEvent dispatchedEvent = DispatchedEvent
-                .newBuilder()
-                .setEvent(command.getEventId())
-                .setWhenDispatched(getCurrentTime())
-                .build();
+    EventDispatchedToReactor handle(DispatchEventToReactor command)
+            throws CannotDispatchEventTwice {
+        Event event = command.getEvent();
+        checkNotDuplicate(event);
         return EventDispatchedToReactor.newBuilder()
                                        .setReceiver(command.getReceiver())
-                                       .setPayload(dispatchedEvent)
+                                       .setPayload(event)
+                                       .setWhenDispatched(now())
                                        .build();
     }
 
     @Assign
-    CommandDispatchedToHandler handle(DispatchCommandToHandler command) {
-        DispatchedCommand dispatchedCommand = DispatchedCommand
-                .newBuilder()
-                .setCommand(command.getCommandId())
-                .setWhenDispatched(getCurrentTime())
-                .build();
+    CommandDispatchedToHandler handle(DispatchCommandToHandler command)
+            throws CannotDispatchCommandTwice {
+        Command domainCommand = command.getCommand();
+        checkNotDuplicate(domainCommand);
         return CommandDispatchedToHandler.newBuilder()
                                          .setReceiver(command.getReceiver())
-                                         .setPayload(dispatchedCommand)
+                                         .setPayload(domainCommand)
+                                         .setWhenDispatched(now())
                                          .build();
     }
 
@@ -165,20 +164,20 @@ final class EntityHistoryAggregate
 
     @Apply
     void on(EventDispatchedToSubscriber event) {
-        updateLastEventTime(event.getPayload()
-                                 .getWhenDispatched());
+        getBuilder().setId(event.getReceiver());
+        updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
     void on(EventDispatchedToReactor event) {
-        updateLastEventTime(event.getPayload()
-                                 .getWhenDispatched());
+        getBuilder().setId(event.getReceiver());
+        updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
     void on(CommandDispatchedToHandler event) {
-        updateLastCommandTime(event.getPayload()
-                                   .getWhenDispatched());
+        getBuilder().setId(event.getReceiver());
+        updateLastCommandTime(event.getWhenDispatched());
     }
 
     @Apply
@@ -216,8 +215,23 @@ final class EntityHistoryAggregate
 
     @Apply(allowImport = true)
     void on(EventImported event) {
-        updateLastEventTime(event.getPayload()
-                                 .getWhenDispatched());
+        updateLastEventTime(event.getWhenImported());
+    }
+
+    private void checkNotDuplicate(Event event) throws CannotDispatchEventTwice {
+        DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
+        boolean duplicate = lookup.isDuplicate(event);
+        if (duplicate) {
+            throw new CannotDispatchEventTwice(getId(), event, now());
+        }
+    }
+
+    private void checkNotDuplicate(Command command) throws CannotDispatchCommandTwice {
+        DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
+        boolean duplicate = lookup.isDuplicate(command);
+        if (duplicate) {
+            throw new CannotDispatchCommandTwice(getId(), command, now());
+        }
     }
 
     private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
@@ -262,5 +276,9 @@ final class EntityHistoryAggregate
         DispatchingHistory newHistory = mutation.apply(builder)
                                                 .build();
         getBuilder().setDispatching(newHistory);
+    }
+
+    private static Timestamp now() {
+        return Time.getCurrentTime();
     }
 }

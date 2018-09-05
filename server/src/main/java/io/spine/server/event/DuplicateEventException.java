@@ -18,39 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.server.event;
 
-import io.spine.core.TenantId;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.tenant.TenantAwareRunner;
+import com.google.protobuf.Message;
+import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.core.Events;
+import io.spine.type.TypeName;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.fail;
+import static java.lang.String.format;
 
 /**
- * A test repository which can load an aggregate by its ID and fail the test if the
- * aggregate with such ID is not found.
+ * Reports an attempt to dispatch a duplicate event.
  *
- * @param <I> the type of aggregate identifiers
- * @param <A> the type of aggregates
- * @author Alexander Yevsyukov
+ * <p>An event is considered a duplicate when its ID matches the ID of another event which was
+ * already dispatched to a given entity.
+ *
+ * @author Dmytro Dashenkov
  */
-public class AbstractAggregateTestRepository<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateRepository<I, A> {
+public final class DuplicateEventException extends RuntimeException {
 
-    public A loadAggregate(I id) {
-        Optional<A> optional = find(id);
-        if (!optional.isPresent()) {
-            fail("Aggregate not found.");
-        }
-        return optional.get();
+    private static final String MESSAGE =
+            "The event %s (ID: %s) cannot be dispatched to a single entity twice.";
+
+    private static final long serialVersionUID = 0L;
+
+    public DuplicateEventException(Event event) {
+        super(messageFrom(event));
     }
 
-    public A loadAggregate(TenantId tenantId, I id) {
-        TenantAwareRunner runner = TenantAwareRunner.with(tenantId);
-        A result = runner.evaluate(() -> loadAggregate(id));
+    private static String messageFrom(Event event) {
+        EventId eventId = event.getId();
+        Message eventMessage = Events.getMessage(event);
+        TypeName eventType = TypeName.of(eventMessage);
+        String result = format(MESSAGE, eventType, eventId.getValue());
         return result;
     }
 }
