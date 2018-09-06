@@ -50,6 +50,8 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 public class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
+    // TODO:2018-09-06:dmytro.dashenkov: Use for querying projection states.
+    // todo            https://github.co/SpineEventEngine/core-java/issues/840
     private static final FieldMask AGGREGATE_STATE_FIELD =
             maskOf(Mirror.getDescriptor(), STATE_FIELD_NUMBER);
 
@@ -111,7 +113,7 @@ public class MirrorRepository
         FieldMask aggregateFields = query.getFieldMask();
         Target target = query.getTarget();
         EntityFilters filters = buildFilters(target);
-        Iterator<MirrorProjection> mirrors = find(filters, AGGREGATE_STATE_FIELD);
+        Iterator<MirrorProjection> mirrors = find(filters, FieldMask.getDefaultInstance());
         Iterator<Any> result = aggregateStates(mirrors, aggregateFields);
         return result;
     }
