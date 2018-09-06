@@ -52,7 +52,7 @@ public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilde
     private static final String TYPE_COLUMN_NAME = "aggregate_type";
     private static final String TYPE_COLUMN_QUERY_NAME = "aggregateType";
 
-    private MirrorProjection(MirrorId id) {
+    public MirrorProjection(MirrorId id) {
         super(id);
     }
 
