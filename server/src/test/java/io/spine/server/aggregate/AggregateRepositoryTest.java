@@ -35,7 +35,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
@@ -47,10 +46,8 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectingRepos
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -61,6 +58,7 @@ import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
@@ -69,6 +67,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
@@ -471,16 +470,9 @@ public class AggregateRepositoryTest {
     }
 
     @Nested
+    @ExtendWith(ShardingReset.class)
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
-
-        @BeforeEach
-        void setUp() {
-            InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
-            InProcessSharding sharding = new InProcessSharding(transport);
-            ServerEnvironment.getInstance()
-                             .replaceSharding(sharding);
-        }
 
         @Test
         @DisplayName("after command dispatching")
