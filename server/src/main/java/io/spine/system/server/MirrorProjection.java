@@ -45,14 +45,22 @@ import static io.spine.server.entity.FieldMasks.applyMask;
 import static java.util.stream.Collectors.toList;
 
 /**
+ * The {@link Mirror} projection for domain aggregates.
+ *
+ * <p>This entity belongs to the system context. It mirrors the state of an aggregate. Not every
+ * aggregate has a mirror projection. Refer to the {@link MirrorRepository} for more details.
+ *
+ * <p>The projection defines an {@link io.spine.server.entity.storage.EntityColumn EntityColumn}
+ * which stored the {@linkplain #getAggregateType() type URL} of the state, which is mirrored.
+ *
  * @author Dmytro Dashenkov
  */
-public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
+public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
 
     private static final String TYPE_COLUMN_NAME = "aggregate_type";
     private static final String TYPE_COLUMN_QUERY_NAME = "aggregateType";
 
-    public MirrorProjection(MirrorId id) {
+    MirrorProjection(MirrorId id) {
         super(id);
     }
 
@@ -172,6 +180,18 @@ public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilde
         return getState().getState();
     }
 
+    /**
+     * Obtains the type of the mirrored aggregate state.
+     *
+     * <p>This method defined an {@link io.spine.server.entity.storage.EntityColumn EntityColumn}
+     * required for effective querying.
+     *
+     * <p>The framework never queries for several types of mirrors in a single call.
+     * {@link io.spine.annotation.SPI SPI} users may exploit this fact when optimising databases for
+     * the system types.
+     *
+     * @return the state {@link TypeUrl} as a {@code String}
+     */
     @Column(name = TYPE_COLUMN_NAME)
     public String getAggregateType() {
         return aggregateState().getTypeUrl();
