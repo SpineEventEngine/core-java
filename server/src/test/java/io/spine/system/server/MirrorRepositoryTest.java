@@ -20,13 +20,23 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
+import io.spine.client.Query;
 import io.spine.client.QueryFactory;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Iterator;
+
+import static io.spine.system.server.SystemBoundedContexts.systemOf;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Dmytro Dashenkov
@@ -39,7 +49,11 @@ class MirrorRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new MirrorRepository();
+        BoundedContext domainContext = BoundedContext.newBuilder().build();
+        BoundedContext systemContext = systemOf(domainContext);
+        repository = (MirrorRepository) systemContext
+                .findRepository(Mirror.class)
+                .orElseGet(() -> fail("MirrorRepository must be registered."));
         queries = TestActorRequestFactory.newInstance(MirrorRepositoryTest.class).query();
     }
 
@@ -61,7 +75,10 @@ class MirrorRepositoryTest {
         @Test
         @DisplayName("for an unknown type")
         void unknown() {
+            Query query = queries.all(Timestamp.class);
 
+            Iterator<Any> result = repository.execute(query);
+            assertFalse(result.hasNext());
         }
     }
 
