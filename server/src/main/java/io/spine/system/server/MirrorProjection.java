@@ -25,6 +25,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
+import io.spine.client.EntityId;
+import io.spine.client.EntityIdFilter;
 import io.spine.client.Target;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.LifecycleFlags;
@@ -32,19 +34,23 @@ import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.type.TypeUrl;
 
+import java.util.Collection;
+import java.util.List;
+
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
 
-    private static final String AGGREGATE_TYPE_STORED_NAME = "aggregate_type";
-    private static final String AGGREGATE_TYPE_QUERY_NAME = "aggregateType";
+    private static final String TYPE_COLUMN_NAME = "aggregate_type";
+    private static final String TYPE_COLUMN_QUERY_NAME = "aggregateType";
 
     private MirrorProjection(MirrorId id) {
         super(id);
@@ -105,12 +111,53 @@ public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilde
     }
 
     static EntityFilters buildFilters(Target target) {
+        EntityIdFilter idFilter = buildIdFilter(target);
         EntityFilters filters = target.getFilters();
-        CompositeColumnFilter typeFilter = all(eq(AGGREGATE_TYPE_QUERY_NAME, target.getType()));
+        CompositeColumnFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
         EntityFilters appendedFilters = filters.toBuilder()
+                                               .setIdFilter(idFilter)
                                                .addFilter(typeFilter)
                                                .build();
         return appendedFilters;
+    }
+
+    private static EntityIdFilter buildIdFilter(Target target) {
+        if (target.getIncludeAll()) {
+            return EntityIdFilter.getDefaultInstance();
+        }
+        List<EntityId> domainIds = target.getFilters()
+                                         .getIdFilter()
+                                         .getIdsList();
+        if (domainIds.isEmpty()) {
+            return EntityIdFilter.getDefaultInstance();
+        }
+        EntityIdFilter result = assembleSystemIdFilter(domainIds);
+        return result;
+    }
+
+    private static EntityIdFilter assembleSystemIdFilter(Collection<EntityId> domainIds) {
+        List<EntityId> mirrorIds = domainIds.stream()
+                                            .map(MirrorProjection::domainToSystemId)
+                                            .collect(toList());
+        EntityIdFilter idFilter = EntityIdFilter
+                .newBuilder()
+                .addAllIds(mirrorIds)
+                .build();
+        return idFilter;
+    }
+
+    private static EntityId domainToSystemId(EntityId domainId) {
+        Any aggregateId = domainId.getId();
+        MirrorId mirrorId = MirrorId
+                .newBuilder()
+                .setValue(aggregateId)
+                .build();
+        Any anyId = pack(mirrorId);
+        EntityId systemId = EntityId
+                .newBuilder()
+                .setId(anyId)
+                .build();
+        return systemId;
     }
 
     final Any aggregateState(FieldMask fields) {
@@ -125,7 +172,7 @@ public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilde
         return getState().getState();
     }
 
-    @Column(name = AGGREGATE_TYPE_STORED_NAME)
+    @Column(name = TYPE_COLUMN_NAME)
     public String getAggregateType() {
         return aggregateState().getTypeUrl();
     }

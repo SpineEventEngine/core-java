@@ -30,6 +30,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.server.BoundedContext;
 import io.spine.test.system.server.Photo;
+import io.spine.test.system.server.PhotoId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
@@ -43,6 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -53,6 +55,7 @@ import static io.spine.testing.server.TestEventFactory.newInstance;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -98,11 +101,22 @@ class MirrorRepositoryTest {
             @DisplayName("find all instances")
             void includeAll() {
                 Query query = queries.all(Photo.class);
-                Iterator<Any> result = repository.execute(query);
-                List<? extends Message> readMessages = stream(result)
-                        .map(unpackFunc())
-                        .collect(toList());
+                List<? extends Message> readMessages = execute(query);
                 assertThat(readMessages, containsInAnyOrder(givenPhotos.values().toArray()));
+            }
+
+            @Test
+            @DisplayName("find an instance by ID")
+            void byId() {
+                Photo target = givenPhotos.values()
+                                          .stream()
+                                          .findAny()
+                                          .orElseGet(() -> fail("No test data."));
+                PhotoId targetId = target.getId();
+                Query query = queries.byIds(Photo.class, of(targetId));
+                List<? extends Message> readMessages = execute(query);
+                assertEquals(1, readMessages.size());
+                assertEquals(target, readMessages.get(0));
             }
         }
 
@@ -127,6 +141,14 @@ class MirrorRepositoryTest {
     private void dispatchEvent(Event event) {
         EventEnvelope envelope = EventEnvelope.of(event);
         repository.dispatch(envelope);
+    }
+
+    private List<? extends Message> execute(Query query) {
+        Iterator<Any> result = repository.execute(query);
+        List<? extends Message> readMessages = stream(result)
+                .map(unpackFunc())
+                .collect(toList());
+        return readMessages;
     }
 
     private static Event entityStateChanged(EntityHistoryId historyId, Message state) {
