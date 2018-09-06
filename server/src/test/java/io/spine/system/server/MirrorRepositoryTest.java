@@ -68,7 +68,6 @@ import static io.spine.system.server.given.mirror.RepositoryTestEnv.givenPhotos;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -118,7 +117,7 @@ class MirrorRepositoryTest {
             @DisplayName("find an instance by ID")
             void byId() {
                 Photo target = onePhoto();
-                checkRead(target);
+                readAndCheck(target);
             }
 
             @Test
@@ -131,7 +130,7 @@ class MirrorRepositoryTest {
                                      .byId(targetId)
                                      .where(eq(archived.name(), true))
                                      .build();
-                checkOneRead(query, target);
+                checkRead(query, target);
             }
 
             @Test
@@ -144,26 +143,66 @@ class MirrorRepositoryTest {
                                      .byId(targetId)
                                      .where(eq(deleted.name(), true))
                                      .build();
-                checkOneRead(query, target);
+                checkRead(query, target);
             }
 
-            private void checkRead(Photo target) {
+            @Test
+            @DisplayName("find all archived instances")
+            void allArchived() {
+                Photo firstPhoto = onePhoto();
+                Photo secondPhoto = anotherPhoto();
+                archive(firstPhoto);
+                archive(secondPhoto);
+
+                Query query = queries.select(Photo.class)
+                                     .where(eq(archived.name(), true),
+                                            eq(deleted.name(), false))
+                                     .build();
+                checkRead(query, firstPhoto, secondPhoto);
+            }
+
+            @Test
+            @DisplayName("find all deleted instances")
+            void allDeleted() {
+                Photo firstPhoto = onePhoto();
+                Photo secondPhoto = anotherPhoto();
+                delete(firstPhoto);
+                delete(secondPhoto);
+
+                Query query = queries.select(Photo.class)
+                                     .where(eq(deleted.name(), true),
+                                            eq(archived.name(), false))
+                                     .build();
+                checkRead(query, firstPhoto, secondPhoto);
+            }
+
+            private void readAndCheck(Photo target) {
                 PhotoId targetId = target.getId();
                 Query query = queries.byIds(Photo.class, of(targetId));
-                checkOneRead(query, target);
+                checkRead(query, target);
             }
 
-            private void checkOneRead(Query query, Photo expected) {
+            private void checkRead(Query query, Photo... expected) {
                 List<? extends Message> readMessages = execute(query);
-                assertEquals(1, readMessages.size());
-                assertEquals(expected, readMessages.get(0));
+                assertThat(readMessages, containsInAnyOrder(expected));
             }
 
             private Photo onePhoto() {
                 Photo target = givenPhotos.values()
                                           .stream()
-                                          .findAny()
+                                          .findFirst()
                                           .orElseGet(() -> fail("No test data."));
+                return target;
+            }
+
+            private Photo anotherPhoto() {
+                Photo target = givenPhotos.values()
+                                          .stream()
+                                          .skip(1)
+                                          .findFirst()
+                                          .orElseGet(() -> fail(
+                                                  "Too few test data items: " + givenPhotos.size())
+                                          );
                 return target;
             }
 
