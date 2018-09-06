@@ -28,7 +28,6 @@ import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.type.TypeUrl;
 
 import java.util.Iterator;
@@ -48,7 +47,8 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 /**
  * @author Dmytro Dashenkov
  */
-public class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
+public class MirrorRepository
+        extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
     private static final FieldMask AGGREGATE_STATE_FIELD =
             maskOf(Mirror.getDescriptor(), STATE_FIELD_NUMBER);
