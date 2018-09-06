@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
@@ -100,16 +99,6 @@ final class TenantAwareSystemGateway implements SystemGateway {
             }
         }.execute();
         return result;
-    }
-
-    @VisibleForTesting
-    SystemGateway getDelegate() {
-        return delegate;
-    }
-
-    @VisibleForTesting
-    TenantId getTenantId() {
-        return tenantId;
     }
 
     /**
