@@ -483,8 +483,9 @@ class StandTest extends TenantAwareTest {
         Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
         Topic someCustomers = requestFactory.topic()
-                                            .someOf(Customer.class,
-                                                    sampleCustomers.keySet());
+                                            .select(Customer.class)
+                                            .byId(sampleCustomers.keySet())
+                                            .build();
         Map<CustomerId, Customer> callbackStates = newHashMap();
         MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override

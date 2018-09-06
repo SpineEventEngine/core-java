@@ -67,7 +67,8 @@ public final class Queries {
      * <p>Throws an {@link IllegalStateException} if the {@code Target} type is unknown to
      * the application.
      *
-     * @param query the query of interest.
+     * @param query
+     *         the query of interest.
      * @return the URL of the type of the query {@linkplain Query#getTarget() target}
      */
     public static TypeUrl typeOf(Query query) {
@@ -83,18 +84,25 @@ public final class Queries {
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
-                                         @Nullable Set<? extends Message> ids,
+    static QueryVBuilder queryBuilderFor(Class<? extends Message> entityClass,
+                                         @Nullable Set<?> ids,
                                          @Nullable Set<CompositeColumnFilter> columnFilters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
         Target target = composeTarget(entityClass, ids, columnFilters);
-        Query.Builder queryBuilder = Query.newBuilder()
-                                          .setTarget(target);
+        QueryVBuilder builder = queryBuilderFor(target, fieldMask);
+        return builder;
+    }
+
+    static QueryVBuilder queryBuilderFor(Target target, @Nullable FieldMask fieldMask) {
+        checkNotNull(target);
+
+        QueryVBuilder builder = QueryVBuilder.newBuilder()
+                                             .setTarget(target);
         if (fieldMask != null) {
-            queryBuilder.setFieldMask(fieldMask);
+            builder.setFieldMask(fieldMask);
         }
-        return queryBuilder;
+        return builder;
     }
 }

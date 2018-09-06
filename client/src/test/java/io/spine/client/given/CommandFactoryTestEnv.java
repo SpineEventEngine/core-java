@@ -18,24 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.client.given;
+
+import io.spine.test.commands.RequiredFieldCommand;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @author Mykhailo Drachuk
  */
- 
-def final SPINE_VERSION = '0.10.87-SNAPSHOT'
+public class CommandFactoryTestEnv {
 
-ext {
+    public static final RequiredFieldCommand INVALID_COMMAND = invalidCommand();
 
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
+    /** Prevents instantiation of this test environment class. */
+    private CommandFactoryTestEnv() {
+    }
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.69-SNAPSHOT'
-
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.14.0'
+    private static RequiredFieldCommand invalidCommand() {
+        return RequiredFieldCommand.getDefaultInstance();
+    }
 }

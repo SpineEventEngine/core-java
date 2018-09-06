@@ -18,24 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.client.given;
+
+import com.google.protobuf.Any;
+import io.spine.client.EntityId;
+
+import javax.annotation.Nullable;
+import java.util.function.Function;
+
+import static io.spine.protobuf.TypeConverter.toObject;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @author Mykhailo Drachuk
  */
- 
-def final SPINE_VERSION = '0.10.87-SNAPSHOT'
+public class EntityIdUnpacker<T> implements Function<EntityId, T> {
 
-ext {
+    private final Class<T> targetClass;
 
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
+    public EntityIdUnpacker(Class<T> targetClass) {
+        this.targetClass = targetClass;
+    }
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.69-SNAPSHOT'
+    @Override
+    public T apply(@Nullable EntityId entityId) {
+        assertNotNull(entityId);
+        Any value = entityId.getId();
+        T actual = toObject(value, targetClass);
+        return actual;
+    }
 
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.14.0'
+    public static <T> EntityIdUnpacker<T> unpacker(Class<T> targetClass) {
+        return new EntityIdUnpacker<>(targetClass);
+    }
 }
