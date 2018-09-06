@@ -20,6 +20,10 @@
 
 package io.spine.system.server.given.gateway;
 
+import io.spine.server.BoundedContext;
+
+import static io.spine.system.server.SystemBoundedContexts.systemOf;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -31,5 +35,16 @@ public class DefaultSystemGatewayTestEnv {
     private DefaultSystemGatewayTestEnv() {
     }
 
+    public static BoundedContext contextWithDomainAggregate() {
+        BoundedContext context = BoundedContext.newBuilder().build();
+        context.register(new ShoppingListRepository());
+        return context;
+    }
 
+    public static BoundedContext contextWithSystemAggregate() {
+        BoundedContext context = BoundedContext.newBuilder().build();
+        BoundedContext systemContext = systemOf(context);
+        systemContext.register(new ShoppingListRepository());
+        return context;
+    }
 }

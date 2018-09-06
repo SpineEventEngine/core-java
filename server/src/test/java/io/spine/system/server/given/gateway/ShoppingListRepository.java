@@ -21,9 +21,10 @@
 package io.spine.system.server.given.gateway;
 
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.test.system.server.ListId;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class ShoppingListRepository extends AggregateRepository<String, ShoppingListAggregate> {
+public class ShoppingListRepository extends AggregateRepository<ListId, ShoppingListAggregate> {
 }

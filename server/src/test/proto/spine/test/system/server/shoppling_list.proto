@@ -12,9 +12,13 @@ option java_multiple_files = true;
 message ShoppingList {
     option (entity).kind = AGGREGATE;
 
-    string id = 1;
+    ListId id = 1;
 
     repeated string item = 2;
 
     uint32 hard_copies_count = 3;
+}
+
+message ListId {
+    string id = 1;
 }

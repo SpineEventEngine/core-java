@@ -29,24 +29,26 @@ option java_package = "io.spine.system.server";
 option java_outer_classname = "GWEventsProto";
 option java_multiple_files = true;
 
+import "spine/test/system/server/shoppling_list.proto";
+
 message ShoppingListCreated {
 
-    string id = 1;
+    ListId id = 1;
 }
 
 message ListItemAdded {
 
-    string list_id = 1;
+    ListId list_id = 1;
 
     string item = 2;
 }
 
 message HardCopyPrinted {
 
-    string list_id = 1;
+    ListId list_id = 1;
 }
 
 message HardCopyLost {
 
-    string list_id = 1;
+    ListId list_id = 1;
 }

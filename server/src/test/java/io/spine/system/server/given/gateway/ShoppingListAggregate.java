@@ -29,15 +29,16 @@ import io.spine.system.server.HardCopyLost;
 import io.spine.system.server.HardCopyPrinted;
 import io.spine.system.server.ListItemAdded;
 import io.spine.system.server.ShoppingListCreated;
+import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import io.spine.test.system.server.ShoppingListVBuilder;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class ShoppingListAggregate extends Aggregate<String, ShoppingList, ShoppingListVBuilder> {
+public class ShoppingListAggregate extends Aggregate<ListId, ShoppingList, ShoppingListVBuilder> {
 
-    private ShoppingListAggregate(String id) {
+    private ShoppingListAggregate(ListId id) {
         super(id);
     }
 
