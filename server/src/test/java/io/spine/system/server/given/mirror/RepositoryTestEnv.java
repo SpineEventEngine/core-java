@@ -82,7 +82,7 @@ public class RepositoryTestEnv {
         return map;
     }
 
-    private static EntityHistoryId historyIdOf(Photo photo) {
+    public static EntityHistoryId historyIdOf(Photo photo) {
         Any id = pack(photo.getId());
         EntityId entityId = EntityId
                 .newBuilder()

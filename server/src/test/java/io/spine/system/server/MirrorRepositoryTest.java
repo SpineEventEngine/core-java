@@ -47,10 +47,14 @@ import java.util.Map;
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.client.ColumnFilters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpackFunc;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.givenPhotos;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.historyIdOf;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -108,15 +112,54 @@ class MirrorRepositoryTest {
             @Test
             @DisplayName("find an instance by ID")
             void byId() {
+                Photo target = onePhoto();
+                checkRead(target);
+            }
+
+            @Test
+            @DisplayName("find an archived aggregate by ID")
+            void archived() {
+                Photo target = onePhoto();
+                archive(target);
+                PhotoId targetId = target.getId();
+                Query query = queries.select(Photo.class)
+                                     .byId(targetId)
+                                     .where(eq(archived.name(), true))
+                                     .build();
+                checkOneRead(query, target);
+            }
+
+            @Test
+            @DisplayName("find a deleted aggregate by ID")
+            void deleted() {
+                Photo target = onePhoto();
+                delete(target);
+                PhotoId targetId = target.getId();
+                Query query = queries.select(Photo.class)
+                                     .byId(targetId)
+                                     .where(eq(deleted.name(), true))
+                                     .build();
+                checkOneRead(query, target);
+            }
+
+            private void checkRead(Photo target) {
+                PhotoId targetId = target.getId();
+                Query query = queries.byIds(Photo.class, of(targetId));
+                checkOneRead(query, target);
+            }
+
+            private void checkOneRead(Query query, Photo expected) {
+                List<? extends Message> readMessages = execute(query);
+                assertEquals(1, readMessages.size());
+                assertEquals(expected, readMessages.get(0));
+            }
+
+            private Photo onePhoto() {
                 Photo target = givenPhotos.values()
                                           .stream()
                                           .findAny()
                                           .orElseGet(() -> fail("No test data."));
-                PhotoId targetId = target.getId();
-                Query query = queries.byIds(Photo.class, of(targetId));
-                List<? extends Message> readMessages = execute(query);
-                assertEquals(1, readMessages.size());
-                assertEquals(target, readMessages.get(0));
+                return target;
             }
         }
 
@@ -137,6 +180,31 @@ class MirrorRepositoryTest {
                        .forEach(this::dispatchEvent);
     }
 
+    private void archive(Photo photo) {
+        EntityHistoryId historyId = historyIdOf(photo);
+        EntityArchived archivedEvent = EntityArchived
+                .newBuilder()
+                .setId(historyId)
+                .setWhen(getCurrentTime())
+                .addMessageId(cause())
+                .build();
+        Event event = events.createEvent(archivedEvent);
+        dispatchEvent(event);
+    }
+
+    private void delete(Photo photo) {
+        EntityHistoryId historyId = historyIdOf(photo);
+        EntityDeleted deletedEvent = EntityDeleted
+                .newBuilder()
+                .setId(historyId)
+                .setWhen(getCurrentTime())
+                .addMessageId(cause())
+                .build();
+        Event event = events.createEvent(deletedEvent);
+        dispatchEvent(event);
+    }
+
+
     @SuppressWarnings("CheckReturnValue")
     private void dispatchEvent(Event event) {
         EventEnvelope envelope = EventEnvelope.of(event);
@@ -152,6 +220,18 @@ class MirrorRepositoryTest {
     }
 
     private static Event entityStateChanged(EntityHistoryId historyId, Message state) {
+        EntityStateChanged eventMessage = EntityStateChanged
+                .newBuilder()
+                .setId(historyId)
+                .setNewState(pack(state))
+                .setWhen(getCurrentTime())
+                .addMessageId(cause())
+                .build();
+        Event event = events.createEvent(eventMessage);
+        return event;
+    }
+
+    private static DispatchedMessageId cause() {
         EventId causeOfChange = EventId
                 .newBuilder()
                 .setValue("For tests")
@@ -160,14 +240,6 @@ class MirrorRepositoryTest {
                 .newBuilder()
                 .setEventId(causeOfChange)
                 .build();
-        EntityStateChanged eventMessage = EntityStateChanged
-                .newBuilder()
-                .setId(historyId)
-                .setNewState(pack(state))
-                .setWhen(getCurrentTime())
-                .addMessageId(messageId)
-                .build();
-        Event event = events.createEvent(eventMessage);
-        return event;
+        return messageId;
     }
 }
