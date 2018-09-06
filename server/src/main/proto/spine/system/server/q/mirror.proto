@@ -13,22 +13,39 @@ import "google/protobuf/any.proto";
 
 import "spine/server/entity/entity.proto";
 
+// A state of a domain aggregate represented in the associated System context.
+//
 message Mirror {
+    option (entity).kind = PROJECTION;
 
     MirrorId id = 1 [(required) = true, (valid) = true];
 
+    // The state of the aggregate.
     google.protobuf.Any state = 2 [(required) = true, (valid) = true];
 
+    // The lifecycle flags of the aggregate.
+    //
+    // This field is here for conveniance. The own lifecycle flags of a mirror projection duplicate
+    // the flags of corresponding aggregate.
+    //
     spine.server.entity.LifecycleFlags lifecycle = 3;
+
+    // Custom entity columns of the aggregate.
     EntityColumns columns = 4;
 }
 
+// An ID of a mirror projection.
+//
 message MirrorId {
 
+    // The ID of the corresponding aggregate packed as Any.
     google.protobuf.Any value = 1 [(required) = true, (valid) = true];
 }
 
+// Entity columns of the associated aggregate.
 message EntityColumns {
+
+    // TODO:2018-09-06:dmytro.dashenkov: Support entity columns.
 
     map<string, google.protobuf.Any> columns = 1;
 }
