@@ -57,9 +57,9 @@ final class DefaultSystemGateway implements SystemGateway {
             .setValue("SYSTEM")
             .build();
 
-    private final BoundedContext system;
+    private final SystemContext system;
 
-    DefaultSystemGateway(BoundedContext system) {
+    DefaultSystemGateway(SystemContext system) {
         this.system = system;
     }
 
