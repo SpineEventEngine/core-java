@@ -140,7 +140,7 @@ class TenantAwareSystemGatewayTest {
     private static void queryAndCheck(MemoizingGateway delegate, TenantId tenantId) {
         Query query = requestFactory.query().all(Timestamp.class);
         SystemGateway gateway = delegatingTo(delegate).get(tenantId);
-        gateway.read(query);
+        gateway.readDomainAggregate(query);
 
         assertEquals(query, delegate.lastSeenQuery().message());
     }

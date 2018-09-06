@@ -62,5 +62,22 @@ public interface SystemGateway {
         return new DefaultSystemGateway(system);
     }
 
-    Iterator<Any> read(Query query);
+    /**
+     * Executes the given query for a domain aggregate state.
+     *
+     * <p>This read operation supports following types of queries:
+     * <ul>
+     *     <li>queries for all instances of an aggregate type (which are not archived or deleted);
+     *     <li>queries by the aggregate IDs;
+     *     <li>queries for archived or/and deleted instance (combined with the other query types,
+     *         if necessary).
+     * </ul>
+     *
+     * @param query
+     *         a query for a domain aggregate
+     * @return an {@code Iterator} over the query results packed as {@link Any}s.
+     * @see MirrorProjection
+     * @see io.spine.client.QueryFactory
+     */
+    Iterator<Any> readDomainAggregate(Query query);
 }

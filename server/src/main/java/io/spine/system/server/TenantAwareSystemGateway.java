@@ -83,8 +83,8 @@ final class TenantAwareSystemGateway implements SystemGateway {
     }
 
     @Override
-    public Iterator<Any> read(Query query) {
-        return run(() -> delegate.read(query));
+    public Iterator<Any> readDomainAggregate(Query query) {
+        return run(() -> delegate.readDomainAggregate(query));
     }
 
     private void run(Runnable action) {

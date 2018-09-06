@@ -53,7 +53,7 @@ public enum NoOpSystemGateway implements SystemGateway {
     }
 
     @Override
-    public Iterator<Any> read(Query query) {
+    public Iterator<Any> readDomainAggregate(Query query) {
         return emptyIterator();
     }
 }

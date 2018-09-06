@@ -32,7 +32,6 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyIterator;
-import static java.util.Collections.emptyList;
 
 /**
  * A {@link SystemGateway} which memoizes the posted system commands.
@@ -97,7 +96,7 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     @Override
-    public Iterator<Any> read(Query query) {
+    public Iterator<Any> readDomainAggregate(Query query) {
         TenantId tenantId = currentTenant();
         lastSeenQuery = new MemoizedMessage(query, tenantId);
         return emptyIterator();

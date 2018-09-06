@@ -51,7 +51,7 @@ class AggregateQueryProcessor implements QueryProcessor {
     public ImmutableCollection<Any> process(Query query) {
         TenantId tenant = tenantOf(query);
         SystemGateway gateway = delegatingTo(systemGateway).get(tenant);
-        Iterator<Any> read = gateway.read(query);
+        Iterator<Any> read = gateway.readDomainAggregate(query);
         ImmutableList<Any> result = copyOf(read);
         return result;
     }

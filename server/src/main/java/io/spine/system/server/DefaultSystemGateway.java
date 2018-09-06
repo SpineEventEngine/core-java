@@ -84,7 +84,7 @@ final class DefaultSystemGateway implements SystemGateway {
     }
 
     @Override
-    public Iterator<Any> read(Query query) {
+    public Iterator<Any> readDomainAggregate(Query query) {
         @SuppressWarnings("unchecked") // Logically checked.
         MirrorRepository repository = (MirrorRepository)
                 system.findRepository(Mirror.class)
