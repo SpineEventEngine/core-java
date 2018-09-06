@@ -64,7 +64,6 @@ public final class BoundedContextBuilder implements Logging {
     private BoundedContextName name = BoundedContextNames.assumingTests();
     private boolean multitenant;
     private TenantIndex tenantIndex;
-    private TransportFactory transportFactory;
     private @Nullable Supplier<StorageFactory> storageFactorySupplier;
 
     private CommandBus.Builder commandBus;
@@ -217,11 +216,6 @@ public final class BoundedContextBuilder implements Logging {
         return this;
     }
 
-    public BoundedContextBuilder setTransportFactory(TransportFactory transportFactory) {
-        this.transportFactory = checkNotNull(transportFactory);
-        return this;
-    }
-
     /**
      * Creates a new instance of {@code BoundedContext} with the set configurations.
      *
@@ -245,28 +239,29 @@ public final class BoundedContextBuilder implements Logging {
      */
     @CheckReturnValue
     public BoundedContext build() {
-        SystemContext system = buildSystem();
-        BoundedContext result = buildDefault(system);
+        TransportFactory transport = getTransportFactory()
+                .orElseGet(InMemoryTransportFactory::newInstance);
+        SystemContext system = buildSystem(transport);
+        BoundedContext result = buildDefault(system, transport);
         log().info(result.nameForLogging() + " created.");
         return result;
     }
 
-    private BoundedContext buildDefault(SystemContext system) {
+    private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
         BiFunction<BoundedContextBuilder, SystemGateway, DomainContext>
                 instanceFactory = DomainContext::newInstance;
         SystemGateway systemGateway = SystemGateway.newInstance(system);
-        BoundedContext result = buildPartial(instanceFactory, systemGateway);
+        BoundedContext result = buildPartial(instanceFactory, systemGateway, transport);
         return result;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored") // Builder methods.
-    private SystemContext buildSystem() {
+    private SystemContext buildSystem(TransportFactory transport) {
         BoundedContextName name = BoundedContextNames.system(this.name);
         BoundedContextBuilder system = BoundedContext
                 .newBuilder()
                 .setMultitenant(multitenant)
-                .setName(name)
-                .setTransportFactory(getTransportFactory());
+                .setName(name);
         Optional<? extends Supplier<StorageFactory>> storage = getStorageFactorySupplier();
         storage.ifPresent(system::setStorageFactorySupplier);
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
@@ -275,22 +270,23 @@ public final class BoundedContextBuilder implements Logging {
         BiFunction<BoundedContextBuilder, SystemGateway, SystemContext> instanceFactory =
                 (builder, systemGateway) -> SystemContext.newInstance(builder);
         NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
-        SystemContext result = system.buildPartial(instanceFactory, systemGateway);
+        SystemContext result = system.buildPartial(instanceFactory,
+                                                   systemGateway,
+                                                   transport);
         return result;
     }
 
     private <B extends BoundedContext> B
     buildPartial(BiFunction<BoundedContextBuilder, SystemGateway, B> instanceFactory,
-                 SystemGateway systemGateway) {
+                 SystemGateway systemGateway,
+                 TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
-
-        TransportFactory transportFactory = getTransportFactory();
 
         initTenantIndex(storageFactory);
         initCommandBus(systemGateway);
         initEventBus(storageFactory);
         initStand(storageFactory);
-        initIntegrationBus(transportFactory);
+        initIntegrationBus(transport);
 
         B result = instanceFactory.apply(this, systemGateway);
         return result;
@@ -311,11 +307,9 @@ public final class BoundedContextBuilder implements Logging {
         return storageFactory;
     }
 
-    private TransportFactory getTransportFactory() {
-        if (transportFactory == null) {
-            transportFactory = InMemoryTransportFactory.newInstance();
-        }
-        return transportFactory;
+    private Optional<TransportFactory> getTransportFactory() {
+        return Optional.ofNullable(integrationBus)
+                       .flatMap(IntegrationBus.Builder::getTransportFactory);
     }
 
     private void initTenantIndex(StorageFactory factory) {
@@ -373,14 +367,12 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private void initIntegrationBus(TransportFactory transportFactory) {
+    private void initIntegrationBus(TransportFactory factory) {
         if (integrationBus == null) {
-            integrationBus = IntegrationBus.newBuilder()
-                                           .setTransportFactory(transportFactory);
+            integrationBus = IntegrationBus.newBuilder();
         }
-        if (!integrationBus.getTransportFactory()
-                           .isPresent()) {
-            integrationBus.setTransportFactory(transportFactory);
+        if (!integrationBus.getTransportFactory().isPresent()) {
+            integrationBus.setTransportFactory(factory);
         }
     }
 

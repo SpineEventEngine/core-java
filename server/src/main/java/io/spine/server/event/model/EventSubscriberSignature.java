@@ -43,7 +43,7 @@ public class EventSubscriberSignature extends EventAcceptingSignature<EventSubsc
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE);
+        return of(AccessModifier.PUBLIC);
     }
 
     @Override

@@ -23,14 +23,20 @@ package io.spine.server.aggregate.given.aggregate;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.aggregate.event.AggTaskStarted;
+
+import java.util.Optional;
 
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
@@ -61,17 +67,39 @@ public class IgTestAggregate
         return message;
     }
 
+    @React
+    Optional<AggProjectStarted> reactOn(AggTaskStarted event) {
+        if (getState().getStatus() == Status.CREATED) {
+            return Optional.of(projectStarted(getId()));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @React
+    AggProjectArchived reactOn(AggProjectPaused event) {
+        return AggProjectArchived
+                .newBuilder()
+                .setProjectId(event.getProjectId())
+                .build();
+    }
+
     @Apply
-    void event(AggProjectCreated event) {
+    private void event(AggProjectCreated event) {
         getBuilder()
                 .setId(event.getProjectId())
                 .setStatus(Status.CREATED);
     }
 
     @Apply
-    void event(AggProjectStarted event) {
+    private void event(AggProjectStarted event) {
         getBuilder()
                 .setId(event.getProjectId())
                 .setStatus(Status.STARTED);
+    }
+
+    @Apply
+    private void event(AggProjectArchived event) {
+        setArchived(true);
     }
 }

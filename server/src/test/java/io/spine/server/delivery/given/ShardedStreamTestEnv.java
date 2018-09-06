@@ -69,7 +69,7 @@ public class ShardedStreamTestEnv {
     private static final ProjectAggregateRepository projectRepo;
     private static final ShardingKey projectsShardZeroKey;
     private static final ShardingKey projectsShardOneKey;
-    private static final DeliveryTag<CommandEnvelope> commandsToProjects;
+    private static final DeliveryTag commandsToProjects;
     private static final CommandShardedStream<ProjectId> projectsShardZero;
     private static final CommandShardedStream<ProjectId> anotherProjectsShardZero;
     private static final CommandShardedStream<ProjectId> projectsShardOne;
@@ -89,7 +89,7 @@ public class ShardedStreamTestEnv {
         BoundedContextName tasksContextName = taskRepo.getBoundedContextName();
         ShardingKey tasksShardZeroKey = shardingKeyOf(taskAggregateClass, 0);
         ShardingKey tasksShardOneKey = shardingKeyOf(taskAggregateClass, 1);
-        DeliveryTag<CommandEnvelope> commandsToTask = DeliveryTag.forCommandsOf(taskRepo);
+        DeliveryTag commandsToTask = DeliveryTag.forCommandsOf(taskRepo);
 
         projectsShardZero = streamToProject(transportFactory,
                                             projectsContextName,
@@ -131,7 +131,7 @@ public class ShardedStreamTestEnv {
     private static CommandShardedStream<TaskId>
     streamToTask(BoundedContextName contextName,
                  ShardingKey key,
-                 DeliveryTag<CommandEnvelope> tag,
+                 DeliveryTag tag,
                  ShardedStreamConsumer<TaskId, CommandEnvelope> consumer) {
         return CommandShardedStream.<TaskId>newBuilder()
                 .setBoundedContextName(contextName)
@@ -181,7 +181,7 @@ public class ShardedStreamTestEnv {
 
     private static CommandShardedStream<ProjectId>
     streamToProject(TransportFactory factory, BoundedContextName contextName,
-                    ShardingKey key, DeliveryTag<CommandEnvelope> tag) {
+                    ShardingKey key, DeliveryTag tag) {
         CommandShardedStream.Builder<ProjectId> builder = CommandShardedStream.newBuilder();
         ShardedStreamConsumer<ProjectId, CommandEnvelope> consumer = dummyConsumer();
         return builder.setBoundedContextName(contextName)
@@ -200,7 +200,7 @@ public class ShardedStreamTestEnv {
         return new ShardedStreamConsumer<I, CommandEnvelope>() {
 
             @Override
-            public DeliveryTag<CommandEnvelope> getTag() {
+            public DeliveryTag getTag() {
                 return null;
             }
 

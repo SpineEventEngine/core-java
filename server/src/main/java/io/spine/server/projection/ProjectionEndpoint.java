@@ -34,14 +34,13 @@ import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Dispatches an event to projections.
  */
 @Internal
 public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
-        extends EntityMessageEndpoint<I, P, EventEnvelope, Set<I>> {
+        extends EntityMessageEndpoint<I, P, EventEnvelope> {
 
     protected ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
@@ -52,24 +51,9 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         return new ProjectionEndpoint<>(repository, event);
     }
 
-    static <I, P extends Projection<I, ?, ?>>
-    Set<I> handle(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
-        ProjectionEndpoint<I, P> endpoint = of(repository, event);
-        Set<I> result = endpoint.handle();
-        return result;
-    }
-
     @Override
     protected ProjectionRepository<I, P, ?> repository() {
         return (ProjectionRepository<I, P, ?>) super.repository();
-    }
-
-    @Override
-    protected Set<I> getTargets() {
-        EventEnvelope event = envelope();
-        Set<I> ids = repository().eventRouting()
-                                 .apply(event.getMessage(), event.getEventContext());
-        return ids;
     }
 
     @Override
@@ -86,7 +70,6 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
         doDispatch(projection, envelope());
-        repository().onEventDispatched(projection.getId(), envelope().getOuterObject());
         tx.commit();
     }
 

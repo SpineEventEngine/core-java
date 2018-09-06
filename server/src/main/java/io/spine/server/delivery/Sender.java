@@ -34,9 +34,9 @@ import java.util.Set;
  */
 public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
-    private final DeliveryTag<M> deliveryTag;
+    private final DeliveryTag deliveryTag;
 
-    public Sender(DeliveryTag<M> deliveryTag) {
+    public Sender(DeliveryTag deliveryTag) {
         this.deliveryTag = deliveryTag;
     }
 

@@ -46,7 +46,6 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRoute;
-import io.spine.server.route.EventRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -148,6 +147,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                 "event subscriptions.", this);
             }
         }
+
+        ProjectionSystemEventWatcher<I> systemSubscriber =
+                new ProjectionSystemEventWatcher<>(this);
+        BoundedContext boundedContext = getBoundedContext();
+        systemSubscriber.registerIn(boundedContext);
 
         registerWithSharding();
     }
@@ -254,14 +258,28 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projectionClass().getExternalEventClasses();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sends a system command to dispatch the given event to a subscriber.
+     */
     @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
-        Set<I> ids = ProjectionEndpoint.handle(this, envelope);
-        return ids;
+    protected void dispatchTo(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToSubscriber(event);
     }
 
-    void onEventDispatched(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToSubscriber(event);
+    /**
+     * Dispatches the given event to the projection with the given ID.
+     *
+     * @param id
+     *         the ID of the target projection
+     * @param envelope
+     *         the event to dispatch
+     */
+    @Internal
+    protected void dispatchNowTo(I id, EventEnvelope envelope) {
+        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
+        endpoint.dispatchTo(id);
     }
 
     @Internal
@@ -276,6 +294,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return nullToDefault(timestamp);
     }
 
+    @VisibleForTesting
     EventStreamQuery createStreamQuery() {
         Set<EventFilter> eventFilters = createEventFilters();
 
@@ -302,11 +321,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @SPI
     protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
         return eventDeliverySupplier.get();
-    }
-
-    /** Exposes routing to the package. */
-    EventRouting<I> eventRouting() {
-        return getEventRouting();
     }
 
     @Override

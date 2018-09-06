@@ -21,13 +21,20 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Message;
+import io.spine.base.Identifier;
+import io.spine.client.CommandFactory;
 import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.AggregateTest;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectPaused;
+import io.spine.test.aggregate.event.AggTaskStarted;
+import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -35,6 +42,12 @@ import static io.spine.base.Identifier.newUuid;
  * @author Mykhailo Drachuk
  */
 public class IdempotencyGuardTestEnv {
+
+    private static final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(IdempotencyGuardTestEnv.class);
+    private static final CommandFactory commandFactory =
+            TestActorRequestFactory.newInstance(AggregateTest.class).command();
+
 
     /** Prevents instantiation of this test environment. */
     private IdempotencyGuardTestEnv() {
@@ -52,6 +65,12 @@ public class IdempotencyGuardTestEnv {
                        .build();
     }
 
+    private static AggTaskId newTaskId() {
+        return AggTaskId.newBuilder()
+                        .setId(Identifier.newUuid())
+                        .build();
+    }
+
     public static AggCreateProject createProject(ProjectId projectId) {
         return AggCreateProject.newBuilder()
                                .setProjectId(projectId)
@@ -64,12 +83,24 @@ public class IdempotencyGuardTestEnv {
                               .build();
     }
 
-    public static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateTest.class, tenantId);
+    public static AggTaskStarted taskStarted(ProjectId projectId) {
+        return AggTaskStarted.newBuilder()
+                             .setTaskId(newTaskId())
+                             .setProjectId(projectId)
+                             .build();
     }
 
-    public static Command command(Message commandMessage, TenantId tenantId) {
-        return newRequestFactory(tenantId).command()
-                                          .create(commandMessage);
+    public static AggProjectPaused projectPaused(ProjectId projectId) {
+        return AggProjectPaused.newBuilder()
+                               .setProjectId(projectId)
+                               .build();
+    }
+
+    public static Command command(Message commandMessage) {
+        return commandFactory.create(commandMessage);
+    }
+
+    public static Event event(Message eventMessage) {
+        return eventFactory.createEvent(eventMessage);
     }
 }

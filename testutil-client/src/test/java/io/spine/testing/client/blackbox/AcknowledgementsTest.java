@@ -38,7 +38,7 @@ import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.MISSING_
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.PRESENT_ERROR_TYPE;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.PRESENT_TASK_TITLE;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.UNIQUE_ERROR_TYPE;
-import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.UNIQUE_TASK_TITLEE;
+import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.UNIQUE_TASK_TITLE;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.acks;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.concat;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.newError;
@@ -181,7 +181,7 @@ class AcknowledgementsTest {
     void countRejectionUsingPredicate() {
         ImmutableList<Ack> items = ImmutableList.of(
                 newRejectionAck(taskLimitReached()),
-                newRejectionAck(taskCreatedInCompletedProject(newTask(UNIQUE_TASK_TITLEE))), 
+                newRejectionAck(taskCreatedInCompletedProject(newTask(UNIQUE_TASK_TITLE))),
                 newRejectionAck(taskCreatedInCompletedProject(newTask(DUPLICATE_TASK_TITLE))),
                 newRejectionAck(taskCreatedInCompletedProject(newTask(DUPLICATE_TASK_TITLE)))
         );
@@ -195,7 +195,7 @@ class AcknowledgementsTest {
         assertEquals(0, acks.countRejections(taskInCompletedProject, withMissingTitle));
 
         RejectionCriterion<Rejections.BbTaskCreatedInCompletedProject> withUniqueTitle =
-                rejection -> UNIQUE_TASK_TITLEE.equals(rejection.getTask().getTitle());
+                rejection -> UNIQUE_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertEquals(1, acks.countRejections(taskInCompletedProject, withUniqueTitle));
 
         RejectionCriterion<Rejections.BbTaskCreatedInCompletedProject> withDuplicatedTitle =

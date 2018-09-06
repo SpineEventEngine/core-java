@@ -40,7 +40,7 @@ public interface ShardedStreamConsumer<I, E extends MessageEnvelope<?, ?, ?>> {
      *
      * @return the tag value
      */
-    DeliveryTag<E> getTag();
+    DeliveryTag getTag();
 
     /**
      * Defines the processing of the message, sent to a particular destination (with the target ID
