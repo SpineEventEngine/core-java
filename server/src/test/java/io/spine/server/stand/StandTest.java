@@ -389,8 +389,9 @@ class StandTest extends TenantAwareTest {
         Collection<Customer> sampleCustomers = fillSampleCustomers(10);
 
         Topic someCustomers = requestFactory.topic()
-                                            .someOf(Customer.class,
-                                                    ids(sampleCustomers));
+                                            .select(Customer.class)
+                                            .byId(ids(sampleCustomers))
+                                            .build();
         Collection<Customer> callbackStates = newHashSet();
         MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
@@ -850,7 +851,7 @@ class StandTest extends TenantAwareTest {
                                .build();
         }
     }
-    
+
     private Stand createStand() {
         return newStand(isMultitenant());
     }
@@ -951,7 +952,7 @@ class StandTest extends TenantAwareTest {
         }
     }
 
-    private Stand 
+    private Stand
     prepareStandWithProjectionRepo(ProjectionRepository<?, ?, ?> projectionRepository) {
         Stand stand = createStand();
         assertNotNull(stand);

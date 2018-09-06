@@ -26,54 +26,55 @@ import com.google.protobuf.Message;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A builder for the {@link Query} instances.
+ * A builder for the {@link io.spine.client.Topic Topic} instances.
  *
  * <p>None of the parameters set by builder methods are required. Call {@link #build()} to retrieve
- * the resulting {@link Query} instance.
+ * the resulting {@link io.spine.client.Topic Topic} instance.
  *
  * <p>Usage example:
  * <pre>
  *     {@code
- *     final Query query = factory().query()
- *                                  .select(Customer.class)
- *                                  .byId(getWestCoastCustomerIds())
- *                                  .withMask("name", "address", "email")
- *                                  .where(eq("type", "permanent"),
- *                                         eq("discountPercent", 10),
- *                                         eq("companySize", Company.Size.SMALL))
- *                                  .build();
+ *     Topic topic = factory().topic()
+ *                            .select(Customer.class)
+ *                            .byId(getWestCoastCustomerIds())
+ *                            .withMask("name", "address", "email")
+ *                            .where(eq("type", "permanent"),
+ *                                   eq("discountPercent", 10),
+ *                                   eq("companySize", Company.Size.SMALL))
+ *                            .build();
  *     }
  * </pre>
  *
- * @author Dmytro Dashenkov
- * @see QueryFactory#select(Class) to start query building
+ * @author Mykhailo Drachuk
+ * @see io.spine.client.TopicFactory#select(Class) to start topic building
  * @see io.spine.client.ColumnFilters for filter creation shortcuts
  * @see AbstractTargetBuilder for more details on this builders API
  */
-public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilder> {
+public final class TopicBuilder extends AbstractTargetBuilder<Topic, TopicBuilder> {
 
-    private final QueryFactory queryFactory;
+    private final TopicFactory topicFactory;
 
-    QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
+    TopicBuilder(Class<? extends Message> targetType, TopicFactory topicFactory) {
         super(targetType);
-        this.queryFactory = checkNotNull(queryFactory);
+        this.topicFactory = checkNotNull(topicFactory);
     }
 
     /**
-     * Generates a new {@link Query} instance with current builder configuration.
+     * Generates a new {@link io.spine.client.Topic Topic} instance with current builder 
+     * configuration.
      *
-     * @return the built {@link Query}
+     * @return a new {@link io.spine.client.Topic Topic}
      */
     @Override
-    public Query build() {
+    public Topic build() {
         Target target = buildTarget();
         FieldMask mask = composeMask();
-        Query query = queryFactory.composeQuery(target, mask);
-        return query;
+        Topic topic = topicFactory.composeTopic(target, mask);
+        return topic;
     }
 
     @Override
-    QueryBuilder self() {
+    TopicBuilder self() {
         return this;
     }
 }

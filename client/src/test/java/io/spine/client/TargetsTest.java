@@ -20,12 +20,26 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.StringValue;
+import io.spine.test.client.TestEntity;
+import io.spine.test.queries.TaskId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.client.Targets.allOf;
+import static io.spine.client.Targets.someOf;
+import static io.spine.client.given.TargetsTestEnv.filtersForIds;
+import static io.spine.client.given.TargetsTestEnv.newTaskId;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.type.TypeUrl.of;
+import static io.spine.type.TypeUrl.parse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.internal.util.collections.Sets.newSet;
 
 /**
  * @author Alex Tymchenko
@@ -46,4 +60,81 @@ class TargetsTest {
                 .testAllPublicStaticMethods(Targets.class);
     }
 
+    @Test
+    @DisplayName("compose Target for all of type")
+    void composeForAllOfType() {
+        Target target = allOf(TestEntity.class);
+
+        assertEquals(of(TestEntity.class), parse(target.getType()));
+    }
+
+    @Test
+    @DisplayName("compose Target with Messagee IDs")
+    void composeWithMessageIds() {
+        TaskId taskId = newTaskId();
+        Target target = someOf(TestEntity.class, newSet(taskId));
+
+        assertEquals(of(TestEntity.class), parse(target.getType()));
+
+        EntityFilters filters = filtersForIds(taskId);
+        assertEquals(filters, target.getFilters());
+    }
+
+    @Test
+    @DisplayName("compose Target with String IDs")
+    void composeWithStringIds() {
+        String firstId = "a";
+        String secondId = "b";
+        String thirdId = "c";
+
+        Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
+
+        assertEquals(of(TestEntity.class), parse(target.getType()));
+
+        EntityFilters filters = filtersForIds(StringValue.of(firstId),
+                                              StringValue.of(secondId),
+                                              StringValue.of(thirdId));
+        assertEquals(filters, target.getFilters());
+    }
+
+    @Test
+    @DisplayName("compose Target with Integer IDs")
+    void composeWithIntIds() {
+        int firstId = 1;
+        int secondId = 2;
+        int thirdId = 3;
+
+        Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
+
+        assertEquals(of(TestEntity.class), parse(target.getType()));
+
+        EntityFilters filters = filtersForIds(Int32Value.of(firstId),
+                                              Int32Value.of(secondId),
+                                              Int32Value.of(thirdId));
+        assertEquals(filters, target.getFilters());
+    }
+
+    @Test
+    @DisplayName("compose Target with Long IDs")
+    void composeWithLongIds() {
+        long firstId = 1L;
+        long secondId = 2L;
+        long thirdId = 3L;
+
+        Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
+
+        assertEquals(of(TestEntity.class), parse(target.getType()));
+
+        EntityFilters filters = filtersForIds(Int64Value.of(firstId),
+                                              Int64Value.of(secondId),
+                                              Int64Value.of(thirdId));
+        assertEquals(filters, target.getFilters());
+    }
+
+    @Test
+    @DisplayName("throw IAE for unsupported IDs")
+    void throwIaeForUnsupportedIds() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> someOf(TaskId.class, newSet(new Object())));
+    }
 }
