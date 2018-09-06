@@ -43,7 +43,8 @@ import static io.spine.server.entity.FieldMasks.applyMask;
  */
 public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
 
-    private static final String AGGREGATE_TYPE_FIELD = "aggregate_type";
+    private static final String AGGREGATE_TYPE_STORED_NAME = "aggregate_type";
+    private static final String AGGREGATE_TYPE_QUERY_NAME = "aggregateType";
 
     private MirrorProjection(MirrorId id) {
         super(id);
@@ -105,7 +106,7 @@ public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilde
 
     static EntityFilters buildFilters(Target target) {
         EntityFilters filters = target.getFilters();
-        CompositeColumnFilter typeFilter = all(eq(AGGREGATE_TYPE_FIELD, target.getType()));
+        CompositeColumnFilter typeFilter = all(eq(AGGREGATE_TYPE_QUERY_NAME, target.getType()));
         EntityFilters appendedFilters = filters.toBuilder()
                                                .addFilter(typeFilter)
                                                .build();
@@ -124,8 +125,8 @@ public class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilde
         return getState().getState();
     }
 
-    @Column(name = AGGREGATE_TYPE_FIELD)
-    public String getTypeUrl() {
+    @Column(name = AGGREGATE_TYPE_STORED_NAME)
+    public String getAggregateType() {
         return aggregateState().getTypeUrl();
     }
 }

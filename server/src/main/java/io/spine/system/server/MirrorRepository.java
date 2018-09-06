@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import io.spine.client.EntityFilters;
-import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.option.EntityOption;
@@ -38,7 +37,6 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Streams.stream;
-import static io.spine.client.Queries.typeOf;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.option.Options.option;

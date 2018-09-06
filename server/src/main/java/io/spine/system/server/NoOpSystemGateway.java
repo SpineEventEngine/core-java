@@ -27,7 +27,6 @@ import io.spine.client.Query;
 import java.util.Iterator;
 
 import static java.util.Collections.emptyIterator;
-import static java.util.Collections.emptyList;
 
 /**
  * An implementation of {@link SystemGateway} which never performs an operation.
