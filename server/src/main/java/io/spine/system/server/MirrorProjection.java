@@ -42,6 +42,7 @@ import static io.spine.client.ColumnFilters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
+import static io.spine.validate.Validate.isDefault;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -118,6 +119,14 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         setDeleted(false);
     }
 
+    /**
+     * Builds the {@link EntityFilters} for the {@link Mirror} projection based on the domain
+     * aggregate {@link Target}.
+     *
+     * @param target
+     *         domain aggregate query target
+     * @return entity filters for this projection
+     */
     static EntityFilters buildFilters(Target target) {
         EntityIdFilter idFilter = buildIdFilter(target);
         EntityFilters filters = target.getFilters();
@@ -168,16 +177,24 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         return systemId;
     }
 
+    /**
+     * Obtains the selected fields of the aggregate state.
+     *
+     * <p>If the {@link FieldMask} is empty, returns the complete state.
+     *
+     * @param fields
+     *         the fields to obtain
+     * @return the state of the mirrored aggregate
+     */
     final Any aggregateState(FieldMask fields) {
         Any completeState = aggregateState();
+        if (isDefault(fields) || fields.getPathsList().isEmpty()) {
+            return completeState;
+        }
         Message unpacked = unpack(completeState);
         Message trimmedState = applyMask(fields, unpacked, TypeUrl.ofEnclosed(completeState));
         Any result = pack(trimmedState);
         return result;
-    }
-
-    private Any aggregateState() {
-        return getState().getState();
     }
 
     /**
@@ -195,5 +212,9 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     @Column(name = TYPE_COLUMN_NAME)
     public String getAggregateType() {
         return aggregateState().getTypeUrl();
+    }
+
+    private Any aggregateState() {
+        return getState().getState();
     }
 }

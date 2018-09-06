@@ -45,9 +45,19 @@ import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
 import static io.spine.system.server.MirrorProjection.buildFilters;
 
 /**
+ * The repository for {@link Mirror} projections.
+ *
+ * <p>An entity has a mirror if all of the following conditions are met:
+ * <ul>
+ *     <li>the entity repository is registered in a domain bounded context;
+ *     <li>the entity state is marked as an {@link EntityOption.Kind#AGGREGATE AGGREGATE}.
+ * </ul>
+ *
+ * <p>In other cases, an entity won't have a {@link Mirror}.
+ *
  * @author Dmytro Dashenkov
  */
-public class MirrorRepository
+final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
     // TODO:2018-09-06:dmytro.dashenkov: Use for querying projection states.
@@ -107,8 +117,12 @@ public class MirrorRepository
     /**
      * Executes the given query upon the aggregate states of the target type.
      *
+     * <p>In a multitenant environment, this method should only be invoked if the current tenant is
+     * set to the one in the {@link Query}.
+     *
      * @param query an aggregate query
      * @return an {@code Iterator} over the result aggregate states
+     * @see SystemGateway#readDomainAggregate(Query)
      */
     Iterator<Any> execute(Query query) {
         FieldMask aggregateFields = query.getFieldMask();
