@@ -24,11 +24,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.core.TenantId;
-import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantAwareRunner;
 
 import java.util.Iterator;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -47,10 +46,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class TenantAwareSystemGateway implements SystemGateway {
 
     private final SystemGateway delegate;
-    private final TenantId tenantId;
+    private final TenantAwareRunner runner;
 
     private TenantAwareSystemGateway(TenantId tenantId, SystemGateway delegate) {
-        this.tenantId = checkNotNull(tenantId);
+        this.runner = TenantAwareRunner.with(checkNotNull(tenantId));
         this.delegate = checkNotNull(delegate);
     }
 
@@ -68,7 +67,7 @@ final class TenantAwareSystemGateway implements SystemGateway {
      */
     @Override
     public void postCommand(Message systemCommand) {
-        run(() -> delegate.postCommand(systemCommand));
+        runner.run(() -> delegate.postCommand(systemCommand));
     }
 
     /**
@@ -78,44 +77,11 @@ final class TenantAwareSystemGateway implements SystemGateway {
      */
     @Override
     public void postEvent(Message systemEvent) {
-        run(() -> delegate.postEvent(systemEvent));
+        runner.run(() -> delegate.postEvent(systemEvent));
     }
 
     @Override
     public Iterator<Any> readDomainAggregate(Query query) {
-        return run(() -> delegate.readDomainAggregate(query));
-    }
-
-    private void run(Runnable action) {
-        TenantAwareOperation operation = new Operation(tenantId, action);
-        operation.execute();
-    }
-
-    private <T> T run(Supplier<T> action) {
-        T result = new TenantAwareFunction0<T>(tenantId) {
-            @Override
-            public T apply() {
-                return action.get();
-            }
-        }.execute();
-        return result;
-    }
-
-    /**
-     * A {@link TenantAwareOperation} which executes the given action for a specific tenant.
-     */
-    private static final class Operation extends TenantAwareOperation {
-
-        private final Runnable action;
-
-        private Operation(TenantId tenantId, Runnable action) {
-            super(tenantId);
-            this.action = action;
-        }
-
-        @Override
-        public void run() {
-            action.run();
-        }
+        return runner.evaluate(() -> delegate.readDomainAggregate(query));
     }
 }
