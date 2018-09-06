@@ -23,8 +23,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.core.ActorContext;
-import io.spine.core.TenantId;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -83,14 +81,6 @@ public final class Queries {
                              .contains(typeUrl),
                    "Unknown type URL: `%s`.", type);
         return typeUrl;
-    }
-
-    public static TenantId tenantOf(Query query) {
-        checkNotNull(query);
-
-        ActorContext context = query.getContext();
-        TenantId result = context.getTenantId();
-        return result;
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder

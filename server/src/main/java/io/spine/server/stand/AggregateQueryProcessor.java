@@ -23,14 +23,15 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.client.Query;
+import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.system.server.SystemGateway;
 
 import java.util.Iterator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.copyOf;
-import static io.spine.client.Queries.tenantOf;
 import static io.spine.system.server.GatewayFunction.delegatingTo;
 
 /**
@@ -53,6 +54,23 @@ class AggregateQueryProcessor implements QueryProcessor {
         SystemGateway gateway = delegatingTo(systemGateway).get(tenant);
         Iterator<Any> read = gateway.readDomainAggregate(query);
         ImmutableList<Any> result = copyOf(read);
+        return result;
+    }
+
+    /**
+     * Obtains the {@link TenantId} of the given {@link Query}.
+     *
+     * <p>In a single-tenant environment, this value should be
+     * the {@linkplain TenantId#getDefaultInstance() default ID}.
+     *
+     * @param query the query to extract tenant from
+     * @return the tenant of this query
+     */
+    private static TenantId tenantOf(Query query) {
+        checkNotNull(query);
+
+        ActorContext context = query.getContext();
+        TenantId result = context.getTenantId();
         return result;
     }
 }
