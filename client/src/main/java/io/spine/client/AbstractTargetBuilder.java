@@ -40,10 +40,10 @@ import static java.util.Collections.singleton;
  * <p>The {@link Target} matching the builder configuration is created with {@link #buildTarget()},
  * while the {@link FieldMask} is composed with {@link #composeMask()}.
  *
- * <p>This classes public API is inspired by the SQL syntax.
+ * <p>The public API of this class is inspired by the SQL syntax.
  * <pre>
  *     {@code
- *     select(Customer.class) // returning <AbstractTargetBuilder> instance
+ *     select(Customer.class) // returning <AbstractTargetBuilder> descendant instance
  *         .byId(getWestCoastCustomerIds())
  *         .withMask("name", "address", "email")
  *         .where(eq("type", "permanent"),
