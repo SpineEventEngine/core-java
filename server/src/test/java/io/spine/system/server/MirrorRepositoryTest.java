@@ -21,28 +21,49 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.Aggregate;
+import io.spine.test.system.server.Photo;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.ShardingReset;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import static com.google.common.collect.Streams.stream;
+import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.givenPhotos;
+import static io.spine.testing.server.TestEventFactory.newInstance;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Dmytro Dashenkov
  */
+@ExtendWith(ShardingReset.class)
 @DisplayName("MirrorRepository should")
 class MirrorRepositoryTest {
+
+    private static final TestEventFactory events = newInstance(MirrorRepositoryTest.class);
 
     private MirrorRepository repository;
     private QueryFactory queries;
@@ -65,10 +86,23 @@ class MirrorRepositoryTest {
         @DisplayName("for a known type")
         class Known {
 
+            private Map<EntityHistoryId, Photo> givenPhotos;
+
+            @BeforeEach
+            void setUp() {
+                givenPhotos = givenPhotos();
+                prepareAggregates(givenPhotos);
+            }
+
             @Test
             @DisplayName("find all instances")
             void includeAll() {
-
+                Query query = queries.all(Photo.class);
+                Iterator<Any> result = repository.execute(query);
+                List<? extends Message> readMessages = stream(result)
+                        .map(unpackFunc())
+                        .collect(toList());
+                assertThat(readMessages, containsInAnyOrder(givenPhotos.values().toArray()));
             }
         }
 
@@ -82,7 +116,36 @@ class MirrorRepositoryTest {
         }
     }
 
-    private void prepareAggreagtes(Aggregate<?, ?, ?>... aggregates) {
+    private void prepareAggregates(Map<EntityHistoryId, ? extends Message> aggregateStates) {
+        aggregateStates.entrySet()
+                       .stream()
+                       .map(entry -> entityStateChanged(entry.getKey(), entry.getValue()))
+                       .forEach(this::dispatchEvent);
+    }
 
+    @SuppressWarnings("CheckReturnValue")
+    private void dispatchEvent(Event event) {
+        EventEnvelope envelope = EventEnvelope.of(event);
+        repository.dispatch(envelope);
+    }
+
+    private static Event entityStateChanged(EntityHistoryId historyId, Message state) {
+        EventId causeOfChange = EventId
+                .newBuilder()
+                .setValue("For tests")
+                .build();
+        DispatchedMessageId messageId = DispatchedMessageId
+                .newBuilder()
+                .setEventId(causeOfChange)
+                .build();
+        EntityStateChanged eventMessage = EntityStateChanged
+                .newBuilder()
+                .setId(historyId)
+                .setNewState(pack(state))
+                .setWhen(getCurrentTime())
+                .addMessageId(messageId)
+                .build();
+        Event event = events.createEvent(eventMessage);
+        return event;
     }
 }
