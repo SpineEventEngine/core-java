@@ -52,6 +52,7 @@ public class MirrorRepository
 
     // TODO:2018-09-06:dmytro.dashenkov: Use for querying projection states.
     // todo            https://github.co/SpineEventEngine/core-java/issues/840
+    @SuppressWarnings("unused") // See the TO-DO.
     private static final FieldMask AGGREGATE_STATE_FIELD =
             maskOf(Mirror.getDescriptor(), STATE_FIELD_NUMBER);
 
