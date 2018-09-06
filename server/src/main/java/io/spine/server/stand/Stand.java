@@ -467,7 +467,7 @@ public class Stand implements AutoCloseable {
          * @return this instance of {@code Builder}
          */
         public Builder setCallbackExecutor(Executor callbackExecutor) {
-            this.callbackExecutor = checkNotNull(callbackExecutor);;
+            this.callbackExecutor = checkNotNull(callbackExecutor);
             return this;
         }
 
@@ -479,7 +479,7 @@ public class Stand implements AutoCloseable {
 
         @Internal
         public Builder setSystemGateway(SystemGateway gateway) {
-            this.systemGateway = checkNotNull(gateway);;
+            this.systemGateway = checkNotNull(gateway);
             return this;
         }
 
