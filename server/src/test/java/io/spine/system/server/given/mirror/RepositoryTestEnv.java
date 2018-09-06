@@ -72,10 +72,12 @@ public class RepositoryTestEnv {
     public static Map<EntityHistoryId, Photo> givenPhotos() {
         Photo spineLogo = newPhoto("spine.io/logo", "Spine Logo");
         Photo projectsLogo = newPhoto("projects.tm/logo", "Projects Logo");
+        Photo jxBrowserLogo = newPhoto("teamdev.com/jxbrowser/logo", "JxBrowser Logo");
         Map<EntityHistoryId, Photo> map = ImmutableMap
                 .<EntityHistoryId, Photo>builder()
                 .put(historyIdOf(spineLogo), spineLogo)
                 .put(historyIdOf(projectsLogo), projectsLogo)
+                .put(historyIdOf(jxBrowserLogo), jxBrowserLogo)
                 .build();
         return map;
     }
