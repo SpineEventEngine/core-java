@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package spine.test.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.system.server";
+option java_outer_classname = "ShopplingListProto";
+option java_multiple_files = true;
+
+message ShoppingList {
+    option (entity).kind = AGGREGATE;
+
+    string id = 1;
+
+    repeated string item = 2;
+
+    uint32 hard_copies_count = 3;
+}
