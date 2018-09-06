@@ -153,6 +153,11 @@ public final class MemoizingGateway implements SystemGateway {
         return lastSeenEvent;
     }
 
+    /**
+     * Obtains the last query submitted to {@link SystemGateway}.
+     *
+     * @return {@code null} if no queries were submitted yet
+     */
     public @Nullable MemoizedMessage lastSeenQuery() {
         return lastSeenQuery;
     }

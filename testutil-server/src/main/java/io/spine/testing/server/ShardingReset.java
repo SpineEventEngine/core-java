@@ -29,6 +29,24 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
+ * A test suite {@link org.junit.jupiter.api.extension.Extension Extension}, which resets
+ * the sharding configuration to {@link InProcessSharding} before and after each test case.
+ *
+ * <p>To apply the extension, declare it with
+ * the {@link org.junit.jupiter.api.extension.ExtendWith @ExtendWith} annotation as follows:
+ * <pre>
+ *     {@code
+ *     \@ExtendWith(ShardingReset.class)
+ *     class MySuiteTest {
+ *
+ *         \@Test
+ *         void testCase() {
+ *             // ...
+ *         }
+ *     }
+ *     }
+ * </pre>
+ *
  * @author Dmytro Dashenkov
  */
 public final class ShardingReset implements BeforeEachCallback, AfterEachCallback {
