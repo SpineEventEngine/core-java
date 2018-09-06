@@ -23,29 +23,36 @@ package io.spine.system.server;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
+import io.spine.client.EntityId;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.EventId;
 import io.spine.server.BoundedContext;
+import io.spine.test.system.server.IncompleteAudio;
+import io.spine.test.system.server.LocalizedVideo;
 import io.spine.test.system.server.Photo;
 import io.spine.test.system.server.PhotoId;
+import io.spine.test.system.server.Video;
+import io.spine.test.system.server.VideoId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.ShardingReset;
-import io.spine.testing.server.TestEventFactory;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Streams.stream;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -53,14 +60,16 @@ import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.archived;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.deleled;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.entityStateChanged;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.event;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.givenPhotos;
-import static io.spine.system.server.given.mirror.RepositoryTestEnv.historyIdOf;
-import static io.spine.testing.server.TestEventFactory.newInstance;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -70,10 +79,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("MirrorRepository should")
 class MirrorRepositoryTest {
 
-    private static final TestEventFactory events = newInstance(MirrorRepositoryTest.class);
-
     private MirrorRepository repository;
     private QueryFactory queries;
+
+    private Map<EntityHistoryId, Photo> givenPhotos;
 
     @BeforeEach
     void setUp() {
@@ -83,6 +92,9 @@ class MirrorRepositoryTest {
                 .findRepository(Mirror.class)
                 .orElseGet(() -> fail("MirrorRepository must be registered."));
         queries = TestActorRequestFactory.newInstance(MirrorRepositoryTest.class).query();
+
+        givenPhotos = givenPhotos();
+        prepareAggregates(givenPhotos);
     }
 
     @Nested
@@ -93,20 +105,13 @@ class MirrorRepositoryTest {
         @DisplayName("for a known type")
         class Known {
 
-            private Map<EntityHistoryId, Photo> givenPhotos;
-
-            @BeforeEach
-            void setUp() {
-                givenPhotos = givenPhotos();
-                prepareAggregates(givenPhotos);
-            }
-
             @Test
             @DisplayName("find all instances")
             void includeAll() {
                 Query query = queries.all(Photo.class);
                 List<? extends Message> readMessages = execute(query);
-                assertThat(readMessages, containsInAnyOrder(givenPhotos.values().toArray()));
+                assertThat(readMessages, containsInAnyOrder(givenPhotos.values()
+                                                                       .toArray()));
             }
 
             @Test
@@ -118,7 +123,7 @@ class MirrorRepositoryTest {
 
             @Test
             @DisplayName("find an archived aggregate by ID")
-            void archived() {
+            void archivedInstance() {
                 Photo target = onePhoto();
                 archive(target);
                 PhotoId targetId = target.getId();
@@ -131,7 +136,7 @@ class MirrorRepositoryTest {
 
             @Test
             @DisplayName("find a deleted aggregate by ID")
-            void deleted() {
+            void deletedInstance() {
                 Photo target = onePhoto();
                 delete(target);
                 PhotoId targetId = target.getId();
@@ -161,6 +166,14 @@ class MirrorRepositoryTest {
                                           .orElseGet(() -> fail("No test data."));
                 return target;
             }
+
+            private void archive(Photo photo) {
+                dispatchEvent(archived(photo));
+            }
+
+            private void delete(Photo photo) {
+                dispatchEvent(deleled(photo));
+            }
         }
 
         @Test
@@ -168,8 +181,70 @@ class MirrorRepositoryTest {
         void unknown() {
             Query query = queries.all(Timestamp.class);
 
-            Iterator<Any> result = repository.execute(query);
-            assertFalse(result.hasNext());
+            Collection<?> result = execute(query);
+            assertTrue(result.isEmpty());
+        }
+
+        @Test
+        @DisplayName("for an aggregate type which is not present")
+        void notPresent() {
+            Query query = queries.all(Video.class);
+
+            Collection<?> result = execute(query);
+            assertTrue(result.isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("dispatch received event")
+    class DispatchEvents {
+
+        @Test
+        @DisplayName("to nowhere if the event is not on an aggregate update")
+        void projection() {
+            VideoId videoId = VideoId
+                    .newBuilder()
+                    .setUuid(newUuid())
+                    .build();
+            TypeUrl projectionType = TypeUrl.of(LocalizedVideo.class);
+            dispatchStateChanged(projectionType, videoId, LocalizedVideo.getDefaultInstance());
+
+            checkNotFound(projectionType);
+        }
+
+        @Test
+        @DisplayName("to nowhere if the target type is not marked as an `(entity)`")
+        void incompleteAggregate() {
+            String id = newUuid();
+            TypeUrl type = TypeUrl.of(IncompleteAudio.class);
+            dispatchStateChanged(type, Identifier.pack(id), IncompleteAudio.getDefaultInstance());
+
+            checkNotFound(type);
+        }
+
+        private void dispatchStateChanged(TypeUrl type, Message id, Message state) {
+            EntityId entityId = EntityId
+                    .newBuilder()
+                    .setId(pack(id))
+                    .build();
+            EntityHistoryId historyId = EntityHistoryId
+                    .newBuilder()
+                    .setEntityId(entityId)
+                    .setTypeUrl(type.value())
+                    .build();
+            EntityStateChanged event = EntityStateChanged
+                    .newBuilder()
+                    .setId(historyId)
+                    .setWhen(getCurrentTime())
+                    .setNewState(pack(state))
+                    .build();
+            dispatchEvent(event(event));
+        }
+
+        private void checkNotFound(TypeUrl type) {
+            Query query = queries.all(type.getMessageClass());
+            List<?> result = execute(query);
+            assertTrue(result.isEmpty());
         }
     }
 
@@ -179,31 +254,6 @@ class MirrorRepositoryTest {
                        .map(entry -> entityStateChanged(entry.getKey(), entry.getValue()))
                        .forEach(this::dispatchEvent);
     }
-
-    private void archive(Photo photo) {
-        EntityHistoryId historyId = historyIdOf(photo);
-        EntityArchived archivedEvent = EntityArchived
-                .newBuilder()
-                .setId(historyId)
-                .setWhen(getCurrentTime())
-                .addMessageId(cause())
-                .build();
-        Event event = events.createEvent(archivedEvent);
-        dispatchEvent(event);
-    }
-
-    private void delete(Photo photo) {
-        EntityHistoryId historyId = historyIdOf(photo);
-        EntityDeleted deletedEvent = EntityDeleted
-                .newBuilder()
-                .setId(historyId)
-                .setWhen(getCurrentTime())
-                .addMessageId(cause())
-                .build();
-        Event event = events.createEvent(deletedEvent);
-        dispatchEvent(event);
-    }
-
 
     @SuppressWarnings("CheckReturnValue")
     private void dispatchEvent(Event event) {
@@ -219,27 +269,4 @@ class MirrorRepositoryTest {
         return readMessages;
     }
 
-    private static Event entityStateChanged(EntityHistoryId historyId, Message state) {
-        EntityStateChanged eventMessage = EntityStateChanged
-                .newBuilder()
-                .setId(historyId)
-                .setNewState(pack(state))
-                .setWhen(getCurrentTime())
-                .addMessageId(cause())
-                .build();
-        Event event = events.createEvent(eventMessage);
-        return event;
-    }
-
-    private static DispatchedMessageId cause() {
-        EventId causeOfChange = EventId
-                .newBuilder()
-                .setValue("For tests")
-                .build();
-        DispatchedMessageId messageId = DispatchedMessageId
-                .newBuilder()
-                .setEventId(causeOfChange)
-                .build();
-        return messageId;
-    }
 }

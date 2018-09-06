@@ -62,7 +62,7 @@ message LocalizedVideo {
 }
 
 // This aggregate type is not finished, so the `(entity)` option is absent.
-message UncompleteAudio {
+message IncompleteAudio {
 
     string id = 1;
 
