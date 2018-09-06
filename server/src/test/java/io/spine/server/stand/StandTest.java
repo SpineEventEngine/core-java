@@ -56,6 +56,7 @@ import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.system.server.MemoizingGateway;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.projection.Project;
@@ -337,7 +338,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("upon update of aggregate")
         void uponUpdateOfAggregate() {
-            Stand stand = newStand(isMultitenant());
+            Stand stand = createStand();
             Topic allCustomers = requestFactory.topic()
                                                .allOf(Customer.class);
 
@@ -360,7 +361,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("upon update of projection")
         void uponUpdateOfProjection() {
-            Stand stand = newStand(isMultitenant());
+            Stand stand = createStand();
             Topic allProjects = requestFactory.topic()
                                               .allOf(Project.class);
 
@@ -383,7 +384,7 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("trigger subscription callbacks matching by ID")
     void triggerSubscriptionsMatchingById() {
-        Stand stand = newStand(isMultitenant());
+        Stand stand = createStand();
 
         Collection<Customer> sampleCustomers = fillSampleCustomers(10);
 
@@ -413,7 +414,7 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("allow cancelling subscriptions")
     void cancelSubscriptions() {
-        Stand stand = newStand(isMultitenant());
+        Stand stand = createStand();
         Topic allCustomers = requestFactory.topic()
                                            .allOf(Customer.class);
 
@@ -436,11 +437,10 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("fail if cancelling non-existent subscription")
     void notCancelNonExistent() {
-        Stand stand = Stand.newBuilder()
-                           .build();
+        Stand stand = createStand();
         Subscription nonExistingSubscription = Subscription.newBuilder()
-                                                          .setId(Subscriptions.generateId())
-                                                          .build();
+                                                           .setId(Subscriptions.generateId())
+                                                           .build();
         assertThrows(IllegalArgumentException.class,
                      () -> stand.cancel(nonExistingSubscription, noOpObserver()));
     }
@@ -449,7 +449,7 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("trigger each subscription callback once for multiple subscriptions")
     void triggerSubscriptionCallbackOnce() {
-        Stand stand = newStand(isMultitenant());
+        Stand stand = createStand();
         Target allCustomers = Targets.allOf(Customer.class);
 
         Set<MemoizeEntityUpdateCallback> callbacks = newHashSet();
@@ -477,7 +477,7 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("not trigger subscription callbacks in case of another type criterion mismatch")
     void notTriggerOnTypeMismatch() {
-        Stand stand = newStand(isMultitenant());
+        Stand stand = createStand();
         Target allProjects = Targets.allOf(Project.class);
         MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
         Customer customer = fillSampleCustomers(1)
@@ -610,10 +610,10 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if querying unknown type")
         void ifQueryingUnknownType() {
-
             Stand stand = Stand.newBuilder()
+                               .setSystemGateway(NoOpSystemGateway.INSTANCE)
+                               .setMultitenant(isMultitenant())
                                .build();
-
             checkTypesEmpty(stand);
 
             // Customer type was NOT registered.
@@ -633,9 +633,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if invalid query message is passed")
         void ifInvalidQueryMessagePassed() {
-
-            Stand stand = Stand.newBuilder()
-                               .build();
+            Stand stand = createStand();
             Query invalidQuery = Query.getDefaultInstance();
 
             try {
@@ -685,34 +683,31 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if subscribing to unknown type changes")
         void ifSubscribingToUnknownType() {
-
             Stand stand = Stand.newBuilder()
+                               .setMultitenant(isMultitenant())
+                               .setSystemGateway(NoOpSystemGateway.INSTANCE)
                                .build();
             checkTypesEmpty(stand);
 
-            // Customer type was NOT registered.
+            // Project type was NOT registered.
             // So create a topic for an unknown type.
-            Topic allCustomersTopic = requestFactory.topic()
-                                                    .allOf(Customer.class);
+            Topic allProjectsTopic = requestFactory.topic()
+                                                    .allOf(Project.class);
 
             try {
-                stand.subscribe(allCustomersTopic, noOpObserver());
+                stand.subscribe(allProjectsTopic, noOpObserver());
                 fail("Expected IllegalArgumentException upon subscribing to a topic " +
                              "with unknown target, but got nothing");
             } catch (IllegalArgumentException e) {
-                verifyUnsupportedTopicException(allCustomersTopic, e);
+                verifyUnsupportedTopicException(allProjectsTopic, e);
             }
         }
 
         @Test
         @DisplayName("if invalid topic message is passed")
         void ifInvalidTopicMessagePassed() {
-
-            Stand stand = Stand.newBuilder()
-                               .build();
-
+            Stand stand = createStand();
             Topic invalidTopic = Topic.getDefaultInstance();
-
             try {
                 stand.subscribe(invalidTopic, noOpObserver());
                 fail("Expected IllegalArgumentException due to an invalid topic message, " +
@@ -759,9 +754,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if activating subscription with unsupported target")
         void ifActivateWithUnsupportedTarget() {
-
-            Stand stand = Stand.newBuilder()
-                               .build();
+            Stand stand = createStand();
             Subscription subscription = subscriptionWithUnknownTopic();
 
             try {
@@ -776,9 +769,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if cancelling subscription with unsupported target")
         void ifCancelWithUnsupportedTarget() {
-
-            Stand stand = Stand.newBuilder()
-                               .build();
+            Stand stand = createStand();
             Subscription subscription = subscriptionWithUnknownTopic();
 
             try {
@@ -793,9 +784,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if invalid subscription message is passed on activation")
         void ifActivateWithInvalidMessage() {
-
-            Stand stand = Stand.newBuilder()
-                               .build();
+            Stand stand = createStand();
             Subscription invalidSubscription = Subscription.getDefaultInstance();
 
             try {
@@ -810,9 +799,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if invalid subscription message is passed on cancel")
         void ifCancelWithInvalidMessage() {
-
-            Stand stand = Stand.newBuilder()
-                               .build();
+            Stand stand = createStand();
             Subscription invalidSubscription = Subscription.getDefaultInstance();
 
             try {
@@ -862,6 +849,10 @@ class StandTest extends TenantAwareTest {
                                .setTopic(allCustomersTopic)
                                .build();
         }
+    }
+    
+    private Stand createStand() {
+        return newStand(isMultitenant());
     }
 
     @CanIgnoreReturnValue
@@ -921,7 +912,7 @@ class StandTest extends TenantAwareTest {
 
     @SuppressWarnings("unchecked") // Mock instance of no type params
     private void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
-        Stand stand = newStand(isMultitenant());
+        Stand stand = createStand();
 
         MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readCustomersQuery, responseObserver);
@@ -958,6 +949,14 @@ class StandTest extends TenantAwareTest {
             Project unpackedSingleResult = unpack(singleRecord);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
+    }
+
+    private Stand 
+    prepareStandWithProjectionRepo(ProjectionRepository<?, ?, ?> projectionRepository) {
+        Stand stand = createStand();
+        assertNotNull(stand);
+        stand.registerTypeSupplier(projectionRepository);
+        return stand;
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
@@ -1129,14 +1128,6 @@ class StandTest extends TenantAwareTest {
         List<Any> messageList = response.getMessagesList();
         assertNotNull(messageList, "Query response has null message list");
         return messageList;
-    }
-
-    private static Stand prepareStandWithProjectionRepo(ProjectionRepository projectionRepository) {
-        Stand stand = Stand.newBuilder()
-                           .build();
-        assertNotNull(stand);
-        stand.registerTypeSupplier(projectionRepository);
-        return stand;
     }
 
     private static void checkTypesEmpty(Stand stand) {

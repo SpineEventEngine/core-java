@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.ack;
 import static io.spine.protobuf.TypeConverter.toAny;
@@ -466,7 +467,7 @@ public class Stand implements AutoCloseable {
          * @return this instance of {@code Builder}
          */
         public Builder setCallbackExecutor(Executor callbackExecutor) {
-            this.callbackExecutor = callbackExecutor;
+            this.callbackExecutor = checkNotNull(callbackExecutor);;
             return this;
         }
 
@@ -478,7 +479,7 @@ public class Stand implements AutoCloseable {
 
         @Internal
         public Builder setSystemGateway(SystemGateway gateway) {
-            this.systemGateway = gateway;
+            this.systemGateway = checkNotNull(gateway);;
             return this;
         }
 
@@ -522,6 +523,8 @@ public class Stand implements AutoCloseable {
         @CheckReturnValue
         @Internal
         public Stand build() {
+            checkState(systemGateway != null, "SystemGateway is not set.");
+
             boolean multitenant = this.multitenant == null
                                   ? false
                                   : this.multitenant;

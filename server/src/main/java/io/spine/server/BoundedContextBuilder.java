@@ -352,7 +352,7 @@ public final class BoundedContextBuilder implements Logging {
 
     private void initStand(SystemGateway systemGateway) {
         if (stand == null) {
-            stand = createStand(systemGateway);
+            stand = createStand();
         } else {
             Boolean standMultitenant = stand.isMultitenant();
             // Check that both either multi-tenant or single-tenant.
@@ -364,6 +364,7 @@ public final class BoundedContextBuilder implements Logging {
                                standMultitenant);
             }
         }
+        stand.setSystemGateway(systemGateway);
     }
 
     private void initIntegrationBus(TransportFactory factory) {
@@ -388,10 +389,9 @@ public final class BoundedContextBuilder implements Logging {
                    String.valueOf(partMultitenancy));
     }
 
-    private Stand.Builder createStand(SystemGateway systemGateway) {
+    private Stand.Builder createStand() {
         Stand.Builder result = Stand.newBuilder()
-                                    .setMultitenant(multitenant)
-                                    .setSystemGateway(systemGateway);
+                                    .setMultitenant(multitenant);
         return result;
     }
 }

@@ -23,17 +23,21 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.client.Query;
+import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.system.server.SystemGateway;
 
 import java.util.Iterator;
 
 import static com.google.common.collect.ImmutableList.copyOf;
+import static io.spine.client.Queries.tenantOf;
+import static io.spine.system.server.GatewayFunction.delegatingTo;
 
 /**
  * Processes the queries targeting {@link Aggregate Aggregate} state.
  *
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 class AggregateQueryProcessor implements QueryProcessor {
 
@@ -45,7 +49,9 @@ class AggregateQueryProcessor implements QueryProcessor {
 
     @Override
     public ImmutableCollection<Any> process(Query query) {
-        Iterator<Any> read = systemGateway.read(query);
+        TenantId tenant = tenantOf(query);
+        SystemGateway gateway = delegatingTo(systemGateway).get(tenant);
+        Iterator<Any> read = gateway.read(query);
         ImmutableList<Any> result = copyOf(read);
         return result;
     }
