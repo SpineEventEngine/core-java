@@ -268,5 +268,4 @@ class MirrorRepositoryTest {
                 .collect(toList());
         return readMessages;
     }
-
 }
