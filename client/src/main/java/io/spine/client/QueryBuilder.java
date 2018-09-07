@@ -23,7 +23,13 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 
+import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * A builder for the {@link Query} instances.
@@ -54,9 +60,34 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
 
     private final QueryFactory queryFactory;
 
+    private String orderingColumn;
+    private Order.Direction direction;
+    private Long limit;
+
     QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
         super(targetType);
         this.queryFactory = checkNotNull(queryFactory);
+    }
+
+    QueryBuilder orderedBy(String column, Order.Direction direction) {
+        checkArgument(
+                direction != Order.Direction.OD_UNKNOWN
+                        && direction != Order.Direction.UNRECOGNIZED,
+                "Invalid ordering direction"
+        );
+        this.orderingColumn = column;
+        this.direction = direction;
+        return self();
+    }
+
+    QueryBuilder limit(Integer count) {
+        this.limit = new Long(count);
+        return self();
+    }
+
+    QueryBuilder limit(Long count) {
+        this.limit = count;
+        return self();
     }
 
     /**
@@ -66,10 +97,43 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
      */
     @Override
     public Query build() {
+        Optional<Order> order = order();
+        Optional<Pagination> pagination = pagination();
+
+        checkState(order.isPresent() || !pagination.isPresent(),
+                   "Pagination cannot be set for unordered Queries");
+
         Target target = buildTarget();
         FieldMask mask = composeMask();
-        Query query = queryFactory.composeQuery(target, mask);
-        return query;
+
+        if (pagination.isPresent()) {
+            return queryFactory.composeQuery(target, order.get(), pagination.get(), mask);
+        }
+        if (order.isPresent()) {
+            return queryFactory.composeQuery(target, order.get(), mask);
+        }
+        return queryFactory.composeQuery(target, mask);
+    }
+
+    private Optional<Pagination> pagination() {
+        if (limit == null) {
+            return empty();
+        }
+        Pagination result = PaginationVBuilder.newBuilder()
+                                              .setPageSize(limit)
+                                              .build();
+        return of(result);
+    }
+
+    private Optional<Order> order() {
+        if (orderingColumn == null) {
+            return empty();
+        }
+        Order result = OrderVBuilder.newBuilder()
+                                    .setColumn(orderingColumn)
+                                    .setDirection(direction)
+                                    .build();
+        return of(result);
     }
 
     @Override
