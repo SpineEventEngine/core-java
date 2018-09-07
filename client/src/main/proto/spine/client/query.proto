@@ -37,6 +37,7 @@ import "spine/core/response.proto";
 import "spine/client/entities.proto";
 
 // Query identifier.
+//
 message QueryId {
 
     // The value of the ID.
@@ -44,6 +45,43 @@ message QueryId {
     // Starts with the `q-` prefix followed by a generated UUID value.
     //
     string value = 1;
+}
+
+// An order for Query results.
+//
+message Order {
+    
+    // A direction of sorting for ordering the Query results.
+    //
+    Direction direction = 1 [(required) = true];
+
+    // A column name which value is used for ordering the Query results. 
+    //
+    string column = 2;
+    
+    enum Direction {
+        OD_UNKNOWN = 0;
+        ASCENDING = 1;
+        DESCENDING = 2;
+    }
+}
+
+// A pagination Query must conform to.
+//
+message Pagination {
+
+    // An amount of entities to be returned by executing a Query.
+    //
+    // A minimum of 1 items per page can be requested
+    //
+    uint64 page_size = 1 [(required) = true];
+
+    // An order by which page is constructed.
+    //
+    Order order = 2 [(required) = true,
+                     (valid) = true,
+                     (if_invalid).msg_format = "Invalid pagination order"];
+    
 }
 
 // Allows clients to form the requests to the read-side through the `QueryService`.
@@ -68,8 +106,11 @@ message Query {
                                    (valid) = true,
                                    (if_invalid).msg_format = "Invalid actor context"];
 
+    Pagination pagination = 5 [(valid) = true,
+                               (if_invalid).msg_format = "Invalid query pagination"];
+    
     // Reserved for utility fields required response timeframe etc.
-    reserved 5 to 10;
+    reserved 6 to 10;
 }
 
 // The result of `Query` processing.
