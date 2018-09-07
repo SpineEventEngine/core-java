@@ -66,7 +66,7 @@ message Order {
     }
 }
 
-// A pagination Query must conform to.
+// A pagination parameters for Query results
 //
 message Pagination {
 
@@ -75,13 +75,6 @@ message Pagination {
     // A minimum of 1 items per page can be requested
     //
     uint64 page_size = 1 [(required) = true];
-
-    // An order by which page is constructed.
-    //
-    Order order = 2 [(required) = true,
-                     (valid) = true,
-                     (if_invalid).msg_format = "Invalid pagination order"];
-    
 }
 
 // Allows clients to form the requests to the read-side through the `QueryService`.
@@ -91,26 +84,37 @@ message Pagination {
 message Query {
 
     // The ID of the query.
+    //
     QueryId id = 1 [(required) = true];
 
     // Defines the entity of interest, e.g. entity type URL and a set of fetch criteria.
+    //
     Target target = 2 [(required) = true,
                        (valid) = true,
                        (if_invalid).msg_format = "Invalid query target"];
 
     // Field mask to be applied to the items of the query result.
+    //
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the query was created.
+    //
     core.ActorContext context = 4 [(required) = true,
                                    (valid) = true,
                                    (if_invalid).msg_format = "Invalid actor context"];
 
-    Pagination pagination = 5 [(valid) = true,
+    // An order for entities returned by the Query.
+    //
+    Order order = 5 [(valid) = true,
+                     (if_invalid).msg_format = "Invalid pagination order"];
+
+    // A specification for a way to paginate the Query results.
+    //
+    Pagination pagination = 6 [(valid) = true,
                                (if_invalid).msg_format = "Invalid query pagination"];
-    
+
     // Reserved for utility fields required response timeframe etc.
-    reserved 6 to 10;
+    reserved 7 to 10;
 }
 
 // The result of `Query` processing.
