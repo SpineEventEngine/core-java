@@ -323,7 +323,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *         the class of the state of the entity managed by the resulting repository
      * @return repository or {@link Optional#empty()} if the requested entity is not visible
      * @throws IllegalStateException
-     *         if the requester repository is not registered
+     *         if the requested repository is not registered
      * @see VisibilityGuard
      */
     @Internal
