@@ -46,6 +46,7 @@ message MirrorId {
 message EntityColumns {
 
     // TODO:2018-09-06:dmytro.dashenkov: Support entity columns.
+    // https://github.com/SpineEventEngine/core-java/issues/400
 
     map<string, google.protobuf.Any> columns = 1;
 }
