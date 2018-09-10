@@ -124,8 +124,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Returns the {@link TypeUrl} for the state objects wrapped by entities
-     * managed by this repository
+     * Obtains the {@link TypeUrl} for the state objects wrapped by entities
+     * managed by this repository.
      */
     public TypeUrl getEntityStateType() {
         return entityClass().getStateType();
@@ -350,7 +350,15 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         SystemGateway gateway = getBoundedContext().getSystemGateway();
-        return EntityLifecycle.create(id, getEntityStateType(), gateway);
+        EventFilter eventFilter = eventFilter();
+        EntityLifecycle lifecycle = EntityLifecycle
+                .newBuilder()
+                .setEntityId(id)
+                .setEntityType(getEntityStateType())
+                .setGateway(gateway)
+                .setEventFilter(eventFilter)
+                .build();
+        return lifecycle;
     }
 
     @SPI

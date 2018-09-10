@@ -62,8 +62,10 @@ import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.server.entity.EventFilter.allowAll;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
@@ -86,6 +88,11 @@ public class EntityLifecycle {
     private final SystemGateway systemGateway;
 
     /**
+     * The {@link EventFilter} to apply to the system events emitted by this lifecycle.
+     */
+    private final EventFilter eventFilter;
+
+    /**
      * The ID of {@linkplain io.spine.system.server.EntityHistory history} of the associated
      * {@link Entity}.
      *
@@ -100,31 +107,27 @@ public class EntityLifecycle {
      *
      * <p>Use this constructor for test purposes <b>only</b>.
      *
-     * @see #create(Object, TypeUrl, SystemGateway) EntityLifecycle.create(...) to instantiate
-     *                                              the class
+     * @see Builder
      */
     @VisibleForTesting
-    protected EntityLifecycle(Object historyId, TypeUrl entityType, SystemGateway gateway) {
+    protected EntityLifecycle(Object entityId,
+                              TypeUrl entityType,
+                              SystemGateway gateway,
+                              EventFilter eventFilter) {
         this.systemGateway = gateway;
-        this.historyId = historyId(historyId, entityType);
+        this.historyId = historyId(entityId, entityType);
+        this.eventFilter = eventFilter;
     }
 
-    /**
-     * Creates a new instance of {@code EntityLifecycle}.
-     *
-     * @param history    the ID of the associated entity history
-     * @param entityType the type of the associated entity
-     * @param gateway    the {@link SystemGateway} to post the system commands
-     * @return new instance of {@code EntityLifecycle}
-     */
-    static EntityLifecycle create(Object history, TypeUrl entityType, SystemGateway gateway) {
-        return new EntityLifecycle(history, entityType, gateway);
+    private EntityLifecycle(Builder builder) {
+        this(builder.entityId, builder.entityType, builder.gateway, builder.eventFilter);
     }
 
     /**
      * Posts the {@link CreateEntity} system command.
      *
-     * @param entityKind the {@link EntityOption.Kind} of the created entity
+     * @param entityKind
+     *         the {@link EntityOption.Kind} of the created entity
      */
     public void onEntityCreated(EntityOption.Kind entityKind) {
         CreateEntity command = CreateEntityVBuilder
@@ -139,7 +142,8 @@ public class EntityLifecycle {
      * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
      * system command.
      *
-     * @param commandId the ID of the command which should be handled by the entity
+     * @param commandId
+     *         the ID of the command which should be handled by the entity
      */
     public void onTargetAssignedToCommand(CommandId commandId) {
         CommandTarget target = CommandTarget
@@ -158,7 +162,8 @@ public class EntityLifecycle {
     /**
      * Posts the {@link DispatchCommandToHandler} system command.
      *
-     * @param command the dispatched command
+     * @param command
+     *         the dispatched command
      */
     public void onDispatchCommand(Command command) {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandlerVBuilder
@@ -172,7 +177,8 @@ public class EntityLifecycle {
     /**
      * Posts the {@link CommandHandled} system event.
      *
-     * @param command the handled command
+     * @param command
+     *         the handled command
      */
     public void onCommandHandled(Command command) {
         CommandHandled systemEvent = CommandHandledVBuilder
@@ -185,8 +191,10 @@ public class EntityLifecycle {
     /**
      * Posts the {@link CommandRejected} system event.
      *
-     * @param commandId the ID of the rejected command
-     * @param rejection the rejection event
+     * @param commandId
+     *         the ID of the rejected command
+     * @param rejection
+     *         the rejection event
      */
     public void onCommandRejected(CommandId commandId, Event rejection) {
         CommandRejected systemCommand = CommandRejectedVBuilder
@@ -200,7 +208,8 @@ public class EntityLifecycle {
     /**
      * Posts the {@link DispatchEventToSubscriber} system command.
      *
-     * @param event the dispatched event
+     * @param event
+     *         the dispatched event
      */
     public void onDispatchEventToSubscriber(Event event) {
         DispatchEventToSubscriber systemCommand = DispatchEventToSubscriberVBuilder
@@ -228,7 +237,8 @@ public class EntityLifecycle {
     /**
      * Posts the {@link DispatchEventToReactor} system command.
      *
-     * @param event the dispatched event
+     * @param event
+     *         the dispatched event
      */
     public void onDispatchEventToReactor(Event event) {
         DispatchEventToReactor systemCommand = DispatchEventToReactor
@@ -246,12 +256,14 @@ public class EntityLifecycle {
      * <p>Only the actual changes in the entity attributes result into system commands.
      * If the previous and new values are equal, then no commands are posted.
      *
-     * @param change     the change in the entity state and attributes
-     * @param messageIds the IDs of the messages which caused the {@code change}; typically,
-     *                   {@link io.spine.core.EventId EventId}s or {@link CommandId}s
+     * @param change
+     *         the change in the entity state and attributes
+     * @param messageIds
+     *         the IDs of the messages which caused the {@code change}; typically,
+     *         {@link io.spine.core.EventId EventId}s or {@link CommandId}s
      */
     protected void onStateChanged(EntityRecordChange change,
-                        Set<? extends Message> messageIds) {
+                                  Set<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);
@@ -390,6 +402,67 @@ public class EntityLifecycle {
                     "Unexpected message ID of type %s. Expected EventId or CommandId.",
                     messageId.getClass()
             );
+        }
+    }
+
+    /**
+     * Creates a new instance of {@code Builder} for {@code EntityLifecycle} instances.
+     *
+     * @return new instance of {@code Builder}
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
+     * A builder for the {@code EntityLifecycle} instances.
+     */
+    public static final class Builder {
+
+        private Object entityId;
+        private TypeUrl entityType;
+        private SystemGateway gateway;
+        private EventFilter eventFilter;
+
+        /**
+         * Prevents direct instantiation.
+         */
+        private Builder() {
+        }
+
+        public Builder setEntityId(Object entityId) {
+            this.entityId = checkNotNull(entityId);
+            return this;
+        }
+
+        public Builder setEntityType(TypeUrl entityType) {
+            this.entityType = checkNotNull(entityType);
+            return this;
+        }
+
+        public Builder setGateway(SystemGateway gateway) {
+            this.gateway = checkNotNull(gateway);
+            return this;
+        }
+
+        public Builder setEventFilter(EventFilter eventFilter) {
+            this.eventFilter = checkNotNull(eventFilter);
+            return this;
+        }
+
+        /**
+         * Creates a new instance of {@code EntityLifecycle}.
+         *
+         * @return new instance of {@code EntityLifecycle}
+         */
+        public EntityLifecycle build() {
+            checkState(entityId != null);
+            checkState(entityType != null);
+            checkState(gateway != null);
+            if (eventFilter == null) {
+                eventFilter = allowAll();
+            }
+            return new EntityLifecycle(this);
         }
     }
 }
