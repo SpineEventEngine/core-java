@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
@@ -350,6 +351,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         checkNotNull(id);
         SystemGateway gateway = getBoundedContext().getSystemGateway();
         return EntityLifecycle.create(id, getEntityStateType(), gateway);
+    }
+
+    @SPI
+    protected EventFilter eventFilter() {
+        return NoOpEventFilter.INSTANCE;
     }
 
     /**
