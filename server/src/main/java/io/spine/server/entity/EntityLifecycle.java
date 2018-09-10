@@ -415,14 +415,14 @@ public class EntityLifecycle {
      *
      * @return new instance of {@code Builder}
      */
-    public static Builder newBuilder() {
+    static Builder newBuilder() {
         return new Builder();
     }
 
     /**
      * A builder for the {@code EntityLifecycle} instances.
      */
-    public static final class Builder {
+    static final class Builder {
 
         private Object entityId;
         private TypeUrl entityType;
@@ -435,22 +435,22 @@ public class EntityLifecycle {
         private Builder() {
         }
 
-        public Builder setEntityId(Object entityId) {
+        Builder setEntityId(Object entityId) {
             this.entityId = checkNotNull(entityId);
             return this;
         }
 
-        public Builder setEntityType(TypeUrl entityType) {
+        Builder setEntityType(TypeUrl entityType) {
             this.entityType = checkNotNull(entityType);
             return this;
         }
 
-        public Builder setGateway(SystemGateway gateway) {
+        Builder setGateway(SystemGateway gateway) {
             this.gateway = checkNotNull(gateway);
             return this;
         }
 
-        public Builder setEventFilter(EventFilter eventFilter) {
+        Builder setEventFilter(EventFilter eventFilter) {
             this.eventFilter = checkNotNull(eventFilter);
             return this;
         }
@@ -460,7 +460,7 @@ public class EntityLifecycle {
          *
          * @return new instance of {@code EntityLifecycle}
          */
-        public EntityLifecycle build() {
+        EntityLifecycle build() {
             checkState(entityId != null);
             checkState(entityType != null);
             checkState(gateway != null);
