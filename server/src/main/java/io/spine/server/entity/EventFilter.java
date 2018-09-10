@@ -33,4 +33,8 @@ import java.util.Optional;
 public interface EventFilter {
 
     Optional<Event> filter(Event event);
+
+    static EventFilter allowAll() {
+        return NoOpEventFilter.INSTANCE;
+    }
 }
