@@ -25,26 +25,68 @@ import io.spine.core.Event;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+
 /**
  * @author Dmytro Dashenkov
  */
-public class CompositeEventFilter implements EventFilter {
+public final class CompositeEventFilter implements EventFilter {
 
     private final ImmutableList<EventFilter> filters;
 
-    private CompositeEventFilter(ImmutableList<EventFilter> filters) {
-        this.filters = filters;
+    private CompositeEventFilter(Builder builder) {
+        this.filters = builder.filters.build();
     }
 
     @Override
     public Optional<Event> filter(Event event) {
-        Optional<Event> result = Optional.of(event);
+        Optional<Event> result = of(event);
         for (EventFilter filter : filters) {
             result = filter.filter(result.get());
             if (!result.isPresent()) {
-                break;
+                return empty();
             }
         }
         return result;
+    }
+
+    /**
+     * Creates a new instance of {@code Builder} for {@code CompositeEventFilter} instances.
+     *
+     * @return new instance of {@code Builder}
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
+     * A builder for the {@code CompositeEventFilter} instances.
+     */
+    public static final class Builder {
+
+        private final ImmutableList.Builder<EventFilter> filters = ImmutableList.builder();
+
+        /**
+         * Prevents direct instantiation.
+         */
+        private Builder() {
+        }
+
+        public Builder add(EventFilter filter) {
+            checkNotNull(filter);
+            filters.add(filter);
+            return this;
+        }
+
+        /**
+         * Creates a new instance of {@code CompositeEventFilter}.
+         *
+         * @return new instance of {@code CompositeEventFilter}
+         */
+        public CompositeEventFilter build() {
+            return new CompositeEventFilter(this);
+        }
     }
 }
