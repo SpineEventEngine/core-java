@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
@@ -63,7 +62,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -412,12 +410,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Posts passed events to {@link EventBus}.
      */
     void postEvents(Collection<Event> events) {
-        ImmutableList<Event> filteredEvents = events.stream()
-                                                    .map(eventFilter()::filter)
-                                                    .filter(Optional::isPresent)
-                                                    .map(Optional::get)
-                                                    .collect(toImmutableList());
-        getEventBus().post(filteredEvents);
+        Iterable<Event> filteredEvents = eventFilter().filter(events);
+        EventBus bus = getBoundedContext().getEventBus();
+        bus.post(filteredEvents);
     }
 
     private void updateStand(TenantId tenantId, A aggregate) {

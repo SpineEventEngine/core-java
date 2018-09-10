@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
@@ -63,7 +62,6 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -298,13 +296,9 @@ public abstract class ProcessManagerRepository<I,
      * Posts passed events to {@link EventBus}.
      */
     void postEvents(Collection<Event> events) {
-        ImmutableList<Event> filteredEvents = events.stream()
-                                                    .map(eventFilter()::filter)
-                                                    .filter(Optional::isPresent)
-                                                    .map(Optional::get)
-                                                    .collect(toImmutableList());
-        getBoundedContext().getEventBus()
-                           .post(filteredEvents);
+        Iterable<Event> filteredEvents = eventFilter().filter(events);
+        EventBus bus = getBoundedContext().getEventBus();
+        bus.post(filteredEvents);
     }
 
     @Override

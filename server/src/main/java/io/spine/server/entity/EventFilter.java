@@ -20,10 +20,14 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableCollection;
 import io.spine.annotation.SPI;
 import io.spine.core.Event;
 
+import java.util.Collection;
 import java.util.Optional;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
  * @author Dmytro Dashenkov
@@ -36,5 +40,14 @@ public interface EventFilter {
 
     static EventFilter allowAll() {
         return NoOpEventFilter.INSTANCE;
+    }
+
+    default ImmutableCollection<Event> filter(Collection<Event> events) {
+        ImmutableCollection<Event> filteredEvents = events.stream()
+                                                          .map(this::filter)
+                                                          .filter(Optional::isPresent)
+                                                          .map(Optional::get)
+                                                          .collect(toImmutableList());
+        return filteredEvents;
     }
 }
