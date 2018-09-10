@@ -30,18 +30,13 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.option.EntityOption;
-import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.AssignTargetToCommand;
 import io.spine.system.server.AssignTargetToCommandVBuilder;
-import io.spine.system.server.ChangeEntityState;
 import io.spine.system.server.CommandHandled;
 import io.spine.system.server.CommandHandledVBuilder;
 import io.spine.system.server.CommandRejected;
 import io.spine.system.server.CommandRejectedVBuilder;
 import io.spine.system.server.CommandTarget;
-import io.spine.system.server.CreateEntity;
-import io.spine.system.server.CreateEntityVBuilder;
-import io.spine.system.server.DeleteEntity;
 import io.spine.system.server.DispatchCommandToHandler;
 import io.spine.system.server.DispatchCommandToHandlerVBuilder;
 import io.spine.system.server.DispatchEventToReactor;
@@ -49,12 +44,22 @@ import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchEventToSubscriberVBuilder;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.DispatchedMessageIdVBuilder;
+import io.spine.system.server.EntityArchived;
+import io.spine.system.server.EntityArchivedVBuilder;
+import io.spine.system.server.EntityCreated;
+import io.spine.system.server.EntityCreatedVBuilder;
+import io.spine.system.server.EntityDeleted;
+import io.spine.system.server.EntityDeletedVBuilder;
+import io.spine.system.server.EntityExtractedFromArchive;
+import io.spine.system.server.EntityExtractedFromArchiveVBuilder;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityHistoryIdVBuilder;
+import io.spine.system.server.EntityRestored;
+import io.spine.system.server.EntityRestoredVBuilder;
+import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.EntityStateChangedVBuilder;
 import io.spine.system.server.EventImported;
 import io.spine.system.server.EventImportedVBuilder;
-import io.spine.system.server.ExtractEntityFromArchive;
-import io.spine.system.server.RestoreEntity;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
 
@@ -63,6 +68,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.copyOf;
 import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.server.entity.EventFilter.allowAll;
@@ -124,18 +130,18 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link CreateEntity} system command.
+     * Posts the {@link EntityCreated} system event.
      *
      * @param entityKind
      *         the {@link EntityOption.Kind} of the created entity
      */
     public void onEntityCreated(EntityOption.Kind entityKind) {
-        CreateEntity command = CreateEntityVBuilder
+        EntityCreated command = EntityCreatedVBuilder
                 .newBuilder()
                 .setId(historyId)
                 .setKind(entityKind)
                 .build();
-        systemGateway.postCommand(command);
+        systemGateway.postEvent(command);
     }
 
     /**
@@ -250,11 +256,11 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link ChangeEntityState} system command and the commands related to
+     * Posts the {@link EntityStateChanged} system event and the event related to
      * the lifecycle flags.
      *
-     * <p>Only the actual changes in the entity attributes result into system commands.
-     * If the previous and new values are equal, then no commands are posted.
+     * <p>Only the actual changes in the entity attributes result into system events.
+     * If the previous and new values are equal, then no events are posted.
      *
      * @param change
      *         the change in the entity state and attributes
@@ -279,15 +285,14 @@ public class EntityLifecycle {
                              .getState();
         Any newState = change.getNewValue()
                              .getState();
-
         if (!oldState.equals(newState)) {
-            ChangeEntityState command = ChangeEntityState
+            EntityStateChanged command = EntityStateChangedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .setNewState(newState)
-                    .addAllMessageId(messageIds)
+                    .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postCommand(command);
+            systemGateway.postEvent(command);
         }
     }
 
@@ -300,12 +305,12 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (newValue && !oldValue) {
-            ArchiveEntity command = ArchiveEntity
+            EntityArchived command = EntityArchivedVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .addAllMessageId(messageIds)
+                    .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postCommand(command);
+            systemGateway.postEvent(command);
         }
     }
 
@@ -318,12 +323,12 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (newValue && !oldValue) {
-            DeleteEntity command = DeleteEntity
+            EntityDeleted command = EntityDeletedVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .addAllMessageId(messageIds)
+                    .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postCommand(command);
+            systemGateway.postEvent(command);
         }
     }
 
@@ -336,12 +341,12 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (!newValue && oldValue) {
-            ExtractEntityFromArchive command = ExtractEntityFromArchive
+            EntityExtractedFromArchive command = EntityExtractedFromArchiveVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .addAllMessageId(messageIds)
+                    .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postCommand(command);
+            systemGateway.postEvent(command);
         }
     }
 
@@ -354,12 +359,12 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (!newValue && oldValue) {
-            RestoreEntity command = RestoreEntity
+            EntityRestored command = EntityRestoredVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .addAllMessageId(messageIds)
+                    .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postCommand(command);
+            systemGateway.postEvent(command);
         }
     }
 
