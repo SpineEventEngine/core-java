@@ -25,7 +25,7 @@ message Mirror {
 
     // The lifecycle flags of the aggregate.
     //
-    // This field is here for conveniance. The own lifecycle flags of a mirror projection duplicate
+    // This field is here for convenience. The own lifecycle flags of a mirror projection duplicate
     // the flags of corresponding aggregate.
     //
     spine.server.entity.LifecycleFlags lifecycle = 3;
