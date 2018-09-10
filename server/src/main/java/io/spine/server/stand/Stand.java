@@ -388,16 +388,12 @@ public class Stand implements AutoCloseable {
                 typeRegistry.getRecordRepository(type);
         if (foundRepository.isPresent()) {
             RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
-            return genericEntityProcessor(repository);
+            return new EntityQueryProcessor(repository);
         } else if (getExposedAggregateTypes().contains(type)) {
             return aggregateProcessor();
         } else {
             return NOOP_PROCESSOR;
         }
-    }
-
-    private static QueryProcessor genericEntityProcessor(RecordBasedRepository<?, ?, ?> repository) {
-        return new EntityQueryProcessor(repository);
     }
 
     private QueryProcessor aggregateProcessor() {
