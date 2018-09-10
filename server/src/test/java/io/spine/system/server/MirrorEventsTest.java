@@ -45,12 +45,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Dmytro Dashenkov
  */
 @DisplayName("Mirror projection should on")
-class MirrorEventTests {
+class MirrorEventsTest {
 
     private static final String CHANGE_STATE = "change own state";
 
     private static final TestEventFactory events =
-            TestEventFactory.newInstance(MirrorEventTests.class);
+            TestEventFactory.newInstance(MirrorEventsTest.class);
 
     @Nested
     @DisplayName("EntityStateChanged event")
