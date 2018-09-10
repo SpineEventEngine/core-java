@@ -54,6 +54,11 @@ import static java.util.stream.Collectors.toList;
  * <p>The projection defines an {@link io.spine.server.entity.storage.EntityColumn EntityColumn}
  * which stored the {@linkplain #getAggregateType() type URL} of the state, which is mirrored.
  *
+ * @implNote
+ * Many subscriber methods of this class ignore their arguments. The argument of a subscriber method
+ * is an event used by the framework to bind the method to the event type. The content of the event,
+ * in those cases, is irrelevant.
+ *
  * @author Dmytro Dashenkov
  */
 public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
