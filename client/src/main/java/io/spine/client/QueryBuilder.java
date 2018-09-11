@@ -70,22 +70,27 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     }
 
     QueryBuilder orderedBy(String column, Order.Direction direction) {
+        checkNotNull(column);
+        checkNotNull(direction);
         checkArgument(
                 direction != Order.Direction.OD_UNKNOWN
                         && direction != Order.Direction.UNRECOGNIZED,
                 "Invalid ordering direction"
         );
+
         this.orderingColumn = column;
         this.direction = direction;
         return self();
     }
 
     QueryBuilder limit(Integer count) {
+        checkNotNull(count);
         this.limit = new Long(count);
         return self();
     }
 
     QueryBuilder limit(Long count) {
+        checkNotNull(count);
         this.limit = count;
         return self();
     }
