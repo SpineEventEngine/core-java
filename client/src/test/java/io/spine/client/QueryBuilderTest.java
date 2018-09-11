@@ -52,11 +52,21 @@ import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.client.Order.Direction.ASCENDING;
+import static io.spine.client.Order.Direction.DESCENDING;
+import static io.spine.client.Order.Direction.OD_UNKNOWN;
+import static io.spine.client.Order.Direction.UNRECOGNIZED;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.EntityIdUnpacker.unpacker;
+import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_ORDER;
+import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_PAGINATION;
+import static io.spine.client.given.QueryBuilderTestEnv.FIRST_FIELD;
+import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.QueryBuilderTestEnv.newMessageId;
+import static io.spine.client.given.QueryBuilderTestEnv.order;
+import static io.spine.client.given.QueryBuilderTestEnv.pagination;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Verify.assertContains;
@@ -75,6 +85,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -90,10 +101,61 @@ class QueryBuilderTest {
         factory = requestFactory().query();
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void notAcceptNulls() {
-        new NullPointerTester().testAllPublicStaticMethods(QueryBuilder.class);
+    @Nested
+    @DisplayName("check arguments and")
+    class CheckArguments {
+
+        @Test
+        @DisplayName(NOT_ACCEPT_NULLS)
+        void notAcceptNulls() throws NoSuchMethodException {
+            NullPointerTester tester = new NullPointerTester();
+            tester.testAllPublicStaticMethods(QueryBuilder.class);
+            tester.testAllPublicInstanceMethods(factory.select(TEST_ENTITY_TYPE));
+        }
+
+        @Test
+        @DisplayName("throw IAE if negative limit int value is provided")
+        void notAcceptNegativeIntLimit() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> factory.select(TEST_ENTITY_TYPE)
+                                      .limit(-10));
+        }
+
+        @Test
+        @DisplayName("throw IAE if negative limit long value is provided")
+        void notAcceptNegativeLongLimit() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> factory.select(TEST_ENTITY_TYPE)
+                                      .limit(-99999999L));
+        }
+
+        @Test
+        @DisplayName("throw IAE if limit int value is 0")
+        void notAcceptZeroIntLimit() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> factory.select(TEST_ENTITY_TYPE)
+                                      .limit(0));
+        }
+
+        @Test
+        @DisplayName("throw IAE if limit long value is 0")
+        void notAcceptZeroLongLimit() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> factory.select(TEST_ENTITY_TYPE)
+                                      .limit(0L));
+        }
+
+        @Test
+        @DisplayName("throw IAE if order direction is not ASCENDING or DESCENDING")
+        void notAcceptInvalidDirection() {
+            QueryBuilder select = factory.select(TEST_ENTITY_TYPE)
+                                         .orderedBy(FIRST_FIELD, ASCENDING)
+                                         .orderedBy(FIRST_FIELD, DESCENDING);
+            assertThrows(IllegalArgumentException.class,
+                         () -> select.orderedBy(FIRST_FIELD, OD_UNKNOWN));
+            assertThrows(IllegalArgumentException.class,
+                         () -> select.orderedBy(FIRST_FIELD, UNRECOGNIZED));
+        }
     }
 
     @Nested
@@ -107,6 +169,74 @@ class QueryBuilderTest {
                                  .build();
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
+
+            Target target = query.getTarget();
+            assertTrue(target.getIncludeAll());
+
+            assertEquals(EMPTY_ORDER, query.getOrder());
+            assertEquals(EMPTY_PAGINATION, query.getPagination());
+
+            assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
+        }
+
+        @Test
+        @DisplayName("with order")
+        void ordered() {
+            Query query = factory.select(TEST_ENTITY_TYPE)
+                                 .orderedBy(FIRST_FIELD, ASCENDING)
+                                 .build();
+            assertNotNull(query);
+            assertFalse(query.hasFieldMask());
+
+            Order expectedOrder = order(FIRST_FIELD, ASCENDING);
+            assertEquals(expectedOrder, query.getOrder());
+
+            assertEquals(EMPTY_PAGINATION, query.getPagination());
+
+            Target target = query.getTarget();
+            assertTrue(target.getIncludeAll());
+
+            assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
+        }
+
+        @Test
+        @DisplayName("with Integer limit")
+        void limitedWithInt() {
+            Query query = factory.select(TEST_ENTITY_TYPE)
+                                 .orderedBy(FIRST_FIELD, ASCENDING)
+                                 .limit(10)
+                                 .build();
+            assertNotNull(query);
+            assertFalse(query.hasFieldMask());
+
+            Order expectedOrder = order(FIRST_FIELD, ASCENDING);
+            assertEquals(expectedOrder, query.getOrder());
+
+            Pagination expectedPagination = pagination(10L);
+            assertEquals(expectedPagination, query.getPagination());
+
+            Target target = query.getTarget();
+            assertTrue(target.getIncludeAll());
+
+            assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
+        }
+
+        @Test
+        @DisplayName("with limit")
+        void limited() {
+            long limit = 15L;
+            Query query = factory.select(TEST_ENTITY_TYPE)
+                                 .orderedBy(SECOND_FIELD, DESCENDING)
+                                 .limit(limit)
+                                 .build();
+            assertNotNull(query);
+            assertFalse(query.hasFieldMask());
+
+            Order expectedOrder = order(SECOND_FIELD, DESCENDING);
+            assertEquals(expectedOrder, query.getOrder());
+
+            Pagination expectedPagination = pagination(limit);
+            assertEquals(expectedPagination, query.getPagination());
 
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
@@ -288,6 +418,7 @@ class QueryBuilderTest {
         void byAllArguments() {
             int id1 = 314;
             int id2 = 271;
+            int limit = 10;
             String columnName1 = "column1";
             Object columnValue1 = 42;
             String columnName2 = "column2";
@@ -298,6 +429,8 @@ class QueryBuilderTest {
                                  .byId(id1, id2)
                                  .where(eq(columnName1, columnValue1),
                                         eq(columnName2, columnValue2))
+                                 .orderedBy(SECOND_FIELD, DESCENDING)
+                                 .limit(limit)
                                  .build();
             assertNotNull(query);
 
@@ -338,6 +471,12 @@ class QueryBuilderTest {
             assertNotNull(actualValue2);
             Message actualGenericValue2 = toObject(actualValue2, TestEntityId.class);
             assertEquals(columnValue2, actualGenericValue2);
+
+            Order expectedOrder = order(SECOND_FIELD, DESCENDING);
+            assertEquals(expectedOrder, query.getOrder());
+
+            Pagination expectedPagination = pagination(limit);
+            assertEquals(expectedPagination, query.getPagination());
         }
 
         private ColumnFilter findByName(Iterable<ColumnFilter> filters, String name) {
@@ -403,6 +542,34 @@ class QueryBuilderTest {
             Collection<String> maskFields = mask.getPathsList();
             assertSize(arrayFields.length, maskFields);
             assertThat(maskFields, contains(arrayFields));
+        }
+
+        @Test
+        @DisplayName("limit")
+        void lastLimit() {
+            int expectedLimit = 10;
+            Query query = factory.select(TEST_ENTITY_TYPE)
+                                 .orderedBy(FIRST_FIELD, ASCENDING)
+                                 .limit(2)
+                                 .limit(5)
+                                 .limit(expectedLimit)
+                                 .build();
+            assertNotNull(query);
+            assertEquals(expectedLimit, query.getPagination()
+                                             .getPageSize());
+        }
+
+        @Test
+        @DisplayName("order")
+        void lastOrder() {
+            Query query = factory.select(TEST_ENTITY_TYPE)
+                                 .orderedBy(FIRST_FIELD, ASCENDING)
+                                 .orderedBy(SECOND_FIELD, ASCENDING)
+                                 .orderedBy(SECOND_FIELD, DESCENDING)
+                                 .orderedBy(FIRST_FIELD, DESCENDING)
+                                 .build();
+            assertNotNull(query);
+            assertEquals(order(FIRST_FIELD, DESCENDING), query.getOrder());
         }
     }
 
