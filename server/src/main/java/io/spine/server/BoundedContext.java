@@ -81,7 +81,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Dmitry Ganzha
  * @author Dmytro Dashenkov
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
- *     Martin Fowler on BoundedContext</a>
+ *     Martin Fowler on bounded contexts</a>
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class BoundedContext implements AutoCloseable, Logging {
@@ -419,8 +419,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
-     *     <li>{@linkplain io.spine.server.entity.Repository#close()} Closes} all registered
-     *     repositories.
+     *     <li>{@linkplain io.spine.server.entity.Repository#close() Closes} all registered
+     *         repositories.
      * </ol>
      *
      * @throws Exception caused by closing one of the components
