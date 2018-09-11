@@ -112,7 +112,7 @@ class DefaultSystemGatewayTest  {
         }
 
         private ShoppingList aggregate() {
-            return findAggreagte(systemContext);
+            return findAggregate(systemContext);
         }
 
         private void createAggregate() {
@@ -150,7 +150,7 @@ class DefaultSystemGatewayTest  {
         }
 
         private ShoppingList aggregate() {
-            return findAggreagte(domainContext);
+            return findAggregate(domainContext);
         }
 
         private void createAggregate() {
@@ -164,7 +164,7 @@ class DefaultSystemGatewayTest  {
         }
     }
 
-    private ShoppingList findAggreagte(BoundedContext context) {
+    private ShoppingList findAggregate(BoundedContext context) {
         ShoppingListRepository repository = (ShoppingListRepository)
                 context.findRepository(ShoppingList.class)
                              .orElseGet(() -> fail("Repository should be registered."));
