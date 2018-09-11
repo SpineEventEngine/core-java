@@ -94,13 +94,15 @@ public final class VisibilityGuard {
     /**
      * Obtains the repository for the passed entity state class.
      *
-     * @param stateClass the class of the state of entities managed by the repository
+     * @param stateClass
+     *         the class of the state of entities managed by the repository
      * @return the repository wrapped into {@code Optional} or {@code Optional#empty()} if the
-     * entity state is {@linkplain Visibility#NONE not visible}
-     * @throws IllegalArgumentException if the repository for the passed state class was not
-     *                                  {@linkplain #register(Repository) registered} with the guard
-     *                                  prior to this call, or if all repositories were
-     *                                  {@linkplain #shutDownRepositories() shut down}
+     *         entity state is {@linkplain Visibility#NONE not visible}
+     * @throws IllegalArgumentException
+     *         if the repository for the passed state class was not
+     *         {@linkplain #register(Repository) registered} with the guard
+     *         prior to this call, or if all repositories were
+     *         {@linkplain #shutDownRepositories() shut down}
      */
     public Optional<Repository> getRepository(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);

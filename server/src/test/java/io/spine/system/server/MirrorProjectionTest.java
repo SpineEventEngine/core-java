@@ -18,24 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.system.server;
+
+import com.google.protobuf.Message;
+import io.spine.server.entity.Repository;
+import io.spine.testing.server.projection.ProjectionTest;
+
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.ID;
+
 /**
- *  The versions of the libraries used.
+ * An implementation base for {@link MirrorProjection} event subscriber tests.
  *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @author Dmytro Dashenkov
  */
- 
-def final SPINE_VERSION = '0.10.88-SNAPSHOT'
+abstract class MirrorProjectionTest<E extends Message>
+        extends ProjectionTest<MirrorId, E, Mirror, MirrorProjection> {
 
-ext {
+    MirrorProjectionTest(E eventMessage) {
+        super(ID, eventMessage);
+    }
 
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.69-SNAPSHOT'
-
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.14.0'
+    @Override
+    protected Repository<MirrorId, MirrorProjection> createEntityRepository() {
+        return new MirrorRepository();
+    }
 }

@@ -43,6 +43,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.testing.TestValues.random;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -113,7 +114,7 @@ class AbstractCommanderTest {
     private static TaskId newTaskId() {
         return TaskId
                 .newBuilder()
-                .setId(TestValues.random(100))
+                .setId(random(1, 100))
                 .build();
 
     }

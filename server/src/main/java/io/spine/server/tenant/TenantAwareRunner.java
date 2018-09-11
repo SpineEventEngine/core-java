@@ -73,4 +73,20 @@ public final class TenantAwareRunner {
         }.execute();
         return result;
     }
+
+    /**
+     * Runs the given {@code operation} for the given tenant.
+     *
+     * @param operation
+     *         the operation to run
+     */
+    public void run(Runnable operation) {
+        checkNotNull(operation);
+        new TenantAwareOperation(tenant) {
+            @Override
+            public void run() {
+                operation.run();
+            }
+        }.execute();
+    }
 }

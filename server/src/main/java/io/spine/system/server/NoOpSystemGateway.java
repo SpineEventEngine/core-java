@@ -20,7 +20,13 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.client.Query;
+
+import java.util.Iterator;
+
+import static java.util.Collections.emptyIterator;
 
 /**
  * An implementation of {@link SystemGateway} which never performs an operation.
@@ -44,5 +50,10 @@ public enum NoOpSystemGateway implements SystemGateway {
     @Override
     public void postEvent(Message systemEvent) {
         // NOP.
+    }
+
+    @Override
+    public Iterator<Any> readDomainAggregate(Query query) {
+        return emptyIterator();
     }
 }

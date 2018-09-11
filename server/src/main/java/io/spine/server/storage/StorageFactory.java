@@ -26,7 +26,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,
@@ -52,11 +51,6 @@ public interface StorageFactory extends AutoCloseable {
      * @return immutable registry of type convection strategies
      */
     ColumnTypeRegistry getTypeRegistry();
-
-    /**
-     * Creates a new {@link StandStorage} instance.
-     */
-    StandStorage createStandStorage();
 
     /**
      * Creates a new {@link AggregateStorage} instance.

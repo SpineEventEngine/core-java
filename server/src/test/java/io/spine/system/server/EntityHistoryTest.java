@@ -28,10 +28,6 @@ import io.spine.core.Command;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
-import io.spine.server.delivery.InProcessSharding;
-import io.spine.server.delivery.Sharding;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.given.entity.HistoryEventWatcher;
 import io.spine.system.server.given.entity.PersonAggregate;
 import io.spine.system.server.given.entity.PersonNamePart;
@@ -42,12 +38,13 @@ import io.spine.system.server.given.entity.PersonProjection;
 import io.spine.system.server.given.entity.PersonProjectionRepository;
 import io.spine.system.server.given.entity.PersonRepository;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.ShardingReset;
 import io.spine.type.TypeUrl;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Commands.getMessage;
@@ -66,6 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
+@ExtendWith(ShardingReset.class)
 @DisplayName("EntityHistory should")
 @SuppressWarnings("InnerClassMayBeStatic")
 class EntityHistoryTest {
@@ -93,13 +91,6 @@ class EntityHistoryTest {
         context.register(new PersonProjectionRepository());
         context.register(new PersonNameRepository());
         context.register(new PersonProcmanRepository());
-    }
-
-    @AfterEach
-    void tearDown() {
-        Sharding sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
-        ServerEnvironment.getInstance()
-                         .replaceSharding(sharding);
     }
 
     @Nested

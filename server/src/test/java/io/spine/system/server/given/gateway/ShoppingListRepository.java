@@ -18,23 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.given;
+package io.spine.system.server.given.gateway;
 
-import io.spine.server.entity.TransactionalEntity;
-import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.ProjectVBuilder;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.test.system.server.ListId;
 
 /**
- * Test environment for {@link io.spine.server.stand.StandStorageTest StandStorageTest}.
+ * @author Dmytro Dashenkov
  */
-public class StandStorageTestEnv {
-
-    public static class StandingEntity
-            extends TransactionalEntity<ProjectId, Project, ProjectVBuilder> {
-
-        public StandingEntity(ProjectId id) {
-            super(id);
-        }
-    }
+public class ShoppingListRepository extends AggregateRepository<ListId, ShoppingListAggregate> {
 }

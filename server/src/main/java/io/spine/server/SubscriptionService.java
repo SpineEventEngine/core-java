@@ -53,6 +53,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("MethodDoesntCallSuperMethod")
 // as we override default implementation with `unimplemented` status.
 public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionServiceImplBase {
+
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
     private SubscriptionService(Map<TypeUrl, BoundedContext> map) {
