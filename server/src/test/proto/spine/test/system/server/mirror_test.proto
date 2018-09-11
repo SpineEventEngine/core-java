@@ -61,7 +61,9 @@ message LocalizedVideo {
     spine.net.Url subtitles_url = 5 [(valid) = true, (required) = false];
 }
 
-// This aggregate type is not finished, so the `(entity)` option is absent.
+// This aggregate design is not complete and the aggregate is not production-ready, so
+// the `(entity)` option is absent.
+//
 message IncompleteAudio {
 
     string id = 1;
