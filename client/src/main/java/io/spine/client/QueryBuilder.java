@@ -47,6 +47,8 @@ import static java.util.Optional.of;
  *                                  .where(eq("type", "permanent"),
  *                                         eq("discountPercent", 10),
  *                                         eq("companySize", Company.Size.SMALL))
+ *                                  .orderedBy("name", DESCENDING)
+ *                                  .limit(20)
  *                                  .build();
  *     }
  * </pre>
