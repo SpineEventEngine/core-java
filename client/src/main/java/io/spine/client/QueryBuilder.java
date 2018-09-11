@@ -69,7 +69,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         this.queryFactory = checkNotNull(queryFactory);
     }
 
-    QueryBuilder orderedBy(String column, Order.Direction direction) {
+    public QueryBuilder orderedBy(String column, Order.Direction direction) {
         checkNotNull(column);
         checkNotNull(direction);
         checkArgument(
@@ -83,13 +83,13 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         return self();
     }
 
-    QueryBuilder limit(Integer count) {
+    public QueryBuilder limit(Integer count) {
         checkNotNull(count);
         this.limit = new Long(count);
         return self();
     }
 
-    QueryBuilder limit(Long count) {
+    public QueryBuilder limit(Long count) {
         checkNotNull(count);
         this.limit = count;
         return self();
