@@ -26,12 +26,12 @@ import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyIterator;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * A {@link SystemGateway} which memoizes the posted system commands.
@@ -138,27 +138,30 @@ public final class MemoizingGateway implements SystemGateway {
     /**
      * Obtains the last command message posted to {@link SystemGateway}.
      *
-     * @return {@code null} if no commands were posted yet
+     * <p>Fails if no commands were posted yet.
      */
-    public @Nullable MemoizedMessage lastSeenCommand() {
+    public MemoizedMessage lastSeenCommand() {
+        assertNotNull(lastSeenCommand);
         return lastSeenCommand;
     }
 
     /**
      * Obtains the last event message posted to {@link SystemGateway}.
      *
-     * @return {@code null} if no events were posted yet
+     * <p>Fails if no events were posted yet.
      */
-    public @Nullable MemoizedMessage lastSeenEvent() {
+    public MemoizedMessage lastSeenEvent() {
+        assertNotNull(lastSeenEvent);
         return lastSeenEvent;
     }
 
     /**
      * Obtains the last query submitted to {@link SystemGateway}.
      *
-     * @return {@code null} if no queries were submitted yet
+     * <p>Fails if no queries were submitted yet.
      */
-    public @Nullable MemoizedMessage lastSeenQuery() {
+    public MemoizedMessage lastSeenQuery() {
+        assertNotNull(lastSeenQuery);
         return lastSeenQuery;
     }
 }
