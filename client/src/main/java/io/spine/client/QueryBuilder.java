@@ -87,14 +87,20 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
 
     public QueryBuilder limit(Integer count) {
         checkNotNull(count);
+        checkLimit(count);
         this.limit = new Long(count);
         return self();
     }
 
     public QueryBuilder limit(Long count) {
         checkNotNull(count);
+        checkLimit(count);
         this.limit = count;
         return self();
+    }
+
+    private static void checkLimit(Number count) {
+        checkArgument(count.longValue() > 0, "A Query limit must be more than 0.");
     }
 
     /**
