@@ -63,18 +63,23 @@ public class ColumnTestEnv {
     @SuppressWarnings("unused") // Reflective access
     public static class TestEntity extends AbstractVersionableEntity<String, Any> {
 
-        private int mutableState = 0;
+        private @Nullable Integer mutableState = 0;
 
         public TestEntity(String id) {
             super(id);
         }
+        
+        public TestEntity(String id, @Nullable Integer state) {
+            super(id);
+            this.mutableState = state;
+        }
 
         @Column
-        public int getMutableState() {
+        public @Nullable Integer getMutableState() {
             return mutableState;
         }
 
-        public void setMutableState(int mutableState) {
+        public void setMutableState(@Nullable Integer mutableState) {
             this.mutableState = mutableState;
         }
 

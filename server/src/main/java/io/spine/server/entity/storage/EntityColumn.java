@@ -31,7 +31,9 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Comparator;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.gson.internal.Primitives.wrap;
 import static io.spine.server.entity.storage.ColumnValueConverters.of;
@@ -41,6 +43,7 @@ import static io.spine.server.entity.storage.Methods.nameFromAnnotation;
 import static io.spine.server.entity.storage.Methods.nameFromGetter;
 import static io.spine.server.entity.storage.Methods.retrieveAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
@@ -130,7 +133,8 @@ import static java.lang.String.format;
  * and pass the instance of the registry into the
  * {@link io.spine.server.storage.StorageFactory StorageFactory} on creation.
  *
- * <p>Note that the type of an column must either be primitive or implement {@link Serializable}.
+ * <p>Note that the column type must either be a primitive or implement {@link Serializable}.
+ * To order the query results on a column value it is also required to implement {@link Comparable}.
  *
  * <h2>Nullability</h2>
  *
@@ -443,9 +447,10 @@ public class EntityColumn implements Serializable {
      * @see EntityColumn#memoizeFor(Entity)
      */
     @Internal
-    public static class MemoizedValue implements Serializable {
+    public static class MemoizedValue implements Serializable, Comparable<MemoizedValue> {
 
         private static final long serialVersionUID = 0L;
+        private static final Comparator<MemoizedValue> COMPARATOR = valueComparator();
 
         private final EntityColumn sourceColumn;
 
@@ -488,6 +493,66 @@ public class EntityColumn implements Serializable {
         @Override
         public int hashCode() {
             return Objects.hashCode(getSourceColumn(), getValue());
+        }
+
+        /**
+         * Creates a new comparator which orders memoized values in an order specified
+         * by {@link MemoizedValue#getValue() their values} comparison.
+         *
+         * <p>The memoized values with {@code null} are added to the end of the ordered set.
+         *
+         * <p>A created comparator throws {@link IllegalArgumentException} if
+         * {@link MemoizedValue#getSourceColumn() source columns} do not match.
+         *
+         * @return an new comparator for non-null {@code MemoizedValue} instances
+         */
+        private static Comparator<MemoizedValue> valueComparator() {
+            return (a, b) -> {
+                checkNotNull(a);
+                checkNotNull(b);
+                checkArgument(columnTypeOf(a).equals(columnTypeOf(b)),
+                              "Memoized value compared to mismatching value type.");
+
+                Serializable aValue = a.getValue();
+                Serializable bValue = b.getValue();
+
+                if (aValue == null) {
+                    return bValue == null ? 0 : +1;
+                }
+                if (bValue == null) {
+                    return -1;
+                }
+                if (aValue instanceof Comparable) {
+                    return ((Comparable) aValue).compareTo(bValue);
+                }
+                throw newIllegalStateException("Memoized value is not a Comparable");
+            };
+        }
+
+        /**
+         * Returns a default {@code MemoizedValue} comparator which orders memoized values
+         * in an order specified by {@link MemoizedValue#getValue() their values} comparison.
+         *
+         * <p>The memoized values with {@code null} are added to the end of the ordered set.
+         *
+         * <p>The returned comparator throws {@link IllegalArgumentException} if
+         * {@link MemoizedValue#getSourceColumn() source columns} do not match.
+         *
+         * @return an instance of a default comparator for {@code MemoizedValue} instance
+         */
+        public static Comparator<MemoizedValue> comparator() {
+            return COMPARATOR;
+        }
+
+        private static Class columnTypeOf(MemoizedValue value) {
+            checkNotNull(value);
+            return value.getSourceColumn()
+                        .getType();
+        }
+
+        @Override
+        public int compareTo(MemoizedValue that) {
+            return COMPARATOR.compare(this, that);
         }
     }
 }

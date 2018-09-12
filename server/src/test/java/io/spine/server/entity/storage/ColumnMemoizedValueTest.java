@@ -25,10 +25,15 @@ import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -87,5 +92,29 @@ class ColumnMemoizedValueTest {
                           .addEqualityGroup(valueB)
                           .addEqualityGroup(valueC)
                           .testEquals();
+    }
+
+    @Test
+    @DisplayName("support comparison")
+    void supportComparison() {
+        EntityColumn column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
+
+        TestEntity firstEntity = new TestEntity("first", 1);
+        TestEntity secondEntity = new TestEntity("second", 2);
+        TestEntity thirdEntity = new TestEntity("third", 3);
+        TestEntity nullEntity = new TestEntity("last", null);
+
+        MemoizedValue nullValue = column.memoizeFor(nullEntity);
+        MemoizedValue firstValue = column.memoizeFor(firstEntity);
+        MemoizedValue secondValue = column.memoizeFor(secondEntity);
+        MemoizedValue thirdValue = column.memoizeFor(thirdEntity);
+
+        List<MemoizedValue> values = newArrayList(thirdValue, secondValue, nullValue, firstValue);
+
+        List<MemoizedValue> expected = newArrayList(firstValue, secondValue, thirdValue, nullValue);
+        List<MemoizedValue> actual = values.stream()
+                                           .sorted()
+                                           .collect(toList());
+        assertEquals(expected, actual);
     }
 }
