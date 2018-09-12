@@ -47,26 +47,25 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
- * The representation of a field of an {@link Entity} which is stored in the storage in the way
- * efficient for querying.
+ * An {@link Entity} field stored in a way allowing ordering and filtering.
  *
- * <p>A entity column is a value retrieved from an {@link Entity} getter,
- * which is marked as {@link Column}.
+ * <p>The value stored in an entity column is retrieved from an {@link Entity} getter method
+ * marked with {@link Column} annotation.
  *
- * <p>Columns are inherited (both from classes and from interfaces).
- * A getter for a column should be annotated only once, i.e. in the place of its declaration.
+ * <p>An entity can inherit the columns from its parents classes and interfaces.
+ * In this case, column getter is annotated only once when its first declared.
  *
  * <h2>Column names</h2>
  *
- * <p>A column has different names for storing and for querying.
+ * <p>A column can have different names for storing and for querying.
  *
  * <p>A {@linkplain #getName() name} for working with {@linkplain EntityQueries queries}
  * is determined by a name of column getter, e.g. {@code value} for {@code getValue()}.
  * A client should specify this value to a {@linkplain io.spine.client.ColumnFilters
  * column filters}.
  *
- * <p>A {@linkplain #getStoredName() name}, which is used for keeping a column in a {@code Storage}
- * is determined by the column annotation {@linkplain Column#name() property}.
+ * <p>A {@linkplain #getStoredName() stored name} is used as a {@code Storage} column name
+ * an is defined by the column annotation {@linkplain Column#name() property}.
  *
  * <h2>Examples</h2>
  *
@@ -123,22 +122,20 @@ import static java.lang.String.format;
  *
  * <h2>Type policy</h2>
  *
- * <p>An entity column can turn into any type. If use a ready implementation of
- * the {@link io.spine.server.storage.Storage Spine Storages}, the most commonly used types should
- * be already supported. However, you may override the behavior for any type whenever you wish.
- * For more info, see {@link ColumnTypeRegistry}.
+ * <p>An entity column can be of any type. Most common types are already supported if an existing 
+ * implementation of the {@link io.spine.server.storage.Storage Spine Storage} is used.
+ * However, their behavior can be overriden using {@link ColumnTypeRegistry}.
  *
- * <p>To handle specific types of the columns, which are not supported by default,
- * implement the {@link ColumnType} {@code interface}, register it in a {@link ColumnTypeRegistry}
- * and pass the instance of the registry into the
- * {@link io.spine.server.storage.StorageFactory StorageFactory} on creation.
+ * <p>To handle column types not supported by default implement the {@link ColumnType}
+ * interface, register it in a {@link ColumnTypeRegistry} and pass the instance of the registry
+ * into the {@link io.spine.server.storage.StorageFactory StorageFactory} upon creation.
  *
  * <p>Note that the column type must either be a primitive or implement {@link Serializable}.
  * To order the query results on a column value it is also required to implement {@link Comparable}.
  *
  * <h2>Nullability</h2>
  *
- * <p>A column may turn into {@code null} value if the getter which declares it is annotated as
+ * <p>A column may contain {@code null} value if the getter which declares it is annotated as
  * {@link javax.annotation.Nullable javax.annotation.Nullable}.
  * Otherwise, the entity column is considered non-null.
  *
@@ -224,7 +221,8 @@ public class EntityColumn implements Serializable {
     /**
      * Creates new instance of the {@code EntityColumn} from the given getter method.
      *
-     * @param getter the getter of the EntityColumn
+     * @param getter
+     *         the getter of the EntityColumn
      * @return new instance of the {@code EntityColumn} reflecting the given property
      */
     public static EntityColumn from(Method getter) {
@@ -274,7 +272,8 @@ public class EntityColumn implements Serializable {
     /**
      * Retrieves the column value from the given {@link Entity}.
      *
-     * @param source the {@link Entity} to get the Columns from
+     * @param source
+     *         the {@link Entity} to get the Columns from
      * @return the value of the column represented by this instance
      */
     public @Nullable Serializable getFor(Entity<?, ?> source) {
@@ -300,7 +299,8 @@ public class EntityColumn implements Serializable {
      * <p>The value is wrapped into a special container,
      * which bears information about the field's metadata.
      *
-     * @param source the {@link Entity} to get the Fields from
+     * @param source
+     *         the {@link Entity} to get the Fields from
      * @return the value of the {@code EntityColumn} represented by this instance wrapped
      *         into {@link MemoizedValue}
      */
@@ -347,10 +347,12 @@ public class EntityColumn implements Serializable {
      * <p>The method is accessible outside of the {@link EntityColumn} class to enable the proper
      * {@link io.spine.client.ColumnFilter} conversion for the {@link Enumerated} column values.
      *
-     * @param columnValue the column value to convert
+     * @param columnValue
+     *         the column value to convert
      * @return the column value converted to the form used for persistence in the data storage
-     * @throws IllegalArgumentException if the value type is not equal to the {@linkplain #getType()
-     *                                  entity column type}
+     * @throws IllegalArgumentException
+     *         if the value type is not equal to the {@linkplain #getType()
+     *         entity column type}
      */
     public @Nullable Serializable toPersistedValue(@Nullable Object columnValue) {
         if (columnValue == null) {
@@ -392,8 +394,10 @@ public class EntityColumn implements Serializable {
      * Checks that the passed value's type is the same as the {@linkplain #getType() entity column
      * type}.
      *
-     * @param value the value to check
-     * @throws IllegalArgumentException in case the check fails
+     * @param value
+     *         the value to check
+     * @throws IllegalArgumentException
+     *         in case the check fails
      */
     private void checkTypeMatches(Object value) {
         Class<?> columnType = wrap(getType());
