@@ -280,8 +280,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Finds all the entities passing the given filters and
-     * applies the given {@link FieldMask} to the results.
+     * Finds the entities passing the given filters and applies the given {@link FieldMask}
+     * to the results. A number of elements to retrieve can be limited by {@link Pagination}.
+     * Order in which to look for and return results is specified by the {@link Order}
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
@@ -292,14 +293,18 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
+     * @param filters
+     *         entity filters
      * @param order
-     * @param filters   entity filters
+     *         an order to sort the filtered results before pagination
      * @param pagination
-     * @param fieldMask mask to apply to the entities
+     *         a pagination to apply to the sorted result set
+     * @param fieldMask
+     *         a mask to apply to the entities
      * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
-    public Iterator<E> find(Order order, EntityFilters filters,
+    public Iterator<E> find(EntityFilters filters, Order order,
                             Pagination pagination, FieldMask fieldMask) {
         checkNotNull(filters);
         checkNotNull(fieldMask);

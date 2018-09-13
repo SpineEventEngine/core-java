@@ -145,7 +145,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     }
 
     private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
-        return repository.find(Order.getDefaultInstance(), filters, Pagination.getDefaultInstance(),
+        return repository.find(filters, Order.getDefaultInstance(), Pagination.getDefaultInstance(),
                                firstFieldOnly);
     }
 
@@ -229,8 +229,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                     .addFilter(aggregatingFilter)
                     .build();
             Collection<E> found = newArrayList(
-                    repository.find(Order.getDefaultInstance(), 
-                                    filters,
+                    repository.find(filters, Order.getDefaultInstance(),
                                     Pagination.getDefaultInstance(),
                                     FieldMask.getDefaultInstance())
             );
@@ -413,8 +412,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         repository.store(archivedEntity);
         repository.store(deletedEntity);
 
-        Iterator<E> found = repository.find(Order.getDefaultInstance(),
-                                            EntityFilters.getDefaultInstance(),
+        Iterator<E> found = repository.find(EntityFilters.getDefaultInstance(), Order.getDefaultInstance(),
                                             Pagination.getDefaultInstance(),
                                             FieldMask.getDefaultInstance());
         List<E> foundList = newArrayList(found);
@@ -448,8 +446,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                 .addFilter(columnFilter)
                 .build();
 
-        Iterator<E> found = repository.find(Order.getDefaultInstance(), 
-                                            filters,
+        Iterator<E> found = repository.find(filters, Order.getDefaultInstance(),
                                             Pagination.getDefaultInstance(),
                                             FieldMask.getDefaultInstance());
         Collection<E> foundList = newArrayList(found);

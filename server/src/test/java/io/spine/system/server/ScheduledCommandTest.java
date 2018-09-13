@@ -142,8 +142,7 @@ class ScheduledCommandTest {
                                               .build()
                                               .getTarget()
                                               .getFilters();
-        Iterator<ScheduledCommand> commands = repository.find(Order.getDefaultInstance(), 
-                                                              filters,
+        Iterator<ScheduledCommand> commands = repository.find(filters, Order.getDefaultInstance(),
                                                               Pagination.getDefaultInstance(),
                                                               FieldMask.getDefaultInstance());
         return commands;

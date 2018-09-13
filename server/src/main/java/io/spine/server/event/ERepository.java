@@ -79,8 +79,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         checkNotNull(query);
 
         EntityFilters filters = toEntityFilters(query);
-        Iterator<EEntity> entities = find(Order.getDefaultInstance(), 
-                                          filters,
+        Iterator<EEntity> entities = find(filters, Order.getDefaultInstance(),
                                           Pagination.getDefaultInstance(),
                                           FieldMask.getDefaultInstance());
         // A predicate on the Event message and EventContext fields.

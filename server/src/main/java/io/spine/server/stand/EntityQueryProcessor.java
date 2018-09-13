@@ -63,7 +63,7 @@ class EntityQueryProcessor implements QueryProcessor {
             EntityFilters filters = target.getFilters();
             Order order = query.getOrder();
             Pagination pagination = query.getPagination();
-            entities = repository.find(order, filters, pagination, fieldMask);
+            entities = repository.find(filters, order, pagination, fieldMask);
         }
         while (entities.hasNext()) {
             Entity entity = entities.next();
