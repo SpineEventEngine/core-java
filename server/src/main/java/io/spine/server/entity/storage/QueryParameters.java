@@ -26,9 +26,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.ColumnFilter;
+import io.spine.client.Order;
 
 import java.io.Serializable;
 import java.util.Iterator;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The parameters of an {@link EntityQuery}.
@@ -55,10 +58,14 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      * it is {@code false}.
      */
     private final boolean hasLifecycle;
+    private final long limit;
+    private final Order order;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
                                  .build();
+        this.limit = builder.limit();
+        this.order = builder.order();
         this.hasLifecycle = builder.hasLifecycle;
     }
 
@@ -75,9 +82,25 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         return parameters.iterator();
     }
 
+    public Order order() {
+        return order;
+    }
+
+    public boolean ordered() {
+        return !order.equals(Order.getDefaultInstance());
+    }
+
+    public long limit() {
+        return limit;
+    }
+
+    public boolean limited() {
+        return limit != 0;
+    }
+
     /**
      * @return whether this parameters include filters by
-     * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags} or not
+     *         the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags} or not
      */
     public boolean isLifecycleAttributesSet() {
         return hasLifecycle;
@@ -112,9 +135,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         private final ImmutableCollection.Builder<CompositeQueryParameter> parameters;
 
         private boolean hasLifecycle;
+        private Order order;
+        private long limit;
 
         private Builder() {
             parameters = ImmutableList.builder();
+            order = Order.getDefaultInstance();
         }
 
         @CanIgnoreReturnValue
@@ -134,6 +160,25 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
 
         public ImmutableCollection.Builder<CompositeQueryParameter> getParameters() {
             return parameters;
+        }
+
+        public Builder limit(long value) {
+            limit = value;
+            return this;
+        }
+
+        public long limit() {
+            return limit;
+        }
+
+        public Builder sort(Order order) {
+            checkNotNull(order);
+            this.order = order;
+            return this;
+        }
+
+        public Order order() {
+            return order;
         }
 
         /**
