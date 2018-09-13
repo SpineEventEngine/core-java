@@ -27,6 +27,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
+import io.spine.client.Order;
+import io.spine.client.Pagination;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
@@ -290,16 +292,20 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
+     * @param order
      * @param filters   entity filters
+     * @param pagination
      * @param fieldMask mask to apply to the entities
      * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
-    public Iterator<E> find(EntityFilters filters, FieldMask fieldMask) {
+    public Iterator<E> find(Order order, EntityFilters filters,
+                            Pagination pagination, FieldMask fieldMask) {
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
+        EntityQuery<I> entityQuery = EntityQueries.from(order, filters, pagination,
+                                                        recordStorage());
         EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
@@ -310,7 +316,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Creates an {@link EntityQuery} instance which has:
      * <ul>
-     *     <li>All the parameters from the {@code src} Query;
+     *     <li>All the parameters from the {@code src} query;
      *     <li>At least one parameter limiting
      *         the {@link LifecycleFlagField Lifecycle Flags Columns}.
      * </ul>

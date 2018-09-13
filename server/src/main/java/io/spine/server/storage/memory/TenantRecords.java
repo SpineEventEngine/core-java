@@ -27,13 +27,17 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.QueryParameters;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
@@ -43,6 +47,8 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsVisible;
 import static io.spine.server.entity.FieldMasks.applyMask;
+import static io.spine.server.storage.memory.EntityRecordComparator.inOrder;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * The memory-based storage for {@link EntityRecord} that represents
@@ -56,6 +62,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
     private final Map<I, EntityRecordWithColumns> filtered =
             filterValues(records, isRecordWithColumnsVisible()::test);
+    private static final EntityRecordUnpacker UNPACKER = EntityRecordUnpacker.INSTANCE;
 
     @Override
     public Iterator<I> index() {
@@ -85,21 +92,38 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     Map<I, EntityRecord> readAllRecords() {
         Map<I, EntityRecordWithColumns> filtered = filtered();
-        Map<I, EntityRecord> records =
-                transformValues(filtered, EntityRecordUnpacker.INSTANCE::apply);
+        Map<I, EntityRecord> records = transformValues(filtered, UNPACKER::apply);
         ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(records);
         return result;
     }
 
     Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        Map<I, EntityRecordWithColumns> filtered =
-                filterValues(records, new EntityQueryMatcher<>(query)::test);
-        Map<I, EntityRecord> records =
-                transformValues(filtered, EntityRecordUnpacker.INSTANCE::apply);
+        Map<I, EntityRecordWithColumns> filtered = filterRecords(query);
+        Map<I, EntityRecord> records = transformValues(filtered, UNPACKER::apply);
         Function<EntityRecord, EntityRecord> fieldMaskApplier = new FieldMaskApplier(fieldMask);
         Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier::apply);
         ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(maskedRecords);
         return result;
+    }
+
+    private Map<I, EntityRecordWithColumns> filterRecords(EntityQuery<I> query) {
+        QueryParameters parameters = query.getParameters();
+        Set<Map.Entry<I, EntityRecordWithColumns>> entries = records.entrySet();
+        Stream<Map.Entry<I, EntityRecordWithColumns>> stream = entries.stream();
+        if (parameters.ordered()) {
+            stream = stream.sorted(inOrder(parameters.order()));
+        }
+        EntityQueryMatcher<I> matcher = new EntityQueryMatcher<>(query);
+        stream = stream.filter(entry -> matcher.test(entry.getValue()));
+        if (parameters.limited()) {
+            stream = stream.limit(parameters.limit());
+        }
+        return stream.collect(entriesToMap());
+    }
+
+    private static <A, B> Collector<Map.Entry<A, B>, ?, Map<A, B>>
+    entriesToMap() {
+        return toMap(Map.Entry::getKey, Map.Entry::getValue);
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder

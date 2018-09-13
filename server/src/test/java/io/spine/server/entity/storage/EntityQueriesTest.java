@@ -29,6 +29,8 @@ import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.client.Order;
+import io.spine.client.Pagination;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
@@ -74,7 +76,8 @@ class EntityQueriesTest {
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
                                                     Class<? extends Entity> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return from(filters, entityColumns);
+        return from(Order.getDefaultInstance(), filters, Pagination.getDefaultInstance(),
+                    entityColumns);
     }
 
     @Test
@@ -92,7 +95,9 @@ class EntityQueriesTest {
         @Test
         @DisplayName("filters")
         void filters() {
-            assertThrows(NullPointerException.class, () -> from(null, Collections.emptyList()));
+            assertThrows(NullPointerException.class, () -> from(Order.getDefaultInstance(), null,
+                                                                Pagination.getDefaultInstance(),
+                                                                Collections.emptyList()));
         }
 
         @SuppressWarnings("ConstantConditions")
@@ -102,7 +107,8 @@ class EntityQueriesTest {
         void storage() {
             RecordStorage<?> storage = null;
             assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), storage));
+                         () -> from(Order.getDefaultInstance(), EntityFilters.getDefaultInstance(),
+                                    Pagination.getDefaultInstance(), storage));
         }
 
         @SuppressWarnings("ConstantConditions")
@@ -112,7 +118,9 @@ class EntityQueriesTest {
         void entityClass() {
             Collection<EntityColumn> entityColumns = null;
             assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), entityColumns));
+                         () -> from(Order.getDefaultInstance(), EntityFilters.getDefaultInstance(),
+                                    Pagination.getDefaultInstance(),
+                                    entityColumns));
         }
     }
 

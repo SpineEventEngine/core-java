@@ -25,6 +25,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
+import io.spine.client.Order;
+import io.spine.client.Pagination;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.protobuf.AnyPacker;
@@ -59,7 +61,9 @@ class EntityQueryProcessor implements QueryProcessor {
             entities = repository.loadAll();
         } else {
             EntityFilters filters = target.getFilters();
-            entities = repository.find(filters, fieldMask);
+            Order order = query.getOrder();
+            Pagination pagination = query.getPagination();
+            entities = repository.find(order, filters, pagination, fieldMask);
         }
         while (entities.hasNext()) {
             Entity entity = entities.next();

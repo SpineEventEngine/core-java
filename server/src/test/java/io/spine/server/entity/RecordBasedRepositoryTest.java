@@ -31,6 +31,8 @@ import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.client.Order;
+import io.spine.client.Pagination;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.storage.RecordStorage;
 import io.spine.testing.Tests;
@@ -143,7 +145,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     }
 
     private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
-        return repository.find(filters, firstFieldOnly);
+        return repository.find(Order.getDefaultInstance(), filters, Pagination.getDefaultInstance(),
+                               firstFieldOnly);
     }
 
     /*
@@ -226,7 +229,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                     .addFilter(aggregatingFilter)
                     .build();
             Collection<E> found = newArrayList(
-                    repository.find(filters, FieldMask.getDefaultInstance())
+                    repository.find(Order.getDefaultInstance(), 
+                                    filters,
+                                    Pagination.getDefaultInstance(),
+                                    FieldMask.getDefaultInstance())
             );
             assertSize(1, found);
             assertContains(entity1, found);
@@ -407,7 +413,9 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         repository.store(archivedEntity);
         repository.store(deletedEntity);
 
-        Iterator<E> found = repository.find(EntityFilters.getDefaultInstance(),
+        Iterator<E> found = repository.find(Order.getDefaultInstance(),
+                                            EntityFilters.getDefaultInstance(),
+                                            Pagination.getDefaultInstance(),
                                             FieldMask.getDefaultInstance());
         List<E> foundList = newArrayList(found);
         // Check results
@@ -440,7 +448,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                 .addFilter(columnFilter)
                 .build();
 
-        Iterator<E> found = repository.find(filters, FieldMask.getDefaultInstance());
+        Iterator<E> found = repository.find(Order.getDefaultInstance(), 
+                                            filters,
+                                            Pagination.getDefaultInstance(),
+                                            FieldMask.getDefaultInstance());
         Collection<E> foundList = newArrayList(found);
         // Check result
         assertSize(2, foundList);

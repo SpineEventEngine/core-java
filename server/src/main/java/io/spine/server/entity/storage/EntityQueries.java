@@ -31,10 +31,13 @@ import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.client.Order;
+import io.spine.client.Pagination;
 import io.spine.server.storage.RecordStorage;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,6 +45,7 @@ import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -57,49 +61,79 @@ public final class EntityQueries {
     }
 
     /**
-     * Creates a new instance of {@link EntityQuery} from the given {@link EntityFilters} and
-     * for the given {@link RecordStorage}.
+     * Creates new {@link EntityQuery} instances for the given {@link Order}, {@link EntityFilters}, 
+     * {@link Pagination}, and {@link RecordStorage}.
      *
-     * @param  entityFilters the filters for the Entities specifying the query predicate
-     * @param  storage the storage for which the query is created
+     * @param order
+     *         an order to sort the data matching filters
+     * @param filters
+     *         filters for the Entities specifying the query predicate
+     * @param pagination
+     *         a specification of a way to paginate the query results
+     * @param storage
+     *         a storage for which the query is created
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
-    public static <I> EntityQuery<I> from(EntityFilters entityFilters,
+    public static <I> EntityQuery<I> from(Order order, EntityFilters filters, Pagination pagination,
                                           RecordStorage<I> storage) {
-        checkNotNull(entityFilters);
+        checkNotNull(order);
+        checkNotNull(filters);
+        checkNotNull(pagination);
         checkNotNull(storage);
 
         Collection<EntityColumn> entityColumns = storage.entityColumns();
-        EntityQuery<I> result = from(entityFilters, entityColumns);
+        EntityQuery<I> result = from(order, filters, pagination, entityColumns);
         return result;
     }
 
     @VisibleForTesting
-    static <I> EntityQuery<I> from(EntityFilters entityFilters,
-                                   Collection<EntityColumn> entityColumns) {
-        checkNotNull(entityFilters);
-        checkNotNull(entityColumns);
+    static <I> EntityQuery<I> from(Order order,
+                                   EntityFilters filters,
+                                   Pagination pagination,
+                                   Collection<EntityColumn> columns) {
+        checkNotNull(order);
+        checkNotNull(filters);
+        checkNotNull(pagination);
+        checkNotNull(columns);
 
-        QueryParameters queryParams = toQueryParams(entityFilters, entityColumns);
-        Collection<I> ids = toGenericIdValues(entityFilters);
+        QueryParameters queryParams = toQueryParams(order, filters, pagination, columns);
+        Collection<I> ids = toGenericIdValues(filters);
 
         EntityQuery<I> result = EntityQuery.of(ids, queryParams);
         return result;
     }
 
-    private static QueryParameters toQueryParams(EntityFilters entityFilters,
+    private static QueryParameters toQueryParams(Order order,
+                                                 EntityFilters filters,
+                                                 Pagination pagination,
                                                  Collection<EntityColumn> entityColumns) {
-        QueryParameters.Builder builder = QueryParameters.newBuilder();
 
-        for (CompositeColumnFilter filter : entityFilters.getFilterList()) {
-            Multimap<EntityColumn, ColumnFilter> columnFilters =
-                    splitFilters(filter, entityColumns);
-            CompositeOperator operator = filter.getOperator();
-            CompositeQueryParameter parameter =
-                    CompositeQueryParameter.from(columnFilters, operator);
-            builder.add(parameter);
-        }
-        return builder.build();
+        List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, entityColumns);
+        return newQueryParameters(parameters, order, pagination);
+    }
+
+    private static List<CompositeQueryParameter>
+    getFiltersQueryParams(EntityFilters filters, Collection<EntityColumn> entityColumns) {
+        return filters.getFilterList()
+                      .stream()
+                      .map(filter -> queryParameterFromFilter(filter, entityColumns))
+                      .collect(toList());
+    }
+
+    private static QueryParameters newQueryParameters(List<CompositeQueryParameter> parameters,
+                                                      Order order, Pagination pagination) {
+        return QueryParameters.newBuilder()
+                              .addAll(parameters)
+                              .limit(pagination.getPageSize())
+                              .sort(order)
+                              .build();
+    }
+
+    private static CompositeQueryParameter
+    queryParameterFromFilter(CompositeColumnFilter filter, Collection<EntityColumn> entityColumns) {
+        Multimap<EntityColumn, ColumnFilter> columnFilters = splitFilters(filter, entityColumns);
+        CompositeOperator operator = filter.getOperator();
+        return CompositeQueryParameter.from(columnFilters, operator);
     }
 
     private static Multimap<EntityColumn, ColumnFilter> splitFilters(CompositeColumnFilter filter,
@@ -124,7 +158,7 @@ public final class EntityQueries {
 
         throw new IllegalArgumentException(
                 format("Could not find an EntityColumn description for column with name %s.",
-                        filter.getColumnName()));
+                       filter.getColumnName()));
     }
 
     private static void checkFilterType(EntityColumn column, ColumnFilter filter) {
