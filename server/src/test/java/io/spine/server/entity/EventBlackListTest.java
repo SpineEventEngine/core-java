@@ -53,7 +53,7 @@ class EventBlackListTest {
     );
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(WhiteListEventFilterTest.class);
+            TestEventFactory.newInstance(EventBlackListTest.class);
 
     private EventBlackList blackList;
 

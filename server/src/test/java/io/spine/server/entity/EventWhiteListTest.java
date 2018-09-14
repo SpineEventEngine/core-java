@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Dmytro Dashenkov
  */
 @DisplayName("EventWhiteList should")
-class WhiteListEventFilterTest {
+class EventWhiteListTest {
 
     private static final Set<EventClass> WHITE_LIST = EventClass.setOf(
             EntProjectCreated.class,
@@ -53,7 +53,7 @@ class WhiteListEventFilterTest {
     );
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(WhiteListEventFilterTest.class);
+            TestEventFactory.newInstance(EventWhiteListTest.class);
 
     private EventWhiteList whiteList;
 

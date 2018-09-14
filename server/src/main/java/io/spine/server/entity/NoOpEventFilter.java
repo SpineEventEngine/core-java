@@ -20,11 +20,13 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableCollection;
 import io.spine.core.Event;
 
+import java.util.Collection;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.copyOf;
 
 /**
  * @author Dmytro Dashenkov
@@ -35,7 +37,11 @@ enum NoOpEventFilter implements EventFilter {
 
     @Override
     public Optional<Event> filter(Event event) {
-        checkNotNull(event);
         return Optional.of(event);
+    }
+
+    @Override
+    public ImmutableCollection<Event> filter(Collection<Event> events) {
+        return copyOf(events);
     }
 }
