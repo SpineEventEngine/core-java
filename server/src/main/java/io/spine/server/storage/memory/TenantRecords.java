@@ -34,7 +34,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -92,35 +91,60 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     Map<I, EntityRecord> readAllRecords() {
         Map<I, EntityRecordWithColumns> filtered = filtered();
-        Map<I, EntityRecord> records = transformValues(filtered, UNPACKER::apply);
+        Map<I, EntityRecord> records = unpackRecords(filtered);
         ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(records);
         return result;
     }
 
     Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        Map<I, EntityRecordWithColumns> filtered = filterRecords(query);
-        Map<I, EntityRecord> records = transformValues(filtered, UNPACKER::apply);
-        Function<EntityRecord, EntityRecord> fieldMaskApplier = new FieldMaskApplier(fieldMask);
-        Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier::apply);
+        Map<I, EntityRecordWithColumns> internalRecords = findRecords(query);
+        Map<I, EntityRecord> records = unpackRecords(internalRecords);
+        Map<I, EntityRecord> maskedRecords = maskRecords(records, fieldMask);
         ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(maskedRecords);
         return result;
     }
 
-    private Map<I, EntityRecordWithColumns> filterRecords(EntityQuery<I> query) {
+    /**
+     * Applies a field mask to the provided records.
+     */
+    private Map<I, EntityRecord> maskRecords(Map<I, EntityRecord> records, FieldMask fieldMask) {
+        Function<EntityRecord, EntityRecord> fieldMaskApplier = new FieldMaskApplier(fieldMask);
+        return transformValues(records, fieldMaskApplier::apply);
+    }
+
+    /**
+     * Gets the {@link EntityRecord} values from {@link EntityRecordWithColumns} entries.
+     */
+    private Map<I, EntityRecord> unpackRecords(Map<I, EntityRecordWithColumns> records) {
+        return transformValues(records, UNPACKER::apply);
+    }
+
+    private Map<I, EntityRecordWithColumns> findRecords(EntityQuery<I> query) {
+        Map<I, EntityRecordWithColumns> filtered = filterRecords(query);
         QueryParameters parameters = query.getParameters();
-        Set<Map.Entry<I, EntityRecordWithColumns>> entries = records.entrySet();
-        Stream<Map.Entry<I, EntityRecordWithColumns>> stream = entries.stream();
+        Stream<Map.Entry<I, EntityRecordWithColumns>> stream = filtered.entrySet()
+                                                                       .stream();
         if (parameters.ordered()) {
             stream = stream.sorted(inOrder(parameters.order()));
         }
-        EntityQueryMatcher<I> matcher = new EntityQueryMatcher<>(query);
-        stream = stream.filter(entry -> matcher.test(entry.getValue()));
         if (parameters.limited()) {
             stream = stream.limit(parameters.limit());
         }
         return stream.collect(entriesToMap());
     }
 
+    /**
+     * Filters the records returning only the ones matching the
+     * {@linkplain EntityQuery entity query}.
+     */
+    private Map<I, EntityRecordWithColumns> filterRecords(EntityQuery<I> query) {
+        EntityQueryMatcher<I> matcher = new EntityQueryMatcher<>(query);
+        return filterValues(records, matcher::test);
+    }
+
+    /**
+     * A generic collector of {@link Map.Entry} instances back to a {@link Map}.
+     */
     private static <A, B> Collector<Map.Entry<A, B>, ?, Map<A, B>>
     entriesToMap() {
         return toMap(Map.Entry::getKey, Map.Entry::getValue);
