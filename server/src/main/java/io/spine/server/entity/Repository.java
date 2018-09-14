@@ -363,7 +363,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     @SPI
     protected EventFilter eventFilter() {
-        return NoOpEventFilter.INSTANCE;
+        return EventFilter.allowAll();
     }
 
     /**
