@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 
@@ -42,8 +43,9 @@ public final class EventWhiteList implements EventFilter {
         this.allowedEvents = allowedEvents;
     }
 
-    public static EventWhiteList allowEvents(Set<EventClass> eventClasses) {
-        ImmutableSet<EventClass> classes = copyOf(eventClasses);
+    @SafeVarargs
+    public static EventWhiteList allowEvents(Class<? extends Message>... eventClasses) {
+        ImmutableSet<EventClass> classes = EventClass.setOf(eventClasses);
         return new EventWhiteList(classes);
     }
 

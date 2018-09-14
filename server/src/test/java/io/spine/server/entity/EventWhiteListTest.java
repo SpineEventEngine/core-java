@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.test.entity.event.EntProjectCreated;
 import io.spine.test.entity.event.EntProjectStarted;
 import io.spine.test.entity.event.EntTaskAdded;
@@ -33,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -47,11 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EventWhiteList should")
 class EventWhiteListTest {
 
-    private static final Set<EventClass> WHITE_LIST = EventClass.setOf(
-            EntProjectCreated.class,
-            EntProjectStarted.class
-    );
-
     private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(EventWhiteListTest.class);
 
@@ -59,7 +52,7 @@ class EventWhiteListTest {
 
     @BeforeEach
     void setUp() {
-        whiteList = EventWhiteList.allowEvents(WHITE_LIST);
+        whiteList = EventWhiteList.allowEvents(EntProjectCreated.class, EntProjectStarted.class);
     }
 
     @Test

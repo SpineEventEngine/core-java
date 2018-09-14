@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 
@@ -42,8 +43,9 @@ public final class EventBlackList implements EventFilter {
         this.forbiddenEvents = forbiddenEvents;
     }
     
-    public static EventBlackList forbiddenEvents(Set<EventClass> eventClasses) {
-        ImmutableSet<EventClass> classes = copyOf(eventClasses);
+    @SafeVarargs
+    public static EventBlackList forbiddenEvents(Class<? extends Message>... eventClasses) {
+        ImmutableSet<EventClass> classes = EventClass.setOf(eventClasses);
         return new EventBlackList(classes);
     }
 

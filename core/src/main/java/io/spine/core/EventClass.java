@@ -71,7 +71,7 @@ public class EventClass extends MessageClass {
     }
 
     /** Creates immutable set of {@code EventClass} from the passed set. */
-    public static Set<EventClass> setOf(Iterable<Class<? extends Message>> classes) {
+    public static ImmutableSet<EventClass> setOf(Iterable<Class<? extends Message>> classes) {
         ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(from(cls));
@@ -81,7 +81,7 @@ public class EventClass extends MessageClass {
 
     /** Creates immutable set of {@code EventClass} from the passed classes. */
     @SafeVarargs
-    public static Set<EventClass> setOf(Class<? extends Message>... classes) {
+    public static ImmutableSet<EventClass> setOf(Class<? extends Message>... classes) {
         return setOf(Arrays.asList(classes));
     }
 }
