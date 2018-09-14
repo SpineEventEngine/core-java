@@ -34,24 +34,24 @@ import static java.util.Optional.of;
 /**
  * @author Dmytro Dashenkov
  */
-public final class BlackListFilter implements EventFilter {
-    
-    private final ImmutableSet<EventClass> forbiddenEvents;
+public final class EventWhiteList implements EventFilter {
 
-    private BlackListFilter(ImmutableSet<EventClass> forbiddenEvents) {
-        this.forbiddenEvents = forbiddenEvents;
+    private final ImmutableSet<EventClass> allowedEvents;
+
+    private EventWhiteList(ImmutableSet<EventClass> allowedEvents) {
+        this.allowedEvents = allowedEvents;
     }
-    
-    public static BlackListFilter forbiddenEvents(Set<EventClass> eventClasses) {
+
+    public static EventWhiteList allowEvents(Set<EventClass> eventClasses) {
         ImmutableSet<EventClass> classes = copyOf(eventClasses);
-        return new BlackListFilter(classes);
+        return new EventWhiteList(classes);
     }
 
     @Override
     public Optional<Event> filter(Event event) {
         EventClass type = EventClass.of(event);
-        return forbiddenEvents.contains(type)
-               ? empty()
-               : of(event);
+        return allowedEvents.contains(type)
+               ? of(event)
+               : empty();
     }
 }
