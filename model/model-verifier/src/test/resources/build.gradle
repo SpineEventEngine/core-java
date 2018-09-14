@@ -71,9 +71,10 @@ compileJava {
 }
 
 dependencies {
-    compile deps.build.protobuf
+    implementation deps.build.protobuf
+    implementation "io.spine:spine-server:$spineVersion"
 
-    compileOnly "io.spine.tools:spine-model-assembler:$spineVersion"
+    annotationProcessor "io.spine.tools:spine-model-assembler:$spineVersion"
 }
 
 sourceSets {
