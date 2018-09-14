@@ -44,50 +44,50 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
-@DisplayName("EventWhiteList should")
-class WhiteListEventFilterTest {
+@DisplayName("EventBlackList should")
+class EventBlackListTest {
 
-    private static final Set<EventClass> WHITE_LIST = EventClass.setOf(
-            EntProjectCreated.class,
+    private static final Set<EventClass> BLACK_LIST = EventClass.setOf(
+            EntTaskAdded.class,
             EntProjectStarted.class
     );
 
     private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(WhiteListEventFilterTest.class);
 
-    private EventWhiteList whiteList;
+    private EventBlackList blackList;
 
     @BeforeEach
     void setUp() {
-        whiteList = EventWhiteList.allowEvents(WHITE_LIST);
+        blackList = EventBlackList.forbiddenEvents(BLACK_LIST);
     }
 
     @Test
-    @DisplayName("allow eventFactory of white list type")
-    void acceptAllowed() {
+    @DisplayName("allow events of type not from the list")
+    void allowArbitrary() {
         Event event = eventFactory.createEvent(EntProjectCreated.getDefaultInstance());
-        Optional<Event> result = whiteList.filter(event);
-        assertTrue(result.isPresent());
-        assertEquals(event, result.get());
+        Optional<Event> filtered = blackList.filter(event);
+        assertTrue(filtered.isPresent());
+        assertEquals(event, filtered.get());
     }
 
     @Test
-    @DisplayName("filter out non-allowed events")
+    @DisplayName("not allow events of type from the list")
+    void notAllowFromList() {
+        Event event = eventFactory.createEvent(EntTaskAdded.getDefaultInstance());
+        Optional<Event> filtered = blackList.filter(event);
+        assertFalse(filtered.isPresent());
+    }
+
+    @Test
+    @DisplayName("filter out events from bulk")
     void filterOut() {
-        List<Event> events = Stream.of(EntProjectStarted.getDefaultInstance(),
+        List<Event> events = Stream.of(EntProjectCreated.getDefaultInstance(),
                                        EntTaskAdded.getDefaultInstance())
                                    .map(eventFactory::createEvent)
                                    .collect(toList());
-        Collection<Event> filtered = whiteList.filter(events);
+        Collection<Event> filtered = blackList.filter(events);
         assertEquals(1, filtered.size());
         assertTrue(events.contains(events.get(0)));
-    }
-
-    @Test
-    @DisplayName("not allow events out from the white list")
-    void denyEvents() {
-        Event event = eventFactory.createEvent(EntTaskAdded.getDefaultInstance());
-        Optional<Event> result = whiteList.filter(event);
-        assertFalse(result.isPresent());
     }
 }
