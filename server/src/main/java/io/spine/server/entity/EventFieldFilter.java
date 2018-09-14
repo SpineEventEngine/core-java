@@ -42,6 +42,15 @@ import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.validate.Validate.isDefault;
 
 /**
+ * An {@link EventFilter} which allows all the events but trims some of their message fields.
+ *
+ * <p>By default, the input event is returned unchanged. Specify a {@link FieldMask} for an event
+ * type in order to trim certain fields off the event messages (the fields in the mask are
+ * the retained, all the others are cleared).
+ *
+ * <p>Note that the mask should contain all the {@code (required) = true} fields. Otherwise,
+ * the event will not be acknowledged by the bus.
+ *
  * @author Dmytro Dashenkov
  */
 public final class EventFieldFilter implements EventFilter {
@@ -108,6 +117,15 @@ public final class EventFieldFilter implements EventFilter {
         private Builder() {
         }
 
+        /**
+         * Specifies the {@link FieldMask} for the given event type.
+         *
+         * @param eventClass
+         *         the type of the event to mask
+         * @param mask
+         *         the fields to <b>retain</b> in the event message
+         * @return self for method chaining
+         */
         public Builder putMask(Class<? extends Message> eventClass, FieldMask mask) {
             checkNotNull(eventClass);
             checkNotNull(mask);

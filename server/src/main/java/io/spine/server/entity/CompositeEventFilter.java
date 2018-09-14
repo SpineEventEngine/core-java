@@ -30,6 +30,13 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 /**
+ * An {@link EventFilter} which composes several other filters.
+ *
+ * <p>The filters are applied to the input event one by one in the order of
+ * {@linkplain Builder#add(EventFilter) addition}. The next filter is applied to the result of
+ * the previous filter. If a filter returns an empty result, the whole composite filter returns
+ * an empty result at once.
+ *
  * @author Dmytro Dashenkov
  */
 public final class CompositeEventFilter implements EventFilter {
@@ -74,6 +81,12 @@ public final class CompositeEventFilter implements EventFilter {
         private Builder() {
         }
 
+        /**
+         * Adds a filter to the built composite filter.
+         *
+         * <p>The order of applying the filters is the order of the filters being passed to this
+         * method.
+         */
         public Builder add(EventFilter filter) {
             checkNotNull(filter);
             filters.add(filter);

@@ -26,14 +26,15 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 
 import java.util.Optional;
-import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 /**
+ * An {@link EventFilter} which allows any events except for the events of given types.
+ *
  * @author Dmytro Dashenkov
+ * @see EventWhiteList
  */
 public final class EventBlackList implements EventFilter {
     
@@ -42,9 +43,16 @@ public final class EventBlackList implements EventFilter {
     private EventBlackList(ImmutableSet<EventClass> forbiddenEvents) {
         this.forbiddenEvents = forbiddenEvents;
     }
-    
+
+    /**
+     * Creates a new instance of {@code EventBlackList} discarding events of the given types.
+     *
+     * @param eventClasses
+     *         the not allowed event classes
+     * @return new instance of the black-list filter
+     */
     @SafeVarargs
-    public static EventBlackList forbiddenEvents(Class<? extends Message>... eventClasses) {
+    public static EventBlackList discardEvents(Class<? extends Message>... eventClasses) {
         ImmutableSet<EventClass> classes = EventClass.setOf(eventClasses);
         return new EventBlackList(classes);
     }

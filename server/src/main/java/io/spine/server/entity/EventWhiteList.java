@@ -26,14 +26,20 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 
 import java.util.Optional;
-import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 /**
+ * An {@link EventFilter} which allows only events of given types.
+ *
+ * <p>All the other events are discarded by this filter by default.
+ *
+ * <p><b>Caution:</b> when using this filter, make sure you're aware of consequences of discarding
+ * system events posted by a repository.
+ *
  * @author Dmytro Dashenkov
+ * @see EventBlackList
  */
 public final class EventWhiteList implements EventFilter {
 
@@ -43,6 +49,14 @@ public final class EventWhiteList implements EventFilter {
         this.allowedEvents = allowedEvents;
     }
 
+    /**
+     * Creates a new instance of {@code EventWhiteList} allowing events of the given types.
+     *
+     * @param eventClasses
+     *         the allowed event classes
+     * @return new instance of the white-list filter
+     */
+    @SuppressWarnings("WeakerAccess") // Public API of the framework.
     @SafeVarargs
     public static EventWhiteList allowEvents(Class<? extends Message>... eventClasses) {
         ImmutableSet<EventClass> classes = EventClass.setOf(eventClasses);

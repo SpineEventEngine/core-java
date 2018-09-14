@@ -52,7 +52,7 @@ class EventBlackListTest {
 
     @BeforeEach
     void setUp() {
-        blackList = EventBlackList.forbiddenEvents(EntTaskAdded.class, EntProjectStarted.class);
+        blackList = EventBlackList.discardEvents(EntTaskAdded.class, EntProjectStarted.class);
     }
 
     @Test
