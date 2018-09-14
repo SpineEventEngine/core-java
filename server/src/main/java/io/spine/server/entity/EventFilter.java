@@ -30,18 +30,61 @@ import java.util.Optional;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
+ * A filter accepting {@link Event}s posted by a {@link Repository}.
+ *
+ * <p>A filter may {@linkplain #allowAll() allow any event}, reject certain types of events, or
+ * change the event content.
+ *
  * @author Dmytro Dashenkov
+ * @apiNote This type is a {@link FunctionalInterface}, so that an event filter may be represented
+ *          with a lambda expression.
+ * @see EventWhiteList
+ * @see EventBlackList
+ * @see EventFieldFilter
+ * @see CompositeEventFilter
  */
 @SPI
 @FunctionalInterface
 public interface EventFilter {
 
-    Optional<Event> filter(Event event);
-
+    /**
+     * Obtains an {@code EventFilter} which always returns the input event without any change.
+     *
+     * <p>The method acts as if
+     * <pre>
+     *     {@code
+     *     static EventFilter allowAll() {
+     *         return Optional::of;
+     *     }
+     *     }
+     * </pre>
+     *
+     * @return a filter which allows any event to be published
+     */
     static EventFilter allowAll() {
         return NoOpEventFilter.INSTANCE;
     }
 
+    /**
+     * Applies this filter to the given {@link Event}.
+     *
+     * @param event
+     *         the event to apply the filter to
+     * @return processed event or {@link Optional#empty()} if the event should not be posted
+     * @apiNote This method may never return a present value or return a value not derived from
+     *          the input event. See the implementations for the details for each case.
+     */
+    Optional<Event> filter(Event event);
+
+    /**
+     * Applies this filter to the given {@link Event}s in bulk.
+     *
+     * @param events
+     *         the events to apply the filter to
+     * @return a collection which contains all the non-empty filtering results for the given events
+     * @apiNote This method should have the same behaviour in any descendant. Override this method
+     *          <b>only</b> for performance improvement.
+     */
     default ImmutableCollection<Event> filter(Collection<Event> events) {
         ImmutableCollection<Event> filteredEvents = events.stream()
                                                           .map(this::filter)

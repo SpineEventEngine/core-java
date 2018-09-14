@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -27,10 +28,12 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.type.TypeUrl;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableMap.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.core.Events.getMessage;
@@ -51,13 +54,25 @@ public final class EventFieldFilter implements EventFilter {
 
     @Override
     public Optional<Event> filter(Event event) {
+        Event masked = mask(event);
+        return Optional.of(masked);
+    }
+
+    @Override
+    public ImmutableCollection<Event> filter(Collection<Event> events) {
+        return events.stream()
+                     .map(this::mask)
+                     .collect(toImmutableList());
+    }
+
+    private Event mask(Event event) {
         EventClass eventClass = EventClass.of(event);
         FieldMask mask = fieldMasks.get(eventClass);
         if (mask == null || isDefault(mask)) {
-            return Optional.of(event);
+            return event;
         } else {
-            Event result = mask(event, eventClass, mask);
-            return Optional.of(result);
+            Event maskedEvent = mask(event, eventClass, mask);
+            return maskedEvent;
         }
     }
 

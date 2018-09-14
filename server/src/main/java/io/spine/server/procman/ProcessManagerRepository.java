@@ -55,6 +55,7 @@ import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
 import io.spine.system.server.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -398,6 +399,16 @@ public abstract class ProcessManagerRepository<I,
         return name;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code ProcessManagerRepository} changes the default behaviour to allowing all
+     * the events <b>except</b> {@link EntityStateChanged}. It is supposed that the changes of
+     * a process manager state are not worth being published.
+     *
+     * <p>Override this method to change the behaviour.
+     */
+    @Pure
     @SPI
     @Override
     protected EventFilter eventFilter() {
