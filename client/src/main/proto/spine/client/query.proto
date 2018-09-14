@@ -66,7 +66,7 @@ message Order {
     }
 }
 
-// A pagination parameters for Query results
+// Pagination parameters for Query results.
 //
 message Pagination {
 
