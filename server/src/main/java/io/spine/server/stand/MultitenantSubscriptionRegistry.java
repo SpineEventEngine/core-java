@@ -58,34 +58,22 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         return new MultitenantSubscriptionRegistry(multitenant);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void activate(Subscription subscription,
                                       Stand.EntityUpdateCallback callback) {
         registrySlice().activate(subscription, callback);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized Subscription add(Topic topic) {
         return registrySlice().add(topic);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void remove(Subscription subscription) {
         registrySlice().remove(subscription);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
         return registrySlice().byType(type);
@@ -96,9 +84,6 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         return registrySlice().containsId(subscriptionId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized boolean hasType(TypeUrl type) {
         return registrySlice().hasType(type);
@@ -131,9 +116,6 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         private final Map<TypeUrl, Set<SubscriptionRecord>> typeToRecord = newHashMap();
         private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized void activate(Subscription subscription,
                                           Stand.EntityUpdateCallback callback) {
@@ -143,9 +125,6 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             subscriptionRecord.activate(callback);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized Subscription add(Topic topic) {
             SubscriptionId subscriptionId = Subscriptions.generateId();
@@ -168,9 +147,6 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             return subscription;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized void remove(Subscription subscription) {
             if (!subscriptionToAttrs.containsKey(subscription)) {
@@ -185,18 +161,12 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             subscriptionToAttrs.remove(subscription);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
             Set<SubscriptionRecord> result = typeToRecord.get(type);
             return result;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized boolean hasType(TypeUrl type) {
             boolean result = typeToRecord.containsKey(type);
