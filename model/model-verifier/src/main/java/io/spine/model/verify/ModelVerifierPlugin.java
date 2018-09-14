@@ -129,7 +129,6 @@ public final class ModelVerifierPlugin extends SpinePlugin {
             CommandHandlers commandHandlers;
             try (InputStream in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
                 commandHandlers = CommandHandlers.parseFrom(in);
-
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
