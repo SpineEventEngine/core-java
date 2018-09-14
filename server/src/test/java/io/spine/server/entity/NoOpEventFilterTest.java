@@ -52,7 +52,7 @@ class NoOpEventFilterTest {
     private final EventFilter filter = EventFilter.allowAll();
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventBlackListTest.class);
+            TestEventFactory.newInstance(NoOpEventFilterTest.class);
 
     @Test
     @DisplayName("be singleton")
