@@ -43,6 +43,7 @@ import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -52,6 +53,7 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
+import io.spine.system.server.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
@@ -63,6 +65,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
+import static io.spine.server.entity.EventBlackList.forbiddenEvents;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -93,6 +96,8 @@ public abstract class ProcessManagerRepository<I,
 
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
             memoize(this::createEventDelivery);
+
+    private final EventFilter entityStateChangedFilter = forbiddenEvents(EntityStateChanged.class);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -391,6 +396,12 @@ public abstract class ProcessManagerRepository<I,
     public BoundedContextName getBoundedContextName() {
         BoundedContextName name = getBoundedContext().getName();
         return name;
+    }
+
+    @SPI
+    @Override
+    protected EventFilter eventFilter() {
+        return entityStateChangedFilter;
     }
 
     @Override
