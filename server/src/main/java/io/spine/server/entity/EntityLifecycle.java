@@ -136,12 +136,12 @@ public class EntityLifecycle {
      *         the {@link EntityOption.Kind} of the created entity
      */
     public void onEntityCreated(EntityOption.Kind entityKind) {
-        EntityCreated command = EntityCreatedVBuilder
+        EntityCreated event = EntityCreatedVBuilder
                 .newBuilder()
                 .setId(historyId)
                 .setKind(entityKind)
                 .build();
-        systemGateway.postEvent(command);
+        systemGateway.postEvent(event);
     }
 
     /**
@@ -203,12 +203,12 @@ public class EntityLifecycle {
      *         the rejection event
      */
     public void onCommandRejected(CommandId commandId, Event rejection) {
-        CommandRejected systemCommand = CommandRejectedVBuilder
+        CommandRejected systemEvent = CommandRejectedVBuilder
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
                 .build();
-        systemGateway.postEvent(systemCommand);
+        systemGateway.postEvent(systemEvent);
     }
 
     /**
@@ -286,13 +286,13 @@ public class EntityLifecycle {
         Any newState = change.getNewValue()
                              .getState();
         if (!oldState.equals(newState)) {
-            EntityStateChanged command = EntityStateChangedVBuilder
+            EntityStateChanged event = EntityStateChangedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .setNewState(newState)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(command);
+            systemGateway.postEvent(event);
         }
     }
 
@@ -305,12 +305,12 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (newValue && !oldValue) {
-            EntityArchived command = EntityArchivedVBuilder
+            EntityArchived event = EntityArchivedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(command);
+            systemGateway.postEvent(event);
         }
     }
 
@@ -323,12 +323,12 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (newValue && !oldValue) {
-            EntityDeleted command = EntityDeletedVBuilder
+            EntityDeleted event = EntityDeletedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(command);
+            systemGateway.postEvent(event);
         }
     }
 
@@ -341,12 +341,12 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (!newValue && oldValue) {
-            EntityExtractedFromArchive command = EntityExtractedFromArchiveVBuilder
+            EntityExtractedFromArchive event = EntityExtractedFromArchiveVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(command);
+            systemGateway.postEvent(event);
         }
     }
 
@@ -359,12 +359,12 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (!newValue && oldValue) {
-            EntityRestored command = EntityRestoredVBuilder
+            EntityRestored event = EntityRestoredVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(command);
+            systemGateway.postEvent(event);
         }
     }
 
