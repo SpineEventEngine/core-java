@@ -22,6 +22,7 @@ package io.spine.system.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.Query;
 
 import java.util.Iterator;
@@ -31,6 +32,7 @@ import java.util.Iterator;
  *
  * @author Dmytro Dashenkov
  */
+@Internal
 public interface SystemGateway {
 
     /**

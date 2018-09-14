@@ -94,11 +94,6 @@ public class EntityLifecycle {
     private final SystemGateway systemGateway;
 
     /**
-     * The {@link EventFilter} to apply to the system events emitted by this lifecycle.
-     */
-    private final EventFilter eventFilter;
-
-    /**
      * The ID of {@linkplain io.spine.system.server.EntityHistory history} of the associated
      * {@link Entity}.
      *
@@ -120,9 +115,8 @@ public class EntityLifecycle {
                               TypeUrl entityType,
                               SystemGateway gateway,
                               EventFilter eventFilter) {
-        this.systemGateway = gateway;
+        this.systemGateway = FilteringGateway.atopOf(gateway, eventFilter);
         this.historyId = historyId(entityId, entityType);
-        this.eventFilter = eventFilter;
     }
 
     private EntityLifecycle(Builder builder) {

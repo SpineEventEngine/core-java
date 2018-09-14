@@ -23,9 +23,14 @@ package io.spine.system.server;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.core.ActorContext;
+import io.spine.core.EventContext;
 import io.spine.server.aggregate.ImportOrigin;
 import io.spine.server.event.EventFactory;
+import io.spine.server.route.EventRoute;
 
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.system.server.SystemCommandFactory.requestFactory;
 
 /**
@@ -33,14 +38,33 @@ import static io.spine.system.server.SystemCommandFactory.requestFactory;
  *
  * @author Alexander Yevsyukov
  */
-final class SystemEventFactory extends EventFactory {
+public final class SystemEventFactory extends EventFactory {
 
-    SystemEventFactory(Message aggregateId, boolean multitenant) {
+    private SystemEventFactory(Message aggregateId, boolean multitenant) {
         super(newOrigin(multitenant), Identifier.pack(aggregateId));
+    }
+
+    public static SystemEventFactory forMessage(Message message, boolean multitenant) {
+        Message aggregateId = getAggregateId(message);
+        return new SystemEventFactory(aggregateId, multitenant);
+    }
+
+    private static Message getAggregateId(Message systemEvent) {
+        Set<Object> routingOut =
+                EventRoute.byFirstMessageField()
+                          .apply(systemEvent, EventContext.getDefaultInstance());
+        checkArgument(routingOut.size() == 1,
+                      "System event message must have aggregate ID in the first field.");
+        Object id = routingOut.iterator()
+                              .next();
+        checkArgument(id instanceof Message, "System aggregate ID must be a Message");
+        return (Message) id;
     }
 
     private static ImportOrigin newOrigin(boolean multitenant) {
         ActorContext actorContext = requestFactory(multitenant).newActorContext();
         return ImportOrigin.newInstance(actorContext);
     }
+
+
 }
