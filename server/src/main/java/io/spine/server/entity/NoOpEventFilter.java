@@ -29,6 +29,8 @@ import java.util.Optional;
 import static com.google.common.collect.ImmutableList.copyOf;
 
 /**
+ * An {@link EventFilter} which allows any event to be posted unchanged.
+ *
  * @author Dmytro Dashenkov
  */
 enum NoOpEventFilter implements EventFilter {
@@ -40,6 +42,11 @@ enum NoOpEventFilter implements EventFilter {
         return Optional.of(event);
     }
 
+    /**
+     * {@inheritDoc}.
+     *
+     * @implSpec Overridden for performance reasons. The behavior of the parent method is unchanged.
+     */
     @Override
     public ImmutableCollection<Event> filter(Collection<Event> events) {
         return copyOf(events);
