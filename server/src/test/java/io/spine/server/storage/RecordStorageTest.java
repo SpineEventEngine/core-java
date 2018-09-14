@@ -169,7 +169,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(Order.getDefaultInstance(), filters,
+        EntityQuery<ProjectId> query = from(filters, Order.getDefaultInstance(),
                                             Pagination.getDefaultInstance(), storage);
         ProjectId idMatching = newId();
         ProjectId idWrong1 = newId();
@@ -261,7 +261,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
-        EntityQuery<ProjectId> query = from(Order.getDefaultInstance(), filters,
+        EntityQuery<ProjectId> query = from(filters, Order.getDefaultInstance(),
                                             Pagination.getDefaultInstance(), storage);
 
         // Perform the query
@@ -293,7 +293,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .addFilter(all(eq(archived.toString(), true)))
                 .build();
-        EntityQuery<ProjectId> query = from(Order.getDefaultInstance(), filters,
+        EntityQuery<ProjectId> query = from(filters, Order.getDefaultInstance(),
                                             Pagination.getDefaultInstance(), storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(archivedRecord, read);
@@ -331,7 +331,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setIdFilter(idFilter)
                 .build();
         EntityQuery<ProjectId> query =
-                from(Order.getDefaultInstance(), filters,
+                from(filters, Order.getDefaultInstance(),
                      Pagination.getDefaultInstance(), storage)
                         .withLifecycleFlags(storage);
         Iterator<EntityRecord> read = storage.readAll(query);
@@ -361,7 +361,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(Order.getDefaultInstance(), filters,
+        EntityQuery<ProjectId> query = from(filters, Order.getDefaultInstance(),
                                             Pagination.getDefaultInstance(), storage);
 
         ProjectId id = newId();
@@ -424,7 +424,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .build();
         RecordStorage<ProjectId> storage = getStorage();
         EntityQuery<ProjectId> query =
-                from(Order.getDefaultInstance(), filters,
+                from(filters, Order.getDefaultInstance(),
                      Pagination.getDefaultInstance(), storage).withLifecycleFlags(storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         List<EntityRecord> readRecords = newArrayList(read);
@@ -470,7 +470,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(Order.getDefaultInstance(), filters,
+        EntityQuery<ProjectId> query = from(filters, Order.getDefaultInstance(),
                                             Pagination.getDefaultInstance(), storage);
         ProjectId idMatching = newId();
         ProjectId idWrong = newId();

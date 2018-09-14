@@ -76,7 +76,7 @@ class EntityQueriesTest {
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
                                                     Class<? extends Entity> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return from(Order.getDefaultInstance(), filters, Pagination.getDefaultInstance(),
+        return from(filters, Order.getDefaultInstance(), Pagination.getDefaultInstance(),
                     entityColumns);
     }
 
@@ -95,7 +95,7 @@ class EntityQueriesTest {
         @Test
         @DisplayName("filters")
         void filters() {
-            assertThrows(NullPointerException.class, () -> from(Order.getDefaultInstance(), null,
+            assertThrows(NullPointerException.class, () -> from(null, Order.getDefaultInstance(),
                                                                 Pagination.getDefaultInstance(),
                                                                 Collections.emptyList()));
         }
@@ -107,7 +107,7 @@ class EntityQueriesTest {
         void storage() {
             RecordStorage<?> storage = null;
             assertThrows(NullPointerException.class,
-                         () -> from(Order.getDefaultInstance(), EntityFilters.getDefaultInstance(),
+                         () -> from(EntityFilters.getDefaultInstance(), Order.getDefaultInstance(),
                                     Pagination.getDefaultInstance(), storage));
         }
 
@@ -118,7 +118,7 @@ class EntityQueriesTest {
         void entityClass() {
             Collection<EntityColumn> entityColumns = null;
             assertThrows(NullPointerException.class,
-                         () -> from(Order.getDefaultInstance(), EntityFilters.getDefaultInstance(),
+                         () -> from(EntityFilters.getDefaultInstance(), Order.getDefaultInstance(),
                                     Pagination.getDefaultInstance(),
                                     entityColumns));
         }

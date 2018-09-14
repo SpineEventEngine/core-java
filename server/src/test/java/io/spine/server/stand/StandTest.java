@@ -1336,7 +1336,8 @@ class StandTest extends TenantAwareTest {
         when(projectionRepository.loadAll())
                 .thenReturn(allResults.iterator());
 
-        when(projectionRepository.find(argThat(entityFilterMatcher(projectIds)), eq(Order.getDefaultInstance()),
+        when(projectionRepository.find(argThat(entityFilterMatcher(projectIds)),
+                                       eq(Order.getDefaultInstance()),
                                        eq(Pagination.getDefaultInstance()),
                                        any(FieldMask.class)))
                 .thenReturn(allResults.iterator());

@@ -64,17 +64,19 @@ public final class EntityQueries {
      * Creates new {@link EntityQuery} instances for the given {@link Order}, {@link EntityFilters}, 
      * {@link Pagination}, and {@link RecordStorage}.
      *
-     * @param order
-     *         an order to sort the data matching filters
      * @param filters
      *         filters for the Entities specifying the query predicate
+     * @param order
+     *         an order to sort the data matching filters
      * @param pagination
      *         a specification of a way to paginate the query results
      * @param storage
      *         a storage for which the query is created
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
-    public static <I> EntityQuery<I> from(Order order, EntityFilters filters, Pagination pagination,
+    public static <I> EntityQuery<I> from(EntityFilters filters, 
+                                          Order order,
+                                          Pagination pagination,
                                           RecordStorage<I> storage) {
         checkNotNull(order);
         checkNotNull(filters);
@@ -82,13 +84,13 @@ public final class EntityQueries {
         checkNotNull(storage);
 
         Collection<EntityColumn> entityColumns = storage.entityColumns();
-        EntityQuery<I> result = from(order, filters, pagination, entityColumns);
+        EntityQuery<I> result = from(filters, order, pagination, entityColumns);
         return result;
     }
 
     @VisibleForTesting
-    static <I> EntityQuery<I> from(Order order,
-                                   EntityFilters filters,
+    static <I> EntityQuery<I> from(EntityFilters filters, 
+                                   Order order,
                                    Pagination pagination,
                                    Collection<EntityColumn> columns) {
         checkNotNull(order);

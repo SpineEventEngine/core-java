@@ -309,7 +309,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        EntityQuery<I> entityQuery = EntityQueries.from(order, filters, pagination,
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, order, pagination,
                                                         recordStorage());
         EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);

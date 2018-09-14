@@ -145,7 +145,9 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     }
 
     private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
-        return repository.find(filters, Order.getDefaultInstance(), Pagination.getDefaultInstance(),
+        return repository.find(filters, 
+                               Order.getDefaultInstance(), 
+                               Pagination.getDefaultInstance(),
                                firstFieldOnly);
     }
 
