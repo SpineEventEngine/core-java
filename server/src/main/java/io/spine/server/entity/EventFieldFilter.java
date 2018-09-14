@@ -36,6 +36,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.FieldMasks.applyMask;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * @author Dmytro Dashenkov
@@ -51,9 +52,13 @@ public final class EventFieldFilter implements EventFilter {
     @Override
     public Optional<Event> filter(Event event) {
         EventClass eventClass = EventClass.of(event);
-        FieldMask mask = fieldMasks.getOrDefault(eventClass, FieldMask.getDefaultInstance());
-        Event result = mask(event, eventClass, mask);
-        return Optional.of(result);
+        FieldMask mask = fieldMasks.get(eventClass);
+        if (mask == null || isDefault(mask)) {
+            return Optional.of(event);
+        } else {
+            Event result = mask(event, eventClass, mask);
+            return Optional.of(result);
+        }
     }
 
     private static Event mask(Event event, EventClass eventClass, FieldMask mask) {
@@ -93,13 +98,6 @@ public final class EventFieldFilter implements EventFilter {
             checkNotNull(mask);
             EventClass eventType = EventClass.from(eventClass);
             masks.put(eventType, mask);
-            return this;
-        }
-
-        public Builder putMask(EventClass eventClass, FieldMask mask) {
-            checkNotNull(eventClass);
-            checkNotNull(mask);
-            masks.put(eventClass, mask);
             return this;
         }
 
