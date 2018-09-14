@@ -20,15 +20,13 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Timestamp;
-import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.test.entity.event.EntProjectCreated;
+import io.spine.test.entity.event.EntProjectStarted;
+import io.spine.test.entity.event.EntTaskAdded;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.time.LocalDate;
-import io.spine.time.LocalDates;
-import io.spine.time.ZonedDateTimes;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,49 +44,41 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
-@DisplayName("WhiteListEventFilter should")
+@DisplayName("WhiteListFilter should")
 class WhiteListEventFilterTest {
 
     private static final Set<EventClass> WHITE_LIST = EventClass.setOf(
-            Timestamp.class,
-            LocalDate.class
+            EntProjectCreated.class,
+            EntProjectStarted.class
     );
 
     private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(WhiteListEventFilterTest.class);
 
+    private WhiteListFilter whiteList;
+
+    @BeforeEach
+    void setUp() {
+        whiteList = WhiteListFilter.allowEvents(WHITE_LIST);
+    }
+
     @Test
     @DisplayName("allow eventFactory of white list type")
     void acceptAllowed() {
-        WhiteListFilter filter = WhiteListFilter.allowEvents(WHITE_LIST);
-        Event event = eventFactory.createEvent(Timestamp.getDefaultInstance());
-        Optional<Event> result = filter.filter(event);
+        Event event = eventFactory.createEvent(EntProjectCreated.getDefaultInstance());
+        Optional<Event> result = whiteList.filter(event);
         assertTrue(result.isPresent());
         assertEquals(event, result.get());
     }
 
     @Test
-    @DisplayName("allow bulk eventFactory of white list types")
-    void acceptAllowedBulk() {
-        WhiteListFilter filter = WhiteListFilter.allowEvents(WHITE_LIST);
-        List<Event> events = Stream.of(Time.getCurrentTime(),
-                                       LocalDates.now())
-                                   .map(eventFactory::createEvent)
-                                   .collect(toList());
-        Collection<Event> filtered = filter.filter(events);
-        assertEquals(events.size(), filtered.size());
-        assertTrue(events.containsAll(filtered));
-    }
-
-    @Test
     @DisplayName("filter out non-allowed events")
     void filterOut() {
-        WhiteListFilter filter = WhiteListFilter.allowEvents(WHITE_LIST);
-        List<Event> events = Stream.of(Time.getCurrentTime(),
-                                       ZonedDateTimes.now())
+        List<Event> events = Stream.of(EntProjectStarted.getDefaultInstance(),
+                                       EntTaskAdded.getDefaultInstance())
                                    .map(eventFactory::createEvent)
                                    .collect(toList());
-        Collection<Event> filtered = filter.filter(events);
+        Collection<Event> filtered = whiteList.filter(events);
         assertEquals(1, filtered.size());
         assertTrue(events.contains(events.get(0)));
     }
@@ -96,9 +86,8 @@ class WhiteListEventFilterTest {
     @Test
     @DisplayName("not allow events out from the white list")
     void denyEvents() {
-        WhiteListFilter filter = WhiteListFilter.allowEvents(WHITE_LIST);
-        Event event = eventFactory.createEvent(Empty.getDefaultInstance());
-        Optional<Event> result = filter.filter(event);
+        Event event = eventFactory.createEvent(EntTaskAdded.getDefaultInstance());
+        Optional<Event> result = whiteList.filter(event);
         assertFalse(result.isPresent());
     }
 }
