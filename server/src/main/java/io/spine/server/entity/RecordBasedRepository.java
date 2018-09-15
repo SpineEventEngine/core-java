@@ -67,7 +67,8 @@ import static java.util.function.Predicate.isEqual;
  * <p>Such a repository is backed by {@link RecordStorage}.
  * Entity states are stored as {@link EntityRecord}s.
  *
- * @param <S> the type of entity state messages
+ * @param <S>
+ *         the type of entity state messages
  * @author Alexander Yevsyukov
  */
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
@@ -92,7 +93,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Ensures that the repository has the storage.
      *
      * @return storage instance
-     * @throws IllegalStateException if the storage is null
+     * @throws IllegalStateException
+     *         if the storage is null
      */
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
@@ -144,7 +146,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param entities the {@linkplain Entity Entities} to store
+     * @param entities
+     *         the {@linkplain Entity Entities} to store
      */
     public void store(Collection<E> entities) {
         Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
@@ -159,9 +162,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds an entity with the passed ID if this entity is
      * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible() visible}.
      *
-     * @param id the ID of the entity to find
+     * @param id
+     *         the ID of the entity to find
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID
-     * or this entity is not visible
+     *         or this entity is not visible
      */
     @Override
     public Optional<E> find(I id) {
@@ -202,7 +206,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>The new entity is created if and only if there is no record with the corresponding ID.
      *
-     * @param id the ID of the entity to load
+     * @param id
+     *         the ID of the entity to load
      * @return the entity with the specified ID
      */
     protected E findOrCreate(I id) {
@@ -235,7 +240,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param ids entity IDs to search for
+     * @param ids
+     *         entity IDs to search for
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids) {
@@ -253,8 +259,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param ids       entity IDs to search for
-     * @param fieldMask mask to apply on entities
+     * @param ids
+     *         entity IDs to search for
+     * @param fieldMask
+     *         mask to apply on entities
      * @return all the entities in this repository with the IDs contained in the given {@code ids}
      * @see #loadAll(Iterable)
      */
@@ -365,7 +373,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * the {@link EntityWithLifecycle}, then no lifecycle attributes are appended and
      * the {@code src} query is returned.
      *
-     * @param src the source {@link EntityQuery} to take the parameters from
+     * @param src
+     *         the source {@link EntityQuery} to take the parameters from
      * @return an {@link EntityQuery} which includes
      *         the {@link LifecycleFlagField Lifecycle Flags Columns} unless
      *         they are not supported
@@ -418,7 +427,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
      *
-     * @throws IllegalStateException in case entity column definitions are incorrect
+     * @throws IllegalStateException
+     *         in case entity column definitions are incorrect
      */
     private void cacheEntityColumns() {
         columnCache().ensureColumnsCached();
@@ -428,7 +438,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Transforms an instance of {@link EntityId} into an identifier
      * of the required type.
      *
-     * @param <I> the target type of identifiers
+     * @param <I>
+     *         the target type of identifiers
      */
     @VisibleForTesting
     static class EntityIdFunction<I> implements Function<EntityId, I> {
