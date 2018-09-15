@@ -26,7 +26,6 @@ import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import java.util.Comparator;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -39,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @author Mykhailo Drachuk
  */
 @SuppressWarnings("ComparatorNotSerializable")
-class EntityRecordComparator implements Comparator<Map.Entry<?, EntityRecordWithColumns>> {
+class EntityRecordComparator implements Comparator<EntityRecordWithColumns> {
 
     private final String column;
     private final Comparator<MemoizedValue> comparator;
@@ -74,15 +73,13 @@ class EntityRecordComparator implements Comparator<Map.Entry<?, EntityRecordWith
     }
 
     @Override
-    public int compare(Map.Entry<?, EntityRecordWithColumns> a,
-                       Map.Entry<?, EntityRecordWithColumns> b) {
+    public int compare(EntityRecordWithColumns a, EntityRecordWithColumns b) {
         return comparator.compare(value(a), value(b));
     }
 
-    private MemoizedValue value(Map.Entry<?, EntityRecordWithColumns> b) {
+    private MemoizedValue value(EntityRecordWithColumns b) {
         checkNotNull(column, "The column can only be null for when no ordering is performed.");
-        return b.getValue()
-                .getColumnValue(column);
+        return b.getColumnValue(column);
     }
 
     /**
