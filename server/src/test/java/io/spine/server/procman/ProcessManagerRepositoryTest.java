@@ -21,8 +21,10 @@
 package io.spine.server.procman;
 
 import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -33,9 +35,9 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.rejection.StandardRejections;
@@ -47,6 +49,8 @@ import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.TestProcessManager;
 import io.spine.server.procman.given.repo.TestProcessManagerRepository;
+import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.Task;
@@ -59,7 +63,9 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,8 +77,10 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getMessage;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.archiveProcess;
@@ -109,6 +117,8 @@ class ProcessManagerRepositoryTest
                                                 TenantId.newBuilder()
                                                         .setValue(newUuid())
                                                         .build());
+    private final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(ProcessManagerRepositoryTest.class);
     private BoundedContext boundedContext;
 
     @Override
@@ -438,7 +448,7 @@ class ProcessManagerRepositoryTest
         dispatchCommand(command);
         StandardRejections.EntityAlreadyArchived expected =
                 StandardRejections.EntityAlreadyArchived.newBuilder()
-                                                        .setEntityId(AnyPacker.pack(id))
+                                                        .setEntityId(pack(id))
                                                         .build();
         assertTrue(TestProcessManager.processed(expected));
     }
@@ -452,5 +462,33 @@ class ProcessManagerRepositoryTest
                                                       .build();
         repo.setBoundedContext(boundedContext);
         assertThrows(IllegalStateException.class, repo::onRegistered);
+    }
+
+    @Test
+    @DisplayName("provide EventFilter which discards EntityStateChanged events")
+    void discardEntityStateChangedEvents() {
+        EventFilter filter = repository().eventFilter();
+        ProjectId projectId = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        Event arbitraryEvent = eventFactory.createEvent(PmTaskAdded
+                                                                .newBuilder()
+                                                                .setProjectId(projectId)
+                                                                .build());
+        assertTrue(filter.filter(arbitraryEvent)
+                         .isPresent());
+        Any newState = pack(getCurrentTime());
+        EntityHistoryId historyId = EntityHistoryId
+                .newBuilder()
+                .setTypeUrl(TypeUrl.ofEnclosed(newState).value())
+                .setEntityId(EntityId.newBuilder().setId(pack(projectId)))
+                .build();
+        Event discardedEvent = eventFactory.createEvent(EntityStateChanged
+                                                                .newBuilder()
+                                                                .setId(historyId)
+                                                                .setNewState(newState)
+                                                                .build());
+        assertFalse(filter.filter(discardedEvent).isPresent());
     }
 }
