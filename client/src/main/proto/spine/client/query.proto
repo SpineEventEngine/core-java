@@ -111,7 +111,8 @@ message Query {
     // A specification for a way to paginate the Query results.
     //
     Pagination pagination = 6 [(valid) = true,
-                               (if_invalid).msg_format = "Invalid query pagination"];
+                              (goes).with="order",
+                              (if_invalid).msg_format = "Invalid query pagination"];
 
     // Reserved for utility fields required response timeframe etc.
     reserved 7 to 10;
