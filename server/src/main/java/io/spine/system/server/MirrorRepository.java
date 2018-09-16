@@ -128,7 +128,8 @@ final class MirrorRepository
         FieldMask aggregateFields = query.getFieldMask();
         Target target = query.getTarget();
         EntityFilters filters = buildFilters(target);
-        Iterator<MirrorProjection> mirrors = find(filters, FieldMask.getDefaultInstance());
+        Iterator<MirrorProjection> mirrors = find(filters, query.getOrder(), query.getPagination(), 
+                                                  FieldMask.getDefaultInstance());
         Iterator<Any> result = aggregateStates(mirrors, aggregateFields);
         return result;
     }
