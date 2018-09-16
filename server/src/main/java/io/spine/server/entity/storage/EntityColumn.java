@@ -52,7 +52,7 @@ import static java.lang.String.format;
  * <p>The value stored in an entity column is retrieved from an {@link Entity} getter method
  * marked with {@link Column} annotation.
  *
- * <p>An entity can inherit the columns from its parents classes and interfaces.
+ * <p>An entity can inherit the columns from its parent classes and interfaces.
  * In this case, column getter is annotated only once when its first declared.
  *
  * <h2>Column names</h2>
