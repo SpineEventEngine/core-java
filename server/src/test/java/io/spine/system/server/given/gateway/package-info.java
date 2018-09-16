@@ -18,42 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+@BoundedContext("_System")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.system.server.given.gateway;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import io.spine.client.Query;
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.server.annotation.BoundedContext;
 
-import java.util.Iterator;
-
-import static java.util.Collections.emptyIterator;
-
-/**
- * An implementation of {@link SystemGateway} which never performs an operation.
- *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
- *
- * @author Dmytro Dashenkov
- */
-public enum NoOpSystemGateway implements SystemGateway {
-
-    INSTANCE;
-
-    @Override
-    public void postCommand(Message systemCommand) {
-        // NOP.
-    }
-
-    @Override
-    public void postEvent(Message systemEvent) {
-        // NOP.
-    }
-
-    @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        return emptyIterator();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

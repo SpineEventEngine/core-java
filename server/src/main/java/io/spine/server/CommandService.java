@@ -64,8 +64,6 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         this.boundedContextMap = ImmutableMap.copyOf(map);
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    // as we override default implementation with `unimplemented` status.
     @Override
     public void post(Command request, StreamObserver<Ack> responseObserver) {
         CommandClass commandClass = CommandClass.of(request);

@@ -21,8 +21,10 @@
 package io.spine.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.CommandFactory;
+import io.spine.client.Query;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -30,11 +32,13 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.route.EventRoute;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The point of integration of the domain and the system bounded context.
@@ -53,9 +57,9 @@ final class DefaultSystemGateway implements SystemGateway {
             .setValue("SYSTEM")
             .build();
 
-    private final BoundedContext system;
+    private final SystemContext system;
 
-    DefaultSystemGateway(BoundedContext system) {
+    DefaultSystemGateway(SystemContext system) {
         this.system = system;
     }
 
@@ -77,6 +81,21 @@ final class DefaultSystemGateway implements SystemGateway {
         Event event = factory.createEvent(systemEvent, null);
         system.getImportBus()
               .post(event, noOpObserver());
+    }
+
+    @Override
+    public Iterator<Any> readDomainAggregate(Query query) {
+        @SuppressWarnings("unchecked") // Logically checked.
+        MirrorRepository repository = (MirrorRepository)
+                system.findRepository(Mirror.class)
+                      .orElseThrow(
+                              () -> newIllegalStateException(
+                                      "Mirror projection repository is not registered in %s.",
+                                      system.getName().getValue()
+                              )
+                      );
+        Iterator<Any> result = repository.execute(query);
+        return result;
     }
 
     private static Message getAggregateId(Message systemEvent) {

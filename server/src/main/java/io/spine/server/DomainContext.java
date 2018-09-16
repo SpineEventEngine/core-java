@@ -53,12 +53,7 @@ final class DomainContext extends BoundedContext {
 
     static DomainContext newInstance(BoundedContextBuilder builder, SystemGateway gateway) {
         DomainContext result = new DomainContext(builder, gateway);
-        result.init();
         return result;
-    }
-
-    private void init() {
-        getStand().onCreated(this);
     }
 
     @Override

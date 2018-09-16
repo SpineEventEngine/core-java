@@ -20,40 +20,26 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.Query;
+import io.spine.server.entity.Repository;
+import io.spine.testing.server.projection.ProjectionTest;
 
-import java.util.Iterator;
-
-import static java.util.Collections.emptyIterator;
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.ID;
 
 /**
- * An implementation of {@link SystemGateway} which never performs an operation.
- *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
+ * An implementation base for {@link MirrorProjection} event subscriber tests.
  *
  * @author Dmytro Dashenkov
  */
-public enum NoOpSystemGateway implements SystemGateway {
+abstract class MirrorProjectionTest<E extends Message>
+        extends ProjectionTest<MirrorId, E, Mirror, MirrorProjection> {
 
-    INSTANCE;
-
-    @Override
-    public void postCommand(Message systemCommand) {
-        // NOP.
+    MirrorProjectionTest(E eventMessage) {
+        super(ID, eventMessage);
     }
 
     @Override
-    public void postEvent(Message systemEvent) {
-        // NOP.
-    }
-
-    @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        return emptyIterator();
+    protected Repository<MirrorId, MirrorProjection> createEntityRepository() {
+        return new MirrorRepository();
     }
 }

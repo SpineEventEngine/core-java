@@ -35,6 +35,9 @@ import io.spine.server.entity.RecordBasedRepository;
 
 import java.util.Iterator;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Streams.stream;
+
 /**
  * Processes the queries targeting {@link io.spine.server.entity.Entity Entity} objects.
  *
@@ -50,12 +53,10 @@ class EntityQueryProcessor implements QueryProcessor {
 
     @Override
     public ImmutableCollection<Any> process(Query query) {
-        ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
-
         Target target = query.getTarget();
         FieldMask fieldMask = query.getFieldMask();
 
-        Iterator<? extends Entity> entities;
+        Iterator<? extends Entity<?, ?>> entities;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
             entities = repository.loadAll();
@@ -65,13 +66,10 @@ class EntityQueryProcessor implements QueryProcessor {
             Pagination pagination = query.getPagination();
             entities = repository.find(filters, order, pagination, fieldMask);
         }
-        while (entities.hasNext()) {
-            Entity entity = entities.next();
-            Message state = entity.getState();
-            Any packedState = AnyPacker.pack(state);
-            resultBuilder.add(packedState);
-        }
-        ImmutableList<Any> result = resultBuilder.build();
+        ImmutableList<Any> result = stream(entities)
+                .map(Entity::getState)
+                .map(AnyPacker::pack)
+                .collect(toImmutableList());
         return result;
     }
 }

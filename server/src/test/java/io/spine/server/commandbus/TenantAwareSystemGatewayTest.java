@@ -21,11 +21,16 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.system.server.MemoizingGateway;
 import io.spine.system.server.SystemGateway;
+import io.spine.testing.client.TestActorRequestFactory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.system.server.GatewayFunction.delegatingTo;
@@ -35,35 +40,108 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("InnerClassMayBeStatic")
-@DisplayName("TenantAwareSystemGateway should post system commands")
+@DisplayName("TenantAwareSystemGateway should")
 class TenantAwareSystemGatewayTest {
 
-    @Test
+    private static final String POST_COMMANDS = "post system commands";
+    private static final String POST_EVENTS = "post system events";
+    private static final String QUERY = "query system BC for domain aggregates";
+
+    private static final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(TenantAwareSystemGatewayTest.class);
+
+    @Nested
     @DisplayName("in single-tenant env")
-    void singleTenant() {
-        MemoizingGateway delegate = MemoizingGateway.singleTenant();
-        TenantId tenantId = TenantId.getDefaultInstance();
-        postAndCheck(delegate, tenantId);
+    class SingleTenant {
+
+        private final TenantId defaultTenant = TenantId.getDefaultInstance();
+
+        private MemoizingGateway delegate;
+
+        @BeforeEach
+        void setUp() {
+            delegate = MemoizingGateway.singleTenant();
+        }
+
+        @Test
+        @DisplayName(POST_COMMANDS)
+        void postCommands() {
+            postCommandAndCheck(delegate, defaultTenant);
+        }
+
+        @Test
+        @DisplayName(POST_EVENTS)
+        void postEvents() {
+            postEventAndCheck(delegate, defaultTenant);
+        }
+
+        @Test
+        @DisplayName(QUERY)
+        void query() {
+            queryAndCheck(delegate, defaultTenant);
+        }
     }
 
-    @Test
+    @Nested
     @DisplayName("in multitenant env")
-    void multitenant() {
-        MemoizingGateway delegate = MemoizingGateway.multitenant();
-        TenantId tenantId = TenantId
-                .newBuilder()
-                .setValue(TenantAwareSystemGatewayTest.class.getName())
-                .build();
-        postAndCheck(delegate, tenantId);
-        assertEquals(tenantId, delegate.lastSeenCommand()
-                                       .tenant());
+    class Multitenant {
+
+        private TenantId tenantId;
+        private MemoizingGateway delegate;
+
+        @BeforeEach
+        void setUp() {
+            delegate = MemoizingGateway.multitenant();
+            tenantId = TenantId
+                    .newBuilder()
+                    .setValue(TenantAwareSystemGatewayTest.class.getName())
+                    .build();
+        }
+
+        @Test
+        @DisplayName(POST_COMMANDS)
+        void postCommands() {
+            postCommandAndCheck(delegate, tenantId);
+            assertEquals(tenantId, delegate.lastSeenCommand().tenant());
+        }
+
+        @Test
+        @DisplayName(POST_EVENTS)
+        void postEvents() {
+            postEventAndCheck(delegate, tenantId);
+            assertEquals(tenantId, delegate.lastSeenEvent().tenant());
+        }
+
+        @Test
+        @DisplayName(QUERY)
+        void query() {
+            queryAndCheck(delegate, tenantId);
+            assertEquals(tenantId, delegate.lastSeenQuery().tenant());
+        }
     }
 
-    private static void postAndCheck(MemoizingGateway delegate, TenantId tenantId) {
+    private static void postCommandAndCheck(MemoizingGateway delegate, TenantId tenantId) {
         Message command = Time.getCurrentTime();
         SystemGateway gateway = delegatingTo(delegate).get(tenantId);
         gateway.postCommand(command);
 
         assertEquals(command, delegate.lastSeenCommand().message());
+    }
+
+    private static void postEventAndCheck(MemoizingGateway delegate, TenantId tenantId) {
+        Message event = Time.getCurrentTime();
+        SystemGateway gateway = delegatingTo(delegate).get(tenantId);
+        gateway.postEvent(event);
+
+        assertEquals(event, delegate.lastSeenEvent().message());
+    }
+
+    @SuppressWarnings("CheckReturnValue")
+    private static void queryAndCheck(MemoizingGateway delegate, TenantId tenantId) {
+        Query query = requestFactory.query().all(Timestamp.class);
+        SystemGateway gateway = delegatingTo(delegate).get(tenantId);
+        gateway.readDomainAggregate(query);
+
+        assertEquals(query, delegate.lastSeenQuery().message());
     }
 }

@@ -79,7 +79,9 @@ public final class SystemContext extends BoundedContext {
     private void init(CommandLifecycleRepository commandLifecycle) {
         register(commandLifecycle);
         register(new EntityHistoryRepository());
+
         register(new ScheduledCommandRepository());
+        register(new MirrorRepository());
     }
 
     /**

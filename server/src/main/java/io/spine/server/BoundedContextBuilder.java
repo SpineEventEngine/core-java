@@ -29,7 +29,6 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
-import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
@@ -285,7 +284,7 @@ public final class BoundedContextBuilder implements Logging {
         initTenantIndex(storageFactory);
         initCommandBus(systemGateway);
         initEventBus(storageFactory);
-        initStand(storageFactory);
+        initStand(systemGateway);
         initIntegrationBus(transport);
 
         B result = instanceFactory.apply(this, systemGateway);
@@ -351,9 +350,9 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private void initStand(StorageFactory factory) {
+    private void initStand(SystemGateway systemGateway) {
         if (stand == null) {
-            stand = createStand(factory);
+            stand = createStand();
         } else {
             Boolean standMultitenant = stand.isMultitenant();
             // Check that both either multi-tenant or single-tenant.
@@ -365,6 +364,7 @@ public final class BoundedContextBuilder implements Logging {
                                standMultitenant);
             }
         }
+        stand.setSystemGateway(systemGateway);
     }
 
     private void initIntegrationBus(TransportFactory factory) {
@@ -389,11 +389,9 @@ public final class BoundedContextBuilder implements Logging {
                    String.valueOf(partMultitenancy));
     }
 
-    private Stand.Builder createStand(StorageFactory factory) {
-        StandStorage standStorage = factory.createStandStorage();
+    private Stand.Builder createStand() {
         Stand.Builder result = Stand.newBuilder()
-                                    .setMultitenant(multitenant)
-                                    .setStorage(standStorage);
+                                    .setMultitenant(multitenant);
         return result;
     }
 }

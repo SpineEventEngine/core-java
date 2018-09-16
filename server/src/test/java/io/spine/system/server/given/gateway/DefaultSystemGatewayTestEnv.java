@@ -18,26 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+package io.spine.system.server.given.gateway;
 
-import io.spine.server.entity.Entity;
-import io.spine.server.stand.StandStorage;
-import io.spine.server.stand.StandStorageTest;
-import org.junit.jupiter.api.DisplayName;
+import io.spine.server.BoundedContext;
 
-import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.system.server.SystemBoundedContexts.systemOf;
 
 /**
  * @author Dmytro Dashenkov
  */
-@DisplayName("InMemoryStandStorage should")
-public class InMemoryStandStorageTest extends StandStorageTest {
+public class DefaultSystemGatewayTestEnv {
 
-    @Override
-    protected StandStorage newStorage(Class<? extends Entity> cls) {
-        return InMemoryStandStorage.newBuilder()
-                                   .setBoundedContextName(newName(getClass().getSimpleName()))
-                                   .setMultitenant(false)
-                                   .build();
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private DefaultSystemGatewayTestEnv() {
+    }
+
+    public static BoundedContext contextWithDomainAggregate() {
+        BoundedContext context = BoundedContext.newBuilder().build();
+        context.register(new ShoppingListRepository());
+        return context;
+    }
+
+    public static BoundedContext contextWithSystemAggregate() {
+        BoundedContext context = BoundedContext.newBuilder().build();
+        BoundedContext systemContext = systemOf(context);
+        systemContext.register(new ShoppingListRepository());
+        return context;
     }
 }
