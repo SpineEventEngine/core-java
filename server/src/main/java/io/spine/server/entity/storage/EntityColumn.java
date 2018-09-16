@@ -527,6 +527,7 @@ public class EntityColumn implements Serializable {
                     return -1;
                 }
                 if (aValue instanceof Comparable) {
+                    //noinspection unchecked the values are chhecked to be of the same column
                     return ((Comparable) aValue).compareTo(bValue);
                 }
                 throw newIllegalStateException("Memoized value is not a Comparable");
