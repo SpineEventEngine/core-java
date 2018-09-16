@@ -45,7 +45,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Iterators.size;
@@ -58,6 +57,7 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.Verify.assertContains;
 import static io.spine.testing.Verify.assertSize;
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,9 +95,9 @@ class EntityQueriesTest {
         @Test
         @DisplayName("filters")
         void filters() {
-            assertThrows(NullPointerException.class, () -> from(null, Order.getDefaultInstance(),
-                                                                Pagination.getDefaultInstance(),
-                                                                Collections.emptyList()));
+            assertThrows(NullPointerException.class,
+                         () -> from(null, Order.getDefaultInstance(),
+                                    Pagination.getDefaultInstance(), emptyList()));
         }
 
         @SuppressWarnings("ConstantConditions")
@@ -114,13 +114,31 @@ class EntityQueriesTest {
         @SuppressWarnings("ConstantConditions")
         // The purpose of the check is passing null for @NotNull field.
         @Test
-        @DisplayName("entity class")
-        void entityClass() {
-            Collection<EntityColumn> entityColumns = null;
+        @DisplayName("order")
+        void order() {
+            assertThrows(NullPointerException.class,
+                         () -> from(EntityFilters.getDefaultInstance(), null,
+                                    Pagination.getDefaultInstance(), emptyList()));
+        }
+
+        @SuppressWarnings("ConstantConditions")
+        // The purpose of the check is passing null for @NotNull field.
+        @Test
+        @DisplayName("pagination")
+        void pagination() {
             assertThrows(NullPointerException.class,
                          () -> from(EntityFilters.getDefaultInstance(), Order.getDefaultInstance(),
-                                    Pagination.getDefaultInstance(),
-                                    entityColumns));
+                                    null, emptyList()));
+        }
+
+        @SuppressWarnings("ConstantConditions")
+        // The purpose of the check is passing null for @NotNull field.
+        @Test
+        @DisplayName("entity class")
+        void entityClass() {
+            assertThrows(NullPointerException.class,
+                         () -> from(EntityFilters.getDefaultInstance(), Order.getDefaultInstance(),
+                                    null, emptyList()));
         }
     }
 
