@@ -102,7 +102,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     public QueryBuilder limit(Integer count) {
         checkNotNull(count);
         checkLimit(count);
-        this.limit = new Long(count);
+        this.limit = Long.valueOf(count);
         return self();
     }
 
