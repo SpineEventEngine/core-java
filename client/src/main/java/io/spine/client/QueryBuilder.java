@@ -28,6 +28,8 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.client.Order.Direction.OD_UNKNOWN;
+import static io.spine.client.Order.Direction.UNRECOGNIZED;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -71,12 +73,18 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         this.queryFactory = checkNotNull(queryFactory);
     }
 
+    /**
+     * Sets the sorting order to query, represented by the target column and order direction.
+     *
+     * @param column an entity column to sort by
+     * @param direction a direction of the sorting
+     * @return this builder instance
+     */
     public QueryBuilder orderedBy(String column, Order.Direction direction) {
         checkNotNull(column);
         checkNotNull(direction);
         checkArgument(
-                direction != Order.Direction.OD_UNKNOWN
-                        && direction != Order.Direction.UNRECOGNIZED,
+                direction != OD_UNKNOWN && direction != UNRECOGNIZED,
                 "Invalid ordering direction"
         );
 
@@ -85,6 +93,12 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         return self();
     }
 
+    /**
+     * Limits the number of results returned by the query.
+     *
+     * @param count an amount of the results to be returned
+     * @return this builder instance
+     */
     public QueryBuilder limit(Integer count) {
         checkNotNull(count);
         checkLimit(count);
@@ -92,6 +106,12 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         return self();
     }
 
+    /**
+     * Limits the number of results returned by the query.
+     *
+     * @param count an amount of the results to be returned
+     * @return this builder instance
+     */
     public QueryBuilder limit(Long count) {
         checkNotNull(count);
         checkLimit(count);
