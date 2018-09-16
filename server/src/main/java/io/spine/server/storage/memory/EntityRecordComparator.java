@@ -38,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @author Mykhailo Drachuk
  */
 @SuppressWarnings("ComparatorNotSerializable")
-class EntityRecordComparator implements Comparator<EntityRecordWithColumns> {
+final class EntityRecordComparator implements Comparator<EntityRecordWithColumns> {
 
     private final String column;
     private final Comparator<MemoizedValue> comparator;
