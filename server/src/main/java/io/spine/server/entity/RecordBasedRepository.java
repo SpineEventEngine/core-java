@@ -322,7 +322,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(order);
         checkNotNull(pagination);
         checkNotNull(fieldMask);
-        checkOrderColumnExists(order);
 
         RecordStorage<I> storage = recordStorage();
         EntityQuery<I> entityQuery = EntityQueries.from(filters, order, pagination, storage);
@@ -331,21 +330,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
-    }
-
-    private void checkOrderColumnExists(Order order) {
-        if (order.equals(Order.getDefaultInstance())) {
-            return;
-        }
-        String targetColumn = order.getColumn();
-        //TODO:2018-09-15:mdrachuk: Use Columns instead of Column Cache.
-        Optional<String> orderColumn = columnCache().getColumns()
-                                                    .stream()
-                                                    .map(EntityColumn::getName)
-                                                    .filter(isEqual(targetColumn))
-                                                    .findFirst();
-        checkArgument(orderColumn.isPresent(),
-                      format("Did not found the column \"%s\" for ordering results", targetColumn));
     }
 
     /**
