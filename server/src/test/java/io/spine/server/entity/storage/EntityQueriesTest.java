@@ -36,6 +36,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.storage.given.EntityQueriesTestEnv;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
@@ -50,7 +51,10 @@ import java.util.List;
 import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.client.Order.Direction.ASCENDING;
 import static io.spine.server.entity.storage.EntityQueries.from;
+import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.order;
+import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.pagination;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
@@ -75,9 +79,20 @@ class EntityQueriesTest {
 
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
                                                     Class<? extends Entity> entityClass) {
+        return createEntityQuery(filters, Order.getDefaultInstance(),
+                                 Pagination.getDefaultInstance(), entityClass);
+    }
+
+    /**
+     * Is not placed test environment because it uses package-private 
+     * {@link EntityQueries#from(EntityFilters, Order, Pagination, Collection<EntityColumn>)}.
+     */
+    private static EntityQuery<?> createEntityQuery(EntityFilters filters,
+                                                    Order order,
+                                                    Pagination pagination,
+                                                    Class<? extends Entity> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return from(filters, Order.getDefaultInstance(), Pagination.getDefaultInstance(),
-                    entityColumns);
+        return from(filters, order, pagination, entityColumns);
     }
 
     @Test
@@ -177,10 +192,13 @@ class EntityQueriesTest {
         EntityFilters filters = EntityFilters.getDefaultInstance();
         EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
         assertNotNull(query);
-        assertEquals(0, size(query.getParameters()
-                                  .iterator()));
-        assertTrue(query.getIds()
-                        .isEmpty());
+        
+        assertTrue(query.getIds().isEmpty());
+        
+        QueryParameters parameters = query.getParameters();
+        assertEquals(0, size(parameters.iterator()));
+        assertFalse(parameters.limited());
+        assertFalse(parameters.ordered());
     }
 
     @Test
@@ -229,7 +247,12 @@ class EntityQueriesTest {
                              .next();
         assertEquals(someGenericId, singleId);
 
-        List<CompositeQueryParameter> values = newArrayList(query.getParameters());
+        QueryParameters parameters = query.getParameters();
+
+        assertFalse(parameters.limited());
+        assertFalse(parameters.ordered());
+        
+        List<CompositeQueryParameter> values = newArrayList(parameters);
         assertSize(1, values);
         CompositeQueryParameter singleParam = values.get(0);
         Collection<ColumnFilter> columnFilters = singleParam.getFilters()
@@ -237,5 +260,28 @@ class EntityQueriesTest {
         assertEquals(EITHER, singleParam.getOperator());
         assertContains(versionFilter, columnFilters);
         assertContains(archivedFilter, columnFilters);
+    }
+
+    @Test
+    @DisplayName("construct queries with limit and order")
+    void constructWithLimitAndOrder() {
+        String expectedColumn = "test";
+        Order.Direction expectedDirection = ASCENDING;
+        long expectedLimit = 10;
+        EntityQuery<?> query = createEntityQuery(EntityFilters.getDefaultInstance(),
+                                                 order(expectedColumn, expectedDirection),
+                                                 pagination(expectedLimit),
+                                                 AbstractEntity.class);
+        assertNotNull(query);
+        
+        QueryParameters parameters = query.getParameters();
+        assertTrue(parameters.ordered());
+        assertTrue(parameters.limited());
+        
+        Order order = parameters.order();
+        assertEquals(expectedColumn, order.getColumn());
+        assertEquals(expectedDirection, order.getDirection());
+        
+        assertEquals(expectedLimit, parameters.limit());
     }
 }
