@@ -328,20 +328,6 @@ public abstract class RecordBasedRepositoryTest
             assertEquals(expectedList, foundList);
         }
 
-        @Test
-        @DisplayName("throw IAE when order column does not exist")
-        void throwIaeWhenOrderColumnMissing() {
-            String missingColumnName = "missing";
-            Order orderByMissing = OrderVBuilder.newBuilder()
-                                                .setDirection(ASCENDING)
-                                                .setColumn(missingColumnName)
-                                                .build();
-
-            assertThrows(IllegalArgumentException.class,
-                         () -> repository.find(emptyFilters(), orderByMissing,
-                                               emptyPagination(), emptyFieldMask()));
-        }
-
         @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("all entities")
