@@ -64,12 +64,15 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static java.lang.String.format;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -153,6 +156,42 @@ class ProjectionRepositoryTest
         }
 
         return projections;
+    }
+
+    @Override
+    protected List<TestProjection> createNamed(int count, Supplier<String> nameSupplier) {
+        List<TestProjection> projections = Lists.newArrayList();
+
+        for (int i = 0; i < count; i++) {
+            ProjectId id = createId(i);
+            TestProjection projection = Given.projectionOfClass(TestProjection.class)
+                                             .withId(id)
+                                             .withState(newProject(id, nameSupplier.get()))
+                                             .build();
+            projections.add(projection);
+        }
+
+        return projections;
+    }
+
+    @Override
+    protected List<TestProjection> orderedByName(List<TestProjection> entities) {
+        return entities.stream()
+                       .sorted(comparing(ProjectionRepositoryTest::entityName))
+                       .collect(
+                               toList());
+    }
+
+    private static String entityName(TestProjection entity) {
+        return entity.getState()
+                     .getName();
+    }
+
+    private static Project newProject(ProjectId id, String name) {
+        return Project.newBuilder()
+                      .setId(id)
+                      .setName(name)
+                      .build();
     }
 
     @Override
@@ -309,9 +348,9 @@ class ProjectionRepositoryTest
 
             Event firstEvent = eventFactory.createEvent(created);
             Event secondEvent = eventFactory.createEvent(archived)
-                                          .toBuilder()
-                                          .setId(firstEvent.getId())
-                                          .build();
+                                            .toBuilder()
+                                            .setId(firstEvent.getId())
+                                            .build();
             dispatchSuccessfully(firstEvent);
             dispatchDuplicate(secondEvent);
         }

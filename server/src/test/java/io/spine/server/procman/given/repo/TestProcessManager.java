@@ -31,6 +31,7 @@ import io.spine.server.command.Command;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
@@ -115,8 +116,8 @@ public class TestProcessManager
 
         PmProjectCreated event = ((PmProjectCreated.Builder)
                 Sample.builderForType(PmProjectCreated.class))
-                      .setProjectId(command.getProjectId())
-                      .build();
+                .setProjectId(command.getProjectId())
+                .build();
         return event;
     }
 
@@ -126,8 +127,8 @@ public class TestProcessManager
 
         PmTaskAdded event = ((PmTaskAdded.Builder)
                 Sample.builderForType(PmTaskAdded.class))
-                      .setProjectId(command.getProjectId())
-                      .build();
+                .setProjectId(command.getProjectId())
+                .build();
         return event;
     }
 
@@ -208,6 +209,11 @@ public class TestProcessManager
 
         handleProjectCreated(event.getProjectId());
         return withNothing();
+    }
+
+    @Column
+    public String getName() {
+        return getState().getName();
     }
 
     @Override
