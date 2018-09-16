@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -47,7 +46,6 @@ import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWith
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.memory.EntityRecordComparator.inOrder;
 import static java.util.Collections.emptyIterator;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * The memory-based storage for {@link EntityRecord} that represents
