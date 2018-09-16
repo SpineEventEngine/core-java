@@ -30,7 +30,6 @@ import io.spine.client.EntityId;
 import io.spine.client.Order;
 import io.spine.client.Pagination;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
@@ -50,7 +49,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
@@ -58,8 +56,6 @@ import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
-import static java.util.function.Predicate.isEqual;
 
 /**
  * The base class for repositories that store entities as records.
