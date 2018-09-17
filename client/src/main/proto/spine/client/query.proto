@@ -47,7 +47,7 @@ message QueryId {
     string value = 1;
 }
 
-// An order for Query results.
+// An order for query results.
 //
 message Order {
     
@@ -55,7 +55,7 @@ message Order {
     //
     Direction direction = 1 [(required) = true];
 
-    // A column name which value is used for ordering the Query results. 
+    // A column name which value is used for ordering the query results. 
     //
     string column = 2 [(required) = true];
     
@@ -89,11 +89,11 @@ message Order {
     }
 }
 
-// Pagination parameters for Query results.
+// Pagination parameters for query results.
 //
 message Pagination {
 
-    // An amount of entities to be returned by executing a Query.
+    // An amount of entities to be returned by executing a `Query`.
     //
     // A minimum of 1 items per page can be requested.
     //
