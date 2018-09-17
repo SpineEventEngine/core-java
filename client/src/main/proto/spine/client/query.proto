@@ -70,7 +70,7 @@ message OrderBy {
         
         // An order in which every following value is greater than the previous one.
         //
-        // An example of collection sorted in an ascending order is `[1, 2, 3]` and 
+        // For example, collections sorted in an ascending order are `[1, 2, 3]` and 
         // `["2 cherries", "apple", "appricot", "orange"]`.
         //
         // The missing values are placed at the beginning of a collection in an ascending order:
@@ -80,7 +80,7 @@ message OrderBy {
 
         // An order in which every following value is lesser than the previous one.
         //
-        // An example of collection sorted in a descending order is `[2033, 2001, 1984]` and 
+        // For example, collections sorted in a descending order are `[2033, 2001, 1984]` and 
         // `['NaCl', 'N2O', 'H2O2', 'H2O', 'C12H22O11']`.
         //
         // The missing values are placed at the end of a collection in a descending order:
