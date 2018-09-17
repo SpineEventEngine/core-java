@@ -62,6 +62,15 @@ message Order {
     enum Direction {
         OD_UNKNOWN = 0;
         ASCENDING = 1;
+
+        // An order in which every following value is less than the previous one.
+        //
+        // An example of collection sorted in a descending order is [2033, 2001, 1984] and 
+        // ['NaCl', 'N2O', 'H2O2', 'H2O', 'C12H22O11'].
+        //
+        // The missing values are placed at the end of a collection in a descending order:
+        // [1905, 1687, -280, null]
+        //
         DESCENDING = 2;
     }
 }
@@ -72,10 +81,10 @@ message Pagination {
 
     // An amount of entities to be returned by executing a Query.
     //
-    // A minimum of 1 items per page can be requested
+    // A minimum of 1 items per page can be requested.
     //
     uint64 page_size = 1 [(required) = true,
-                          (min).value = 1];
+                          (min).value = "1"];
 }
 
 // Allows clients to form the requests to the read-side through the `QueryService`.
