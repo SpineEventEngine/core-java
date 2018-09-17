@@ -45,6 +45,7 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.server.procman.given.delivery.GivenMessage;
+import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.TestProcessManager;
@@ -56,6 +57,7 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmArchiveProcess;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmCreateProjectVBuilder;
 import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
@@ -64,6 +66,7 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -91,8 +94,10 @@ import static io.spine.server.procman.given.repo.GivenCommandMessage.projectCrea
 import static io.spine.server.procman.given.repo.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.taskAdded;
+import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -490,5 +495,23 @@ class ProcessManagerRepositoryTest
                                                                 .setNewState(newState)
                                                                 .build());
         assertFalse(filter.filter(discardedEvent).isPresent());
+    }
+
+    @Test
+    @DisplayName("post all domain events through an EventFilter")
+    void postEventsThroughFilter() {
+        ProjectId projectId = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        PmCreateProject command = PmCreateProjectVBuilder
+                .newBuilder()
+                .setProjectId(projectId)
+                .build();
+        BlackBoxBoundedContext
+                .newInstance()
+                .with(new EventDiscardingProcManRepository())
+                .receivesCommand(command)
+                .assertThat(emittedEvent(count(0)));
     }
 }
