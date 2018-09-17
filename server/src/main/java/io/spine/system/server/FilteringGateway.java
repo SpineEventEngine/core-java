@@ -21,8 +21,9 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.client.Query;
 import io.spine.core.Event;
 import io.spine.core.Events;
@@ -77,7 +78,7 @@ public final class FilteringGateway implements SystemGateway {
      * the <b>original</b> parameters are posted.
      */
     @Override
-    public void postEvent(Message systemEvent) {
+    public void postEvent(EventMessage systemEvent) {
         SystemEventFactory eventFactory = SystemEventFactory.forMessage(systemEvent, false);
         Event event = eventFactory.createEvent(systemEvent, null);
         Optional<Event> filtered = this.filter.filter(event);
@@ -86,7 +87,7 @@ public final class FilteringGateway implements SystemGateway {
     }
 
     @Override
-    public void postCommand(Message systemCommand) {
+    public void postCommand(CommandMessage systemCommand) {
         delegate.postCommand(systemCommand);
     }
 

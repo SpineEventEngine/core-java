@@ -108,7 +108,7 @@ public abstract class MethodResult<V extends Message> {
      * @return the list of event messages or an empty list if {@code null} is passed
      */
     @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
-    protected static List<Message> toMessages(@Nullable Object output) {
+    protected static <V extends Message> List<V> toMessages(@Nullable Object output) {
         if (output == null) {
             return emptyList();
         }
@@ -125,7 +125,7 @@ public abstract class MethodResult<V extends Message> {
         if (output instanceof Optional) {
             Optional optional = (Optional) output;
             if (optional.isPresent()) {
-                Message message = (Message) optional.get();
+                V message = (V) optional.get();
                 return ImmutableList.of(message);
             } else {
                 return emptyList();
@@ -135,17 +135,19 @@ public abstract class MethodResult<V extends Message> {
         if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
-            List<Message> result = (List<Message>) output;
+            List<V> result = (List<V>) output;
             return result;
         }
 
         // If it's not a list it could be another `Iterable`.
         if (output instanceof Iterable) {
-            return copyOf((Iterable<? extends Message>) output);
+            Iterable<V> iterable = (Iterable<V>) output;
+            return copyOf(iterable);
         }
 
         // Another type of result is single event message (as Message).
-        List<Message> result = singletonList((Message) output);
+        V singleMessage = (V) output;
+        List<V> result = singletonList(singleMessage);
         return result;
     }
 

@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
@@ -142,8 +143,8 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public Message getMessage() {
-        return event.getMessage();
+    public RejectionMessage getMessage() {
+        return (RejectionMessage) event.getMessage();
     }
 
     @Override

@@ -27,6 +27,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.core.Ack;
@@ -58,8 +60,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 @Internal
 public abstract class CommandSequence<O extends Message,
-                                      R extends Message,
-                                      B extends Message.Builder,
+                                      R extends EventMessage,
+                                      B extends EventMessage.Builder,
                                       S extends CommandSequence<O, R, B, S>> {
 
     /** The ID of the message which caused the sequence. */
@@ -103,7 +105,7 @@ public abstract class CommandSequence<O extends Message,
      * Adds a command message to the sequence of commands to be posted.
      */
     @CanIgnoreReturnValue
-    protected  S add(Message commandMessage) {
+    protected  S add(CommandMessage commandMessage) {
         queue.add(commandMessage);
         return getThis();
     }
