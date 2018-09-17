@@ -402,8 +402,8 @@ public abstract class ProcessManagerRepository<I,
     /**
      * {@inheritDoc}
      *
-     * <p>The {@code ProcessManagerRepository} changes the default behaviour to allowing all
-     * the events <b>except</b> {@link EntityStateChanged}. It is supposed that the changes of
+     * <p>The {@code ProcessManagerRepository} changes the default behaviour and allows all
+     * the events <b>except</b> for {@link EntityStateChanged}. It is supposed that the changes of
      * a process manager state are not worth being published.
      *
      * <p>Override this method to change the behaviour.

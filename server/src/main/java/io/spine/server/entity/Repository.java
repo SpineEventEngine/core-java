@@ -374,8 +374,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @return an {@link EventFilter} to apply to all posted events
      * @implNote This method may be called many times for a single repository. It is reasonable that
      *           it does not re-initialize the filter each time. Also, it is necessary that
-     *           the filter returned from this method is always (at least effectively) same.
-     *           See {@link Pure} for the details on the expected behaviour.
+     *           the filter returned from this method is always (at least effectively) the same.
+     *           See {@link Pure @Pure} for the details on the expected behaviour.
      */
     @SPI
     @Pure

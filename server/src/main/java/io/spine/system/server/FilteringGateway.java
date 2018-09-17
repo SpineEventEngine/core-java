@@ -52,7 +52,7 @@ public final class FilteringGateway implements SystemGateway {
 
     /**
      * Creates a new instance of {@code FilteringGateway} atop of the given gateway delegate and
-     * {@link EventFilter} instances.
+     * an {@link EventFilter} instance.
      *
      * @param delegate
      *         the {@link SystemGateway} which performs all the operations for the resulting gateway

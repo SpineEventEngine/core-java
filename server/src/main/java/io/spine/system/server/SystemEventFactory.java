@@ -38,13 +38,23 @@ import static io.spine.system.server.SystemCommandFactory.requestFactory;
  *
  * @author Alexander Yevsyukov
  */
-public final class SystemEventFactory extends EventFactory {
+final class SystemEventFactory extends EventFactory {
 
     private SystemEventFactory(Message aggregateId, boolean multitenant) {
         super(newOrigin(multitenant), Identifier.pack(aggregateId));
     }
 
-    public static SystemEventFactory forMessage(Message message, boolean multitenant) {
+    /**
+     * Creates a new factory of system events.
+     *
+     * @param message
+     *         the system event message
+     * @param multitenant
+     *         {@code true} if the current context environment is multitenant,
+     *         {@code false} otherwise
+     * @return new instance of {@code SystemEventFactory}
+     */
+    static SystemEventFactory forMessage(Message message, boolean multitenant) {
         Message aggregateId = getAggregateId(message);
         return new SystemEventFactory(aggregateId, multitenant);
     }
@@ -65,6 +75,4 @@ public final class SystemEventFactory extends EventFactory {
         ActorContext actorContext = requestFactory(multitenant).newActorContext();
         return ImportOrigin.newInstance(actorContext);
     }
-
-
 }
