@@ -84,7 +84,7 @@ class EntityQueriesTest {
     }
 
     /**
-     * Is not placed test environment because it uses package-private 
+     * This method is not placed in test environment because it uses package-private 
      * {@link EntityQueries#from(EntityFilters, Order, Pagination, Collection<EntityColumn>)}.
      */
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
