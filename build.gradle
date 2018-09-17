@@ -28,13 +28,11 @@ buildscript {
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
-        jcenter()
-        google()
-        maven { url = repos.gradlePlugins }
-        mavenCentral()
-        mavenLocal()
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
+        google()
+        maven { url = repos.gradlePlugins }
+        mavenLocal()
     }
 
     dependencies {
