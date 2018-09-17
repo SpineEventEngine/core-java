@@ -483,6 +483,7 @@ class ProcessManagerRepositoryTest
                                                                 .build());
         assertTrue(filter.filter(arbitraryEvent)
                          .isPresent());
+
         Any newState = pack(getCurrentTime());
         EntityHistoryId historyId = EntityHistoryId
                 .newBuilder()
@@ -494,7 +495,8 @@ class ProcessManagerRepositoryTest
                                                                 .setId(historyId)
                                                                 .setNewState(newState)
                                                                 .build());
-        assertFalse(filter.filter(discardedEvent).isPresent());
+        assertFalse(filter.filter(discardedEvent)
+                          .isPresent());
     }
 
     @Test
