@@ -36,6 +36,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
@@ -85,6 +86,7 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBo
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static io.spine.testing.server.blackbox.VerifyEvents.emmiterEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -531,6 +533,32 @@ public class AggregateRepositoryTest {
                                           0,    // Manually assembled event (`archived`)
                                           3     // Event produced in response to `archived` event
                                   ));
+        }
+
+        @Test
+        @DisplayName("through the repository EventFilter")
+        void throughEventFilter() {
+            ProjectId id = givenAggregateId(Identifier.newUuid());
+            AggCreateProject create = AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setName("Test Project")
+                    .build();
+            AggStartProject start = AggStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            ProjectId parent = givenAggregateId(Identifier.newUuid());
+            AggProjectArchived archived = AggProjectArchived
+                    .newBuilder()
+                    .setProjectId(parent)
+                    .addChildProjectId(id)
+                    .build();
+            BlackBoxBoundedContext.newInstance()
+                                  .with(new EventDiscardingAggregateRepository())
+                                  .receivesCommands(create, start)
+                                  .receivesEvent(archived)
+                                  .assertThat(emittedEvents(AggProjectArchived.class));
         }
     }
 

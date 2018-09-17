@@ -45,6 +45,7 @@ import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.React;
 import io.spine.server.route.CommandRoute;
@@ -367,6 +368,17 @@ public class AggregateRepositoryTestEnv {
         @Override
         public AggregateStorage<ProjectId> aggregateStorage() {
             return super.aggregateStorage();
+        }
+    }
+
+    public static class EventDiscardingAggregateRepository
+            extends ProjectAggregateRepository {
+
+        private static final EventFilter discardAll = anyEvent -> Optional.empty();
+
+        @Override
+        protected EventFilter eventFilter() {
+            return discardAll;
         }
     }
 
