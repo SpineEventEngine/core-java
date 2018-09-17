@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdVBuilder;
 import io.spine.core.Command;
@@ -85,6 +86,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
+@Internal
 @SuppressWarnings("OverlyCoupledClass") // Posts system commands.
 public class EntityLifecycle {
 
