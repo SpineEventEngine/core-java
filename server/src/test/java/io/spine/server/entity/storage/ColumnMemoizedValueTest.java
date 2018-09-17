@@ -99,19 +99,25 @@ class ColumnMemoizedValueTest {
     void supportComparison() {
         EntityColumn column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
 
+        TestEntity nullEntity = new TestEntity("null", null);
+        TestEntity negFirstEntity = new TestEntity("negative-first", -1);
+        TestEntity zeroEntity = new TestEntity("zero", 0);
         TestEntity firstEntity = new TestEntity("first", 1);
         TestEntity secondEntity = new TestEntity("second", 2);
         TestEntity thirdEntity = new TestEntity("third", 3);
-        TestEntity nullEntity = new TestEntity("last", null);
 
-        MemoizedValue nullValue = column.memoizeFor(nullEntity);
         MemoizedValue firstValue = column.memoizeFor(firstEntity);
+        MemoizedValue negFirstValue = column.memoizeFor(negFirstEntity);
+        MemoizedValue zeroValue = column.memoizeFor(zeroEntity);
         MemoizedValue secondValue = column.memoizeFor(secondEntity);
         MemoizedValue thirdValue = column.memoizeFor(thirdEntity);
+        MemoizedValue nullValue = column.memoizeFor(nullEntity);
 
-        List<MemoizedValue> values = newArrayList(thirdValue, secondValue, nullValue, firstValue);
+        List<MemoizedValue> values = newArrayList(thirdValue, zeroValue, secondValue, negFirstValue,
+                                                  nullValue, firstValue);
 
-        List<MemoizedValue> expected = newArrayList(firstValue, secondValue, thirdValue, nullValue);
+        List<MemoizedValue> expected = newArrayList(nullValue, negFirstValue, zeroValue, firstValue,
+                                                    secondValue, thirdValue);
         List<MemoizedValue> actual = values.stream()
                                            .sorted()
                                            .collect(toList());

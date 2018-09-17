@@ -503,7 +503,7 @@ public class EntityColumn implements Serializable {
          * Creates a new comparator which orders memoized values in an order specified
          * by {@link MemoizedValue#getValue() their values} comparison.
          *
-         * <p>The memoized values with {@code null} are added to the end of the ordered set.
+         * <p>The memoized values with {@code null} are considered to be less than any other value.
          *
          * <p>A created comparator throws {@link IllegalArgumentException} if
          * {@link MemoizedValue#getSourceColumn() source columns} do not match.
@@ -521,10 +521,10 @@ public class EntityColumn implements Serializable {
                 Serializable bValue = b.getValue();
 
                 if (aValue == null) {
-                    return bValue == null ? 0 : +1;
+                    return bValue == null ? 0 : -1;
                 }
                 if (bValue == null) {
-                    return -1;
+                    return +1;
                 }
                 if (aValue instanceof Comparable) {
                     //noinspection unchecked the values are chhecked to be of the same column
