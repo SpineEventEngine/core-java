@@ -29,14 +29,13 @@ import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.client.Order;
+import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.given.EntityQueriesTestEnv;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
@@ -51,7 +50,7 @@ import java.util.List;
 import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static io.spine.client.Order.Direction.ASCENDING;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.order;
 import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.pagination;
@@ -79,20 +78,20 @@ class EntityQueriesTest {
 
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
                                                     Class<? extends Entity> entityClass) {
-        return createEntityQuery(filters, Order.getDefaultInstance(),
+        return createEntityQuery(filters, OrderBy.getDefaultInstance(),
                                  Pagination.getDefaultInstance(), entityClass);
     }
 
     /**
      * This method is not placed in test environment because it uses package-private 
-     * {@link EntityQueries#from(EntityFilters, Order, Pagination, Collection<EntityColumn>)}.
+     * {@link EntityQueries#from(EntityFilters, OrderBy, Pagination, Collection<EntityColumn>)}.
      */
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
-                                                    Order order,
+                                                    OrderBy orderBy,
                                                     Pagination pagination,
                                                     Class<? extends Entity> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return from(filters, order, pagination, entityColumns);
+        return from(filters, orderBy, pagination, entityColumns);
     }
 
     @Test
@@ -111,7 +110,7 @@ class EntityQueriesTest {
         @DisplayName("filters")
         void filters() {
             assertThrows(NullPointerException.class,
-                         () -> from(null, Order.getDefaultInstance(),
+                         () -> from(null, OrderBy.getDefaultInstance(),
                                     Pagination.getDefaultInstance(), emptyList()));
         }
 
@@ -122,7 +121,7 @@ class EntityQueriesTest {
         void storage() {
             RecordStorage<?> storage = null;
             assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), Order.getDefaultInstance(),
+                         () -> from(EntityFilters.getDefaultInstance(), OrderBy.getDefaultInstance(),
                                     Pagination.getDefaultInstance(), storage));
         }
 
@@ -142,7 +141,7 @@ class EntityQueriesTest {
         @DisplayName("pagination")
         void pagination() {
             assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), Order.getDefaultInstance(),
+                         () -> from(EntityFilters.getDefaultInstance(), OrderBy.getDefaultInstance(),
                                     null, emptyList()));
         }
 
@@ -152,7 +151,7 @@ class EntityQueriesTest {
         @DisplayName("entity class")
         void entityClass() {
             assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), Order.getDefaultInstance(),
+                         () -> from(EntityFilters.getDefaultInstance(), OrderBy.getDefaultInstance(),
                                     null, emptyList()));
         }
     }
@@ -266,7 +265,7 @@ class EntityQueriesTest {
     @DisplayName("construct queries with limit and order")
     void constructWithLimitAndOrder() {
         String expectedColumn = "test";
-        Order.Direction expectedDirection = ASCENDING;
+        OrderBy.Direction expectedDirection = ASCENDING;
         long expectedLimit = 10;
         EntityQuery<?> query = createEntityQuery(EntityFilters.getDefaultInstance(),
                                                  order(expectedColumn, expectedDirection),
@@ -278,9 +277,9 @@ class EntityQueriesTest {
         assertTrue(parameters.ordered());
         assertTrue(parameters.limited());
         
-        Order order = parameters.order();
-        assertEquals(expectedColumn, order.getColumn());
-        assertEquals(expectedDirection, order.getDirection());
+        OrderBy orderBy = parameters.orderBy();
+        assertEquals(expectedColumn, orderBy.getColumn());
+        assertEquals(expectedDirection, orderBy.getDirection());
         
         assertEquals(expectedLimit, parameters.limit());
     }

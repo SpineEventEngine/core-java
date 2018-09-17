@@ -33,7 +33,7 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
-import io.spine.client.Order;
+import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -1031,7 +1031,7 @@ class StandTest extends TenantAwareTest {
                 .thenReturn(allResults.iterator());
 
         when(projectionRepository.find(argThat(entityFilterMatcher(projectIds)),
-                                       eq(Order.getDefaultInstance()),
+                                       eq(OrderBy.getDefaultInstance()),
                                        eq(Pagination.getDefaultInstance()),
                                        any(FieldMask.class)))
                 .thenReturn(allResults.iterator());

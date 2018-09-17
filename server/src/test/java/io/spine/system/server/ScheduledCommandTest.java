@@ -26,7 +26,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.Durations;
 import io.spine.client.EntityFilters;
-import io.spine.client.Order;
+import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -142,7 +142,8 @@ class ScheduledCommandTest {
                                               .build()
                                               .getTarget()
                                               .getFilters();
-        Iterator<ScheduledCommand> commands = repository.find(filters, Order.getDefaultInstance(),
+        Iterator<ScheduledCommand> commands = repository.find(filters, 
+                                                              OrderBy.getDefaultInstance(),
                                                               Pagination.getDefaultInstance(),
                                                               FieldMask.getDefaultInstance());
         return commands;

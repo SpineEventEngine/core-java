@@ -20,8 +20,8 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.client.Order;
-import io.spine.client.Order.Direction;
+import io.spine.client.OrderBy;
+import io.spine.client.OrderBy.Direction;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 
@@ -33,7 +33,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A comparator for sorting the contents of {@link TenantRecords} in a provided {@link Order order}.
+ * A comparator for sorting the contents of {@link TenantRecords}
+ * in a provided {@link OrderBy order}.
  *
  * @author Mykhailo Drachuk
  */
@@ -50,26 +51,26 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
 
     /**
      * A static factory for {@code EntityRecordComparator} instances, which sort the
-     * {@link TenantRecords} contents in a provided {@link Order order}.
+     * {@link TenantRecords} contents in a provided {@link OrderBy orderBy}.
      *
-     * @param order
-     *         an order specifying column and the direction for comparing
+     * @param orderBy
+     *         a specification of a column and the direction for ordering
      * @return a new comparator instance, which uses specified column and aligns items
      *         in the provided direction
      * @throws IllegalArgumentException
-     *         if the provided {@code Order} is a default instance
+     *         if the provided {@code OrderBy} is a default instance
      */
-    static EntityRecordComparator inOrder(Order order) {
-        checkNotNull(order);
-        checkArgument(!orderIsEmpty(order),
-                      "An empty Order instance cannot be mapped to an EntityRecordComparator.");
-        Direction direction = order.getDirection();
+    static EntityRecordComparator orderedBy(OrderBy orderBy) {
+        checkNotNull(orderBy);
+        checkArgument(!orderIsEmpty(orderBy),
+                      "An empty OrderBy instance cannot be mapped to an EntityRecordComparator.");
+        Direction direction = orderBy.getDirection();
         DirectedComparator orderDirection = DirectedComparator.of(direction);
-        return new EntityRecordComparator(order.getColumn(), orderDirection.comparator());
+        return new EntityRecordComparator(orderBy.getColumn(), orderDirection.comparator());
     }
 
-    private static boolean orderIsEmpty(Order order) {
-        return order.equals(Order.getDefaultInstance());
+    private static boolean orderIsEmpty(OrderBy orderBy) {
+        return orderBy.equals(OrderBy.getDefaultInstance());
     }
 
     @Override
@@ -84,8 +85,8 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
 
     /**
      * An {@link #ASCENDING ASCENDING} or {@link #DESCENDING DESCENDING} comparator of
-     * {@link MemoizedValue MemoizedValue}s resolved from corresponding 
-     * {@linkplain Order#getDirection() order direction}.
+     * {@link MemoizedValue MemoizedValue}s resolved from corresponding
+     * {@linkplain OrderBy#getDirection() order direction}.
      */
     private enum DirectedComparator {
         ASCENDING {

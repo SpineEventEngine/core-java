@@ -44,7 +44,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsVisible;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.storage.memory.EntityRecordComparator.inOrder;
+import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
 import static java.util.Collections.emptyIterator;
 
 /**
@@ -106,7 +106,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         Stream<EntityRecordWithColumns> stream = filtered.values()
                                                          .stream();
         if (parameters.ordered()) {
-            stream = stream.sorted(inOrder(parameters.order()));
+            stream = stream.sorted(orderedBy(parameters.orderBy()));
         }
         if (parameters.limited()) {
             stream = stream.limit(parameters.limit());

@@ -23,8 +23,8 @@ package io.spine.client.given;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.EntityId;
-import io.spine.client.Order;
-import io.spine.client.OrderVBuilder;
+import io.spine.client.OrderBy;
+import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
 import io.spine.test.client.TestEntity;
@@ -46,7 +46,7 @@ public class QueryBuilderTestEnv {
     public static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
     public static final TypeUrl TEST_ENTITY_TYPE_URL = TypeUrl.of(TEST_ENTITY_TYPE);
     public static final Pagination EMPTY_PAGINATION = Pagination.getDefaultInstance();
-    public static final Order EMPTY_ORDER = Order.getDefaultInstance();
+    public static final OrderBy EMPTY_ORDER_BY = OrderBy.getDefaultInstance();
     public static final String SECOND_FIELD = "second_field";
     public static final String FIRST_FIELD = "first_field";
 
@@ -66,11 +66,11 @@ public class QueryBuilderTestEnv {
                                  .build();
     }
 
-    public static Order order(String column, Order.Direction direction) {
-        return OrderVBuilder.newBuilder()
-                            .setColumn(column)
-                            .setDirection(direction)
-                            .build();
+    public static OrderBy orderBy(String column, OrderBy.Direction direction) {
+        return OrderByVBuilder.newBuilder()
+                              .setColumn(column)
+                              .setDirection(direction)
+                              .build();
     }
 
     public static class EntityIdUnpacker<T> implements Function<EntityId, T> {

@@ -28,8 +28,8 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.client.Order.Direction.OD_UNKNOWN;
-import static io.spine.client.Order.Direction.UNRECOGNIZED;
+import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
+import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -65,7 +65,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     private final QueryFactory queryFactory;
 
     private String orderingColumn;
-    private Order.Direction direction;
+    private OrderBy.Direction direction;
     private long limit = 0;
 
     QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
@@ -76,11 +76,13 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     /**
      * Sets the sorting order to query, represented by the target column and order direction.
      *
-     * @param column an entity column to sort by
-     * @param direction a direction of the sorting
+     * @param column
+     *         an entity column to sort by
+     * @param direction
+     *         a direction of the sorting
      * @return this builder instance
      */
-    public QueryBuilder orderedBy(String column, Order.Direction direction) {
+    public QueryBuilder orderedBy(String column, OrderBy.Direction direction) {
         checkNotNull(column);
         checkNotNull(direction);
         checkArgument(
@@ -96,7 +98,8 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     /**
      * Limits the number of results returned by the query.
      *
-     * @param count an amount of the results to be returned
+     * @param count
+     *         an amount of the results to be returned
      * @return this builder instance
      */
     public QueryBuilder limit(long count) {
@@ -116,20 +119,20 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
      */
     @Override
     public Query build() {
-        Optional<Order> order = order();
+        Optional<OrderBy> orderBy = orderBy();
         Optional<Pagination> pagination = pagination();
 
-        checkState(order.isPresent() || !pagination.isPresent(),
+        checkState(orderBy.isPresent() || !pagination.isPresent(),
                    "Pagination cannot be set for unordered Queries");
 
         Target target = buildTarget();
         FieldMask mask = composeMask();
 
         if (pagination.isPresent()) {
-            return queryFactory.composeQuery(target, order.get(), pagination.get(), mask);
+            return queryFactory.composeQuery(target, orderBy.get(), pagination.get(), mask);
         }
-        if (order.isPresent()) {
-            return queryFactory.composeQuery(target, order.get(), mask);
+        if (orderBy.isPresent()) {
+            return queryFactory.composeQuery(target, orderBy.get(), mask);
         }
         return queryFactory.composeQuery(target, mask);
     }
@@ -144,14 +147,14 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         return of(result);
     }
 
-    private Optional<Order> order() {
+    private Optional<OrderBy> orderBy() {
         if (orderingColumn == null) {
             return empty();
         }
-        Order result = OrderVBuilder.newBuilder()
-                                    .setColumn(orderingColumn)
-                                    .setDirection(direction)
-                                    .build();
+        OrderBy result = OrderByVBuilder.newBuilder()
+                                        .setColumn(orderingColumn)
+                                        .setDirection(direction)
+                                        .build();
         return of(result);
     }
 

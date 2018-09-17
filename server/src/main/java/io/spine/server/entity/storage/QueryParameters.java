@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.ColumnFilter;
-import io.spine.client.Order;
+import io.spine.client.OrderBy;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -59,13 +59,13 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      */
     private final boolean hasLifecycle;
     private final long limit;
-    private final Order order;
+    private final OrderBy orderBy;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
                                  .build();
         this.limit = builder.limit();
-        this.order = builder.order();
+        this.orderBy = builder.orderBy();
         this.hasLifecycle = builder.hasLifecycle;
     }
 
@@ -82,12 +82,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         return parameters.iterator();
     }
 
-    public Order order() {
-        return order;
+    public OrderBy orderBy() {
+        return orderBy;
     }
 
     public boolean ordered() {
-        return !order.equals(Order.getDefaultInstance());
+        return !orderBy.equals(OrderBy.getDefaultInstance());
     }
 
     public long limit() {
@@ -135,12 +135,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         private final ImmutableCollection.Builder<CompositeQueryParameter> parameters;
 
         private boolean hasLifecycle;
-        private Order order;
+        private OrderBy orderBy;
         private long limit;
 
         private Builder() {
             parameters = ImmutableList.builder();
-            order = Order.getDefaultInstance();
+            orderBy = OrderBy.getDefaultInstance();
         }
 
         @CanIgnoreReturnValue
@@ -171,14 +171,14 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
             return limit;
         }
 
-        public Builder sort(Order order) {
-            checkNotNull(order);
-            this.order = order;
+        public Builder orderBy(OrderBy orderBy) {
+            checkNotNull(orderBy);
+            this.orderBy = orderBy;
             return this;
         }
 
-        public Order order() {
-            return order;
+        public OrderBy orderBy() {
+            return orderBy;
         }
 
         /**

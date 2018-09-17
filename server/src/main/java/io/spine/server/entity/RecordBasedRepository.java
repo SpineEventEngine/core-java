@@ -27,7 +27,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
-import io.spine.client.Order;
+import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumnCache;
@@ -290,7 +290,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Finds the entities passing the given filters and applies the given {@link FieldMask}
      * to the results. A number of elements to retrieve can be limited by {@link Pagination}.
-     * Order in which to look for and return results in is specified by the {@link Order}.
+     * OrderBy in which to look for and return results in is specified by the {@link OrderBy}.
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
@@ -303,8 +303,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param filters
      *         entity filters
-     * @param order
-     *         an order to sort the filtered results before pagination
+     * @param orderBy
+     *         an orderBy to sort the filtered results before pagination
      * @param pagination
      *         a pagination to apply to the sorted result set
      * @param fieldMask
@@ -312,15 +312,15 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
-    public Iterator<E> find(EntityFilters filters, Order order,
+    public Iterator<E> find(EntityFilters filters, OrderBy orderBy,
                             Pagination pagination, FieldMask fieldMask) {
         checkNotNull(filters);
-        checkNotNull(order);
+        checkNotNull(orderBy);
         checkNotNull(pagination);
         checkNotNull(fieldMask);
 
         RecordStorage<I> storage = recordStorage();
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, order, pagination, storage);
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
         EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         Iterator<EntityRecord> records = storage.readAll(completeQuery, fieldMask);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();

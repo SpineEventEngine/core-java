@@ -31,7 +31,7 @@ import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.client.Order;
+import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.server.storage.RecordStorage;
 
@@ -61,57 +61,57 @@ public final class EntityQueries {
     }
 
     /**
-     * Creates new {@link EntityQuery} instances for the given {@link Order}, {@link EntityFilters}, 
-     * {@link Pagination}, and {@link RecordStorage}.
+     * Creates new {@link EntityQuery} instances for the given {@link OrderBy},
+     * {@link EntityFilters}, {@link Pagination}, and {@link RecordStorage}.
      *
      * @param filters
      *         filters for the Entities specifying the query predicate
-     * @param order
-     *         an order to sort the data matching filters
+     * @param orderBy
+     *         an order to sort the data matching filters by
      * @param pagination
      *         a specification of a way to paginate the query results
      * @param storage
      *         a storage for which the query is created
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
-    public static <I> EntityQuery<I> from(EntityFilters filters, 
-                                          Order order,
+    public static <I> EntityQuery<I> from(EntityFilters filters,
+                                          OrderBy orderBy,
                                           Pagination pagination,
                                           RecordStorage<I> storage) {
-        checkNotNull(order);
+        checkNotNull(orderBy);
         checkNotNull(filters);
         checkNotNull(pagination);
         checkNotNull(storage);
 
         Collection<EntityColumn> entityColumns = storage.entityColumns();
-        EntityQuery<I> result = from(filters, order, pagination, entityColumns);
+        EntityQuery<I> result = from(filters, orderBy, pagination, entityColumns);
         return result;
     }
 
     @VisibleForTesting
-    static <I> EntityQuery<I> from(EntityFilters filters, 
-                                   Order order,
+    static <I> EntityQuery<I> from(EntityFilters filters,
+                                   OrderBy orderBy,
                                    Pagination pagination,
                                    Collection<EntityColumn> columns) {
-        checkNotNull(order);
+        checkNotNull(orderBy);
         checkNotNull(filters);
         checkNotNull(pagination);
         checkNotNull(columns);
 
-        QueryParameters queryParams = toQueryParams(order, filters, pagination, columns);
+        QueryParameters queryParams = toQueryParams(orderBy, filters, pagination, columns);
         Collection<I> ids = toGenericIdValues(filters);
 
         EntityQuery<I> result = EntityQuery.of(ids, queryParams);
         return result;
     }
 
-    private static QueryParameters toQueryParams(Order order,
+    private static QueryParameters toQueryParams(OrderBy orderBy,
                                                  EntityFilters filters,
                                                  Pagination pagination,
                                                  Collection<EntityColumn> entityColumns) {
 
         List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, entityColumns);
-        return newQueryParameters(parameters, order, pagination);
+        return newQueryParameters(parameters, orderBy, pagination);
     }
 
     private static List<CompositeQueryParameter>
@@ -123,11 +123,11 @@ public final class EntityQueries {
     }
 
     private static QueryParameters newQueryParameters(List<CompositeQueryParameter> parameters,
-                                                      Order order, Pagination pagination) {
+                                                      OrderBy orderBy, Pagination pagination) {
         return QueryParameters.newBuilder()
                               .addAll(parameters)
                               .limit(pagination.getPageSize())
-                              .sort(order)
+                              .orderBy(orderBy)
                               .build();
     }
 

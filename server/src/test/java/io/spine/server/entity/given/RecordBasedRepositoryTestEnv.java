@@ -23,8 +23,8 @@ package io.spine.server.entity.given;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
-import io.spine.client.Order;
-import io.spine.client.OrderVBuilder;
+import io.spine.client.OrderBy;
+import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
 import io.spine.server.entity.AbstractVersionableEntity;
@@ -59,18 +59,18 @@ public final class RecordBasedRepositoryTestEnv {
                                  .build();
     }
 
-    public static Order emptyOrder() {
-        return Order.getDefaultInstance();
+    public static OrderBy emptyOrder() {
+        return OrderBy.getDefaultInstance();
     }
 
     /**
      * An order by {@linkplain #ENTITY_NAME_COLUMN entity name column}.
      */
-    public static Order orderByName(Order.Direction direction) {
-        return OrderVBuilder.newBuilder()
-                            .setColumn(ENTITY_NAME_COLUMN)
-                            .setDirection(direction)
-                            .build();
+    public static OrderBy orderByName(OrderBy.Direction direction) {
+        return OrderByVBuilder.newBuilder()
+                              .setColumn(ENTITY_NAME_COLUMN)
+                              .setDirection(direction)
+                              .build();
     }
 
     public static EntityFilters emptyFilters() {

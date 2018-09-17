@@ -206,27 +206,27 @@ public final class QueryFactory {
     }
 
     Query composeQuery(Target target,
-                       Order order,
+                       OrderBy orderBy,
                        @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        checkNotNull(order);
+        checkNotNull(orderBy);
         QueryVBuilder builder =
                 queryBuilderFor(target, fieldMask)
-                        .setOrder(order);
+                        .setOrderBy(orderBy);
         Query query = newQuery(builder);
         return query;
     }
 
     Query composeQuery(Target target,
-                       Order order,
+                       OrderBy orderBy,
                        Pagination pagination,
                        @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        checkNotNull(order);
+        checkNotNull(orderBy);
         checkNotNull(pagination);
         QueryVBuilder builder =
                 queryBuilderFor(target, fieldMask)
-                        .setOrder(order)
+                        .setOrderBy(orderBy)
                         .setPagination(pagination);
         Query query = newQuery(builder);
         return query;

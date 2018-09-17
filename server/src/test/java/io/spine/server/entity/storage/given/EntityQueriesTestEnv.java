@@ -20,8 +20,8 @@
 
 package io.spine.server.entity.storage.given;
 
-import io.spine.client.Order;
-import io.spine.client.OrderVBuilder;
+import io.spine.client.OrderBy;
+import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
 
@@ -40,10 +40,10 @@ public class EntityQueriesTestEnv {
                                  .build();
     }
 
-    public static Order order(String column, Order.Direction direction) {
-        return OrderVBuilder.newBuilder()
-                            .setColumn(column)
-                            .setDirection(direction)
-                            .build();
+    public static OrderBy order(String column, OrderBy.Direction direction) {
+        return OrderByVBuilder.newBuilder()
+                              .setColumn(column)
+                              .setDirection(direction)
+                              .build();
     }
 }

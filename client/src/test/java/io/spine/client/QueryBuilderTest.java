@@ -52,20 +52,20 @@ import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static io.spine.client.Order.Direction.ASCENDING;
-import static io.spine.client.Order.Direction.DESCENDING;
-import static io.spine.client.Order.Direction.OD_UNKNOWN;
-import static io.spine.client.Order.Direction.UNRECOGNIZED;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
+import static io.spine.client.OrderBy.Direction.DESCENDING;
+import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
+import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.EntityIdUnpacker.unpacker;
-import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_ORDER;
+import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_ORDER_BY;
 import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_PAGINATION;
 import static io.spine.client.given.QueryBuilderTestEnv.FIRST_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.QueryBuilderTestEnv.newMessageId;
-import static io.spine.client.given.QueryBuilderTestEnv.order;
+import static io.spine.client.given.QueryBuilderTestEnv.orderBy;
 import static io.spine.client.given.QueryBuilderTestEnv.pagination;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -173,7 +173,7 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
-            assertEquals(EMPTY_ORDER, query.getOrder());
+            assertEquals(EMPTY_ORDER_BY, query.getOrderBy());
             assertEquals(EMPTY_PAGINATION, query.getPagination());
 
             assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
@@ -188,8 +188,8 @@ class QueryBuilderTest {
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
 
-            Order expectedOrder = order(FIRST_FIELD, ASCENDING);
-            assertEquals(expectedOrder, query.getOrder());
+            OrderBy expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
+            assertEquals(expectedOrderBy, query.getOrderBy());
 
             assertEquals(EMPTY_PAGINATION, query.getPagination());
 
@@ -209,8 +209,8 @@ class QueryBuilderTest {
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
 
-            Order expectedOrder = order(FIRST_FIELD, ASCENDING);
-            assertEquals(expectedOrder, query.getOrder());
+            OrderBy expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
+            assertEquals(expectedOrderBy, query.getOrderBy());
 
             Pagination expectedPagination = pagination(10L);
             assertEquals(expectedPagination, query.getPagination());
@@ -232,8 +232,8 @@ class QueryBuilderTest {
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
 
-            Order expectedOrder = order(SECOND_FIELD, DESCENDING);
-            assertEquals(expectedOrder, query.getOrder());
+            OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
+            assertEquals(expectedOrderBy, query.getOrderBy());
 
             Pagination expectedPagination = pagination(limit);
             assertEquals(expectedPagination, query.getPagination());
@@ -472,8 +472,8 @@ class QueryBuilderTest {
             Message actualGenericValue2 = toObject(actualValue2, TestEntityId.class);
             assertEquals(columnValue2, actualGenericValue2);
 
-            Order expectedOrder = order(SECOND_FIELD, DESCENDING);
-            assertEquals(expectedOrder, query.getOrder());
+            OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
+            assertEquals(expectedOrderBy, query.getOrderBy());
 
             Pagination expectedPagination = pagination(limit);
             assertEquals(expectedPagination, query.getPagination());
@@ -569,7 +569,7 @@ class QueryBuilderTest {
                                  .orderedBy(FIRST_FIELD, DESCENDING)
                                  .build();
             assertNotNull(query);
-            assertEquals(order(FIRST_FIELD, DESCENDING), query.getOrder());
+            assertEquals(orderBy(FIRST_FIELD, DESCENDING), query.getOrderBy());
         }
     }
 

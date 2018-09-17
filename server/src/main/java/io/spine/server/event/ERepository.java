@@ -27,7 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
-import io.spine.client.Order;
+import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -79,7 +79,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         checkNotNull(query);
 
         EntityFilters filters = toEntityFilters(query);
-        Iterator<EEntity> entities = find(filters, Order.getDefaultInstance(),
+        Iterator<EEntity> entities = find(filters, OrderBy.getDefaultInstance(),
                                           Pagination.getDefaultInstance(),
                                           FieldMask.getDefaultInstance());
         // A predicate on the Event message and EventContext fields.
