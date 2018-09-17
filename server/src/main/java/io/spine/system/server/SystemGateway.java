@@ -27,6 +27,8 @@ import io.spine.client.Query;
 
 import java.util.Iterator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A gateway for sending messages into a {@link SystemContext}.
  *
@@ -61,6 +63,7 @@ public interface SystemGateway {
      * Creates new instance of the gateway which serves the passed System Bounded Context.
      */
     static SystemGateway newInstance(SystemContext system) {
+        checkNotNull(system);
         return new DefaultSystemGateway(system);
     }
 
