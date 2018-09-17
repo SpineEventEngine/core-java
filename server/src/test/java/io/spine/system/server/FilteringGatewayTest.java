@@ -21,30 +21,41 @@
 package io.spine.system.server;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
+import io.spine.client.Query;
+import io.spine.core.Command;
 import io.spine.server.entity.EventFilter;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.option.EntityOption.Kind.ENTITY;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.testdata.Sample.messageOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov
  */
 @DisplayName("FilteringGateway should")
 class FilteringGatewayTest {
+
+    private static final TestActorRequestFactory requests =
+            TestActorRequestFactory.newInstance(FilteringGatewayTest.class);
 
     @Test
     @DisplayName("not accept nulls on creation")
@@ -79,7 +90,43 @@ class FilteringGatewayTest {
         assertEquals(newMessage, actualEvent);
     }
 
+    @Test
+    @DisplayName("post given commands 'as-is'")
+    void postCommands() {
+        EntityHistoryId historyId = historyId();
+        Command domainCommand = requests.createCommand(messageOfType(CreateShoppingList.class));
+        DispatchCommandToHandler command = DispatchCommandToHandler
+                .newBuilder()
+                .setReceiver(historyId)
+                .setCommand(domainCommand)
+                .build();
+        MemoizingGateway delegate = MemoizingGateway.singleTenant();
+        SystemGateway gateway = FilteringGateway.atopOf(delegate, EventFilter.allowAll());
+        gateway.postCommand(command);
+        assertEquals(command, delegate.lastSeenCommand().message());
+    }
+
+    @Test
+    @DisplayName("pass aggregate queries 'as-is'")
+    void passQueries() {
+        Query query = requests.query().all(Timestamp.class);
+        MemoizingGateway delegate = MemoizingGateway.singleTenant();
+        SystemGateway gateway = FilteringGateway.atopOf(delegate, EventFilter.allowAll());
+        Iterator<Any> iterator = gateway.readDomainAggregate(query);
+        assertNotNull(iterator);
+        assertEquals(query, delegate.lastSeenQuery().message());
+    }
+
     private static EventMessage newEvent() {
+        EntityCreated eventMessage = EntityCreated
+                .newBuilder()
+                .setId(historyId())
+                .setKind(ENTITY)
+                .build();
+        return eventMessage;
+    }
+
+    private static EntityHistoryId historyId() {
         EntityId entityId = EntityId
                 .newBuilder()
                 .setId(Identifier.pack(newUuid()))
@@ -89,11 +136,6 @@ class FilteringGatewayTest {
                 .setEntityId(entityId)
                 .setTypeUrl(TypeUrl.of(Empty.class).value())
                 .build();
-        EntityCreated eventMessage = EntityCreated
-                .newBuilder()
-                .setId(historyId)
-                .setKind(ENTITY)
-                .build();
-        return eventMessage;
+        return historyId;
     }
 }
