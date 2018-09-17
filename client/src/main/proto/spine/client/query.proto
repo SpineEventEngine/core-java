@@ -57,7 +57,7 @@ message Order {
 
     // A column name which value is used for ordering the Query results. 
     //
-    string column = 2;
+    string column = 2 [(required) = true];
     
     // A direction of an `Order` specifying if the greater or lesser values should come first.
     //
