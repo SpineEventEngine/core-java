@@ -24,8 +24,8 @@ import com.google.protobuf.Empty;
 import io.spine.core.Subscribe;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.system.server.EntityCreated;
+import io.spine.test.delivery.SewProjectCraeted;
 import io.spine.type.TypeUrl;
-import spine.test.delivery.SewProjectCraeted;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
