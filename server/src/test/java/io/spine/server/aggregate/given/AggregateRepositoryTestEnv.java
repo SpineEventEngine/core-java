@@ -371,6 +371,9 @@ public class AggregateRepositoryTestEnv {
         }
     }
 
+    /**
+     * A repository for {@link ProjectAggregate}s which never posts any events, domain or system.
+     */
     public static class EventDiscardingAggregateRepository
             extends ProjectAggregateRepository {
 
