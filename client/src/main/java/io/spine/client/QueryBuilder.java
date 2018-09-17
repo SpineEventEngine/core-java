@@ -66,7 +66,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
 
     private String orderingColumn;
     private Order.Direction direction;
-    private Long limit;
+    private long limit = 0;
 
     QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
         super(targetType);
@@ -99,21 +99,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
      * @param count an amount of the results to be returned
      * @return this builder instance
      */
-    public QueryBuilder limit(Integer count) {
-        checkNotNull(count);
-        checkLimit(count);
-        this.limit = Long.valueOf(count);
-        return self();
-    }
-
-    /**
-     * Limits the number of results returned by the query.
-     *
-     * @param count an amount of the results to be returned
-     * @return this builder instance
-     */
-    public QueryBuilder limit(Long count) {
-        checkNotNull(count);
+    public QueryBuilder limit(long count) {
         checkLimit(count);
         this.limit = count;
         return self();
@@ -149,7 +135,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     }
 
     private Optional<Pagination> pagination() {
-        if (limit == null) {
+        if (limit == 0) {
             return empty();
         }
         Pagination result = PaginationVBuilder.newBuilder()
