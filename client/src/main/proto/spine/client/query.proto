@@ -130,7 +130,7 @@ message Query {
     // An order for entities returned by the Query.
     //
     Order order = 5 [(valid) = true,
-                     (if_invalid).msg_format = "Invalid pagination order"];
+                     (if_invalid).msg_format = "Invalid query order"];
 
     // A specification for a way to paginate the Query results.
     //
