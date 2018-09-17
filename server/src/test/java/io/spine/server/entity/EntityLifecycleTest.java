@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.option.EntityOption.Kind.ENTITY;
 import static io.spine.protobuf.AnyPacker.pack;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,6 +51,15 @@ import static org.junit.jupiter.api.Assertions.assertSame;
  */
 @DisplayName("EntityLifecycle should")
 class EntityLifecycleTest {
+
+    @Test
+    @DisplayName("not allow nulls in Builder")
+    void nullTolerance() {
+        new NullPointerTester()
+                .setDefault(TypeUrl.class, TypeUrl.of(Empty.class))
+                .setDefault(Object.class, 42)
+                .testInstanceMethods(EntityLifecycle.newBuilder(), PACKAGE);
+    }
 
     @Test
     @DisplayName("be created with a default EventFilter")
