@@ -34,6 +34,9 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A {@link SystemGateway} which applies the given {@link EventFilter} to system events before
+ * posting them.
+ *
  * @author Dmytro Dashenkov
  */
 final class FilteringGateway implements SystemGateway {
@@ -46,17 +49,32 @@ final class FilteringGateway implements SystemGateway {
         this.filter = filter;
     }
 
+    /**
+     * Creates a new instance of {@code FilteringGateway} atop of the given gateway delegate and
+     * {@link EventFilter} instances.
+     *
+     * @param delegate
+     *         the {@link SystemGateway} which performs all the operations for the resulting gateway
+     * @param filter
+     *         the {@link EventFilter} to apply to the system events before posting
+     * @return new instance of {@code FilteringGateway}
+     */
     static SystemGateway atopOf(SystemGateway delegate, EventFilter filter) {
         checkNotNull(delegate);
         checkNotNull(filter);
         return new FilteringGateway(delegate, filter);
     }
 
-    @Override
-    public void postCommand(Message systemCommand) {
-        delegate.postCommand(systemCommand);
-    }
-
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Before posting a system event, applies the given {@link EventFilter} to it. The event is
+     * posted only if the filter allows it.
+     *
+     * <p>If the filter alters the event message, the altered version is posted. The internal event
+     * parameters, such as ID, context, etc. are preserved, i.e. if the filter alters them,
+     * the <b>original</b> parameters are posted.
+     */
     @Override
     public void postEvent(Message systemEvent) {
         SystemEventFactory eventFactory = SystemEventFactory.forMessage(systemEvent, false);
@@ -64,6 +82,11 @@ final class FilteringGateway implements SystemGateway {
         Optional<Event> filtered = this.filter.filter(event);
         filtered.map(Events::getMessage)
                 .ifPresent(delegate::postEvent);
+    }
+
+    @Override
+    public void postCommand(Message systemCommand) {
+        delegate.postCommand(systemCommand);
     }
 
     @Override
