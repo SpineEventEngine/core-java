@@ -61,6 +61,7 @@ import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.EntityStateChangedVBuilder;
 import io.spine.system.server.EventImported;
 import io.spine.system.server.EventImportedVBuilder;
+import io.spine.system.server.FilteringGateway;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
 

@@ -18,15 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.system.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.Query;
 import io.spine.core.Event;
 import io.spine.core.Events;
-import io.spine.system.server.SystemEventFactory;
-import io.spine.system.server.SystemGateway;
+import io.spine.server.entity.EventFilter;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -39,7 +39,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-final class FilteringGateway implements SystemGateway {
+@Internal
+public final class FilteringGateway implements SystemGateway {
 
     private final SystemGateway delegate;
     private final EventFilter filter;
@@ -59,7 +60,7 @@ final class FilteringGateway implements SystemGateway {
      *         the {@link EventFilter} to apply to the system events before posting
      * @return new instance of {@code FilteringGateway}
      */
-    static SystemGateway atopOf(SystemGateway delegate, EventFilter filter) {
+    public static SystemGateway atopOf(SystemGateway delegate, EventFilter filter) {
         checkNotNull(delegate);
         checkNotNull(filter);
         return new FilteringGateway(delegate, filter);

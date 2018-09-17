@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.system.server;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
@@ -26,10 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
-import io.spine.system.server.EntityCreated;
-import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.MemoizingGateway;
-import io.spine.system.server.SystemGateway;
+import io.spine.server.entity.EventFilter;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
