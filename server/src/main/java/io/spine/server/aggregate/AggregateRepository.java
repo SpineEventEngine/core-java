@@ -59,7 +59,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
@@ -135,7 +134,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         {@link io.spine.server.aggregate.ImportBus ImportBus} of
      *         the parent {@code BoundedContext} for dispatching messages to its aggregates;
      *     <li>{@link io.spine.server.delivery.Sharding#register(io.spine.server.delivery.Shardable)
-     *     Sharding} for groupping of messages sent to its aggregates.
+     *     Sharding} for grouping of messages sent to its aggregates.
      * </ul>
      */
     @Override

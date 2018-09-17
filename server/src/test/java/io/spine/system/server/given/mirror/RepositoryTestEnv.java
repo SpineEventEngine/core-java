@@ -143,7 +143,7 @@ public class RepositoryTestEnv {
         return event(archived);
     }
 
-    public static Event deleled(Photo aggregate) {
+    public static Event deleted(Photo aggregate) {
         EntityHistoryId historyId = historyIdOf(aggregate);
         EntityDeleted deleted = EntityDeleted
                 .newBuilder()
