@@ -87,7 +87,7 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRe
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
-import static io.spine.testing.server.blackbox.VerifyEvents.emmiterEventsHadVersions;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -502,7 +502,7 @@ public class AggregateRepositoryTest {
             BlackBoxBoundedContext.newInstance()
                                   .with(repository())
                                   .receivesCommands(create, addTask, start)
-                                  .assertThat(emmiterEventsHadVersions(1, 2, 3));
+                                  .assertThat(emittedEventsHadVersions(1, 2, 3));
         }
 
         @Test
@@ -528,7 +528,7 @@ public class AggregateRepositoryTest {
                                   .with(repository())
                                   .receivesCommands(create, start)
                                   .receivesEvent(archived)
-                                  .assertThat(emmiterEventsHadVersions(
+                                  .assertThat(emittedEventsHadVersions(
                                           1, 2, // Product creation
                                           0,    // Manually assembled event (`archived`)
                                           3     // Event produced in response to `archived` event
