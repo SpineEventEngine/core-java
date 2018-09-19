@@ -22,11 +22,28 @@ package io.spine.server.entity;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
+import io.spine.base.Time;
+import io.spine.core.EventId;
+import io.spine.system.server.EntityCreated;
+import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.MemoizingGateway;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static io.spine.option.EntityOption.Kind.ENTITY;
+import static io.spine.protobuf.AnyPacker.pack;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * @author Dmytro Dashenkov
@@ -41,5 +58,58 @@ class EntityLifecycleTest {
                 .setDefault(TypeUrl.class, TypeUrl.of(Empty.class))
                 .setDefault(Object.class, 42)
                 .testInstanceMethods(EntityLifecycle.newBuilder(), PACKAGE);
+    }
+
+    @Test
+    @DisplayName("be created with a default EventFilter")
+    void allowCreationWithoutEventFilter() {
+        EntityLifecycle lifecycle = EntityLifecycle
+                .newBuilder()
+                .setGateway(NoOpSystemGateway.INSTANCE)
+                .setEntityType(TypeUrl.of(Empty.class))
+                .setEntityId("sample-id")
+                .build();
+        assertNotNull(lifecycle);
+    }
+
+    @Test
+    @DisplayName("filter system events before posting")
+    void filterEventsBeforePosting() {
+        EventFilter filter = event -> {
+            boolean stateChanged = event instanceof EntityStateChanged;
+            return stateChanged
+                   ? Optional.empty()
+                   : Optional.of(event);
+        };
+        MemoizingGateway gateway = MemoizingGateway.singleTenant();
+        int entityId = 42;
+        EntityLifecycle lifecycle = EntityLifecycle
+                .newBuilder()
+                .setEntityId(entityId)
+                .setEntityType(TypeUrl.of(Timestamp.class))
+                .setGateway(gateway)
+                .setEventFilter(filter)
+                .build();
+        lifecycle.onEntityCreated(ENTITY);
+        MemoizingGateway.MemoizedMessage lastSeenEvent = gateway.lastSeenEvent();
+        assertThat(lastSeenEvent.message(), instanceOf(EntityCreated.class));
+
+
+        EntityRecord previousRecord = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(entityId))
+                .setState(pack(Timestamp.getDefaultInstance()))
+                .build();
+        EntityRecord newRecord = previousRecord
+                .toBuilder()
+                .setState(pack(Time.getCurrentTime()))
+                .build();
+        EntityRecordChange change = EntityRecordChange
+                .newBuilder()
+                .setPreviousValue(previousRecord)
+                .setNewValue(newRecord)
+                .build();
+        lifecycle.onStateChanged(change, of(EventId.getDefaultInstance()));
+        assertSame(lastSeenEvent, gateway.lastSeenEvent());
     }
 }

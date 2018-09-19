@@ -49,7 +49,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.system.server.FilteringGateway.atopOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
@@ -351,14 +350,15 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Internal
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
+        TypeUrl stateType = getEntityStateType();
         SystemGateway gateway = getBoundedContext().getSystemGateway();
         EventFilter eventFilter = eventFilter();
-        SystemGateway filteringGateway = atopOf(gateway, eventFilter);
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
                 .setEntityId(id)
-                .setEntityType(getEntityStateType())
-                .setGateway(filteringGateway)
+                .setEntityType(stateType)
+                .setGateway(gateway)
+                .setEventFilter(eventFilter)
                 .build();
         return lifecycle;
     }
