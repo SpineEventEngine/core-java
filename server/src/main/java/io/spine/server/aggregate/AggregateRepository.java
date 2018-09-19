@@ -598,6 +598,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return commandDeliverySupplier.get();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose the method into current package.
+     */
     @Override
     protected EntityLifecycle lifecycleOf(I id) {
         return super.lifecycleOf(id);
