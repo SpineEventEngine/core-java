@@ -61,7 +61,6 @@ import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.EntityStateChangedVBuilder;
 import io.spine.system.server.EventImported;
 import io.spine.system.server.EventImportedVBuilder;
-import io.spine.system.server.FilteringGateway;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
 
@@ -73,7 +72,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.server.entity.EventFilter.allowAll;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
@@ -116,14 +114,13 @@ public class EntityLifecycle {
     @VisibleForTesting
     protected EntityLifecycle(Object entityId,
                               TypeUrl entityType,
-                              SystemGateway gateway,
-                              EventFilter eventFilter) {
-        this.systemGateway = FilteringGateway.atopOf(gateway, eventFilter);
+                              SystemGateway gateway) {
+        this.systemGateway = gateway;
         this.historyId = historyId(entityId, entityType);
     }
 
     private EntityLifecycle(Builder builder) {
-        this(builder.entityId, builder.entityType, builder.gateway, builder.eventFilter);
+        this(builder.entityId, builder.entityType, builder.gateway);
     }
 
     /**
@@ -424,7 +421,6 @@ public class EntityLifecycle {
         private Object entityId;
         private TypeUrl entityType;
         private SystemGateway gateway;
-        private EventFilter eventFilter;
 
         /**
          * Prevents direct instantiation.
@@ -447,11 +443,6 @@ public class EntityLifecycle {
             return this;
         }
 
-        Builder setEventFilter(EventFilter eventFilter) {
-            this.eventFilter = checkNotNull(eventFilter);
-            return this;
-        }
-
         /**
          * Creates a new instance of {@code EntityLifecycle}.
          *
@@ -461,9 +452,6 @@ public class EntityLifecycle {
             checkState(entityId != null);
             checkState(entityType != null);
             checkState(gateway != null);
-            if (eventFilter == null) {
-                eventFilter = allowAll();
-            }
             return new EntityLifecycle(this);
         }
     }
