@@ -24,8 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.Query;
-import io.spine.core.Event;
-import io.spine.core.Events;
 import io.spine.server.entity.EventFilter;
 
 import java.util.Iterator;
@@ -78,11 +76,8 @@ public final class FilteringGateway implements SystemGateway {
      */
     @Override
     public void postEvent(Message systemEvent) {
-        SystemEventFactory eventFactory = SystemEventFactory.forMessage(systemEvent, false);
-        Event event = eventFactory.createEvent(systemEvent, null);
-        Optional<Event> filtered = this.filter.filter(event);
-        filtered.map(Events::getMessage)
-                .ifPresent(delegate::postEvent);
+        Optional<? extends Message> filtered = this.filter.filter(systemEvent);
+        filtered.ifPresent(delegate::postEvent);
     }
 
     @Override

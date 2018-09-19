@@ -40,6 +40,7 @@ import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -410,7 +411,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Posts passed events to {@link EventBus}.
      */
     void postEvents(Collection<Event> events) {
-        Iterable<Event> filteredEvents = eventFilter().filter(events);
+        EventFilter filter = eventFilter();
+        Iterable<Event> filteredEvents = filter.filter(events);
         EventBus bus = getBoundedContext().getEventBus();
         bus.post(filteredEvents);
     }

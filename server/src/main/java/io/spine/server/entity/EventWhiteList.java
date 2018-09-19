@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 
 import java.util.Optional;
@@ -64,7 +63,7 @@ public final class EventWhiteList implements EventFilter {
     }
 
     @Override
-    public Optional<Event> filter(Event event) {
+    public Optional<? extends Message> filter(Message event) {
         EventClass type = EventClass.of(event);
         return allowedEvents.contains(type)
                ? of(event)

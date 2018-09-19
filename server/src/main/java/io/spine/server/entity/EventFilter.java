@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.Event;
 
@@ -28,6 +29,8 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static io.spine.core.Events.getMessage;
+import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * A filter accepting {@link Event}s posted by a {@link Repository}.
@@ -62,7 +65,7 @@ public interface EventFilter {
     }
 
     /**
-     * Applies this filter to the given {@link Event}.
+     * Applies this filter to the given {@linkplain io.spine.base.EventMessage event}.
      *
      * @param event
      *         the event to apply the filter to
@@ -70,7 +73,7 @@ public interface EventFilter {
      * @apiNote This method may never return a present value or return a value not derived from
      *          the input event. See the implementations for the details for each case.
      */
-    Optional<Event> filter(Event event);
+    Optional<? extends Message> filter(Message event);
 
     /**
      * Applies this filter to the given {@link Event}s in bulk.
@@ -82,11 +85,19 @@ public interface EventFilter {
      *          <b>only</b> for performance improvement.
      */
     default ImmutableCollection<Event> filter(Collection<Event> events) {
-        ImmutableCollection<Event> filteredEvents = events.stream()
-                                                          .map(this::filter)
-                                                          .filter(Optional::isPresent)
-                                                          .map(Optional::get)
-                                                          .collect(toImmutableList());
+        ImmutableCollection<Event> filteredEvents = events
+                .stream()
+                .map(event -> {
+                    Message eventMessage = getMessage(event);
+                    Optional<? extends Message> filtered = filter(eventMessage);
+                    Optional<Event> result = filtered.map(message -> event.toBuilder()
+                                                                          .setMessage(pack(message))
+                                                                          .build());
+                    return result;
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toImmutableList());
         return filteredEvents;
     }
 }

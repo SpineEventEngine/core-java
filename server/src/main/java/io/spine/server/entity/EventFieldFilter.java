@@ -26,6 +26,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.Events;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -36,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableMap.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.validate.Validate.isDefault;
@@ -62,37 +62,36 @@ public final class EventFieldFilter implements EventFilter {
     }
 
     @Override
-    public Optional<Event> filter(Event event) {
-        Event masked = mask(event);
+    public Optional<? extends Message> filter(Message event) {
+        Message masked = mask(event);
         return Optional.of(masked);
     }
 
     @Override
     public ImmutableCollection<Event> filter(Collection<Event> events) {
         return events.stream()
-                     .map(this::mask)
+                     .map(this::maskEvent)
                      .collect(toImmutableList());
     }
 
-    private Event mask(Event event) {
+    private Event maskEvent(Event event) {
+        Message message = Events.getMessage(event);
+        Message masked = mask(message);
+        return event.toBuilder()
+                    .setMessage(pack(masked))
+                    .build();
+    }
+
+    private Message mask(Message event) {
         EventClass eventClass = EventClass.of(event);
         FieldMask mask = fieldMasks.get(eventClass);
         if (mask == null || isDefault(mask)) {
             return event;
         } else {
-            Event maskedEvent = mask(event, eventClass, mask);
+            TypeUrl typeUrl = eventClass.getTypeName().toUrl();
+            Message maskedEvent = applyMask(mask, event, typeUrl);
             return maskedEvent;
         }
-    }
-
-    private static Event mask(Event event, EventClass eventClass, FieldMask mask) {
-        Message eventMessage = getMessage(event);
-        TypeUrl typeUrl = eventClass.getTypeName().toUrl();
-        Message masked = applyMask(mask, eventMessage, typeUrl);
-        Event result = event.toBuilder()
-                            .setMessage(pack(masked))
-                            .build();
-        return result;
     }
 
     /**

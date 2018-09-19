@@ -21,7 +21,9 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.protobuf.Message;
 import io.spine.core.Event;
+import io.spine.core.Events;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.test.entity.ProjectId;
@@ -63,8 +65,9 @@ class NoOpEventFilterTest {
     @Test
     @DisplayName("allow any event")
     void allowAny() {
-        events().forEach(event -> {
-            Optional<Event> filtered = this.filter.filter(event);
+        events().map(Events::getMessage)
+                .forEach(event -> {
+            Optional<? extends Message> filtered = this.filter.filter(event);
             assertTrue(filtered.isPresent());
             assertSame(event, filtered.get());
         });
