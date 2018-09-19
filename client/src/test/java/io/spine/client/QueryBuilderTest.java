@@ -149,12 +149,12 @@ class QueryBuilderTest {
         @DisplayName("throw IAE if order direction is not ASCENDING or DESCENDING")
         void notAcceptInvalidDirection() {
             QueryBuilder select = factory.select(TEST_ENTITY_TYPE)
-                                         .orderedBy(FIRST_FIELD, ASCENDING)
-                                         .orderedBy(FIRST_FIELD, DESCENDING);
+                                         .orderBy(FIRST_FIELD, ASCENDING)
+                                         .orderBy(FIRST_FIELD, DESCENDING);
             assertThrows(IllegalArgumentException.class,
-                         () -> select.orderedBy(FIRST_FIELD, OD_UNKNOWN));
+                         () -> select.orderBy(FIRST_FIELD, OD_UNKNOWN));
             assertThrows(IllegalArgumentException.class,
-                         () -> select.orderedBy(FIRST_FIELD, UNRECOGNIZED));
+                         () -> select.orderBy(FIRST_FIELD, UNRECOGNIZED));
         }
     }
 
@@ -183,7 +183,7 @@ class QueryBuilderTest {
         @DisplayName("with order")
         void ordered() {
             Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderedBy(FIRST_FIELD, ASCENDING)
+                                 .orderBy(FIRST_FIELD, ASCENDING)
                                  .build();
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
@@ -203,7 +203,7 @@ class QueryBuilderTest {
         @DisplayName("with Integer limit")
         void limitedWithInt() {
             Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderedBy(FIRST_FIELD, ASCENDING)
+                                 .orderBy(FIRST_FIELD, ASCENDING)
                                  .limit(10)
                                  .build();
             assertNotNull(query);
@@ -226,7 +226,7 @@ class QueryBuilderTest {
         void limited() {
             long limit = 15L;
             Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderedBy(SECOND_FIELD, DESCENDING)
+                                 .orderBy(SECOND_FIELD, DESCENDING)
                                  .limit(limit)
                                  .build();
             assertNotNull(query);
@@ -429,7 +429,7 @@ class QueryBuilderTest {
                                  .byId(id1, id2)
                                  .where(eq(columnName1, columnValue1),
                                         eq(columnName2, columnValue2))
-                                 .orderedBy(SECOND_FIELD, DESCENDING)
+                                 .orderBy(SECOND_FIELD, DESCENDING)
                                  .limit(limit)
                                  .build();
             assertNotNull(query);
@@ -549,7 +549,7 @@ class QueryBuilderTest {
         void lastLimit() {
             int expectedLimit = 10;
             Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderedBy(FIRST_FIELD, ASCENDING)
+                                 .orderBy(FIRST_FIELD, ASCENDING)
                                  .limit(2)
                                  .limit(5)
                                  .limit(expectedLimit)
@@ -563,10 +563,10 @@ class QueryBuilderTest {
         @DisplayName("order")
         void lastOrder() {
             Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderedBy(FIRST_FIELD, ASCENDING)
-                                 .orderedBy(SECOND_FIELD, ASCENDING)
-                                 .orderedBy(SECOND_FIELD, DESCENDING)
-                                 .orderedBy(FIRST_FIELD, DESCENDING)
+                                 .orderBy(FIRST_FIELD, ASCENDING)
+                                 .orderBy(SECOND_FIELD, ASCENDING)
+                                 .orderBy(SECOND_FIELD, DESCENDING)
+                                 .orderBy(FIRST_FIELD, DESCENDING)
                                  .build();
             assertNotNull(query);
             assertEquals(orderBy(FIRST_FIELD, DESCENDING), query.getOrderBy());

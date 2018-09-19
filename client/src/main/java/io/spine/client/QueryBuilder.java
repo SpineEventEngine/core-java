@@ -49,7 +49,7 @@ import static java.util.Optional.of;
  *                                  .where(eq("type", "permanent"),
  *                                         eq("discountPercent", 10),
  *                                         eq("companySize", Company.Size.SMALL))
- *                                  .orderedBy("name", DESCENDING)
+ *                                  .orderBy("name", DESCENDING)
  *                                  .limit(20)
  *                                  .build();
  *     }
@@ -82,7 +82,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
      *         a direction of the sorting
      * @return this builder instance
      */
-    public QueryBuilder orderedBy(String column, OrderBy.Direction direction) {
+    public QueryBuilder orderBy(String column, OrderBy.Direction direction) {
         checkNotNull(column);
         checkNotNull(direction);
         checkArgument(
