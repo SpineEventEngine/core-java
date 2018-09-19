@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdVBuilder;
@@ -88,7 +89,8 @@ import static java.util.stream.Collectors.toList;
  * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
 @Internal
-@SuppressWarnings("OverlyCoupledClass") // Posts system commands.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
+    // Posts system messages in multiple cases.
 public class EntityLifecycle {
 
     /**
@@ -136,7 +138,7 @@ public class EntityLifecycle {
      * @param entityKind
      *         the {@link EntityOption.Kind} of the created entity
      */
-    public void onEntityCreated(EntityOption.Kind entityKind) {
+    public final void onEntityCreated(EntityOption.Kind entityKind) {
         EntityCreated event = EntityCreatedVBuilder
                 .newBuilder()
                 .setId(historyId)
@@ -152,7 +154,7 @@ public class EntityLifecycle {
      * @param commandId
      *         the ID of the command which should be handled by the entity
      */
-    public void onTargetAssignedToCommand(CommandId commandId) {
+    public final void onTargetAssignedToCommand(CommandId commandId) {
         CommandTarget target = CommandTarget
                 .newBuilder()
                 .setEntityId(historyId.getEntityId())
@@ -163,7 +165,7 @@ public class EntityLifecycle {
                 .setId(commandId)
                 .setTarget(target)
                 .build();
-        systemGateway.postCommand(command);
+        postCommand(command);
     }
 
     /**
@@ -172,13 +174,13 @@ public class EntityLifecycle {
      * @param command
      *         the dispatched command
      */
-    public void onDispatchCommand(Command command) {
+    public final void onDispatchCommand(Command command) {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandlerVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
                 .setCommand(command)
                 .build();
-        systemGateway.postCommand(systemCommand);
+        postCommand(systemCommand);
     }
 
     /**
@@ -187,7 +189,7 @@ public class EntityLifecycle {
      * @param command
      *         the handled command
      */
-    public void onCommandHandled(Command command) {
+    public final void onCommandHandled(Command command) {
         CommandHandled systemEvent = CommandHandledVBuilder
                 .newBuilder()
                 .setId(command.getId())
@@ -203,7 +205,7 @@ public class EntityLifecycle {
      * @param rejection
      *         the rejection event
      */
-    public void onCommandRejected(CommandId commandId, Event rejection) {
+    public final void onCommandRejected(CommandId commandId, Event rejection) {
         CommandRejected systemEvent = CommandRejectedVBuilder
                 .newBuilder()
                 .setId(commandId)
@@ -218,20 +220,20 @@ public class EntityLifecycle {
      * @param event
      *         the dispatched event
      */
-    public void onDispatchEventToSubscriber(Event event) {
+    public final void onDispatchEventToSubscriber(Event event) {
         DispatchEventToSubscriber systemCommand = DispatchEventToSubscriberVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEvent(event)
                 .build();
-        systemGateway.postCommand(systemCommand);
+        postCommand(systemCommand);
     }
 
-    public void onImportTargetSet(EventId id) {
+    public final void onImportTargetSet(EventId id) {
         //TODO:2018-08-22:alexander.yevsyukov: Post a system event when EventLifecycleAggregate is available.
     }
 
-    public void onEventImported(Event event) {
+    public final void onEventImported(Event event) {
         EventImported systemEvent = EventImportedVBuilder
                 .newBuilder()
                 .setReceiver(historyId)
@@ -247,13 +249,13 @@ public class EntityLifecycle {
      * @param event
      *         the dispatched event
      */
-    public void onDispatchEventToReactor(Event event) {
+    public final void onDispatchEventToReactor(Event event) {
         DispatchEventToReactor systemCommand = DispatchEventToReactor
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEvent(event)
                 .build();
-        systemGateway.postCommand(systemCommand);
+        postCommand(systemCommand);
     }
 
     /**
@@ -269,7 +271,7 @@ public class EntityLifecycle {
      *         the IDs of the messages which caused the {@code change}; typically,
      *         {@link io.spine.core.EventId EventId}s or {@link CommandId}s
      */
-    protected void onStateChanged(EntityRecordChange change,
+    final void onStateChanged(EntityRecordChange change,
                                   Set<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
@@ -369,9 +371,13 @@ public class EntityLifecycle {
         }
     }
     
-    private void postEvent(EventMessage event) {
+    protected void postEvent(EventMessage event) {
         Optional<? extends Message> filtered = eventFilter.filter(event);
         filtered.ifPresent(systemGateway::postEvent);
+    }
+    
+    protected void postCommand(CommandMessage command) {
+        systemGateway.postCommand(command);
     }
 
     private static Collection<DispatchedMessageId>
