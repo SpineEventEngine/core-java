@@ -122,27 +122,11 @@ class QueryBuilderTest {
         }
 
         @Test
-        @DisplayName("throw IAE if negative limit long value is provided")
-        void notAcceptNegativeLongLimit() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> factory.select(TEST_ENTITY_TYPE)
-                                      .limit(-99999999L));
-        }
-
-        @Test
         @DisplayName("throw IAE if limit int value is 0")
         void notAcceptZeroIntLimit() {
             assertThrows(IllegalArgumentException.class,
                          () -> factory.select(TEST_ENTITY_TYPE)
                                       .limit(0));
-        }
-
-        @Test
-        @DisplayName("throw IAE if limit long value is 0")
-        void notAcceptZeroLongLimit() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> factory.select(TEST_ENTITY_TYPE)
-                                      .limit(0L));
         }
 
         @Test
@@ -200,31 +184,9 @@ class QueryBuilderTest {
         }
 
         @Test
-        @DisplayName("with Integer limit")
-        void limitedWithInt() {
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderBy(FIRST_FIELD, ASCENDING)
-                                 .limit(10)
-                                 .build();
-            assertNotNull(query);
-            assertFalse(query.hasFieldMask());
-
-            OrderBy expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
-            assertEquals(expectedOrderBy, query.getOrderBy());
-
-            Pagination expectedPagination = pagination(10L);
-            assertEquals(expectedPagination, query.getPagination());
-
-            Target target = query.getTarget();
-            assertTrue(target.getIncludeAll());
-
-            assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
-        }
-
-        @Test
         @DisplayName("with limit")
         void limited() {
-            long limit = 15L;
+            int limit = 15;
             Query query = factory.select(TEST_ENTITY_TYPE)
                                  .orderBy(SECOND_FIELD, DESCENDING)
                                  .limit(limit)

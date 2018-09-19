@@ -101,7 +101,7 @@ message EventContext {
         // The context of the event which generated this event.
         EventContext event_context = 6 [(required) = true];
 
-        // The event was imported using this `AсtorContext`.
+        // The event was imported using this `ActorContext`.
         ActorContext import_context = 11 [(required) = true];
     }
 

@@ -98,7 +98,7 @@ message Pagination {
     //
     // A minimum of 1 items per page can be requested.
     //
-    uint64 page_size = 1 [(required) = true,
+    uint32 page_size = 1 [(required) = true,
                           (min).value = "1"];
 }
 

@@ -60,7 +60,7 @@ public class QueryBuilderTestEnv {
                            .build();
     }
 
-    public static Pagination pagination(long pageSize) {
+    public static Pagination pagination(int pageSize) {
         return PaginationVBuilder.newBuilder()
                                  .setPageSize(pageSize)
                                  .build();

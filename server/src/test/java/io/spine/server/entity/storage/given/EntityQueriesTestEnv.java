@@ -34,7 +34,7 @@ public class EntityQueriesTestEnv {
         // Prevent instantiation of this utility class.
     }
 
-    public static Pagination pagination(long size) {
+    public static Pagination pagination(int size) {
         return PaginationVBuilder.newBuilder()
                                  .setPageSize(size)
                                  .build();

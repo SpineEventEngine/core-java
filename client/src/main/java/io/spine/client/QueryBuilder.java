@@ -66,7 +66,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
 
     private String orderingColumn;
     private OrderBy.Direction direction;
-    private long limit = 0;
+    private int limit = 0;
 
     QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
         super(targetType);
@@ -102,7 +102,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
      *         an amount of the results to be returned
      * @return this builder instance
      */
-    public QueryBuilder limit(long count) {
+    public QueryBuilder limit(int count) {
         checkLimit(count);
         this.limit = count;
         return self();

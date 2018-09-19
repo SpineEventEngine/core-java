@@ -266,7 +266,7 @@ class EntityQueriesTest {
     void constructWithLimitAndOrder() {
         String expectedColumn = "test";
         OrderBy.Direction expectedDirection = ASCENDING;
-        long expectedLimit = 10;
+        int expectedLimit = 10;
         EntityQuery<?> query = createEntityQuery(EntityFilters.getDefaultInstance(),
                                                  order(expectedColumn, expectedDirection),
                                                  pagination(expectedLimit),

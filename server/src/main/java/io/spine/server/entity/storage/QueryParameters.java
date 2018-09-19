@@ -58,7 +58,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      * it is {@code false}.
      */
     private final boolean hasLifecycle;
-    private final long limit;
+    private final int limit;
     private final OrderBy orderBy;
 
     private QueryParameters(Builder builder) {
@@ -90,7 +90,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         return !orderBy.equals(OrderBy.getDefaultInstance());
     }
 
-    public long limit() {
+    public int limit() {
         return limit;
     }
 
@@ -136,7 +136,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
 
         private boolean hasLifecycle;
         private OrderBy orderBy;
-        private long limit;
+        private int limit;
 
         private Builder() {
             parameters = ImmutableList.builder();
@@ -162,12 +162,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
             return parameters;
         }
 
-        public Builder limit(long value) {
+        public Builder limit(int value) {
             limit = value;
             return this;
         }
 
-        public long limit() {
+        public int limit() {
             return limit;
         }
 

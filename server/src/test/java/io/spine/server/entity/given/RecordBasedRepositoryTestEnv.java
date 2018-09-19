@@ -53,7 +53,7 @@ public final class RecordBasedRepositoryTestEnv {
         return Pagination.getDefaultInstance();
     }
 
-    public static Pagination pagination(long pageSize) {
+    public static Pagination pagination(int pageSize) {
         return PaginationVBuilder.newBuilder()
                                  .setPageSize(pageSize)
                                  .build();

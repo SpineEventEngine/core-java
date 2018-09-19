@@ -35,7 +35,7 @@ message ChannelId {
 
     // The packed value, serving as an identifier for a channel.
     //
-    // As а channel ID is a high-level abstraction, the particular contents of this field
+    // As a channel ID is a high-level abstraction, the particular contents of this field
     // solely depend on the usage scenario.
     //
     // One of the possible applications is to pack type URLs of messages, that are being served
