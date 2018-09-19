@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdVBuilder;
 import io.spine.core.Command;
@@ -65,6 +66,7 @@ import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -90,9 +92,14 @@ import static java.util.stream.Collectors.toList;
 public class EntityLifecycle {
 
     /**
-     * The {@link SystemGateway} which the system commands are posted into.
+     * The {@link SystemGateway} which the system messages are posted into.
      */
     private final SystemGateway systemGateway;
+
+    /**
+     * The {@link EventFilter} applied to system events before posting.
+     */
+    private final EventFilter eventFilter;
 
     /**
      * The ID of {@linkplain io.spine.system.server.EntityHistory history} of the associated
@@ -135,7 +142,7 @@ public class EntityLifecycle {
                 .setId(historyId)
                 .setKind(entityKind)
                 .build();
-        systemGateway.postEvent(event);
+        postEvent(event);
     }
 
     /**
@@ -185,7 +192,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setId(command.getId())
                 .build();
-        systemGateway.postEvent(systemEvent);
+        postEvent(systemEvent);
     }
 
     /**
@@ -202,7 +209,7 @@ public class EntityLifecycle {
                 .setId(commandId)
                 .setRejectionEvent(rejection)
                 .build();
-        systemGateway.postEvent(systemEvent);
+        postEvent(systemEvent);
     }
 
     /**
@@ -231,7 +238,7 @@ public class EntityLifecycle {
                 .setEventId(event.getId())
                 .setWhenImported(getCurrentTime())
                 .build();
-        systemGateway.postEvent(systemEvent);
+        postEvent(systemEvent);
     }
 
     /**
@@ -286,7 +293,7 @@ public class EntityLifecycle {
                     .setNewState(newState)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(event);
+            postEvent(event);
         }
     }
 
@@ -304,7 +311,7 @@ public class EntityLifecycle {
                     .setId(historyId)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(event);
+            postEvent(event);
         }
     }
 
@@ -322,7 +329,7 @@ public class EntityLifecycle {
                     .setId(historyId)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(event);
+            postEvent(event);
         }
     }
 
@@ -340,7 +347,7 @@ public class EntityLifecycle {
                     .setId(historyId)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(event);
+            postEvent(event);
         }
     }
 
@@ -358,8 +365,13 @@ public class EntityLifecycle {
                     .setId(historyId)
                     .addAllMessageId(copyOf(messageIds))
                     .build();
-            systemGateway.postEvent(event);
+            postEvent(event);
         }
+    }
+    
+    private void postEvent(EventMessage event) {
+        Optional<? extends Message> filtered = eventFilter.filter(event);
+        filtered.ifPresent(systemGateway::postEvent);
     }
 
     private static Collection<DispatchedMessageId>
