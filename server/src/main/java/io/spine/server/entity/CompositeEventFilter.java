@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.core.Event;
+import com.google.protobuf.Message;
 
 import java.util.Optional;
 
@@ -48,8 +48,8 @@ public final class CompositeEventFilter implements EventFilter {
     }
 
     @Override
-    public Optional<Event> filter(Event event) {
-        Optional<Event> result = of(event);
+    public Optional<? extends Message> filter(Message event) {
+        Optional<? extends Message> result = of(event);
         for (EventFilter filter : filters) {
             result = filter.filter(result.get());
             if (!result.isPresent()) {

@@ -20,7 +20,8 @@
 
 package io.spine.server.entity;
 
-import io.spine.core.Event;
+import com.google.protobuf.Message;
+import io.spine.test.entity.event.EntProjectCreated;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,9 +30,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Dmytro Dashenkov
@@ -45,7 +46,8 @@ class CompositeEventFilterTest {
         CompositeEventFilter emptyFilter = CompositeEventFilter
                 .newBuilder()
                 .build();
-        Optional<Event> filtered = emptyFilter.filter(Event.getDefaultInstance());
+        Optional<? extends Message> filtered =
+                emptyFilter.filter(EntProjectCreated.getDefaultInstance());
         assertTrue(filtered.isPresent());
     }
 
@@ -57,8 +59,8 @@ class CompositeEventFilterTest {
                 .add(Optional::of)
                 .add(Optional::of)
                 .build();
-        Event event = Event.getDefaultInstance();
-        Optional<Event> filtered = filter.filter(event);
+        Optional<? extends Message> filtered =
+                filter.filter(EntProjectCreated.getDefaultInstance());
         assertTrue(filtered.isPresent());
     }
 
@@ -66,15 +68,15 @@ class CompositeEventFilterTest {
     @DisplayName("not accept an event is one filter not accepts")
     void rejectIfOneRejects() {
         EventFilter spyFilter = mock(EventFilter.class);
-        when(spyFilter.filter(any(Event.class)))
-                .thenReturn(Optional.of(Event.getDefaultInstance()));
+        Message eventMessage = EntProjectCreated.getDefaultInstance();
+        doReturn(Optional.of(eventMessage))
+                .when(spyFilter).filter(any(Message.class));
         CompositeEventFilter filter = CompositeEventFilter
                 .newBuilder()
                 .add(anyEvent -> Optional.empty())
                 .add(spyFilter)
                 .build();
-        Event event = Event.getDefaultInstance();
-        Optional<Event> filtered = filter.filter(event);
+        Optional<? extends Message> filtered = filter.filter(eventMessage);
         assertFalse(filtered.isPresent());
         verifyZeroInteractions(spyFilter);
     }

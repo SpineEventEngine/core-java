@@ -42,7 +42,6 @@ import java.util.Optional;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.option.EntityOption.Kind.ENTITY;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testdata.Sample.messageOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -78,9 +77,7 @@ class FilteringGatewayTest {
     @DisplayName("alter event message with the EventFilter")
     void alterEventMessage() {
         EventMessage newMessage = newEvent();
-        EventFilter filter = systemEvent -> Optional.of(systemEvent.toBuilder()
-                                                                   .setMessage(pack(newMessage))
-                                                                   .build());
+        EventFilter filter = systemEvent -> Optional.of(newMessage);
         EventMessage originalMessage = newEvent();
         MemoizingGateway delegate = MemoizingGateway.singleTenant();
         SystemGateway gateway = FilteringGateway.atopOf(delegate, filter);

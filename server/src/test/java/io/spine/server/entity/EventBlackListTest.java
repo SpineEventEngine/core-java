@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.test.entity.event.EntProjectCreated;
 import io.spine.test.entity.event.EntProjectStarted;
@@ -58,8 +59,8 @@ class EventBlackListTest {
     @Test
     @DisplayName("allow events of type not from the list")
     void allowArbitrary() {
-        Event event = eventFactory.createEvent(EntProjectCreated.getDefaultInstance());
-        Optional<Event> filtered = blackList.filter(event);
+        Message event = EntProjectCreated.getDefaultInstance();
+        Optional<? extends Message> filtered = blackList.filter(event);
         assertTrue(filtered.isPresent());
         assertEquals(event, filtered.get());
     }
@@ -67,8 +68,8 @@ class EventBlackListTest {
     @Test
     @DisplayName("not allow events of type from the list")
     void notAllowFromList() {
-        Event event = eventFactory.createEvent(EntTaskAdded.getDefaultInstance());
-        Optional<Event> filtered = blackList.filter(event);
+        Message event = EntTaskAdded.getDefaultInstance();
+        Optional<? extends Message> filtered = blackList.filter(event);
         assertFalse(filtered.isPresent());
     }
 

@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.FieldMask;
-import io.spine.core.Event;
+import com.google.protobuf.Message;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.Task;
 import io.spine.test.entity.event.EntProjectCreated;
@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.core.Events.getMessage;
 import static io.spine.server.entity.FieldMasks.maskOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -54,8 +53,8 @@ class EventFieldFilterTest {
         EventFieldFilter filter = EventFieldFilter
                 .newBuilder()
                 .build();
-        Event event = eventFactory.createEvent(EntProjectCreated.getDefaultInstance());
-        Optional<Event> filtered = filter.filter(event);
+        EntProjectCreated event = EntProjectCreated.getDefaultInstance();
+        Optional<? extends Message> filtered = filter.filter(event);
         assertTrue(filtered.isPresent());
         assertEquals(event, filtered.get());
     }
@@ -68,18 +67,16 @@ class EventFieldFilterTest {
                 .newBuilder()
                 .putMask(EntTaskAdded.class, mask)
                 .build();
-        EntTaskAdded eventMessage = EntTaskAdded
+        EntTaskAdded event = EntTaskAdded
                 .newBuilder()
                 .setProjectId(Sample.messageOfType(ProjectId.class))
                 .setTask(Sample.messageOfType(Task.class))
                 .build();
-        Event event = eventFactory.createEvent(eventMessage);
-
-        Optional<Event> filtered = filter.filter(event);
+        Optional<? extends Message> filtered = filter.filter(event);
         assertTrue(filtered.isPresent());
-        EntTaskAdded maskedEventMessage = (EntTaskAdded) getMessage(filtered.get());
+        EntTaskAdded maskedEventMessage = (EntTaskAdded) filtered.get();
         assertTrue(maskedEventMessage.hasProjectId());
-        assertEquals(eventMessage.getProjectId(), maskedEventMessage.getProjectId());
+        assertEquals(event.getProjectId(), maskedEventMessage.getProjectId());
         assertFalse(maskedEventMessage.hasTask());
     }
 }

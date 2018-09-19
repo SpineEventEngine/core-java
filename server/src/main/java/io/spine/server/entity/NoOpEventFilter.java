@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.protobuf.Message;
 import io.spine.core.Event;
 
 import java.util.Collection;
@@ -38,7 +39,7 @@ enum NoOpEventFilter implements EventFilter {
     INSTANCE;
 
     @Override
-    public Optional<Event> filter(Event event) {
+    public Optional<? extends Message> filter(Message event) {
         return Optional.of(event);
     }
 
