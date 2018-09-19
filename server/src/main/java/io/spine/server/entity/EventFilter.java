@@ -38,10 +38,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
  * @author Dmytro Dashenkov
  * @apiNote This type is a {@link FunctionalInterface}, so that an event filter may be defined
  *          with a lambda expression.
- * @see EventWhiteList
- * @see EventBlackList
- * @see EventFieldFilter
- * @see CompositeEventFilter
  */
 @SPI
 @FunctionalInterface
