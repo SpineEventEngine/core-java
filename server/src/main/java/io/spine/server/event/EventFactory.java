@@ -23,6 +23,7 @@ package io.spine.server.event;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
@@ -31,9 +32,11 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.type.TypeName;
 import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -79,15 +82,21 @@ public class EventFactory {
      * <p>It is recommended to use a corresponding {@linkplain io.spine.validate.ValidatingBuilder
      * ValidatingBuilder} implementation to create a message.
      *
-     * @param messageOrAny the message of the event or the message packed into {@code Any}
+     * @param message the message of the event or the message packed into {@code Any}
      * @param version      the version of the entity which produces the event
      * @throws ValidationException if the passed message does not satisfy the constraints
      *                             set for it in its Protobuf definition
      */
-    public Event createEvent(Message messageOrAny,
+    public Event createEvent(EventMessage message,
                              @Nullable Version version) throws ValidationException {
         EventContext context = createContext(version);
-        return doCreateEvent(messageOrAny, context);
+        return doCreateEvent(message, context);
+    }
+
+    public Event createEvent(Any message,
+                             @Nullable Version version) throws ValidationException {
+        EventMessage eventMessage = AnyPacker.unpack(message);
+        return createEvent(eventMessage, version);
     }
 
     /**
@@ -99,8 +108,7 @@ public class EventFactory {
      * @return new rejection event
      * @throws ValidationException if the passed message does not satisfy the constraints
      *                             set for it in its Protobuf definition
-     * @see #createEvent(Message, Version) createEvent(Message, Version) - for general rules of
-     *                                     the event construction
+     * @see #createEvent createEvent(Message, Version) - for general rules of the event construction
      */
     public Event createRejectionEvent(Message messageOrAny,
                                       @Nullable Version version,
@@ -126,11 +134,12 @@ public class EventFactory {
      * for the validation.
      */
     private static void validate(Message messageOrAny) throws ValidationException {
-        Message toValidate;
-        toValidate = messageOrAny instanceof Any
+        Message message = messageOrAny instanceof Any
                      ? AnyPacker.unpack((Any) messageOrAny)
                      : messageOrAny;
-        checkValid(toValidate);
+        checkArgument(messageOrAny instanceof EventMessage,
+                      "%s is not an event type.", TypeName.of(messageOrAny));
+        checkValid(message);
     }
 
     /**

@@ -20,7 +20,7 @@
 
 package io.spine.core.given;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.base.Time;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
@@ -56,12 +56,12 @@ public class GivenEvent {
         return result;
     }
 
-    public static Event withMessage(Message message) {
+    public static Event withMessage(EventMessage message) {
         Event event = eventFactory.createEvent(message);
         return event;
     }
 
-    public static Event withDisabledEnrichmentOf(Message message) {
+    public static Event withDisabledEnrichmentOf(EventMessage message) {
         Event event = withMessage(message);
         Event.Builder builder =
                 event.toBuilder()

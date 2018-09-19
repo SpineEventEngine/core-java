@@ -28,9 +28,8 @@ option java_package="io.spine.test.commands";
 option java_multiple_files = true;
 option java_outer_classname = "CommandFactoryTestProto";
 
-
 // To use in `CommandFactoryTest` class.
-message RequiredFieldCommand{
+message RequiredFieldCommand {
     string opt_value = 1;
 
     string req_value = 2 [(required) = true];

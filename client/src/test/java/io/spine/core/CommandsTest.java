@@ -27,10 +27,12 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.string.Stringifiers;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.client.c.CreateTask;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.Durations2;
@@ -50,7 +52,6 @@ import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.Commands.wereWithinPeriod;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -150,8 +151,10 @@ class CommandsTest {
     @Test
     @DisplayName("extract message from given command")
     void extractMessage() {
-        StringValue message = toMessage("extract_message_from_command");
-
+        CommandMessage message = CreateTask
+                .newBuilder()
+                .setId(Identifier.newUuid())
+                .build();
         Command command = requestFactory.createCommand(message);
         assertEquals(message, Commands.getMessage(command));
     }
@@ -247,7 +250,7 @@ class CommandsTest {
         TypeName typeName = CommandEnvelope.of(command)
                                            .getTypeName();
         assertNotNull(typeName);
-        assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
+        assertEquals(TypeName.of(CreateTask.class), typeName);
     }
 
     @Test
@@ -255,7 +258,10 @@ class CommandsTest {
     void getCommandTypeUrl() {
         ActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(CommandsTest.class);
-        StringValue message = toMessage(Identifier.newUuid());
+        CommandMessage message = CreateTask
+                .newBuilder()
+                .setId(Identifier.newUuid())
+                .build();
         Command command = factory.command()
                                  .create(message);
 
@@ -263,6 +269,6 @@ class CommandsTest {
                                          .getTypeName()
                                          .toUrl();
 
-        assertEquals(TypeUrl.of(StringValue.class), typeUrl);
+        assertEquals(TypeUrl.of(CreateTask.class), typeUrl);
     }
 }

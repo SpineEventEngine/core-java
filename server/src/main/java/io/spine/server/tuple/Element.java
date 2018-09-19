@@ -23,6 +23,7 @@ package io.spine.server.tuple;
 import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.validate.Validate;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * An element of a tuple.
  *
- * <p>Can hold either {@link Message}, or {@link Optional} message, or an instance of
+ * <p>Can hold either an {@link EventMessage}, or {@link Optional} message, or an instance of
  * {@link Either}.
  *
  * @author Alexander Yevsyukov
@@ -103,7 +104,7 @@ class Element implements Serializable {
     Message getMessage() {
         switch (type) {
             case MESSAGE:
-                return (Message) value;
+                return (EventMessage) value;
             case EITHER:
                 return ((Either) value).getValue();
             case OPTIONAL: {

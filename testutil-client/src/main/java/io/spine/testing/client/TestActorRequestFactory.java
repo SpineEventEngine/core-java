@@ -33,6 +33,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.testing.TestValues;
+import io.spine.testing.client.c.CreateTask;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
@@ -146,9 +147,9 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     @SuppressWarnings("MagicNumber")
     private Command generate() {
         String randomSuffix = String.valueOf(TestValues.random(10_000));
-        StringValue msg = StringValue
+        CreateTask msg = CreateTask
                 .newBuilder()
-                .setValue("GeneratedTestCommand" + randomSuffix)
+                .setId("GeneratedTestCommand" + randomSuffix)
                 .build();
         return createCommand(msg);
     }
