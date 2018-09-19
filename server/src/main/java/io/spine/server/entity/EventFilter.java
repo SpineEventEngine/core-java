@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 
 import java.util.Collection;
@@ -73,7 +73,7 @@ public interface EventFilter {
      * @apiNote This method may never return a present value or return a value not derived from
      *          the input event. See the implementations for the details for each case.
      */
-    Optional<? extends Message> filter(Message event);
+    Optional<? extends EventMessage> filter(EventMessage event);
 
     /**
      * Applies this filter to the given {@link Event}s in bulk.
@@ -88,8 +88,8 @@ public interface EventFilter {
         ImmutableCollection<Event> filteredEvents = events
                 .stream()
                 .map(event -> {
-                    Message eventMessage = getMessage(event);
-                    Optional<? extends Message> filtered = filter(eventMessage);
+                    EventMessage eventMessage = getMessage(event);
+                    Optional<? extends EventMessage> filtered = filter(eventMessage);
                     Optional<Event> result = filtered.map(message -> event.toBuilder()
                                                                           .setMessage(pack(message))
                                                                           .build());

@@ -22,15 +22,15 @@ package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
-import com.google.protobuf.BoolValue;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.string.Stringifiers;
+import io.spine.test.commands.CmdCreateProject;
+import io.spine.test.commands.CmdStartProject;
+import io.spine.test.commands.CmdStopProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.c.CreateTask;
 import io.spine.testing.core.given.GivenCommandContext;
@@ -79,9 +79,10 @@ class CommandsTest {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
-    private static final StringValue STR_MSG = StringValue.getDefaultInstance();
-    private static final Int64Value INT_64_MSG = Int64Value.getDefaultInstance();
-    private static final BoolValue BOOL_MSG = BoolValue.getDefaultInstance();
+
+    private static final CmdCreateProject createProject = CmdCreateProject.getDefaultInstance();
+    private static final CmdStartProject startProject = CmdStartProject.getDefaultInstance();
+    private static final CmdStopProject stopProject = CmdStopProject.getDefaultInstance();
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandsTest.class);
@@ -99,7 +100,7 @@ class CommandsTest {
                 .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
                 .setDefault(Timestamp.class, getCurrentTime())
                 .setDefault(Duration.class, Durations2.ZERO)
-                .setDefault(Command.class, requestFactory.createCommand(STR_MSG, minutesAgo(1)))
+                .setDefault(Command.class, requestFactory.createCommand(createProject, minutesAgo(1)))
                 .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.utc())
                 .setDefault(UserId.class, GivenUserId.newUuid())
@@ -109,9 +110,9 @@ class CommandsTest {
     @Test
     @DisplayName("sort given commands by timestamp")
     void sortByTimestamp() {
-        Command cmd1 = requestFactory.createCommand(STR_MSG, minutesAgo(1));
-        Command cmd2 = requestFactory.createCommand(INT_64_MSG, secondsAgo(30));
-        Command cmd3 = requestFactory.createCommand(BOOL_MSG, secondsAgo(5));
+        Command cmd1 = requestFactory.createCommand(createProject, minutesAgo(1));
+        Command cmd2 = requestFactory.createCommand(startProject, secondsAgo(30));
+        Command cmd3 = requestFactory.createCommand(stopProject, secondsAgo(5));
         List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
         assertNotEquals(sortedCommands, commandsToSort);
@@ -167,7 +168,7 @@ class CommandsTest {
         @DisplayName("`wereAfter`")
         void wereAfter() {
             Command command = requestFactory.command()
-                                            .create(BOOL_MSG);
+                                            .create(stopProject);
             assertTrue(Commands.wereAfter(secondsAgo(5))
                                .test(command));
         }
@@ -175,11 +176,11 @@ class CommandsTest {
         @Test
         @DisplayName("`wereBetween`")
         void wereBetween() {
-            Command fiveMinsAgo = requestFactory.createCommand(STR_MSG, minutesAgo(5));
-            Command twoMinsAgo = requestFactory.createCommand(INT_64_MSG, minutesAgo(2));
-            Command thirtySecondsAgo = requestFactory.createCommand(BOOL_MSG, secondsAgo(30));
-            Command twentySecondsAgo = requestFactory.createCommand(BOOL_MSG, secondsAgo(20));
-            Command fiveSecondsAgo = requestFactory.createCommand(BOOL_MSG, secondsAgo(5));
+            Command fiveMinsAgo = requestFactory.createCommand(createProject, minutesAgo(5));
+            Command twoMinsAgo = requestFactory.createCommand(startProject, minutesAgo(2));
+            Command thirtySecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(30));
+            Command twentySecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(20));
+            Command fiveSecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(5));
 
             long filteredCommands = Stream.of(fiveMinsAgo,
                                               twoMinsAgo,
@@ -197,14 +198,14 @@ class CommandsTest {
     void recognizeScheduled() {
         CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
         Command cmd = requestFactory.command()
-                                    .createBasedOnContext(STR_MSG, context);
+                                    .createBasedOnContext(createProject, context);
         assertTrue(Commands.isScheduled(cmd));
     }
 
     @Test
     @DisplayName("consider command not scheduled when no scheduling options are present")
     void recognizeNotScheduled() {
-        Command cmd = requestFactory.createCommand(STR_MSG);
+        Command cmd = requestFactory.createCommand(createProject);
         assertFalse(Commands.isScheduled(cmd));
     }
 
@@ -214,7 +215,7 @@ class CommandsTest {
         CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
         Command cmd =
                 requestFactory.command()
-                              .createBasedOnContext(STR_MSG, context);
+                              .createBasedOnContext(createProject, context);
         assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
     }
 

@@ -20,7 +20,8 @@
 
 package io.spine.server.aggregate.given;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
@@ -96,11 +97,11 @@ public class IdempotencyGuardTestEnv {
                                .build();
     }
 
-    public static Command command(Message commandMessage) {
+    public static Command command(CommandMessage commandMessage) {
         return commandFactory.create(commandMessage);
     }
 
-    public static Event event(Message eventMessage) {
+    public static Event event(EventMessage eventMessage) {
         return eventFactory.createEvent(eventMessage);
     }
 }

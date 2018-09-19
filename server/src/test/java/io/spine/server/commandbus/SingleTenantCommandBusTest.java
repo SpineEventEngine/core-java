@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -124,8 +125,8 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         List<Message> handledCommands = handler.handledCommands();
         assertEquals(2, handledCommands.size());
-        assertTrue(FirstCmdCreateProject.class.isInstance(handledCommands.get(0)));
-        assertTrue(SecondCmdStartProject.class.isInstance(handledCommands.get(1)));
+        assertTrue(handledCommands.get(0) instanceof FirstCmdCreateProject);
+        assertTrue(handledCommands.get(1) instanceof SecondCmdStartProject);
     }
 
     @Test
@@ -153,7 +154,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
     @Override
     protected Command newCommand() {
-        Message commandMessage = Given.CommandMessage.createProjectMessage();
+        CommandMessage commandMessage = Given.CommandMessage.createProjectMessage();
         return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
                                       .createCommand(commandMessage);
     }

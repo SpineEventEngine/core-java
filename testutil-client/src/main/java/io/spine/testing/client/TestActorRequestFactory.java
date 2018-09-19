@@ -21,10 +21,10 @@
 package io.spine.testing.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
@@ -102,7 +102,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     /** Creates new command with the passed timestamp. */
-    public Command createCommand(Message message, Timestamp timestamp) {
+    public Command createCommand(CommandMessage message, Timestamp timestamp) {
         Command command = command().create(message);
         return withTimestamp(command, timestamp);
     }
@@ -119,12 +119,12 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         return commandBuilder.build();
     }
 
-    public Command createCommand(Message message) {
+    public Command createCommand(CommandMessage message) {
         Command command = command().create(message);
         return command;
     }
 
-    public CommandEnvelope createEnvelope(Message message) {
+    public CommandEnvelope createEnvelope(CommandMessage message) {
         return CommandEnvelope.of(createCommand(message));
     }
 

@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -99,7 +100,7 @@ public class AggregateTestEnv {
         return CommandEnvelope.of(command(commandMessage));
     }
 
-    public static Event event(Message eventMessage, int versionNumber) {
+    public static Event event(EventMessage eventMessage, int versionNumber) {
         return eventFactory().createEvent(eventMessage, withNumber(versionNumber));
     }
 

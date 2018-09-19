@@ -74,7 +74,7 @@ public abstract class CommandSequence<O extends Message,
     private final CommandFactory commandFactory;
 
     /** Command messages for commands that we are going to post. */
-    private final Queue<Message> queue;
+    private final Queue<CommandMessage> queue;
 
     /** The handler for the posting errors. */
     private ErrorHandler errorHandler = new DefaultErrorHandler();
@@ -145,8 +145,8 @@ public abstract class CommandSequence<O extends Message,
     /**
      * Gets and removes the next command message from the queue.
      */
-    private Message next() throws NoSuchElementException {
-        Message result = queue.remove();
+    private CommandMessage next() throws NoSuchElementException {
+        CommandMessage result = queue.remove();
         return result;
     }
 
@@ -160,7 +160,7 @@ public abstract class CommandSequence<O extends Message,
         SystemGateway gateway = gateway(bus);
         B builder = newBuilder();
         while (hasNext()) {
-            Message message = next();
+            CommandMessage message = next();
             Optional<Command> posted = post(message, bus);
             if (posted.isPresent()) {
                 Command command = posted.get();
@@ -186,7 +186,7 @@ public abstract class CommandSequence<O extends Message,
      * <p>This method waits till the posting of the command is finished.
      * @return the created and posted {@code Command}
      */
-    private Optional<Command> post(Message message, CommandBus bus) {
+    private Optional<Command> post(CommandMessage message, CommandBus bus) {
         Command command = commandFactory.create(message);
         SettableFuture<Ack> finishFuture = SettableFuture.create();
         StreamObserver<Ack> observer = newAckObserver(finishFuture);

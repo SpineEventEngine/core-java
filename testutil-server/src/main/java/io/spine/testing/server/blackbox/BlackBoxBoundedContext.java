@@ -24,6 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -198,7 +200,7 @@ public class BlackBoxBoundedContext {
      * @param domainCommand a domain command to be dispatched to the Bounded Context
      * @return current instance
      */
-    public BlackBoxBoundedContext receivesCommand(Message domainCommand) {
+    public BlackBoxBoundedContext receivesCommand(CommandMessage domainCommand) {
         return this.receivesCommands(singletonList(domainCommand));
     }
 
@@ -212,7 +214,8 @@ public class BlackBoxBoundedContext {
      * @return current instance
      */
     public BlackBoxBoundedContext
-    receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
+    receivesCommands(CommandMessage firstCommand, CommandMessage secondCommand,
+                     CommandMessage... otherCommands) {
         return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
@@ -222,7 +225,7 @@ public class BlackBoxBoundedContext {
      * @param domainCommands a list of domain commands to be dispatched to the Bounded Context
      * @return current instance
      */
-    private BlackBoxBoundedContext receivesCommands(Collection<Message> domainCommands) {
+    private BlackBoxBoundedContext receivesCommands(Collection<CommandMessage> domainCommands) {
         List<Command> commands = domainCommands.stream()
                                                .map(requestFactory.command()::create)
                                                .collect(toList());
@@ -244,7 +247,7 @@ public class BlackBoxBoundedContext {
      *        event message and posted to the bus.
      * @return current instance
      */
-    public BlackBoxBoundedContext receivesEvent(Message messageOrEvent) {
+    public BlackBoxBoundedContext receivesEvent(EventMessage messageOrEvent) {
         return this.receivesEvents(singletonList(messageOrEvent));
     }
 
@@ -264,7 +267,7 @@ public class BlackBoxBoundedContext {
      */
     @SuppressWarnings("unused")
     public BlackBoxBoundedContext
-    receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+    receivesEvents(EventMessage firstEvent, EventMessage secondEvent, EventMessage... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
@@ -274,13 +277,13 @@ public class BlackBoxBoundedContext {
      * @param domainEvents a list of domain event to be dispatched to the Bounded Context
      * @return current instance
      */
-    private BlackBoxBoundedContext receivesEvents(Collection<Message> domainEvents) {
+    private BlackBoxBoundedContext receivesEvents(Collection<EventMessage> domainEvents) {
         List<Event> events = toEvents(domainEvents);
         eventBus.post(events, observer);
         return this;
     }
 
-    private List<Event> toEvents(Collection<Message> domainEvents) {
+    private List<Event> toEvents(Collection<EventMessage> domainEvents) {
         List<Event> events = newArrayListWithCapacity(domainEvents.size());
         for (Message domainEvent : domainEvents) {
             events.add(event(domainEvent));
@@ -288,16 +291,11 @@ public class BlackBoxBoundedContext {
         return events;
     }
 
-    public BlackBoxBoundedContext importsEvent(Message eventOrMessage) {
-        return this.importAll(singletonList(eventOrMessage));
+    public BlackBoxBoundedContext importsEvent(EventMessage eventMessage) {
+        return this.importAll(singletonList(eventMessage));
     }
 
-    public BlackBoxBoundedContext
-    importsEvents(Message firstEvent, Message secondEvent, Message ... otherEvents) {
-        return this.importAll(asList(firstEvent, secondEvent, otherEvents));
-    }
-
-    private BlackBoxBoundedContext importAll(Collection<Message> domainEvents) {
+    private BlackBoxBoundedContext importAll(Collection<EventMessage> domainEvents) {
         List<Event> events = toEvents(domainEvents);
         importBus.post(events, observer);
         return this;
@@ -307,13 +305,14 @@ public class BlackBoxBoundedContext {
      * Generates {@link Event} with the passed instance is an event message. If the passed
      * instance is {@code Event} returns it.
      *
-     * @param eventMessage a domain event message or {@code Event}
+     * @param eventOrMessage a domain event message or {@code Event}
      * @return a newly created {@code Event} instance or passed {@code Event}
      */
-    private Event event(Message eventMessage) {
-        if (eventMessage instanceof Event) {
-            return (Event) eventMessage;
+    private Event event(Message eventOrMessage) {
+        if (eventOrMessage instanceof Event) {
+            return (Event) eventOrMessage;
         }
+        EventMessage eventMessage = (EventMessage) eventOrMessage;
         return eventFactory.createEvent(eventMessage);
     }
 

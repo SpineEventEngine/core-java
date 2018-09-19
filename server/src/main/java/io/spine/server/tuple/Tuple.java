@@ -26,7 +26,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -44,7 +43,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class Tuple implements Iterable<EventMessage>, Serializable {
+public abstract class Tuple implements Iterable<Message>, Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -121,8 +120,8 @@ public abstract class Tuple implements Iterable<EventMessage>, Serializable {
     }
 
     @Override
-    public final @NonNull Iterator<EventMessage> iterator() {
-        Iterator<EventMessage> result = new ExtractingIterator(values);
+    public final @NonNull Iterator<Message> iterator() {
+        Iterator<Message> result = new ExtractingIterator(values);
         return result;
     }
 
@@ -159,7 +158,7 @@ public abstract class Tuple implements Iterable<EventMessage>, Serializable {
     /**
      * Traverses through elements obtaining a message value from them.
      */
-    private static final class ExtractingIterator extends UnmodifiableIterator<EventMessage> {
+    private static final class ExtractingIterator extends UnmodifiableIterator<Message> {
 
         private final Iterator<Element> source;
 
@@ -174,9 +173,9 @@ public abstract class Tuple implements Iterable<EventMessage>, Serializable {
         }
 
         @Override
-        public EventMessage next() {
+        public Message next() {
             Element next = source.next();
-            EventMessage result = next.getMessage();
+            Message result = next.getMessage();
             return result;
         }
     }

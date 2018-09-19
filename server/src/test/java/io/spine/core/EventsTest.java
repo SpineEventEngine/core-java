@@ -21,11 +21,9 @@ package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.DoubleValue;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.base.Time;
@@ -46,7 +44,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getMessage;
@@ -90,18 +87,13 @@ public class EventsTest {
     private Event event;
     private EventContext context;
 
-    private final StringValue stringValue = toMessage(newUuid());
-    private final BoolValue boolValue = toMessage(true);
-    @SuppressWarnings("MagicNumber")
-    private final DoubleValue doubleValue = toMessage(10.1);
-
     @BeforeEach
     void setUp() {
         TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(getClass());
         CommandEnvelope cmd = requestFactory.generateEnvelope();
         StringValue producerId = toMessage(getClass().getSimpleName());
         eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
-        event = eventFactory.createEvent(Time.getCurrentTime(), null);
+        event = eventFactory.createEvent(GivenEvent.message(), null);
         context = event.getContext();
     }
 
@@ -155,9 +147,9 @@ public class EventsTest {
         @Test
         @DisplayName("message")
         void message() {
-            createEventAndAssertReturnedMessageFor(stringValue);
-            createEventAndAssertReturnedMessageFor(boolValue);
-            createEventAndAssertReturnedMessageFor(doubleValue);
+            EventMessage message = GivenEvent.message();
+            Event event = GivenEvent.withMessage(message);
+            assertEquals(message, getMessage(event));
         }
 
         @Test
@@ -175,7 +167,7 @@ public class EventsTest {
             CommandEnvelope command = requestFactory.generateEnvelope();
             StringValue producerId = toMessage(getClass().getSimpleName());
             EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-            Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+            Event event = ef.createEvent(GivenEvent.message(), null);
 
             assertEquals(command.getId(), Events.getRootCommandId(event));
         }
@@ -186,18 +178,12 @@ public class EventsTest {
             CommandEnvelope command = requestFactory.generateEnvelope();
             StringValue producerId = toMessage(getClass().getSimpleName());
             EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-            Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+            Event event = ef.createEvent(GivenEvent.message(), null);
 
             TypeName typeName = EventEnvelope.of(event)
                                              .getTypeName();
             assertNotNull(typeName);
             assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
-        }
-
-        private void createEventAndAssertReturnedMessageFor(Message msg) {
-            Event event = GivenEvent.withMessage(msg);
-
-            assertEquals(msg, getMessage(event));
         }
     }
 

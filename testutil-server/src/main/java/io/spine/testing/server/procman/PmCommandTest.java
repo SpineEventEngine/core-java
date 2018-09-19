@@ -21,6 +21,7 @@
 package io.spine.testing.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Events;
@@ -42,7 +43,7 @@ import static io.spine.testing.server.procman.PmDispatcher.dispatch;
  * @author Vladyslav Lubenskyi
  */
 public abstract class PmCommandTest<I,
-                                    C extends Message,
+                                    C extends CommandMessage,
                                     S extends Message,
                                     P extends ProcessManager<I, S, ?>>
         extends CommandHandlerTest<I, C, S, P> {

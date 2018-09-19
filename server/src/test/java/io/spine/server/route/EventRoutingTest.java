@@ -24,12 +24,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.testing.TestValues;
-import io.spine.testing.server.TestEventFactory;
+import io.spine.core.given.GivenEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,8 +84,6 @@ class EventRoutingTest {
         }
     };
 
-    private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
-
     @BeforeEach
     void setUp() {
         eventRouting = EventRouting.withDefault(defaultRoute);
@@ -105,7 +101,7 @@ class EventRoutingTest {
 
     @Test
     @DisplayName("have default route")
-    void haveDefaultRoute() throws Exception {
+    void haveDefaultRoute() {
         assertNotNull(eventRouting.getDefault());
     }
 
@@ -170,7 +166,7 @@ class EventRoutingTest {
 
         // An event which has `Timestamp` as its message.
         // It should go through the default route, because only `StringValue` has a custom route.
-        Event event = eventFactory.createEvent(Time.getCurrentTime());
+        Event event = GivenEvent.arbitrary();
 
         Set<Long> ids = eventRouting.apply(event.getMessage(), event.getContext());
         assertEquals(DEFAULT_ROUTE, ids);
@@ -182,7 +178,7 @@ class EventRoutingTest {
         eventRouting.route(StringValue.class, customRoute);
 
         // An event which has `StringValue` as its message, which should go the custom route.
-        EventEnvelope event = EventEnvelope.of(eventFactory.createEvent(TestValues.newUuidValue()));
+        EventEnvelope event = EventEnvelope.of(GivenEvent.arbitrary());
 
         Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
         assertEquals(CUSTOM_ROUTE, ids);

@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.test.entity.event.EntProjectCreated;
 import io.spine.test.entity.event.EntProjectStarted;
@@ -59,7 +60,7 @@ class EventWhiteListTest {
     @Test
     @DisplayName("allow eventFactory of white list type")
     void acceptAllowed() {
-        Message event = EntProjectCreated.getDefaultInstance();
+        EventMessage event = EntProjectCreated.getDefaultInstance();
         Optional<? extends Message> result = whiteList.filter(event);
         assertTrue(result.isPresent());
         assertEquals(event, result.get());
@@ -80,8 +81,8 @@ class EventWhiteListTest {
     @Test
     @DisplayName("not allow events out from the white list")
     void denyEvents() {
-        Message event = EntTaskAdded.getDefaultInstance();
-        Optional<? extends Message> result = whiteList.filter(event);
+        EventMessage event = EntTaskAdded.getDefaultInstance();
+        Optional<? extends EventMessage> result = whiteList.filter(event);
         assertFalse(result.isPresent());
     }
 }

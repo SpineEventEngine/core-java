@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -63,7 +64,7 @@ public final class CommandFactory {
      * @throws ValidationException if the passed message does not satisfy the constraints
      *                             set for it in its Protobuf definition
      */
-    public Command create(Message message) throws ValidationException {
+    public Command create(CommandMessage message) throws ValidationException {
         checkNotNull(message);
         checkValid(message);
 
@@ -85,7 +86,7 @@ public final class CommandFactory {
      * @throws ValidationException if the passed message does not satisfy the constraints
      *                             set for it in its Protobuf definition
      */
-    public Command create(Message message, int targetVersion) throws ValidationException {
+    public Command create(CommandMessage message, int targetVersion) throws ValidationException {
         checkNotNull(message);
         checkValid(message);
 
@@ -108,7 +109,7 @@ public final class CommandFactory {
      */
     @Internal
     @VisibleForTesting
-    public Command createBasedOnContext(Message message, CommandContext context)
+    public Command createBasedOnContext(CommandMessage message, CommandContext context)
             throws ValidationException {
         checkNotNull(message);
         checkNotNull(context);
@@ -131,7 +132,7 @@ public final class CommandFactory {
      * @param context the context of the command
      * @return a new command
      */
-    private static Command createCommand(Message message, CommandContext context) {
+    private static Command createCommand(CommandMessage message, CommandContext context) {
         Any packed = AnyPacker.pack(message);
         Command.Builder result = Command
                 .newBuilder()

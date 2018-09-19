@@ -22,6 +22,7 @@ package io.spine.server.route;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 
@@ -42,8 +43,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of the entity IDs to which events are routed
  * @author Alexander Yevsyukov
  */
-public final class EventRouting<I> extends MessageRouting<EventContext, EventClass, Set<I>>
-        implements EventRoute<I, Message> {
+public final class EventRouting<I>
+        extends MessageRouting<EventMessage, EventContext, EventClass, Set<I>>
+        implements EventRoute<I, EventMessage> {
 
     private static final long serialVersionUID = 0L;
 
@@ -53,7 +55,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @param defaultRoute
      *        the route to use if a custom one is not {@linkplain #route(Class, EventRoute) set}
      */
-    private EventRouting(EventRoute<I, Message> defaultRoute) {
+    private EventRouting(EventRoute<I, EventMessage> defaultRoute) {
         super(defaultRoute);
     }
 
@@ -65,7 +67,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @return new routing instance
      */
     @CanIgnoreReturnValue
-    public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultRoute) {
+    public static <I> EventRouting<I> withDefault(EventRoute<I, EventMessage> defaultRoute) {
         checkNotNull(defaultRoute);
         return new EventRouting<>(defaultRoute);
     }
@@ -76,8 +78,8 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * <p>Overrides for return type covariance.
      */
     @Override
-    public final EventRoute<I, Message> getDefault() {
-        return (EventRoute<I, Message>) super.getDefault();
+    public final EventRoute<I, EventMessage> getDefault() {
+        return (EventRoute<I, EventMessage>) super.getDefault();
     }
 
     /**
@@ -87,7 +89,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @return {@code this} to allow chained calls when configuring the routing
      */
     @CanIgnoreReturnValue
-    public EventRouting<I> replaceDefault(EventRoute<I, Message> newDefault) {
+    public EventRouting<I> replaceDefault(EventRoute<I, EventMessage> newDefault) {
         return (EventRouting<I>) super.replaceDefault(newDefault);
     }
 
@@ -112,10 +114,11 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @throws IllegalStateException if the route for this event class is already set
      */
     @CanIgnoreReturnValue
-    public <E extends Message> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
+    public <E extends EventMessage> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        Route<Message, EventContext, Set<I>> casted = (Route<Message, EventContext, Set<I>>) via;
+        Route<EventMessage, EventContext, Set<I>> casted =
+                (Route<EventMessage, EventContext, Set<I>>) via;
         return (EventRouting<I>) doRoute(eventClass, casted);
     }
 
@@ -126,8 +129,8 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @param <M>        the type of the event message
      * @return optionally available route
      */
-    public <M extends Message> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
-        Optional<? extends Route<Message, EventContext, Set<I>>> optional = doGet(eventClass);
+    public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
+        Optional<? extends Route<EventMessage, EventContext, Set<I>>> optional = doGet(eventClass);
         if (optional.isPresent()) {
             @SuppressWarnings("unchecked") // Cast to external API.
             EventRoute<I, M> route = (EventRoute<I, M>) optional.get();

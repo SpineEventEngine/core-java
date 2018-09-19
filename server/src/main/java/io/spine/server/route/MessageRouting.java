@@ -41,25 +41,25 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <R> the type returned by the {@linkplain Route#apply(Message, Message) routing function}
  * @author Alexander Yevsyukov
  */
-abstract class MessageRouting<C extends Message, K extends MessageClass, R>
-        implements Route<Message, C, R> {
+abstract class MessageRouting<M extends Message, C extends Message, K extends MessageClass, R>
+        implements Route<M, C, R> {
 
     private static final long serialVersionUID = 0L;
 
     @SuppressWarnings("CollectionDeclaredAsConcreteClass") // We need a serializable field.
-    private final HashMap<K, Route<Message, C, R>> routes = Maps.newHashMap();
+    private final HashMap<K, Route<M, C, R>> routes = Maps.newHashMap();
 
     /** The default route to be used if there is no matching entry set in {@link #routes}. */
-    private Route<Message, C, R> defaultRoute;
+    private Route<M, C, R> defaultRoute;
 
-    MessageRouting(Route<Message, C, R> defaultRoute) {
+    MessageRouting(Route<M, C, R> defaultRoute) {
         this.defaultRoute = defaultRoute;
     }
 
     /**
      * Obtains the default route used by the schema.
      */
-    protected Route<Message, C, R> getDefault() {
+    protected Route<M, C, R> getDefault() {
         return defaultRoute;
     }
 
@@ -68,7 +68,7 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
      *
      * @param newDefault the new route to be used as default
      */
-    MessageRouting<C, K, R> replaceDefault(Route<Message, C, R> newDefault) {
+    MessageRouting<M, C, K, R> replaceDefault(Route<M, C, R> newDefault) {
         checkNotNull(newDefault);
         defaultRoute = newDefault;
         return this;
@@ -99,11 +99,11 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
      *
      * @param messageClass the class of messages to route
      * @param via          the instance of the route to be used
-     * @param <M>          the type of the message
+     * @param <T>          the type of the message
      * @throws IllegalStateException if the route for this message class is already set
      */
-    <M extends Message> MessageRouting<C, K, R> doRoute(Class<M> messageClass,
-                                                        Route<Message, C, R> via)
+    <T extends Message> MessageRouting<M, C, K, R> doRoute(Class<T> messageClass,
+                                                           Route<M, C, R> via)
             throws IllegalStateException {
         checkNotNull(messageClass);
         checkNotNull(via);
@@ -123,13 +123,13 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
      * Obtains a route for the passed message class.
      *
      * @param msgCls the class of the messages
-     * @param <M>    the type of the message
+     * @param <T>    the type of the message
      * @return optionally available route
      */
-    <M extends Message> Optional<? extends Route<Message, C, R>> doGet(Class<M> msgCls) {
+    <T extends Message> Optional<? extends Route<M, C, R>> doGet(Class<T> msgCls) {
         checkNotNull(msgCls);
         K cls = toMessageClass(msgCls);
-        Route<Message, C, R> route = routes.get(cls);
+        Route<M, C, R> route = routes.get(cls);
         return Optional.ofNullable(route);
     }
 
@@ -159,11 +159,11 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
      * @return the set of entity IDs to which the message should be delivered
      */
     @Override
-    public R apply(Message message, C context) {
+    public R apply(M message, C context) {
         checkNotNull(message);
         checkNotNull(context);
         K messageClass = toMessageClass(message);
-        Route<Message, C, R> func = routes.get(messageClass);
+        Route<M, C, R> func = routes.get(messageClass);
         if (func != null) {
             R result = func.apply(message, context);
             return result;

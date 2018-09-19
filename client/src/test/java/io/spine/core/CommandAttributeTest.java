@@ -20,9 +20,9 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.base.Time;
+import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +50,7 @@ class CommandAttributeTest {
 
     @BeforeEach
     void setUp() {
-        Command command = factory.createCommand(Empty.getDefaultInstance(),
+        Command command = factory.createCommand(RequiredFieldCommand.getDefaultInstance(),
                                                 Time.getCurrentTime());
         contextBuilder = command.getContext()
                                 .toBuilder();

@@ -22,7 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -148,7 +148,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateMessage() {
-            Message message = command.getMessage();
+            CommandMessage message = command.getMessage();
             if (isDefault(message)) {
                 addViolation("Non-default command message must be set.");
             }
@@ -164,8 +164,8 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateTargetId() {
-            Message message = command.getMessage();
-            Optional targetId = DefaultCommandRoute.asOptional(message);
+            CommandMessage message = command.getMessage();
+            Optional<?> targetId = DefaultCommandRoute.asOptional(message);
             if (targetId.isPresent()) {
                 String targetIdString = Identifier.toString(targetId.get());
                 if (targetIdString.equals(EMPTY_ID)) {

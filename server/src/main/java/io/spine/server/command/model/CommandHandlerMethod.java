@@ -22,6 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.EventProducer;
 import io.spine.server.command.CommandHandler;
@@ -66,8 +67,8 @@ public final class CommandHandlerMethod
 
         private Result(EventProducer producer, Object rawMethodResult) {
             super(producer, rawMethodResult);
-            List<Message> eventMessages = toMessages(rawMethodResult);
-            List<Message> filtered = filterEmpty(eventMessages);
+            List<EventMessage> eventMessages = toMessages(rawMethodResult);
+            List<EventMessage> filtered = filterEmpty(eventMessages);
             ensureNotEmptyIfNotProcessManager(filtered, rawMethodResult, producer);
             setMessages(filtered);
         }
