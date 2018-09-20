@@ -295,6 +295,11 @@ public class BlackBoxBoundedContext {
         return this.importAll(singletonList(eventMessage));
     }
 
+    public BlackBoxBoundedContext
+    importsEvents(EventMessage firstEvent, EventMessage secondEvent, EventMessage... otherEvents) {
+        return this.importAll(asList(firstEvent, secondEvent, otherEvents));
+    }
+
     private BlackBoxBoundedContext importAll(Collection<EventMessage> domainEvents) {
         List<Event> events = toEvents(domainEvents);
         importBus.post(events, observer);

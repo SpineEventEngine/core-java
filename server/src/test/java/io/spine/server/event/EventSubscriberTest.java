@@ -20,9 +20,10 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.BoolValue;
+import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
+import io.spine.test.event.FailRequested;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -99,9 +100,10 @@ class EventSubscriberTest {
                                   .size());
     }
 
-    private EventEnvelope createEvent(boolean value) {
-        return EventEnvelope.of(factory.createEvent(BoolValue.newBuilder()
-                                                             .setValue(value)
-                                                             .build()));
+    private EventEnvelope createEvent(boolean shouldFail) {
+        Event event = factory.createEvent(FailRequested.newBuilder()
+                                                       .setShouldFail(shouldFail)
+                                                       .build());
+        return EventEnvelope.of(event);
     }
 }

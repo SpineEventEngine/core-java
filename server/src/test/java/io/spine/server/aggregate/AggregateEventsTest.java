@@ -21,10 +21,10 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageEnvelope;
+import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.testing.Tests;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +49,7 @@ public class AggregateEventsTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         Command command = TestActorRequestFactory.newInstance(AggregateEventsTest.class)
-                                                 .createCommand(StringValue.of(""));
+                                                 .createCommand(AggCreateTask.getDefaultInstance());
         new NullPointerTester()
                 .setDefault(MessageEnvelope.class, CommandEnvelope.of(command))
                 .testAllPublicStaticMethods(AggregateEvents.class);

@@ -21,11 +21,11 @@
 package io.spine.server.route;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.test.commands.CmdCreateProject;
+import io.spine.test.route.RegisterUser;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,22 +54,22 @@ class CommandRoutingTest {
     private static final long CUSTOM_ANSWER = 100500L;
 
     /** A custom default route. */
-    private final CommandRoute<Long, Message> customDefault =
-            new CommandRoute<Long, Message>() {
+    private final CommandRoute<Long, CommandMessage> customDefault =
+            new CommandRoute<Long, CommandMessage>() {
                 private static final long serialVersionUID = 0L;
 
                 @Override
-                public Long apply(Message message, CommandContext context) {
+                public Long apply(CommandMessage message, CommandContext context) {
                     return DEFAULT_ANSWER;
                 }
             };
     /** A custom command path for {@code StringValue} command messages. */
-    private final CommandRoute<Long, StringValue> customRoute =
-            new CommandRoute<Long, StringValue>() {
+    private final CommandRoute<Long, RegisterUser> customRoute =
+            new CommandRoute<Long, RegisterUser>() {
                 private static final long serialVersionUID = 0L;
 
                 @Override
-                public Long apply(StringValue message, CommandContext context) {
+                public Long apply(RegisterUser message, CommandContext context) {
                     return CUSTOM_ANSWER;
                 }
             };
@@ -101,39 +101,39 @@ class CommandRoutingTest {
 
     @Test
     @DisplayName("replace default route")
-    void replaceDefaultRoute() throws Exception {
+    void replaceDefaultRoute() {
         assertEquals(commandRouting, commandRouting.replaceDefault(customDefault));
         assertEquals(customDefault, commandRouting.getDefault());
     }
 
     @Test
     @DisplayName("add custom route")
-    void addCustomRoute() throws Exception {
-        assertEquals(commandRouting, commandRouting.route(StringValue.class, customRoute));
+    void addCustomRoute() {
+        assertEquals(commandRouting, commandRouting.route(RegisterUser.class, customRoute));
 
-        assertEquals(customRoute, commandRouting.get(StringValue.class)
+        assertEquals(customRoute, commandRouting.get(RegisterUser.class)
                                                 .get());
     }
 
     @Test
     @DisplayName("not allow overwriting set route")
-    void notOverwriteSetRoute() throws Exception {
-        commandRouting.route(StringValue.class, customRoute);
+    void notOverwriteSetRoute() {
+        commandRouting.route(RegisterUser.class, customRoute);
         assertThrows(IllegalStateException.class,
-                     () -> commandRouting.route(StringValue.class, customRoute));
+                     () -> commandRouting.route(RegisterUser.class, customRoute));
     }
 
     @Test
     @DisplayName("remove previously set route")
     void removePreviouslySetRoute() {
-        commandRouting.route(StringValue.class, customRoute);
-        commandRouting.remove(StringValue.class);
+        commandRouting.route(RegisterUser.class, customRoute);
+        commandRouting.remove(RegisterUser.class);
     }
 
     @Test
     @DisplayName("throw ISE on removal if route is not set")
     void notRemoveIfRouteNotSet() {
-        assertThrows(IllegalStateException.class, () -> commandRouting.remove(StringValue.class));
+        assertThrows(IllegalStateException.class, () -> commandRouting.remove(RegisterUser.class));
     }
 
     @Test
@@ -144,7 +144,7 @@ class CommandRoutingTest {
         // Replace the default route since we have custom command message.
         commandRouting.replaceDefault(customDefault)
                       // Have custom route too.
-                      .route(StringValue.class, customRoute);
+                      .route(RegisterUser.class, customRoute);
 
         CmdCreateProject cmd = CmdCreateProject
                 .newBuilder()
@@ -163,7 +163,7 @@ class CommandRoutingTest {
         TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
         // Have custom route.
-        commandRouting.route(StringValue.class, customRoute);
+        commandRouting.route(RegisterUser.class, customRoute);
 
         CommandEnvelope command = factory.generateEnvelope();
 

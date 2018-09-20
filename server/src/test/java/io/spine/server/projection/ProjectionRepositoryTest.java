@@ -22,9 +22,8 @@ package io.spine.server.projection;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Event;
@@ -68,6 +67,7 @@ import java.util.Set;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -99,13 +99,10 @@ class ProjectionRepositoryTest
     }
 
     private static Event createEvent(TenantId tenantId,
-                                     Message eventMessage,
-                                     Any producerId,
+                                     EventMessage eventMessage,
                                      Timestamp when) {
         Version version = Versions.increment(Versions.zero());
-        return newEventFactory(tenantId, producerId).createEvent(eventMessage,
-                                                                 version,
-                                                                 when);
+        return newEventFactory(tenantId, PRODUCER_ID).createEvent(eventMessage, version, when);
     }
 
     /**
@@ -228,7 +225,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("several events")
         void severalEvents() {
-            checkDispatchesEvent(GivenEventMessage.projectCreated());
+            checkDispatchesEvent(projectCreated());
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             checkDispatchesEvent(GivenEventMessage.projectStarted());
         }
@@ -273,7 +270,7 @@ class ProjectionRepositoryTest
             assertFalse(addedTasks.isEmpty());
         }
 
-        private void checkDispatchesEvent(Message eventMessage) {
+        private void checkDispatchesEvent(EventMessage eventMessage) {
             TestEventFactory eventFactory = newEventFactory(tenantId(), PRODUCER_ID);
             Event event = eventFactory.createEvent(eventMessage);
 
@@ -291,7 +288,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("events")
         void events() {
-            PrjProjectCreated msg = GivenEventMessage.projectCreated();
+            PrjProjectCreated msg = projectCreated();
             TestEventFactory eventFactory = newEventFactory(tenantId(), pack(msg.getProjectId()));
             Event event = eventFactory.createEvent(msg);
 
@@ -302,7 +299,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("different events with same ID")
         void differentEventsWithSameId() {
-            PrjProjectCreated created = GivenEventMessage.projectCreated();
+            PrjProjectCreated created = projectCreated();
             PrjProjectArchived archived = GivenEventMessage.projectArchived();
             ProjectId id = created.getProjectId();
             TestEventFactory eventFactory = newEventFactory(tenantId(), pack(id));
@@ -338,9 +335,7 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("log error when dispatching unknown event")
     void logErrorOnUnknownEvent() {
-        StringValue unknownEventMessage = StringValue.getDefaultInstance();
-
-        Event event = GivenEvent.withMessage(unknownEventMessage);
+        Event event = GivenEvent.arbitrary();
 
         dispatchEvent(event);
 
@@ -397,10 +392,7 @@ class ProjectionRepositoryTest
         assertFalse(repo.loadAll()
                         .hasNext());
 
-        Event event = createEvent(tenantId(),
-                                  GivenEventMessage.projectCreated(),
-                                  PRODUCER_ID,
-                                  getCurrentTime());
+        Event event = createEvent(tenantId(), projectCreated(), getCurrentTime());
         repo.dispatch(EventEnvelope.of(event));
 
         Iterator<?> items = repo.loadAll();

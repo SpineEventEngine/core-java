@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
-import com.google.protobuf.StringValue;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -31,6 +30,7 @@ import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.transport.GrpcContainer;
+import io.spine.test.commandservice.CmdSDontHandle;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -141,7 +141,7 @@ class CommandServiceTest {
     void returnCommandUnsupportedError() {
         TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
-        Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
+        Command unsupportedCmd = factory.createCommand(CmdSDontHandle.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 

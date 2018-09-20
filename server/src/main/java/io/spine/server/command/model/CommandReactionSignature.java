@@ -23,6 +23,7 @@ package io.spine.server.command.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -100,7 +101,7 @@ public class CommandReactionSignature
         MESSAGE {
             @Override
             public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, Message.class);
+                return consistsOfSingle(methodParams, EventMessage.class);
             }
 
             @Override
@@ -112,7 +113,7 @@ public class CommandReactionSignature
         MESSAGE_AND_EVENT_CONTEXT {
             @Override
             public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, Message.class, EventContext.class);
+                return consistsOfTwo(methodParams, EventMessage.class, EventContext.class);
             }
 
             @Override
@@ -124,7 +125,7 @@ public class CommandReactionSignature
         MESSAGE_AND_COMMAND_CONTEXT {
             @Override
             public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, Message.class, CommandContext.class);
+                return consistsOfTwo(methodParams, EventMessage.class, CommandContext.class);
             }
 
             @Override

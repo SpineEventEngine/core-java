@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package spine.test.storage;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.storage";
+option java_outer_classname = "ImportEventProto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+message StateImported {
+    google.protobuf.Any state = 1;
+}

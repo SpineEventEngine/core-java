@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate.given;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
 import io.spine.core.UserId;
@@ -121,11 +120,11 @@ public class Given {
         }
 
         /**
-         * Creates a new {@link ACommand} with the given command message,
+         * Creates a new {@code ACommand} with the given command message,
          * userId and timestamp using default
          * {@link io.spine.core.CommandId CommandId} instance.
          */
-        public static Command create(Message command, UserId userId, Timestamp when) {
+        public static Command create(io.spine.base.CommandMessage command, UserId userId, Timestamp when) {
             Command result = TestActorRequestFactory.newInstance(userId)
                                                     .createCommand(command, when);
             return result;

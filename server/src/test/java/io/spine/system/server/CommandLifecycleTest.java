@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
@@ -264,7 +265,7 @@ class CommandLifecycleTest {
             assertEquals(expectedType, rejectionType);
         }
 
-        private CommandId postCommand(Message commandMessage) {
+        private CommandId postCommand(CommandMessage commandMessage) {
             Command command = requestFactory.createCommand(commandMessage);
             return postBuiltCommand(command);
         }

@@ -24,7 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.UserId;
@@ -87,7 +87,7 @@ public class MethodParamsTestEnv {
         MESSAGE_AND_CONTEXT {
             @Override
             public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, Message.class, CommandContext.class);
+                return consistsOfTwo(methodParams, CommandMessage.class, CommandContext.class);
             }
 
             @Override

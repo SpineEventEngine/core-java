@@ -22,10 +22,9 @@ package io.spine.server.aggregate.given.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
@@ -48,6 +47,7 @@ import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.Commands.getMessage;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
@@ -152,7 +152,7 @@ public class TestAggregate
     @VisibleForTesting
     public void dispatchCommands(Command... commands) {
         for (Command cmd : commands) {
-            Message commandMessage = Commands.getMessage(cmd);
+            CommandMessage commandMessage = getMessage(cmd);
             AggregateMessageDispatcher.dispatchCommand(this, env(commandMessage));
         }
     }

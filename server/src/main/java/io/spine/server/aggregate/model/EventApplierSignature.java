@@ -23,7 +23,7 @@ package io.spine.server.aggregate.model;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.declare.AccessModifier;
@@ -77,7 +77,7 @@ class EventApplierSignature
         MESSAGE {
             @Override
             public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, Message.class);
+                return consistsOfSingle(methodParams, EventMessage.class);
             }
 
             @Override

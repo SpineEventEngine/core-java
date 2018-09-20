@@ -21,7 +21,7 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -184,7 +184,7 @@ class MirrorEventsTest {
         }
     }
 
-    private static void play(MirrorProjection projection, Message eventMessage) {
+    private static void play(MirrorProjection projection, EventMessage eventMessage) {
         Event event = events.createEvent(eventMessage);
         dispatch(projection, event);
     }

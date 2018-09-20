@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package spine.test.aggregate.archiver;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.aggregate.archiver";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
+
+message Evaluated {
+    string cmd = 1;
+}

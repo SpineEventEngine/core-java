@@ -20,10 +20,11 @@
 
 package io.spine.server.projection.given;
 
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
+import io.spine.test.projection.event.Int32Imported;
+import io.spine.test.projection.event.StringImported;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -49,13 +50,13 @@ public class ProjectionTestEnv {
         }
 
         @Subscribe
-        void on(StringValue event) {
+        public void on(StringImported event) {
             StringValue newState = createNewState("stringState", event.getValue());
             getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
-        void on(Int32Value event) {
+        public void on(Int32Imported event) {
             StringValue newState = createNewState("integerState",
                                                   String.valueOf(event.getValue()));
             getBuilder().mergeFrom(newState);

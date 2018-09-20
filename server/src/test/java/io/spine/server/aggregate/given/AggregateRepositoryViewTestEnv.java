@@ -21,14 +21,16 @@
 package io.spine.server.aggregate.given;
 
 import com.google.common.base.Splitter;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.route.CommandRoute;
+import io.spine.test.aggregate.archiver.Evaluate;
+import io.spine.test.aggregate.archiver.Evaluated;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
@@ -61,14 +63,14 @@ public class AggregateRepositoryViewTestEnv {
         }
 
         @Assign
-        StringValue handle(StringValue commandMessage) {
-            String msg = commandMessage.getValue();
+        StringValue handle(Evaluate commandMessage) {
+            String command = commandMessage.getCmd();
             // Transform the command to the event (the fact in the past).
-            return toMessage(msg + 'd');
+            return toMessage(command + 'd');
         }
 
         @Apply
-        void on(StringValue eventMessage) {
+        void on(Evaluated eventMessage) {
             String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
             if (archived.name()
                         .equalsIgnoreCase(msg)) {
@@ -95,14 +97,14 @@ public class AggregateRepositoryViewTestEnv {
         /**
          * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
          */
-        private static final CommandRoute<Long, Message> parsingRoute =
-                new CommandRoute<Long, Message>() {
+        private static final CommandRoute<Long, CommandMessage> parsingRoute =
+                new CommandRoute<Long, CommandMessage>() {
 
                     private static final long serialVersionUID = 0L;
 
                     @Override
-                    public Long apply(Message message, CommandContext context) {
-                        Long result = getId((StringValue) message);
+                    public Long apply(CommandMessage message, CommandContext context) {
+                        Long result = getId((Evaluate) message);
                         return result;
                     }
                 };
@@ -115,22 +117,22 @@ public class AggregateRepositoryViewTestEnv {
         /**
          * Creates a command message in the form {@code <id>-<action>}.
          *
-         * @see #getId(StringValue)
-         * @see #getMessage(StringValue)
+         * @see #getId(Evaluate)
+         * @see #getMessage(Evaluated)
          */
-        public static StringValue createCommandMessage(Long id, String msg) {
+        public static Evaluate createCommandMessage(Long id, String msg) {
             return toMessage(format("%d%s%s", id, SEPARATOR, msg));
         }
 
-        private static Long getId(StringValue commandMessage) {
+        private static Long getId(Evaluate commandMessage) {
             return Long.valueOf(Splitter.on(SEPARATOR)
-                                        .splitToList(commandMessage.getValue())
+                                        .splitToList(commandMessage.getCmd())
                                         .get(0));
         }
 
-        static String getMessage(StringValue commandMessage) {
+        static String getMessage(Evaluated commandMessage) {
             return Splitter.on(SEPARATOR)
-                           .splitToList(commandMessage.getValue())
+                           .splitToList(commandMessage.getCmd())
                            .get(1);
         }
     }

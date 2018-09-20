@@ -23,6 +23,9 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.DispatchedCommand;
 import io.spine.core.EventContext;
@@ -42,21 +45,21 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 @Immutable
 enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(of(Message.class), false) {
+    MESSAGE(of(EventMessage.class), false) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
             return new Object[] {envelope.getMessage()};
         }
     },
 
-    MESSAGE_EVENT_CTX(of(Message.class, EventContext.class), false) {
+    MESSAGE_EVENT_CTX(of(EventMessage.class, EventContext.class), false) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
             return new Object[] {envelope.getMessage(), envelope.getEventContext()};
         }
     },
 
-    MESSAGE_COMMAND_CTX(of(Message.class, CommandContext.class), false) {
+    MESSAGE_COMMAND_CTX(of(RejectionMessage.class, CommandContext.class), false) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
@@ -67,7 +70,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
     },
 
-    MESSAGE_COMMAND_MSG(of(Message.class, Message.class), true) {
+    MESSAGE_COMMAND_MSG(of(RejectionMessage.class, CommandMessage.class), true) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
@@ -77,7 +80,10 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
     },
 
-    MESSAGE_COMMAND_MSG_COMMAND_CTX(of(Message.class, Message.class, CommandContext.class), true) {
+    MESSAGE_COMMAND_MSG_COMMAND_CTX(of(RejectionMessage.class,
+                                       CommandMessage.class,
+                                       CommandContext.class),
+                                    true) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();

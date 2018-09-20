@@ -22,8 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.protobuf.FloatValue;
-import com.google.protobuf.UInt64Value;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
@@ -58,6 +56,8 @@ import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
+import io.spine.test.aggregate.number.FloatEncountered;
+import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
@@ -98,9 +98,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
@@ -162,7 +159,8 @@ public class AggregateRepositoryTest {
             ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
             UncommittedEvents events = ((Aggregate<?, ?, ?>) expected).getUncommittedEvents();
-            repository().setSnapshotTrigger(events.list().size());
+            repository().setSnapshotTrigger(events.list()
+                                                  .size());
             repository().store(expected);
 
             ProjectAggregate actual = assertFound(id);
@@ -202,7 +200,8 @@ public class AggregateRepositoryTest {
             ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
             // This should make the repository write the snapshot.
             UncommittedEvents events = ((Aggregate<?, ?, ?>) aggregate).getUncommittedEvents();
-            repository().setSnapshotTrigger(events.list().size());
+            repository().setSnapshotTrigger(events.list()
+                                                  .size());
 
             repository().store(aggregate);
             AggregateStateRecord record = readRecord(aggregate);
@@ -606,9 +605,9 @@ public class AggregateRepositoryTest {
 
         // Passing negative float value should cause an exception.
         EventEnvelope envelope =
-                EventEnvelope.of(factory.createEvent(FloatValue.newBuilder()
-                                                               .setValue(-412.0f)
-                                                               .build()));
+                EventEnvelope.of(factory.createEvent(FloatEncountered.newBuilder()
+                                                                     .setNumber(-412.0f)
+                                                                     .build()));
         boundedContext().getEventBus()
                         .post(envelope.getOuterObject());
 
@@ -636,9 +635,9 @@ public class AggregateRepositoryTest {
 
         // Passing negative long value to `FailingAggregate` should cause a rejection.
         CommandEnvelope ce = CommandEnvelope.of(
-                requestFactory().createCommand(UInt64Value.newBuilder()
-                                                          .setValue(-100_000_000L)
-                                                          .build()));
+                requestFactory().createCommand(RejectNegativeLong.newBuilder()
+                                                                 .setNumber(-100_000_000L)
+                                                                 .build()));
         boundedContext().getCommandBus()
                         .post(ce.getCommand(), StreamObservers.noOpObserver());
 

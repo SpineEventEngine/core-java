@@ -31,6 +31,8 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
+import io.spine.test.projection.event.Int32Imported;
+import io.spine.test.projection.event.StringImported;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.BeforeEach;
@@ -116,23 +118,23 @@ class ProjectionShould {
     @DisplayName("expose `play events` operation to package")
     void exposePlayingEvents() {
         TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
-        StringValue strValue = StringValue.newBuilder()
-                                          .setValue("eins zwei drei")
-                                          .build();
-        Int32Value intValue = Int32Value.newBuilder()
-                                        .setValue(123)
-                                        .build();
+        StringImported stringImported = StringImported
+                .newBuilder()
+                .setValue("eins zwei drei")
+                .build();
+        Int32Imported integerImported = Int32Imported
+                .newBuilder()
+                .setValue(123)
+                .build();
         Version nextVersion = Versions.increment(projection.getVersion());
-        Event e1 = eventFactory.createEvent(strValue, nextVersion);
-        Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));
+        Event e1 = eventFactory.createEvent(stringImported, nextVersion);
+        Event e2 = eventFactory.createEvent(integerImported, Versions.increment(nextVersion));
 
         boolean projectionChanged = Projection.playOn(projection, ImmutableList.of(e1, e2));
 
-        String projectionState = projection.getState()
-                                           .getValue();
-
+        String projectionState = projection.getState().getValue();
         assertTrue(projectionChanged);
-        assertTrue(projectionState.contains(strValue.getValue()));
-        assertTrue(projectionState.contains(String.valueOf(intValue.getValue())));
+        assertTrue(projectionState.contains(stringImported.getValue()));
+        assertTrue(projectionState.contains(String.valueOf(integerImported.getValue())));
     }
 }

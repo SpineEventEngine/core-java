@@ -26,6 +26,7 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -189,7 +190,7 @@ public class HandlerMethodTestEnv {
 
         @Override
         public boolean matches(Class<?>[] methodParams) {
-            return consistsOfSingle(methodParams, Message.class);
+            return consistsOfSingle(methodParams, EventMessage.class);
         }
 
         @Override

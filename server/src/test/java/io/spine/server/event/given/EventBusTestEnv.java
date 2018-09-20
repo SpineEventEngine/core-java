@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -80,8 +81,8 @@ import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;
-import static java.lang.String.format;
 import static io.spine.util.Exceptions.unsupported;
+import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -155,7 +156,7 @@ public class EventBusTestEnv {
         return command;
     }
 
-    public static Command command(Message message) {
+    public static Command command(CommandMessage message) {
         return requestFactory.command()
                              .create(message);
     }

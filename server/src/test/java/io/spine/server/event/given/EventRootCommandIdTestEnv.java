@@ -21,7 +21,7 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -103,7 +103,7 @@ public class EventRootCommandIdTestEnv {
         return id;
     }
 
-    public static Command command(Message message) {
+    public static Command command(CommandMessage message) {
         return requestFactory.createCommand(message);
     }
 

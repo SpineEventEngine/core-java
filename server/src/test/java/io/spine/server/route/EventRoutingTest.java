@@ -22,12 +22,13 @@ package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.given.GivenEvent;
+import io.spine.test.route.UserRegistered;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.spine.core.Events.getMessage;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -62,24 +64,24 @@ class EventRoutingTest {
     private EventRouting<Long> eventRouting;
 
     /** A custom route for {@code StringValue} messages. */
-    private final EventRoute<Long, StringValue> customRoute = new EventRoute<Long, StringValue>() {
+    private final EventRoute<Long, UserRegistered> customRoute = new EventRoute<Long, UserRegistered>() {
 
         private static final long serialVersionUID = 0L;
 
         @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType") // return immutable instance
         @Override
-        public Set<Long> apply(StringValue message, EventContext context) {
+        public Set<Long> apply(UserRegistered message, EventContext context) {
             return CUSTOM_ROUTE;
         }
     };
 
     /** The default route to be used by the routing under the test. */
-    private final EventRoute<Long, Message> defaultRoute = new EventRoute<Long, Message>() {
+    private final EventRoute<Long, EventMessage> defaultRoute = new EventRoute<Long, EventMessage>() {
 
         private static final long serialVersionUID = 0L;
 
         @Override
-        public Set<Long> apply(Message message, EventContext context) {
+        public Set<Long> apply(EventMessage message, EventContext context) {
             return DEFAULT_ROUTE;
         }
     };
@@ -108,12 +110,12 @@ class EventRoutingTest {
     @Test
     @DisplayName("allow replacing default route")
     void allowReplacingDefaultRoute() {
-        EventRoute<Long, Message> newDefault = new EventRoute<Long, Message>() {
+        EventRoute<Long, EventMessage> newDefault = new EventRoute<Long, EventMessage>() {
 
             private static final long serialVersionUID = 0L;
 
             @Override
-            public Set<Long> apply(Message message, EventContext context) {
+            public Set<Long> apply(EventMessage message, EventContext context) {
                 return ImmutableSet.of(10L, 20L);
             }
         };
@@ -126,9 +128,9 @@ class EventRoutingTest {
     @Test
     @DisplayName("set custom route")
     void setCustomRoute() {
-        assertSame(eventRouting, eventRouting.route(StringValue.class, customRoute));
+        assertSame(eventRouting, eventRouting.route(UserRegistered.class, customRoute));
 
-        Optional<EventRoute<Long, StringValue>> route = eventRouting.get(StringValue.class);
+        Optional<EventRoute<Long, UserRegistered>> route = eventRouting.get(UserRegistered.class);
 
         assertTrue(route.isPresent());
         assertSame(customRoute, route.get());
@@ -137,16 +139,16 @@ class EventRoutingTest {
     @Test
     @DisplayName("not allow overwriting set route")
     void notOverwriteSetRoute() {
-        eventRouting.route(StringValue.class, customRoute);
+        eventRouting.route(UserRegistered.class, customRoute);
         assertThrows(IllegalStateException.class,
-                     () -> eventRouting.route(StringValue.class, customRoute));
+                     () -> eventRouting.route(UserRegistered.class, customRoute));
     }
 
     @Test
     @DisplayName("remove previously set route")
     void removePreviouslySetRoute() {
-        eventRouting.route(StringValue.class, customRoute);
-        eventRouting.remove(StringValue.class);
+        eventRouting.route(UserRegistered.class, customRoute);
+        eventRouting.remove(UserRegistered.class);
 
         assertFalse(eventRouting.doGet(StringValue.class)
                                 .isPresent());
@@ -155,27 +157,27 @@ class EventRoutingTest {
     @Test
     @DisplayName("throw ISE on removal if route is not set")
     void notRemoveIfRouteNotSet() {
-        assertThrows(IllegalStateException.class, () -> eventRouting.remove(StringValue.class));
+        assertThrows(IllegalStateException.class, () -> eventRouting.remove(UserRegistered.class));
     }
 
     @Test
     @DisplayName("apply default route")
     void applyDefaultRoute() {
         // Have custom route too.
-        eventRouting.route(StringValue.class, customRoute);
+        eventRouting.route(UserRegistered.class, customRoute);
 
         // An event which has `Timestamp` as its message.
         // It should go through the default route, because only `StringValue` has a custom route.
         Event event = GivenEvent.arbitrary();
 
-        Set<Long> ids = eventRouting.apply(event.getMessage(), event.getContext());
+        Set<Long> ids = eventRouting.apply(getMessage(event), event.getContext());
         assertEquals(DEFAULT_ROUTE, ids);
     }
 
     @Test
     @DisplayName("apply custom route")
     void applyCustomRoute() {
-        eventRouting.route(StringValue.class, customRoute);
+        eventRouting.route(UserRegistered.class, customRoute);
 
         // An event which has `StringValue` as its message, which should go the custom route.
         EventEnvelope event = EventEnvelope.of(GivenEvent.arbitrary());
