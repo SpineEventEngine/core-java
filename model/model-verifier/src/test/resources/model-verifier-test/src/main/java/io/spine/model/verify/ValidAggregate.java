@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * An Aggregate with a valid command handler method.
  *
- * <p>The command handler method handles command of type {@code Any}.
+ * <p>The command handler method handles command of type {@code SendMessage}.
  *
  * @author Dmytro Dashenkov
  */
@@ -44,7 +44,7 @@ class ValidAggregate extends Aggregate<String, Any, AnyVBuilder> {
     }
 
     @Assign
-    List<Message> handle(Any command) {
+    List<?> handle(SendMessage command) {
         return Collections.emptyList();
     }
 }
