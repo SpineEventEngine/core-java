@@ -21,8 +21,9 @@
 package io.spine.core;
 
 import com.google.protobuf.StringValue;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
-import io.spine.test.commands.RequiredFieldCommand;
+import io.spine.test.commands.CmdCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for {@linkplain CommandAttribute CommandAttribute API}.
@@ -50,17 +52,19 @@ class CommandAttributeTest {
 
     @BeforeEach
     void setUp() {
-        Command command = factory.createCommand(RequiredFieldCommand.getDefaultInstance(),
-                                                Time.getCurrentTime());
-        contextBuilder = command.getContext()
-                                .toBuilder();
+        CmdCreateProject commandMessage = CmdCreateProject
+                .newBuilder()
+                .setId(Identifier.newUuid())
+                .build();
+        Command command = factory.createCommand(commandMessage, Time.getCurrentTime());
+        contextBuilder = command.getContext().toBuilder();
     }
 
     private <T> void assertSetGet(CommandAttribute<T> attr, T value) {
         attr.setValue(contextBuilder, value);
 
         assertEquals(value, attr.getValue(contextBuilder.build())
-                                .get());
+                                .orElseGet(() -> fail("Attribute is absent.")));
     }
 
     @Test

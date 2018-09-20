@@ -80,9 +80,18 @@ class CommandsTest {
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
 
-    private static final CmdCreateProject createProject = CmdCreateProject.getDefaultInstance();
-    private static final CmdStartProject startProject = CmdStartProject.getDefaultInstance();
-    private static final CmdStopProject stopProject = CmdStopProject.getDefaultInstance();
+    private static final CmdCreateProject createProject = CmdCreateProject
+            .newBuilder()
+            .setId(Identifier.newUuid())
+            .build();
+    private static final CmdStartProject startProject = CmdStartProject
+            .newBuilder()
+            .setId(Identifier.newUuid())
+            .build();
+    private static final CmdStopProject stopProject = CmdStopProject
+            .newBuilder()
+            .setId(Identifier.newUuid())
+            .build();
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandsTest.class);
