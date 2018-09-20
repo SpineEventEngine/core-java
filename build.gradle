@@ -131,6 +131,8 @@ subprojects {
     apply plugin: 'net.ltgt.errorprone'
     apply plugin: spineProtobufPluginId
 
+    apply from: deps.scripts.javacArgs
+
     // Specific setup for a Travis build,
     // which prevents appearing of warning messages in build logs.
     //
@@ -164,6 +166,9 @@ subprojects {
     }
 
     dependencies {
+        errorprone deps.build.errorProneCore
+        errorproneJavac deps.build.errorProneJavac
+
         implementation deps.build.guava
 
         //TODO:2018-05-11:alexander.yevsyukov: Replace the below with Checker Framework
@@ -210,18 +215,6 @@ subprojects {
         options.tags = ["apiNote:a:API Note:",
                         "implSpec:a:Implementation Requirements:",
                         "implNote:a:Implementation Note:"]
-    }
-
-    tasks.withType(JavaCompile) {
-        // Exclude generated sources from being analyzed by Error Prone.
-        options.compilerArgs += [
-                // Turn Error Prone off for generated code.
-                '-XepExcludedPaths:.*/generated/.*',
-                
-                // Turn the check off until Error Prone can handle `@Nested` JUnit classes.
-                // See issue: https://github.com/google/error-prone/issues/956
-                '-Xep:ClassCanBeStatic:OFF'
-        ]
     }
     
     task sourceJar(type: Jar) {
