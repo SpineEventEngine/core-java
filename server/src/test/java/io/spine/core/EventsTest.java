@@ -22,7 +22,6 @@ package io.spine.core;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
@@ -32,6 +31,7 @@ import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
+import io.spine.test.core.given.GivenProjectCreated;
 import io.spine.testing.Tests;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeName;
@@ -183,7 +183,7 @@ public class EventsTest {
             TypeName typeName = EventEnvelope.of(event)
                                              .getTypeName();
             assertNotNull(typeName);
-            assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
+            assertEquals(GivenProjectCreated.class.getSimpleName(), typeName.getSimpleName());
         }
     }
 
