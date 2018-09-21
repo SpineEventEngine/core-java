@@ -54,7 +54,6 @@ import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggPauseProject;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.command.AggStartProject;
-import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -194,13 +193,12 @@ public class AggregateTest {
                     asAggregateClass(TestAggregate.class)
                             .getCommands();
 
-            assertEquals(4, commandClasses.size());
+            assertEquals(3, commandClasses.size());
 
             assertCommandClasses(commandClasses,
                                  AggCreateProject.class,
                                  AggAddTask.class,
-                                 AggStartProject.class,
-                                 ImportEvents.class);
+                                 AggStartProject.class);
         }
 
         @Test
@@ -532,23 +530,6 @@ public class AggregateTest {
         assertEquals(aggregate.getState(), anotherAggregate.getState());
         assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
         assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
-    }
-
-    @Test
-    @DisplayName("import events")
-    void importEvents() {
-        String projectName = getClass().getSimpleName();
-        ProjectId id = aggregate.getId();
-        ImportEvents importCmd =
-                ImportEvents.newBuilder()
-                            .setProjectId(id)
-                            .addEvent(event(projectCreated(id, projectName), 1))
-                            .addEvent(event(taskAdded(id), 2))
-                            .build();
-        aggregate.dispatchCommands(command(importCmd));
-
-        assertTrue(aggregate.isProjectCreatedEventApplied);
-        assertTrue(aggregate.isTaskAddedEventApplied);
     }
 
     @Test

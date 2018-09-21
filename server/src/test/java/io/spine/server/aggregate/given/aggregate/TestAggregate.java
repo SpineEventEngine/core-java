@@ -25,7 +25,6 @@ import com.google.protobuf.Empty;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -38,7 +37,6 @@ import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
-import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -108,11 +106,6 @@ public class TestAggregate
         isStartProjectCommandHandled = true;
         AggProjectStarted message = projectStarted(cmd.getProjectId());
         return newArrayList(message);
-    }
-
-    @Assign
-    List<Event> handle(ImportEvents command, CommandContext ctx) {
-        return command.getEventList();
     }
 
     @Apply
