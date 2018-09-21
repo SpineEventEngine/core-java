@@ -104,7 +104,7 @@ class Element implements Serializable {
     Message getMessage() {
         switch (type) {
             case MESSAGE:
-                return (EventMessage) value;
+                return (Message) value;
             case EITHER:
                 return ((Either) value).getValue();
             case OPTIONAL: {
@@ -126,7 +126,7 @@ class Element implements Serializable {
     private void writeObject(ObjectOutputStream o) throws IOException {
         o.writeObject(type);
         if (type == Type.OPTIONAL) {
-            Optional optionalValue = (Optional) value;
+            Optional<?> optionalValue = (Optional<?>) value;
             o.writeObject(optionalValue.orElse(null));
         }
         if (type != Type.OPTIONAL) {
