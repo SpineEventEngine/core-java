@@ -153,7 +153,7 @@ class EventImportTest {
         }
 
         private void assertImports(EventEnvelope event) {
-            boundedContext.importsEvent(event.getMessage())
+            boundedContext.importsEvent(event.getOuterObject())
                           .assertThat(emittedEvent(EngineStopped.class, once()));
         }
     }
@@ -168,7 +168,7 @@ class EventImportTest {
                 .build();
         EventEnvelope unsupported = createEvent(eventMessage, id);
 
-        boundedContext.importsEvent(unsupported.getMessage())
+        boundedContext.importsEvent(unsupported.getOuterObject())
                       .assertThat(ackedWithErrors());
     }
 

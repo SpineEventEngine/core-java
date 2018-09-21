@@ -37,13 +37,15 @@ import static com.google.common.collect.ImmutableList.copyOf;
  * @param <W> the type of the wrapper object containing messages
  * @author Alexander Yevsyukov
  */
-public abstract class EmittedMessages<C extends MessageClass, W extends Message> {
+public abstract class EmittedMessages<C extends MessageClass,
+                                      W extends Message,
+                                      M extends Message> {
 
     private final ImmutableList<W> messages;
-    private final MessageTypeCounter<C, W> countByType;
+    private final MessageTypeCounter<C, W, M> countByType;
     private final Class<W> wrapperClass;
 
-    EmittedMessages(List<W> messages, MessageTypeCounter<C, W> counter, Class<W> wrapperClass) {
+    EmittedMessages(List<W> messages, MessageTypeCounter<C, W, M> counter, Class<W> wrapperClass) {
         checkNotNull(messages);
         checkNotNull(counter);
         this.messages = copyOf(messages);
@@ -57,7 +59,7 @@ public abstract class EmittedMessages<C extends MessageClass, W extends Message>
     }
 
     /** Obtains the total number of messages of the passed type. */
-    public int count(Class<? extends Message> messageClass) {
+    public int count(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
         return countByType.get(messageClass);
     }
@@ -69,7 +71,7 @@ public abstract class EmittedMessages<C extends MessageClass, W extends Message>
     }
 
     /** Obtains the number of messages with the passed class. */
-    public boolean contain(Class<? extends Message> messageClass) {
+    public boolean contain(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
         return countByType.contains(messageClass);
     }

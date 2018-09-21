@@ -47,24 +47,25 @@ import static java.lang.String.format;
  * same object (not class).
  *
  * @param <T> the type of the target object
- * @param <M> the type of the message class
+ * @param <C> the type of the message class
  * @param <E> the type of message envelopes, in which the messages to handle are wrapped
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @Immutable
 public abstract class AbstractHandlerMethod<T,
-                                            M extends MessageClass,
+                                            M extends Message,
+                                            C extends MessageClass,
                                             E extends MessageEnvelope<?, ?, ?>,
                                             R extends MethodResult>
-        implements HandlerMethod<T, M, E, R> {
+        implements HandlerMethod<T, C, E, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
     private final Method method;
 
     /** The class of the first parameter. */
-    private final Class<? extends Message> messageClass;
+    private final Class<M> messageClass;
 
     /**
      * The set of the metadata attributes set via method annotations.
@@ -139,7 +140,7 @@ public abstract class AbstractHandlerMethod<T,
         return ImmutableSet.of(ExternalAttribute::of);
     }
 
-    protected final Class<? extends Message> rawMessageClass() {
+    protected final Class<M> rawMessageClass() {
         return messageClass;
     }
 
@@ -153,10 +154,10 @@ public abstract class AbstractHandlerMethod<T,
      * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
-    static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") /* We always expect first param as `Message`. */
-        Class<? extends Message> result =
-                (Class<? extends Message>) handler.getParameterTypes()[0];
+    static <M extends Message> Class<M> getFirstParamType(Method handler) {
+        @SuppressWarnings("unchecked")
+            // We always expect first param as a Message of required type.
+        Class<M> result = (Class<M>) handler.getParameterTypes()[0];
         return result;
     }
 
@@ -215,8 +216,9 @@ public abstract class AbstractHandlerMethod<T,
         }
     }
 
-    @SuppressWarnings("NoopMethodInAbstractClass") // to make it optional for descendants
-    protected void checkAttributesMatch(E envelope) {
+    @SuppressWarnings("NoopMethodInAbstractClass") // Optional for descendants.
+    protected void checkAttributesMatch(@SuppressWarnings("unused") // See suppression above.
+                                        E envelope) {
         // Do nothing by default.
     }
 
@@ -268,7 +270,8 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     /**
-     * @return full name of the handler method
+     * Obtains the full name of the handler method.
+     *
      * @see #getFullName()
      */
     @Override

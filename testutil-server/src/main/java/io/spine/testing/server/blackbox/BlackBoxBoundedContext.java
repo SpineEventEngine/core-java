@@ -115,7 +115,8 @@ public class BlackBoxBoundedContext {
      * Creates a new {@link io.spine.client.ActorRequestFactory actor request factory} for tests
      * with a provided tenant ID.
      *
-     * @param tenantId an identifier of a tenant that is executing requests in this Bounded Context
+     * @param tenantId
+     *         an identifier of a tenant that is executing requests in this Bounded Context
      * @return a new request factory instance
      */
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
@@ -127,8 +128,9 @@ public class BlackBoxBoundedContext {
      * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory
      * request factory}.
      *
-     * @param requestFactory a request factory bearing the actor and able to provide an origin for
-     *                       factory generated events
+     * @param requestFactory
+     *         a request factory bearing the actor and able to provide an origin for
+     *         factory generated events
      * @return a new event factory instance
      */
     private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
@@ -147,7 +149,8 @@ public class BlackBoxBoundedContext {
      * Creates a new instance of {@link TestEventFactory} which supplies the passed value
      * of the {@linkplain io.spine.core.EventContext#getProducerId() event producer ID}.
      *
-     * @param producerId can be {@code Integer}, {@code Long}, {@link String}, or {@code Message}
+     * @param producerId
+     *         can be {@code Integer}, {@code Long}, {@link String}, or {@code Message}
      */
     public TestEventFactory newEventFactory(Object producerId) {
         checkNotNull(producerId);
@@ -174,9 +177,12 @@ public class BlackBoxBoundedContext {
     /**
      * Registers passed repositories with the Bounded Context.
      *
-     * @param repositories repositories to register in the Bounded Context
-     * @param <I>          the type of IDs used in the repository
-     * @param <E>          the type of entities or aggregates
+     * @param repositories
+     *         repositories to register in the Bounded Context
+     * @param <I>
+     *         the type of IDs used in the repository
+     * @param <E>
+     *         the type of entities or aggregates
      * @return current instance
      */
     @SafeVarargs
@@ -197,37 +203,41 @@ public class BlackBoxBoundedContext {
     /**
      * Sends off a provided command to the Bounded Context.
      *
-     * @param domainCommand a domain command to be dispatched to the Bounded Context
+     * @param domainCommand
+     *         a domain command to be dispatched to the Bounded Context
      * @return current instance
      */
-    public BlackBoxBoundedContext receivesCommand(CommandMessage domainCommand) {
+    public BlackBoxBoundedContext receivesCommand(Message domainCommand) {
         return this.receivesCommands(singletonList(domainCommand));
     }
 
     /**
      * Sends off provided commands to the Bounded Context.
      *
-     * @param firstCommand  a domain command to be dispatched to the Bounded Context first
-     * @param secondCommand a domain command to be dispatched to the Bounded Context second
-     * @param otherCommands optional domain commands to be dispatched to the Bounded Context
-     *                      in supplied order
+     * @param firstCommand
+     *         a domain command to be dispatched to the Bounded Context first
+     * @param secondCommand
+     *         a domain command to be dispatched to the Bounded Context second
+     * @param otherCommands
+     *         optional domain commands to be dispatched to the Bounded Context
+     *         in supplied order
      * @return current instance
      */
     public BlackBoxBoundedContext
-    receivesCommands(CommandMessage firstCommand, CommandMessage secondCommand,
-                     CommandMessage... otherCommands) {
+    receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
         return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
     /**
      * Sends off a provided command to the Bounded Context.
      *
-     * @param domainCommands a list of domain commands to be dispatched to the Bounded Context
+     * @param domainCommands
+     *         a list of domain commands to be dispatched to the Bounded Context
      * @return current instance
      */
-    private BlackBoxBoundedContext receivesCommands(Collection<CommandMessage> domainCommands) {
+    private BlackBoxBoundedContext receivesCommands(Collection<Message> domainCommands) {
         List<Command> commands = domainCommands.stream()
-                                               .map(requestFactory.command()::create)
+                                               .map(this::command)
                                                .collect(toList());
         commandBus.post(commands, observer);
         return this;
@@ -241,13 +251,13 @@ public class BlackBoxBoundedContext {
      * Sends off a provided event to the Bounded Context.
      *
      * @param messageOrEvent
-     *        an event message or {@link Event}. If an instance of {@code Event} is passed, it
-     *        will be posted to {@link EventBus} as is.
-     *        Otherwise, an instance of {@code Event} will be generated basing on the passed
-     *        event message and posted to the bus.
+     *         an event message or {@link Event}. If an instance of {@code Event} is passed, it
+     *         will be posted to {@link EventBus} as is.
+     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
+     *         event message and posted to the bus.
      * @return current instance
      */
-    public BlackBoxBoundedContext receivesEvent(EventMessage messageOrEvent) {
+    public BlackBoxBoundedContext receivesEvent(Message messageOrEvent) {
         return this.receivesEvents(singletonList(messageOrEvent));
     }
 
@@ -259,31 +269,35 @@ public class BlackBoxBoundedContext {
      * Otherwise, an instance of {@code Event} will be generated basing on the passed event
      * message and posted to the bus.
      *
-     * @param firstEvent  a domain event to be dispatched to the Bounded Context first
-     * @param secondEvent a domain event to be dispatched to the Bounded Context second
-     * @param otherEvents optional domain events to be dispatched to the Bounded Context
-     *                    in supplied order
+     * @param firstEvent
+     *         a domain event to be dispatched to the Bounded Context first
+     * @param secondEvent
+     *         a domain event to be dispatched to the Bounded Context second
+     * @param otherEvents
+     *         optional domain events to be dispatched to the Bounded Context
+     *         in supplied order
      * @return current instance
      */
     @SuppressWarnings("unused")
     public BlackBoxBoundedContext
-    receivesEvents(EventMessage firstEvent, EventMessage secondEvent, EventMessage... otherEvents) {
+    receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
     /**
      * Sends off provided events to the Bounded Context.
      *
-     * @param domainEvents a list of domain event to be dispatched to the Bounded Context
+     * @param domainEvents
+     *         a list of domain event to be dispatched to the Bounded Context
      * @return current instance
      */
-    private BlackBoxBoundedContext receivesEvents(Collection<EventMessage> domainEvents) {
+    private BlackBoxBoundedContext receivesEvents(Collection<Message> domainEvents) {
         List<Event> events = toEvents(domainEvents);
         eventBus.post(events, observer);
         return this;
     }
 
-    private List<Event> toEvents(Collection<EventMessage> domainEvents) {
+    private List<Event> toEvents(Collection<Message> domainEvents) {
         List<Event> events = newArrayListWithCapacity(domainEvents.size());
         for (Message domainEvent : domainEvents) {
             events.add(event(domainEvent));
@@ -291,16 +305,16 @@ public class BlackBoxBoundedContext {
         return events;
     }
 
-    public BlackBoxBoundedContext importsEvent(EventMessage eventMessage) {
-        return this.importAll(singletonList(eventMessage));
+    public BlackBoxBoundedContext importsEvent(Message eventOrMessage) {
+        return this.importAll(singletonList(eventOrMessage));
     }
 
     public BlackBoxBoundedContext
-    importsEvents(EventMessage firstEvent, EventMessage secondEvent, EventMessage... otherEvents) {
+    importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.importAll(asList(firstEvent, secondEvent, otherEvents));
     }
 
-    private BlackBoxBoundedContext importAll(Collection<EventMessage> domainEvents) {
+    private BlackBoxBoundedContext importAll(Collection<Message> domainEvents) {
         List<Event> events = toEvents(domainEvents);
         importBus.post(events, observer);
         return this;
@@ -310,15 +324,25 @@ public class BlackBoxBoundedContext {
      * Generates {@link Event} with the passed instance is an event message. If the passed
      * instance is {@code Event} returns it.
      *
-     * @param eventOrMessage a domain event message or {@code Event}
+     * @param eventOrMessage
+     *         a domain event message or {@code Event}
      * @return a newly created {@code Event} instance or passed {@code Event}
      */
     private Event event(Message eventOrMessage) {
         if (eventOrMessage instanceof Event) {
             return (Event) eventOrMessage;
         }
-        EventMessage eventMessage = (EventMessage) eventOrMessage;
-        return eventFactory.createEvent(eventMessage);
+        EventMessage message = (EventMessage) eventOrMessage;
+        return eventFactory.createEvent(message);
+    }
+
+    private Command command(Message commandOrMessage) {
+        if (commandOrMessage instanceof Command) {
+            return (Command) commandOrMessage;
+        }
+        CommandMessage message = (CommandMessage) commandOrMessage;
+        return requestFactory.command()
+                             .create(message);
     }
 
     /*
@@ -328,7 +352,8 @@ public class BlackBoxBoundedContext {
     /**
      * Verifies emitted events by the passed verifier.
      *
-     * @param verifier a verifier that checks the events emitted in this Bounded Context
+     * @param verifier
+     *         a verifier that checks the events emitted in this Bounded Context
      * @return current instance
      */
     @CanIgnoreReturnValue
@@ -347,7 +372,8 @@ public class BlackBoxBoundedContext {
      * Executes the provided verifier, which throws an assertion error in case of
      * unexpected results.
      *
-     * @param verifier a verifier that checks the acknowledgements in this Bounded Context
+     * @param verifier
+     *         a verifier that checks the acknowledgements in this Bounded Context
      * @return current instance
      */
     @CanIgnoreReturnValue
@@ -360,7 +386,8 @@ public class BlackBoxBoundedContext {
     /**
      * Verifies emitted commands by the passed verifier.
      *
-     * @param verifier a verifier that checks the commands emitted in this Bounded Context
+     * @param verifier
+     *         a verifier that checks the commands emitted in this Bounded Context
      * @return current instance
      */
     @CanIgnoreReturnValue

@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -126,7 +125,7 @@ public final class EventFieldFilter implements EventFilter {
          *         the fields to <b>retain</b> in the event message
          * @return self for method chaining
          */
-        public Builder putMask(Class<? extends Message> eventClass, FieldMask mask) {
+        public Builder putMask(Class<? extends EventMessage> eventClass, FieldMask mask) {
             checkNotNull(eventClass);
             checkNotNull(mask);
             EventClass eventType = EventClass.from(eventClass);

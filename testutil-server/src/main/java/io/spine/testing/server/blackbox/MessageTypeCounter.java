@@ -40,13 +40,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mykhailo Drachuk
  * @author Alexander Yevsyukov
  */
-class MessageTypeCounter<C extends MessageClass, W extends Message> {
+class MessageTypeCounter<C extends MessageClass, W extends Message, M extends Message> {
 
     private final Map<C, Integer> countByType;
-    private final Function<Class<? extends Message>, C> rawClassFn;
+    private final Function<Class<? extends M>, C> rawClassFn;
 
-    MessageTypeCounter(List<W> wrappers, Function<W, C> classFn,
-                       Function<Class<? extends Message>, C> fn) {
+    MessageTypeCounter(List<W> wrappers,
+                       Function<W, C> classFn,
+                       Function<Class<? extends M>, C> fn) {
         checkNotNull(wrappers);
         Function<W, C> classFn1 = checkNotNull(classFn);
         Map<C, Integer> counters = new HashMap<>(wrappers.size());
@@ -63,7 +64,7 @@ class MessageTypeCounter<C extends MessageClass, W extends Message> {
      * Converts the raw class of a message into an instance of the generic
      * parameter {@code <C>}.
      */
-    private C toMessageClass(Class<? extends Message> rawClass) {
+    private C toMessageClass(Class<? extends M> rawClass) {
         return rawClassFn.apply(rawClass);
     }
 
@@ -72,13 +73,13 @@ class MessageTypeCounter<C extends MessageClass, W extends Message> {
         return countByType.getOrDefault(messageClass, 0);
     }
 
-    int get(Class<? extends Message> messageClass) {
+    int get(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
         C cls = toMessageClass(messageClass);
         return get(cls);
     }
 
-    boolean contains(Class<? extends Message> classOfMessage) {
+    boolean contains(Class<? extends M> classOfMessage) {
         checkNotNull(classOfMessage);
         C cls = toMessageClass(classOfMessage);
         boolean result = contains(cls);

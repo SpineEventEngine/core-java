@@ -121,7 +121,8 @@ public final class RejectionEnvelope
         Any producerId = throwableMessage.producerId()
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
-        Message thrownMessage = throwableMessage.getMessageThrown();
+        // TODO:2018-09-21:dmytro.dashenkov: Remeve case as soon as ThrowableMessage holds RejectionMessage.
+        RejectionMessage thrownMessage = (RejectionMessage) throwableMessage.getMessageThrown();
         RejectionEventContext context = rejectionContext(origin.getMessage(), throwableMessage);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
@@ -150,7 +151,10 @@ public final class RejectionEnvelope
     @Override
     public RejectionClass getMessageClass() {
         EventClass eventClass = event.getMessageClass();
-        RejectionClass rejectionClass = RejectionClass.of(eventClass.value());
+        @SuppressWarnings("unchecked") // Checked at runtime.
+        Class<? extends RejectionMessage> value =
+                (Class<? extends RejectionMessage>) eventClass.value();
+        RejectionClass rejectionClass = RejectionClass.of(value);
         return rejectionClass;
     }
 

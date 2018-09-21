@@ -23,9 +23,9 @@ package io.spine.server.commandbus;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
-import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -40,6 +40,7 @@ import io.spine.system.server.CommandAcknowledged;
 import io.spine.system.server.CommandErrored;
 import io.spine.system.server.MemoizingGateway;
 import io.spine.system.server.NoOpSystemGateway;
+import io.spine.test.commandbus.CmdBusStartProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -262,10 +263,14 @@ class CommandAckMonitorTest {
     }
 
     private static Ack rejectionAck(CommandId commandId) {
+        CommandMessage commandMessage = CmdBusStartProject
+                .newBuilder()
+                .setId(commandId.getUuid())
+                .build();
         Command command = Command
                 .newBuilder()
                 .setId(commandId)
-                .setMessage(pack(Time.getCurrentTime()))
+                .setMessage(pack(commandMessage))
                 .build();
         CommandEnvelope envelope = CommandEnvelope.of(command);
 

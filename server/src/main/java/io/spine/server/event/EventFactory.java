@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
@@ -60,8 +61,10 @@ public class EventFactory {
     /**
      * Creates a new event factory for producing events in response to the passed message.
      *
-     * @param origin     the message in response to which events will be generated
-     * @param producerId the ID of the entity producing the events
+     * @param origin
+     *         the message in response to which events will be generated
+     * @param producerId
+     *         the ID of the entity producing the events
      * @return new event factory
      */
     public static EventFactory on(MessageEnvelope origin, Any producerId) {
@@ -82,10 +85,13 @@ public class EventFactory {
      * <p>It is recommended to use a corresponding {@linkplain io.spine.validate.ValidatingBuilder
      * ValidatingBuilder} implementation to create a message.
      *
-     * @param message the message of the event or the message packed into {@code Any}
-     * @param version      the version of the entity which produces the event
-     * @throws ValidationException if the passed message does not satisfy the constraints
-     *                             set for it in its Protobuf definition
+     * @param message
+     *         the message of the event or the message packed into {@code Any}
+     * @param version
+     *         the version of the entity which produces the event
+     * @throws ValidationException
+     *         if the passed message does not satisfy the constraints
+     *         set for it in its Protobuf definition
      */
     public Event createEvent(EventMessage message,
                              @Nullable Version version) throws ValidationException {
@@ -93,37 +99,36 @@ public class EventFactory {
         return doCreateEvent(message, context);
     }
 
-    public Event createEvent(Any message,
-                             @Nullable Version version) throws ValidationException {
-        EventMessage eventMessage = AnyPacker.unpack(message);
-        return createEvent(eventMessage, version);
-    }
-
     /**
      * Creates a rejection event for the passed rejection message.
      *
-     * @param messageOrAny     the rejection message
-     * @param version          the version of the event to create
-     * @param rejectionContext the rejection context
+     * @param message
+     *         the rejection message
+     * @param version
+     *         the version of the event to create
+     * @param rejectionContext
+     *         the rejection context
      * @return new rejection event
-     * @throws ValidationException if the passed message does not satisfy the constraints
-     *                             set for it in its Protobuf definition
-     * @see #createEvent createEvent(Message, Version) - for general rules of the event construction
+     * @throws ValidationException
+     *         if the passed message does not satisfy the constraints
+     *         set for it in its Protobuf definition
+     * @see #createEvent createEvent(Message, Version) - for general rules of the event
+     *         construction
      */
-    public Event createRejectionEvent(Message messageOrAny,
+    public Event createRejectionEvent(RejectionMessage message,
                                       @Nullable Version version,
                                       RejectionEventContext rejectionContext)
             throws ValidationException {
         EventContext context = createContext(version, rejectionContext);
-        return doCreateEvent(messageOrAny, context);
+        return doCreateEvent(message, context);
     }
 
-    private static Event doCreateEvent(Message messageOrAny, EventContext context) {
-        checkNotNull(messageOrAny);
-        validate(messageOrAny);     // we must validate it now before emitting the next ID.
+    private static Event doCreateEvent(EventMessage message, EventContext context) {
+        checkNotNull(message);
+        validate(message);     // we must validate it now before emitting the next ID.
 
         EventId eventId = Events.generateId();
-        Event result = createEvent(eventId, messageOrAny, context);
+        Event result = createEvent(eventId, message, context);
         return result;
     }
 
@@ -135,8 +140,8 @@ public class EventFactory {
      */
     private static void validate(Message messageOrAny) throws ValidationException {
         Message message = messageOrAny instanceof Any
-                     ? AnyPacker.unpack((Any) messageOrAny)
-                     : messageOrAny;
+                          ? AnyPacker.unpack((Any) messageOrAny)
+                          : messageOrAny;
         checkArgument(messageOrAny instanceof EventMessage,
                       "%s is not an event type.", TypeName.of(messageOrAny));
         checkValid(message);
@@ -145,15 +150,18 @@ public class EventFactory {
     /**
      * Creates a new {@code Event} instance.
      *
-     * @param id           the ID of the event
-     * @param messageOrAny the event message or {@code Any} containing the message
-     * @param context      the event context
+     * @param id
+     *         the ID of the event
+     * @param message
+     *         the event message or {@code Any} containing the message
+     * @param context
+     *         the event context
      * @return created event instance
      */
-    static Event createEvent(EventId id, Message messageOrAny, EventContext context) {
-        checkNotNull(messageOrAny);
+    private static Event createEvent(EventId id, EventMessage message, EventContext context) {
+        checkNotNull(message);
         checkNotNull(context);
-        Any packed = pack(messageOrAny);
+        Any packed = pack(message);
         Event result = Event
                 .newBuilder()
                 .setId(id)

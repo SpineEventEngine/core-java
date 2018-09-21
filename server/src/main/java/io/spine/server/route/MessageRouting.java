@@ -77,7 +77,7 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
     /**
      * Creates an instance of {@link MessageClass} by the passed class of messages.
      */
-    abstract K toMessageClass(Class<? extends Message> classOfMessages);
+    abstract K toMessageClass(Class<? extends M> classOfMessages);
 
     /**
      * Creates an instance of {@link MessageClass} by the passed outer message object.
@@ -99,11 +99,9 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
      *
      * @param messageClass the class of messages to route
      * @param via          the instance of the route to be used
-     * @param <T>          the type of the message
      * @throws IllegalStateException if the route for this message class is already set
      */
-    <T extends Message> MessageRouting<M, C, K, R> doRoute(Class<T> messageClass,
-                                                           Route<M, C, R> via)
+    MessageRouting<M, C, K, R> doRoute(Class<? extends M> messageClass, Route<M, C, R> via)
             throws IllegalStateException {
         checkNotNull(messageClass);
         checkNotNull(via);
@@ -123,10 +121,9 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
      * Obtains a route for the passed message class.
      *
      * @param msgCls the class of the messages
-     * @param <T>    the type of the message
      * @return optionally available route
      */
-    <T extends Message> Optional<? extends Route<M, C, R>> doGet(Class<T> msgCls) {
+    Optional<? extends Route<M, C, R>> doGet(Class<? extends M> msgCls) {
         checkNotNull(msgCls);
         K cls = toMessageClass(msgCls);
         Route<M, C, R> route = routes.get(cls);
@@ -138,7 +135,7 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
      *
      * @throws IllegalStateException if a custom route for this message class was not previously set
      */
-    public void remove(Class<? extends Message> messageClass) {
+    public void remove(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
         K cls = toMessageClass(messageClass);
         if (!routes.containsKey(cls)) {

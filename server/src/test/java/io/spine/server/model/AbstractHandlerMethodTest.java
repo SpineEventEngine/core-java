@@ -23,6 +23,7 @@ package io.spine.server.model;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -62,9 +63,12 @@ class AbstractHandlerMethodTest {
     private final OneParamSignature signature = new OneParamSignature();
 
     private
-    AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> twoParamMethod;
+    AbstractHandlerMethod<Object, EventMessage, EventClass, EventEnvelope, MethodResult<Empty>>
+            twoParamMethod;
     private
-    AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> oneParamMethod;
+    AbstractHandlerMethod<Object, EventMessage, EventClass, EventEnvelope, MethodResult<Empty>>
+            oneParamMethod;
+
     private Object target;
 
     @BeforeEach
@@ -177,10 +181,9 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>>
-                    anotherMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod(),
-                                                       TwoParamSpec.INSTANCE);
-
+            AbstractHandlerMethod<?, ?, ?, ?, ?> anotherMethod =
+                    new TwoParamMethod(StubHandler.getTwoParameterMethod(),
+                                       TwoParamSpec.INSTANCE);
             assertEquals(twoParamMethod, anotherMethod);
         }
     }

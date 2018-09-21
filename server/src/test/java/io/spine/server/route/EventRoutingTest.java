@@ -22,12 +22,12 @@ package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.given.GivenEvent;
+import io.spine.test.route.UsedLoggedIn;
 import io.spine.test.route.UserRegistered;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -150,7 +150,7 @@ class EventRoutingTest {
         eventRouting.route(UserRegistered.class, customRoute);
         eventRouting.remove(UserRegistered.class);
 
-        assertFalse(eventRouting.doGet(StringValue.class)
+        assertFalse(eventRouting.doGet(UsedLoggedIn.class)
                                 .isPresent());
     }
 

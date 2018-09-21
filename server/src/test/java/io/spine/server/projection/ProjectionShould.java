@@ -21,14 +21,12 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
 import io.spine.test.projection.event.Int32Imported;
@@ -42,9 +40,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.testing.server.projection.ProjectionEventDispatcher.dispatch;
+import static java.lang.String.valueOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,21 +74,24 @@ class ProjectionShould {
     @Test
     @DisplayName("handle events")
     void handleEvents() {
-        String stringValue = newUuid();
-
-        dispatch(projection, toMessage(stringValue), EventContext.getDefaultInstance());
+        StringImported stringEvent = StringImported
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
+        dispatch(projection, stringEvent, EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
-                             .contains(stringValue));
-
+                             .contains(stringEvent.getValue()));
         assertTrue(projection.isChanged());
 
-        Integer integerValue = 1024;
-        dispatch(projection, toMessage(integerValue), EventContext.getDefaultInstance());
+        Int32Imported integerEvent = Int32Imported
+                .newBuilder()
+                .setValue(42)
+                .build();
+        dispatch(projection, integerEvent, EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
-                             .contains(String.valueOf(integerValue)));
-
+                             .contains(valueOf(integerEvent.getValue())));
         assertTrue(projection.isChanged());
     }
 
@@ -99,7 +100,7 @@ class ProjectionShould {
     void throwIfNoHandlerPresent() {
         assertThrows(IllegalStateException.class,
                      () -> dispatch(projection,
-                                    BoolValue.getDefaultInstance(),
+                                    GivenEvent.message(),
                                     EventContext.getDefaultInstance()));
     }
 
@@ -110,8 +111,8 @@ class ProjectionShould {
                 asProjectionClass(TestProjection.class).getEventClasses();
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
-        assertTrue(classes.contains(EventClass.from(StringValue.class)));
-        assertTrue(classes.contains(EventClass.from(Int32Value.class)));
+        assertTrue(classes.contains(EventClass.from(StringImported.class)));
+        assertTrue(classes.contains(EventClass.from(Int32Imported.class)));
     }
 
     @Test
@@ -135,6 +136,6 @@ class ProjectionShould {
         String projectionState = projection.getState().getValue();
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(stringImported.getValue()));
-        assertTrue(projectionState.contains(String.valueOf(integerImported.getValue())));
+        assertTrue(projectionState.contains(valueOf(integerImported.getValue())));
     }
 }

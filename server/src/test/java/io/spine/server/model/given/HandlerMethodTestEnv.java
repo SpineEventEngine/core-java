@@ -137,7 +137,11 @@ public class HandlerMethodTestEnv {
     }
 
     public static class TwoParamMethod
-            extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
+            extends AbstractHandlerMethod<Object,
+                                          EventMessage,
+                                          EventClass,
+                                          EventEnvelope,
+                                          MethodResult<Empty>> {
 
         public TwoParamMethod(Method method,
                               ParameterSpec<EventEnvelope> parameterSpec) {
@@ -161,7 +165,11 @@ public class HandlerMethodTestEnv {
     }
 
     public static class OneParamMethod
-            extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
+            extends AbstractHandlerMethod<Object,
+                                          EventMessage,
+                                          EventClass,
+                                          EventEnvelope,
+            MethodResult<Empty>> {
 
         public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
             super(method, parameterSpec);
@@ -242,35 +250,7 @@ public class HandlerMethodTestEnv {
         }
     }
 
-    private static class TwoParamSignature extends MethodSignature<TwoParamMethod, EventEnvelope> {
-
-        protected TwoParamSignature() {
-            super(Annotation.class);
-        }
-
-        @Override
-        public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
-            return TwoParamSpec.class;
-        }
-
-        @Override
-        protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-            return allModifiers();
-        }
-
-        @Override
-        protected ImmutableSet<Class<?>> getValidReturnTypes() {
-            return of(Object.class);
-        }
-
-        @Override
-        public TwoParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-            return new TwoParamMethod(method, parameterSpec);
-        }
-    }
-
     private static ImmutableSet<AccessModifier> allModifiers() {
         return of(PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE);
     }
-
 }

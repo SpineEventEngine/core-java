@@ -24,11 +24,13 @@ import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.base.Time;
 import io.spine.core.given.EventsTestEnv;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
 import io.spine.test.core.given.GivenProjectCreated;
@@ -52,6 +54,7 @@ import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
 import static io.spine.core.given.EventsTestEnv.tenantId;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
@@ -327,8 +330,12 @@ public class EventsTest {
                 .newBuilder()
                 .setStacktrace("at package.name.Class.method(Class.java:42)")
                 .build();
+        RejectionMessage message = StandardRejections.EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(pack(Time.getCurrentTime()))
+                .build();
         Event event =
-                eventFactory.createRejectionEvent(Time.getCurrentTime(), null, rejectionContext);
+                eventFactory.createRejectionEvent(message, null, rejectionContext);
         assertTrue(Events.isRejection(event));
     }
 

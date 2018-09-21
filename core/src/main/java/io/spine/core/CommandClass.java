@@ -23,6 +23,7 @@ package io.spine.core;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.type.MessageClass;
 
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public final class CommandClass extends MessageClass {
      * @param value class reference
      * @return new instance
      */
-    public static CommandClass from(Class<? extends Message> value) {
+    public static CommandClass from(Class<? extends CommandMessage> value) {
         return new CommandClass(checkNotNull(value));
     }
 
@@ -66,14 +67,14 @@ public final class CommandClass extends MessageClass {
      * @return new instance
      */
     public static CommandClass of(Message commandOrMessage) {
-        Message commandMessage = Commands.ensureMessage(commandOrMessage);
+        CommandMessage commandMessage = Commands.ensureMessage(commandOrMessage);
         return from(commandMessage.getClass());
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */
-    public static Set<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
+    public static Set<CommandClass> setOf(Iterable<Class<? extends CommandMessage>> classes) {
         ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
-        for (Class<? extends Message> cls : classes) {
+        for (Class<? extends CommandMessage> cls : classes) {
             builder.add(from(cls));
         }
         return builder.build();
@@ -81,7 +82,14 @@ public final class CommandClass extends MessageClass {
 
     /** Creates immutable set of {@code CommandClass} from the passed classes. */
     @SafeVarargs
-    public static Set<CommandClass> setOf(Class<? extends Message>... classes) {
+    public static Set<CommandClass> setOf(Class<? extends CommandMessage>... classes) {
         return setOf(Arrays.asList(classes));
+    }
+
+    @Override
+    public Class<? extends CommandMessage> value() {
+        @SuppressWarnings("unchecked") // Checked at runtime.
+        Class<? extends CommandMessage> value = (Class<? extends CommandMessage>) super.value();
+        return value;
     }
 }

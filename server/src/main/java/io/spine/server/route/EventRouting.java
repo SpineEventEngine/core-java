@@ -143,7 +143,7 @@ public final class EventRouting<I>
      * Creates {@link EventClass} by the passed class value.
      */
     @Override
-    EventClass toMessageClass(Class<? extends Message> classOfEvents) {
+    EventClass toMessageClass(Class<? extends EventMessage> classOfEvents) {
         return EventClass.from(classOfEvents);
     }
 

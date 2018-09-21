@@ -12,3 +12,7 @@ option java_multiple_files = true;
 message UserRegistered {
     uint64 id = 1;
 }
+
+message UsedLoggedIn {
+    uint64 id = 1;
+}
