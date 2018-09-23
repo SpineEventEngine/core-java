@@ -20,6 +20,7 @@
 
 package io.spine.system.server.given.entity;
 
+import io.spine.server.entity.EventFilter;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.system.server.PersonCreation;
 import io.spine.system.server.PersonId;
@@ -31,4 +32,10 @@ import io.spine.system.server.PersonId;
  */
 public class PersonProcmanRepository
         extends ProcessManagerRepository<PersonId, PersonProcman, PersonCreation> {
+
+    // Allow all events for the test purposes.
+    @Override
+    protected EventFilter eventFilter() {
+        return EventFilter.allowAll();
+    }
 }

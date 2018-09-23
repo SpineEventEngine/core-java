@@ -122,7 +122,7 @@ final class CommandLifecycleAggregate
     /**
      * Imports the event {@link TargetAssignedToCommand}.
      *
-     * <p>The event is generatef when the command target is determined.
+     * <p>The event is generated when the command target is determined.
      */
     @Apply(allowImport = true)
     void on(TargetAssignedToCommand event) {

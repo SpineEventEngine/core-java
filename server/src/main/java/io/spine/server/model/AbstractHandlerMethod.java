@@ -160,9 +160,6 @@ public abstract class AbstractHandlerMethod<T,
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Method getRawMethod() {
         return method;

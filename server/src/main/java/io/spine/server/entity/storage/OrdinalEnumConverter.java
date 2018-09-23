@@ -34,17 +34,11 @@ final class OrdinalEnumConverter extends EnumConverter {
         super(sourceType);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<? extends Serializable> getTargetType() {
         return Integer.class;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     Integer convertEnumValue(Enum value) {
         return value.ordinal();

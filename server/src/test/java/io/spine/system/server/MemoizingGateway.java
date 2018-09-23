@@ -32,6 +32,7 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyIterator;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * A {@link SystemGateway} which memoizes the posted system commands.
@@ -153,6 +154,15 @@ public final class MemoizingGateway implements SystemGateway {
     public MemoizedMessage lastSeenEvent() {
         assertNotNull(lastSeenEvent);
         return lastSeenEvent;
+    }
+
+    /**
+     * Checks that this gateway has never seen an event.
+     *
+     * <p>Fails if the check does not pass.
+     */
+    public void assertNoEvents() {
+        assertNull(lastSeenEvent, () -> lastSeenEvent.message().toString());
     }
 
     /**
