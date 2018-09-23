@@ -21,6 +21,8 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.IterableSubject;
+import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
@@ -59,9 +61,6 @@ import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.QueryBuilderTestEnv.newMessageId;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertSize;
-import static io.spine.testing.Verify.fail;
 import static io.spine.time.Durations2.fromHours;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
@@ -76,11 +75,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
-@DisplayName("Query builder should")
+@DisplayName("QueryBuilder should")
 class QueryBuilderTest {
 
     private QueryFactory factory;
@@ -136,7 +133,8 @@ class QueryBuilderTest {
                                                       .map(transformer)
                                                       .collect(toList());
 
-            assertSize(2, idValues);
+            Truth.assertThat(idValues)
+                 .hasSize(2);
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
         }
 
@@ -152,8 +150,11 @@ class QueryBuilderTest {
 
             FieldMask mask = query.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
-            assertSize(1, fieldNames);
-            assertContains(fieldName, fieldNames);
+
+            IterableSubject assertFieldNames = Truth.assertThat(fieldNames);
+
+            assertFieldNames.hasSize(1);
+            assertFieldNames.contains(fieldName);
         }
 
         @Test
@@ -172,10 +173,12 @@ class QueryBuilderTest {
             EntityFilters entityFilters = target.getFilters();
             List<CompositeColumnFilter> aggregatingColumnFilters =
                     entityFilters.getFilterList();
-            assertSize(1, aggregatingColumnFilters);
+            Truth.assertThat(aggregatingColumnFilters)
+                 .hasSize(1);
             CompositeColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
             Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
-            assertSize(1, columnFilters);
+            Truth.assertThat(columnFilters)
+                 .hasSize(1);
             Any actualValue = findByName(columnFilters, columnName).getValue();
             assertNotNull(columnValue);
             Int32Value messageValue = AnyPacker.unpack(actualValue);
@@ -202,7 +205,8 @@ class QueryBuilderTest {
             EntityFilters entityFilters = target.getFilters();
             List<CompositeColumnFilter> aggregatingColumnFilters =
                     entityFilters.getFilterList();
-            assertSize(1, aggregatingColumnFilters);
+            Truth.assertThat(aggregatingColumnFilters)
+                 .hasSize(1);
             Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
                                                                              .getFilterList();
             Any actualValue1 = findByName(columnFilters, columnName1).getValue();
@@ -237,7 +241,8 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             List<CompositeColumnFilter> filters = target.getFilters()
                                                         .getFilterList();
-            assertSize(2, filters);
+            Truth.assertThat(filters)
+                 .hasSize(2);
 
             CompositeColumnFilter firstFilter = filters.get(0);
             CompositeColumnFilter secondFilter = filters.get(1);
@@ -253,8 +258,11 @@ class QueryBuilderTest {
                 eitherColumnFilters = firstFilter.getFilterList();
                 allColumnFilters = secondFilter.getFilterList();
             }
-            assertSize(2, allColumnFilters);
-            assertSize(2, eitherColumnFilters);
+
+            Truth.assertThat(allColumnFilters)
+                 .hasSize(2);
+            Truth.assertThat(eitherColumnFilters)
+                 .hasSize(2);
 
             ColumnFilter companySizeLowerBound = allColumnFilters.get(0);
             assertEquals(companySizeColumn, companySizeLowerBound.getColumnName());
@@ -304,8 +312,11 @@ class QueryBuilderTest {
             // Check FieldMask
             FieldMask mask = query.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
-            assertSize(1, fieldNames);
-            assertContains(fieldName, fieldNames);
+
+            IterableSubject assertFieldNames = Truth.assertThat(fieldNames);
+
+            assertFieldNames.hasSize(1);
+            assertFieldNames.containsExactly(fieldName);
 
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
@@ -318,16 +329,21 @@ class QueryBuilderTest {
             Collection<Integer> intIdValues = idValues.stream()
                                                       .map(transformer)
                                                       .collect(toList());
-            assertSize(2, idValues);
+
+            Truth.assertThat(idValues)
+                 .hasSize(2);
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
             // Check query params
             List<CompositeColumnFilter> aggregatingColumnFilters =
                     entityFilters.getFilterList();
-            assertSize(1, aggregatingColumnFilters);
+
+            Truth.assertThat(aggregatingColumnFilters)
+                 .hasSize(1);
             Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
                                                                              .getFilterList();
-            assertSize(2, columnFilters);
+            Truth.assertThat(columnFilters)
+                 .hasSize(2);
 
             Any actualValue1 = findByName(columnFilters, columnName1).getValue();
             assertNotNull(actualValue1);
@@ -379,7 +395,8 @@ class QueryBuilderTest {
             EntityFilters filters = target.getFilters();
             Collection<EntityId> entityIds = filters.getIdFilter()
                                                     .getIdsList();
-            assertSize(messageIds.length, entityIds);
+            Truth.assertThat(entityIds)
+                 .hasSize(messageIds.length);
             Function<EntityId, TestEntityId> transformer = unpacker(TestEntityId.class);
             Iterable<? extends Message> actualValues = entityIds.stream()
                                                                 .map(transformer)
@@ -401,7 +418,8 @@ class QueryBuilderTest {
             FieldMask mask = query.getFieldMask();
 
             Collection<String> maskFields = mask.getPathsList();
-            assertSize(arrayFields.length, maskFields);
+            Truth.assertThat(maskFields)
+                 .hasSize(arrayFields.length);
             assertThat(maskFields, contains(arrayFields));
         }
     }

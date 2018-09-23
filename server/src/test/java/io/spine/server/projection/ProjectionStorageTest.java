@@ -45,6 +45,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
@@ -52,12 +53,10 @@ import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenPro
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertSize;
-import static io.spine.testing.Verify.assertThrows;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -140,11 +139,11 @@ public abstract class ProjectionStorageTest
 
             Iterator<EntityRecord> read = storage.readAll();
             Collection<EntityRecord> readRecords = newArrayList(read);
-            assertSize(ids.size(), readRecords);
+            assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
                 Project state = AnyPacker.unpack(record.getState());
                 ProjectId id = state.getId();
-                assertContains(id, ids);
+                assertThat(ids).contains(id);
             }
         }
 
@@ -162,7 +161,7 @@ public abstract class ProjectionStorageTest
 
             Iterator<EntityRecord> read = storage.readAll(fieldMask);
             Collection<EntityRecord> readRecords = newArrayList(read);
-            assertSize(ids.size(), readRecords);
+            assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
                 Any packedState = record.getState();
                 Project state = AnyPacker.unpack(packedState);
@@ -178,7 +177,7 @@ public abstract class ProjectionStorageTest
 
             Iterator<EntityRecord> read = storage.readMultiple(ids);
             Collection<EntityRecord> readRecords = newArrayList(read);
-            assertSize(ids.size(), readRecords);
+            assertThat(readRecords).hasSize(ids.size());
 
             // Check data consistency
             for (EntityRecord record : readRecords) {
@@ -199,7 +198,7 @@ public abstract class ProjectionStorageTest
 
             Iterator<EntityRecord> read = storage.readMultiple(ids, fieldMask);
             Collection<EntityRecord> readRecords = newArrayList(read);
-            assertSize(ids.size(), readRecords);
+            assertThat(readRecords).hasSize(ids.size());
 
             // Check data consistency
             for (EntityRecord record : readRecords) {

@@ -242,7 +242,7 @@ public final class BoundedContextBuilder implements Logging {
                 .orElseGet(InMemoryTransportFactory::newInstance);
         SystemContext system = buildSystem(transport);
         BoundedContext result = buildDefault(system, transport);
-        log().info(result.nameForLogging() + " created.");
+        log().debug(result.nameForLogging() + " created.");
         return result;
     }
 

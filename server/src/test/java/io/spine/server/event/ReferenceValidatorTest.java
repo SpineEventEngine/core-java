@@ -40,8 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.spine.testing.Verify.assertEmpty;
-import static io.spine.testing.Verify.assertSize;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -51,9 +50,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("ReferenceValidator should")
 class ReferenceValidatorTest {
 
@@ -80,8 +76,7 @@ class ReferenceValidatorTest {
         ValidationResult result = validator.validate();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
         assertNotNull(fieldMap);
-        assertFalse(fieldMap.isEmpty());
-        assertSize(1, fieldMap);
+        assertThat(fieldMap).hasSize(1);
 
         Iterator<? extends Map.Entry<?, ? extends Collection<?>>> fieldsIterator =
                 fieldMap.asMap()
@@ -99,8 +94,7 @@ class ReferenceValidatorTest {
         assertEquals("deleted_uid", eventFieldName);
 
         Collection<FieldDescriptor> enrichmentFields = fieldEntry.getValue();
-        assertFalse(enrichmentFields.isEmpty());
-        assertSize(1, enrichmentFields);
+        assertThat(enrichmentFields).hasSize(1);
 
         Iterator<FieldDescriptor> enrichmentFieldIterator = enrichmentFields.iterator();
         assertTrue(enrichmentFieldIterator.hasNext());
@@ -122,7 +116,7 @@ class ReferenceValidatorTest {
     @Test
     @DisplayName("skip mapping if no mapping function is defined")
     void skipMappingIfNoFuncDefined() {
-        // TODO:2018-07-30:dmytro.dashenkov: Moack does not work.
+        // TODO:2018-07-30:dmytro.dashenkov: Mock does not work.
         Enricher mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
                 .thenReturn(Optional.empty());
@@ -134,7 +128,7 @@ class ReferenceValidatorTest {
         List<EnrichmentFunction<?, ?, ?>> functions = result.getFunctions();
         assertTrue(functions.isEmpty());
         Multimap<FieldDescriptor, FieldDescriptor> fields = result.getFieldMap();
-        assertEmpty(fields);
+        assertThat(fields).isEmpty();
     }
 
     @Test
@@ -147,7 +141,7 @@ class ReferenceValidatorTest {
         ValidationResult result = validator.validate();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
         assertFalse(fieldMap.isEmpty());
-        assertSize(1, fieldMap);
+        assertThat(fieldMap).hasSize(1);
 
         Iterator<Map.Entry<FieldDescriptor, Collection<FieldDescriptor>>> mapIterator =
                 fieldMap.asMap()
@@ -162,7 +156,7 @@ class ReferenceValidatorTest {
         assertEquals("project_id", boundFieldName);
 
         Collection<FieldDescriptor> targets = singleEntry.getValue();
-        assertSize(1, targets);
+        assertThat(targets).hasSize(1);
 
         FieldDescriptor targetField = targets.iterator()
                                              .next();

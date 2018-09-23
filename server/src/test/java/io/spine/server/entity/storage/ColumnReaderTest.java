@@ -35,23 +35,18 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.ColumnReader.forClass;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertFalse;
-import static io.spine.testing.Verify.assertNotNull;
-import static io.spine.testing.Verify.assertSize;
-import static io.spine.testing.Verify.assertTrue;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Kuzmin
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */})
 @DisplayName("ColumnReader should")
 class ColumnReaderTest {
 
@@ -78,7 +73,7 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithManyGetters.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
-            assertSize(3, entityColumns);
+            assertThat(entityColumns).hasSize(3);
             assertTrue(containsColumn(entityColumns, "someMessage"));
             assertTrue(containsColumn(entityColumns, "integerFieldValue"));
             assertTrue(containsColumn(entityColumns, "floatNull"));
@@ -100,7 +95,7 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(RealLifeEntity.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
-            assertSize(5, entityColumns);
+            assertThat(entityColumns).hasSize(5);
             assertTrue(containsColumn(entityColumns, archived.name()));
             assertTrue(containsColumn(entityColumns, deleted.name()));
             assertTrue(containsColumn(entityColumns, "visible"));
@@ -114,7 +109,7 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
-            assertSize(1, entityColumns);
+            assertThat(entityColumns).hasSize(1);
             assertTrue(containsColumn(entityColumns, "integerFieldValue"));
         }
     }
@@ -128,7 +123,7 @@ class ColumnReaderTest {
         void inheritedNonPublicColumns() {
             ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-            assertSize(3, entityColumns);
+            assertThat(entityColumns).hasSize(3);
         }
 
         @Test

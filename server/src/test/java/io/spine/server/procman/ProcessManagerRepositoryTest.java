@@ -94,10 +94,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- */
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProcessManagerRepository should")
 class ProcessManagerRepositoryTest
         extends RecordBasedRepositoryTest<TestProcessManager,

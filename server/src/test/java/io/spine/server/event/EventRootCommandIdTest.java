@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
@@ -56,13 +57,8 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProjec
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Mykhailo Drachuk
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Event root CommandId should")
 public class EventRootCommandIdTest {
 
@@ -113,7 +109,7 @@ public class EventRootCommandIdTest {
             postCommand(command);
 
             List<Event> events = readEvents();
-            assertSize(3, events);
+            assertThat(events).hasSize(3);
             assertEquals(command.getId(), getRootCommandId(events.get(0)));
             assertEquals(command.getId(), getRootCommandId(events.get(1)));
             assertEquals(command.getId(), getRootCommandId(events.get(2)));
@@ -127,7 +123,7 @@ public class EventRootCommandIdTest {
             postCommand(command);
 
             List<Event> events = readEvents();
-            assertSize(1, events);
+            assertThat(events).hasSize(1);
 
             Event event = events.get(0);
             assertEquals(command.getId(), getRootCommandId(event));
@@ -141,7 +137,7 @@ public class EventRootCommandIdTest {
             postCommand(command);
 
             List<Event> events = readEvents();
-            assertSize(3, events);
+            assertThat(events).hasSize(3);
             assertEquals(command.getId(), getRootCommandId(events.get(0)));
             assertEquals(command.getId(), getRootCommandId(events.get(1)));
             assertEquals(command.getId(), getRootCommandId(events.get(2)));
@@ -173,7 +169,7 @@ public class EventRootCommandIdTest {
             postCommand(command);
 
             List<Event> events = readEvents();
-            assertSize(2, events);
+            assertThat(events).hasSize(2);
 
             Event reaction = events.get(1);
             assertEquals(command.getId(), getRootCommandId(reaction));
@@ -201,7 +197,7 @@ public class EventRootCommandIdTest {
             postCommand(command);
 
             List<Event> events = readEvents();
-            assertSize(2, events);
+            assertThat(events).hasSize(2);
 
             Event reaction = events.get(1);
             assertEquals(command.getId(), getRootCommandId(reaction));

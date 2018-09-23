@@ -33,9 +33,9 @@ ext {
     spineVersion = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.89-SNAPSHOT'
+    spineBaseVersion = '0.10.90-SNAPSHOT'
 
-    spineTimeVersion = '0.10.45-SNAPSHOT'
+    spineTimeVersion = '0.10.90-SNAPSHOT'
 
     gRpcVersion = '1.14.0'
 }

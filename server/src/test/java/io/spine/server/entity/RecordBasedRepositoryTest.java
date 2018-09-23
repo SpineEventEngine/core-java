@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
+import com.google.common.truth.IterableSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
@@ -55,10 +57,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.archive;
 import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertNotContains;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -134,6 +132,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         return repository.loadAll(ids);
     }
 
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // uses generic param <E> of the top class.
     private Iterator<E> loadAll() {
         return repository.loadAll();
     }
@@ -142,6 +141,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         return repository.findOrCreate(id);
     }
 
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // uses generic param <E> of the top class.
     private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
         return repository.find(filters, firstFieldOnly);
     }
@@ -194,11 +194,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             Collection<E> found = newArrayList(loadMany(ids));
 
-            assertSize(ids.size(), found);
-
-            for (E entity : found) {
-                assertContains(entity, entities);
-            }
+            assertThat(found).hasSize(ids.size());
+            assertThat(entities).containsAllIn(found);
         }
 
         @Test
@@ -228,9 +225,11 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             Collection<E> found = newArrayList(
                     repository.find(filters, FieldMask.getDefaultInstance())
             );
-            assertSize(1, found);
-            assertContains(entity1, found);
-            assertNotContains(entity2, found);
+
+            IterableSubject assertThatFound = assertThat(found);
+            assertThatFound.hasSize(1);
+            assertThatFound.contains(entity1);
+            assertThatFound.doesNotContain(entity2);
         }
 
         @Test
@@ -248,7 +247,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             Iterator<E> readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
 
-            assertSize(ids.size(), foundList);
+            assertThat(foundList).hasSize(ids.size());
             for (E entity : foundList) {
                 assertMatches(entity, firstFieldOnly);
             }
@@ -260,18 +259,19 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void allEntities() {
             List<E> entities = createAndStoreEntities(repository, 150);
             Collection<E> found = newArrayList(loadAll());
-            assertSize(entities.size(), found);
 
-            for (E entity : found) {
-                assertContains(entity, entities);
-            }
+            IterableSubject assertFoundEntities = assertThat(found);
+
+            assertFoundEntities.hasSize(entities.size());
+
+            assertThat(entities).containsExactlyElementsIn(found);
         }
 
         @Test
         @DisplayName("no entities if repository is empty")
         void noEntitiesIfEmpty() {
             Collection<E> found = newArrayList(loadAll());
-            assertSize(0, found);
+            assertThat(found).isEmpty();
         }
 
         private List<EntityId> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
@@ -336,11 +336,9 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         ids.add(sideEntity.getId());
 
         Collection<E> found = newArrayList(loadMany(ids));
-        assertSize(ids.size() - 1, found); // Check we've found all existing items
-
-        for (E entity : found) {
-            assertContains(entity, entities);
-        }
+        IterableSubject assertThatFound = assertThat(found);
+        assertThatFound.hasSize(ids.size() - 1); // Check we've found all existing items
+        assertThatFound.containsExactlyElementsIn(entities);
     }
 
     @Nested
@@ -411,7 +409,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                                             FieldMask.getDefaultInstance());
         List<E> foundList = newArrayList(found);
         // Check results
-        assertSize(1, foundList);
+        assertThat(foundList).hasSize(1);
         E actualEntity = foundList.get(0);
         assertEquals(activeEntity, actualEntity);
     }
@@ -443,8 +441,9 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         Iterator<E> found = repository.find(filters, FieldMask.getDefaultInstance());
         Collection<E> foundList = newArrayList(found);
         // Check result
-        assertSize(2, foundList);
-        assertContainsAll(foundList, activeEntity, deletedEntity);
+        IterableSubject assertFoundList = assertThat(foundList);
+        assertFoundList.hasSize(2);
+        assertFoundList.containsExactly(activeEntity, deletedEntity);
     }
 
     @Test
