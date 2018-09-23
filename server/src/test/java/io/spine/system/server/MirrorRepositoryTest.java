@@ -61,7 +61,7 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.archived;
-import static io.spine.system.server.given.mirror.RepositoryTestEnv.deleled;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.deleted;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.entityStateChanged;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.event;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.givenPhotos;
@@ -211,7 +211,7 @@ class MirrorRepositoryTest {
             }
 
             private void delete(Photo photo) {
-                dispatchEvent(deleled(photo));
+                dispatchEvent(deleted(photo));
             }
         }
 

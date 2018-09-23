@@ -23,7 +23,6 @@ package io.spine.system.server;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
@@ -63,14 +62,6 @@ final class EntityHistoryAggregate
     }
 
     @Assign
-    EntityCreated handle(CreateEntity command) {
-        return EntityCreated.newBuilder()
-                            .setId(command.getId())
-                            .setKind(command.getKind())
-                            .build();
-    }
-
-    @Assign
     EventDispatchedToSubscriber handle(DispatchEventToSubscriber command)
             throws CannotDispatchEventTwice {
         Event event = command.getEvent();
@@ -106,58 +97,7 @@ final class EntityHistoryAggregate
                                          .build();
     }
 
-    @Assign
-    EntityStateChanged handle(ChangeEntityState command, CommandContext context) {
-        return EntityStateChanged.newBuilder()
-                                 .setId(command.getId())
-                                 .addAllMessageId(command.getMessageIdList())
-                                 .setNewState(command.getNewState())
-                                 .setWhen(context.getActorContext()
-                                                 .getTimestamp())
-                                 .build();
-    }
-
-    @Assign
-    EntityArchived handle(ArchiveEntity command, CommandContext context) {
-        return EntityArchived.newBuilder()
-                             .setId(command.getId())
-                             .addAllMessageId(command.getMessageIdList())
-                             .setWhen(context.getActorContext()
-                                             .getTimestamp())
-                             .build();
-    }
-
-    @Assign
-    EntityDeleted handle(DeleteEntity command, CommandContext context) {
-        return EntityDeleted.newBuilder()
-                            .setId(command.getId())
-                            .addAllMessageId(command.getMessageIdList())
-                            .setWhen(context.getActorContext()
-                                            .getTimestamp())
-                            .build();
-    }
-
-    @Assign
-    EntityExtractedFromArchive handle(ExtractEntityFromArchive command, CommandContext context) {
-        return EntityExtractedFromArchive.newBuilder()
-                                         .setId(command.getId())
-                                         .addAllMessageId(command.getMessageIdList())
-                                         .setWhen(context.getActorContext()
-                                                         .getTimestamp())
-                                         .build();
-    }
-
-    @Assign
-    EntityRestored handle(RestoreEntity command, CommandContext context) {
-        return EntityRestored.newBuilder()
-                             .setId(command.getId())
-                             .addAllMessageId(command.getMessageIdList())
-                             .setWhen(context.getActorContext()
-                                             .getTimestamp())
-                             .build();
-    }
-
-    @Apply
+    @Apply(allowImport = true)
     void on(EntityCreated event) {
         getBuilder().setId(event.getId());
     }
@@ -180,33 +120,33 @@ final class EntityHistoryAggregate
         updateLastCommandTime(event.getWhenDispatched());
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(EntityStateChanged event) {
         getBuilder().setLastStateChange(event.getWhen());
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(EntityArchived event) {
         updateLifecycleFlags(builder -> builder.setArchived(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenArchived(whenOccurred));
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(EntityDeleted event) {
         updateLifecycleFlags(builder -> builder.setDeleted(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenDeleted(whenOccurred));
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(EntityExtractedFromArchive event) {
         updateLifecycleFlags(builder -> builder.setArchived(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenExtractedFromArchive(whenOccurred));
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(EntityRestored event) {
         updateLifecycleFlags(builder -> builder.setDeleted(false));
         Timestamp whenOccurred = event.getWhen();

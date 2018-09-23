@@ -70,28 +70,18 @@ public class EventClass extends MessageClass {
         return from(eventMessage.getClass());
     }
 
-    /**
-     * Creates a new instance of the event class.
-     *
-     * @param value a value to hold
-     * @return new instance
-     */
-    public static EventClass of(Class<? extends Message> value) {
-        return new EventClass(checkNotNull(value));
-    }
-
     /** Creates immutable set of {@code EventClass} from the passed set. */
-    public static Set<EventClass> setOf(Iterable<Class<? extends Message>> classes) {
+    public static ImmutableSet<EventClass> setOf(Iterable<Class<? extends Message>> classes) {
         ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
-            builder.add(of(cls));
+            builder.add(from(cls));
         }
         return builder.build();
     }
 
     /** Creates immutable set of {@code EventClass} from the passed classes. */
     @SafeVarargs
-    public static Set<EventClass> setOf(Class<? extends Message>... classes) {
+    public static ImmutableSet<EventClass> setOf(Class<? extends Message>... classes) {
         return setOf(Arrays.asList(classes));
     }
 }

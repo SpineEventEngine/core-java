@@ -81,7 +81,7 @@ class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
     void dispatchToSeveralShards() throws Exception {
         ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
-                        270, 1637, dispatchWaitTime()) {
+                        270, 1033, dispatchWaitTime()) {
                     @Override
                     protected ThreadStats<ProjectId> getStats() {
                         return DeliveryProjection.getStats();

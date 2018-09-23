@@ -18,12 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides test environment for {@link io.spine.system.server.ScheduledCommandTest}.
- */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.system.server.given.schedule;
+package io.spine.server.procman.given.repo;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.ParametersAreNonnullByDefault;
+import io.spine.server.entity.EventFilter;
+import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.test.procman.Project;
+import io.spine.test.procman.ProjectId;
+
+import java.util.Optional;
+
+/**
+ * A repository managing {@link TestProcessManager}s and discarding all the events from being
+ * posted.
+ *
+ * <p>Note that this behaviour is not expected in production PM repositories, since
+ * the "discard all" strategy breaks event PM dispatching. The same is true for
+ * the {@link io.spine.server.projection.ProjectionRepository ProjectionRepository}-s.
+ *
+ * @author Dmytro Dashenkov
+ */
+public final class EventDiscardingProcManRepository
+        extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
+
+    private static final EventFilter eventFilter = anyEvent -> Optional.empty();
+
+    @Override
+    protected EventFilter eventFilter() {
+        return eventFilter;
+    }
+}

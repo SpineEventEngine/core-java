@@ -18,12 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides test environment for {@link io.spine.system.server.ScheduledCommandTest}.
- */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.system.server.given.schedule;
+package io.spine.server.entity;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.common.collect.ImmutableCollection;
+import com.google.protobuf.Message;
+import io.spine.core.Event;
+
+import java.util.Collection;
+import java.util.Optional;
+
+import static com.google.common.collect.ImmutableList.copyOf;
+
+/**
+ * An {@link EventFilter} which allows any event to be posted unchanged.
+ *
+ * @author Dmytro Dashenkov
+ */
+enum NoOpEventFilter implements EventFilter {
+
+    INSTANCE;
+
+    @Override
+    public Optional<? extends Message> filter(Message event) {
+        return Optional.of(event);
+    }
+
+    /**
+     * {@inheritDoc}.
+     *
+     * @implSpec Overridden for performance reasons. The behavior of the parent method is unchanged.
+     */
+    @Override
+    public ImmutableCollection<Event> filter(Collection<Event> events) {
+        return copyOf(events);
+    }
+}

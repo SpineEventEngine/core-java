@@ -22,15 +22,19 @@ package io.spine.system.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.Query;
 
 import java.util.Iterator;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A gateway for sending messages into a {@link SystemContext}.
  *
  * @author Dmytro Dashenkov
  */
+@Internal
 public interface SystemGateway {
 
     /**
@@ -59,6 +63,7 @@ public interface SystemGateway {
      * Creates new instance of the gateway which serves the passed System Bounded Context.
      */
     static SystemGateway newInstance(SystemContext system) {
+        checkNotNull(system);
         return new DefaultSystemGateway(system);
     }
 
