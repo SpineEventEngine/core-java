@@ -20,10 +20,10 @@
 
 dependencies {
     compile "io.spine:spine-base:$spineBaseVersion"
-    compile "io.spine:spine-time:$spineTimeVersion"
+    compile "io.spine:spine-time:$spineBaseVersion"
 
     testImplementation project(path: ":testutil-core")
-    testImplementation "io.spine:spine-testutil-time:$spineTimeVersion"
+    testImplementation "io.spine:spine-testutil-time:$spineBaseVersion"
 }
 
 apply from: testArtifactsScript
