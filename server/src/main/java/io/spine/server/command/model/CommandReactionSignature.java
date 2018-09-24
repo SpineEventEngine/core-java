@@ -22,7 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -64,7 +64,7 @@ public class CommandReactionSignature
 
     @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(Message.class, Iterable.class, Optional.class);
+        return of(CommandMessage.class, Iterable.class, Optional.class);
     }
 
     @Override

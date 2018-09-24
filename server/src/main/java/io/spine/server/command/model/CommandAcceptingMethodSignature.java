@@ -22,7 +22,6 @@ package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
@@ -72,11 +71,6 @@ abstract class CommandAcceptingMethodSignature
     @Override
     protected ImmutableSet<Class<? extends Throwable>> getAllowedExceptions() {
         return of(ThrowableMessage.class);
-    }
-
-    @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(Message.class, Iterable.class);
     }
 
     /**
