@@ -33,15 +33,12 @@ import java.util.List;
 
 import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertFalse;
-import static io.spine.testing.Verify.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Kuzmin
- */
 @DisplayName("EntityColumnCache should")
 class EntityColumnCacheTest {
 
@@ -67,7 +64,15 @@ class EntityColumnCacheTest {
     @Test
     @DisplayName("be empty on creation")
     void beEmptyOnCreation() {
-        assertTrue(entityColumnCache.isEmpty());
+        assertEmpty(entityColumnCache);
+    }
+
+    private static void assertEmpty(EntityColumnCache cache) {
+        assertTrue(cache.isEmpty());
+    }
+
+    private static void assertNotEmpty(EntityColumnCache cache) {
+        assertFalse(cache.isEmpty());
     }
 
     @SuppressWarnings("CheckReturnValue")
@@ -77,18 +82,18 @@ class EntityColumnCacheTest {
     void cacheOnFirstAccess() {
         EntityColumnCache cacheForGetAll = EntityColumnCache.initializeFor(entityClass);
         cacheForGetAll.getColumns();
-        assertFalse(cacheForGetAll.isEmpty());
+        assertNotEmpty(cacheForGetAll);
 
         EntityColumnCache cacheForFind = EntityColumnCache.initializeFor(entityClass);
         cacheForFind.findColumn("floatNull");
-        assertFalse(cacheForFind.isEmpty());
+        assertNotEmpty(cacheForFind);
     }
 
     @Test
     @DisplayName("allow to forcefully cache columns")
     void forcefullyCache() {
         entityColumnCache.ensureColumnsCached();
-        assertFalse(entityColumnCache.isEmpty());
+        assertNotEmpty(entityColumnCache);
     }
 
     @Test

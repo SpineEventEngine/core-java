@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
@@ -41,15 +42,11 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Columns utility should")
 class ColumnsTest {
 
@@ -66,8 +63,7 @@ class ColumnsTest {
     private
     static void checkFields(EntityWithManyGetters entity, Map<String, MemoizedValue> fields) {
         assertNotNull(fields);
-
-        assertSize(3, fields);
+        assertThat(fields).hasSize(3);
 
         String floatNullKey = "floatNull";
         MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
@@ -102,7 +98,7 @@ class ColumnsTest {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(EntityWithManyGetters.class);
 
         assertNotNull(entityColumns);
-        assertSize(3, entityColumns);
+        assertThat(entityColumns).hasSize(3);
     }
 
     @Test

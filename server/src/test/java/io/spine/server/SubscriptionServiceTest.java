@@ -43,9 +43,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Versions.newVersion;
-import static io.spine.testing.Verify.assertInstanceOf;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,11 +58,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"})
-// JUnit nested classes cannot be static.
 @DisplayName("SubscriptionService should")
 class SubscriptionServiceTest {
 
@@ -99,7 +93,7 @@ class SubscriptionServiceTest {
             assertNotNull(subscriptionService);
 
             List<BoundedContext> boundedContexts = builder.getBoundedContexts();
-            assertSize(1, boundedContexts);
+            assertThat(boundedContexts).hasSize(1);
             assertTrue(boundedContexts.contains(oneContext));
         }
 
@@ -118,7 +112,7 @@ class SubscriptionServiceTest {
             assertNotNull(service);
 
             List<BoundedContext> boundedContexts = builder.getBoundedContexts();
-            assertSize(3, boundedContexts);
+            assertThat(boundedContexts).hasSize(3);
             assertTrue(boundedContexts.contains(firstBoundedContext));
             assertTrue(boundedContexts.contains(secondBoundedContext));
             assertTrue(boundedContexts.contains(thirdBoundedContext));
@@ -142,7 +136,7 @@ class SubscriptionServiceTest {
         assertNotNull(subscriptionService);
 
         List<BoundedContext> boundedContexts = builder.getBoundedContexts();
-        assertSize(1, boundedContexts);
+        assertThat(boundedContexts).hasSize(1);
         assertFalse(boundedContexts.contains(firstBoundedContext));
         assertFalse(boundedContexts.contains(secondBoundedContext));
         assertTrue(boundedContexts.contains(thirdBoundedContext));
@@ -151,8 +145,9 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("fail to initialize from empty builder")
     void notInitFromEmptyBuilder() {
-        assertThrows(IllegalStateException.class, () -> SubscriptionService.newBuilder()
-                                                                           .build());
+        assertThrows(IllegalStateException.class,
+                     () -> SubscriptionService.newBuilder()
+                                              .build());
     }
 
     /*
@@ -165,9 +160,10 @@ class SubscriptionServiceTest {
     void subscribeToTopic() {
         BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                     .add(boundedContext)
-                                                                     .build();
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
         String type = boundedContext.getStand()
                                     .getExposedTypes()
                                     .iterator()
@@ -254,7 +250,7 @@ class SubscriptionServiceTest {
 
         // Activate subscription.
         MemoizeStreamObserver<SubscriptionUpdate> activateSubscription =
-                spy(new MemoizeStreamObserver<SubscriptionUpdate>());
+                spy(new MemoizeStreamObserver<>());
         subscriptionService.activate(subscribeObserver.streamFlowValue(), activateSubscription);
 
         // Cancel subscription.
@@ -300,7 +296,7 @@ class SubscriptionServiceTest {
             assertNull(observer.streamFlowValue());
             assertFalse(observer.isCompleted());
             assertNotNull(observer.throwable());
-            assertInstanceOf(NullPointerException.class, observer.throwable());
+            assertThat(observer.throwable()).isInstanceOf(NullPointerException.class);
         }
 
         @SuppressWarnings("ConstantConditions")
@@ -319,7 +315,7 @@ class SubscriptionServiceTest {
             assertNull(observer.streamFlowValue());
             assertFalse(observer.isCompleted());
             assertNotNull(observer.throwable());
-            assertInstanceOf(NullPointerException.class, observer.throwable());
+            assertThat(observer.throwable()).isInstanceOf(NullPointerException.class);
         }
 
         @Test
@@ -350,7 +346,7 @@ class SubscriptionServiceTest {
             assertNotNull(observer.streamFlowValue());
             assertFalse(observer.isCompleted());
             assertNotNull(observer.throwable());
-            assertInstanceOf(RuntimeException.class, observer.throwable());
+            assertThat(observer.throwable()).isInstanceOf(RuntimeException.class);
             assertEquals(observer.throwable().getMessage(), rejectionMessage);
         }
     }

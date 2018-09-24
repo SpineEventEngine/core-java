@@ -285,7 +285,7 @@
     <inspection_tool class="InconsistentLanguageLevel" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="IncrementDecrementUsedAsExpression" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InnerClassMayBeStatic" enabled="true" level="WARNING" enabled_by_default="true">
-      <scope name="Tests" level="TYPO" enabled="false" />
+      <scope name="Tests" level="WARNING" enabled="false" />
     </inspection_tool>
     <inspection_tool class="InstanceMethodNamingConvention" enabled="true" level="INFO" enabled_by_default="true">
       <scope name="Tests" level="INFO" enabled="false">
@@ -345,38 +345,6 @@
     <inspection_tool class="JDBCPrepareStatementWithNonConstantString" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="JUnit5Converter" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="JavaDoc" enabled="true" level="WARNING" enabled_by_default="true">
-      <scope name="Tests" level="WARNING" enabled="false">
-        <option name="TOP_LEVEL_CLASS_OPTIONS">
-          <value>
-            <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-            <option name="REQUIRED_TAGS" value="" />
-          </value>
-        </option>
-        <option name="INNER_CLASS_OPTIONS">
-          <value>
-            <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-            <option name="REQUIRED_TAGS" value="" />
-          </value>
-        </option>
-        <option name="METHOD_OPTIONS">
-          <value>
-            <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-            <option name="REQUIRED_TAGS" value="" />
-          </value>
-        </option>
-        <option name="FIELD_OPTIONS">
-          <value>
-            <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />
-            <option name="REQUIRED_TAGS" value="" />
-          </value>
-        </option>
-        <option name="IGNORE_DEPRECATED" value="false" />
-        <option name="IGNORE_JAVADOC_PERIOD" value="false" />
-        <option name="IGNORE_DUPLICATED_THROWS" value="false" />
-        <option name="IGNORE_POINT_TO_ITSELF" value="false" />
-        <option name="myAdditionalJavadocTags" value="" />
-        <IGNORE_DUPLICATED_THROWS_TAGS value="false" />
-      </scope>
       <option name="TOP_LEVEL_CLASS_OPTIONS">
         <value>
           <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none" />

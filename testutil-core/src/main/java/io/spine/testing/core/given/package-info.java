@@ -18,35 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * This package provides testing environment utilities.
+ */
+
+@CheckReturnValue
+@ParametersAreNonnullByDefault
 package io.spine.testing.core.given;
 
-import io.spine.base.Identifier;
-import io.spine.testing.UtilityClassTest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-@DisplayName("GivenTenantId should")
-class GivenTenantIdTest extends UtilityClassTest<GivenTenantId> {
-
-    GivenTenantIdTest() {
-        super(GivenTenantId.class);
-    }
-
-    @Test
-    @DisplayName("create TenantId by string value")
-    void createByStringValue() {
-        String expected = Identifier.newUuid();
-
-        assertEquals(expected, GivenTenantId.of(expected)
-                                            .getValue());
-    }
-
-    @Test
-    @DisplayName("create TenantId by test class name")
-    void createByTestClassName() {
-        assertEquals(getClass().getSimpleName(), GivenTenantId.nameOf(getClass())
-                                                              .getValue());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

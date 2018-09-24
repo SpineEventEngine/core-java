@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
@@ -45,6 +46,7 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.getCurrentTime;
@@ -54,8 +56,6 @@ import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static io.spine.server.event.given.EventStoreTestEnv.initEventFactory;
 import static io.spine.server.event.given.EventStoreTestEnv.projectCreated;
 import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,10 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("EventStore should")
 public class EventStoreTest {
 
@@ -112,7 +108,7 @@ public class EventStoreTest {
             eventStore.read(query, new ResponseObserver(resultEvents, done));
             assertDone(done);
 
-            assertSize(1, resultEvents);
+            assertThat(resultEvents).hasSize(1);
             Event event = resultEvents.iterator()
                                       .next();
             assertEquals(eventInPresent, event);
@@ -145,8 +141,9 @@ public class EventStoreTest {
             eventStore.read(query, new ResponseObserver(resultEvents, done));
             assertDone(done);
 
-            assertSize(2, resultEvents);
-            assertContainsAll(resultEvents, taskAdded1, teasAdded2);
+            IterableSubject assertResultEvents = assertThat(resultEvents);
+            assertResultEvents.hasSize(2);
+            assertResultEvents.containsExactly(taskAdded1, teasAdded2);
         }
 
         @Test
@@ -180,10 +177,9 @@ public class EventStoreTest {
             eventStore.read(query, new ResponseObserver(resultEvents, done));
             assertDone(done);
 
-            assertSize(1, resultEvents);
-            Event event = resultEvents.iterator()
-                                      .next();
-            assertEquals(eventInFuture, event);
+            IterableSubject assertResultEvents = assertThat(resultEvents);
+            assertResultEvents.hasSize(1);
+            assertResultEvents.containsExactly(eventInFuture);
         }
     }
 

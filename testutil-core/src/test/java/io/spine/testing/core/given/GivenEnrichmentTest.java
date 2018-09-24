@@ -22,26 +22,20 @@ package io.spine.testing.core.given;
 
 import com.google.protobuf.Any;
 import io.spine.core.Enrichment;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertSize;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
 
-/**
- * @author Dmytro Grankin
- */
 @DisplayName("GivenEnrichment should")
-class GivenEnrichmentTest {
+class GivenEnrichmentTest extends UtilityClassTest<GivenEnrichment> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(GivenEnrichment.class);
+    GivenEnrichmentTest() {
+        super(GivenEnrichment.class);
     }
 
     @Test
@@ -50,6 +44,6 @@ class GivenEnrichmentTest {
         Enrichment enrichment = withOneAttribute();
         Map<String, Any> enrichmentAttributes = enrichment.getContainer()
                                                           .getItemsMap();
-        assertSize(1, enrichmentAttributes);
+        assertThat(enrichmentAttributes).hasSize(1);
     }
 }

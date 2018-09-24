@@ -20,6 +20,7 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.truth.IterableSubject;
 import io.spine.base.Error;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Ack;
@@ -53,13 +54,12 @@ import org.mockito.ArgumentCaptor;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,10 +72,8 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.
- *
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ProtectedField") // OK for brevity of derived tests.
+@SuppressWarnings("ProtectedField") // for brevity of derived tests.
 abstract class AbstractCommandBusTestSuite {
 
     private final boolean multitenant;
@@ -216,13 +214,14 @@ abstract class AbstractCommandBusTestSuite {
         @SuppressWarnings("unchecked") ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
         verify(spy).store(storingCaptor.capture());
         Iterable<Command> storingArgs = storingCaptor.getValue();
-        assertSize(commands.size(), storingArgs);
-        assertContainsAll(storingArgs, first, second);
+        IterableSubject assertStoringArgs = assertThat(storingArgs);
+        assertStoringArgs.hasSize(commands.size());
+        assertStoringArgs.containsExactly(first, second);
 
         ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
         verify(spy, times(2)).dispatch(postingCaptor.capture());
         List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
-        assertSize(commands.size(), postingArgs);
+        assertThat(postingArgs).hasSize(commands.size());
         assertEquals(commands.get(0), postingArgs.get(0).getCommand());
         assertEquals(commands.get(1), postingArgs.get(1).getCommand());
 

@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
+import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.ColumnFilter;
@@ -39,6 +40,7 @@ import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
@@ -48,18 +50,11 @@ import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.entity.storage.QueryParameters.newBuilder;
 import static io.spine.server.storage.EntityField.version;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("QueryParameters should")
 class QueryParametersTest {
 
@@ -151,16 +146,15 @@ class QueryParametersTest {
         CompositeQueryParameter parameter = from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
-        assertSize(1, newArrayList(parameters));
         CompositeQueryParameter singleParameter = parameters.iterator()
                                                             .next();
         Multimap<EntityColumn, ColumnFilter> actualFilters = singleParameter.getFilters();
         for (int i = 0; i < columns.length; i++) {
             EntityColumn column = columns[i];
             Collection<ColumnFilter> readFilters = actualFilters.get(column);
-            assertFalse(readFilters.isEmpty());
-            assertSize(1, readFilters);
-            assertEquals(filters[i], readFilters.iterator().next());
+            assertThat(readFilters).hasSize(1);
+            assertEquals(filters[i], readFilters.iterator()
+                                                .next());
         }
     }
 
@@ -185,13 +179,15 @@ class QueryParametersTest {
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
         List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
-        assertSize(1, aggregatingParameters);
+        assertThat(aggregatingParameters).hasSize(1);
         Multimap<EntityColumn, ColumnFilter> actualColumnFilters =
                 aggregatingParameters.get(0)
                                      .getFilters();
         Collection<ColumnFilter> timeFilters = actualColumnFilters.get(column);
-        assertSize(2, timeFilters);
-        assertContainsAll(timeFilters, startTimeFilter, deadlineFilter);
+
+        IterableSubject assertTimeFilters = assertThat(timeFilters);
+        assertTimeFilters.hasSize(2);
+        assertTimeFilters.containsExactly(startTimeFilter, deadlineFilter);
     }
 
     private static EntityColumn mockColumn() {

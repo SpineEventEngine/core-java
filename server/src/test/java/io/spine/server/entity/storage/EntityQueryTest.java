@@ -22,9 +22,11 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.StringSubject;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
 import io.spine.client.EntityIdFilter;
@@ -44,13 +46,13 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertContains;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -58,9 +60,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("EntityQuery should")
 class EntityQueryTest {
@@ -83,9 +82,10 @@ class EntityQueryTest {
         ColumnFilter filter = ColumnFilters.eq(columnName, false);
         Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
-        QueryParameters parameters = QueryParameters.newBuilder()
-                                                    .add(parameter)
-                                                    .build();
+        QueryParameters parameters = QueryParameters
+                .newBuilder()
+                .add(parameter)
+                .build();
         Set<String> ids = singleton("my-awesome-ID");
         EntityQuery<String> query = EntityQuery.of(ids, parameters);
         reserializeAndAssert(query);
@@ -103,12 +103,12 @@ class EntityQueryTest {
         params.put(someColumn, someValue);
 
         EntityQuery query = EntityQuery.of(ids, paramsFromValues(params));
-        String repr = query.toString();
 
-        assertContains(query.getIds()
-                            .toString(), repr);
-        assertContains(query.getParameters()
-                            .toString(), repr);
+        StringSubject assertQuery = assertThat(query.toString());
+        assertQuery.contains(query.getIds()
+                                  .toString());
+        assertQuery.contains(query.getParameters()
+                                  .toString());
     }
 
     @Test
@@ -129,10 +129,11 @@ class EntityQueryTest {
         CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()), ALL
         );
-        QueryParameters parameters = QueryParameters.newBuilder()
-                                                    .add(queryParameter)
-                                                    .build();
-        EntityQuery<String> query = EntityQuery.of(Collections.<String>emptySet(), parameters);
+        QueryParameters parameters = QueryParameters
+                .newBuilder()
+                .add(queryParameter)
+                .build();
+        EntityQuery<String> query = EntityQuery.of(ImmutableSet.of(), parameters);
         assertFalse(query.canAppendLifecycleFlags());
     }
 
@@ -203,11 +204,12 @@ class EntityQueryTest {
         Multimap<EntityColumn, ColumnFilter> filters = HashMultimap.create(values.size(), 1);
         for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
             EntityColumn column = param.getKey();
-            ColumnFilter filter = ColumnFilter.newBuilder()
-                                              .setOperator(EQUAL)
-                                              .setValue(toAny(param.getValue()))
-                                              .setColumnName(column.getName())
-                                              .build();
+            ColumnFilter filter = ColumnFilter
+                    .newBuilder()
+                    .setOperator(EQUAL)
+                    .setValue(toAny(param.getValue()))
+                    .setColumnName(column.getName())
+                    .build();
             filters.put(column, filter);
         }
         return builder.add(CompositeQueryParameter.from(filters, ALL))

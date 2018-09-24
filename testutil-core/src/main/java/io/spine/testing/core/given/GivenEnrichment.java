@@ -29,10 +29,8 @@ import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**
  * Factory methods to create {@code Enrichment} instances in test purposes.
- *
- * @author Dmytro Grankin
  */
-public class GivenEnrichment {
+public final class GivenEnrichment {
 
     /** Prevents instantiation of this utility class. */
     private GivenEnrichment() {

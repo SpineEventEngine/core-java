@@ -21,6 +21,7 @@
 package io.spine.testing.core.given;
 
 import io.spine.core.Version;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,11 +30,12 @@ import static io.spine.testing.TestValues.random;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("GivenVersion should")
-class GivenVersionTest {
+class GivenVersionTest extends UtilityClassTest<GivenVersion> {
+
+    GivenVersionTest() {
+        super(GivenVersion.class);
+    }
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)

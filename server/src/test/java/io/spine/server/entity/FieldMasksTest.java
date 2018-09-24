@@ -34,10 +34,10 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.Tests.assertMatchesMask;
-import static io.spine.testing.Verify.assertSize;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,12 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("FieldMasks utility should")
 class FieldMasksTest {
 
@@ -75,7 +69,8 @@ class FieldMasksTest {
             FieldMask mask = FieldMasks.maskOf(descriptor, fieldNumbers);
 
             List<String> paths = mask.getPathsList();
-            assertSize(fieldNumbers.length, paths);
+
+            assertThat(paths).hasSize(fieldNumbers.length);
 
             for (int i = 0; i < paths.size(); i++) {
                 String expectedPath = descriptor.getFullName() + '.' + fieldNames[i];
@@ -126,7 +121,7 @@ class FieldMasksTest {
 
             Collection<Project> masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
 
-            assertSize(original.size(), masked);
+            assertThat(masked).hasSize(original.size());
 
             // Collection references are not the same
             assertNotSame(original, masked);
@@ -179,7 +174,7 @@ class FieldMasksTest {
 
             Collection<Project> processed = FieldMasks.applyMask(emptyMask, original, Given.TYPE);
 
-            assertSize(original.size(), processed);
+            assertThat(processed).hasSize(original.size());
 
             // The argument is not returned
             assertNotSame(original, processed);

@@ -33,9 +33,6 @@ import org.junit.jupiter.api.DisplayName;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("ProcessManagerDispatcher utility should")
 class PmDispatcherTest extends UtilityClassTest<PmDispatcher> {
 
@@ -48,7 +45,8 @@ class PmDispatcherTest extends UtilityClassTest<PmDispatcher> {
     }
 
     @Override
-    protected void setDefaults(NullPointerTester tester) {
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
         Command command = requestFactory.generateCommand();
         tester.setDefault(CommandEnvelope.class,
                           CommandEnvelope.of(command))

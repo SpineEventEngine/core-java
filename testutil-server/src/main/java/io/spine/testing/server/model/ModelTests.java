@@ -34,7 +34,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *           string literal for security check.
  * @author Alexander Yevsyukov
  */
-public class ModelTests {
+public final class ModelTests {
 
     /** Prevents instantiation of this utility class. */
     private ModelTests() {
