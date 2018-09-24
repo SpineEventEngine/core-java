@@ -132,7 +132,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         return repository.loadAll(ids);
     }
 
-    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // uses generic param <E> of the top class.
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
     private Iterator<E> loadAll() {
         return repository.loadAll();
     }
@@ -141,7 +141,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         return repository.findOrCreate(id);
     }
 
-    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // uses generic param <E> of the top class.
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
     private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
         return repository.find(filters, firstFieldOnly);
     }

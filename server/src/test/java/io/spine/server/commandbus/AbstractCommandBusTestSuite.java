@@ -251,7 +251,6 @@ abstract class AbstractCommandBusTestSuite {
             super(eventBus);
         }
 
-        @SuppressWarnings("unused") // called by reflection
         @Assign
         CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
             handlerInvoked = true;
