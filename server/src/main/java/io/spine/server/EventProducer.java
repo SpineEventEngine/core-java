@@ -47,6 +47,10 @@ public interface EventProducer {
     /**
      * Obtains the {@link NothingHappened} event message.
      *
+     * <p>This event should be returned if there is no value for the domain to produce an actual
+     * event. Note that a {@link NothingHappened} event is never actually posted into
+     * the {@link io.spine.server.event.EventBus EventBus}.
+     *
      * @return the default instance of {@link NothingHappened}
      */
     default NothingHappened nothing() {
