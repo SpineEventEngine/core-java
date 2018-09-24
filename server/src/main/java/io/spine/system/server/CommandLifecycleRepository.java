@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import io.spine.core.CommandId;
-import io.spine.server.aggregate.AggregateRepository;
 
 /**
  * The repository for {@link CommandLifecycleAggregate}s.
@@ -29,5 +28,5 @@ import io.spine.server.aggregate.AggregateRepository;
  * @author Dmytro Dashenkov
  */
 final class CommandLifecycleRepository
-        extends AggregateRepository<CommandId, CommandLifecycleAggregate> {
+        extends SystemRepository<CommandId, CommandLifecycleAggregate> {
 }

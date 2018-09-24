@@ -28,11 +28,6 @@ ext {
 
 group 'io.spine.tools'
 
-repositories {
-    mavenCentral()
-    maven { url = repos.sonatypeSnapshots }
-}
-
 sourceSets {
     main {
         resources.srcDirs "$sourcesRootDir/main/resources"

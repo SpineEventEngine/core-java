@@ -37,10 +37,10 @@ import io.spine.type.MessageClass;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.commandbus.CommandSequence.inResponseTo;
-import static io.spine.server.commandbus.CommandSequence.respondMany;
-import static io.spine.server.commandbus.CommandSequence.split;
-import static io.spine.server.commandbus.CommandSequence.transform;
+import static io.spine.server.commandbus.SeveralCommands.respondMany;
+import static io.spine.server.commandbus.SingleCommand.inResponseTo;
+import static io.spine.server.commandbus.Split.split;
+import static io.spine.server.commandbus.Transform.transform;
 
 /**
  * Base interface for methods that generate one or more command messages in response to
@@ -123,6 +123,9 @@ public interface CommandingMethod<T,
             checkNotNull(event);
             checkNotNull(bus);
             List<? extends Message> messages = asMessages();
+            if (optional && messages.isEmpty()) {
+                return;
+            }
             if (messages.size() == 1) {
                 SingleCommand seq = inResponseTo(event).produce(messages.get(0));
                 seq.post(bus);

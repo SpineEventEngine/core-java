@@ -26,7 +26,6 @@ import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -44,6 +43,7 @@ import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -52,10 +52,12 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.EventProducers;
-import io.spine.server.route.EventRouting;
+import io.spine.server.route.EventRoute;
+import io.spine.system.server.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.dataflow.qual.Pure;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -64,7 +66,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
+import static io.spine.server.entity.EventBlackList.discardEvents;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -94,6 +98,8 @@ public abstract class ProcessManagerRepository<I,
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
             memoize(this::createEventDelivery);
 
+    private final EventFilter entityStateChangedFilter = discardEvents(EntityStateChanged.class);
+
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
      *
@@ -106,7 +112,7 @@ public abstract class ProcessManagerRepository<I,
      * Creates a new instance with the event routing by the first message field.
      */
     protected ProcessManagerRepository() {
-        super(EventProducers.fromFirstMessageField());
+        super(EventRoute.byFirstMessageField());
     }
 
     /** Obtains class information of process managers managed by this repository. */
@@ -163,6 +169,9 @@ public abstract class ProcessManagerRepository<I,
         }
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
+        systemSubscriber.registerIn(boundedContext);
+
         registerWithSharding();
     }
 
@@ -219,22 +228,57 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        return PmCommandEndpoint.handle(this, command);
+        I target = with(command.getTenantId()).evaluate(() -> doDispatch(command));
+        return target;
+    }
+
+    private I doDispatch(CommandEnvelope command) {
+        I target = route(command);
+        lifecycleOf(target).onDispatchCommand(command.getCommand());
+        return target;
+    }
+
+    private I route(CommandEnvelope envelope) {
+        CommandRouting<I> routing = getCommandRouting();
+        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
+        lifecycleOf(target).onTargetAssignedToCommand(envelope.getId());
+        return target;
     }
 
     /**
-     * Dispatches the event to a corresponding process manager.
+     * Dispatches the given command to the {@link ProcessManager} with the given ID.
      *
-     * <p>If there is no stored process manager with such an ID, a new process manager is created
-     * and stored after it handles the passed event.
+     * @param id
+     *         the target entity ID
+     * @param command
+     *         the command to dispatch
+     */
+    void dispatchNowTo(I id, CommandEnvelope command) {
+        PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
+        endpoint.dispatchTo(id);
+    }
+
+    /**
+     * {@inheritDoc}
      *
-     * @param event the event to dispatch
-     * @see ProcessManager#dispatchEvent(EventEnvelope)
+     * <p>Sends a system command to dispatch the given event to a reactor.
      */
     @Override
-    public Set<I> dispatch(EventEnvelope event) {
-        Set<I> result = PmEventEndpoint.handle(this, event);
-        return result;
+    protected final void dispatchTo(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToReactor(event);
+    }
+
+    /**
+     * Dispatches the given event to the {@link ProcessManager} with the given ID.
+     *
+     * @param id
+     *         the target entity ID
+     * @param event
+     *         the event to dispatch
+     */
+    void dispatchNowTo(I id, EventEnvelope event) {
+        PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, event);
+        endpoint.dispatchTo(id);
     }
 
     @Override
@@ -257,24 +301,20 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Posts passed events to {@link EventBus}.
      */
-    void postEvents(Iterable<Event> events) {
-        EventBus eventBus = getBoundedContext().getEventBus();
-        for (Event event : events) {
-            eventBus.post(event);
-        }
+    void postEvents(Collection<Event> events) {
+        Iterable<Event> filteredEvents = eventFilter().filter(events);
+        EventBus bus = getBoundedContext().getEventBus();
+        bus.post(filteredEvents);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose the method into current package.
+     */
     @Override
     protected EntityLifecycle lifecycleOf(I id) {
         return super.lifecycleOf(id);
-    }
-
-    void onDispatchEvent(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToReactor(event);
-    }
-
-    void onCommandTargetSet(I id, CommandId commandId) {
-        lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
     /**
@@ -301,11 +341,6 @@ public abstract class ProcessManagerRepository<I,
         P procman = super.create(id);
         lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
         return procman;
-    }
-
-    /** Open access to the event routing to the package. */
-    EventRouting<I> eventRouting() {
-        return getEventRouting();
     }
 
     /**
@@ -367,6 +402,22 @@ public abstract class ProcessManagerRepository<I,
     public BoundedContextName getBoundedContextName() {
         BoundedContextName name = getBoundedContext().getName();
         return name;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code ProcessManagerRepository} changes the default behaviour and allows all
+     * the events <b>except</b> for {@link EntityStateChanged}. It is supposed that the changes of
+     * a process manager state are not worth being published.
+     *
+     * <p>Override this method to change the behaviour.
+     */
+    @Pure
+    @SPI
+    @Override
+    protected EventFilter eventFilter() {
+        return entityStateChangedFilter;
     }
 
     @Override

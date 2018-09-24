@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.system.server.MarkSplit;
+import io.spine.system.server.CommandSplit;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -37,11 +37,18 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class Split extends OnCommand<MarkSplit, MarkSplit.Builder, Split> {
+public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
 
-    Split(CommandEnvelope command) {
+    private Split(CommandEnvelope command) {
         super(command.getId(), command.getCommandContext()
                                       .getActorContext());
+    }
+
+    /**
+     * Creates an empty sequence for splitting the source command into several ones.
+     */
+    public static Split split(CommandEnvelope command) {
+        return new Split(command);
     }
 
     @CanIgnoreReturnValue
@@ -63,8 +70,8 @@ public final class Split extends OnCommand<MarkSplit, MarkSplit.Builder, Split> 
     }
 
     @Override
-    protected MarkSplit.Builder newBuilder() {
-        MarkSplit.Builder result = MarkSplit
+    protected CommandSplit.Builder newBuilder() {
+        CommandSplit.Builder result = CommandSplit
                 .newBuilder()
                 .setId(origin());
         return result;
@@ -72,19 +79,19 @@ public final class Split extends OnCommand<MarkSplit, MarkSplit.Builder, Split> 
 
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
-    protected void addPosted(MarkSplit.Builder builder, Command command,
-                             SystemGateway gateway) {
+    protected
+    void addPosted(CommandSplit.Builder builder, Command command, SystemGateway gateway) {
         builder.addProduced(command.getId());
     }
 
     /**
      * {@inheritDoc}
-     *
+     * &nbsp;
      * @apiNote Overrides to open the method for outside use.
      */
     @Override
     @CanIgnoreReturnValue
-    public MarkSplit postAll(CommandBus bus) {
+    public CommandSplit postAll(CommandBus bus) {
         return super.postAll(bus);
     }
 }

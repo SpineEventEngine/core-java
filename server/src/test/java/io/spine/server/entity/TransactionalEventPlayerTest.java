@@ -96,7 +96,7 @@ class TransactionalEventPlayerTest {
 
         @Override
         public void play(Iterable<Event> events) {
-            EventPlayers.forTransactionOf(this).play(events);
+            EventPlayer.forTransactionOf(this).play(events);
         }
     }
 }

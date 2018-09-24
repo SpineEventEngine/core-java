@@ -35,8 +35,8 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
@@ -47,10 +47,8 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectingRepos
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -61,6 +59,7 @@ import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
@@ -69,6 +68,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
@@ -86,7 +86,8 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBo
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
-import static io.spine.testing.server.blackbox.VerifyEvents.emmiterEventsHadVersions;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -471,16 +472,9 @@ public class AggregateRepositoryTest {
     }
 
     @Nested
+    @ExtendWith(ShardingReset.class)
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
-
-        @BeforeEach
-        void setUp() {
-            InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
-            InProcessSharding sharding = new InProcessSharding(transport);
-            ServerEnvironment.getInstance()
-                             .replaceSharding(sharding);
-        }
 
         @Test
         @DisplayName("after command dispatching")
@@ -508,7 +502,7 @@ public class AggregateRepositoryTest {
             BlackBoxBoundedContext.newInstance()
                                   .with(repository())
                                   .receivesCommands(create, addTask, start)
-                                  .assertThat(emmiterEventsHadVersions(1, 2, 3));
+                                  .assertThat(emittedEventsHadVersions(1, 2, 3));
         }
 
         @Test
@@ -534,11 +528,37 @@ public class AggregateRepositoryTest {
                                   .with(repository())
                                   .receivesCommands(create, start)
                                   .receivesEvent(archived)
-                                  .assertThat(emmiterEventsHadVersions(
+                                  .assertThat(emittedEventsHadVersions(
                                           1, 2, // Product creation
                                           0,    // Manually assembled event (`archived`)
                                           3     // Event produced in response to `archived` event
                                   ));
+        }
+
+        @Test
+        @DisplayName("through the repository EventFilter")
+        void throughEventFilter() {
+            ProjectId id = givenAggregateId(Identifier.newUuid());
+            AggCreateProject create = AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setName("Test Project")
+                    .build();
+            AggStartProject start = AggStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            ProjectId parent = givenAggregateId(Identifier.newUuid());
+            AggProjectArchived archived = AggProjectArchived
+                    .newBuilder()
+                    .setProjectId(parent)
+                    .addChildProjectId(id)
+                    .build();
+            BlackBoxBoundedContext.newInstance()
+                                  .with(new EventDiscardingAggregateRepository())
+                                  .receivesCommands(create, start)
+                                  .receivesEvent(archived)
+                                  .assertThat(emittedEvents(AggProjectArchived.class));
         }
     }
 

@@ -18,7 +18,7 @@ contain _Spine model elements_:
  }
  
  dependencies {
-     compileOnly group: 'io.spine.tools', name: 'spine-model-assembler', version: spineVersion
+     annotationProcessor group: 'io.spine.tools', name: 'spine-model-assembler', version: spineVersion
  }
  ``` 
 The _Spine model elements_ are Java and Protobuf declarations of Entities and the messages handled (i.e. `Command`s, `Event`s and `Rejection`s).

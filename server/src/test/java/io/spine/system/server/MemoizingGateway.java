@@ -20,12 +20,19 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Iterator;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyIterator;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * A {@link SystemGateway} which memoizes the posted system commands.
@@ -35,7 +42,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class MemoizingGateway implements SystemGateway {
 
-    private @MonotonicNonNull MemoizedCommand lastSeenCommand;
+    private @MonotonicNonNull MemoizedMessage lastSeenCommand;
+    private @MonotonicNonNull MemoizedMessage lastSeenEvent;
+    private @MonotonicNonNull MemoizedMessage lastSeenQuery;
 
     private final boolean multitenant;
 
@@ -66,35 +75,60 @@ public final class MemoizingGateway implements SystemGateway {
      *
      * <p>Memoizes the given command message and the {@link TenantId} which it was posted for.
      *
-     * @see #lastSeen()
+     * @see #lastSeenCommand()
      */
     @Override
     public void postCommand(Message systemCommand) {
-        TenantId tenantId = new TenantFunction<TenantId>(multitenant) {
+        TenantId tenantId = currentTenant();
+        lastSeenCommand = new MemoizedMessage(systemCommand, tenantId);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Memoizes the given event message and the {@link TenantId} which it was posted for.
+     *
+     * @see #lastSeenEvent()
+     */
+    @Override
+    public void postEvent(Message systemEvent) {
+        TenantId tenantId = currentTenant();
+        lastSeenEvent = new MemoizedMessage(systemEvent, tenantId);
+    }
+
+    @Override
+    public Iterator<Any> readDomainAggregate(Query query) {
+        TenantId tenantId = currentTenant();
+        lastSeenQuery = new MemoizedMessage(query, tenantId);
+        return emptyIterator();
+    }
+
+    /** Obtains the ID of the current tenant. */
+    private TenantId currentTenant() {
+        TenantId result = new TenantFunction<TenantId>(multitenant) {
             @Override
             public TenantId apply(TenantId id) {
                 return id;
             }
         }.execute();
-        checkNotNull(tenantId);
-        lastSeenCommand = new MemoizedCommand(systemCommand, tenantId);
+        return checkNotNull(result);
     }
 
     /**
      * A command received by the {@code MemoizingGateway}.
      */
-    public static final class MemoizedCommand {
+    public static final class MemoizedMessage {
 
-        private final Message commandMessage;
+        private final Message message;
         private final TenantId tenantId;
 
-        private MemoizedCommand(Message message, TenantId id) {
-            commandMessage = message;
+        private MemoizedMessage(Message message, TenantId id) {
+            this.message = message;
             tenantId = id;
         }
 
-        public Message command() {
-            return commandMessage;
+        public Message message() {
+            return message;
         }
 
         public TenantId tenant() {
@@ -103,9 +137,41 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     /**
-     * Obtains the last seen by the gateway system command.
+     * Obtains the last command message posted to {@link SystemGateway}.
+     *
+     * <p>Fails if no commands were posted yet.
      */
-    public MemoizedCommand lastSeen() {
+    public MemoizedMessage lastSeenCommand() {
+        assertNotNull(lastSeenCommand);
         return lastSeenCommand;
+    }
+
+    /**
+     * Obtains the last event message posted to {@link SystemGateway}.
+     *
+     * <p>Fails if no events were posted yet.
+     */
+    public MemoizedMessage lastSeenEvent() {
+        assertNotNull(lastSeenEvent);
+        return lastSeenEvent;
+    }
+
+    /**
+     * Checks that this gateway has never seen an event.
+     *
+     * <p>Fails if the check does not pass.
+     */
+    public void assertNoEvents() {
+        assertNull(lastSeenEvent, () -> lastSeenEvent.message().toString());
+    }
+
+    /**
+     * Obtains the last query submitted to {@link SystemGateway}.
+     *
+     * <p>Fails if no queries were submitted yet.
+     */
+    public MemoizedMessage lastSeenQuery() {
+        assertNotNull(lastSeenQuery);
+        return lastSeenQuery;
     }
 }

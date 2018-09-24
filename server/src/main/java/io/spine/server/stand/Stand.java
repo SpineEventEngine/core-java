@@ -20,16 +20,15 @@
 package io.spine.server.stand;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.client.EntityStateUpdate;
-import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
@@ -37,31 +36,29 @@ import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
-import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.EntityUpdateOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.ack;
 import static io.spine.protobuf.TypeConverter.toAny;
 
@@ -92,17 +89,6 @@ public class Stand implements AutoCloseable {
     private static final QueryProcessor NOOP_PROCESSOR = new NoopQueryProcessor();
 
     /**
-     * Persistent storage for the latest {@code Aggregate} states.
-     *
-     * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is
-     * persisted to this storage.
-     *
-     * <p>The storage is {@code null} if it was not passed to the builder and this instance is not
-     * yet added to a {@code BoundedContext}.
-     */
-    private @Nullable StandStorage storage;
-
-    /**
      * Manages the subscriptions for this instance of {@code Stand}.
      */
     private final SubscriptionRegistry subscriptionRegistry;
@@ -123,33 +109,28 @@ public class Stand implements AutoCloseable {
     private final QueryValidator queryValidator;
     private final SubscriptionValidator subscriptionValidator;
 
-    private Stand(Builder builder) {
-        storage = builder.getStorage();
-        callbackExecutor = builder.getCallbackExecutor();
-        multitenant = builder.multitenant != null
-                      ? builder.multitenant
-                      : false;
-        subscriptionRegistry = builder.getSubscriptionRegistry();
-        typeRegistry = builder.getTypeRegistry();
-        topicValidator = builder.getTopicValidator();
-        queryValidator = builder.getQueryValidator();
-        subscriptionValidator = builder.getSubscriptionValidator();
-    }
+    private final AggregateQueryProcessor aggregateQueryProcessor;
 
-    public void onCreated(BoundedContext parent) {
-        if (storage == null) {
-            storage = parent.getStorageFactory()
-                            .createStandStorage();
-        }
+    private Stand(Builder builder) {
+        this.callbackExecutor = builder.getCallbackExecutor();
+        this.multitenant = builder.multitenant != null
+                           ? builder.multitenant
+                           : false;
+        this.subscriptionRegistry = builder.getSubscriptionRegistry();
+        this.typeRegistry = builder.getTypeRegistry();
+        this.topicValidator = builder.getTopicValidator();
+        this.queryValidator = builder.getQueryValidator();
+        this.subscriptionValidator = builder.getSubscriptionValidator();
+        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.getSystemGateway());
     }
 
     /**
-     * Posts the state of an {@link VersionableEntity} to this {@link Stand}.
+     * Posts the state of an {@link VersionableEntity} to this {@code Stand}.
      *
      * @param entity the entity which state should be delivered to the {@code Stand}
      */
-    public void post(TenantId tenantId, VersionableEntity entity) {
-        EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, tenantId);
+    public void post(TenantId tenantId, VersionableEntity<?, ?> entity) {
+        EntityStateEnvelope<?, ?> envelope = EntityStateEnvelope.of(entity, tenantId);
         update(envelope);
     }
 
@@ -160,23 +141,8 @@ public class Stand implements AutoCloseable {
     /**
      * Updates the state of an entity inside of the current instance of {@code Stand}.
      *
-     * <p>In case the entity update represents the new
-     * {@link io.spine.server.aggregate.Aggregate Aggregate} state,
-     * store the new value for the {@code Aggregate} to each of the configured instances of
-     * {@link StandStorage}.
-     *
-     * <p>Each {@code Aggregate} state value is stored as one-to-one to its
-     * {@link TypeUrl TypeUrl} obtained via {@link Any#getTypeUrl()}.
-     *
-     * <p>In case {@code Stand} already contains the state for this {@code Aggregate},
-     * the value will be replaced.
-     *
-     * <p>The state updates which are not originated from the {@code Aggregate} are not
-     * stored in the {@code Stand}.
-     *
-     * <p>In any case, the state update is then propagated to the callbacks.
-     * The set of matched callbacks is determined by filtering all the registered callbacks
-     * by the entity {@code TypeUrl}.
+     * <p>The state update is then propagated to the callbacks. The set of matched callbacks is
+     * determined by filtering all the registered callbacks by the entity {@link TypeUrl}.
      *
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
      *
@@ -191,27 +157,7 @@ public class Stand implements AutoCloseable {
                 Object id = envelope.getEntityId();
                 Message entityState = envelope.getMessage();
                 Any packedState = AnyPacker.pack(entityState);
-
                 TypeUrl entityTypeUrl = TypeUrl.of(entityState);
-                boolean aggregateUpdate = typeRegistry.hasAggregateType(entityTypeUrl);
-
-                if (aggregateUpdate) {
-                    Optional<Version> entityVersion = envelope.getEntityVersion();
-                    checkState(entityVersion.isPresent(),
-                               "The aggregate version must be set in order to update Stand. " +
-                                       "Actual envelope: {}", envelope);
-
-                    @SuppressWarnings("OptionalGetWithoutIsPresent")    // checked above.
-                    Version versionValue = entityVersion.get();
-                    AggregateStateId aggregateStateId = AggregateStateId.of(id,
-                                                                            entityTypeUrl);
-
-                    EntityRecord record = EntityRecord.newBuilder()
-                                                      .setState(packedState)
-                                                      .setVersion(versionValue)
-                                                      .build();
-                    getStorage().write(aggregateStateId, record);
-                }
                 notifyMatchingSubscriptions(id, packedState, entityTypeUrl);
             }
         };
@@ -348,17 +294,18 @@ public class Stand implements AutoCloseable {
                         StreamObserver<QueryResponse> responseObserver) {
         queryValidator.validate(query, responseObserver);
 
-        TypeUrl type = Queries.typeOf(query);
+        TypeUrl type = typeOf(query);
         QueryProcessor queryProcessor = processorFor(type);
 
         QueryOperation op = new QueryOperation(query) {
             @Override
             public void run() {
-                ImmutableCollection<Any> readResult = queryProcessor.process(query());
-                QueryResponse response = QueryResponse.newBuilder()
-                                                      .addAllMessages(readResult)
-                                                      .setResponse(Responses.ok())
-                                                      .build();
+                Collection<Any> readResult = queryProcessor.process(query());
+                QueryResponse response = QueryResponse
+                        .newBuilder()
+                        .addAllMessages(readResult)
+                        .setResponse(Responses.ok())
+                        .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
             }
@@ -406,10 +353,6 @@ public class Stand implements AutoCloseable {
     @Override
     public void close() throws Exception {
         typeRegistry.close();
-
-        if (storage != null) {
-            storage.close();
-        }
     }
 
     /**
@@ -441,31 +384,20 @@ public class Stand implements AutoCloseable {
      * @return suitable implementation of {@code QueryProcessor}
      */
     private QueryProcessor processorFor(TypeUrl type) {
-        QueryProcessor result;
-
-        Optional<? extends RecordBasedRepository<?, ?, ?>> repository =
+        Optional<? extends RecordBasedRepository<?, ?, ?>> foundRepository =
                 typeRegistry.getRecordRepository(type);
-
-        if (repository.isPresent()) {
-
-            // The query target is an {@code Entity}.
-            result = new EntityQueryProcessor(repository.get());
+        if (foundRepository.isPresent()) {
+            RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
+            return new EntityQueryProcessor(repository);
         } else if (getExposedAggregateTypes().contains(type)) {
-
-            // The query target is an {@code Aggregate} state.
-            result = new AggregateQueryProcessor(getStorage(), type);
+            return aggregateProcessor();
         } else {
-
-            // This type points to an object, that are not exposed via the current
-            // instance of {@code Stand}.
-            result = NOOP_PROCESSOR;
+            return NOOP_PROCESSOR;
         }
-        return result;
     }
 
-    private StandStorage getStorage() {
-        checkState(storage != null, "Stand %s does not have a storage assigned", this);
-        return storage;
+    private QueryProcessor aggregateProcessor() {
+        return aggregateQueryProcessor;
     }
 
     /**
@@ -494,6 +426,7 @@ public class Stand implements AutoCloseable {
         return result;
     }
 
+    @CanIgnoreReturnValue
     public static class Builder {
 
         /**
@@ -506,31 +439,15 @@ public class Stand implements AutoCloseable {
          * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating
          * {@code BoundedContext}.
          */
-        private @MonotonicNonNull Boolean multitenant;
+        private @Nullable Boolean multitenant;
 
-        private StandStorage storage;
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
         private TypeRegistry typeRegistry;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
-
-        /**
-         * Sets an instance of {@link StandStorage} to be used to persist
-         * the latest aggregate states.
-         *
-         * <p>If no {@code storage} is assigned,
-         * {@linkplain InMemoryStorageFactory#createStandStorage() in-memory storage}
-         * will be used.
-         *
-         * @param storage an instance of {@code StandStorage}
-         * @return this instance of {@code Builder}
-         */
-        public Builder setStorage(StandStorage storage) {
-            this.storage = storage;
-            return this;
-        }
+        private SystemGateway systemGateway;
 
         public Executor getCallbackExecutor() {
             return callbackExecutor;
@@ -546,18 +463,19 @@ public class Stand implements AutoCloseable {
          * @return this instance of {@code Builder}
          */
         public Builder setCallbackExecutor(Executor callbackExecutor) {
-            this.callbackExecutor = callbackExecutor;
+            this.callbackExecutor = checkNotNull(callbackExecutor);
             return this;
         }
 
-        public StandStorage getStorage() {
-            return storage;
+        @Internal
+        public Builder setMultitenant(@Nullable Boolean multitenant) {
+            this.multitenant = multitenant;
+            return this;
         }
 
         @Internal
-        @CanIgnoreReturnValue
-        public Builder setMultitenant(@Nullable Boolean multitenant) {
-            this.multitenant = multitenant;
+        public Builder setSystemGateway(SystemGateway gateway) {
+            this.systemGateway = checkNotNull(gateway);
             return this;
         }
 
@@ -586,6 +504,10 @@ public class Stand implements AutoCloseable {
             return typeRegistry;
         }
 
+        private SystemGateway getSystemGateway() {
+            return systemGateway;
+        }
+
         /**
          * Builds an instance of {@code Stand}.
          *
@@ -594,8 +516,11 @@ public class Stand implements AutoCloseable {
          *
          * @return new instance of Stand
          */
+        @CheckReturnValue
         @Internal
         public Stand build() {
+            checkState(systemGateway != null, "SystemGateway is not set.");
+
             boolean multitenant = this.multitenant == null
                                   ? false
                                   : this.multitenant;

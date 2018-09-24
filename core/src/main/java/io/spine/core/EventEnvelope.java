@@ -121,8 +121,9 @@ public final class EventEnvelope
     @Override
     public void setOriginFields(EventContext.Builder builder) {
         EventContext context = getEventContext();
-        builder.setEventContext(context);
-        builder.setRootCommandId(context.getRootCommandId());
+        builder.setEventContext(context)
+               .setRootCommandId(context.getRootCommandId())
+               .setEventId(getId());
     }
 
     /**
@@ -160,7 +161,7 @@ public final class EventEnvelope
     }
 
     /**
-     * @return {@code true} if the wrapped event is a rejection, {@code false} otherwise
+     * Returns {@code true} if the wrapped event is a rejection, {@code false} otherwise.
      */
     public boolean isRejection() {
         return rejection;

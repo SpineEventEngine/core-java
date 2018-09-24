@@ -20,10 +20,14 @@
 
 package io.spine.system.server;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantAwareRunner;
+
+import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,10 +46,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class TenantAwareSystemGateway implements SystemGateway {
 
     private final SystemGateway delegate;
-    private final TenantId tenantId;
+    private final TenantAwareRunner runner;
 
     private TenantAwareSystemGateway(TenantId tenantId, SystemGateway delegate) {
-        this.tenantId = checkNotNull(tenantId);
+        this.runner = TenantAwareRunner.with(checkNotNull(tenantId));
         this.delegate = checkNotNull(delegate);
     }
 
@@ -59,41 +63,25 @@ final class TenantAwareSystemGateway implements SystemGateway {
     /**
      * {@inheritDoc}
      *
-     * <p>On an instance of {@code TenantAwareSystemGateway}, posts the given system command for
-     * the specified tenant.
+     * <p>Posts the given system command under the context of the specified tenant.
      */
     @Override
     public void postCommand(Message systemCommand) {
-        Runnable action = () -> delegate.postCommand(systemCommand);
-        TenantAwareOperation operation = new Operation(tenantId, action);
-        operation.execute();
-    }
-
-    @VisibleForTesting
-    SystemGateway getDelegate() {
-        return delegate;
-    }
-
-    @VisibleForTesting
-    TenantId getTenantId() {
-        return tenantId;
+        runner.run(() -> delegate.postCommand(systemCommand));
     }
 
     /**
-     * A {@link TenantAwareOperation} which executes the given action for a specific tenant.
+     * {@inheritDoc}
+     *
+     * <p>Posts the given system event under the context of the specified tenant.
      */
-    private static final class Operation extends TenantAwareOperation {
+    @Override
+    public void postEvent(Message systemEvent) {
+        runner.run(() -> delegate.postEvent(systemEvent));
+    }
 
-        private final Runnable action;
-
-        private Operation(TenantId tenantId, Runnable action) {
-            super(tenantId);
-            this.action = action;
-        }
-
-        @Override
-        public void run() {
-            action.run();
-        }
+    @Override
+    public Iterator<Any> readDomainAggregate(Query query) {
+        return runner.evaluate(() -> delegate.readDomainAggregate(query));
     }
 }

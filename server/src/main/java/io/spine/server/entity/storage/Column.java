@@ -34,6 +34,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>The annotation will have affect only if it applied to a {@code public} instance getter,
  * i.e. a method without parameters with {@code get-} or {@code is-} prefix.
  *
+ * <p>The class declaring an entity column <b>must</b> as well be {@code public}.
+ *
  * <p>A {@link #name()} allows to specify a custom column name to be persisted in a {@code Storage}.
  *
  * <p>If there are repeated column names within an {@code Entity},

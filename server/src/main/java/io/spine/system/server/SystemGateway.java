@@ -20,13 +20,21 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
+import io.spine.client.Query;
+
+import java.util.Iterator;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A gateway for sending messages into a system bounded context.
+ * A gateway for sending messages into a {@link SystemContext}.
  *
  * @author Dmytro Dashenkov
  */
+@Internal
 public interface SystemGateway {
 
     /**
@@ -41,9 +49,40 @@ public interface SystemGateway {
     void postCommand(Message systemCommand);
 
     /**
+     * Posts a system event.
+     *
+     * <p>If the associated bounded context is
+     * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the event is
+     * posted for the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
+     *
+     * @param systemEvent event message
+     */
+    void postEvent(Message systemEvent);
+
+    /**
      * Creates new instance of the gateway which serves the passed System Bounded Context.
      */
-    static SystemGateway newInstance(SystemBoundedContext system) {
+    static SystemGateway newInstance(SystemContext system) {
+        checkNotNull(system);
         return new DefaultSystemGateway(system);
     }
+
+    /**
+     * Executes the given query for a domain aggregate state.
+     *
+     * <p>This read operation supports following types of queries:
+     * <ul>
+     *     <li>queries for all instances of an aggregate type (which are not archived or deleted);
+     *     <li>queries by the aggregate IDs;
+     *     <li>queries for archived or/and deleted instance (combined with the other query types,
+     *         if necessary).
+     * </ul>
+     *
+     * @param query
+     *         a query for a domain aggregate
+     * @return an {@code Iterator} over the query results packed as {@link Any}s.
+     * @see MirrorProjection
+     * @see io.spine.client.QueryFactory
+     */
+    Iterator<Any> readDomainAggregate(Query query);
 }

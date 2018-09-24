@@ -38,7 +38,6 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
-import io.spine.server.stand.StandStorage;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -75,12 +74,12 @@ public abstract class RecordStorage<I>
     private final @MonotonicNonNull EntityColumnCache entityColumnCache;
 
     /**
-     * Creates an instance of {@link RecordStorage} which does not support
+     * Creates an instance of {@code RecordStorage} which does not support
      * the {@link EntityColumnCache}.
      *
-     * <p>This creation method should only be used for the {@link RecordStorage} descendants,
-     * that are containers for the other {@link RecordStorage} instance, which actually supports
-     * {@link EntityColumnCache}, for example: {@link ProjectionStorage}, {@link StandStorage}.
+     * <p>This creation method should only be used for the {@code RecordStorage} descendants,
+     * that are containers for another {@code RecordStorage} instance, which actually supports
+     * {@link EntityColumnCache}, for example, a {@link ProjectionStorage}.
      *
      * <p>Instances created by this constructor should override
      * {@link RecordStorage#entityColumnCache()} method.
@@ -91,7 +90,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Creates an instance of {@link RecordStorage} which supports the {@link EntityColumnCache}.
+     * Creates an instance of {@code RecordStorage} which supports the {@link EntityColumnCache}.
      */
     protected RecordStorage(boolean multitenant, Class<? extends Entity> entityClass) {
         super(multitenant);
@@ -162,9 +161,6 @@ public abstract class RecordStorage<I>
         writeRecord(id, record);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void write(I id, EntityRecord record) {
         EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
@@ -220,9 +216,6 @@ public abstract class RecordStorage<I>
      */
     public abstract boolean delete(I id);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Iterator<EntityRecord> readMultiple(Iterable<I> ids) {
         checkNotClosed();
@@ -245,9 +238,6 @@ public abstract class RecordStorage<I>
         return readMultipleRecords(ids, fieldMask);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Iterator<EntityRecord> readAll() {
         checkNotClosed();

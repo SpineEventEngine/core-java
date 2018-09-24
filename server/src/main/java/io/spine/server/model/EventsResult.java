@@ -26,7 +26,6 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.EventProducer;
 import io.spine.server.event.EventFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
@@ -57,8 +56,7 @@ public abstract class EventsResult extends MethodResult<Message> {
     /**
      * Transforms the messages of the result into a list of events.
      */
-    public
-    List<Event> produceEvents(MessageEnvelope origin) {
+    public List<Event> produceEvents(MessageEnvelope origin) {
         List<? extends Message> messages = asMessages();
         List<Event> result =
                 messages.stream()
@@ -67,7 +65,7 @@ public abstract class EventsResult extends MethodResult<Message> {
         return result;
     }
 
-    protected Function<Message, Event> toEvent(MessageEnvelope origin) {
+    private Function<Message, Event> toEvent(MessageEnvelope origin) {
         return new ToEvent(producer, origin);
     }
 
@@ -77,10 +75,9 @@ public abstract class EventsResult extends MethodResult<Message> {
     private static final class ToEvent implements Function<Message, Event> {
 
         private final EventFactory eventFactory;
-        private final @Nullable Version version;
+        private final Version version;
 
-        private ToEvent(EventProducer producer,
-                        MessageEnvelope origin) {
+        private ToEvent(EventProducer producer, MessageEnvelope origin) {
             this.eventFactory = EventFactory.on(origin, producer.getProducerId());
             this.version = producer.getVersion();
         }

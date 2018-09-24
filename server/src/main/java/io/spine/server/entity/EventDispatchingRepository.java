@@ -32,14 +32,13 @@ import io.spine.server.route.EventRouting;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
  *
- * @param <I> the type of IDs of entities
- * @param <E> the type of entities
- * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
 public abstract class EventDispatchingRepository<I,
@@ -78,6 +77,51 @@ public abstract class EventDispatchingRepository<I,
     public void onRegistered() {
         super.onRegistered();
         getBoundedContext().registerEventDispatcher(this);
+    }
+
+    /**
+     * Dispatches the event to the corresponding entities.
+     *
+     * <p>If there is no stored entity with such an ID, a new one is created and stored after it
+     * handles the passed event.
+     *
+     * @param envelope the event to dispatch
+     */
+    @Override
+    public final Set<I> dispatch(EventEnvelope envelope) {
+        checkNotNull(envelope);
+        Set<I> targets = with(envelope.getTenantId())
+                .evaluate(() -> doDispatch(envelope));
+        return targets;
+    }
+
+    private Set<I> doDispatch(EventEnvelope envelope) {
+        Set<I> targets = route(envelope);
+        Event event = envelope.getOuterObject();
+        targets.forEach(id -> dispatchTo(id, event));
+        return targets;
+    }
+
+    /**
+     * Dispatches the given event to an entity with the given ID.
+     *
+     * @param id
+     *         the target entity ID
+     * @param event
+     *         the event to dispatch
+     */
+    protected abstract void dispatchTo(I id, Event event);
+
+    /**
+     * Determines the targets of the given event.
+     *
+     * @param envelope the event to find targets for
+     * @return a set of IDs of projections to dispatch the given event to
+     */
+    private Set<I> route(EventEnvelope envelope) {
+        EventRouting<I> routing = getEventRouting();
+        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        return targets;
     }
 
     /**

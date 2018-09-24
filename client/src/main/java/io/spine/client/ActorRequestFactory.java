@@ -21,9 +21,9 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.annotation.Internal;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
-import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.time.ZoneId;
@@ -34,7 +34,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.Events.getActorContextOrThrow;
 
 /**
  * A factory for the various requests fired from the client-side by an actor.
@@ -94,17 +93,6 @@ public class ActorRequestFactory {
                 .setZoneOffset(actorContext.getZoneOffset())
                 .setZoneId(actorContext.getZoneId());
         return builder.build();
-    }
-
-    /**
-     * Creates an instance by the passed {@code EventContext}, setting attributes from
-     * an {@code ActorContext} found in the origin chain of the event.
-     */
-    public static ActorRequestFactory fromContext(EventContext eventContext) {
-        checkNotNull(eventContext);
-        ActorContext actorContext = getActorContextOrThrow(eventContext);
-        ActorRequestFactory result = fromContext(actorContext);
-        return result;
     }
 
     /**
@@ -204,6 +192,8 @@ public class ActorRequestFactory {
     }
 
     /**
+     * Creates new {@code CommandContext}.
+     *
      * @see CommandFactory#createContext()
      */
     @VisibleForTesting
@@ -217,8 +207,9 @@ public class ActorRequestFactory {
      * <p>Sets the timestamp value to the
      * {@linkplain io.spine.base.Time#getCurrentTime() current time}.
      */
+    @Internal
     @SuppressWarnings("CheckReturnValue") // calling builder
-    ActorContext actorContext() {
+    public final ActorContext newActorContext() {
         ActorContext.Builder builder = ActorContext
                 .newBuilder()
                 .setActor(actor)

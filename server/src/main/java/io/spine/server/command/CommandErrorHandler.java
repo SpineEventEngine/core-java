@@ -27,14 +27,12 @@ import io.spine.base.Error;
 import io.spine.base.Errors;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
+import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.string.Stringifiers;
-import io.spine.system.server.MarkCommandAsErrored;
-import io.spine.system.server.MarkCommandAsRejected;
+import io.spine.system.server.CommandErrored;
+import io.spine.system.server.CommandRejected;
 import io.spine.system.server.SystemGateway;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.command.Rejections.causedByRejection;
@@ -51,7 +49,7 @@ import static java.lang.String.format;
  * @see #handleError(CommandEnvelope, RuntimeException)
  */
 @Internal
-public final class CommandErrorHandler {
+public final class CommandErrorHandler implements Logging {
 
     private final SystemGateway systemGateway;
 
@@ -107,9 +105,9 @@ public final class CommandErrorHandler {
         String commandTypeName = envelope.getMessage()
                                          .getClass()
                                          .getName();
-        String commandIdAsString = Stringifiers.toString(envelope.getId());
+        String commandId = envelope.idAsString();
         log().error(format("Error dispatching command (class: %s id: %s).",
-                           commandTypeName, commandIdAsString),
+                           commandTypeName, commandId),
                     exception);
         Error error = Errors.causeOf(exception);
         markErrored(envelope, error);
@@ -134,36 +132,26 @@ public final class CommandErrorHandler {
 
     private void markErrored(CommandEnvelope command, Error error) {
         CommandId commandId = command.getId();
-        MarkCommandAsErrored systemCommand = MarkCommandAsErrored
+        CommandErrored systemEvent = CommandErrored
                 .newBuilder()
                 .setId(commandId)
                 .setError(error)
                 .build();
-        postSystem(systemCommand);
+        postSystem(systemEvent);
     }
 
     private void markRejected(CommandEnvelope command, RejectionEnvelope rejection) {
         CommandId commandId = command.getId();
 
-        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
+        CommandRejected systemEvent = CommandRejected
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection.getOuterObject())
                 .build();
-        postSystem(systemCommand);
+        postSystem(systemEvent);
     }
 
-    private void postSystem(Message systemCommand) {
-        systemGateway.postCommand(systemCommand);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandErrorHandler.class);
+    private void postSystem(Message systemEvent) {
+        systemGateway.postEvent(systemEvent);
     }
 }

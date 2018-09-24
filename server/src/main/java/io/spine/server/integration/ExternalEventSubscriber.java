@@ -29,11 +29,9 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -51,10 +49,7 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  */
-final class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
-
-    /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
+final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>, Logging {
 
     private final AbstractEventSubscriber delegate;
 
@@ -64,8 +59,7 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
 
     @Override
     public Set<ExternalMessageClass> getMessageClasses() {
-        EventSubscriberClass<?> subscriberClass = asEventSubscriberClass(delegate.getClass());
-        Set<EventClass> extSubscriptions = subscriberClass.getExternalEventClasses();
+        Set<EventClass> extSubscriptions = delegate.getExternalEventClasses();
         return ExternalMessageClass.fromEventClasses(extSubscriptions);
     }
 
@@ -91,15 +85,11 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
         checkNotNull(exception);
 
         MessageClass messageClass = envelope.getMessageClass();
-        String messageId = Stringifiers.toString(envelope.getId());
+        String messageId = envelope.idAsString();
         String errorMessage =
                 format("Error handling external event subscription (class: %s id: %s).",
                        messageClass, messageId);
         log().error(errorMessage, exception);
-    }
-
-    private Logger log() {
-        return loggerSupplier.get();
     }
 
     @Override

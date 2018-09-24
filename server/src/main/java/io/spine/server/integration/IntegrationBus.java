@@ -25,7 +25,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
@@ -35,7 +35,6 @@ import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
 
 import java.util.Optional;
@@ -371,7 +370,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      */
     @CanIgnoreReturnValue
     public static class Builder
-            extends Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
+            extends BusBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
 
         /**
          * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow
@@ -425,16 +424,9 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                        "`eventBus` must be set for IntegrationBus.");
             checkNotDefault(boundedContextName,
                             "`boundedContextName` must be set for IntegrationBus.");
-
-            if (transportFactory == null) {
-                transportFactory = initTransportFactory();
-            }
-
+            checkState(transportFactory != null,
+                       "`TransportFactory` must be set for IntegrationBus.");
             return new IntegrationBus(this);
-        }
-
-        private static TransportFactory initTransportFactory() {
-            return InMemoryTransportFactory.newInstance();
         }
 
         @Override

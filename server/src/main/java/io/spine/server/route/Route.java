@@ -21,9 +21,9 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
 
 import java.io.Serializable;
+import java.util.function.BiFunction;
 
 /**
  * Obtains one or more entity identifiers based on a message and its context.
@@ -33,15 +33,22 @@ import java.io.Serializable;
  * @param <R> the type of the route function result
  * @author Alexander Yevsyukov
  */
-public interface Route<M extends Message, C extends Message, R> extends Serializable {
+@FunctionalInterface
+public interface Route<M extends Message, C extends Message, R>
+        extends BiFunction<M, C, R>, Serializable {
 
     /**
-     * Obtains a set of entity IDs based on the passed event or command message and its context.
+     * Obtains entity ID(s) from the passed message and its context.
      *
      * @param message an event or a command message
-     * @param context either {@link EventContext EventContext} or
-     *                  {@link io.spine.core.CommandContext CommandContext} instance
+     * @param context a context of the message
      * @return a set of entity identifiers
+     * @apiNote
+     * This method overrides the one from {@code BiFunction} for more clarity in Javadoc
+     * references. Without overriding, it would be {@code #apply(Object, Object)},
+     * which may be confusing in the context of event routing.
      */
+    @SuppressWarnings("AbstractMethodOverridesAbstractMethod") // see @apiNote
+    @Override
     R apply(M message, C context);
 }

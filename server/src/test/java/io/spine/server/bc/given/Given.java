@@ -20,38 +20,14 @@
 
 package io.spine.server.bc.given;
 
-import com.google.protobuf.Message;
-import io.spine.core.BoundedContextName;
-import io.spine.core.EventId;
-import io.spine.protobuf.AnyPacker;
-import io.spine.server.integration.IntegrationEvent;
-import io.spine.server.integration.IntegrationEventContext;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
 
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.protobuf.AnyPacker.pack;
-
 public class Given {
 
     private Given() {
-    }
-
-    public static class AggregateId {
-
-        private AggregateId() {
-        }
-
-        public static ProjectId newProjectId() {
-            String uuid = newUuid();
-            return ProjectId.newBuilder()
-                            .setId(uuid)
-                            .build();
-        }
     }
 
     public static class EventMessage {
@@ -75,49 +51,6 @@ public class Given {
             return BcProjectStarted.newBuilder()
                                    .setProjectId(id)
                                    .build();
-        }
-    }
-
-    public static class AnIntegrationEvent {
-
-        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
-        private static final BoundedContextName TEST_BC_NAME = newName("Test BC");
-
-        private AnIntegrationEvent() {
-        }
-
-        public static IntegrationEvent projectCreated() {
-            return projectCreated(PROJECT_ID);
-        }
-
-        public static IntegrationEvent projectCreated(ProjectId projectId) {
-            IntegrationEventContext context = createIntegrationEventContext(projectId);
-            return projectCreated(projectId, context);
-        }
-
-        public static IntegrationEvent projectCreated(ProjectId projectId,
-                                                      IntegrationEventContext eventContext) {
-            BcProjectCreated event = EventMessage.projectCreated(projectId);
-            IntegrationEvent.Builder builder = IntegrationEvent.newBuilder()
-                                                               .setContext(eventContext)
-                                                               .setMessage(AnyPacker.pack(event));
-            return builder.build();
-        }
-
-        public static IntegrationEventContext createIntegrationEventContext(Message aggregateId) {
-            // An integration event ID may have a value which does not follow our internal
-            // conventions. We simulate this in the initialization below
-            EventId eventId = EventId.newBuilder()
-                                     .setValue("ieid-" + newUuid())
-                                     .build();
-
-            IntegrationEventContext.Builder builder =
-                    IntegrationEventContext.newBuilder()
-                                           .setEventId(eventId)
-                                           .setTimestamp(getCurrentTime())
-                                           .setBoundedContextName(TEST_BC_NAME)
-                                           .setProducerId(pack(aggregateId));
-            return builder.build();
         }
     }
 }

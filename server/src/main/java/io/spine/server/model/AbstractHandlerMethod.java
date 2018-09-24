@@ -160,9 +160,6 @@ public abstract class AbstractHandlerMethod<T,
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Method getRawMethod() {
         return method;
@@ -188,9 +185,6 @@ public abstract class AbstractHandlerMethod<T,
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")   // Returning immutable impl.
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
@@ -221,6 +215,7 @@ public abstract class AbstractHandlerMethod<T,
         }
     }
 
+    @SuppressWarnings("NoopMethodInAbstractClass") // to make it optional for descendants
     protected void checkAttributesMatch(E envelope) {
         // Do nothing by default.
     }

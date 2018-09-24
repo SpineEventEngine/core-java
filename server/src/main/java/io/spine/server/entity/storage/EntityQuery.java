@@ -51,8 +51,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * <p>The query contains the acceptable values of the record IDs and the
  * {@linkplain EntityColumn entity columns}.
  *
- * <p>A storage may ignore the query or throw an exception if it's specified (see
- * {@link io.spine.server.stand.StandStorage StandSotrage}). By default,
+ * <p>A storage may ignore the query or throw an exception if it's specified. By default,
  * {@link io.spine.server.storage.RecordStorage RecordStorage} supports the Entity queries.
  *
  * <p>If the {@linkplain EntityQuery#getIds() accepted IDs set} is empty, all the IDs are
@@ -106,7 +105,7 @@ public final class EntityQuery<I> implements Serializable {
     }
 
     /**
-     * @return an immutable set of accepted ID values
+     * Obtains an immutable set of accepted ID values.
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public Set<I> getIds() {
@@ -114,15 +113,15 @@ public final class EntityQuery<I> implements Serializable {
     }
 
     /**
-     * @return a {@link Map} of the {@link EntityColumn} metadata to the column required value
+     * Obtains a {@link Map} of the {@link EntityColumn} metadata to the column required value.
      */
     public QueryParameters getParameters() {
         return parameters;
     }
 
     /**
-     * @return {@code true} if the query overrides the default lifecycle handling strategy,
-     * {@code false} otherwise
+     * Obtains {@code true} if the query overrides the default lifecycle handling strategy,
+     * {@code false} otherwise.
      */
     @Internal
     public boolean isLifecycleAttributesSet() {

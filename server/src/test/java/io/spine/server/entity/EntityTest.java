@@ -45,7 +45,6 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.given.EntityTestEnv.isBetween;
-import static io.spine.testing.Tests.assertSecondsEqual;
 import static io.spine.testing.Tests.nullRef;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -240,9 +239,7 @@ class EntityTest {
         void onStateUpdate() {
             entityNew.incrementState(state);
             long expectedTimeSec = TimeTests.currentTimeSeconds();
-
-            assertSecondsEqual(expectedTimeSec, entityNew.whenModified()
-                                                         .getSeconds(), 1);
+            assertEquals(expectedTimeSec, entityNew.whenModified().getSeconds());
         }
     }
 

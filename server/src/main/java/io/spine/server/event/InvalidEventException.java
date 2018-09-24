@@ -38,6 +38,7 @@ import java.util.Map;
  * attributes are not populated according to framework conventions or validation constraints.
  *
  * @author Alexander Litus
+ * @author Alex Tymchenko
  */
 public class InvalidEventException extends EventException implements MessageInvalid {
 
@@ -57,11 +58,12 @@ public class InvalidEventException extends EventException implements MessageInva
      * @param eventMsg   an invalid event message
      * @param violations constraint violations for the event message
      */
-    public static InvalidEventException onConstraintViolations(
-            Message eventMsg, Iterable<ConstraintViolation> violations) {
+    public static
+    InvalidEventException onConstraintViolations(Message eventMsg,
+                                                 Iterable<ConstraintViolation> violations) {
 
-        ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
-                eventMsg, violations);
+        ConstraintViolationExceptionFactory helper =
+                new ConstraintViolationExceptionFactory(eventMsg, violations);
         return helper.newException();
     }
 

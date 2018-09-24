@@ -83,6 +83,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
      * @apiNote
      * Overridden to mark {@code rawMethodOutput} argument as nullable.
      */
+    @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug: `@apiNote` isn't seen as modification
     @Override
     protected abstract R toResult(T target, @Nullable Object rawMethodOutput);
 }

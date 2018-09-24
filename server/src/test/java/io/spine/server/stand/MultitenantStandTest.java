@@ -32,7 +32,6 @@ import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.testing.core.given.GivenVersion;
@@ -41,9 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
-import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -72,31 +69,9 @@ class MultitenantStandTest extends StandTest {
     }
 
     @Test
-    @DisplayName("not allow reading aggregate records from another tenant")
-    void readOnlySameTenant() {
-        Stand stand = doCheckReadingCustomersById(15);
-
-        TenantId anotherTenant = newUuid();
-        ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
-
-        Query readAllCustomers = requestFactory.query()
-                                               .all(Customer.class);
-
-        MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
-        stand.execute(readAllCustomers, responseObserver);
-        QueryResponse response = responseObserver.responseHandled();
-        assertTrue(Responses.isOk(response.getResponse()));
-        assertEquals(0, response.getMessagesCount());
-    }
-
-    @Test
     @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
     void updateOnlySameTenant() {
-        StandStorage standStorage =
-                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
-                                                   isMultitenant())
-                                      .createStandStorage();
-        Stand stand = prepareStandWithAggregateRepo(standStorage);
+        Stand stand = newStand(isMultitenant());
 
         // --- Default Tenant
         ActorRequestFactory requestFactory = getRequestFactory();
@@ -110,12 +85,8 @@ class MultitenantStandTest extends StandTest {
                 subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
-        Map.Entry<CustomerId, Customer> sampleData =
-                fillSampleCustomers(1).entrySet()
-                                      .iterator()
-                                      .next();
-        CustomerId customerId = sampleData.getKey();
-        Customer customer = sampleData.getValue();
+        Customer customer = fillSampleCustomers(1).iterator().next();
+        CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 

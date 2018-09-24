@@ -34,8 +34,8 @@ import java.util.function.Predicate;
  * <p>{@code Repository} itself is also a {@code RepositoryView}, which loads only
  * "visible" entities.
  *
- * @param <I> the type of IDs of entities returned by the view
- * @param <E> the entity type
+ * @param <I> the type of IDs of entities
+ * @param <E> the type of entities
  * @author Alexander Yevsyukov
  */
 public interface RepositoryView<I, E extends Entity<I, ?>> {

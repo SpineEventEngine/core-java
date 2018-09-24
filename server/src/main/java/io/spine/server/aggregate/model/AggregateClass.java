@@ -21,7 +21,6 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
@@ -48,14 +47,14 @@ public class AggregateClass<A extends Aggregate>
     private static final long serialVersionUID = 0L;
 
     private final MessageHandlerMap<EventClass, EventApplier> stateEvents;
-    private final ImmutableSet<EventClass> importEvents;
+    private final ImmutableSet<EventClass> importableEvents;
     private final ReactorClassDelegate<A> delegate;
 
     /** Creates new instance. */
     protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
         this.stateEvents = MessageHandlerMap.create(cls, new EventApplierSignature());
-        this.importEvents = stateEvents.getMessageClasses(EventApplier::allowsImport);
+        this.importableEvents = stateEvents.getMessageClasses(EventApplier::allowsImport);
         this.delegate = new ReactorClassDelegate<>(cls);
     }
 
@@ -70,30 +69,53 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public final Set<EventClass> getEventClasses() {
         return delegate.getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public final Set<EventClass> getExternalEventClasses() {
         return delegate.getExternalEventClasses();
+    }
+
+    /**
+     * Obtains set of classes of events used as arguments of applier methods.
+     *
+     * @see #getImportableEventClasses()
+     */
+    public final Set<EventClass> getStateEventClasses() {
+        return stateEvents.getMessageClasses();
     }
 
     /**
      * Obtains a set of event classes that are
      * {@linkplain io.spine.server.aggregate.Apply#allowImport() imported}
      * by the aggregates of this class.
+     *
+     * @see #getStateEventClasses()
      */
-    public Set<EventClass> getImportEvents() {
-        return importEvents;
+    public final Set<EventClass> getImportableEventClasses() {
+        return importableEvents;
+    }
+
+    /**
+     * Returns {@code true} if aggregates of this class
+     * {@link io.spine.server.aggregate.Apply#allowImport() import} events of at least one class;
+     * {@code false} otherwise.
+     */
+    public final boolean importsEvents() {
+        return !importableEvents.isEmpty();
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
+    public final EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
         return delegate.getReactor(eventClass, commandClass);
     }
 
-    public EventApplier getApplier(EventClass eventClass) {
+    /**
+     * Obtains event applier method for the passed class of events.
+     */
+    public final EventApplier getApplier(EventClass eventClass) {
         return stateEvents.getMethod(eventClass);
     }
 }

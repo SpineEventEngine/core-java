@@ -100,18 +100,14 @@ public interface HandlerMethod<T,
     }
 
     /**
-     * Ensures that the {@code external} attribute of the {@linkplain HandlerMethod method} is
-     * the one expected.
+     * Ensures that the {@code external} attribute of the method is the one expected.
      *
      * <p>This method is for checking that an {@code external} attribute of a message context
      * matches the one set for the handler method.
      *
-     * @param expectedValue
-     *         an expected value of the {@code external} attribute
-     * @throws IllegalArgumentException
-     *         is thrown if the value does not meet the expectation.
+     * @param expectedValue an expected value of the {@code external} attribute
+     * @throws IllegalArgumentException is thrown if the value does not meet the expectation
      * @see ExternalAttribute
-     * @throws IllegalArgumentException is thrown if the value does not meet the expectation.
      */
     default void ensureExternalMatch(boolean expectedValue) {
         checkArgument(isExternal() == expectedValue,

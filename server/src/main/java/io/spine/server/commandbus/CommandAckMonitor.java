@@ -28,8 +28,8 @@ import io.spine.core.Ack;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.system.server.MarkCommandAsAcknowledged;
-import io.spine.system.server.MarkCommandAsErrored;
+import io.spine.system.server.CommandAcknowledged;
+import io.spine.system.server.CommandErrored;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -61,15 +61,15 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
     /**
      * {@inheritDoc}
      *
-     * <p>Posts either {@link MarkCommandAsAcknowledged} or {@link MarkCommandAsErrored} system
-     * command depending on the value of the given {@code Ack}.
+     * <p>Posts either {@link CommandAcknowledged} or {@link CommandErrored} system
+     * event depending on the value of the given {@code Ack}.
      *
      * @param value
      */
     @Override
     public void onNext(Ack value) {
         delegate.onNext(value);
-        postSystemCommand(value);
+        postSystemEvent(value);
     }
 
     @Override
@@ -82,11 +82,11 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         delegate.onCompleted();
     }
 
-    private void postSystemCommand(Ack ack) {
+    private void postSystemEvent(Ack ack) {
         Status status = ack.getStatus();
         CommandId commandId = commandIdFrom(ack);
-        Message systemCommand = systemCommandFor(status, commandId);
-        gateway.postCommand(systemCommand);
+        Message systemEvent = systemEventFor(status, commandId);
+        gateway.postEvent(systemEvent);
     }
 
     private static CommandId commandIdFrom(Ack ack) {
@@ -95,17 +95,17 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Default values.
-    private static Message systemCommandFor(Status status, CommandId commandId) {
+    private static Message systemEventFor(Status status, CommandId commandId) {
         switch (status.getStatusCase()) {
             case OK:
-                return MarkCommandAsAcknowledged.newBuilder()
-                                                .setId(commandId)
-                                                .build();
+                return CommandAcknowledged.newBuilder()
+                                          .setId(commandId)
+                                          .build();
             case ERROR:
-                return MarkCommandAsErrored.newBuilder()
-                                           .setId(commandId)
-                                           .setError(status.getError())
-                                           .build();
+                return CommandErrored.newBuilder()
+                                     .setId(commandId)
+                                     .setError(status.getError())
+                                     .build();
             case REJECTION:
             default:
                 throw newIllegalArgumentException("Invalid status %s.", status.getStatusCase());
@@ -137,7 +137,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         }
 
         /**
-         * @param delegate the {@link StreamObserver} to delegate calls to
+         * Sets the {@link StreamObserver} to delegate calls to.
          */
         Builder setDelegate(StreamObserver<Ack> delegate) {
             this.delegate = checkNotNull(delegate);
@@ -145,7 +145,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         }
 
         /**
-         * @param tenantId the ID of a tenant who owns the observed commands
+         * Sets the ID of a tenant who owns the observed commands.
          */
         Builder setTenantId(TenantId tenantId) {
             this.tenantId = checkNotNull(tenantId);
@@ -153,7 +153,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         }
 
         /**
-         * @param systemGateway the {@link SystemGateway} to post system commands into
+         * Sets the {@link SystemGateway} to post system commands into.
          */
         Builder setSystemGateway(SystemGateway systemGateway) {
             this.systemGateway = checkNotNull(systemGateway);

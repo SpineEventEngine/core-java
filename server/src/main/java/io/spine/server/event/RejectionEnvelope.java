@@ -187,7 +187,7 @@ public final class RejectionEnvelope
     }
 
     /**
-     * Obtains the origin command message
+     * Obtains the origin command message.
      *
      * @return the rejected command message
      */

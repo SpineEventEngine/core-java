@@ -24,18 +24,15 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateCommandEndpoint;
-import io.spine.server.aggregate.AggregateEventEndpoint;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.AggregateTestSupport;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.testing.server.NoOpLifecycle;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -59,13 +56,11 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message> dispatchCommand(Aggregate<?, ?, ?> aggregate,
-                                                          CommandEnvelope envelope) {
-        checkNotNull(envelope);
-
-        List<? extends Message> eventMessages =
-                TestAggregateCommandEndpoint.dispatch(aggregate, envelope);
-        return eventMessages;
+    public static List<? extends Message>
+    dispatchCommand(Aggregate<?, ?, ?> aggregate, CommandEnvelope command) {
+        checkNotNull(aggregate);
+        checkNotNull(command);
+        return AggregateTestSupport.dispatchCommand(mockRepository(), aggregate, command);
     }
 
     /**
@@ -75,72 +70,11 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message> dispatchEvent(Aggregate<?, ?, ?> aggregate,
-                                                        EventEnvelope envelope) {
-        checkNotNull(envelope);
-
-        List<? extends Message> eventMessages =
-                TestAggregateEventEndpoint.dispatch(aggregate, envelope);
-        return eventMessages;
-    }
-
-    /**
-     * A test-only implementation of an {@link AggregateEventEndpoint}, that dispatches
-     * events to an instance of {@code Aggregate} into its reactor methods and returns
-     * the list of produced events.
-     *
-     * @param <I> the type of {@code Aggregate} identifier
-     * @param <A> the type of {@code Aggregate}
-     */
-    private static class TestAggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateEventEndpoint<I, A> {
-
-        @SuppressWarnings("ConstantConditions")     /*  {@code null} is supplied to the ctor,
-                                                        since in the workflow of this test endpoint
-                                                        the repository is not used. */
-        private TestAggregateEventEndpoint(EventEnvelope envelope) {
-            super(mockRepository(), envelope);
-        }
-
-        private static <I, A extends Aggregate<I, ?, ?>>
-        List<? extends Message> dispatch(A aggregate, EventEnvelope envelope) {
-            TestAggregateEventEndpoint<I, A> endpoint =
-                    new TestAggregateEventEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
-                                                     .stream()
-                                                     .map(Events::getMessage)
-                                                     .collect(toList());
-            return result;
-        }
-    }
-
-    /**
-     * A test-only implementation of an {@link AggregateCommandEndpoint}, that dispatches
-     * commands to an instance of {@code Aggregate} and returns the list of produced events.
-     *
-     * @param <I> the type of {@code Aggregate} identifier
-     * @param <A> the type of {@code Aggregate}
-     */
-    private static class TestAggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateCommandEndpoint<I, A> {
-
-        @SuppressWarnings("ConstantConditions")     /*  {@code null} is supplied to the ctor,
-                                                        since in the workflow of this test endpoint
-                                                        the repository is not used. */
-        private TestAggregateCommandEndpoint(CommandEnvelope envelope) {
-            super(mockRepository(), envelope);
-        }
-
-        private static <I, A extends Aggregate<I, ?, ?>>
-        List<? extends Message> dispatch(A aggregate, CommandEnvelope envelope) {
-            TestAggregateCommandEndpoint<I, A> endpoint =
-                    new TestAggregateCommandEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
-                                                     .stream()
-                                                     .map(Events::getMessage)
-                                                     .collect(toList());
-            return result;
-        }
+    public static List<? extends Message>
+    dispatchEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
+        checkNotNull(aggregate);
+        checkNotNull(event);
+        return AggregateTestSupport.dispatchEvent(mockRepository(), aggregate, event);
     }
 
     @SuppressWarnings("unchecked") // It is OK when mocking

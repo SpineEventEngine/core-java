@@ -120,7 +120,7 @@ class AbstractEntityTest {
     void returnStringId() {
         AnEntity entity = new AnEntity(1_234_567L);
 
-        assertEquals("1234567", entity.stringId());
-        assertSame(entity.stringId(), entity.stringId());
+        assertEquals("1234567", entity.idAsString());
+        assertSame(entity.idAsString(), entity.idAsString());
     }
 }

@@ -36,15 +36,19 @@ import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
+import io.spine.test.procman.command.PmStartIteration;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationCompleted;
 import io.spine.test.procman.event.PmIterationPlanned;
+import io.spine.test.procman.event.PmIterationStarted;
 import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.AnyVBuilder;
+
+import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testdata.Sample.builderForType;
@@ -116,6 +120,15 @@ public class TestProcessManager
                 .build();
     }
 
+    @Assign
+    PmIterationStarted handle(PmStartIteration command) {
+        remember(command);
+        return PmIterationStarted
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
+    }
+
     /*
      * Command generation
      *************************************/
@@ -164,6 +177,20 @@ public class TestProcessManager
                                .newBuilder()
                                .setProjectId(pid)
                                .build());
+    }
+
+    /*
+     * Optional generation of a command
+     **********************************/
+
+    @Command
+    Optional<PmStartIteration> on(PmIterationPlanned event) {
+        if (event.getBudgetAllocated()) {
+            return Optional.of(PmStartIteration.newBuilder()
+                                               .setProjectId(event.getProjectId())
+                                               .build());
+        }
+        return Optional.empty();
     }
 
     /*

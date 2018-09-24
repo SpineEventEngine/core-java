@@ -21,17 +21,12 @@
 package io.spine.testing.server;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import io.spine.core.Command;
-import io.spine.core.CommandId;
-import io.spine.core.Event;
-import io.spine.option.EntityOption;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.entity.EntityRecordChange;
+import io.spine.server.entity.EventFilter;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.type.TypeUrl;
-
-import java.util.Set;
 
 /**
  * A test implementation of {@link EntityLifecycle} which performs no action on any method call.
@@ -40,60 +35,27 @@ import java.util.Set;
  */
 public final class NoOpLifecycle extends EntityLifecycle {
 
+    private static final NoOpLifecycle INSTANCE = new NoOpLifecycle();
+
     @SuppressWarnings("TestOnlyProblems") // OK for a test utility.
     private NoOpLifecycle() {
         super(NoOpLifecycle.class.getSimpleName(),
               TypeUrl.of(Any.class),
-              NoOpSystemGateway.INSTANCE);
-    }
-
-    @Override
-    public void onEntityCreated(EntityOption.Kind entityKind) {
-        // NoOp.
-    }
-
-    @Override
-    public void onDispatchCommand(Command command) {
-        // NoOp.
-    }
-
-    @Override
-    public void onCommandHandled(Command command) {
-        // NoOp.
-    }
-
-    @Override
-    public void onCommandRejected(CommandId commandId, Event rejection) {
-        // NoOp.
-    }
-
-    @Override
-    public void onDispatchEventToSubscriber(Event event) {
-        // NoOp.
-    }
-
-    @Override
-    public void onDispatchEventToReactor(Event event) {
-        // NoOp.
-    }
-
-    @Override
-    protected void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds) {
-        // NoOp.
-    }
-
-    @Override
-    public void onTargetAssignedToCommand(CommandId id) {
-        // NoOp.
+              NoOpSystemGateway.INSTANCE,
+              EventFilter.allowAll());
     }
 
     public static NoOpLifecycle instance() {
-        return Singleton.INSTANCE.value;
+        return INSTANCE;
     }
 
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final NoOpLifecycle value = new NoOpLifecycle();
+    @Override
+    protected void postCommand(CommandMessage command) {
+        // NoOp.
+    }
+
+    @Override
+    protected void postEvent(EventMessage event) {
+        // NoOp.
     }
 }

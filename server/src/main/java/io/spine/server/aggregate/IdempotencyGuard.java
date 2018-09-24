@@ -24,17 +24,19 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.event.DuplicateEventException;
 
 import java.util.Iterator;
-
-import static io.spine.core.Events.getRootCommandId;
 
 /**
  * This guard ensures that the message was not yet dispatched to the {@link Aggregate aggregate}.
  * If it was, the exception is thrown.
  *
  * @author Mykhailo Drachuk
+ * @author Dmytro Dashenkov
  */
 final class IdempotencyGuard {
 
@@ -46,16 +48,57 @@ final class IdempotencyGuard {
 
     /**
      * Checks that the command was not dispatched to the aggregate.
-     * If it was a {@link DuplicateCommandException} is thrown.
+     *
+     * <p>If it was a {@link DuplicateCommandException} is thrown.
      *
      * @param envelope an envelope with a command to check
      * @throws DuplicateCommandException if the command was dispatched to the aggregate
      */
     void check(CommandEnvelope envelope) {
-        if (didHandleSinceLastSnapshot(envelope)) {
+        if (didHandleRecently(envelope)) {
             Command command = envelope.getOuterObject();
             throw DuplicateCommandException.of(command);
         }
+    }
+
+    /**
+     * Checks that the event was not dispatched to the aggregate.
+     *
+     * <p>If it was a {@link DuplicateEventException} is thrown.
+     *
+     * @param envelope an envelope with an event to check
+     * @throws DuplicateEventException if the event was dispatched to the aggregate
+     */
+    void check(EventEnvelope envelope) {
+        if (didHandleRecently(envelope)) {
+            Event event = envelope.getOuterObject();
+            throw new DuplicateEventException(event);
+        }
+    }
+
+    /**
+     * Checks if the event was already handled by the aggregate since last snapshot.
+     *
+     * <p>The check is performed by searching for an event caused by this event that was
+     * committed since last snapshot.
+     *
+     * <p>This functionality supports the ability to stop duplicate events from being dispatched
+     * to the aggregate.
+     *
+     * @param envelope the event to check
+     * @return {@code true} if the event was handled since last snapshot, {@code false} otherwise
+     */
+    private boolean didHandleRecently(EventEnvelope envelope) {
+        EventId eventId = envelope.getId();
+        Iterator<Event> iterator = aggregate.historyBackward();
+        while (iterator.hasNext()) {
+            Event event = iterator.next();
+            EventId originEventId = event.getContext().getEventId();
+            if (eventId.equals(originEventId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -70,13 +113,13 @@ final class IdempotencyGuard {
      * @param envelope the command to check
      * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
      */
-    private boolean didHandleSinceLastSnapshot(CommandEnvelope envelope) {
+    private boolean didHandleRecently(CommandEnvelope envelope) {
         CommandId newCommandId = envelope.getId();
         Iterator<Event> iterator = aggregate.historyBackward();
         while (iterator.hasNext()) {
             Event event = iterator.next();
-            CommandId eventRootCommandId = getRootCommandId(event);
-            if (newCommandId.equals(eventRootCommandId)) {
+            CommandId originCommandId = event.getContext().getCommandId();
+            if (newCommandId.equals(originCommandId)) {
                 return true;
             }
         }

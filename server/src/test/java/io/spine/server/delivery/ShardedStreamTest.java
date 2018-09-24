@@ -70,7 +70,7 @@ class ShardedStreamTest {
     void supportToString() {
         CommandShardedStream<ProjectId> stream = projectsShardZero();
         ShardingKey key = stream.getKey();
-        DeliveryTag<CommandEnvelope> tag = stream.getTag();
+        DeliveryTag tag = stream.getTag();
         Class<ProjectId> targetClass = ProjectId.class;
         BoundedContextName contextName = tag.getBoundedContextName();
 

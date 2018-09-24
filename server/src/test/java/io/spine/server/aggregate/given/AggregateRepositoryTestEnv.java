@@ -45,6 +45,7 @@ import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.React;
 import io.spine.server.route.CommandRoute;
@@ -93,8 +94,8 @@ public class AggregateRepositoryTestEnv {
     private static BoundedContext boundedContext = newBoundedContext();
     private static ProjectAggregateRepository repository = newRepository();
 
+    /** Prevent instantiation of this utility class. */
     private AggregateRepositoryTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     public static TestActorRequestFactory requestFactory() {
@@ -160,11 +161,6 @@ public class AggregateRepositoryTestEnv {
         return new ProjectAggregateRepository();
     }
 
-    /** Generates a command for the passed message and wraps it into the envelope. */
-    private static CommandEnvelope env(Message commandMessage) {
-        return CommandEnvelope.of(requestFactory.command()
-                                                .create(commandMessage));
-    }
 
     /** Utility factory for test aggregates. */
     public static class GivenAggregate {
@@ -200,6 +196,12 @@ public class AggregateRepositoryTestEnv {
             dispatchCommand(aggregate, env(startProject));
 
             return aggregate;
+        }
+
+        /** Generates a command for the passed message and wraps it into the envelope. */
+        private static CommandEnvelope env(Message commandMessage) {
+            return CommandEnvelope.of(requestFactory.command()
+                                                    .create(commandMessage));
         }
     }
 
@@ -366,6 +368,20 @@ public class AggregateRepositoryTestEnv {
         @Override
         public AggregateStorage<ProjectId> aggregateStorage() {
             return super.aggregateStorage();
+        }
+    }
+
+    /**
+     * A repository for {@link ProjectAggregate}s which never posts any events, domain or system.
+     */
+    public static class EventDiscardingAggregateRepository
+            extends ProjectAggregateRepository {
+
+        private static final EventFilter discardAll = anyEvent -> Optional.empty();
+
+        @Override
+        protected EventFilter eventFilter() {
+            return discardAll;
         }
     }
 

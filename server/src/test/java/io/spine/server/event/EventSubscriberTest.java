@@ -92,6 +92,13 @@ class EventSubscriberTest {
                                   .size());
     }
 
+    @Test
+    @DisplayName("expose handled external message classes")
+    void exposeExternalClasses() {
+        assertEquals(1, subscriber.getExternalEventClasses()
+                                  .size());
+    }
+
     private EventEnvelope createEvent(boolean value) {
         return EventEnvelope.of(factory.createEvent(BoolValue.newBuilder()
                                                              .setValue(value)

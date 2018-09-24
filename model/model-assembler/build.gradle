@@ -24,10 +24,6 @@ buildscript {
 
 group 'io.spine.tools'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation project(':server')
 }

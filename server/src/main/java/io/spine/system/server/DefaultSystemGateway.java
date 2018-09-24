@@ -21,18 +21,20 @@
 package io.spine.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
+import io.spine.client.Query;
 import io.spine.core.Command;
-import io.spine.core.TenantId;
+import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
-import io.spine.server.tenant.TenantFunction;
-import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The point of integration of the domain and the system bounded context.
@@ -44,61 +46,55 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 final class DefaultSystemGateway implements SystemGateway {
 
     /**
-     * The which posts the system events.
+     * The ID of the user which is used for generating system commands and events.
      */
-    private static final UserId SYSTEM = UserId
+    static final UserId SYSTEM_USER = UserId
             .newBuilder()
             .setValue("SYSTEM")
             .build();
 
-    private final BoundedContext system;
+    private final SystemContext system;
 
-    DefaultSystemGateway(BoundedContext system) {
+    DefaultSystemGateway(SystemContext system) {
         this.system = system;
     }
 
     @Override
     public void postCommand(Message systemCommand) {
         checkNotNull(systemCommand);
-        CommandFactory commandFactory = buildRequestFactory().command();
+        CommandFactory commandFactory = SystemCommandFactory.newInstance(system.isMultitenant());
         Command command = commandFactory.create(systemCommand);
         system.getCommandBus()
               .post(command, noOpObserver());
     }
 
-    @VisibleForTesting
-    BoundedContext target() {
-        return system;
+    @Override
+    public void postEvent(Message systemEvent) {
+        checkNotNull(systemEvent);
+        SystemEventFactory factory = SystemEventFactory.forMessage(systemEvent,
+                                                                   system.isMultitenant());
+        Event event = factory.createEvent(systemEvent, null);
+        system.getImportBus()
+              .post(event, noOpObserver());
     }
 
-    private ActorRequestFactory buildRequestFactory() {
-        return system.isMultitenant()
-               ? buildMultitenantFactory()
-               : buildSingleTenantFactory();
-    }
-
-    private static ActorRequestFactory buildMultitenantFactory() {
-        TenantFunction<ActorRequestFactory> contextFactory =
-                new TenantFunction<ActorRequestFactory>(true) {
-                    @Override
-                    public ActorRequestFactory apply(@Nullable TenantId tenantId) {
-                        checkNotNull(tenantId);
-                        return constructFactory(tenantId);
-                    }
-                };
-        ActorRequestFactory result = contextFactory.execute();
-        checkNotNull(result);
+    @Override
+    public Iterator<Any> readDomainAggregate(Query query) {
+        @SuppressWarnings("unchecked") // Logically checked.
+        MirrorRepository repository = (MirrorRepository)
+                system.findRepository(Mirror.class)
+                      .orElseThrow(
+                              () -> newIllegalStateException(
+                                      "Mirror projection repository is not registered in %s.",
+                                      system.getName().getValue()
+                              )
+                      );
+        Iterator<Any> result = repository.execute(query);
         return result;
     }
 
-    private static ActorRequestFactory buildSingleTenantFactory() {
-        return constructFactory(TenantId.getDefaultInstance());
-    }
-
-    private static ActorRequestFactory constructFactory(TenantId tenantId) {
-        return ActorRequestFactory.newBuilder()
-                                  .setActor(SYSTEM)
-                                  .setTenantId(tenantId)
-                                  .build();
+    @VisibleForTesting
+    BoundedContext target() {
+        return system;
     }
 }

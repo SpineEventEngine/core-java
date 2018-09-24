@@ -23,8 +23,8 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Arrays;
 import java.util.Set;
 
@@ -55,7 +55,7 @@ public final class QueryFactory {
 
     QueryFactory(ActorRequestFactory actorRequestFactory) {
         checkNotNull(actorRequestFactory);
-        this.actorContext = actorRequestFactory.actorContext();
+        this.actorContext = actorRequestFactory.newActorContext();
     }
 
     private static QueryId newQueryId() {
@@ -69,7 +69,8 @@ public final class QueryFactory {
      * Creates a new instance of {@link QueryBuilder} for the further {@link Query}
      * construction.
      *
-     * @param targetType the {@linkplain Query query} target type
+     * @param targetType
+     *         the {@linkplain Query query} target type
      * @return new instance of {@link QueryBuilder}
      */
     public QueryBuilder select(Class<? extends Message> targetType) {
@@ -94,14 +95,18 @@ public final class QueryFactory {
      * (e.g. a {@code path} references a missing field),
      * such invalid paths are silently ignored.
      *
-     * @param entityClass the class of a target entity
-     * @param ids         the entity IDs of interest
-     * @param maskPaths   the property paths for the {@code FieldMask} applied
-     *                    to each of results
+     * @param entityClass
+     *         the class of a target entity
+     * @param ids
+     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
+     *         which is supported as identifier}
+     * @param maskPaths
+     *         the property paths for the {@code FieldMask} applied
+     *         to each of results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query byIdsWithMask(Class<? extends Message> entityClass,
-                               Set<? extends Message> ids,
+                               Set<?> ids,
                                String... maskPaths) {
         checkNotNull(ids);
         checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
@@ -123,12 +128,17 @@ public final class QueryFactory {
      * <p>Unlike {@link #byIdsWithMask(Class, Set, String...)}, the {@code Query} processing
      * will not change the resulting entities.
      *
-     * @param entityClass the class of a target entity
-     * @param ids         the entity IDs of interest
+     * @param entityClass
+     *         the class of a target entity
+     * @param ids
+     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
+     *         which is supported as identifier}
      * @return an instance of {@code Query} formed according to the passed parameters
+     * @throws IllegalArgumentException
+     *         if any of IDs have invalid type or are {@code null}
      */
     public Query byIds(Class<? extends Message> entityClass,
-                       Set<? extends Message> ids) {
+                       Set<?> ids) {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
@@ -147,9 +157,11 @@ public final class QueryFactory {
      * (e.g. a {@code path} references a missing field), such invalid paths
      * are silently ignored.
      *
-     * @param entityClass the class of a target entity
-     * @param maskPaths   the property paths for the {@code FieldMask} applied
-     *                    to each of results
+     * @param entityClass
+     *         the class of a target entity
+     * @param maskPaths
+     *         the property paths for the {@code FieldMask} applied
+     *         to each of results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
@@ -166,7 +178,8 @@ public final class QueryFactory {
      * <p>Unlike {@link #allWithMask(Class, String...)}, the {@code Query} processing will
      * not change the resulting entities.
      *
-     * @param entityClass the class of a target entity
+     * @param entityClass
+     *         the class of a target entity
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query all(Class<? extends Message> entityClass) {
@@ -176,15 +189,25 @@ public final class QueryFactory {
     }
 
     Query composeQuery(Class<? extends Message> entityClass,
-                       @Nullable Set<? extends Message> ids,
+                       @Nullable Set<?> ids,
                        @Nullable Set<CompositeColumnFilter> columnFilters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
+        QueryVBuilder builder = queryBuilderFor(entityClass, ids, columnFilters, fieldMask);
+        Query query = newQuery(builder);
+        return query;
+    }
 
-        Query.Builder builder =
-                queryBuilderFor(entityClass, ids, columnFilters, fieldMask)
-                        .setId(newQueryId())
-                        .setContext(actorContext);
-        return builder.build();
+    Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
+        checkNotNull(target, "Target must be specified to compose a Query");
+        QueryVBuilder builder = queryBuilderFor(target, fieldMask);
+        Query query = newQuery(builder);
+        return query;
+    }
+
+    private Query newQuery(QueryVBuilder builder) {
+        return builder.setId(newQueryId())
+                      .setContext(actorContext)
+                      .build();
     }
 }

@@ -20,15 +20,12 @@
 package io.spine.server;
 
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
-import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
-import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
-import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.aggregate.ImportBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -41,16 +38,13 @@ import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.EventFactory;
 import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
-import io.spine.server.integration.IntegrationEvent;
-import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemBoundedContext;
+import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeName;
 
@@ -87,12 +81,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Dmitry Ganzha
  * @author Dmytro Dashenkov
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
- *     Martin Fowler on BoundedContext</a>
+ *     Martin Fowler on bounded contexts</a>
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
-public abstract class BoundedContext
-        extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
-        implements AutoCloseable, Logging {
+public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
@@ -106,6 +98,7 @@ public abstract class BoundedContext
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final IntegrationBus integrationBus;
+    private final ImportBus importBus;
     private final Stand stand;
 
     /** Controls access to entities of all registered repositories. */
@@ -139,6 +132,21 @@ public abstract class BoundedContext
 
         this.commandBus = buildCommandBus(builder, eventBus);
         this.integrationBus = buildIntegrationBus(builder, eventBus, name);
+        this.importBus = buildImportBus(tenantIndex);
+    }
+
+    /**
+     * Prevents 3rd party code from creating classes extending from {@code BoundedContext}.
+     */
+    @SuppressWarnings("ClassReferencesSubclass")
+    private void checkInheritance() {
+        Class<? extends BoundedContext> thisClass = getClass();
+        checkState(
+                DomainContext.class.equals(thisClass) ||
+                        SystemContext.class.equals(thisClass),
+                "The class `BoundedContext` is not designed for " +
+                        "inheritance by the framework users."
+        );
     }
 
     private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
@@ -148,20 +156,6 @@ public abstract class BoundedContext
                                       .injectEventBus(eventBus)
                                       .build();
         return result;
-    }
-
-    /**
-     * Prevents 3rd party code from creating classes extending {@link BoundedContext}.
-     */
-    @SuppressWarnings("ClassReferencesSubclass")
-    private void checkInheritance() {
-        Class<? extends BoundedContext> thisClass = getClass();
-        checkState(
-                DomainBoundedContext.class.equals(thisClass) ||
-                        SystemBoundedContext.class.equals(thisClass),
-                "The class `BoundedContext` is not designed for " +
-                        "inheritance by the framework users"
-        );
     }
 
     /**
@@ -184,6 +178,13 @@ public abstract class BoundedContext
                           .setEventBus(eventBus)
                           .build();
         return result;
+    }
+
+    private static ImportBus buildImportBus(TenantIndex tenantIndex) {
+        ImportBus.Builder result = ImportBus
+                .newBuilder()
+                .injectTenantIndex(tenantIndex);
+        return result.build();
     }
 
     /**
@@ -299,15 +300,6 @@ public abstract class BoundedContext
         CommandErrorHandler result = CommandErrorHandler.with(systemGateway);
         return result;
     }
-    /**
-     * Sends an integration event to this {@code BoundedContext}.
-     */
-    @Experimental
-    @Override
-    public void notify(IntegrationEvent integrationEvent, StreamObserver<Ack> observer) {
-        Event event = EventFactory.toEvent(integrationEvent);
-        eventBus.post(event, observer);
-    }
 
     /**
      * Obtains a set of entity type names by their visibility.
@@ -319,6 +311,21 @@ public abstract class BoundedContext
 
     /**
      * Finds a repository by the state class of entities.
+     *
+     * <p>This method assumes that a repository for the given entity state class <b>is</b>
+     * registered in this context. If there is no such repository, throws
+     * an {@link IllegalStateException}.
+     *
+     * <p>If a repository is registered, the method returns it or {@link Optional#empty()} if
+     * the requested entity is {@linkplain Visibility#NONE not visible}.
+     *
+     * @param entityStateClass
+     *         the class of the state of the entity managed by the resulting repository
+     * @return the requested repository or {@link Optional#empty()} if the repository manages
+     *         a {@linkplain Visibility#NONE non-visible} entity
+     * @throws IllegalStateException
+     *         if the requested repository is not registered
+     * @see VisibilityGuard
      */
     @Internal
     public Optional<Repository> findRepository(Class<? extends Message> entityStateClass) {
@@ -344,6 +351,11 @@ public abstract class BoundedContext
     /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
     public IntegrationBus getIntegrationBus() {
         return this.integrationBus;
+    }
+
+    /** Obtains instance of {@link ImportBus} of this {@code BoundedContext}. */
+    public ImportBus getImportBus() {
+        return this.importBus;
     }
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
@@ -372,7 +384,8 @@ public abstract class BoundedContext
     }
 
     /**
-     * @return {@code true} if the bounded context serves many organizations
+     * Returns {@code true} if the Bounded Context is designed to serve more than one tenant of
+     * the application, {@code false} otherwise.
      */
     public boolean isMultitenant() {
         return multitenant;
@@ -405,12 +418,9 @@ public abstract class BoundedContext
      *     <li>Closes {@link IntegrationBus}.
      *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      *     <li>Closes {@link Stand}.
-     *     <li>Shuts down all registered repositories. Each registered repository is:
-     *      <ul>
-     *          <li>un-registered from {@link CommandBus}
-     *          <li>un-registered from {@link EventBus}
-     *          <li>detached from its storage
-     *      </ul>
+     *     <li>Closes {@link ImportBus}.
+     *     <li>{@linkplain io.spine.server.entity.Repository#close() Closes} all registered
+     *         repositories.
      * </ol>
      *
      * @throws Exception caused by closing one of the components
@@ -423,6 +433,7 @@ public abstract class BoundedContext
         eventBus.close();
         integrationBus.close();
         stand.close();
+        importBus.close();
 
         shutDownRepositories();
 
