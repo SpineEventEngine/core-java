@@ -36,7 +36,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
@@ -222,11 +221,9 @@ public class EventStore implements AutoCloseable {
 
     /**
      * Closes the underlying storage.
-     *
-     * @throws IOException if the attempt to close the storage throws an exception
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         storage.close();
     }
 
@@ -350,8 +347,8 @@ public class EventStore implements AutoCloseable {
         if (logger == null) {
             return;
         }
-        if (logger.isTraceEnabled()) {
-            logger.trace("Stored: {}", TextFormat.shortDebugString(request));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Stored: {}", TextFormat.shortDebugString(request));
         }
     }
 
@@ -366,9 +363,9 @@ public class EventStore implements AutoCloseable {
             return;
         }
 
-        if (logger.isInfoEnabled()) {
+        if (logger.isDebugEnabled()) {
             String requestData = TextFormat.shortDebugString(request);
-            logger.info("Creating stream on request: {} for observer: {}",
+            logger.debug("Creating stream on request: {} for observer: {}",
                         requestData,
                         responseObserver);
         }
@@ -383,8 +380,8 @@ public class EventStore implements AutoCloseable {
         if (logger == null) {
             return;
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("Observer {} got all queried events.", observer);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Observer {} got all queried events.", observer);
         }
     }
 }
