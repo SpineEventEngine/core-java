@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.protobuf.Any;
 import io.spine.core.Version;
+import io.spine.server.model.NothingHappened;
 
 /**
  * An object with identity which produces events.
@@ -42,4 +43,13 @@ public interface EventProducer {
      * the generated events.
      */
     Version getVersion();
+
+    /**
+     * Obtains the {@link NothingHappened} event message.
+     *
+     * @return the default instance of {@link NothingHappened}
+     */
+    default NothingHappened nothing() {
+        return NothingHappened.getDefaultInstance();
+    }
 }
