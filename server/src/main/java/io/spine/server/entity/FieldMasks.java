@@ -25,10 +25,10 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
+import io.spine.logging.Logging;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
@@ -44,8 +44,6 @@ import static java.lang.String.format;
 /**
  * A utility class for creating instances of {@code FieldMask} and processing them
  * against instances of {@link Message}.
- *
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
 public class FieldMasks {
@@ -57,8 +55,8 @@ public class FieldMasks {
             "Class %s must be assignable from com.google.protobuf.Message. " +
             "Try to rebuild the project. Make sure type URL is valid.";
 
+    /** Prevent instantiation of this utility class. */
     private FieldMasks() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -222,12 +220,6 @@ public class FieldMasks {
     }
 
     private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(FieldMasks.class);
+        return Logging.get(FieldMasks.class);
     }
 }

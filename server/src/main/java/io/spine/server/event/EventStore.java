@@ -28,13 +28,13 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.Events;
 import io.spine.core.TenantId;
+import io.spine.logging.Logging;
 import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -227,13 +227,6 @@ public class EventStore implements AutoCloseable {
         storage.close();
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventStore.class);
-    }
-
     /**
      * Abstract builder base for building.
      *
@@ -371,11 +364,6 @@ public class EventStore implements AutoCloseable {
         }
     }
 
-    /** Returns default logger for the class. */
-    public static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
     private void logReadingComplete(StreamObserver<Event> observer) {
         if (logger == null) {
             return;
@@ -383,5 +371,10 @@ public class EventStore implements AutoCloseable {
         if (logger.isDebugEnabled()) {
             logger.debug("Observer {} got all queried events.", observer);
         }
+    }
+
+    /** Returns default logger for this class. */
+    public static Logger log() {
+        return Logging.get(EventStore.class);
     }
 }

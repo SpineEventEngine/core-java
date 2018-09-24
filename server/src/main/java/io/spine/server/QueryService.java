@@ -27,10 +27,9 @@ import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
+import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +38,10 @@ import java.util.Set;
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
  *
  * <p> For asynchronous read-side updates please see {@link SubscriptionService}.
- *
- * @author Alex Tymchenko
  */
-public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
+public class QueryService
+        extends QueryServiceGrpc.QueryServiceImplBase
+        implements Logging {
 
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
@@ -121,15 +120,5 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
                 mapBuilder.put(availableType, boundedContext);
             }
         }
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(QueryService.class);
     }
 }

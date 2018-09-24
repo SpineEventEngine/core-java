@@ -28,10 +28,9 @@ import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
+import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +43,9 @@ import static io.spine.server.bus.Buses.reject;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
+public class CommandService
+        extends CommandServiceGrpc.CommandServiceImplBase
+        implements Logging {
 
     private final ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
 
@@ -76,8 +77,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         }
     }
 
-    private static void handleUnsupported(Command request,
-                                          StreamObserver<Ack> responseObserver) {
+    private void handleUnsupported(Command request, StreamObserver<Ack> responseObserver) {
         UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
         Error error = unsupported.asError();
@@ -151,15 +151,5 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
                 builder.put(commandClass, boundedContext);
             }
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandService.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

@@ -32,10 +32,9 @@ import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.grpc.StreamObservers;
+import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +51,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @SuppressWarnings("MethodDoesntCallSuperMethod")
 // as we override default implementation with `unimplemented` status.
-public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionServiceImplBase {
+public class SubscriptionService
+        extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
+        implements Logging {
 
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
@@ -101,7 +102,7 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             Stand targetStand = boundedContext.getStand();
             targetStand.activate(subscription,
                                  updateCallback,
-                                 StreamObservers.<Response>forwardErrorsOnly(responseObserver));
+                                 StreamObservers.forwardErrorsOnly(responseObserver));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error activating the subscription", e);
             responseObserver.onError(e);
@@ -184,15 +185,5 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                 mapBuilder.put(availableType, boundedContext);
             }
         }
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(SubscriptionService.class);
     }
 }

@@ -27,10 +27,10 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
+import io.spine.logging.Logging;
 import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -55,10 +55,8 @@ import static java.lang.String.format;
  *
  * <p>As long as the new enrichment functions may be appended to the parent enricher at runtime,
  * the validation result will vary for the same enricher depending on its actual state.
- *
- * @author Alexander Yevsyukov
  */
-final class ReferenceValidator {
+final class ReferenceValidator implements Logging {
 
     /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";
@@ -160,9 +158,9 @@ final class ReferenceValidator {
      * @return {@link FieldDescriptor} for the field with the given name or {@code null} if the
      * field is absent and if not in the strict mode
      */
-    private FieldDescriptor findSourceFieldByName(String name,
-                                                  FieldDescriptor enrichmentField,
-                                                  boolean strict) {
+    private @Nullable FieldDescriptor findSourceFieldByName(String name,
+                                                            FieldDescriptor enrichmentField,
+                                                            boolean strict) {
         checkSourceFieldName(name, enrichmentField);
         Descriptor srcMessage = getSrcMessage(name);
         FieldDescriptor field = findField(name, srcMessage);
@@ -227,7 +225,8 @@ final class ReferenceValidator {
         return format("Enrichment field %s targets fields of different types.", enrichmentField);
     }
 
-    private static FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
+    private static
+    @Nullable FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
         if (fieldNameFull.contains(PROTO_FQN_SEPARATOR)) { // is event field FQN or context field
             int firstCharIndex = fieldNameFull.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
             String fieldName = fieldNameFull.substring(firstCharIndex);
@@ -282,7 +281,7 @@ final class ReferenceValidator {
                 enrichmentField.getFullName());
     }
 
-    private static void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+    private void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
         // Using `DEBUG` level to avoid polluting the `stderr`.
         if (log().isDebugEnabled()) {
             log().debug("There is no enrichment function for translating {} into {}",
@@ -320,15 +319,5 @@ final class ReferenceValidator {
         ImmutableMultimap<FieldDescriptor, FieldDescriptor> getFieldMap() {
             return fieldMap;
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ReferenceValidator.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }
