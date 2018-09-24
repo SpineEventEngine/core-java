@@ -121,24 +121,26 @@ final class Element implements Serializable {
         throw newIllegalStateException("Unsupported element type encountered %s", this.type);
     }
 
-    private void writeObject(ObjectOutputStream o) throws IOException {
-        o.writeObject(type);
-        if (type == Type.OPTIONAL) {
-            Optional<?> optionalValue = (Optional) value;
-            o.writeObject(optionalValue.orElse(null));
-        }
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeObject(type);
+        final Serializable obj;
         if (type != Type.OPTIONAL) {
-            o.writeObject(value);
+            obj = (Serializable) value;
+            out.writeObject(obj);
+        } else /* (type == Type.OPTIONAL) */ {
+            Optional<?> optionalValue = (Optional) value;
+            obj = (Serializable) optionalValue.orElse(null);
         }
+        out.writeObject(obj);
     }
 
-    private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
-        type = (Type) o.readObject();
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        type = (Type) in.readObject();
         if (type == Type.OPTIONAL) {
-            value = Optional.ofNullable(o.readObject());
+            value = Optional.ofNullable(in.readObject());
         }
         if (type != Type.OPTIONAL) {
-            value = o.readObject();
+            value = in.readObject();
         }
     }
 
