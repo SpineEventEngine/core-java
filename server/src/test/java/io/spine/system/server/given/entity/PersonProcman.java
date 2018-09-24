@@ -20,9 +20,9 @@
 
 package io.spine.system.server.given.entity;
 
-import com.google.protobuf.Empty;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.server.model.NothingHappened;
 import io.spine.server.procman.ProcessManager;
 import io.spine.system.server.CompletePersonCreation;
 import io.spine.system.server.PersonCreation;
@@ -47,22 +47,22 @@ public class PersonProcman
     }
 
     @Assign
-    Empty handle(StartPersonCreation command) {
+    NothingHappened handle(StartPersonCreation command) {
         getBuilder().setId(command.getId());
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @Assign
-    Empty handle(CompletePersonCreation command) {
+    NothingHappened handle(CompletePersonCreation command) {
         getBuilder().setId(command.getId())
                     .setCreated(true);
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @React
-    Empty reactOn(PersonNameCreated event) {
+    NothingHappened reactOn(PersonNameCreated event) {
         getBuilder().setId(event.getId())
                     .setCreated(true);
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 }

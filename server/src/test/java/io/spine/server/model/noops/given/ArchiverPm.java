@@ -18,32 +18,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
+package io.spine.server.model.noops.given;
 
-import com.google.protobuf.Empty;
+import io.spine.base.Identifier;
 import io.spine.server.command.Assign;
 import io.spine.server.model.NothingHappened;
 import io.spine.server.procman.ProcessManager;
-import io.spine.test.reflect.ProjectId;
-import io.spine.test.reflect.command.RefCreateProject;
-import io.spine.validate.EmptyVBuilder;
+import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.test.model.contexts.archiver.ArchiveFile;
+import io.spine.test.model.contexts.archiver.Archiver;
+import io.spine.test.model.contexts.archiver.ArchiverId;
+import io.spine.test.model.contexts.archiver.ArchiverVBuilder;
 
 /**
- * A simple process manager that accepts a command and always returns {@link Empty}.
+ * A test process manager which emits empty events and commands.
  *
- * <p>The process manager does not modify its state when “handling” the passed command.
- *
- * @author Alexander Yevsykov
+ * @author Dmytro Dashenkov
  */
-public class ProcessManagerDoingNothing
-        extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
+public final class ArchiverPm extends ProcessManager<ArchiverId, Archiver, ArchiverVBuilder> {
 
-    public ProcessManagerDoingNothing(ProjectId id) {
+    static final ArchiverId SINGLE_ID = ArchiverId
+            .newBuilder()
+            .setUuid(Identifier.newUuid())
+            .build();
+
+    private ArchiverPm(ArchiverId id) {
         super(id);
     }
 
     @Assign
-    NothingHappened handle(RefCreateProject cmd) {
-        return nothing();
+    NothingHappened handle(ArchiveFile command) {
+        ArchiverVBuilder builder = getBuilder();
+        builder.setArchivedFiles(builder.getArchivedFiles() + 1);
+        return NothingHappened.getDefaultInstance();
+    }
+
+    public static final class Repository
+            extends ProcessManagerRepository<ArchiverId, ArchiverPm, Archiver> {
     }
 }

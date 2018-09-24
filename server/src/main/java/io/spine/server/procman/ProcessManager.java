@@ -37,6 +37,7 @@ import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
+import io.spine.server.model.NothingHappened;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.validate.ValidatingBuilder;
@@ -199,6 +200,10 @@ public abstract class ProcessManager<I,
                         " nor produced commands.",
                 this, event.getId(), eventClass
         );
+    }
+
+    protected static NothingHappened nothing() {
+        return NothingHappened.getDefaultInstance();
     }
 
     private static ImmutableList<Event> noEvents() {

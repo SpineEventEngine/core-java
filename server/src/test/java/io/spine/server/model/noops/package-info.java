@@ -18,32 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
-
-import com.google.protobuf.Empty;
-import io.spine.server.command.Assign;
-import io.spine.server.model.NothingHappened;
-import io.spine.server.procman.ProcessManager;
-import io.spine.test.reflect.ProjectId;
-import io.spine.test.reflect.command.RefCreateProject;
-import io.spine.validate.EmptyVBuilder;
-
 /**
- * A simple process manager that accepts a command and always returns {@link Empty}.
- *
- * <p>The process manager does not modify its state when “handling” the passed command.
- *
- * @author Alexander Yevsykov
+ * Tests for the no-op messages, {@link io.spine.server.model.NothingHappened NothingHappened} event
+ * and {@link io.spine.test.aggregate.number.DoNothing DoNothing} command.
  */
-public class ProcessManagerDoingNothing
-        extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
 
-    public ProcessManagerDoingNothing(ProjectId id) {
-        super(id);
-    }
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.noops;
 
-    @Assign
-    NothingHappened handle(RefCreateProject cmd) {
-        return nothing();
-    }
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

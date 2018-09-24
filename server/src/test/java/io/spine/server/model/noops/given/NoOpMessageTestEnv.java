@@ -18,32 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
+package io.spine.server.model.noops.given;
 
-import com.google.protobuf.Empty;
-import io.spine.server.command.Assign;
-import io.spine.server.model.NothingHappened;
-import io.spine.server.procman.ProcessManager;
-import io.spine.test.reflect.ProjectId;
-import io.spine.test.reflect.command.RefCreateProject;
-import io.spine.validate.EmptyVBuilder;
+import io.spine.net.Url;
+import io.spine.test.model.contexts.archiver.ArchiveFile;
+import io.spine.testdata.Sample;
 
-/**
- * A simple process manager that accepts a command and always returns {@link Empty}.
- *
- * <p>The process manager does not modify its state when “handling” the passed command.
- *
- * @author Alexander Yevsykov
- */
-public class ProcessManagerDoingNothing
-        extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
+import static io.spine.server.model.noops.given.ArchiverPm.SINGLE_ID;
 
-    public ProcessManagerDoingNothing(ProjectId id) {
-        super(id);
+public final class NoOpMessageTestEnv {
+
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private NoOpMessageTestEnv() {
     }
 
-    @Assign
-    NothingHappened handle(RefCreateProject cmd) {
-        return nothing();
+    public static ArchiveFile archiveSingleFile() {
+        ArchiveFile command = ArchiveFile
+                .newBuilder()
+                .setId(SINGLE_ID)
+                .setFileLocation(url())
+                .build();
+        return command;
+    }
+
+    private static Url url() {
+        return Sample.messageOfType(Url.class);
     }
 }

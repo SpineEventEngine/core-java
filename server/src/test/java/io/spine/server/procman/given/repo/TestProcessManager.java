@@ -22,7 +22,6 @@ package io.spine.server.procman.given.repo;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -32,6 +31,7 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
+import io.spine.server.model.NothingHappened;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
@@ -81,10 +81,6 @@ public class TestProcessManager
     /** Keeps the event message for further inspection in tests. */
     private void keep(Message commandOrEventMsg) {
         messagesDelivered.put(getState().getId(), commandOrEventMsg);
-    }
-
-    private static Empty withNothing() {
-        return Empty.getDefaultInstance();
     }
 
     private void handleProjectCreated(ProjectId projectId) {
@@ -148,23 +144,23 @@ public class TestProcessManager
     }
 
     @Assign
-    Empty handle(PmArchiveProcess command) {
+    NothingHappened handle(PmArchiveProcess command) {
         keep(command);
         setArchived(true);
-        return withNothing();
+        return nothing();
     }
 
     @Assign
-    Empty handle(PmDeleteProcess command) {
+    NothingHappened handle(PmDeleteProcess command) {
         keep(command);
         setDeleted(true);
-        return withNothing();
+        return nothing();
     }
 
     @Assign
-    Empty handle(PmDoNothing command, CommandContext ignored) {
+    NothingHappened handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
-        return withNothing();
+        return nothing();
     }
 
     @Assign
@@ -174,40 +170,40 @@ public class TestProcessManager
     }
 
     @React
-    Empty on(StandardRejections.EntityAlreadyArchived rejection) {
+    NothingHappened on(StandardRejections.EntityAlreadyArchived rejection) {
         keep(rejection);
-        return withNothing();
+        return nothing();
     }
 
     @React
-    Empty on(StandardRejections.EntityAlreadyDeleted rejection) {
+    NothingHappened on(StandardRejections.EntityAlreadyDeleted rejection) {
         keep(rejection);
-        return withNothing();
+        return nothing();
     }
 
     @React
-    Empty on(PmTaskAdded event) {
+    NothingHappened on(PmTaskAdded event) {
         keep(event);
 
         Task task = event.getTask();
         handleTaskAdded(task);
-        return withNothing();
+        return nothing();
     }
 
     @React
-    Empty on(PmProjectStarted event) {
+    NothingHappened on(PmProjectStarted event) {
         keep(event);
 
         handleProjectStarted();
-        return withNothing();
+        return nothing();
     }
 
     @React
-    Empty on(PmProjectCreated event, EventContext ignored) {
+    NothingHappened on(PmProjectCreated event, EventContext ignored) {
         keep(event);
 
         handleProjectCreated(event.getProjectId());
-        return withNothing();
+        return nothing();
     }
 
     @Override
