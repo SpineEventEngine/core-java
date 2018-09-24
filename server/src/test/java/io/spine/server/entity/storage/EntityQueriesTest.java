@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
@@ -48,26 +49,19 @@ import java.util.List;
 
 import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EntityQueries utility should")
 class EntityQueriesTest {
 
@@ -198,18 +192,19 @@ class EntityQueriesTest {
 
         Collection<?> ids = query.getIds();
         assertFalse(ids.isEmpty());
-        assertSize(1, ids);
+        assertThat(ids).hasSize(1);
         Object singleId = ids.iterator()
                              .next();
         assertEquals(someGenericId, singleId);
 
         List<CompositeQueryParameter> values = newArrayList(query.getParameters());
-        assertSize(1, values);
+        assertThat(values).hasSize(1);
         CompositeQueryParameter singleParam = values.get(0);
         Collection<ColumnFilter> columnFilters = singleParam.getFilters()
                                                             .values();
         assertEquals(EITHER, singleParam.getOperator());
-        assertContains(versionFilter, columnFilters);
-        assertContains(archivedFilter, columnFilters);
+        IterableSubject assertColumFilters = assertThat(columnFilters);
+        assertColumFilters.contains(versionFilter);
+        assertColumFilters.contains(archivedFilter);
     }
 }

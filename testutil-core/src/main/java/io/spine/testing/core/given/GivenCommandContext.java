@@ -32,13 +32,11 @@ import static io.spine.base.Time.getCurrentTime;
 
 /**
  * Factory methods to create {@code CommandContext} instances for test purposes.
- *
- * @author Mikhail Mikhaylov
  */
-public class GivenCommandContext {
+public final class GivenCommandContext {
 
+    /** Prevent instantiation of this utility class. */
     private GivenCommandContext() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

@@ -45,11 +45,10 @@ import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.transformValues;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.Tests.assertMatchesMask;
-import static io.spine.testing.Verify.assertIteratorsEqual;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.server.entity.given.GivenLifecycleFlags.archived;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.stream.Collectors.toList;
@@ -259,7 +258,7 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
                     ids.subList(0, bulkCount),
                     fieldMask);
             List<EntityRecord> readList = newArrayList(readRecords);
-            assertSize(bulkCount, readList);
+            assertThat(readList).hasSize(bulkCount);
             for (EntityRecord record : readList) {
                 Message state = unpack(record.getState());
                 assertMatchesMask(state, fieldMask);
@@ -334,6 +333,14 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
             Iterator<EntityRecord> secondRevision = storage.readAll();
             assertIteratorsEqual(v2Records.values()
                                           .iterator(), secondRevision);
+        }
+
+        private <E> void assertIteratorsEqual(Iterator<? extends E> first,
+                                              Iterator<? extends E> second) {
+            Collection<? extends E> firstCollection = newArrayList(first);
+            Collection<? extends E> secondCollection = newArrayList(second);
+            assertEquals(firstCollection.size(), secondCollection.size());
+            assertThat(firstCollection).containsExactlyElementsIn(secondCollection);
         }
     }
 

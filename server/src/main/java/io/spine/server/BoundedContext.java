@@ -437,7 +437,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
         shutDownRepositories();
 
-        log().info(closed(nameForLogging()));
+        log().debug(closed(nameForLogging()));
     }
 
     String nameForLogging() {

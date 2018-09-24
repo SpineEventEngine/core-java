@@ -76,11 +76,11 @@ public class RepositoryTestEnv {
                 .build();
         Url fullSizeUrl = Url
                 .newBuilder()
-                .setRaw(url)
+                .setSpec(url)
                 .build();
         Url thumbnail = Url
                 .newBuilder()
-                .setRaw(url + "-thumbnail")
+                .setSpec(url + "-thumbnail")
                 .build();
         Photo photo = PhotoVBuilder
                 .newBuilder()

@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.Tests.nullRef;
-import static io.spine.testing.Verify.assertContainsAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -260,7 +260,7 @@ public abstract class AbstractStorageTest<I,
             Collection<I> indexValues = newHashSet(index);
 
             assertEquals(ids.size(), indexValues.size());
-            assertContainsAll(indexValues, (I[]) ids.toArray());
+            assertThat(indexValues).containsExactlyElementsIn(ids);
         }
 
         @Test

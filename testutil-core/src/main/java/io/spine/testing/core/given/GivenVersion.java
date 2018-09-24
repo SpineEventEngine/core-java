@@ -26,13 +26,11 @@ import io.spine.core.Versions;
 
 /**
  * Utilities for using {@link Version}s in tests.
- *
- * @author Alexander Yevsyukov
  */
-public class GivenVersion {
+public final class GivenVersion {
 
+    /** Prevent instantiation of this utility class. */
     private GivenVersion() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

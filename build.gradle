@@ -168,6 +168,8 @@ subprojects {
     dependencies {
         errorprone deps.build.errorProneCore
         errorproneJavac deps.build.errorProneJavac
+        // For dependencies config. based on version of Java, see:
+        //  https://github.com/epeee/junit-jupiter-extension-testing/blob/57b7ba75ab64ed8c229d2a5b14a954d6ae359189/gradle/errorprone.gradle
 
         implementation deps.build.guava
 
@@ -208,14 +210,9 @@ subprojects {
         }
     }
 
-    apply from: "$rootDir/config/gradle/test-output.gradle"
-
-    javadoc {
-        source = sourceSets.main.allJava
-        options.tags = ["apiNote:a:API Note:",
-                        "implSpec:a:Implementation Requirements:",
-                        "implNote:a:Implementation Note:"]
-    }
+    apply from: deps.scripts.testOutput
+    apply from: deps.scripts.javadocOptions
+    apply from: deps.scripts.javacArgs
     
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
