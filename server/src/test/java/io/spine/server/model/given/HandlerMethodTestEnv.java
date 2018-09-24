@@ -25,7 +25,6 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -36,6 +35,8 @@ import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.ModProjectStarted;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -78,7 +79,7 @@ public class HandlerMethodTestEnv {
             Method method;
             Class<?> clazz = StubHandler.class;
             try {
-                method = clazz.getMethod("on", StringValue.class, EventContext.class);
+                method = clazz.getMethod("on", ModProjectCreated.class, EventContext.class);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(e);
             }
@@ -89,7 +90,7 @@ public class HandlerMethodTestEnv {
             Method method;
             Class<?> clazz = StubHandler.class;
             try {
-                method = clazz.getDeclaredMethod("handle", BoolValue.class);
+                method = clazz.getDeclaredMethod("handle", ModProjectStarted.class);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(e);
             }
@@ -118,12 +119,12 @@ public class HandlerMethodTestEnv {
             return method;
         }
 
-        public void on(StringValue message, EventContext context) {
+        public void on(ModProjectCreated message, EventContext context) {
             onInvoked = true;
         }
 
         @SuppressWarnings("unused") // The method is used via reflection.
-        private void handle(BoolValue message) {
+        private void handle(ModProjectStarted message) {
             handleInvoked = true;
         }
 
