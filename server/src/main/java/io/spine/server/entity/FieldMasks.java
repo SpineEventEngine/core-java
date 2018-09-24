@@ -151,9 +151,8 @@ public class FieldMasks {
         return message;
     }
 
-    private static <M extends Message, B extends Message.Builder> M doApply(FieldMask mask,
-                                                                            M message,
-                                                                            TypeUrl type) {
+    private static <M extends Message, B extends Message.Builder>
+    M doApply(FieldMask mask, M message, TypeUrl type) {
         checkNotNull(mask);
         checkNotNull(message);
         checkNotNull(type);
@@ -182,9 +181,10 @@ public class FieldMasks {
         }
     }
 
-    private static <M extends Message, B extends Message.Builder> M messageForFilter(
-            ProtocolStringList filter,
-            Constructor<B> builderConstructor, Message wholeMessage)
+    private static <M extends Message, B extends Message.Builder>
+    M messageForFilter(ProtocolStringList filter,
+                       Constructor<B> builderConstructor,
+                       Message wholeMessage)
             throws InstantiationException,
                    IllegalAccessException,
                    InvocationTargetException {

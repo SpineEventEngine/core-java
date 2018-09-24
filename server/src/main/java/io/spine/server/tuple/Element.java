@@ -41,10 +41,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>Can hold either {@link Message}, or {@link Optional} message, or an instance of
  * {@link Either}.
- *
- * @author Alexander Yevsyukov
  */
-class Element implements Serializable {
+final class Element implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -78,6 +76,7 @@ class Element implements Serializable {
     /**
      * Obtains the value of the element by its index and casts it to the type {@code <T>}.
      */
+    @SuppressWarnings("TypeParameterUnusedInFormals") // See Javadoc.
     static <T> T value(Tuple tuple, int index) {
         @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
         T value = (T) tuple.get(index);
@@ -125,7 +124,7 @@ class Element implements Serializable {
     private void writeObject(ObjectOutputStream o) throws IOException {
         o.writeObject(type);
         if (type == Type.OPTIONAL) {
-            Optional optionalValue = (Optional) value;
+            Optional<?> optionalValue = (Optional) value;
             o.writeObject(optionalValue.orElse(null));
         }
         if (type != Type.OPTIONAL) {
@@ -143,11 +142,17 @@ class Element implements Serializable {
         }
     }
 
+    @SuppressWarnings("NonFinalFieldReferencedInHashCode")
+        // The fields are non-final to support serialization.
+        // Otherwise, they are set only in the constructor.
     @Override
     public int hashCode() {
         return Objects.hash(value, type);
     }
 
+    @SuppressWarnings("NonFinalFieldReferenceInEquals")
+        // The fields are non-final to support serialization.
+        // Otherwise, they are set only in the constructor.
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -158,7 +163,7 @@ class Element implements Serializable {
         }
         Element other = (Element) obj;
         return Objects.equals(this.value, other.value)
-                && Objects.equals(this.type, other.type);
+                && this.type == other.type;
     }
 
     private enum Type {

@@ -34,15 +34,15 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 /**
  * A {@link Stringifier} for the {@link AggregateStateId}.
  *
- * <p>An example of a stringified {@link AggregateStateId AggregateStateId<Int>}:
+ * <p>An example of a stringified {@link AggregateStateId AggregateStateId&lt;Int&gt;}:
  * {@code "my.domain/my.type.of.State-Integer-271828"}.
  *
- * <p>An example of a stringified {@link AggregateStateId AggregateStateId<MyType>}:
+ * <p>An example of a stringified {@link AggregateStateId AggregateStateId&lt;MyType&gt;}:
  * {@code "my.domain/my.type.of.State-my.type.MyType-{foo=42, bar="abc"}"}.
- *
- * @author Dmytro Dashenkov
  */
 final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
+
+    private static final AggregateStateIdStringifier INSTANCE = new AggregateStateIdStringifier();
 
     private static final String DIVIDER = "-";
     private static final int MEAN_STRING_LENGTH = 256;
@@ -50,11 +50,11 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
     private static final String JAVA_LANG_PACKAGE_NAME = "java.lang.";
 
     static Stringifier<AggregateStateId> getInstance() {
-        return Singleton.INSTANCE.value;
+        return INSTANCE;
     }
 
+    /** Prevents direct instantiation. */
     private AggregateStateIdStringifier() {
-        // Prevent direct instantiation.
     }
 
     @Override
@@ -68,12 +68,13 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
         String idTypeString = idTypeToString(genericIdType);
         String genericIdString = Stringifiers.toString(genericId);
 
-        String result = new StringBuilder(MEAN_STRING_LENGTH).append(typeUrl)
-                                                             .append(DIVIDER)
-                                                             .append(idTypeString)
-                                                             .append(DIVIDER)
-                                                             .append(genericIdString)
-                                                             .toString();
+        String result = new StringBuilder(MEAN_STRING_LENGTH)
+                .append(typeUrl)
+                .append(DIVIDER)
+                .append(idTypeString)
+                .append(DIVIDER)
+                .append(genericIdString)
+                .toString();
         return result;
     }
 
@@ -102,11 +103,13 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
         return result;
     }
 
-    private static String idTypeToString(Class idType) {
+    private static String idTypeToString(Class<?> idType) {
         checkSupported(idType);
         String result;
         if (Message.class.isAssignableFrom(idType)) {
-            result = TypeName.of(idType)
+            @SuppressWarnings("unchecked") // Checked by `if` above.
+            Class<? extends Message> messageClass = (Class<? extends Message>) idType;
+            result = TypeName.of(messageClass)
                              .value();
         } else {
             result = idType.getSimpleName();
@@ -127,11 +130,5 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
             }
         }
         return result;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Stringifier<AggregateStateId> value = new AggregateStateIdStringifier();
     }
 }

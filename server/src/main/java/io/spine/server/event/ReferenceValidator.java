@@ -32,10 +32,10 @@ import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -95,7 +95,7 @@ final class ReferenceValidator implements Logging {
      * functions.
      */
     ValidationResult validate() {
-        List<EnrichmentFunction<?, ?, ?>> functions = new LinkedList<>();
+        List<EnrichmentFunction<?, ?, ?>> functions = new ArrayList<>();
         Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);

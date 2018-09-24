@@ -36,13 +36,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>If the access level check fails, the {@linkplain Logger#warn(String) warning} will be output
  * to the log. If the check passes, no action is performed.
  *
- * <p>This class is effectively {@code final} since it has a single {@code private} constructor.
- * Though the modifier "{@code final}" is absent to make it possible to create mocks for testing.
- *
- * @author Dmytro Kuzmin
+ * @implNote This class is effectively {@code final} since it has a single {@code private}
+ *           constructor. Though, the modifier "{@code final}" is absent to make it possible to
+ *           create mocks for testing.
  */
 @Internal
-public final class MethodAccessChecker implements Logging {
+public class MethodAccessChecker implements Logging {
 
     private final Method method;
 
