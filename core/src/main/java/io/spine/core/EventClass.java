@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class EventClass extends MessageClass {
+public class EventClass extends MessageClass<Message> {
 
     private static final long serialVersionUID = 0L;
 

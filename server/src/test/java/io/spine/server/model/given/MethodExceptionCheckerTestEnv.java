@@ -22,13 +22,11 @@ package io.spine.server.model.given;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
+import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
 
 import java.io.IOException;
 
-/**
- * @author Dmytro Kuzmin
- */
 public class MethodExceptionCheckerTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -63,7 +61,7 @@ public class MethodExceptionCheckerTestEnv {
         private static final long serialVersionUID = 0L;
 
         DescendantThrowableMessage(GeneratedMessageV3 message) {
-            super(message);
+            super((RejectionMessage) message);
         }
     }
 }
