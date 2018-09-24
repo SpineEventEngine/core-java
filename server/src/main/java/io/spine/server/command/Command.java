@@ -31,15 +31,14 @@ import java.lang.annotation.Target;
  * <p>A commanding method <strong>must</strong>:
  * <ul>
  *     <li>be annotated with {@link Command @Command};
- *     <li>return a command message derived from {@link com.google.protobuf.Message Message},
- *     if there is only one command to be generated;
- *     <strong>or</strong> an {@link java.lang.Iterable Iterable} of command messages for two or
- *     more commands;
+ *     <li>return a command message derived from {@link io.spine.base.CommandMessage
+ *         CommandMessage}, if there is only one command to be generated;
+ *         <strong>or</strong> an {@code Iterable} of command messages for two or more commands;
  *     <li>accept one of the following as the first parameter:
  *     <ul>
- *        <li>a {@linkplain com.google.protobuf.Message command message};
- *        <li>an {@linkplain com.google.protobuf.Message event message};
- *        <li>a {@linkplain com.google.protobuf.Message rejection message}.
+ *        <li>a {@linkplain io.spine.base.CommandMessage command message};
+ *        <li>an {@linkplain io.spine.base.EventMessage event message};
+ *        <li>a {@linkplain io.spine.base.RejectionMessage rejection message}.
  *     </ul>
  * </ul>
  *
@@ -52,7 +51,7 @@ import java.lang.annotation.Target;
  * this method is not considered a command handler and is <strong>not</strong> registered for
  * command generation.
  *
- * <h2>Throwables</h2>
+ * <h1>Throwables</h1>
  * <p>A commanding method may throw a {@link io.spine.base.ThrowableMessage ThrowableMessage}
  * <em>if, and only if</em> it accepts a command message. This means that the incoming command
  * may be either rejected, or substituting command(s) must be generated.
