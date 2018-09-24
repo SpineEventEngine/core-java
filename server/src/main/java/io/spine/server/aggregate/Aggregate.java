@@ -41,6 +41,7 @@ import io.spine.server.entity.EventPlayer;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.EventsResult;
+import io.spine.server.model.MayProduceNothing;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.validate.ValidatingBuilder;
 
@@ -123,7 +124,7 @@ public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventPlayer, EventReactor {
+        implements EventPlayer, EventReactor, MayProduceNothing {
 
     /**
      * Events generated in the process of handling commands that were not yet committed.

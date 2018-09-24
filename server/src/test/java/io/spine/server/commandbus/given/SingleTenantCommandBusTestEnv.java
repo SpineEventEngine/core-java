@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus.given;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -28,6 +27,7 @@ import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.NothingHappened;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.FirstCmdCreateProject;
@@ -95,16 +95,16 @@ public class SingleTenantCommandBusTestEnv {
         }
 
         @Assign
-        Empty handle(FirstCmdCreateProject command) {
+        NothingHappened handle(FirstCmdCreateProject command) {
             commandBus.post(commandToPost, noOpObserver());
             handledCommands.add(command);
-            return Empty.getDefaultInstance();
+            return nothing();
         }
 
         @Assign
-        Empty handle(SecondCmdStartProject command) {
+        NothingHappened handle(SecondCmdStartProject command) {
             handledCommands.add(command);
-            return Empty.getDefaultInstance();
+            return nothing();
         }
 
         public List<Message> handledCommands() {

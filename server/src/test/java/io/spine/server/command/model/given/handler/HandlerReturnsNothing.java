@@ -20,18 +20,19 @@
 
 package io.spine.server.command.model.given.handler;
 
-import com.google.protobuf.Empty;
 import io.spine.server.command.Assign;
+import io.spine.server.model.NothingHappened;
 import io.spine.test.reflect.command.RefCreateProject;
 
 /**
- * Provides a handler method that returns {@link Empty}.
+ * Provides a handler method that returns {@link NothingHappened}.
  *
  * @author Alexander Yevsyukov
  */
-public class HandlerReturnsEmpty extends TestCommandHandler {
+public class HandlerReturnsNothing extends TestCommandHandler {
+
     @Assign
-    Empty handleTest(RefCreateProject cmd) {
-        return Empty.getDefaultInstance();
+    NothingHappened handleTest(RefCreateProject cmd) {
+        return nothing();
     }
 }

@@ -21,7 +21,6 @@
 package io.spine.server.aggregate.given;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
@@ -83,9 +82,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static io.spine.core.Events.nothing;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * @author Alexander Yevsyukov
@@ -263,14 +263,16 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        Iterable<AggProjectArchived> on(AggProjectArchived event) {
+        Optional<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(AggProjectArchived.newBuilder()
-                                                          .setProjectId(getId())
-                                                          .build());
+                AggProjectArchived reaction = AggProjectArchived.newBuilder()
+                                                             .setProjectId(getId())
+                                                             .build();
+                return of(reaction);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         @Apply
@@ -283,14 +285,16 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+        Optional<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(AggProjectDeleted.newBuilder()
-                                                         .setProjectId(getId())
-                                                         .build());
+                AggProjectDeleted reaction = AggProjectDeleted.newBuilder()
+                                                           .setProjectId(getId())
+                                                           .build();
+                return of(reaction);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         /**
@@ -358,7 +362,7 @@ public class AggregateRepositoryTestEnv {
         @Override
         public Optional<ProjectAggregate> find(ProjectId id) {
             if (id.equals(troublesome)) {
-                return Optional.empty();
+                return empty();
             }
             return super.find(id);
         }
@@ -380,7 +384,7 @@ public class AggregateRepositoryTestEnv {
     public static class EventDiscardingAggregateRepository
             extends ProjectAggregateRepository {
 
-        private static final EventFilter discardAll = anyEvent -> Optional.empty();
+        private static final EventFilter discardAll = anyEvent -> empty();
 
         @Override
         protected EventFilter eventFilter() {
@@ -569,14 +573,17 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        Iterable<AggProjectArchived> on(AggProjectArchived event) {
+        Optional<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(AggProjectArchived.newBuilder()
-                                                          .setProjectId(getId())
-                                                          .build());
+                AggProjectArchived reaction = AggProjectArchived
+                        .newBuilder()
+                        .setProjectId(getId())
+                        .build();
+                return of(reaction);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         /**
@@ -584,14 +591,17 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+        Optional<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(AggProjectDeleted.newBuilder()
-                                                         .setProjectId(getId())
-                                                         .build());
+                AggProjectDeleted reaction = AggProjectDeleted
+                        .newBuilder()
+                        .setProjectId(getId())
+                        .build();
+                return of(reaction);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         @Apply
@@ -681,15 +691,16 @@ public class AggregateRepositoryTestEnv {
         }
 
         @React
-        Iterable<AggProjectArchived> on(
-                Rejections.AggCannotStartArchivedProject rejection) {
+        Optional<AggProjectArchived> on(Rejections.AggCannotStartArchivedProject rejection) {
             List<ProjectId> childIdList = rejection.getChildProjectIdList();
             if (childIdList.contains(getId())) {
-                return ImmutableList.of(AggProjectArchived.newBuilder()
-                                                          .setProjectId(getId())
-                                                          .build());
+                AggProjectArchived event = AggProjectArchived.newBuilder()
+                                                             .setProjectId(getId())
+                                                             .build();
+                return of(event);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         @Apply

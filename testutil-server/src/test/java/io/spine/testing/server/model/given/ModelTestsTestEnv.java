@@ -20,10 +20,10 @@
 
 package io.spine.testing.server.model.given;
 
-import com.google.protobuf.Empty;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.NothingHappened;
 import io.spine.testing.server.given.entity.command.TuCreateProject;
 
 /**
@@ -42,8 +42,8 @@ public class ModelTestsTestEnv {
         }
 
         @Assign
-        Empty handle(TuCreateProject cmd) {
-            return Empty.getDefaultInstance();
+        NothingHappened handle(TuCreateProject cmd) {
+            return nothing();
         }
     }
 
@@ -56,8 +56,8 @@ public class ModelTestsTestEnv {
          * Handles the same command as {@link TestCommandHandler#handle(TuCreateProject)}.
          */
         @Assign
-        Empty handle(TuCreateProject cmd) {
-            return Empty.getDefaultInstance();
+        NothingHappened handle(TuCreateProject cmd) {
+            return nothing();
         }
     }
 }

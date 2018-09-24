@@ -21,9 +21,9 @@
 package io.spine.server.procman.given.tx;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.server.event.React;
+import io.spine.server.model.NothingHappened;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
@@ -63,17 +63,17 @@ public class TestProcessManager
     }
 
     @React
-    Empty event(PmProjectCreated event) {
+    NothingHappened event(PmProjectCreated event) {
         receivedEvents.add(event);
         Project newState = Project.newBuilder(getState())
                                   .setId(event.getProjectId())
                                   .build();
         getBuilder().mergeFrom(newState);
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @React
-    Empty event(PmTaskAdded event) {
+    NothingHappened event(PmTaskAdded event) {
         throw new RuntimeException("that tests the tx behaviour for process manager");
     }
 
