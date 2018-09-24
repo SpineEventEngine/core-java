@@ -33,7 +33,6 @@ import io.spine.test.aggregate.archiver.Evaluate;
 import io.spine.test.aggregate.archiver.Evaluated;
 import io.spine.validate.StringValueVBuilder;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static java.lang.String.format;
@@ -63,10 +62,14 @@ public class AggregateRepositoryViewTestEnv {
         }
 
         @Assign
-        StringValue handle(Evaluate commandMessage) {
+        Evaluated handle(Evaluate commandMessage) {
             String command = commandMessage.getCmd();
             // Transform the command to the event (the fact in the past).
-            return toMessage(command + 'd');
+            String result = command + 'd';
+            return Evaluated
+                    .newBuilder()
+                    .setCmd(result)
+                    .build();
         }
 
         @Apply
@@ -121,7 +124,9 @@ public class AggregateRepositoryViewTestEnv {
          * @see #getMessage(Evaluated)
          */
         public static Evaluate createCommandMessage(Long id, String msg) {
-            return toMessage(format("%d%s%s", id, SEPARATOR, msg));
+            return Evaluate.newBuilder()
+                           .setCmd(format("%d%s%s", id, SEPARATOR, msg))
+                           .build();
         }
 
         private static Long getId(Evaluate commandMessage) {

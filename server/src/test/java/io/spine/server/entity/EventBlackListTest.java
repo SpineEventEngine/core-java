@@ -76,8 +76,8 @@ class EventBlackListTest {
     @Test
     @DisplayName("filter out events from bulk")
     void filterOut() {
-        List<Event> events = Stream.of(EntProjectCreated.getDefaultInstance(),
-                                       EntTaskAdded.getDefaultInstance())
+        List<Event> events = Stream.<EventMessage>of(EntProjectCreated.getDefaultInstance(),
+                                                     EntTaskAdded.getDefaultInstance())
                                    .map(eventFactory::createEvent)
                                    .collect(toList());
         Collection<Event> filtered = blackList.filter(events);

@@ -20,13 +20,13 @@
 
 package io.spine.server.event.error;
 
-import com.google.protobuf.StringValue;
+import io.spine.base.EventMessage;
 import io.spine.server.event.InvalidEventException;
+import io.spine.test.event.ProjectCreated;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -41,7 +41,7 @@ class InvalidEventExceptionTest {
     @Test
     @DisplayName("create exception with violations")
     void createWithViolations() {
-        StringValue msg = toMessage("");
+        EventMessage msg = ProjectCreated.getDefaultInstance();
 
         InvalidEventException exception = InvalidEventException.onConstraintViolations(
                 msg,

@@ -36,11 +36,11 @@ import static io.spine.core.Events.ensureMessage;
  *
  * @author Alexander Yevsyukov
  */
-public class EventClass extends MessageClass {
+public class EventClass extends MessageClass<EventMessage> {
 
     private static final long serialVersionUID = 0L;
 
-    EventClass(Class<? extends Message> value) {
+    EventClass(Class<? extends EventMessage> value) {
         super(value);
     }
 
@@ -84,12 +84,5 @@ public class EventClass extends MessageClass {
     @SafeVarargs
     public static ImmutableSet<EventClass> setOf(Class<? extends EventMessage>... classes) {
         return setOf(Arrays.asList(classes));
-    }
-
-    @Override
-    public Class<? extends EventMessage> value() {
-        @SuppressWarnings("unchecked") // Checked at runtime.
-        Class<? extends EventMessage> value = (Class<? extends EventMessage>) super.value();
-        return value;
     }
 }

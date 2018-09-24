@@ -38,6 +38,7 @@ import java.util.Set;
 
 import static io.spine.core.Events.getMessage;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.TestValues.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -179,8 +180,11 @@ class EventRoutingTest {
     void applyCustomRoute() {
         eventRouting.route(UserRegistered.class, customRoute);
 
-        // An event which has `StringValue` as its message, which should go the custom route.
-        EventEnvelope event = EventEnvelope.of(GivenEvent.arbitrary());
+        UserRegistered eventMessage = UserRegistered
+                .newBuilder()
+                .setId(random(1, 100))
+                .build();
+        EventEnvelope event = EventEnvelope.of(GivenEvent.withMessage(eventMessage));
 
         Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
         assertEquals(CUSTOM_ROUTE, ids);

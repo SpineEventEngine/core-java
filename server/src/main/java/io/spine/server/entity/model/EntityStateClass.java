@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public final class EntityStateClass extends MessageClass {
+public final class EntityStateClass extends MessageClass<Message> {
 
     private static final long serialVersionUID = 0L;
 

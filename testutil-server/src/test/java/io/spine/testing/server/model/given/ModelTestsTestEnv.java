@@ -21,10 +21,10 @@
 package io.spine.testing.server.model.given;
 
 import com.google.protobuf.Empty;
-import com.google.protobuf.Timestamp;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
+import io.spine.testing.server.given.entity.command.TuCreateProject;
 
 /**
  * @author Alexander Yevsyukov
@@ -42,7 +42,7 @@ public class ModelTestsTestEnv {
         }
 
         @Assign
-        Empty handle(Timestamp cmd) {
+        Empty handle(TuCreateProject cmd) {
             return Empty.getDefaultInstance();
         }
     }
@@ -53,10 +53,10 @@ public class ModelTestsTestEnv {
         }
 
         /**
-         * Handles the same command as {@link TestCommandHandler#handle(Timestamp)}.
+         * Handles the same command as {@link TestCommandHandler#handle(TuCreateProject)}.
          */
         @Assign
-        Empty handle(Timestamp cmd) {
+        Empty handle(TuCreateProject cmd) {
             return Empty.getDefaultInstance();
         }
     }

@@ -36,11 +36,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandClass extends MessageClass {
+public final class CommandClass extends MessageClass<CommandMessage> {
 
     private static final long serialVersionUID = 0L;
 
-    private CommandClass(Class<? extends Message> value) {
+    private CommandClass(Class<? extends CommandMessage> value) {
         super(value);
     }
 
@@ -84,12 +84,5 @@ public final class CommandClass extends MessageClass {
     @SafeVarargs
     public static Set<CommandClass> setOf(Class<? extends CommandMessage>... classes) {
         return setOf(Arrays.asList(classes));
-    }
-
-    @Override
-    public Class<? extends CommandMessage> value() {
-        @SuppressWarnings("unchecked") // Checked at runtime.
-        Class<? extends CommandMessage> value = (Class<? extends CommandMessage>) super.value();
-        return value;
     }
 }

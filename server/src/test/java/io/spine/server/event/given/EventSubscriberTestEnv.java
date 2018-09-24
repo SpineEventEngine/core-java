@@ -25,6 +25,9 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.event.FailRequested;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectStarted;
+import io.spine.test.event.TaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -49,6 +52,21 @@ public class EventSubscriberTestEnv {
             if (!message.getShouldFail()) {
                 throw new UnsupportedOperationException("Do not want false messages!");
             }
+        }
+
+        @Subscribe
+        void on(ProjectCreated message) {
+            // Do nothing. Just expose the method.
+        }
+
+        @Subscribe
+        void on(ProjectStarted message) {
+            // Do nothing. Just expose the method.
+        }
+
+        @Subscribe(external = true)
+        void on(TaskAdded message) {
+            // Do nothing. Just expose the method.
         }
 
         public boolean isMethodCalled() {

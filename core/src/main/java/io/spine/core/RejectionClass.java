@@ -21,6 +21,7 @@ package io.spine.core;
 
 import com.google.protobuf.Message;
 import io.spine.base.RejectionMessage;
+import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.ensureMessage;
@@ -30,7 +31,7 @@ import static io.spine.core.Events.ensureMessage;
  *
  * @author Alex Tymchenko
  */
-public class RejectionClass extends EventClass {
+public class RejectionClass extends MessageClass<RejectionMessage> {
 
     private static final long serialVersionUID = 0L;
 
@@ -62,12 +63,5 @@ public class RejectionClass extends EventClass {
         RejectionMessage message = (RejectionMessage) ensureMessage(rejectionOrMessage);
         RejectionClass result = of(message.getClass());
         return result;
-    }
-
-    @Override
-    public Class<? extends RejectionMessage> value() {
-        @SuppressWarnings("unchecked") // Checked at runtime.
-        Class<? extends RejectionMessage> value = (Class<? extends RejectionMessage>) super.value();
-        return value;
     }
 }

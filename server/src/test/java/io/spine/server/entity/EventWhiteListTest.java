@@ -69,8 +69,8 @@ class EventWhiteListTest {
     @Test
     @DisplayName("filter out non-allowed events")
     void filterOut() {
-        List<Event> events = Stream.of(EntProjectStarted.getDefaultInstance(),
-                                       EntTaskAdded.getDefaultInstance())
+        List<Event> events = Stream.<EventMessage>of(EntProjectStarted.getDefaultInstance(),
+                                                     EntTaskAdded.getDefaultInstance())
                                    .map(eventFactory::createEvent)
                                    .collect(toList());
         Collection<Event> filtered = whiteList.filter(events);

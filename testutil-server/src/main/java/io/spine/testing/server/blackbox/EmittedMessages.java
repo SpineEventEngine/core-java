@@ -37,7 +37,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
  * @param <W> the type of the wrapper object containing messages
  * @author Alexander Yevsyukov
  */
-public abstract class EmittedMessages<C extends MessageClass,
+public abstract class EmittedMessages<C extends MessageClass<M>,
                                       W extends Message,
                                       M extends Message> {
 

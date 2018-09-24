@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.TestValues.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -162,10 +163,11 @@ class CommandRoutingTest {
     void applyCustomRoute() {
         TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
+        CommandEnvelope command = factory.createEnvelope(RegisterUser.newBuilder()
+                                                                     .setId(random(1, 100))
+                                                                     .build());
         // Have custom route.
         commandRouting.route(RegisterUser.class, customRoute);
-
-        CommandEnvelope command = factory.generateEnvelope();
 
         long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
 

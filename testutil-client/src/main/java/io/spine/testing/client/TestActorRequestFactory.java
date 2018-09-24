@@ -21,7 +21,6 @@
 package io.spine.testing.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
@@ -129,10 +128,16 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     /**
-     * Generates a test instance of a command based on {@link StringValue}
+     * Generates a test instance of a command.
      */
     public Command generateCommand() {
-        return generate();
+        @SuppressWarnings("MagicNumber")
+        String randomSuffix = String.valueOf(TestValues.random(10_000));
+        CreateTask msg = CreateTask
+                .newBuilder()
+                .setId("GeneratedTestCommand" + randomSuffix)
+                .build();
+        return createCommand(msg);
     }
 
     /**
@@ -142,16 +147,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         Command command = generateCommand();
         CommandEnvelope result = CommandEnvelope.of(command);
         return result;
-    }
-
-    @SuppressWarnings("MagicNumber")
-    private Command generate() {
-        String randomSuffix = String.valueOf(TestValues.random(10_000));
-        CreateTask msg = CreateTask
-                .newBuilder()
-                .setId("GeneratedTestCommand" + randomSuffix)
-                .build();
-        return createCommand(msg);
     }
 
     /**
