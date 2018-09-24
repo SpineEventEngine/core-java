@@ -121,8 +121,7 @@ public final class RejectionEnvelope
         Any producerId = throwableMessage.producerId()
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
-        // TODO:2018-09-21:dmytro.dashenkov: Remeve case as soon as ThrowableMessage holds RejectionMessage.
-        RejectionMessage thrownMessage = (RejectionMessage) throwableMessage.getMessageThrown();
+        RejectionMessage thrownMessage = throwableMessage.getMessageThrown();
         RejectionEventContext context = rejectionContext(origin.getMessage(), throwableMessage);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
