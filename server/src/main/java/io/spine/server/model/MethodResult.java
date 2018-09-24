@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -44,6 +45,12 @@ import static java.util.stream.Collectors.toList;
  * @author Alexander Yevsyukov
  */
 public abstract class MethodResult<V extends Message> {
+
+    private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
+            DoNothing.getDefaultInstance(),
+            NothingHappened.getDefaultInstance(),
+            Empty.getDefaultInstance()
+    );
 
     private final @Nullable Object rawMethodOutput;
     private @MonotonicNonNull ImmutableList<V> messages;
@@ -74,11 +81,9 @@ public abstract class MethodResult<V extends Message> {
      * Filters the list removing instances of {@link Empty}.
      */
     protected static <M extends Message> List<M> filterEmpty(List<M> messages) {
-        Message empty = Empty.getDefaultInstance();
-        List<M> result =
-                messages.stream()
-                        .filter(message -> !empty.equals(message))
-                        .collect(toList());
+        List<M> result = messages.stream()
+                                 .filter(message -> !IGNORED_MESSAGES.contains(message))
+                                 .collect(toList());
         return result;
     }
 
