@@ -21,6 +21,7 @@
 package io.spine.testing.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.procman.ProcessManager;
@@ -38,10 +39,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public abstract
-class PmCommandOnEventTest <I,
-                            M extends Message,
-                            S extends Message,
-                            P extends ProcessManager<I, S, ?>>
+class PmCommandOnEventTest<I,
+                           M extends EventMessage,
+                           S extends Message,
+                           P extends ProcessManager<I, S, ?>>
         extends PmCommandGenerationTest<I, M, S, P, EventEnvelope> {
 
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());

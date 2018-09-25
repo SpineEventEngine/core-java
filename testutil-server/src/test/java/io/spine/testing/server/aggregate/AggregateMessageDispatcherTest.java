@@ -20,15 +20,15 @@
 
 package io.spine.testing.server.aggregate;
 
-import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.aggregate.given.agg.TuMessageLog;
+import io.spine.testing.server.log.FloatLogged;
+import io.spine.testing.server.log.LogInteger;
+import io.spine.testing.server.log.ValueLogged;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,19 +57,17 @@ class AggregateMessageDispatcherTest {
     void dispatchCommand() {
         TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
         int messageValue = 2017_07_28;
-        UInt32Value message = UInt32Value.newBuilder()
-                                         .setValue(messageValue)
-                                         .build();
+        LogInteger message = LogInteger.newBuilder()
+                                       .setValue(messageValue)
+                                       .build();
         CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
-
         List<? extends Message> eventMessages =
                 AggregateMessageDispatcher.dispatchCommand(aggregate, commandEnvelope);
-
         assertTrue(aggregate.getState()
                             .getValue()
                             .contains(String.valueOf(messageValue)));
         assertEquals(1, eventMessages.size());
-        assertTrue(eventMessages.get(0) instanceof StringValue);
+        assertTrue(eventMessages.get(0) instanceof ValueLogged);
     }
 
     @Test
@@ -77,18 +75,16 @@ class AggregateMessageDispatcherTest {
     void dispatchEvent() {
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
         float messageValue = 2017.0729f;
-        FloatValue message = FloatValue.newBuilder()
-                                       .setValue(messageValue)
-                                       .build();
+        FloatLogged message = FloatLogged.newBuilder()
+                                         .setValue(messageValue)
+                                         .build();
         EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
-
         List<? extends Message> eventMessages =
                 AggregateMessageDispatcher.dispatchEvent(aggregate, eventEnvelope);
-
         assertTrue(aggregate.getState()
                             .getValue()
                             .contains(String.valueOf(messageValue)));
         assertEquals(1, eventMessages.size());
-        assertTrue(eventMessages.get(0) instanceof StringValue);
+        assertTrue(eventMessages.get(0) instanceof ValueLogged);
     }
 }

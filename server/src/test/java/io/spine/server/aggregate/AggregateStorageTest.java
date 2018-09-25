@@ -22,8 +22,10 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.EventMessage;
 import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -35,6 +37,7 @@ import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
+import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
 import io.spine.testing.Tests;
 import io.spine.testing.server.TestEventFactory;
@@ -51,6 +54,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.protobuf.Any.pack;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -401,7 +405,7 @@ public abstract class AggregateStorageTest
             Version currentVersion = zero();
             for (int i = 0; i < eventsNumber; i++) {
                 Project state = Project.getDefaultInstance();
-                Event event = eventFactory.createEvent(state, currentVersion, timestamp);
+                Event event = eventFactory.createEvent(event(state), currentVersion, timestamp);
                 AggregateEventRecord record = StorageRecords.create(timestamp, event);
                 records.add(record);
                 currentVersion = increment(currentVersion);
@@ -425,8 +429,8 @@ public abstract class AggregateStorageTest
         Timestamp maxTimestamp = Timestamps.MAX_VALUE;
 
         // The first event is an event, which is the oldest, i.e. with the minimal version.
-        Event expectedFirst = eventFactory.createEvent(state, minVersion, maxTimestamp);
-        Event expectedSecond = eventFactory.createEvent(state, maxVersion, minTimestamp);
+        Event expectedFirst = eventFactory.createEvent(event(state), minVersion, maxTimestamp);
+        Event expectedSecond = eventFactory.createEvent(event(state), maxVersion, minTimestamp);
 
         storage.writeEvent(id, expectedSecond);
         storage.writeEvent(id, expectedFirst);
@@ -524,7 +528,7 @@ public abstract class AggregateStorageTest
         for (int i = 0; i < eventCountAfterSnapshot; i++) {
             currentVersion = increment(currentVersion);
             Project state = Project.getDefaultInstance();
-            Event event = eventFactory.createEvent(state, currentVersion);
+            Event event = eventFactory.createEvent(event(state), currentVersion);
             storage.writeEvent(id, event);
         }
 
@@ -610,7 +614,7 @@ public abstract class AggregateStorageTest
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
-        Event expectedEvent = eventFactory.createEvent(Time.getCurrentTime());
+        Event expectedEvent = eventFactory.createEvent(event(Time.getCurrentTime()));
 
         storage.writeEvent(id, expectedEvent);
 
@@ -676,5 +680,12 @@ public abstract class AggregateStorageTest
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }
+    }
+
+    private static EventMessage event(Message entityState) {
+        return StateImported
+                .newBuilder()
+                .setState(pack(entityState))
+                .build();
     }
 }

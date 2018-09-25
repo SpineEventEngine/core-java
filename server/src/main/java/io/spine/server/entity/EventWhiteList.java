@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 
 import java.util.Optional;
@@ -57,13 +57,13 @@ public final class EventWhiteList implements EventFilter {
      */
     @SuppressWarnings("WeakerAccess") // Public API of the framework.
     @SafeVarargs
-    public static EventWhiteList allowEvents(Class<? extends Message>... eventClasses) {
+    public static EventWhiteList allowEvents(Class<? extends EventMessage>... eventClasses) {
         ImmutableSet<EventClass> classes = EventClass.setOf(eventClasses);
         return new EventWhiteList(classes);
     }
 
     @Override
-    public Optional<? extends Message> filter(Message event) {
+    public Optional<? extends EventMessage> filter(EventMessage event) {
         EventClass type = EventClass.of(event);
         return allowedEvents.contains(type)
                ? of(event)

@@ -19,19 +19,19 @@
 //
 syntax = "proto3";
 
-package spine.test.commands;
+package spine.test.model;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.commands";
+option java_package="io.spine.test.model";
 option java_multiple_files = true;
-option java_outer_classname = "CommandFactoryTestProto";
+option java_outer_classname = "EventsProto";
 
+message ModProjectCreated {
+    string id = 1;
+}
 
-// To use in `CommandFactoryTest` class.
-message RequiredFieldCommand{
-    string opt_value = 1;
-
-    string req_value = 2 [(required) = true];
+message ModProjectStarted {
+    string id = 1;
 }

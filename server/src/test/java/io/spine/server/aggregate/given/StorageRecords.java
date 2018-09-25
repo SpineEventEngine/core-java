@@ -21,8 +21,8 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.test.aggregate.ProjectId;
@@ -64,7 +64,7 @@ public class StorageRecords {
      * Creates a sample {@linkplain AggregateEventRecord record} with the passed timestamp.
      */
     public static AggregateEventRecord create(Timestamp timestamp) {
-        Message eventMessage = Sample.messageOfType(AggProjectCreated.class);
+        EventMessage eventMessage = Sample.messageOfType(AggProjectCreated.class);
         Event event = eventFactory.createEvent(eventMessage);
         return newRecordWith(timestamp)
                 .setEvent(event)

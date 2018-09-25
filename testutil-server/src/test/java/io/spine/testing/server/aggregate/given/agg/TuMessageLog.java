@@ -20,15 +20,16 @@
 
 package io.spine.testing.server.aggregate.given.agg;
 
-import com.google.protobuf.FloatValue;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.testing.server.log.FloatLogged;
+import io.spine.testing.server.log.LogInteger;
+import io.spine.testing.server.log.ValueLogged;
 import io.spine.validate.StringValueVBuilder;
 
 public class TuMessageLog extends Aggregate<Long, StringValue, StringValueVBuilder> {
@@ -38,28 +39,28 @@ public class TuMessageLog extends Aggregate<Long, StringValue, StringValueVBuild
     }
 
     @Assign
-    StringValue handle(UInt32Value value) {
+    ValueLogged handle(LogInteger value) {
         String digitalPart = String.valueOf(value.getValue());
         return logItem(digitalPart);
     }
 
     @React
-    StringValue handle(FloatValue value) {
+    ValueLogged handle(FloatLogged value) {
         String digitalPart = String.valueOf(value.getValue());
         return logItem(digitalPart);
     }
 
     @Apply
-    void newLine(StringValue line) {
+    void newLine(ValueLogged line) {
         String current = getState().getValue();
         getBuilder().setValue(current + System.lineSeparator() + line.getValue());
     }
 
-    private static StringValue logItem(String digitalPart) {
+    private static ValueLogged logItem(String digitalPart) {
         String str = Timestamps.toString(Time.getCurrentTime())
                 + " - "
                 + digitalPart;
-        return StringValue.newBuilder()
+        return ValueLogged.newBuilder()
                           .setValue(str)
                           .build();
     }

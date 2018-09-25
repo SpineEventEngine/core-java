@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
@@ -48,7 +49,7 @@ final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
     public Optional<MessageInvalid> validate(EventEnvelope envelope) {
         checkNotNull(envelope);
         MessageInvalid result = null;
-        Message eventMessage = envelope.getMessage();
+        EventMessage eventMessage = envelope.getMessage();
         List<ConstraintViolation> violations = messageValidator.validate(eventMessage);
         if (!violations.isEmpty()) {
             result = onConstraintViolations(eventMessage, violations);

@@ -31,8 +31,8 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
-import io.spine.server.command.model.given.handler.HandlerReturnsEmpty;
 import io.spine.server.command.model.given.handler.HandlerReturnsEmptyList;
+import io.spine.server.command.model.given.handler.HandlerReturnsNothing;
 import io.spine.server.command.model.given.handler.InvalidHandlerNoAnnotation;
 import io.spine.server.command.model.given.handler.InvalidHandlerNoParams;
 import io.spine.server.command.model.given.handler.InvalidHandlerOneNotMsgParam;
@@ -180,9 +180,9 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("`Empty` event")
+        @DisplayName("`Nothing` event")
         void emptyEvent() {
-            HandlerReturnsEmpty handlerObject = new HandlerReturnsEmpty();
+            HandlerReturnsNothing handlerObject = new HandlerReturnsNothing();
             Optional<CommandHandlerMethod> method =
                     new CommandHandlerSignature().create(handlerObject.getHandler());
             assertTrue(method.isPresent());

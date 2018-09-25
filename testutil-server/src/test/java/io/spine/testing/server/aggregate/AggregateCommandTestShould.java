@@ -27,6 +27,7 @@ import io.spine.testing.server.aggregate.given.agg.TuAggregate;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.rejection.Rejections.TuFailedToAssignProject;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,7 @@ class AggregateCommandTestShould {
 
     @BeforeEach
     void setUp() {
+        ModelTests.dropAllModels();
         aggregateCommandTest = new SampleCommandTest();
         aggregateRejectionCommandTest = new SampleRejectionThrowingTest();
     }

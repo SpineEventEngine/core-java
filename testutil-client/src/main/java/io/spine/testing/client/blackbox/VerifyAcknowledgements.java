@@ -23,6 +23,7 @@ package io.spine.testing.client.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.RejectionMessage;
 import io.spine.core.RejectionClass;
 
 /**
@@ -148,7 +149,8 @@ public abstract class VerifyAcknowledgements {
      * @param type rejection type in a form of message class
      * @return a new instance
      */
-    public static VerifyAcknowledgements ackedWithRejections(Class<? extends Message> type) {
+    public static VerifyAcknowledgements
+    ackedWithRejections(Class<? extends RejectionMessage> type) {
         RejectionClass rejectionClass = RejectionClass.of(type);
         return ackedWithRejections(rejectionClass);
     }
@@ -197,7 +199,7 @@ public abstract class VerifyAcknowledgements {
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @return a new instance
      */
-    public static VerifyAcknowledgements ackedWithRejections(Class<? extends Message> type,
+    public static VerifyAcknowledgements ackedWithRejections(Class<? extends RejectionMessage> type,
                                                              Count expectedCount) {
         RejectionClass rejectionClass = RejectionClass.of(type);
         return ackedWithRejections(rejectionClass, expectedCount);
@@ -341,7 +343,7 @@ public abstract class VerifyAcknowledgements {
      * @param type a type of a domain rejection specified by message class
      * @return a new instance
      */
-    public VerifyAcknowledgements withRejections(Class<? extends Message> type) {
+    public VerifyAcknowledgements withRejections(Class<? extends RejectionMessage> type) {
         VerifyAcknowledgements rejectedType = ackedWithRejections(type);
         return this.and(rejectedType);
     }
@@ -366,7 +368,7 @@ public abstract class VerifyAcknowledgements {
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @return a new instance
      */
-    public VerifyAcknowledgements withRejections(Class<? extends Message> type,
+    public VerifyAcknowledgements withRejections(Class<? extends RejectionMessage> type,
                                                  Count expectedCount) {
         VerifyAcknowledgements rejectedType = ackedWithRejections(type, expectedCount);
         return this.and(rejectedType);

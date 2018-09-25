@@ -22,6 +22,7 @@ package io.spine.testing.server;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -57,7 +58,7 @@ import static java.util.Collections.emptyList;
  */
 @CheckReturnValue
 public abstract class CommandHandlerTest<I,
-                                         C extends Message,
+                                         C extends CommandMessage,
                                          S extends Message,
                                          E extends CommandHandlingEntity<I, S, ?>>
         extends MessageHandlerTest<I, C, S, E, CommandHandlerExpected<S>> {

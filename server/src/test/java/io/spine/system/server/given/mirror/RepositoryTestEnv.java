@@ -23,6 +23,7 @@ package io.spine.system.server.given.mirror;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -45,9 +46,6 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
-/**
- * @author Dmytro Dashenkov
- */
 public class RepositoryTestEnv {
 
     public static final TestEventFactory events = newInstance(RepositoryTestEnv.class);
@@ -154,7 +152,7 @@ public class RepositoryTestEnv {
         return event(deleted);
     }
 
-    public static Event event(Message eventMessage) {
+    public static Event event(EventMessage eventMessage) {
         return events.createEvent(eventMessage);
     }
 }

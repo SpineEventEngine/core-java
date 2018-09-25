@@ -22,6 +22,7 @@ package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
@@ -60,9 +61,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @ExtendWith(ShardingReset.class)
 @DisplayName("EntityHistory should")
 @SuppressWarnings("InnerClassMayBeStatic")
@@ -191,7 +189,7 @@ class EntityHistoryTest {
         @Test
         @DisplayName("command is dispatched to handler in procman")
         void commandToPm() {
-            Message startCommand = StartPersonCreation
+            CommandMessage startCommand = StartPersonCreation
                     .newBuilder()
                     .setId(id)
                     .build();
@@ -206,7 +204,7 @@ class EntityHistoryTest {
             assertFalse(startedState.getCreated());
             eventAccumulator.forgetEvents();
 
-            Message domainCommand = CompletePersonCreation
+            CommandMessage domainCommand = CompletePersonCreation
                     .newBuilder()
                     .setId(id)
                     .build();
@@ -395,7 +393,7 @@ class EntityHistoryTest {
             assertEquals(id, actualId);
         }
 
-        private void postCommand(Message commandMessage) {
+        private void postCommand(CommandMessage commandMessage) {
             Command command = requestFactory.createCommand(commandMessage);
             context.getCommandBus()
                    .post(command, noOpObserver());

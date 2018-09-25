@@ -25,12 +25,12 @@ import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.given.GivenEvent;
 import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.DummyEventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.integration.ExternalMessages;
-import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,9 +68,7 @@ class DelegatingEventDispatcherTest {
     @Test
     @DisplayName("delegate `onError`")
     void delegateOnError() {
-        TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
-
+        EventEnvelope envelope = EventEnvelope.of(GivenEvent.arbitrary());
         RuntimeException exception = new RuntimeException("test delegating onError");
         delegatingDispatcher.onError(envelope, exception);
 
@@ -86,10 +84,8 @@ class DelegatingEventDispatcherTest {
                         .createExternalDispatcher()
                         .orElseThrow(() -> newIllegalStateException("No external events in %s",
                                                                     delegatingDispatcher));
-
-        TestEventFactory factory = TestEventFactory.newInstance(getClass());
         StringValue eventMsg = newUuidValue();
-        Event event = factory.createEvent(eventMsg);
+        Event event = GivenEvent.arbitrary();
         ExternalMessage externalMessage =
                 ExternalMessages.of(event, BoundedContextNames.newName(getClass().getName()));
 

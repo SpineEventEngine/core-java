@@ -375,7 +375,7 @@ public class EntityLifecycle {
     }
     
     protected void postEvent(EventMessage event) {
-        Optional<? extends Message> filtered = eventFilter.filter(event);
+        Optional<? extends EventMessage> filtered = eventFilter.filter(event);
         filtered.ifPresent(systemGateway::postEvent);
     }
     

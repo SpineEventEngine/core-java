@@ -18,29 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.error;
+package io.spine.server.event;
 
-import com.google.protobuf.StringValue;
-import io.spine.server.event.UnsupportedEventException;
+import io.spine.base.EventMessage;
+import io.spine.test.event.ProjectCreated;
+import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Alexander Litus
  */
-@DisplayName("UnsupportedEventException should")
-class UnsupportedEventExceptionTest {
+@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+@DisplayName("InvalidEventException should")
+class InvalidEventExceptionTest {
 
     @Test
-    @DisplayName("have message and error")
-    void haveMessageAndError() {
-        StringValue msg = toMessage("");
+    @DisplayName("create exception with violations")
+    void createWithViolations() {
+        EventMessage msg = ProjectCreated.getDefaultInstance();
 
-        UnsupportedEventException exception = new UnsupportedEventException(msg);
+        InvalidEventException exception = InvalidEventException.onConstraintViolations(
+                msg,
+                singletonList(ConstraintViolation.getDefaultInstance()));
 
         assertNotNull(exception.getMessage());
         assertNotNull(exception.asError());

@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Describes a method that accepts a message and optionally its context.
  *
  * @param <T> the type of the target object
- * @param <M> the type of the incoming message class
+ * @param <C> the type of the incoming message class
  * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
  * @param <R> the type of the method result object
  * @author Alexander Yevsyukov
@@ -43,14 +43,14 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 @Immutable
 public interface HandlerMethod<T,
-                               M extends MessageClass,
+                               C extends MessageClass,
                                E extends MessageEnvelope<?, ?, ?>,
                                R extends MethodResult> {
 
     /**
      * @return the type of the incoming message class
      */
-    M getMessageClass();
+    C getMessageClass();
 
     @PostConstruct
     void discoverAttributes();

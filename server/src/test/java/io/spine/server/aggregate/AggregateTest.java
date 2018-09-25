@@ -54,7 +54,6 @@ import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggPauseProject;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.command.AggStartProject;
-import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -80,6 +79,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandEnvelope.of;
+import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -193,13 +193,12 @@ public class AggregateTest {
                     asAggregateClass(TestAggregate.class)
                             .getCommands();
 
-            assertEquals(4, commandClasses.size());
+            assertEquals(3, commandClasses.size());
 
             assertCommandClasses(commandClasses,
                                  AggCreateProject.class,
                                  AggAddTask.class,
-                                 AggStartProject.class,
-                                 ImportEvents.class);
+                                 AggStartProject.class);
         }
 
         @Test
@@ -534,23 +533,6 @@ public class AggregateTest {
     }
 
     @Test
-    @DisplayName("import events")
-    void importEvents() {
-        String projectName = getClass().getSimpleName();
-        ProjectId id = aggregate.getId();
-        ImportEvents importCmd =
-                ImportEvents.newBuilder()
-                            .setProjectId(id)
-                            .addEvent(event(projectCreated(id, projectName), 1))
-                            .addEvent(event(taskAdded(id), 2))
-                            .build();
-        aggregate.dispatchCommands(command(importCmd));
-
-        assertTrue(aggregate.isProjectCreatedEventApplied);
-        assertTrue(aggregate.isTaskAddedEventApplied);
-    }
-
-    @Test
     @DisplayName("increment version upon state changing event applied")
     void incrementVersionOnEventApplied() {
         int version = aggregate.getVersion()
@@ -598,7 +580,7 @@ public class AggregateTest {
 
             Command command = Given.ACommand.createProject();
             try {
-                dispatchCommand(faultyAggregate, env(command.getMessage()));
+                dispatchCommand(faultyAggregate, env(getMessage(command)));
                 failNotThrows();
             } catch (RuntimeException e) {
                 Throwable cause = getRootCause(e);
@@ -616,7 +598,7 @@ public class AggregateTest {
 
             Command command = Given.ACommand.createProject();
             try {
-                dispatchCommand(faultyAggregate, env(command.getMessage()));
+                dispatchCommand(faultyAggregate, env(getMessage(command)));
                 failNotThrows();
             } catch (RuntimeException e) {
                 Throwable cause = getRootCause(e);

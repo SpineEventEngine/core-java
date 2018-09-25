@@ -25,6 +25,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.Messages;
@@ -118,19 +120,19 @@ public final class Events {
      *
      * @param event an event to get message from
      */
-    public static Message getMessage(Event event) {
+    public static EventMessage getMessage(Event event) {
         checkNotNull(event);
         Any any = event.getMessage();
-        Message result = unpack(any);
+        EventMessage result = unpack(any);
         return result;
     }
 
     /**
      * Extract event messages from the passed events.
      */
-    public static List<? extends Message> toMessages(List<Event> events) {
+    public static List<? extends EventMessage> toMessages(List<Event> events) {
        checkNotNull(events);
-        List<Message> result =
+        List<EventMessage> result =
                 events.stream()
                       .map(Events::getMessage)
                       .collect(toList());
@@ -141,12 +143,13 @@ public final class Events {
      * Extracts an event message if the passed instance is an {@link Event} object or {@link Any},
      * otherwise returns the passed message.
      */
-    public static Message ensureMessage(Message eventOrMessage) {
+    public static EventMessage ensureMessage(Message eventOrMessage) {
         checkNotNull(eventOrMessage);
         if (eventOrMessage instanceof Event) {
             return getMessage((Event) eventOrMessage);
         }
-        return Messages.ensureMessage(eventOrMessage);
+        Message unpacked = Messages.ensureMessage(eventOrMessage);
+        return (EventMessage) unpacked;
     }
 
     /**
@@ -232,7 +235,7 @@ public final class Events {
      * @param throwableMessage thrown rejection
      * @return new instance of {@code RejectionEventContext}
      */
-    public static RejectionEventContext rejectionContext(Message commandMessage,
+    public static RejectionEventContext rejectionContext(CommandMessage commandMessage,
                                                          ThrowableMessage throwableMessage) {
         checkNotNull(commandMessage);
         checkNotNull(throwableMessage);
@@ -311,7 +314,7 @@ public final class Events {
      * @param <M> the type of messages
      * @return empty {@link Iterable}
      */
-    public static <M> Iterable<M> nothing() {
+    public static <M extends EventMessage> Iterable<M> nothing() {
         return ImmutableList.of();
     }
 
@@ -386,6 +389,7 @@ public final class Events {
      * The stringifier of event IDs.
      */
     static class EventIdStringifier extends Stringifier<EventId> {
+
         @Override
         protected String toString(EventId eventId) {
             String result = eventId.getValue();

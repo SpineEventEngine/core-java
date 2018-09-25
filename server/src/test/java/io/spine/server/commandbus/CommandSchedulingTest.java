@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.test.commandbus.CmdBusStartProject;
 import io.spine.time.Durations2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -113,8 +114,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("scheduling options")
         void schedulingOptions() {
-            Command cmd = requestFactory.command()
-                                        .create(toMessage(newUuid()));
+            Command cmd = createCommand();
             Timestamp schedulingTime = getCurrentTime();
             Duration delay = Durations2.minutes(5);
 
@@ -130,14 +130,22 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("scheduling time")
         void schedulingTime() {
-            Command cmd = requestFactory.command()
-                                        .create(toMessage(newUuid()));
+            Command cmd = createCommand();
             Timestamp schedulingTime = getCurrentTime();
 
             Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
 
             assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
                                                    .getSchedulingTime());
+        }
+
+        private Command createCommand() {
+            CmdBusStartProject command = CmdBusStartProject.newBuilder()
+                                                           .setId(newUuid())
+                                                           .build();
+            Command cmd = requestFactory.command()
+                                        .create(toMessage(command));
+            return cmd;
         }
     }
 

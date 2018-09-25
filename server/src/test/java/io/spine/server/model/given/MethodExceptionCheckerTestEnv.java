@@ -20,13 +20,17 @@
 
 package io.spine.server.model.given;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.GeneratedMessageV3;
 import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
+import io.spine.test.model.Rejections.ProjectAlreadyExists;
 
 import java.io.IOException;
 
+import static io.spine.base.Identifier.newUuid;
+
+/**
+ * @author Dmytro Kuzmin
+ */
 public class MethodExceptionCheckerTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -52,7 +56,11 @@ public class MethodExceptionCheckerTestEnv {
         }
 
         private static void methodDescendantException() throws DescendantThrowableMessage {
-            throw new DescendantThrowableMessage(Any.getDefaultInstance());
+            ProjectAlreadyExists rejection = ProjectAlreadyExists
+                    .newBuilder()
+                    .setId(newUuid())
+                    .build();
+            throw new DescendantThrowableMessage(rejection);
         }
     }
 
@@ -60,8 +68,8 @@ public class MethodExceptionCheckerTestEnv {
 
         private static final long serialVersionUID = 0L;
 
-        DescendantThrowableMessage(GeneratedMessageV3 message) {
-            super((RejectionMessage) message);
+        DescendantThrowableMessage(RejectionMessage message) {
+            super(message);
         }
     }
 }

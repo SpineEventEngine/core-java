@@ -20,6 +20,7 @@
 package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.testing.server.CommandHandlerTest;
 
@@ -37,7 +38,7 @@ import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispa
  * @author Vladyslav Lubenskyi
  */
 public abstract class AggregateCommandTest<I,
-                                           C extends Message,
+                                           C extends CommandMessage,
                                            S extends Message,
                                            A extends Aggregate<I, S, ?>>
         extends CommandHandlerTest<I, C, S, A> {

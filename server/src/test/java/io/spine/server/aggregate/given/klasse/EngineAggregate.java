@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate.given.klasse;
 
-import com.google.protobuf.Empty;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
@@ -36,6 +35,7 @@ import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStopped;
 import io.spine.server.aggregate.given.klasse.rejection.Rejections;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 
 import static io.spine.server.aggregate.given.klasse.Engine.Status.STARTED;
 import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;
@@ -101,13 +101,13 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      ****************************/
 
     @React(external = true)
-    Empty on(EmissionTestStarted event) {
-        return empty();
+    Nothing on(EmissionTestStarted event) {
+        return nothing();
     }
 
     @React(external = true)
-    Empty on(EmissionTestStopped event) {
-        return empty();
+    Nothing on(EmissionTestStopped event) {
+        return nothing();
     }
 
     /*
@@ -120,13 +120,13 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      *********************************************************************/
 
     @React
-    Empty on(Rejections.EngineAlreadyStarted rejection) {
-        return empty();
+    Nothing on(Rejections.EngineAlreadyStarted rejection) {
+        return nothing();
     }
 
     @React
-    Empty on(Rejections.EngineAlreadyStopped rejection) {
-        return empty();
+    Nothing on(Rejections.EngineAlreadyStopped rejection) {
+        return nothing();
     }
 
     /*
@@ -134,8 +134,8 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      *************************************/
 
     @React(external = true)
-    Empty on(Rejections.CannotStartEmissionTest rejection) {
-        return empty();
+    Nothing on(Rejections.CannotStartEmissionTest rejection) {
+        return nothing();
     }
 
     /*
@@ -152,10 +152,6 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
         return EngineStopped.newBuilder()
                             .setId(id)
                             .build();
-    }
-
-    private static Empty empty() {
-        return Empty.getDefaultInstance();
     }
 
     private void setStarted() {

@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.Version;
@@ -129,12 +130,12 @@ class AggregateTransactionTest
     }
 
     @Override
-    protected Message createEventMessage() {
+    protected EventMessage createEventMessage() {
         return projectCreated(ID, "Project created in a transaction");
     }
 
     @Override
-    protected Message createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventMessageThatFailsInHandler() {
         return Given.EventMessage.taskAdded(ID);
     }
 

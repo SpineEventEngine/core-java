@@ -21,8 +21,8 @@
 package io.spine.server.event.given;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -66,7 +66,7 @@ public class EventEnricherTestEnv {
                         .build();
     }
 
-    public static Event createEvent(Message msg) {
+    public static Event createEvent(EventMessage msg) {
         TestEventFactory eventFactory = newInstance(EnricherTest.class);
         Event event = eventFactory.createEvent(msg);
         return event;
@@ -193,9 +193,8 @@ public class EventEnricherTestEnv {
             return sharingRequestApproved;
         }
 
-        private static Event createGenericEvent(Message eventMessage) {
-            Any wrappedMessage = pack(eventMessage);
-            Event permissionRevoked = eventFactory().createEvent(wrappedMessage);
+        private static Event createGenericEvent(EventMessage eventMessage) {
+            Event permissionRevoked = eventFactory().createEvent(eventMessage);
             return permissionRevoked;
         }
     }

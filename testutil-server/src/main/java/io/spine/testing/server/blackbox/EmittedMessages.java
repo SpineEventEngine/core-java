@@ -33,17 +33,23 @@ import static com.google.common.collect.ImmutableList.copyOf;
  * Abstract base for classes providing information on messages emitted
  * in the {@link BlackBoxBoundedContext Bounded Context}.
  *
- * @param <C> the type of the message class
- * @param <W> the type of the wrapper object containing messages
+ * @param <C>
+ *         the type of the message class
+ * @param <W>
+ *         the type of the wrapper object containing messages
+ * @param <M>
+ *         the type of the emitted message
  * @author Alexander Yevsyukov
  */
-public abstract class EmittedMessages<C extends MessageClass, W extends Message> {
+public abstract class EmittedMessages<C extends MessageClass<M>,
+                                      W extends Message,
+                                      M extends Message> {
 
     private final ImmutableList<W> messages;
-    private final MessageTypeCounter<C, W> countByType;
+    private final MessageTypeCounter<C, W, M> countByType;
     private final Class<W> wrapperClass;
 
-    EmittedMessages(List<W> messages, MessageTypeCounter<C, W> counter, Class<W> wrapperClass) {
+    EmittedMessages(List<W> messages, MessageTypeCounter<C, W, M> counter, Class<W> wrapperClass) {
         checkNotNull(messages);
         checkNotNull(counter);
         this.messages = copyOf(messages);
@@ -57,7 +63,7 @@ public abstract class EmittedMessages<C extends MessageClass, W extends Message>
     }
 
     /** Obtains the total number of messages of the passed type. */
-    public int count(Class<? extends Message> messageClass) {
+    public int count(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
         return countByType.get(messageClass);
     }
@@ -69,7 +75,7 @@ public abstract class EmittedMessages<C extends MessageClass, W extends Message>
     }
 
     /** Obtains the number of messages with the passed class. */
-    public boolean contain(Class<? extends Message> messageClass) {
+    public boolean contain(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
         return countByType.contains(messageClass);
     }
@@ -95,6 +101,7 @@ public abstract class EmittedMessages<C extends MessageClass, W extends Message>
 
     /**
      * Obtains a plural word for naming emitted objects.
+     *
      * @see #singular()
      */
     public String plural() {

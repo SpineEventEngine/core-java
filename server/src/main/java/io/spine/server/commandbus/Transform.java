@@ -21,8 +21,8 @@
 package io.spine.server.commandbus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.system.server.CommandTransformed;
@@ -54,7 +54,7 @@ public final class Transform
     /**
      * Sets the message for the target command.
      */
-    public Transform to(Message targetMessage) {
+    public Transform to(CommandMessage targetMessage) {
         return add(targetMessage);
     }
 

@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
@@ -54,7 +55,7 @@ public abstract class EventDispatchingRepository<I,
      *
      * @param defaultFunction the default function for getting target entity IDs
      */
-    protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(EventRoute<I, EventMessage> defaultFunction) {
         super();
         this.eventRouting = EventRouting.withDefault(defaultFunction);
     }

@@ -18,15 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.system.server;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Time;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.client.Query;
 import io.spine.core.TenantId;
-import io.spine.system.server.MemoizingGateway;
-import io.spine.system.server.SystemGateway;
+import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -121,7 +120,7 @@ class TenantAwareSystemGatewayTest {
     }
 
     private static void postCommandAndCheck(MemoizingGateway delegate, TenantId tenantId) {
-        Message command = Time.getCurrentTime();
+        CommandMessage command = Sample.messageOfType(CreateShoppingList.class);
         SystemGateway gateway = delegatingTo(delegate).get(tenantId);
         gateway.postCommand(command);
 
@@ -129,7 +128,7 @@ class TenantAwareSystemGatewayTest {
     }
 
     private static void postEventAndCheck(MemoizingGateway delegate, TenantId tenantId) {
-        Message event = Time.getCurrentTime();
+        EventMessage event = Sample.messageOfType(ShoppingListCreated.class);
         SystemGateway gateway = delegatingTo(delegate).get(tenantId);
         gateway.postEvent(event);
 

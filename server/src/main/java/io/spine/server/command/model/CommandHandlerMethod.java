@@ -20,12 +20,13 @@
 
 package io.spine.server.command.model;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.EventProducer;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.model.EventsResult;
+import io.spine.server.model.Nothing;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.procman.ProcessManager;
 
@@ -66,8 +67,8 @@ public final class CommandHandlerMethod
 
         private Result(EventProducer producer, Object rawMethodResult) {
             super(producer, rawMethodResult);
-            List<Message> eventMessages = toMessages(rawMethodResult);
-            List<Message> filtered = filterEmpty(eventMessages);
+            List<EventMessage> eventMessages = toMessages(rawMethodResult);
+            List<EventMessage> filtered = filterEmpty(eventMessages);
             ensureNotEmptyIfNotProcessManager(filtered, rawMethodResult, producer);
             setMessages(filtered);
         }
@@ -76,7 +77,7 @@ public final class CommandHandlerMethod
          * Ensures that a command handler method produces one or more event messages.
          *
          * <p>The only allowed exception to this are {@link ProcessManager} instances returning
-         * {@link Empty} from their command handler methods.
+         * {@link io.spine.server.model.Nothing Nothing} from command handlers.
          *
          * @param eventMessages  the events produced as the result of the command handling
          * @param handlingResult the result of the command handler method invocation
@@ -87,11 +88,11 @@ public final class CommandHandlerMethod
                                                               Object handlingResult,
                                                               Object target) {
 
-            //TODO:2018-07-25:dmytro.kuzmin: Prohibit returning `Empty` from `ProcessManager` in favor
+            //TODO:2018-07-25:dmytro.kuzmin: Prohibit returning `Nothing` from `ProcessManager` in favor
             // of "Expect<...>" construction.
             // See https://github.com/SpineEventEngine/core-java/issues/790.
             boolean procmanReturnedEmpty =
-                    handlingResult instanceof Empty && target instanceof ProcessManager;
+                    handlingResult instanceof Nothing && target instanceof ProcessManager;
             checkState(!eventMessages.isEmpty() || procmanReturnedEmpty,
                        "Command handling method did not produce events");
         }
