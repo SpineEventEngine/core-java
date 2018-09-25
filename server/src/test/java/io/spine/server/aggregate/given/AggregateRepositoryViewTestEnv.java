@@ -29,8 +29,8 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.route.CommandRoute;
-import io.spine.test.aggregate.archiver.Evaluate;
-import io.spine.test.aggregate.archiver.Evaluated;
+import io.spine.test.aggregate.cli.Evaluate;
+import io.spine.test.aggregate.cli.Evaluated;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.server.storage.LifecycleFlagField.archived;
