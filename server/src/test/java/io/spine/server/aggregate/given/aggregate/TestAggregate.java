@@ -44,6 +44,7 @@ import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
