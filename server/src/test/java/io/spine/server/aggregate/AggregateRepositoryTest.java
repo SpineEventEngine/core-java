@@ -63,6 +63,7 @@ import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.testlogging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -472,7 +473,7 @@ public class AggregateRepositoryTest {
     }
 
     @Nested
-    @ExtendWith(ShardingReset.class)
+    @ExtendWith({ShardingReset.class, MuteLogging.class})
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
@@ -596,6 +597,7 @@ public class AggregateRepositoryTest {
                                       .isArchived());
     }
 
+    @ExtendWith(MuteLogging.class)
     @Test
     @DisplayName("log error when event reaction fails")
     void logErrorWhenEventReactionFails() {

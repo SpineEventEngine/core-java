@@ -66,11 +66,13 @@ import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.InjectCommandBus;
 import io.spine.testing.server.tenant.TenantAwareTest;
+import io.spine.testlogging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -418,6 +420,7 @@ class ProcessManagerTest {
          *
          * @see io.spine.server.procman.given.pm.DirectQuizProcman
          */
+        @ExtendWith(MuteLogging.class)
         @Test
         @DisplayName("for an either of three emitted upon handling a command")
         void afterEmittingEitherOfThreeOnCommandDispatch() {

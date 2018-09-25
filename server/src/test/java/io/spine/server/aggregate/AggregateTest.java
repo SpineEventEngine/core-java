@@ -63,12 +63,14 @@ import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.testlogging.MuteLogging;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -717,6 +719,7 @@ public class AggregateTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
         // We're not interested in what dispatch() returns
+    @ExtendWith(MuteLogging.class)
     @Test
     @DisplayName("throw DuplicateCommandException for a duplicated command")
     void acknowledgeExceptionForDuplicateCommand() {

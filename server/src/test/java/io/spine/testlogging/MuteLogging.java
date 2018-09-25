@@ -20,7 +20,9 @@
 
 package io.spine.testlogging;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.logging.Logging;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.CommandErrorHandler;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -28,6 +30,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.SubstituteLogger;
+
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.slf4j.helpers.NOPLogger.NOP_LOGGER;
@@ -40,21 +44,32 @@ import static org.slf4j.helpers.NOPLogger.NOP_LOGGER;
  */
 public class MuteLogging implements BeforeEachCallback, AfterEachCallback {
 
-    private static final Class<?> LOG_TAG = CommandErrorHandler.class;
+    private static final Collection<Class<?>> LOG_TAGS = ImmutableSet.of(
+            CommandErrorHandler.class,
+            AggregateRepository.class
+    );
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        substitute().setDelegate(NOP_LOGGER);
+        LOG_TAGS.forEach(MuteLogging::disableLoggingFor);
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
-        Logger actualLogger = LoggerFactory.getLogger(LOG_TAG);
-        substitute().setDelegate(actualLogger);
+        LOG_TAGS.forEach(MuteLogging::enableLoggingFor);
     }
 
-    private static SubstituteLogger substitute() {
-        Logger logger = Logging.get(LOG_TAG);
+    private static void disableLoggingFor(Class<?> logTag) {
+        substitute(logTag).setDelegate(NOP_LOGGER);
+    }
+
+    private static void enableLoggingFor(Class<?> logTag) {
+        Logger actualLogger = LoggerFactory.getLogger(logTag);
+        substitute(logTag).setDelegate(actualLogger);
+    }
+
+    private static SubstituteLogger substitute(Class<?> logTag) {
+        Logger logger = Logging.get(logTag);
         assertTrue(logger instanceof SubstituteLogger);
         SubstituteLogger substituteLogger = (SubstituteLogger) logger;
         return substituteLogger;
