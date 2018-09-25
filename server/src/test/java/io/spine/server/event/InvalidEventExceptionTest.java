@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.error;
+package io.spine.server.event;
 
 import io.spine.base.EventMessage;
-import io.spine.server.event.InvalidEventException;
 import io.spine.test.event.ProjectCreated;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;

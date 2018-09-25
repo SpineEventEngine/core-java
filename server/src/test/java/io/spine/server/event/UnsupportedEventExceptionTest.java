@@ -18,10 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.event.error;
+package io.spine.server.event;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.base.EventMessage;
+import io.spine.test.event.ProjectCreated;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+/**
+ * @author Alexander Litus
+ */
+@DisplayName("UnsupportedEventException should")
+class UnsupportedEventExceptionTest {
+
+    @Test
+    @DisplayName("have message and error")
+    void haveMessageAndError() {
+        EventMessage msg = ProjectCreated.getDefaultInstance();
+        UnsupportedEventException exception = new UnsupportedEventException(msg);
+
+        assertNotNull(exception.getMessage());
+        assertNotNull(exception.asError());
+        assertEquals(msg, exception.getEventMessage());
+    }
+}
