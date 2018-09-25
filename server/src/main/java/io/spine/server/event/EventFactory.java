@@ -86,7 +86,7 @@ public class EventFactory {
      * ValidatingBuilder} implementation to create a message.
      *
      * @param message
-     *         the message of the event or the message packed into {@code Any}
+     *         the message of the event
      * @param version
      *         the version of the entity which produces the event
      * @throws ValidationException
@@ -153,7 +153,7 @@ public class EventFactory {
      * @param id
      *         the ID of the event
      * @param message
-     *         the event message or {@code Any} containing the message
+     *         the event message
      * @param context
      *         the event context
      * @return created event instance

@@ -47,15 +47,17 @@ import static java.lang.String.format;
  * same object (not class).
  *
  * @param <T> the type of the target object
+ * @param <M> the type of the message handled by this method
  * @param <C> the type of the message class
  * @param <E> the type of message envelopes, in which the messages to handle are wrapped
+ * @param <R> the type of the method invocation result
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @Immutable
 public abstract class AbstractHandlerMethod<T,
                                             M extends Message,
-                                            C extends MessageClass,
+                                            C extends MessageClass<M>,
                                             E extends MessageEnvelope<?, ?, ?>,
                                             R extends MethodResult>
         implements HandlerMethod<T, C, E, R> {
