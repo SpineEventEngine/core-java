@@ -180,7 +180,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("`NothingHappened` event")
+        @DisplayName("`Didnt` event")
         void emptyEvent() {
             HandlerReturnsNothing handlerObject = new HandlerReturnsNothing();
             Optional<CommandHandlerMethod> method =

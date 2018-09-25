@@ -31,7 +31,7 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
@@ -51,8 +51,6 @@ import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
 
 import java.util.List;
-
-import static io.spine.protobuf.AnyPacker.pack;
 
 @SuppressWarnings({
         "OverlyCoupledClass",
@@ -144,21 +142,21 @@ public class TestProcessManager
     }
 
     @Assign
-    NothingHappened handle(PmArchiveProcess command) {
+    Didnt handle(PmArchiveProcess command) {
         keep(command);
         setArchived(true);
         return nothing();
     }
 
     @Assign
-    NothingHappened handle(PmDeleteProcess command) {
+    Didnt handle(PmDeleteProcess command) {
         keep(command);
         setDeleted(true);
         return nothing();
     }
 
     @Assign
-    NothingHappened handle(PmDoNothing command, CommandContext ignored) {
+    Didnt handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
         return nothing();
     }
@@ -170,19 +168,19 @@ public class TestProcessManager
     }
 
     @React
-    NothingHappened on(StandardRejections.EntityAlreadyArchived rejection) {
+    Didnt on(StandardRejections.EntityAlreadyArchived rejection) {
         keep(rejection);
         return nothing();
     }
 
     @React
-    NothingHappened on(StandardRejections.EntityAlreadyDeleted rejection) {
+    Didnt on(StandardRejections.EntityAlreadyDeleted rejection) {
         keep(rejection);
         return nothing();
     }
 
     @React
-    NothingHappened on(PmTaskAdded event) {
+    Didnt on(PmTaskAdded event) {
         keep(event);
 
         Task task = event.getTask();
@@ -191,7 +189,7 @@ public class TestProcessManager
     }
 
     @React
-    NothingHappened on(PmProjectStarted event) {
+    Didnt on(PmProjectStarted event) {
         keep(event);
 
         handleProjectStarted();
@@ -199,7 +197,7 @@ public class TestProcessManager
     }
 
     @React
-    NothingHappened on(PmProjectCreated event, EventContext ignored) {
+    Didnt on(PmProjectCreated event, EventContext ignored) {
         keep(event);
 
         handleProjectCreated(event.getProjectId());

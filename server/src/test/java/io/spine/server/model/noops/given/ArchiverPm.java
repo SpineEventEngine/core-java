@@ -22,7 +22,7 @@ package io.spine.server.model.noops.given;
 
 import io.spine.base.Identifier;
 import io.spine.server.command.Assign;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.model.contexts.archiver.ArchiveFile;
@@ -47,10 +47,10 @@ public final class ArchiverPm extends ProcessManager<ArchiverId, Archiver, Archi
     }
 
     @Assign
-    NothingHappened handle(ArchiveFile command) {
+    Didnt handle(ArchiveFile command) {
         ArchiverVBuilder builder = getBuilder();
         builder.setArchivedFiles(builder.getArchivedFiles() + 1);
-        return NothingHappened.getDefaultInstance();
+        return Didnt.getDefaultInstance();
     }
 
     public static final class Repository

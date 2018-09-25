@@ -22,7 +22,7 @@ package io.spine.system.server.given.entity;
 
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 import io.spine.server.procman.ProcessManager;
 import io.spine.system.server.CompletePersonCreation;
 import io.spine.system.server.PersonCreation;
@@ -47,20 +47,20 @@ public class PersonProcman
     }
 
     @Assign
-    NothingHappened handle(StartPersonCreation command) {
+    Didnt handle(StartPersonCreation command) {
         getBuilder().setId(command.getId());
         return nothing();
     }
 
     @Assign
-    NothingHappened handle(CompletePersonCreation command) {
+    Didnt handle(CompletePersonCreation command) {
         getBuilder().setId(command.getId())
                     .setCreated(true);
         return nothing();
     }
 
     @React
-    NothingHappened reactOn(PersonNameCreated event) {
+    Didnt reactOn(PersonNameCreated event) {
         getBuilder().setId(event.getId())
                     .setCreated(true);
         return nothing();

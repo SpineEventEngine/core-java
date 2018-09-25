@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.toList;
 public abstract class MethodResult<V extends Message> {
 
     private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
-            NothingHappened.getDefaultInstance(),
+            Didnt.getDefaultInstance(),
             Empty.getDefaultInstance()
     );
 

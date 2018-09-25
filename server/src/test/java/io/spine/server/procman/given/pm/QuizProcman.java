@@ -22,7 +22,7 @@ package io.spine.server.procman.given.pm;
 
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.EitherOfThree;
 import io.spine.test.procman.quiz.PmAnswer;
@@ -70,13 +70,13 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     }
 
     @React
-    NothingHappened on(PmQuizStarted event) {
+    Didnt on(PmQuizStarted event) {
         getBuilder().setId(event.getQuizId());
         return nothing();
     }
 
     @React
-    EitherOfThree<PmQuestionSolved, PmQuestionFailed, NothingHappened> on(PmQuestionAnswered event) {
+    EitherOfThree<PmQuestionSolved, PmQuestionFailed, Didnt> on(PmQuestionAnswered event) {
         PmAnswer answer = event.getAnswer();
         PmQuizId examId = event.getQuizId();
         PmQuestionId questionId = answer.getQuestionId();
@@ -110,7 +110,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     }
 
     @React
-    NothingHappened on(PmQuestionSolved event) {
+    Didnt on(PmQuestionSolved event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addSolvedQuestion(questionId);
@@ -118,7 +118,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     }
 
     @React
-    NothingHappened on(PmQuestionFailed event) {
+    Didnt on(PmQuestionFailed event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addFailedQuestion(questionId);

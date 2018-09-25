@@ -22,7 +22,7 @@ package io.spine.server.procman.given.pm;
 
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.EitherOfThree;
 import io.spine.test.procman.quiz.PmAnswer;
@@ -65,7 +65,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
 
     @Assign
     @SuppressWarnings("Duplicates")
-    EitherOfThree<PmQuestionSolved, PmQuestionFailed, NothingHappened> handle(PmAnswerQuestion command) {
+    EitherOfThree<PmQuestionSolved, PmQuestionFailed, Didnt> handle(PmAnswerQuestion command) {
         PmAnswer answer = command.getAnswer();
         PmQuizId examId = command.getQuizId();
         PmQuestionId questionId = answer.getQuestionId();
@@ -99,13 +99,13 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @React
-    NothingHappened on(PmQuizStarted event) {
+    Didnt on(PmQuizStarted event) {
         getBuilder().setId(event.getQuizId());
         return nothing();
     }
 
     @React
-    NothingHappened on(PmQuestionSolved event) {
+    Didnt on(PmQuestionSolved event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addSolvedQuestion(questionId);
@@ -113,7 +113,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @React
-    NothingHappened on(PmQuestionFailed event) {
+    Didnt on(PmQuestionFailed event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addFailedQuestion(questionId);

@@ -22,7 +22,7 @@ package io.spine.server;
 
 import com.google.protobuf.Any;
 import io.spine.core.Version;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 
 /**
  * An object with identity which produces events.
@@ -45,15 +45,15 @@ public interface EventProducer {
     Version getVersion();
 
     /**
-     * Obtains the {@link NothingHappened} event message.
+     * Obtains the {@link io.spine.server.model.Didnt} event message.
      *
      * <p>This event should be returned if there is no value for the domain to produce an actual
-     * event. Note that a {@link NothingHappened} event is never actually posted into
+     * event. Note that a {@link io.spine.server.model.Didnt} event is never actually posted into
      * the {@link io.spine.server.event.EventBus EventBus}.
      *
-     * @return the default instance of {@link NothingHappened}
+     * @return the default instance of {@link io.spine.server.model.Didnt}
      */
-    default NothingHappened nothing() {
-        return NothingHappened.getDefaultInstance();
+    default Didnt nothing() {
+        return Didnt.getDefaultInstance();
     }
 }

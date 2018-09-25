@@ -13,11 +13,11 @@ option java_multiple_files = true;
 //
 // Use this event type when a message processing does not produce any output.
 //
-// This type is treated by the framework in a special way. A `NothingHappened` event is never posted
+// This type is treated by the framework in a special way. A `Didnt` event is never posted
 // for processing after being emitted. Neither is it stored.
 //
-// An applier for a `NothingHappened` event is never called.
+// An applier for a `Didnt` event is never called.
 //
-message NothingHappened {
+message Didnt {
     option (experimental_type) = true;
 }

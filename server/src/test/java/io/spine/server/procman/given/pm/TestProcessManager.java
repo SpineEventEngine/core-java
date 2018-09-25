@@ -26,7 +26,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.event.React;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.ProjectId;
@@ -198,13 +198,13 @@ public class TestProcessManager
      ************************/
 
     @React
-    NothingHappened on(PmProjectCreated event) {
+    Didnt on(PmProjectCreated event) {
         remember(event);
         return nothing();
     }
 
     @React
-    NothingHappened on(PmTaskAdded event) {
+    Didnt on(PmTaskAdded event) {
         remember(event);
         return nothing();
     }
@@ -220,13 +220,13 @@ public class TestProcessManager
      **************************/
 
     @React
-    NothingHappened on(EntityAlreadyArchived rejection, PmAddTask command) {
+    Didnt on(EntityAlreadyArchived rejection, PmAddTask command) {
         remember(command); // We check the command in the test.
         return nothing();
     }
 
     @React
-    NothingHappened on(EntityAlreadyArchived rejection) {
+    Didnt on(EntityAlreadyArchived rejection) {
         remember(rejection);
         return nothing();
     }

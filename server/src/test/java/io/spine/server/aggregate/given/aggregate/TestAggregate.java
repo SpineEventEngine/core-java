@@ -29,7 +29,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -44,7 +44,6 @@ import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
@@ -131,13 +130,13 @@ public class TestAggregate
     }
 
     @React
-    NothingHappened on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
+    Didnt on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
         isRejectionWithCmdHandled = true;
         return nothing();
     }
 
     @React
-    NothingHappened on(StandardRejections.CannotModifyDeletedEntity rejection) {
+    Didnt on(StandardRejections.CannotModifyDeletedEntity rejection) {
         isRejectionHandled = true;
         return nothing();
     }

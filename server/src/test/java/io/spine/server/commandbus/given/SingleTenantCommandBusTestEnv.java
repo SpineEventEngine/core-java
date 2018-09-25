@@ -27,7 +27,7 @@ import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.model.NothingHappened;
+import io.spine.server.model.Didnt;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.FirstCmdCreateProject;
@@ -95,14 +95,14 @@ public class SingleTenantCommandBusTestEnv {
         }
 
         @Assign
-        NothingHappened handle(FirstCmdCreateProject command) {
+        Didnt handle(FirstCmdCreateProject command) {
             commandBus.post(commandToPost, noOpObserver());
             handledCommands.add(command);
             return nothing();
         }
 
         @Assign
-        NothingHappened handle(SecondCmdStartProject command) {
+        Didnt handle(SecondCmdStartProject command) {
             handledCommands.add(command);
             return nothing();
         }
