@@ -20,12 +20,12 @@
 
 package io.spine.model.verify;
 
+import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
 import io.spine.validate.AnyVBuilder;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +44,7 @@ class ValidAggregate extends Aggregate<String, Any, AnyVBuilder> {
     }
 
     @Assign
-    List<?> handle(SendMessage command) {
+    List<? extends EventMessage> handle(SendMessage command) {
         return Collections.emptyList();
     }
 }
