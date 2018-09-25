@@ -33,8 +33,12 @@ import static com.google.common.collect.ImmutableList.copyOf;
  * Abstract base for classes providing information on messages emitted
  * in the {@link BlackBoxBoundedContext Bounded Context}.
  *
- * @param <C> the type of the message class
- * @param <W> the type of the wrapper object containing messages
+ * @param <C>
+ *         the type of the message class
+ * @param <W>
+ *         the type of the wrapper object containing messages
+ * @param <M>
+ *         the type of the emitted message
  * @author Alexander Yevsyukov
  */
 public abstract class EmittedMessages<C extends MessageClass<M>,
@@ -97,6 +101,7 @@ public abstract class EmittedMessages<C extends MessageClass<M>,
 
     /**
      * Obtains a plural word for naming emitted objects.
+     *
      * @see #singular()
      */
     public String plural() {

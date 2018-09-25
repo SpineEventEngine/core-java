@@ -35,8 +35,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Counts messages sent in the wrapper objects of the type {@code <W>}
  * by their class.
  *
- * @param <C> the type of message class
- * @param <W> the type of objects that contain messages
+ * @param <C>
+ *         the type of message class
+ * @param <W>
+ *         the type of objects that contain messages
+ * @param <M>
+ *         the type of the messages to count
  * @author Mykhailo Drachuk
  * @author Alexander Yevsyukov
  */
