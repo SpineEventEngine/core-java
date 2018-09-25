@@ -52,6 +52,8 @@ import io.spine.testdata.Sample;
 
 import java.util.List;
 
+import static io.spine.protobuf.AnyPacker.pack;
+
 @SuppressWarnings({
         "OverlyCoupledClass",
         "UnusedParameters" /* The parameter left to show that a projection subscriber can have

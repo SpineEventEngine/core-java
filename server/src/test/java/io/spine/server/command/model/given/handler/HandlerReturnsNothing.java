@@ -25,7 +25,7 @@ import io.spine.server.model.Didnt;
 import io.spine.test.reflect.command.RefCreateProject;
 
 /**
- * Provides a handler method that returns {@link io.spine.server.model.Didnt}.
+ * Provides a handler method that returns {@link Didnt}.
  *
  * @author Alexander Yevsyukov
  */

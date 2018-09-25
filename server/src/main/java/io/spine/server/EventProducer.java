@@ -45,13 +45,13 @@ public interface EventProducer {
     Version getVersion();
 
     /**
-     * Obtains the {@link io.spine.server.model.Didnt} event message.
+     * Obtains the {@link Didnt} event message.
      *
      * <p>This event should be returned if there is no value for the domain to produce an actual
-     * event. Note that a {@link io.spine.server.model.Didnt} event is never actually posted into
+     * event. Note that a {@link Didnt} event is never actually posted into
      * the {@link io.spine.server.event.EventBus EventBus}.
      *
-     * @return the default instance of {@link io.spine.server.model.Didnt}
+     * @return the default instance of {@link Didnt}
      */
     default Didnt nothing() {
         return Didnt.getDefaultInstance();
