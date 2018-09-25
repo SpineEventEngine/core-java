@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import io.spine.server.route.DefaultCommandRoute;
 import io.spine.test.entity.command.EntCreateProject;
 import io.spine.testdata.Sample;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -48,15 +47,5 @@ class DefaultCommandRouteTest {
 
         assertTrue(id.isPresent());
         assertEquals(msg.getProjectId(), id.get());
-    }
-
-    @Disabled("until the destiny of Empty is determined")
-    // TODO:2018-09-20:dmytro.dashenkov: Re-enable or delete.
-    @Test
-    @DisplayName("return empty Optional for command message without ID field")
-    void returnEmptyForNoId() {
-//        Optional<?> id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
-//
-//        assertFalse(id.isPresent());
     }
 }
