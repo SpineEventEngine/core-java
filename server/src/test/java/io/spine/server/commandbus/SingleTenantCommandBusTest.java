@@ -32,10 +32,12 @@ import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHand
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testlogging.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -128,6 +130,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         assertTrue(SecondCmdStartProject.class.isInstance(handledCommands.get(1)));
     }
 
+    @ExtendWith(MuteLogging.class)
     @Test
     @DisplayName("do not propagate dispatching errors")
     void doNotPropagateExceptions() {
