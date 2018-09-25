@@ -21,7 +21,7 @@ message Mirror {
     MirrorId id = 1 [(required) = true, (valid) = true];
 
     // The state of the aggregate.
-    google.protobuf.Any state = 2 [(required) = true, (valid) = true];
+    google.protobuf.Any state = 2 [(required) = false, (valid) = true];
 
     // The lifecycle flags of the aggregate.
     //
