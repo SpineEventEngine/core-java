@@ -19,15 +19,17 @@
 //
 syntax = "proto3";
 
-package spine.test.model;
+package spine.test.model.contexts.tasks;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.model";
+option java_package="io.spine.test.model.contexts.tasks.rejections";
 
-message ProjectAlreadyExists {
+import "spine/test/model/contexts/tasks/task.proto";
 
-    string id = 1;
-
+message TaskAlreadyExists {
+    TaskId id = 1;
+    string name = 2 [(required) = true];
+    string description = 3;
 }

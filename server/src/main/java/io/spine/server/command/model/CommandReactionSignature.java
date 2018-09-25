@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -110,7 +111,7 @@ public class CommandReactionSignature
             }
         },
 
-        MESSAGE_AND_EVENT_CONTEXT {
+        EVENT_AND_EVENT_CONTEXT {
             @Override
             public boolean matches(Class<?>[] methodParams) {
                 return consistsOfTwo(methodParams, EventMessage.class, EventContext.class);
@@ -122,15 +123,17 @@ public class CommandReactionSignature
             }
         },
 
-        MESSAGE_AND_COMMAND_CONTEXT {
+        REJECTION_AND_COMMAND_CONTEXT {
             @Override
             public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, EventMessage.class, CommandContext.class);
+                return consistsOfTwo(methodParams, RejectionMessage.class, CommandContext.class);
             }
 
             @Override
             public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope, envelope.getEventContext()};
+                CommandContext originContext = envelope.getEventContext()
+                                                       .getCommandContext();
+                return new Object[]{envelope.getMessage(), originContext};
             }
         }
     }
