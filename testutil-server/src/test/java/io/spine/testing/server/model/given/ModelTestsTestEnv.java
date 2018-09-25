@@ -23,7 +23,7 @@ package io.spine.testing.server.model.given;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
-import io.spine.server.model.Didnt;
+import io.spine.server.model.Nothing;
 import io.spine.testing.server.given.entity.command.TuCreateProject;
 
 /**
@@ -42,7 +42,7 @@ public class ModelTestsTestEnv {
         }
 
         @Assign
-        Didnt handle(TuCreateProject cmd) {
+        Nothing handle(TuCreateProject cmd) {
             return nothing();
         }
     }
@@ -56,7 +56,7 @@ public class ModelTestsTestEnv {
          * Handles the same command as {@link TestCommandHandler#handle(TuCreateProject)}.
          */
         @Assign
-        Didnt handle(TuCreateProject cmd) {
+        Nothing handle(TuCreateProject cmd) {
             return nothing();
         }
     }

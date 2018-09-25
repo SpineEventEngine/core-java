@@ -31,8 +31,8 @@ import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
-@DisplayName("When Didnt event is emitted")
-class DidntTest {
+@DisplayName("When Nothing event is emitted")
+class NothingTest {
 
     @Test
     @DisplayName("the bus should not know")

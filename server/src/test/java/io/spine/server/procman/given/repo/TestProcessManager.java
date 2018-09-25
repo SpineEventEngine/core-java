@@ -31,7 +31,7 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
-import io.spine.server.model.Didnt;
+import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
@@ -144,21 +144,21 @@ public class TestProcessManager
     }
 
     @Assign
-    Didnt handle(PmArchiveProcess command) {
+    Nothing handle(PmArchiveProcess command) {
         keep(command);
         setArchived(true);
         return nothing();
     }
 
     @Assign
-    Didnt handle(PmDeleteProcess command) {
+    Nothing handle(PmDeleteProcess command) {
         keep(command);
         setDeleted(true);
         return nothing();
     }
 
     @Assign
-    Didnt handle(PmDoNothing command, CommandContext ignored) {
+    Nothing handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
         return nothing();
     }
@@ -170,19 +170,19 @@ public class TestProcessManager
     }
 
     @React
-    Didnt on(StandardRejections.EntityAlreadyArchived rejection) {
+    Nothing on(StandardRejections.EntityAlreadyArchived rejection) {
         keep(rejection);
         return nothing();
     }
 
     @React
-    Didnt on(StandardRejections.EntityAlreadyDeleted rejection) {
+    Nothing on(StandardRejections.EntityAlreadyDeleted rejection) {
         keep(rejection);
         return nothing();
     }
 
     @React
-    Didnt on(PmTaskAdded event) {
+    Nothing on(PmTaskAdded event) {
         keep(event);
 
         Task task = event.getTask();
@@ -191,7 +191,7 @@ public class TestProcessManager
     }
 
     @React
-    Didnt on(PmProjectStarted event) {
+    Nothing on(PmProjectStarted event) {
         keep(event);
 
         handleProjectStarted();
@@ -199,7 +199,7 @@ public class TestProcessManager
     }
 
     @React
-    Didnt on(PmProjectCreated event, EventContext ignored) {
+    Nothing on(PmProjectCreated event, EventContext ignored) {
         keep(event);
 
         handleProjectCreated(event.getProjectId());

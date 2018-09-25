@@ -22,7 +22,7 @@ package io.spine.server.command.model.given.handler;
 
 import com.google.protobuf.Empty;
 import io.spine.server.command.Assign;
-import io.spine.server.model.Didnt;
+import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
@@ -43,7 +43,7 @@ public class ProcessManagerDoingNothing
     }
 
     @Assign
-    Didnt handle(RefCreateProject cmd) {
+    Nothing handle(RefCreateProject cmd) {
         return nothing();
     }
 }

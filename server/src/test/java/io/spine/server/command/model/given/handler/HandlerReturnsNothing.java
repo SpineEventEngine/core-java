@@ -21,18 +21,18 @@
 package io.spine.server.command.model.given.handler;
 
 import io.spine.server.command.Assign;
-import io.spine.server.model.Didnt;
+import io.spine.server.model.Nothing;
 import io.spine.test.reflect.command.RefCreateProject;
 
 /**
- * Provides a handler method that returns {@link Didnt}.
+ * Provides a handler method that returns {@link io.spine.server.model.Nothing}.
  *
  * @author Alexander Yevsyukov
  */
 public class HandlerReturnsNothing extends TestCommandHandler {
 
     @Assign
-    Didnt handleTest(RefCreateProject cmd) {
+    Nothing handleTest(RefCreateProject cmd) {
         return nothing();
     }
 }

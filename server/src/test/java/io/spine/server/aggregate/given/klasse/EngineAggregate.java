@@ -35,7 +35,7 @@ import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStopped;
 import io.spine.server.aggregate.given.klasse.rejection.Rejections;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
-import io.spine.server.model.Didnt;
+import io.spine.server.model.Nothing;
 
 import static io.spine.server.aggregate.given.klasse.Engine.Status.STARTED;
 import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;
@@ -101,12 +101,12 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      ****************************/
 
     @React(external = true)
-    Didnt on(EmissionTestStarted event) {
+    Nothing on(EmissionTestStarted event) {
         return nothing();
     }
 
     @React(external = true)
-    Didnt on(EmissionTestStopped event) {
+    Nothing on(EmissionTestStopped event) {
         return nothing();
     }
 
@@ -120,12 +120,12 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      *********************************************************************/
 
     @React
-    Didnt on(Rejections.EngineAlreadyStarted rejection) {
+    Nothing on(Rejections.EngineAlreadyStarted rejection) {
         return nothing();
     }
 
     @React
-    Didnt on(Rejections.EngineAlreadyStopped rejection) {
+    Nothing on(Rejections.EngineAlreadyStopped rejection) {
         return nothing();
     }
 
@@ -134,7 +134,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      *************************************/
 
     @React(external = true)
-    Didnt on(Rejections.CannotStartEmissionTest rejection) {
+    Nothing on(Rejections.CannotStartEmissionTest rejection) {
         return nothing();
     }
 

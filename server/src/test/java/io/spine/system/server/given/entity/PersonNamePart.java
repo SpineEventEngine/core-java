@@ -24,7 +24,7 @@ import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
-import io.spine.server.model.Didnt;
+import io.spine.server.model.Nothing;
 import io.spine.system.server.CreatePersonName;
 import io.spine.system.server.PersonFirstName;
 import io.spine.system.server.PersonFirstNameVBuilder;
@@ -48,7 +48,7 @@ public class PersonNamePart
     }
 
     @React
-    Didnt reactOn(PersonRenamed event) {
+    Nothing reactOn(PersonRenamed event) {
         return nothing();
     }
 

@@ -19,7 +19,7 @@
  */
 
 /**
- * Tests for the no-op messages, {@link io.spine.server.model.Didnt Didnt} event
+ * Tests for the no-op messages, {@link io.spine.server.model.Nothing Nothing} event
  * and {@link io.spine.test.aggregate.number.DoNothing DoNothing} command.
  */
 

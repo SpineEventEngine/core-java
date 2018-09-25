@@ -29,7 +29,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
-import io.spine.server.model.Didnt;
+import io.spine.server.model.Nothing;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -131,13 +131,13 @@ public class TestAggregate
     }
 
     @React
-    Didnt on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
+    Nothing on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
         isRejectionWithCmdHandled = true;
         return nothing();
     }
 
     @React
-    Didnt on(StandardRejections.CannotModifyDeletedEntity rejection) {
+    Nothing on(StandardRejections.CannotModifyDeletedEntity rejection) {
         isRejectionHandled = true;
         return nothing();
     }
