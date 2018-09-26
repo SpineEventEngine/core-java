@@ -80,6 +80,9 @@ public final class MuteLoggingExtension implements BeforeEachCallback, AfterEach
         return result;
     }
 
+    /**
+     * The output of a software component.
+     */
     private static final class ProgramOutput {
 
         @SuppressWarnings("UseOfSystemOutOrSystemErr")
@@ -93,14 +96,30 @@ public final class MuteLoggingExtension implements BeforeEachCallback, AfterEach
             this.err = err;
         }
 
+        /**
+         * Creates an {@code ProgramOutput} into the given stream.
+         *
+         * <p>Both the output and error streams are represented with the given target stream.
+         *
+         * @param stream the target stream
+         * @return new instance of {@code ProgramOutput}
+         */
         private static ProgramOutput into(PrintStream stream) {
             return new ProgramOutput(stream, stream);
         }
 
+        /**
+         * Obtains an instance of {@code ProgramOutput} from the standard I/O of this process.
+         *
+         * @return the standard I/O output
+         */
         private static ProgramOutput fromSystem() {
             return SYSTEM;
         }
 
+        /**
+         * Installs this output for the current process.
+         */
         private void install() {
             System.setOut(out);
             System.setErr(err);
