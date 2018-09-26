@@ -64,7 +64,7 @@ import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
- * @author Alex Tymchenko
+ * Test environment for {@link io.spine.server.integration.IntegrationBusTest}.
  */
 public class IntegrationBusTestEnv {
 
@@ -214,10 +214,8 @@ public class IntegrationBusTestEnv {
             return Collections.emptyList();
         }
 
-        public static <M extends Message> M getExternalEvent() {
-            @SuppressWarnings("unchecked") // OK for tests.
-            M event = (M) externalEvent;
-            return event;
+        public static Message getExternalEvent() {
+            return externalEvent;
         }
 
         public static void clear() {
