@@ -312,7 +312,7 @@ public class EntityColumn implements Serializable {
     /**
      * Obtains the type of the column.
      */
-    public Class<?> getType() {
+    public Class getType() {
         return valueConverter.getSourceType();
     }
 
