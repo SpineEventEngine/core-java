@@ -20,7 +20,6 @@
 
 package io.spine.testlogging;
 
-import io.spine.annotation.Internal;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -33,10 +32,12 @@ import java.util.Optional;
  * A JUnit {@link org.junit.jupiter.api.extension.Extension Extension} which mutes all the logs
  * for a test case.
  *
- * @see io.spine.testlogging.MuteLogging
+ * <p>Do not use this extension directly. Mark the target test method or class with
+ * the {@link MuteLogging} annotation.
+ *
+ * @see MuteLogging
  * @author Dmytro Dashenkov
  */
-@Internal
 public final class MuteLoggingExtension implements BeforeEachCallback, AfterEachCallback {
 
     private final MemoizingStream memoizingStream = new MemoizingStream();
