@@ -20,11 +20,11 @@
 
 package io.spine.system.server.given.entity;
 
-import com.google.protobuf.Empty;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.system.server.CreatePersonName;
 import io.spine.system.server.PersonFirstName;
 import io.spine.system.server.PersonFirstNameVBuilder;
@@ -48,8 +48,8 @@ public class PersonNamePart
     }
 
     @React
-    Empty reactOn(PersonRenamed event) {
-        return Empty.getDefaultInstance();
+    Nothing reactOn(PersonRenamed event) {
+        return nothing();
     }
 
     @Assign

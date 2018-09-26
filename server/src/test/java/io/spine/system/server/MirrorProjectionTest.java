@@ -20,7 +20,7 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.projection.ProjectionTest;
 
@@ -31,7 +31,7 @@ import static io.spine.system.server.given.mirror.ProjectionTestEnv.ID;
  *
  * @author Dmytro Dashenkov
  */
-abstract class MirrorProjectionTest<E extends Message>
+abstract class MirrorProjectionTest<E extends EventMessage>
         extends ProjectionTest<MirrorId, E, Mirror, MirrorProjection> {
 
     MirrorProjectionTest(E eventMessage) {

@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.model.CommandingMethod.Result;
@@ -35,7 +36,11 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 public final class CommandReactionMethod
-        extends AbstractHandlerMethod<EventReceiver, EventClass, EventEnvelope, Result>
+        extends AbstractHandlerMethod<EventReceiver,
+                                      EventMessage,
+                                      EventClass,
+                                      EventEnvelope,
+                                      Result>
         implements CommandingMethod<EventReceiver, EventClass, EventEnvelope, Result> {
 
     CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {

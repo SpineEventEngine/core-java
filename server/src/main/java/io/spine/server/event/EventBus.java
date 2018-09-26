@@ -27,6 +27,7 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -482,7 +483,7 @@ public class EventBus
             Event event = envelope.getOuterObject();
             store(of(event));
 
-            Message message = envelope.getMessage();
+            EventMessage message = envelope.getMessage();
             UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }

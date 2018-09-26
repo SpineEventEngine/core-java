@@ -22,6 +22,8 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.client.grpc.CommandServiceGrpc;
@@ -86,6 +88,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @CanIgnoreReturnValue
     public static class Builder {
 
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
@@ -113,6 +116,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * @param boundedContext the instance to check
          * @return {@code true} if the instance was added to the builder, {@code false} otherwise
          */
+        @CheckReturnValue
         public boolean contains(BoundedContext boundedContext) {
             boolean contains = boundedContexts.contains(boundedContext);
             return contains;
@@ -121,6 +125,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         /**
          * Builds a new {@link CommandService}.
          */
+        @CheckReturnValue
         public CommandService build() {
             ImmutableMap<CommandClass, BoundedContext> map = createMap();
             CommandService result = new CommandService(map);
@@ -131,6 +136,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * Creates a map from {@code CommandClass}es to {@code BoundedContext}s that
          * handle such commands.
          */
+        @CheckReturnValue
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
             ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {

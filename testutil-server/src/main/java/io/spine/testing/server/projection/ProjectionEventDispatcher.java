@@ -21,6 +21,7 @@ package io.spine.testing.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -52,8 +53,7 @@ public class ProjectionEventDispatcher {
     /**
      * Dispatches the {@code Event} to the given {@code Projection}.
      */
-    public static void dispatch(Projection<?, ?, ?> projection,
-                                Event event) {
+    public static void dispatch(Projection<?, ?, ?> projection, Event event) {
         checkNotNull(projection);
         checkNotNull(event);
         EventEnvelope envelope = EventEnvelope.of(event);
@@ -65,7 +65,7 @@ public class ProjectionEventDispatcher {
      * to the given {@code Projection}.
      */
     public static void dispatch(Projection<?, ?, ?> projection,
-                                Message eventMessage,
+                                EventMessage eventMessage,
                                 EventContext eventContext) {
         checkNotNull(projection);
         checkNotNull(eventMessage);

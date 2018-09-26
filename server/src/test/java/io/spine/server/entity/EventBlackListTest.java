@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.test.entity.event.EntProjectCreated;
 import io.spine.test.entity.event.EntProjectStarted;
@@ -59,8 +59,8 @@ class EventBlackListTest {
     @Test
     @DisplayName("allow events of type not from the list")
     void allowArbitrary() {
-        Message event = EntProjectCreated.getDefaultInstance();
-        Optional<? extends Message> filtered = blackList.filter(event);
+        EventMessage event = EntProjectCreated.getDefaultInstance();
+        Optional<? extends EventMessage> filtered = blackList.filter(event);
         assertTrue(filtered.isPresent());
         assertEquals(event, filtered.get());
     }
@@ -68,16 +68,16 @@ class EventBlackListTest {
     @Test
     @DisplayName("not allow events of type from the list")
     void notAllowFromList() {
-        Message event = EntTaskAdded.getDefaultInstance();
-        Optional<? extends Message> filtered = blackList.filter(event);
+        EventMessage event = EntTaskAdded.getDefaultInstance();
+        Optional<? extends EventMessage> filtered = blackList.filter(event);
         assertFalse(filtered.isPresent());
     }
 
     @Test
     @DisplayName("filter out events from bulk")
     void filterOut() {
-        List<Event> events = Stream.of(EntProjectCreated.getDefaultInstance(),
-                                       EntTaskAdded.getDefaultInstance())
+        List<Event> events = Stream.<EventMessage>of(EntProjectCreated.getDefaultInstance(),
+                                                     EntTaskAdded.getDefaultInstance())
                                    .map(eventFactory::createEvent)
                                    .collect(toList());
         Collection<Event> filtered = blackList.filter(events);

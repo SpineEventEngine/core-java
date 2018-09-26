@@ -24,6 +24,7 @@ import com.google.protobuf.StringValue;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.testing.server.given.entity.event.TuProjectCreated;
 import io.spine.validate.StringValueVBuilder;
 
 /**
@@ -48,7 +49,7 @@ public final class TuProjection
     }
 
     @Subscribe
-    void on(StringValue command) {
-        getBuilder().setValue(command.getValue());
+    void on(TuProjectCreated event) {
+        getBuilder().setValue(event.getId().getValue());
     }
 }

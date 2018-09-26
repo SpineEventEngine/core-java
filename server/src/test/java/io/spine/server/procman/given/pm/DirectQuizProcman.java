@@ -20,9 +20,9 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.protobuf.Empty;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.EitherOfThree;
 import io.spine.test.procman.quiz.PmAnswer;
@@ -65,7 +65,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
 
     @Assign
     @SuppressWarnings("Duplicates")
-    EitherOfThree<PmQuestionSolved, PmQuestionFailed, Empty> handle(PmAnswerQuestion command) {
+    EitherOfThree<PmQuestionSolved, PmQuestionFailed, Nothing> handle(PmAnswerQuestion command) {
         PmAnswer answer = command.getAnswer();
         PmQuizId examId = command.getQuizId();
         PmQuestionId questionId = answer.getQuestionId();
@@ -99,13 +99,13 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @React
-    Empty on(PmQuizStarted event) {
+    Nothing on(PmQuizStarted event) {
         getBuilder().setId(event.getQuizId());
         return nothing();
     }
 
     @React
-    Empty on(PmQuestionSolved event) {
+    Nothing on(PmQuestionSolved event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addSolvedQuestion(questionId);
@@ -113,7 +113,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @React
-    Empty on(PmQuestionFailed event) {
+    Nothing on(PmQuestionFailed event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addFailedQuestion(questionId);
@@ -124,9 +124,5 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
         List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
         int index = openQuestions.indexOf(questionId);
         getBuilder().removeOpenQuestion(index);
-    }
-
-    private static Empty nothing() {
-        return Empty.getDefaultInstance();
     }
 }

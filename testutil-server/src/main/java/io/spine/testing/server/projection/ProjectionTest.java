@@ -21,6 +21,7 @@
 package io.spine.testing.server.projection;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -43,7 +44,7 @@ import static java.util.Collections.emptyList;
  * @author Vladyslav Lubenskyi
  */
 public abstract class ProjectionTest<I,
-                                     M extends Message,
+                                     M extends EventMessage,
                                      S extends Message,
                                      P extends Projection<I, S, ?>>
         extends EventSubscriptionTest<I, M, S, P> {
@@ -64,7 +65,6 @@ public abstract class ProjectionTest<I,
                 sourceEvent.toBuilder()
                            .setContext(context)
                            .build();
-
         dispatch(entity, enrichedEvent);
         return emptyList();
     }

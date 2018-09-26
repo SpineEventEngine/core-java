@@ -23,8 +23,8 @@ package io.spine.server.projection;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
@@ -97,7 +97,7 @@ class ProjectionSystemEventWatcherTest {
     @DisplayName("dispatch event")
     void event() {
         ProjectionSystemEventWatcher<?> watcher = new ProjectionSystemEventWatcher<>(repository);
-        Event payload = givenEvent();
+        Event payload = GivenEvent.arbitrary();
         EventDispatchedToSubscriber systemEvent = EventDispatchedToSubscriber
                 .newBuilder()
                 .setPayload(payload)
@@ -113,7 +113,7 @@ class ProjectionSystemEventWatcherTest {
     @DisplayName("warn repository with DuplicateEventException")
     void duplicateEvent() {
         ProjectionSystemEventWatcher<?> watcher = new ProjectionSystemEventWatcher<>(repository);
-        Event payload = givenEvent();
+        Event payload = GivenEvent.arbitrary();
         CannotDispatchEventTwice rejection = CannotDispatchEventTwice
                 .newBuilder()
                 .setPayload(payload)
@@ -144,7 +144,7 @@ class ProjectionSystemEventWatcherTest {
         @Test
         @DisplayName("on event dispatching")
         void eventDispatched() {
-            Event payload = givenEvent();
+            Event payload = GivenEvent.arbitrary();
             EventDispatchedToSubscriber systemEvent = EventDispatchedToSubscriberVBuilder
                     .newBuilder()
                     .setPayload(payload)
@@ -159,7 +159,7 @@ class ProjectionSystemEventWatcherTest {
         @Test
         @DisplayName("on duplicate event rejection")
         void duplicateEvent() {
-            Event payload = givenEvent();
+            Event payload = GivenEvent.arbitrary();
             CannotDispatchEventTwice rejection = CannotDispatchEventTwice
                     .newBuilder()
                     .setPayload(payload)
@@ -182,7 +182,7 @@ class ProjectionSystemEventWatcherTest {
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
-        private void dispatch(Message eventMessage, EntityHistoryId producer) {
+        private void dispatch(EventMessage eventMessage, EntityHistoryId producer) {
             TestEventFactory eventFactory =
                     TestEventFactory.newInstance(producer, ProjectionSystemEventWatcherTest.class);
             Event event = eventFactory.createEvent(eventMessage);
@@ -202,9 +202,5 @@ class ProjectionSystemEventWatcherTest {
                 .setTypeUrl(REPOSITORY_TYPE.value())
                 .setEntityId(entityId)
                 .build();
-    }
-
-    private static Event givenEvent() {
-        return GivenEvent.withMessage(getCurrentTime());
     }
 }

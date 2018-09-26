@@ -44,8 +44,3 @@ message CsAddTask {
 message CsStartProject {
     ProjectId project_id = 1;
 }
-
-message ImportEvents {
-    ProjectId project_id = 1;
-    repeated core.Event event = 2;
-}

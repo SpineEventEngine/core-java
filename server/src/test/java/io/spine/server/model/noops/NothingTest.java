@@ -18,37 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.error;
+package io.spine.server.model.noops;
 
-import com.google.protobuf.StringValue;
-import io.spine.server.event.InvalidEventException;
-import io.spine.validate.ConstraintViolation;
+import io.spine.server.model.noops.given.ArchiverPm;
+import io.spine.test.model.contexts.archiver.ArchiveFile;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
-import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static io.spine.server.model.noops.given.NoOpMessageTestEnv.archiveSingleFile;
+import static io.spine.testing.client.blackbox.Count.count;
+import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
-/**
- * @author Alexander Litus
- */
-@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-@DisplayName("InvalidEventException should")
-class InvalidEventExceptionTest {
+@DisplayName("When Nothing event is emitted")
+class NothingTest {
 
     @Test
-    @DisplayName("create exception with violations")
-    void createWithViolations() {
-        StringValue msg = toMessage("");
+    @DisplayName("the bus should not know")
+    void notPost() {
+        BlackBoxBoundedContext boundedContext = BlackBoxBoundedContext
+                .newInstance()
+                .with(new ArchiverPm.Repository())
+                .receivesCommand(archiveSingleFile());
+        boundedContext.assertThat(emittedCommand(count(1)));
+        boundedContext.assertThat(emittedCommand(ArchiveFile.class));
 
-        InvalidEventException exception = InvalidEventException.onConstraintViolations(
-                msg,
-                singletonList(ConstraintViolation.getDefaultInstance()));
-
-        assertNotNull(exception.getMessage());
-        assertNotNull(exception.asError());
-        assertEquals(msg, exception.getEventMessage());
+        boundedContext.assertThat(emittedEvent(count(0)));
     }
 }

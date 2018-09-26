@@ -23,13 +23,14 @@ package io.spine.server.procman;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
@@ -42,6 +43,7 @@ import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
+import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmPlanIteration;
@@ -151,7 +153,7 @@ class ProcessManagerTest {
     }
 
     @CanIgnoreReturnValue
-    private List<? extends Message> testDispatchEvent(Message eventMessage) {
+    private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
         assertEquals(pack(eventMessage), processManager.getState());
@@ -159,7 +161,7 @@ class ProcessManagerTest {
     }
 
     @CanIgnoreReturnValue
-    private List<Event> testDispatchCommand(Message commandMsg) {
+    private List<Event> testDispatchCommand(CommandMessage commandMsg) {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
@@ -207,7 +209,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("rejection message only")
         void rejectionMessage() {
-            RejectionEnvelope rejection = entityAlreadyArchived(StringValue.class);
+            RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
             dispatch(processManager, rejection.getEvent());
             assertEquals(rejection.getOuterObject().getMessage(),
                          processManager.getState());
@@ -336,12 +338,9 @@ class ProcessManagerTest {
         @Test
         @DisplayName("command")
         void command() {
-            Int32Value unknownCommand = Int32Value.getDefaultInstance();
-
             CommandEnvelope envelope = CommandEnvelope.of(
-                    requestFactory.createCommand(unknownCommand)
+                    requestFactory.createCommand(PmDontHandle.getDefaultInstance())
             );
-
             assertThrows(IllegalStateException.class,
                          () -> processManager.dispatchCommand(envelope));
         }
@@ -349,8 +348,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("event")
         void event() {
-            StringValue unknownEvent = StringValue.getDefaultInstance();
-            EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(unknownEvent));
+            EventEnvelope envelope = EventEnvelope.of(GivenEvent.arbitrary());
 
             assertThrows(IllegalStateException.class, () -> dispatch(processManager, envelope));
         }

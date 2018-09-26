@@ -22,8 +22,8 @@ package io.spine.server.procman;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -52,6 +52,7 @@ import io.spine.server.procman.given.repo.TestProcessManager;
 import io.spine.server.procman.given.repo.TestProcessManagerRepository;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
+import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.Task;
@@ -184,14 +185,14 @@ class ProcessManagerRepositoryTest
         repository().dispatchCommand(CommandEnvelope.of(command));
     }
 
-    private void testDispatchCommand(Message cmdMsg) {
+    private void testDispatchCommand(CommandMessage cmdMsg) {
         Command cmd = requestFactory.command()
                                     .create(cmdMsg);
         dispatchCommand(cmd);
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
-    private void testDispatchEvent(Message eventMessage) {
+    private void testDispatchEvent(EventMessage eventMessage) {
         Event event = GivenEvent.withMessage(eventMessage);
         dispatchEvent(event);
         assertTrue(TestProcessManager.processed(eventMessage));
@@ -397,8 +398,7 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("throw ISE when dispatching unknown command")
     void throwOnUnknownCommand() {
-        Command unknownCommand =
-                requestFactory.createCommand(Int32Value.getDefaultInstance());
+        Command unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
         ProjectId id = createId(42);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
@@ -473,10 +473,10 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setId(newUuid())
                 .build();
-        Event arbitraryEvent = eventFactory.createEvent(PmTaskAdded
-                                                                .newBuilder()
-                                                                .setProjectId(projectId)
-                                                                .build());
+        EventMessage arbitraryEvent = PmTaskAdded
+                .newBuilder()
+                .setProjectId(projectId)
+                .build();
         assertTrue(filter.filter(arbitraryEvent)
                          .isPresent());
 
@@ -486,13 +486,12 @@ class ProcessManagerRepositoryTest
                 .setTypeUrl(TypeUrl.ofEnclosed(newState).value())
                 .setEntityId(EntityId.newBuilder().setId(pack(projectId)))
                 .build();
-        Event discardedEvent = eventFactory.createEvent(EntityStateChanged
-                                                                .newBuilder()
-                                                                .setId(historyId)
-                                                                .setNewState(newState)
-                                                                .build());
-        assertFalse(filter.filter(discardedEvent)
-                          .isPresent());
+        EventMessage discardedEvent = EntityStateChanged
+                .newBuilder()
+                .setId(historyId)
+                .setNewState(newState)
+                .build();
+        assertFalse(filter.filter(discardedEvent).isPresent());
     }
 
     @Test

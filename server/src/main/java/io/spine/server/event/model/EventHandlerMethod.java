@@ -20,7 +20,8 @@
 
 package io.spine.server.event.model;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -38,7 +39,7 @@ import java.lang.reflect.Method;
  * @author Dmytro Dashenkov
  */
 public abstract class EventHandlerMethod<T, R extends MethodResult>
-        extends AbstractHandlerMethod<T, EventClass, EventEnvelope, R> {
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -58,13 +59,14 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
     public HandlerKey key() {
         Class<?>[] types = getRawMethod().getParameterTypes();
         @SuppressWarnings("unchecked")
-        Class<? extends Message> eventMessageClass = (Class<? extends Message>) types[0];
+        Class<? extends EventMessage> eventMessageClass = (Class<? extends EventMessage>) types[0];
         EventClass eventClass = EventClass.from(eventMessageClass);
         if (!getParameterSpec().isAwareOfCommandType()) {
             return HandlerKey.of(eventClass);
         } else {
             @SuppressWarnings("unchecked")
-            Class<? extends Message> commandMessageClass = (Class<? extends Message>) types[1];
+            Class<? extends CommandMessage> commandMessageClass =
+                    (Class<? extends CommandMessage>) types[1];
             CommandClass commandClass = CommandClass.from(commandMessageClass);
             return HandlerKey.of(eventClass, commandClass);
         }

@@ -23,7 +23,7 @@ package io.spine.server.entity;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.Events;
@@ -62,8 +62,8 @@ public final class EventFieldFilter implements EventFilter {
     }
 
     @Override
-    public Optional<? extends Message> filter(Message event) {
-        Message masked = mask(event);
+    public Optional<? extends EventMessage> filter(EventMessage event) {
+        EventMessage masked = mask(event);
         return Optional.of(masked);
     }
 
@@ -75,21 +75,21 @@ public final class EventFieldFilter implements EventFilter {
     }
 
     private Event maskEvent(Event event) {
-        Message message = Events.getMessage(event);
-        Message masked = mask(message);
+        EventMessage message = Events.getMessage(event);
+        EventMessage masked = mask(message);
         return event.toBuilder()
                     .setMessage(pack(masked))
                     .build();
     }
 
-    private Message mask(Message event) {
+    private EventMessage mask(EventMessage event) {
         EventClass eventClass = EventClass.of(event);
         FieldMask mask = fieldMasks.get(eventClass);
         if (mask == null || isDefault(mask)) {
             return event;
         } else {
             TypeUrl typeUrl = eventClass.getTypeName().toUrl();
-            Message maskedEvent = applyMask(mask, event, typeUrl);
+            EventMessage maskedEvent = applyMask(mask, event, typeUrl);
             return maskedEvent;
         }
     }
@@ -125,7 +125,7 @@ public final class EventFieldFilter implements EventFilter {
          *         the fields to <b>retain</b> in the event message
          * @return self for method chaining
          */
-        public Builder putMask(Class<? extends Message> eventClass, FieldMask mask) {
+        public Builder putMask(Class<? extends EventMessage> eventClass, FieldMask mask) {
             checkNotNull(eventClass);
             checkNotNull(mask);
             EventClass eventType = EventClass.from(eventClass);

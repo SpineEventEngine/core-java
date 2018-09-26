@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 
@@ -32,12 +33,16 @@ import java.util.List;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public final class EmittedCommands extends EmittedMessages<CommandClass, Command> {
+public final class EmittedCommands extends EmittedMessages<CommandClass, Command, CommandMessage> {
 
     EmittedCommands(List<Command> commands) {
-        super(commands,
-              new MessageTypeCounter<>(commands, CommandClass::of, CommandClass::from),
-              Command.class
-        );
+        super(commands, counterFor(commands), Command.class);
+    }
+
+    private static MessageTypeCounter<CommandClass, Command, CommandMessage>
+    counterFor(List<Command> commands) {
+        return new MessageTypeCounter<CommandClass, Command, CommandMessage>(commands,
+                                                                             CommandClass::of,
+                                                                             CommandClass::from);
     }
 }

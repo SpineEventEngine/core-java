@@ -18,20 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.noops.given;
 
-import com.google.protobuf.Empty;
-import io.spine.server.command.Assign;
-import io.spine.test.reflect.command.RefCreateProject;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-/**
- * Provides a handler method that returns {@link Empty}.
- *
- * @author Alexander Yevsyukov
- */
-public class HandlerReturnsEmpty extends TestCommandHandler {
-    @Assign
-    Empty handleTest(RefCreateProject cmd) {
-        return Empty.getDefaultInstance();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
@@ -135,10 +134,10 @@ public class Given {
         }
 
         /**
-         * Creates a new {@link ACommand} with the given command message, userId and
-         * timestamp using default {@link ACommand} instance.
+         * Creates a new {@code ACommand} with the given command message, userId and
+         * timestamp using default {@code ACommand} instance.
          */
-        private static Command create(Message command, UserId userId, Timestamp when) {
+        private static Command create(io.spine.base.CommandMessage command, UserId userId, Timestamp when) {
             TenantId generatedTenantId = TenantId.newBuilder()
                                                  .setValue(newUuid())
                                                  .build();
@@ -180,7 +179,7 @@ public class Given {
                     .setId(customerId)
                     .setName(personName)
                     .build();
-            Message msg = CreateCustomer
+            io.spine.base.CommandMessage msg = CreateCustomer
                     .newBuilder()
                     .setCustomerId(customerId)
                     .setCustomer(customer)

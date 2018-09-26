@@ -21,6 +21,7 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.protobuf.MessageFieldException;
 
@@ -38,8 +39,8 @@ import static java.util.Optional.of;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public class DefaultCommandRoute<I> extends FieldAtIndex<I, Message, CommandContext>
-        implements CommandRoute<I, Message> {
+public class DefaultCommandRoute<I> extends FieldAtIndex<I, CommandMessage, CommandContext>
+        implements CommandRoute<I, CommandMessage> {
 
     private static final long serialVersionUID = 0L;
     private static final int ID_FIELD_INDEX = 0;
@@ -61,7 +62,7 @@ public class DefaultCommandRoute<I> extends FieldAtIndex<I, Message, CommandCont
      * if {@link DefaultCommandRoute#apply(Message, Message)} throws an exception
      * (in the case if the command is not for an entity)
      */
-    public static <I> Optional<I> asOptional(Message commandMessage) {
+    public static <I> Optional<I> asOptional(CommandMessage commandMessage) {
         try {
             DefaultCommandRoute<I> function = newInstance();
             I id = function.apply(commandMessage, CommandContext.getDefaultInstance());

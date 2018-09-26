@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
@@ -63,7 +63,7 @@ class AggregatePartTest {
     private TaskDescriptionPart taskDescriptionPart;
     private TaskRepository taskRepository;
 
-    private static CommandEnvelope env(Message commandMessage) {
+    private static CommandEnvelope env(CommandMessage commandMessage) {
         return CommandEnvelope.of(factory.command()
                                          .create(commandMessage));
     }

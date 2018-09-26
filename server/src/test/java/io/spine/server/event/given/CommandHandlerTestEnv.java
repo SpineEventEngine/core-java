@@ -23,8 +23,7 @@ package io.spine.server.event.given;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
+import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -39,6 +38,7 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdStartProject;
+import io.spine.test.command.ProjectId;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
@@ -67,8 +67,7 @@ public class CommandHandlerTestEnv {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.from(CmdProjectStarted.class),
-                                   EventClass.from(StringValue.class));
+            return ImmutableSet.of(EventClass.from(CmdProjectStarted.class));
         }
 
         @Override
@@ -102,7 +101,7 @@ public class CommandHandlerTestEnv {
                        "ReturnOfCollectionOrArrayField"})
     public static class TestCommandHandler extends AbstractCommandHandler {
 
-        private final ImmutableList<Message> eventsOnStartProjectCmd =
+        private final ImmutableList<EventMessage> eventsOnStartProjectCmd =
                 createEventsOnStartProjectCmd();
 
         private final CommandHistory commandsHandled = new CommandHistory();
@@ -125,7 +124,7 @@ public class CommandHandlerTestEnv {
             dispatch(commandEnvelope);
         }
 
-        public ImmutableList<Message> getEventsOnStartProjectCmd() {
+        public ImmutableList<EventMessage> getEventsOnStartProjectCmd() {
             return eventsOnStartProjectCmd;
         }
 
@@ -148,7 +147,7 @@ public class CommandHandlerTestEnv {
         }
 
         @Assign
-        List<Message> handle(CmdStartProject msg, CommandContext context) {
+        List<EventMessage> handle(CmdStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return eventsOnStartProjectCmd;
         }
@@ -168,11 +167,17 @@ public class CommandHandlerTestEnv {
             return lastException;
         }
 
-        private static ImmutableList<Message> createEventsOnStartProjectCmd() {
-            ImmutableList.Builder<Message> builder = ImmutableList.<Message>builder()
-                    .add(CmdProjectStarted.getDefaultInstance(),
-                         StringValue.getDefaultInstance());
-            return builder.build();
+        private ImmutableList<EventMessage> createEventsOnStartProjectCmd() {
+            ProjectId id = ProjectId
+                    .newBuilder()
+                    .setId(getId())
+                    .build();
+            CmdProjectStarted startedEvent = CmdProjectStarted
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            CmdProjectStarted defaultEvent = CmdProjectStarted.getDefaultInstance();
+            return ImmutableList.of(startedEvent, defaultEvent);
         }
     }
 }

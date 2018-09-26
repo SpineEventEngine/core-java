@@ -29,7 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
+import io.spine.core.Events;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
@@ -281,11 +281,10 @@ public abstract class Aggregate<I,
      * {@code 44}, and {@code 45}.
      *
      * @param events the events to apply
-     * @param origin the envelope of a message which caused the events
      * @return the exact list of {@code events} but with adjusted versions
      */
-    List<Event> apply(List<Event> events, MessageEnvelope origin) {
-        ImmutableList<Event> versionedEvents = prepareEvents(events, origin);
+    List<Event> apply(List<Event> events) {
+        ImmutableList<Event> versionedEvents = prepareEvents(events);
         play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
         return versionedEvents;
@@ -294,14 +293,12 @@ public abstract class Aggregate<I,
     /**
      * Prepares the given events to be applied to this aggregate.
      *
-     * @param originalEvents the events to be applied
-     * @param origin         the origin of those events
+     * @param originalEvents
+     *         the events to be applied
      * @return events ready to be applied to this aggregate
-     * @see #apply(List, MessageEnvelope)
-     * @see AggregateEvents#prepareEvent(Event, MessageEnvelope, Version)
+     * @see #apply(List)
      */
-    private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents,
-                                               MessageEnvelope origin) {
+    private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents) {
         Version currentVersion = getVersion();
 
         Stream<Version> versions = Stream.iterate(currentVersion, Versions::increment)
@@ -309,7 +306,7 @@ public abstract class Aggregate<I,
                                          .limit(originalEvents.size());
         Stream<Event> events = originalEvents.stream();
         ImmutableList<Event> eventsToApply = Streams.zip(events, versions,
-                                                         AggregateEvents.prepareEventForApplyFn(origin))
+                                                         Events::substituteVersion)
                                                     .collect(toImmutableList());
         return eventsToApply;
     }

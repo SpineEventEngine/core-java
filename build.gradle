@@ -131,6 +131,8 @@ subprojects {
     apply plugin: 'net.ltgt.errorprone'
     apply plugin: spineProtobufPluginId
 
+    apply from: deps.scripts.javacArgs
+
     // Specific setup for a Travis build,
     // which prevents appearing of warning messages in build logs.
     //

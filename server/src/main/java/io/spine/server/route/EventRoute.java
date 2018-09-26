@@ -20,7 +20,7 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 
 /**
@@ -31,7 +31,7 @@ import io.spine.core.EventContext;
  * @author Alexander Yevsyukov
  */
 @FunctionalInterface
-public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventContext> {
+public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, EventContext> {
 
     /**
      * Creates an event route that obtains event producer ID from an {@code EventContext} and
@@ -40,7 +40,7 @@ public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventC
      * @param <I> the type of the entity IDs to which the event would be routed
      * @return new route instance
      */
-    static <I> EventRoute<I, Message> byProducerId() {
+    static <I> EventRoute<I, EventMessage> byProducerId() {
         return new EventProducers.FromContext<>();
     }
 
@@ -51,7 +51,7 @@ public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventC
      * @param <I> the type of the IDs for which the event would be routed
      * @return new function instance
      */
-    static <I> EventRoute<I, Message> byFirstMessageField() {
+    static <I> EventRoute<I, EventMessage> byFirstMessageField() {
         return new EventProducers.FromFirstMessageField<>();
     }
 }

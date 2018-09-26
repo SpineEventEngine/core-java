@@ -20,9 +20,8 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -31,6 +30,8 @@ import io.spine.server.model.given.HandlerMethodTestEnv.OneParamMethod;
 import io.spine.server.model.given.HandlerMethodTestEnv.StubHandler;
 import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamMethod;
 import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamSpec;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.ModProjectStarted;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.AbstractHandlerMethod.getFirstParamType;
 import static io.spine.server.model.given.HandlerMethodTestEnv.OneParamSignature;
@@ -62,9 +64,12 @@ class AbstractHandlerMethodTest {
     private final OneParamSignature signature = new OneParamSignature();
 
     private
-    AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> twoParamMethod;
+    AbstractHandlerMethod<Object, EventMessage, EventClass, EventEnvelope, MethodResult<Empty>>
+            twoParamMethod;
     private
-    AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> oneParamMethod;
+    AbstractHandlerMethod<Object, EventMessage, EventClass, EventEnvelope, MethodResult<Empty>>
+            oneParamMethod;
+
     private Object target;
 
     @BeforeEach
@@ -109,7 +114,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
-        assertEquals(BoolValue.class, getFirstParamType(oneParamMethod.getRawMethod()));
+        assertEquals(ModProjectStarted.class, getFirstParamType(oneParamMethod.getRawMethod()));
     }
 
     @Nested
@@ -120,9 +125,13 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("with one parameter")
         void withOneParam() {
+            ModProjectStarted eventMessage = ModProjectStarted
+                    .newBuilder()
+                    .setId(newUuid())
+                    .build();
             Event event = Event
                     .newBuilder()
-                    .setMessage(pack(BoolValue.getDefaultInstance()))
+                    .setMessage(pack(eventMessage))
                     .build();
             EventEnvelope envelope = EventEnvelope.of(event);
             oneParamMethod.invoke(target, envelope);
@@ -134,9 +143,13 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("with two parameters")
         void withTwoParams() {
+            ModProjectCreated eventMessage = ModProjectCreated
+                    .newBuilder()
+                    .setId(newUuid())
+                    .build();
             Event event = Event
                     .newBuilder()
-                    .setMessage(pack(StringValue.getDefaultInstance()))
+                    .setMessage(pack(eventMessage))
                     .setContext(EventContext.getDefaultInstance())
                     .build();
             EventEnvelope envelope = EventEnvelope.of(event);
@@ -177,10 +190,9 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>>
-                    anotherMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod(),
-                                                       TwoParamSpec.INSTANCE);
-
+            AbstractHandlerMethod<?, ?, ?, ?, ?> anotherMethod =
+                    new TwoParamMethod(StubHandler.getTwoParameterMethod(),
+                                       TwoParamSpec.INSTANCE);
             assertEquals(twoParamMethod, anotherMethod);
         }
     }

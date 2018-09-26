@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.ActorContext;
 import io.spine.core.EventContext;
@@ -54,12 +55,12 @@ final class SystemEventFactory extends EventFactory {
      *         {@code false} otherwise
      * @return new instance of {@code SystemEventFactory}
      */
-    static SystemEventFactory forMessage(Message message, boolean multitenant) {
+    static SystemEventFactory forMessage(EventMessage message, boolean multitenant) {
         Message aggregateId = getAggregateId(message);
         return new SystemEventFactory(aggregateId, multitenant);
     }
 
-    private static Message getAggregateId(Message systemEvent) {
+    private static Message getAggregateId(EventMessage systemEvent) {
         Set<Object> routingOut =
                 EventRoute.byFirstMessageField()
                           .apply(systemEvent, EventContext.getDefaultInstance());

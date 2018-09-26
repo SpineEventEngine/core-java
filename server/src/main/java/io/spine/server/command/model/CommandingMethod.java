@@ -21,7 +21,7 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
@@ -63,7 +63,7 @@ public interface CommandingMethod<T,
     /**
      * A commanding method returns one or more command messages.
      */
-    final class Result extends MethodResult<Message> {
+    final class Result extends MethodResult<CommandMessage> {
 
         private final boolean optional;
 
@@ -79,12 +79,12 @@ public interface CommandingMethod<T,
         Result(Object rawMethodOutput, boolean optional) {
             super(rawMethodOutput);
             this.optional = optional;
-            List<Message> messages = toMessages(rawMethodOutput);
+            List<CommandMessage> messages = toMessages(rawMethodOutput);
             checkMessages(messages);
             setMessages(messages);
         }
 
-        private void checkMessages(List<Message> messages) {
+        private void checkMessages(List<CommandMessage> messages) {
             if (messages.isEmpty() && !optional) {
                 throw new IllegalStateException(
                         "Commanding method did not produce command messages"
@@ -102,7 +102,7 @@ public interface CommandingMethod<T,
         public void transformOrSplitAndPost(CommandEnvelope cmd, CommandBus bus) {
             checkNotNull(cmd);
             checkNotNull(bus);
-            List<? extends Message> messages = asMessages();
+            List<? extends CommandMessage> messages = asMessages();
             if (messages.size() == 1) {
                 Transform transform = transform(cmd).to(messages.get(0));
                 transform.post(bus);
@@ -122,7 +122,7 @@ public interface CommandingMethod<T,
         public void produceAndPost(EventEnvelope event, CommandBus bus) {
             checkNotNull(event);
             checkNotNull(bus);
-            List<? extends Message> messages = asMessages();
+            List<? extends CommandMessage> messages = asMessages();
             if (optional && messages.isEmpty()) {
                 return;
             }

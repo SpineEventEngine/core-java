@@ -40,17 +40,22 @@ public class DuplicateAggregate extends Aggregate<String, Any, AnyVBuilder> {
     }
 
     @Assign
-    public List<UInt64Value> handle(UInt64Value command) {
-        return singletonList(command);
+    public MessageSent handle(SendMessage command) {
+        return MessageSentVBuilder.newBuilder()
+                                  .setMessage(command.getMessage())
+                                  .build();
     }
 
     @Assign
-    public List<Any> on(Any command) {
-        return singletonList(command);
+    public List<VideoCallStarted> on(StartVideoCall command) {
+        return singletonList(VideoCallStarted.newBuilder()
+                                             .setIp(command.getIp())
+                                             .build());
     }
 
     @Assign
-    public void oneMore(Any cmd) {
+    public VideoCallStarted oneMore(StartVideoCall cmd) {
         // NoOp for test
+        return VideoCallStarted.getDefaultInstance();
     }
 }
