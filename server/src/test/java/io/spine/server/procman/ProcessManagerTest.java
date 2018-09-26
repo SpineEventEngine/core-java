@@ -304,6 +304,7 @@ class ProcessManagerTest {
             @Test
             @DisplayName("when splitting incoming command")
             void splitCommand() {
+                System.err.println("hello");
                 boundedContext.receivesCommand(cancelIteration())
                               .assertThat(emittedCommands(PmScheduleRetrospective.class,
                                                           PmPlanIteration.class));
@@ -417,7 +418,6 @@ class ProcessManagerTest {
          *
          * @see io.spine.server.procman.given.pm.DirectQuizProcman
          */
-        @MuteLogging
         @Test
         @DisplayName("for an either of three emitted upon handling a command")
         void afterEmittingEitherOfThreeOnCommandDispatch() {

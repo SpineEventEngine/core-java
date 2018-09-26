@@ -33,6 +33,7 @@ import io.spine.server.transport.GrpcContainer;
 import io.spine.test.commandservice.CmdServDontHandle;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.testlogging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -138,6 +139,7 @@ class CommandServiceTest {
 
     @Test
     @DisplayName("return error status if command is unsupported")
+    @MuteLogging
     void returnCommandUnsupportedError() {
         TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 

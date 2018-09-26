@@ -54,6 +54,7 @@ import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.testlogging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -283,6 +284,7 @@ class ProjectionRepositoryTest
 
     @Nested
     @DisplayName("not allow duplicate")
+    @MuteLogging
     class AvoidDuplicates {
 
         @Test
@@ -334,6 +336,7 @@ class ProjectionRepositoryTest
 
     @Test
     @DisplayName("log error when dispatching unknown event")
+    @MuteLogging
     void logErrorOnUnknownEvent() {
         Event event = GivenEvent.arbitrary();
 

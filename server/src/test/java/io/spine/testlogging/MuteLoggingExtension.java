@@ -20,6 +20,7 @@
 
 package io.spine.testlogging;
 
+import io.spine.annotation.Internal;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -29,35 +30,79 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 /**
- * A JUnit {@link org.junit.jupiter.api.extension.Extension Extension} which mutes all the logs from
- * failed command handling for a given test case.
+ * A JUnit {@link org.junit.jupiter.api.extension.Extension Extension} which mutes all the logs
+ * for a test case.
  *
+ * @see io.spine.testlogging.MuteLogging
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("UseOfSystemOutOrSystemErr")
+@Internal
 public final class MuteLoggingExtension implements BeforeEachCallback, AfterEachCallback {
 
-    private static final PrintStream stdOut = System.out;
-    private static final PrintStream stdErr = System.err;
-
-    private static final MemoizingStream memoizingStream = new MemoizingStream();
-    private static final PrintStream temporaryOutput = new PrintStream(memoizingStream);
+    private final MemoizingStream memoizingStream = new MemoizingStream();
+    private final PrintStream temporaryOutputStream = new PrintStream(memoizingStream);
+    private final ProgramOutput temporaryOutput = ProgramOutput.into(temporaryOutputStream);
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        System.setOut(temporaryOutput);
-        System.setErr(temporaryOutput);
+        if (isAnnotated(context)) {
+            mute();
+        }
     }
 
     @Override
     public void afterEach(ExtensionContext context) throws IOException {
-        System.setOut(stdOut);
-        System.setErr(stdErr);
+        if (isAnnotated(context)) {
+            unMute(context);
+        }
+    }
+
+    private void mute() {
+        temporaryOutput.install();
+    }
+
+    private void unMute(ExtensionContext context) throws IOException {
+        ProgramOutput standardOutput = ProgramOutput.fromSystem();
+        standardOutput.install();
         Optional<Throwable> exception = context.getExecutionException();
         if (exception.isPresent()) {
-            memoizingStream.flushTo(stdErr);
+            memoizingStream.flushTo(standardOutput.err);
         } else {
             memoizingStream.clear();
+        }
+    }
+
+    private static boolean isAnnotated(ExtensionContext context) {
+        boolean result = context.getElement()
+                                .map(element -> element.isAnnotationPresent(MuteLogging.class))
+                                .orElse(false);
+        return result;
+    }
+
+    private static final class ProgramOutput {
+
+        @SuppressWarnings("UseOfSystemOutOrSystemErr")
+        private static final ProgramOutput SYSTEM = new ProgramOutput(System.out, System.err);
+
+        private final PrintStream out;
+        private final PrintStream err;
+
+        private ProgramOutput(PrintStream out, PrintStream err) {
+            this.out = out;
+            this.err = err;
+        }
+
+        private static ProgramOutput into(PrintStream stream) {
+            return new ProgramOutput(stream, stream);
+        }
+
+        private static ProgramOutput fromSystem() {
+            return SYSTEM;
+        }
+
+        private void install() {
+            System.setOut(out);
+            System.setErr(err);
         }
     }
 }
