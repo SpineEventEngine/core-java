@@ -47,7 +47,6 @@ final class Element implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    @SuppressWarnings("NonSerializableFieldInSerializableClass") // possible values are serializable
     private Object value;
     private Type type;
 
