@@ -59,11 +59,11 @@ public class MuteLogging implements BeforeEachCallback, AfterEachCallback {
         LOG_TAGS.forEach(MuteLogging::enableLoggingFor);
     }
 
-    private static void disableLoggingFor(Class<?> logTag) {
+    public static void disableLoggingFor(Class<?> logTag) {
         substitute(logTag).setDelegate(NOP_LOGGER);
     }
 
-    private static void enableLoggingFor(Class<?> logTag) {
+    public static void enableLoggingFor(Class<?> logTag) {
         Logger actualLogger = LoggerFactory.getLogger(logTag);
         substitute(logTag).setDelegate(actualLogger);
     }
