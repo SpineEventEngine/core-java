@@ -25,13 +25,19 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
+ * An {@link OutputStream} which stores its input.
+ *
+ * <p>The stream stores all the given bytes in a {@link ByteBuffer}. The size of the buffer is
+ * exactly 1 MiB. If the steam is not {@linkplain #clear() cleared} before the buffer fills up,
+ * an {@link java.nio.BufferOverflowException} occurs.
+ *
  * @author Dmytro Dashenkov
  */
 final class MemoizingStream extends OutputStream {
 
-    private static final int ONE_MEGABYTE = 1024 * 1024;
+    private static final int ONE_MEBI_BYTE = 1024 * 1024;
 
-    private final ByteBuffer memory = ByteBuffer.allocate(ONE_MEGABYTE);
+    private final ByteBuffer memory = ByteBuffer.allocate(ONE_MEBI_BYTE);
 
     @Override
     public void write(int b) {
@@ -43,10 +49,19 @@ final class MemoizingStream extends OutputStream {
         }
     }
 
+    /**
+     * Clears the memoized input.
+     */
     void clear() {
         memory.clear();
     }
 
+    /**
+     * Copies the memoized input into the given stream and {@linkplain #clear() clears} memory.
+     *
+     * @param stream the target stream
+     * @throws IOException if the target stream throws an {@link IOException} on a write operation
+     */
     void flushTo(OutputStream stream) throws IOException {
         int entryCount = memory.position();
         for (int i = 0; i < entryCount; i++) {
