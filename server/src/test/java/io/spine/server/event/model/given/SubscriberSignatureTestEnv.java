@@ -39,11 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * @author Dmytro Dashenkov
+ * Test environment for {@link io.spine.server.event.model.declare.SubscriberSignatureTest}.
  */
 public class SubscriberSignatureTestEnv {
 
-    public static final String MESSAGE_ONLY = "messageOnly";
+    private static final String MESSAGE_ONLY = "messageOnly";
 
     /**
      * Prevents the utility class instantiation.
@@ -194,13 +194,20 @@ public class SubscriberSignatureTestEnv {
         }
 
         @Subscribe
-        private void throwsUncheckedException(ProjectAlreadyExists rejection)
-                throws IOException {
+        private void throwsUncheckedException(ProjectAlreadyExists rejection) throws IOException {
             IOException throwable = halt();
             throw throwable;
         }
 
+        /**
+         * Always fail a test.
+         *
+         * @param <T> generic parameter used for covariance of return type for failing a test
+         *            from methods that return a value
+         * @return nothing ever
+         */
         @CanIgnoreReturnValue
+        @SuppressWarnings("TypeParameterUnusedInFormals") // See Javadoc.
         private static <T> T halt() {
             return fail(SHOULD_NEVER_BE_CALLED);
         }
