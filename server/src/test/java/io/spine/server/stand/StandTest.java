@@ -568,11 +568,11 @@ class StandTest extends TenantAwareTest {
                         .build();
     }
 
-    private static final List<String> FIRST_NAMES = ImmutableList.of(
+    private static final ImmutableList<String> FIRST_NAMES = ImmutableList.of(
             "Emma", "Liam", "Mary", "John"
     );
 
-    private static final List<String> LAST_NAMES = ImmutableList.of(
+    private static final ImmutableList<String> LAST_NAMES = ImmutableList.of(
             "Smith", "Doe", "Steward", "Lee"
     );
 
