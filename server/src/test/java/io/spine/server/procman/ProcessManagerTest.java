@@ -304,7 +304,6 @@ class ProcessManagerTest {
             @Test
             @DisplayName("when splitting incoming command")
             void splitCommand() {
-                System.err.println("hello");
                 boundedContext.receivesCommand(cancelIteration())
                               .assertThat(emittedCommands(PmScheduleRetrospective.class,
                                                           PmPlanIteration.class));
