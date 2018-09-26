@@ -69,7 +69,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -701,7 +700,7 @@ public class AggregateTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
         // We're not interested in what dispatch() returns
-    @ExtendWith(MuteLogging.class)
+    @MuteLogging
     @Test
     @DisplayName("throw DuplicateCommandException for a duplicated command")
     void acknowledgeExceptionForDuplicateCommand() {

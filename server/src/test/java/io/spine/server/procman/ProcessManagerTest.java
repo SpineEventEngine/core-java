@@ -74,7 +74,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -418,7 +417,7 @@ class ProcessManagerTest {
          *
          * @see io.spine.server.procman.given.pm.DirectQuizProcman
          */
-        @ExtendWith(MuteLogging.class)
+        @MuteLogging
         @Test
         @DisplayName("for an either of three emitted upon handling a command")
         void afterEmittingEitherOfThreeOnCommandDispatch() {

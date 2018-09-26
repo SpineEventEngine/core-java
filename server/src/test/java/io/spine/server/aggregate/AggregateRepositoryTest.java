@@ -89,8 +89,6 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
-import static io.spine.testlogging.MuteLogging.disableLoggingFor;
-import static io.spine.testlogging.MuteLogging.enableLoggingFor;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -474,7 +472,8 @@ public class AggregateRepositoryTest {
     }
 
     @Nested
-    @ExtendWith({ShardingReset.class, MuteLogging.class})
+    @ExtendWith(ShardingReset.class)
+    @MuteLogging
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
@@ -598,12 +597,10 @@ public class AggregateRepositoryTest {
                                       .isArchived());
     }
 
-    @ExtendWith(MuteLogging.class)
     @Test
     @DisplayName("do nothing when event reaction fails")
+    @MuteLogging
     void doNothingWhenEventReactionFails() {
-        disableLoggingFor(FailingAggregateRepository.class);
-
         FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext().register(repository);
 
@@ -631,8 +628,6 @@ public class AggregateRepositoryTest {
         assertNotNull(lastErrorEnvelope);
         assertTrue(lastErrorEnvelope instanceof EventEnvelope);
         assertEquals(envelope.getMessage(), lastErrorEnvelope.getMessage());
-
-        enableLoggingFor(FailingAggregateRepository.class);
     }
 
     @Test
