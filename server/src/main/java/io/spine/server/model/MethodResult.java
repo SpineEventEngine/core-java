@@ -46,6 +46,11 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class MethodResult<V extends Message> {
 
+    /**
+     * The ignored message types.
+     *
+     * <p>Messages of these types should not be posted to the system.
+     */
     private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
             Nothing.getDefaultInstance(),
             Empty.getDefaultInstance()
@@ -77,9 +82,9 @@ public abstract class MethodResult<V extends Message> {
     }
 
     /**
-     * Filters the list removing instances of {@link Empty}.
+     * Filters the list removing instances of the {@linkplain #IGNORED_MESSAGES ignored types}.
      */
-    protected static <M extends Message> List<M> filterEmpty(List<M> messages) {
+    protected static <M extends Message> List<M> filterIgnored(List<M> messages) {
         List<M> result = messages.stream()
                                  .filter(message -> !IGNORED_MESSAGES.contains(message))
                                  .collect(toList());
