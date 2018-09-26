@@ -20,20 +20,38 @@
 
 package io.spine.testlogging;
 
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
- * Mutes all the logging for a certain test case or test suite.
- *
  * @author Dmytro Dashenkov
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(MuteLoggingExtension.class)
-public @interface MuteLogging {
+final class MemoizingStream extends OutputStream {
+
+    private static final int ONE_MEGABYTE = 1024 * 1024;
+
+    private final ByteBuffer memory = ByteBuffer.allocate(ONE_MEGABYTE);
+
+    @Override
+    public void write(int b) {
+        if (b >= 0) {
+            @SuppressWarnings("NumericCastThatLosesPrecision")
+                // Adheres to the OutputStream contract.
+            byte byteValue = (byte) b;
+            memory.put(byteValue);
+        }
+    }
+
+    void clear() {
+        memory.clear();
+    }
+
+    void flushTo(OutputStream stream) throws IOException {
+        int entryCount = memory.position();
+        for (int i = 0; i < entryCount; i++) {
+            byte byteValue = memory.get(i);
+            stream.write(byteValue);
+        }
+    }
 }
