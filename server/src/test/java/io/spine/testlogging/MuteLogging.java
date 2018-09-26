@@ -30,6 +30,12 @@ import java.lang.annotation.Target;
 /**
  * Mutes all the logging for a certain test case or test suite.
  *
+ * <p>Any kind of output into the standard output streams is blocked by this annotation.
+ *
+ * <p>If the test fails, the output is printed into the standard error stream.
+ *
+ * <p>After the test completes, the standard output capabilities are restored.
+ *
  * @author Dmytro Dashenkov
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
