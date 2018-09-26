@@ -80,7 +80,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      */
     @CanIgnoreReturnValue
     static @Nullable <M extends Message, T extends Tuple>
-    @Nullable M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
+    M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
         if (value == null) {
             return null;
         }

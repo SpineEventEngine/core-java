@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides model classes for {@link io.spine.server.aggregate}.
+ * This package provides model classes for the {@code io.spine.server.aggregate} package.
  */
 @Internal
 @CheckReturnValue

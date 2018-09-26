@@ -32,8 +32,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A rudimentary implementation of {@link MessageEnvelope} with the sole purpose
- * of setting {@link EventContext.Builder#setImportContext(ActorContext) import context}
- * in events created for import into system aggregates.
+ * of setting {@link io.spine.core.EventContext.Builder#setImportContext(ActorContext)
+ * import context} in events created for import into system aggregates.
  *
  * @author Alexander Yevsyukov
  */
