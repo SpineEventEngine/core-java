@@ -20,9 +20,11 @@
 package io.spine.server.projection;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
@@ -126,14 +128,14 @@ class ProjectionTransactionTest
     }
 
     @Override
-    protected Message createEventMessage() {
+    protected EventMessage createEventMessage() {
         return PrjProjectCreated.newBuilder()
                                 .setProjectId(ID)
                                 .build();
     }
 
     @Override
-    protected Message createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventMessageThatFailsInHandler() {
         return PrjTaskAdded.newBuilder()
                            .setProjectId(ID)
                            .build();
@@ -161,7 +163,7 @@ class ProjectionTransactionTest
     void incrementVersionOnEvent() {
         Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
         Version oldVersion = entity.getVersion();
-        Event event = createEvent(createEventMessage());
+        Event event = GivenEvent.withMessage(createEventMessage());
         Projection.playOn(entity, Collections.singleton(event));
         Version expected = Versions.increment(oldVersion);
         assertEquals(expected.getNumber(), entity.getVersion()

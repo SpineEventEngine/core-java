@@ -21,7 +21,7 @@
 package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.core.Events;
 
@@ -41,12 +41,12 @@ final class EventProducers {
     /**
      * Obtains an event producer ID from the context of the event.
      */
-    static final class FromContext<I> implements EventRoute<I, Message> {
+    static final class FromContext<I> implements EventRoute<I, EventMessage> {
 
         private static final long serialVersionUID = 0L;
 
         @Override
-        public Set<I> apply(Message message, EventContext context) {
+        public Set<I> apply(EventMessage message, EventContext context) {
             @SuppressWarnings("unchecked") // The route creator is responsible for the type check.
             I id = (I) Events.getProducer(context);
             return ImmutableSet.of(id);
@@ -61,14 +61,14 @@ final class EventProducers {
     /**
      * The route that obtains a producer ID from the first field of the event message.
      */
-    static final class FromFirstMessageField<I> implements EventRoute<I, Message> {
+    static final class FromFirstMessageField<I> implements EventRoute<I, EventMessage> {
 
         private static final long serialVersionUID = 0L;
 
         private final FromEventMessage<I> func = FromEventMessage.fieldAt(0);
 
         @Override
-        public Set<I> apply(Message message, EventContext context) {
+        public Set<I> apply(EventMessage message, EventContext context) {
             I id = func.apply(message, context);
             return ImmutableSet.of(id);
         }
@@ -82,7 +82,7 @@ final class EventProducers {
     /**
      * Obtains an event producer ID from a field of an event message.
      */
-    static final class FromEventMessage<I> extends FieldAtIndex<I, Message, EventContext> {
+    static final class FromEventMessage<I> extends FieldAtIndex<I, EventMessage, EventContext> {
 
         private static final long serialVersionUID = 0L;
 

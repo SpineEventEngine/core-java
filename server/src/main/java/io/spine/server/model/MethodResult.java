@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -44,6 +45,16 @@ import static java.util.stream.Collectors.toList;
  * @author Alexander Yevsyukov
  */
 public abstract class MethodResult<V extends Message> {
+
+    /**
+     * The ignored message types.
+     *
+     * <p>Messages of these types should not be posted to the system.
+     */
+    private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
+            Nothing.getDefaultInstance(),
+            Empty.getDefaultInstance()
+    );
 
     private final @Nullable Object rawMethodOutput;
     private @MonotonicNonNull ImmutableList<V> messages;
@@ -71,14 +82,12 @@ public abstract class MethodResult<V extends Message> {
     }
 
     /**
-     * Filters the list removing instances of {@link Empty}.
+     * Filters the list removing instances of the {@linkplain #IGNORED_MESSAGES ignored types}.
      */
-    protected static <M extends Message> List<M> filterEmpty(List<M> messages) {
-        Message empty = Empty.getDefaultInstance();
-        List<M> result =
-                messages.stream()
-                        .filter(message -> !empty.equals(message))
-                        .collect(toList());
+    protected static <M extends Message> List<M> filterIgnored(List<M> messages) {
+        List<M> result = messages.stream()
+                                 .filter(message -> !IGNORED_MESSAGES.contains(message))
+                                 .collect(toList());
         return result;
     }
 
@@ -108,7 +117,7 @@ public abstract class MethodResult<V extends Message> {
      * @return the list of event messages or an empty list if {@code null} is passed
      */
     @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
-    protected static List<Message> toMessages(@Nullable Object output) {
+    protected static <V extends Message> List<V> toMessages(@Nullable Object output) {
         if (output == null) {
             return emptyList();
         }
@@ -125,7 +134,7 @@ public abstract class MethodResult<V extends Message> {
         if (output instanceof Optional) {
             Optional optional = (Optional) output;
             if (optional.isPresent()) {
-                Message message = (Message) optional.get();
+                V message = (V) optional.get();
                 return ImmutableList.of(message);
             } else {
                 return emptyList();
@@ -135,17 +144,19 @@ public abstract class MethodResult<V extends Message> {
         if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
-            List<Message> result = (List<Message>) output;
+            List<V> result = (List<V>) output;
             return result;
         }
 
         // If it's not a list it could be another `Iterable`.
         if (output instanceof Iterable) {
-            return copyOf((Iterable<? extends Message>) output);
+            Iterable<V> iterable = (Iterable<V>) output;
+            return copyOf(iterable);
         }
 
         // Another type of result is single event message (as Message).
-        List<Message> result = singletonList((Message) output);
+        V singleMessage = (V) output;
+        List<V> result = singletonList(singleMessage);
         return result;
     }
 

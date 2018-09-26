@@ -23,6 +23,7 @@ package io.spine.testing.server;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Ack;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -195,7 +196,7 @@ public abstract class MessageHandlerTest<I,
         Class<?> cls = type.getJavaClass();
         if (Message.class.isAssignableFrom(cls)) {
             @SuppressWarnings("unchecked")
-            Class<? extends Message> messageType = (Class<? extends Message>) cls;
+            Class<? extends CommandMessage> messageType = (Class<? extends CommandMessage>) cls;
             CommandClass commandClass = CommandClass.from(messageType);
             return of(commandClass);
         } else {
@@ -246,7 +247,7 @@ public abstract class MessageHandlerTest<I,
 
         @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            log().error("Error while dispatching a command during the unit test");
+            _error("Error while dispatching a command during the unit test");
         }
     }
 

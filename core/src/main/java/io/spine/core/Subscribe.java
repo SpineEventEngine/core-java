@@ -31,30 +31,30 @@ import java.lang.annotation.Target;
  *
  * <p>Use it to subscribe to either events or business rejections
  *
- * <h2>Subscribing to Events</h2>
+ * <h1>Subscribing to Events</h1>
  *
  * <p>An event subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
  *     <li>is {@code public};
  *     <li>returns {@code void};
- *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
+ *     <li>accepts an event derived from {@link io.spine.base.EventMessage EventMessage}
  *          as the first parameter;
  *     <li>(optional) accepts an {@link io.spine.core.EventContext EventContext}
  *          as the second parameter.
  * </ul>
  *
- * <h2>Subscribing to Rejections</h2>
+ * <h1>Subscribing to Rejections</h1>
  *
  * <p>A rejection subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
  *     <li>is {@code public};
  *     <li>returns {@code void};
- *     <li>accepts a rejection message derived from {@link com.google.protobuf.Message Message}
- *          as the first parameter;
- *     <li>(optional) accepts a command derived from {@link com.google.protobuf.Message Message}
- *          as the second parameter;
+ *     <li>accepts a rejection message derived from {@link io.spine.base.RejectionMessage
+ *         RejectionMessage} as the first parameter;
+ *     <li>(optional) accepts a command derived from {@link io.spine.base.CommandMessage
+ *         CommandMessage} as the second parameter;
  *     <li>(optional) accepts an {@link io.spine.core.CommandContext CommandContext}
  *          as the second or the third parameter.
  * </ul>

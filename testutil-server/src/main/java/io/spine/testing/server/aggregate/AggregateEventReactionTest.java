@@ -21,6 +21,7 @@
 package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
@@ -40,7 +41,7 @@ import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispa
  * @author Dmytro Dashenkov
  */
 public abstract class AggregateEventReactionTest<I,
-                                                 E extends Message,
+                                                 E extends EventMessage,
                                                  S extends Message,
                                                  A extends Aggregate<I, S, ?>>
         extends EventReactionTest<I, E, S, A> {

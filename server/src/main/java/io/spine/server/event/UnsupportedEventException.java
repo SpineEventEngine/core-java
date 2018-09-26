@@ -21,6 +21,7 @@ package io.spine.server.event;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.server.bus.MessageUnhandled;
@@ -38,7 +39,7 @@ public class UnsupportedEventException extends EventException implements Message
 
     private static final long serialVersionUID = 0L;
 
-    public UnsupportedEventException(Message eventMsg) {
+    public UnsupportedEventException(EventMessage eventMsg) {
         super(messageFormat(eventMsg), eventMsg, unsupportedEventError(eventMsg));
     }
 

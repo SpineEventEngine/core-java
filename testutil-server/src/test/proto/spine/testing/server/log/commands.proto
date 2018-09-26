@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package spine.testing.server.log;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.testing.server.log";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+message LogInteger {
+    uint32 value = 1;
+}

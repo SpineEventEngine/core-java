@@ -24,7 +24,7 @@ import com.google.protobuf.Empty;
 import io.spine.core.Subscribe;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.system.server.EntityCreated;
-import io.spine.test.delivery.SewProjectCraeted;
+import io.spine.test.delivery.SewProjectCreated;
 import io.spine.type.TypeUrl;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -47,7 +47,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe
-        public void on(SewProjectCraeted domesticEvent) {
+        public void on(SewProjectCreated domesticEvent) {
             fail("Domestic events are not allowed in SystemEventWatchers.");
         }
     }
@@ -59,7 +59,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(SewProjectCraeted externalEvent) {
+        public void on(SewProjectCreated externalEvent) {
             fail("Only spine.system.server events are allowed.");
         }
     }

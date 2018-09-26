@@ -22,7 +22,8 @@ package io.spine.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.client.CommandFactory;
 import io.spine.client.Query;
 import io.spine.core.Command;
@@ -60,7 +61,7 @@ final class DefaultSystemGateway implements SystemGateway {
     }
 
     @Override
-    public void postCommand(Message systemCommand) {
+    public void postCommand(CommandMessage systemCommand) {
         checkNotNull(systemCommand);
         CommandFactory commandFactory = SystemCommandFactory.newInstance(system.isMultitenant());
         Command command = commandFactory.create(systemCommand);
@@ -69,7 +70,7 @@ final class DefaultSystemGateway implements SystemGateway {
     }
 
     @Override
-    public void postEvent(Message systemEvent) {
+    public void postEvent(EventMessage systemEvent) {
         checkNotNull(systemEvent);
         SystemEventFactory factory = SystemEventFactory.forMessage(systemEvent,
                                                                    system.isMultitenant());

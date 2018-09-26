@@ -21,6 +21,7 @@
 package io.spine.testing.server;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
@@ -40,13 +41,13 @@ import java.util.List;
  * </ol>
  *
  * @param <I> ID message of the command and the handling entity
- * @param <M> the type of the command message to test
+ * @param <M> the type of the event message to test
  * @param <S> state message of the handling entity
  * @param <E> the type of the {@link CommandHandlingEntity} being tested
  * @author Dmytro Dashenkov
  */
 public abstract class EventReactionTest<I,
-                                        M extends Message,
+                                        M extends EventMessage,
                                         S extends Message,
                                         E extends CommandHandlingEntity<I, S, ?>>
         extends MessageHandlerTest<I, M, S, E, EventReactorExpected<S>> {

@@ -18,20 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
-
-import com.google.protobuf.Empty;
-import io.spine.server.command.Assign;
-import io.spine.test.reflect.command.RefCreateProject;
-
 /**
- * Provides a handler method that returns {@link Empty}.
- *
- * @author Alexander Yevsyukov
+ * Utilities for working with logs in the test environment.
  */
-public class HandlerReturnsEmpty extends TestCommandHandler {
-    @Assign
-    Empty handleTest(RefCreateProject cmd) {
-        return Empty.getDefaultInstance();
-    }
-}
+
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testlogging;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

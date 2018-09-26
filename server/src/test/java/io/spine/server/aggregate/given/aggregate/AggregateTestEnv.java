@@ -20,7 +20,8 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -85,21 +86,21 @@ public class AggregateTestEnv {
                               .build();
     }
 
-    public static Command command(Message commandMessage, TenantId tenantId) {
+    public static Command command(CommandMessage commandMessage, TenantId tenantId) {
         return requestFactory(tenantId).command()
                                        .create(commandMessage);
     }
 
-    public static Command command(Message commandMessage) {
+    public static Command command(CommandMessage commandMessage) {
         return requestFactory().command()
                                .create(commandMessage);
     }
 
-    public static CommandEnvelope env(Message commandMessage) {
+    public static CommandEnvelope env(CommandMessage commandMessage) {
         return CommandEnvelope.of(command(commandMessage));
     }
 
-    public static Event event(Message eventMessage, int versionNumber) {
+    public static Event event(EventMessage eventMessage, int versionNumber) {
         return eventFactory().createEvent(eventMessage, withNumber(versionNumber));
     }
 

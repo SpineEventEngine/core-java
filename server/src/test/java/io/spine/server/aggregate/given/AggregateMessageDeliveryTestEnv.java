@@ -21,6 +21,7 @@ package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -33,7 +34,6 @@ import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.event.React;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCancelProject;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectStarted;
@@ -102,7 +102,7 @@ public class AggregateMessageDeliveryTestEnv {
                         .build();
     }
 
-    private static Command createCommand(Message cmdMessage) {
+    private static Command createCommand(CommandMessage cmdMessage) {
         Command result = TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
                                                 .createCommand(cmdMessage);
         return result;
@@ -162,9 +162,7 @@ public class AggregateMessageDeliveryTestEnv {
             extends AggregateRepository<ProjectId, DeliveryProject> {
         public SingleShardProjectRepository() {
             super();
-            getEventRouting().route(AggCancelProject.class,
-                                    (message, context) -> of(message.getProjectId()))
-                             .route(AggCannotStartArchivedProject.class,
+            getEventRouting().route(AggCannotStartArchivedProject.class,
                                     (message, context) -> of(message.getProjectId()));
         }
 
@@ -175,9 +173,7 @@ public class AggregateMessageDeliveryTestEnv {
 
         public TripleShardProjectRepository() {
             super();
-            getEventRouting().route(AggCancelProject.class,
-                                    (message, context) -> of(message.getProjectId()))
-                             .route(AggCannotStartArchivedProject.class,
+            getEventRouting().route(AggCannotStartArchivedProject.class,
                                     (message, context) -> of(message.getProjectId()));
 
         }

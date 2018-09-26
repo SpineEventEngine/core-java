@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
@@ -78,21 +79,21 @@ class CommandDispatcherRegistryTest {
     }
 
     @SafeVarargs
-    private final void assertSupported(Class<? extends Message>... cmdClasses) {
+    private final void assertSupported(Class<? extends CommandMessage>... cmdClasses) {
         Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
 
-        for (Class<? extends Message> clazz : cmdClasses) {
-            CommandClass cmdClass = CommandClass.from(clazz);
+        for (Class<? extends CommandMessage> cls : cmdClasses) {
+            CommandClass cmdClass = CommandClass.from(cls);
             assertTrue(supportedClasses.contains(cmdClass));
         }
     }
 
     @SafeVarargs
-    private final void assertNotSupported(Class<? extends Message>... cmdClasses) {
+    private final void assertNotSupported(Class<? extends CommandMessage>... cmdClasses) {
         Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
 
-        for (Class<? extends Message> clazz : cmdClasses) {
-            CommandClass cmdClass = CommandClass.from(clazz);
+        for (Class<? extends CommandMessage> cls : cmdClasses) {
+            CommandClass cmdClass = CommandClass.from(cls);
             assertFalse(supportedClasses.contains(cmdClass));
         }
     }

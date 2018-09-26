@@ -20,14 +20,14 @@
 
 package io.spine.server.event.given;
 
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.FloatValue;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.test.event.FailRequested;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectStarted;
+import io.spine.test.event.TaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -47,26 +47,26 @@ public class EventSubscriberTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        void on(BoolValue message, EventContext context) {
+        void on(FailRequested message, EventContext context) {
             methodCalled = true;
-            if (!message.getValue()) {
+            if (!message.getShouldFail()) {
                 throw new UnsupportedOperationException("Do not want false messages!");
             }
         }
 
         @Subscribe
-        void on(FloatValue message) {
+        void on(ProjectCreated message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe
-        void on(UInt32Value message) {
+        void on(ProjectStarted message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe(external = true)
-        void on(StringValue message) {
-
+        void on(TaskAdded message) {
+            // Do nothing. Just expose the method.
         }
 
         public boolean isMethodCalled() {

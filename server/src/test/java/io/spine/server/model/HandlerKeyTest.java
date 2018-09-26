@@ -22,9 +22,9 @@ package io.spine.server.model;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
 import io.spine.core.CommandClass;
 import io.spine.core.EmptyClass;
+import io.spine.test.model.contexts.tasks.commands.CreateTask;
 import io.spine.type.MessageClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HandlerKeyTest {
 
     private final MessageClass emptyClass = EmptyClass.instance();
-    private final CommandClass stringClass = CommandClass.from(StringValue.class);
+    private final CommandClass commandClass = CommandClass.from(CreateTask.class);
 
     @Test
     @DisplayName("not accept nulls on construction")
@@ -52,7 +52,7 @@ class HandlerKeyTest {
     @Test
     @DisplayName("return class of Empty if there is no origin")
     void getEmptyClassWhenNoOrigin() {
-        CommandClass handledMessage = stringClass;
+        CommandClass handledMessage = commandClass;
         HandlerKey key = HandlerKey.of(handledMessage);
         assertEquals(handledMessage, key.getHandledMessageCls());
         assertEquals(emptyClass, key.getOriginCls());
@@ -61,9 +61,9 @@ class HandlerKeyTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        HandlerKey first = HandlerKey.of(stringClass);
-        HandlerKey second = HandlerKey.of(stringClass, stringClass);
-        HandlerKey third = HandlerKey.of(emptyClass, stringClass);
+        HandlerKey first = HandlerKey.of(commandClass);
+        HandlerKey second = HandlerKey.of(commandClass, commandClass);
+        HandlerKey third = HandlerKey.of(emptyClass, commandClass);
 
         new EqualsTester().addEqualityGroup(first)
                           .addEqualityGroup(second)

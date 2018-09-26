@@ -23,6 +23,7 @@ package io.spine.core;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.type.MessageClass;
 
 import java.util.Arrays;
@@ -35,11 +36,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandClass extends MessageClass<Message> {
+public final class CommandClass extends MessageClass<CommandMessage> {
 
     private static final long serialVersionUID = 0L;
 
-    private CommandClass(Class<? extends Message> value) {
+    private CommandClass(Class<? extends CommandMessage> value) {
         super(value);
     }
 
@@ -49,7 +50,7 @@ public final class CommandClass extends MessageClass<Message> {
      * @param value class reference
      * @return new instance
      */
-    public static CommandClass from(Class<? extends Message> value) {
+    public static CommandClass from(Class<? extends CommandMessage> value) {
         return new CommandClass(checkNotNull(value));
     }
 
@@ -66,14 +67,14 @@ public final class CommandClass extends MessageClass<Message> {
      * @return new instance
      */
     public static CommandClass of(Message commandOrMessage) {
-        Message commandMessage = Commands.ensureMessage(commandOrMessage);
+        CommandMessage commandMessage = Commands.ensureMessage(commandOrMessage);
         return from(commandMessage.getClass());
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */
-    public static Set<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
+    public static Set<CommandClass> setOf(Iterable<Class<? extends CommandMessage>> classes) {
         ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
-        for (Class<? extends Message> cls : classes) {
+        for (Class<? extends CommandMessage> cls : classes) {
             builder.add(from(cls));
         }
         return builder.build();
@@ -81,7 +82,7 @@ public final class CommandClass extends MessageClass<Message> {
 
     /** Creates immutable set of {@code CommandClass} from the passed classes. */
     @SafeVarargs
-    public static Set<CommandClass> setOf(Class<? extends Message>... classes) {
+    public static Set<CommandClass> setOf(Class<? extends CommandMessage>... classes) {
         return setOf(Arrays.asList(classes));
     }
 }

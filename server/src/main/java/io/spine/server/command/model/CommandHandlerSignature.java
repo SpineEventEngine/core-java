@@ -20,6 +20,8 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableSet;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Assign;
 import io.spine.server.model.declare.ParameterSpec;
@@ -35,6 +37,11 @@ public class CommandHandlerSignature extends CommandAcceptingMethodSignature<Com
 
     public CommandHandlerSignature() {
         super(Assign.class);
+    }
+
+    @Override
+    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+        return ImmutableSet.of(EventMessage.class, Iterable.class);
     }
 
     @Override

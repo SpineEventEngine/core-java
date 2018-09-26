@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
@@ -65,10 +64,10 @@ public class Given {
         }
 
         /**
-         * Creates a new {@link ACommand} with the given command message,
-         * serId and timestamp using default {@link ACommand} instance.
+         * Creates a new {@code ACommand} with the given command message,
+         * serId and timestamp using default {@code ACommand} instance.
          */
-        private static Command create(Message command, UserId userId,
+        private static Command create(io.spine.base.CommandMessage command, UserId userId,
                                       Timestamp when) {
             TenantId generatedTenantId = TenantId.newBuilder()
                                                  .setValue(newUuid())
@@ -79,7 +78,7 @@ public class Given {
             return result;
         }
 
-        public static Command withMessage(Message message) {
+        public static Command withMessage(io.spine.base.CommandMessage message) {
             return create(message, USER_ID, getCurrentTime());
         }
 
@@ -107,7 +106,7 @@ public class Given {
             return create(command, USER_ID, getCurrentTime());
         }
 
-        /** Creates a new {@link ACommand} with default properties (current time etc). */
+        /** Creates a new {@code ACommand} with default properties (current time etc). */
         public static Command createProject() {
             return createProject(getCurrentTime());
         }

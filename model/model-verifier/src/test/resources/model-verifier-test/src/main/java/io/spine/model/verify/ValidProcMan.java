@@ -21,9 +21,6 @@
 package io.spine.model.verify;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.FloatValue;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt64Value;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
 import io.spine.validate.AnyVBuilder;
@@ -46,7 +43,9 @@ public class ValidProcMan extends ProcessManager<String, Any, AnyVBuilder> {
     }
 
     @Assign
-    List<UInt64Value> handle(UInt64Value command) {
-        return singletonList(command);
+    List<VideoCallStarted> handle(StartVideoCall command) {
+        return singletonList(VideoCallStarted.newBuilder()
+                                             .setIp(command.getIp())
+                                             .build());
     }
 }

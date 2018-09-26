@@ -43,7 +43,7 @@ public interface ParameterSpec<E extends MessageEnvelope<?, ?, ?>> {
 
     /**
      * Tells if the given {@code methodParams} are matched against this instance of
-     * {@code ParameterSpec}
+     * {@code ParameterSpec}.
      *
      * @param methodParams
      *         the method parameters to match

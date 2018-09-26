@@ -21,6 +21,7 @@
 package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
 
@@ -35,7 +36,7 @@ import io.spine.server.aggregate.AggregateRoot;
  * @author Dmytro Dashenkov
  */
 public abstract class AggregatePartCommandTest<I,
-                                               C extends Message,
+                                               C extends CommandMessage,
                                                S extends Message,
                                                P extends AggregatePart<I, S, ?, R>,
                                                R extends AggregateRoot<I>>

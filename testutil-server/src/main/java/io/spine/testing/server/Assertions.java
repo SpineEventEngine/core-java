@@ -21,6 +21,9 @@
 package io.spine.testing.server;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
@@ -49,7 +52,7 @@ public class Assertions {
      */
     @SafeVarargs
     public static void assertCommandClasses(Collection<CommandClass> expected,
-                                            Class<? extends Message>... commandClass) {
+                                            Class<? extends CommandMessage>... commandClass) {
         assertContains(expected, CommandClass::from, commandClass);
     }
 
@@ -58,7 +61,7 @@ public class Assertions {
      */
     @SafeVarargs
     public static void assertEventClasses(Collection<EventClass> expected,
-                                          Class<? extends Message>... eventClass) {
+                                          Class<? extends EventMessage>... eventClass) {
         assertContains(expected, EventClass::from, eventClass);
     }
 
@@ -67,20 +70,22 @@ public class Assertions {
      */
     @SafeVarargs
     public static void assertRejectionClasses(Collection<RejectionClass> expected,
-                                              Class<? extends Message>... rejectionClass) {
+                                              Class<? extends RejectionMessage>... rejectionClass) {
         assertContains(expected, RejectionClass::of, rejectionClass);
     }
 
     @SafeVarargs
-    private static <C extends MessageClass>
+    private static <C extends MessageClass, M extends Message>
     void assertContains(Collection<C> expected,
-                        Function<Class<? extends Message>, C> func,
-                        Class<? extends Message>...classes) {
+                        Function<Class<M>, C> func,
+                        Class<? extends M>...classes) {
         checkNotNull(expected);
         checkNotNull(classes);
-        for (Class<? extends Message> cls : classes) {
+        for (Class<? extends M> cls : classes) {
             assertNotNull(cls);
-            C messageClass = func.apply(cls);
+            @SuppressWarnings("unchecked") // OK for tests.
+            Class<M> messageType = (Class<M>) cls;
+            C messageClass = func.apply(messageType);
             assertTrue(expected.contains(messageClass));
         }
     }

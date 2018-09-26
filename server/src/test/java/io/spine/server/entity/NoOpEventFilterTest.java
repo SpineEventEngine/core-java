@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.Events;
 import io.spine.protobuf.AnyPacker;
@@ -40,7 +41,6 @@ import java.util.stream.Stream;
 
 import static io.spine.base.Identifier.newUuid;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -87,22 +87,22 @@ class NoOpEventFilterTest {
                 .setId(newUuid())
                 .build();
         Stream<Event> result =
-                of(EntProjectCreated
-                           .newBuilder()
-                           .setProjectId(projectId)
-                           .build(),
-                   EntProjectStarted
-                           .newBuilder()
-                           .setProjectId(projectId)
-                           .build(),
-                   EntTaskAdded
-                           .newBuilder()
-                           .setProjectId(projectId)
-                           .build(),
-                   StandardRejections.EntityAlreadyArchived
-                           .newBuilder()
-                           .setEntityId(AnyPacker.pack(projectId))
-                           .build())
+                Stream.<EventMessage>of(EntProjectCreated
+                                                .newBuilder()
+                                                .setProjectId(projectId)
+                                                .build(),
+                                        EntProjectStarted
+                                                .newBuilder()
+                                                .setProjectId(projectId)
+                                                .build(),
+                                        EntTaskAdded
+                                                .newBuilder()
+                                                .setProjectId(projectId)
+                                                .build(),
+                                        StandardRejections.EntityAlreadyArchived
+                                                .newBuilder()
+                                                .setEntityId(AnyPacker.pack(projectId))
+                                                .build())
                         .map(eventFactory::createEvent);
         return result;
     }

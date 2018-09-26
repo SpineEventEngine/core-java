@@ -21,10 +21,10 @@
 package io.spine.server.command;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Errors;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.logging.Logging;
@@ -151,7 +151,7 @@ public final class CommandErrorHandler implements Logging {
         postSystem(systemEvent);
     }
 
-    private void postSystem(Message systemEvent) {
+    private void postSystem(EventMessage systemEvent) {
         systemGateway.postEvent(systemEvent);
     }
 }

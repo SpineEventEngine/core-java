@@ -20,7 +20,8 @@
 
 package io.spine.server.command;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.client.CommandFactory;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
@@ -35,7 +36,6 @@ import io.spine.test.command.ProjectId;
 import io.spine.test.command.Task;
 import io.spine.test.command.TaskId;
 import io.spine.test.command.event.CmdTaskAdded;
-import io.spine.testing.TestValues;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,13 +119,13 @@ class AbstractCommanderTest {
 
     }
 
-    private void createCommandAndPost(Message commandMessage) {
+    private void createCommandAndPost(CommandMessage commandMessage) {
         io.spine.core.Command command = commandFactory.create(commandMessage);
         boundedContext.getCommandBus()
                       .post(command, StreamObservers.noOpObserver());
     }
 
-    private void createEventAndPost(Message eventMessage) {
+    private void createEventAndPost(EventMessage eventMessage) {
         io.spine.core.Event event = eventFactory.createEvent(eventMessage, null);
         boundedContext.getEventBus()
                       .post(event);

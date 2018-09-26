@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
@@ -42,6 +43,7 @@ import io.spine.system.server.given.command.CompanyNameProcman;
 import io.spine.system.server.given.command.CompanyNameProcmanRepo;
 import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testlogging.MuteLogging;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -154,6 +156,7 @@ class CommandLifecycleTest {
 
         @Test
         @DisplayName("causes a runtime exception")
+        @MuteLogging
         void errored() {
             StartCompanyEstablishing start = StartCompanyEstablishing
                     .newBuilder()
@@ -264,7 +267,7 @@ class CommandLifecycleTest {
             assertEquals(expectedType, rejectionType);
         }
 
-        private CommandId postCommand(Message commandMessage) {
+        private CommandId postCommand(CommandMessage commandMessage) {
             Command command = requestFactory.createCommand(commandMessage);
             return postBuiltCommand(command);
         }

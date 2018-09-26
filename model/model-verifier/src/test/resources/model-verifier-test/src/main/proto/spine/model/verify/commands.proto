@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package spine.model.verify;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.model.verify";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+import "spine/net/url.proto";
+
+message SendMessage {
+    string message = 1;
+}
+
+message StartVideoCall {
+    string ip = 1;
+}
+
+message SendLink {
+    spine.net.Url link = 1;
+}

@@ -22,18 +22,19 @@ package io.spine.server.procman;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.model.Nothing;
 import io.spine.server.procman.given.pm.AddTaskDispatcher;
 import io.spine.server.procman.given.pm.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
@@ -42,6 +43,7 @@ import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
+import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmPlanIteration;
@@ -66,6 +68,7 @@ import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.InjectCommandBus;
 import io.spine.testing.server.tenant.TenantAwareTest;
+import io.spine.testlogging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -149,7 +152,7 @@ class ProcessManagerTest {
     }
 
     @CanIgnoreReturnValue
-    private List<? extends Message> testDispatchEvent(Message eventMessage) {
+    private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
         assertEquals(pack(eventMessage), processManager.getState());
@@ -157,7 +160,7 @@ class ProcessManagerTest {
     }
 
     @CanIgnoreReturnValue
-    private List<Event> testDispatchCommand(Message commandMsg) {
+    private List<Event> testDispatchCommand(CommandMessage commandMsg) {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
@@ -205,7 +208,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("rejection message only")
         void rejectionMessage() {
-            RejectionEnvelope rejection = entityAlreadyArchived(StringValue.class);
+            RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
             dispatch(processManager, rejection.getEvent());
             assertEquals(rejection.getOuterObject().getMessage(),
                          processManager.getState());
@@ -334,12 +337,9 @@ class ProcessManagerTest {
         @Test
         @DisplayName("command")
         void command() {
-            Int32Value unknownCommand = Int32Value.getDefaultInstance();
-
             CommandEnvelope envelope = CommandEnvelope.of(
-                    requestFactory.createCommand(unknownCommand)
+                    requestFactory.createCommand(PmDontHandle.getDefaultInstance())
             );
-
             assertThrows(IllegalStateException.class,
                          () -> processManager.dispatchCommand(envelope));
         }
@@ -347,22 +347,21 @@ class ProcessManagerTest {
         @Test
         @DisplayName("event")
         void event() {
-            StringValue unknownEvent = StringValue.getDefaultInstance();
-            EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(unknownEvent));
+            EventEnvelope envelope = EventEnvelope.of(GivenEvent.arbitrary());
 
             assertThrows(IllegalStateException.class, () -> dispatch(processManager, envelope));
         }
     }
 
     @Nested
-    @DisplayName("not create an empty event")
+    @DisplayName("not create `Nothing` event")
     class NoEmpty {
 
         /**
          * This test executes two commands, thus checks for 2 Acks:
          * <ol>
-         * <li>{@link PmStartQuiz Start Quiz} — to start the process;
-         * <li>{@link PmAnswerQuestion Answer Question } — a target
+         *     <li>{@link PmStartQuiz Start Quiz} — to start the process;
+         *     <li>{@link PmAnswerQuestion Answer Question } — a target
          * command that produces either of 3 events.
          * </ol>
          *
@@ -374,7 +373,7 @@ class ProcessManagerTest {
          *
          * <p>As a reaction to {@link PmQuestionAnswered Quiestion Answered}
          * the process manager emits an {@link io.spine.server.tuple.EitherOfThree Either Of Three}
-         * containing {@link com.google.protobuf.Empty Empty}. This is done because the answered
+         * containing {@link Nothing}. This is done because the answered
          * question is not part of a quiz.
          *
          * @see io.spine.server.procman.given.pm.QuizProcman
@@ -395,15 +394,15 @@ class ProcessManagerTest {
                     .assertThat(emittedEvent(twice()))
                     .assertThat(emittedEvents(PmQuizStarted.class))
                     .assertThat(emittedEvents(PmQuestionAnswered.class))
-                    .assertThat(emittedEvent(Empty.class, none()))
+                    .assertThat(emittedEvent(Nothing.class, none()))
                     .close();
         }
 
         /**
          * This test executes two commands, thus checks for 2 Acks:
          * <ol>
-         * <li>{@link PmStartQuiz Start Quiz} — to initialize the process;
-         * <li>{@link PmAnswerQuestion Answer Question } — a target
+         *     <li>{@link PmStartQuiz Start Quiz} — to initialize the process;
+         *     <li>{@link PmAnswerQuestion Answer Question } — a target
          * command that produces either of 3 events.
          * </ol>
          *
@@ -414,7 +413,7 @@ class ProcessManagerTest {
          * an {@link PmAnswerQuestion answer question command} can not
          * match any questions. This results in emitting
          * {@link io.spine.server.tuple.EitherOfThree Either Of Three}
-         * containing {@link com.google.protobuf.Empty Empty}.
+         * containing {@link Nothing}.
          *
          * @see io.spine.server.procman.given.pm.DirectQuizProcman
          */
@@ -433,7 +432,7 @@ class ProcessManagerTest {
                     .assertThat(acked(twice()).withoutErrorsOrRejections())
                     .assertThat(emittedEvent(once()))
                     .assertThat(emittedEvents(PmQuizStarted.class))
-                    .assertThat(emittedEvent(Empty.class, none()))
+                    .assertThat(emittedEvent(Nothing.class, none()))
                     .close();
         }
     }

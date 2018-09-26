@@ -51,3 +51,11 @@ message PrjProjectArchived {
 message PrjProjectDeleted {
     ProjectId project_id = 1;
 }
+
+message StringImported {
+    string value = 1;
+}
+
+message Int32Imported {
+    int32 value = 1;
+}

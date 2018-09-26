@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageInvalid;
@@ -57,7 +58,8 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
         MessageInvalid result = null;
         List<ConstraintViolation> violations = messageValidator.validate(event);
         if (!violations.isEmpty()) {
-            result = onConstraintViolations(event, violations);
+            EventMessage message = envelope.getMessage();
+            result = onConstraintViolations(message, violations);
         }
         return ofNullable(result);
     }
