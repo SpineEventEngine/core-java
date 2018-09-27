@@ -18,13 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Utilities for working with logs in the test environment.
- */
-
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.testlogging;
+package io.spine.server.event.model.given;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
