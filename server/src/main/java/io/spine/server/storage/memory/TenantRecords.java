@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -116,9 +115,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                                                             .getRecord()
                                                             .toBuilder();
                 Any state = matchingRecord.getState();
-                TypeUrl typeUrl = TypeUrl.parse(state.getTypeUrl());
                 Message wholeState = unpack(state);
-                Message maskedState = applyMask(fieldMask, wholeState, typeUrl);
+                Message maskedState = applyMask(fieldMask, wholeState);
                 Any processed = pack(maskedState);
 
                 matchingRecord.setState(processed);
@@ -144,11 +142,9 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             I id = storageEntry.getKey();
             EntityRecord rawRecord = storageEntry.getValue()
                                                  .getRecord();
-            TypeUrl type = TypeUrl.parse(rawRecord.getState()
-                                                  .getTypeUrl());
             Any recordState = rawRecord.getState();
             Message stateAsMessage = unpack(recordState);
-            Message processedState = applyMask(fieldMask, stateAsMessage, type);
+            Message processedState = applyMask(fieldMask, stateAsMessage);
             Any packedState = pack(processedState);
             EntityRecord resultingRecord = EntityRecord
                     .newBuilder()
@@ -185,8 +181,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             checkNotNull(input);
             Any packedState = input.getState();
             Message state = unpack(packedState);
-            TypeUrl typeUrl = TypeUrl.ofEnclosed(packedState);
-            Message maskedState = applyMask(fieldMask, state, typeUrl);
+            Message maskedState = applyMask(fieldMask, state);
             Any repackedState = pack(maskedState);
             EntityRecord result = EntityRecord
                     .newBuilder(input)

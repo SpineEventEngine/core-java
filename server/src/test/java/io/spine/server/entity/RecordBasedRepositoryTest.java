@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.collect.Lists;
 import com.google.common.truth.IterableSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -50,6 +49,7 @@ import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
@@ -70,9 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *            {@link TestEntityWithStringColumn} at runtime
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings({"ConstantConditions",
-        "DuplicateStringLiteralInspection" /* Common test display names. */,
-        "unused" /* JUnit nested classes considered unused in abstract class. */})
 public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
                                                 I,
                                                 S extends Message>
@@ -177,7 +174,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertEquals(found, entity);
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("multiple entities by IDs")
         void multipleEntitiesByIds() {
@@ -253,7 +249,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             }
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("all entities")
         void allEntities() {
@@ -300,10 +295,9 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         private FieldMask createFirstFieldOnlyMask(List<E> entities) {
-            Descriptor entityDescriptor = entities.get(0)
-                                                  .getState()
-                                                  .getDescriptorForType();
-            FieldMask fieldMask = FieldMasks.maskOf(entityDescriptor, 1);
+            E firstEntity = entities.get(0);
+            FieldMask fieldMask = fromFieldNumbers(firstEntity.getDefaultState()
+                                                              .getClass(), 1);
             return fieldMask;
         }
     }
@@ -321,7 +315,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         assertEquals(id, entity.getId());
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     @DisplayName("handle wrong passed IDs")
     void handleWrongPassedIds() {

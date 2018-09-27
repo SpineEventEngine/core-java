@@ -27,25 +27,18 @@ import io.spine.test.entity.Task;
 import io.spine.test.entity.event.EntProjectCreated;
 import io.spine.test.entity.event.EntTaskAdded;
 import io.spine.testdata.Sample;
-import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.server.entity.FieldMasks.maskOf;
+import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("EventFieldFilter should")
 class EventFieldFilterTest {
-
-    private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventFieldFilterTest.class);
 
     @Test
     @DisplayName("pass event if not specified otherwise")
@@ -62,7 +55,8 @@ class EventFieldFilterTest {
     @Test
     @DisplayName("apply mask and pass")
     void applyFieldMask() {
-        FieldMask mask = maskOf(EntTaskAdded.getDescriptor(), EntTaskAdded.PROJECT_ID_FIELD_NUMBER);
+        FieldMask mask =
+                fromFieldNumbers(EntTaskAdded.class, EntTaskAdded.PROJECT_ID_FIELD_NUMBER);
         EventFieldFilter filter = EventFieldFilter
                 .newBuilder()
                 .putMask(EntTaskAdded.class, mask)

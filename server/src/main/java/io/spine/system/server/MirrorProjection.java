@@ -77,8 +77,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused")
-                   EntityArchived event) {
+    public void on(EntityArchived event) {
         LifecycleFlags flags = getBuilder().getLifecycle()
                                            .toBuilder()
                                            .setArchived(true)
@@ -89,8 +88,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused")
-                   EntityDeleted event) {
+    public void on(EntityDeleted event) {
         LifecycleFlags flags = getBuilder().getLifecycle()
                                            .toBuilder()
                                            .setDeleted(true)
@@ -101,8 +99,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused")
-                   EntityExtractedFromArchive event) {
+    public void on(EntityExtractedFromArchive event) {
         LifecycleFlags flags = getBuilder().getLifecycle()
                                            .toBuilder()
                                            .setArchived(false)
@@ -113,8 +110,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused")
-                   EntityRestored event) {
+    public void on(EntityRestored event) {
         LifecycleFlags flags = getBuilder().getLifecycle()
                                            .toBuilder()
                                            .setDeleted(false)
@@ -197,7 +193,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
             return completeState;
         }
         Message unpacked = unpack(completeState);
-        Message trimmedState = applyMask(fields, unpacked, TypeUrl.ofEnclosed(completeState));
+        Message trimmedState = applyMask(fields, unpacked);
         Any result = pack(trimmedState);
         return result;
     }

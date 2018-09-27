@@ -20,16 +20,17 @@
 
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Arrays;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.Queries.queryBuilderFor;
 import static java.lang.String.format;
@@ -110,10 +111,7 @@ public final class QueryFactory {
                                String... maskPaths) {
         checkNotNull(ids);
         checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
-
-        FieldMask fieldMask = FieldMask.newBuilder()
-                                       .addAllPaths(Arrays.asList(maskPaths))
-                                       .build();
+        FieldMask fieldMask = fromStringList(null, ImmutableList.copyOf(maskPaths));
         Query result = composeQuery(entityClass, ids, null, fieldMask);
         return result;
     }
@@ -165,9 +163,7 @@ public final class QueryFactory {
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
-        FieldMask fieldMask = FieldMask.newBuilder()
-                                       .addAllPaths(Arrays.asList(maskPaths))
-                                       .build();
+        FieldMask fieldMask = fromStringList(null, ImmutableList.copyOf(maskPaths));
         Query result = composeQuery(entityClass, null, null, fieldMask);
         return result;
     }

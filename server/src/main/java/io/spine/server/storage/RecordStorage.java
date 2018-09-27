@@ -135,7 +135,7 @@ public abstract class RecordStorage<I>
         TypeUrl type = TypeUrl.parse(state.getTypeUrl());
         Message stateAsMessage = AnyPacker.unpack(state);
 
-        Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
+        Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage);
 
         Any packedState = AnyPacker.pack(maskedState);
         builder.setState(packedState);

@@ -44,16 +44,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 
-/**
- * @author Alexander Yevsyukov
- * @author Alexander Aleksandrov
- * @author Dmytro Grankin
- * @author Alex Tymchenko
- */
 public class ProjectionRepositoryTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private ProjectionRepositoryTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -63,7 +57,6 @@ public class ProjectionRepositoryTestEnv {
      * does not modify the state of an {@code Entity}. For the newly created entities it could lead
      * to an invalid entry created in the storage.
      */
-    @SuppressWarnings("unused")
     public static class NoOpTaskNamesProjection
             extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
 
