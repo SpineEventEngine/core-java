@@ -18,10 +18,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides test environment for tests of methods accepting events.
- */
-
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.event.model.given;

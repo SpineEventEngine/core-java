@@ -76,7 +76,7 @@ public final class CommandHandlerMethod
          * Ensures that a command handler method produces one or more event messages.
          *
          * <p>The only allowed exception to this are {@link ProcessManager} instances returning
-         * empty  from command handlers.
+         * empty from command handlers.
          *
          * @param eventMessages  the events produced as the result of the command handling
          * @param target         the target on which the method was executed
