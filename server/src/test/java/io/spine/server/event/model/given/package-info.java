@@ -18,25 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.event.model.given;
 
-import io.spine.base.EventMessage;
-import io.spine.server.EventProducer;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-import java.util.List;
-
-/**
- * A reactor method may not return a result in response to an incoming message. When so,
- * the raw method should return {@link com.google.protobuf.Empty Empty}.
- *
- * @author Alexander Yevsyukov
- */
-public final class ReactorMethodResult extends EventsResult {
-
-    public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
-        super(producer, rawMethodOutput);
-        List<EventMessage> messages = toMessages(rawMethodOutput);
-        List<EventMessage> filtered = filterIgnored(messages);
-        setMessages(filtered);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

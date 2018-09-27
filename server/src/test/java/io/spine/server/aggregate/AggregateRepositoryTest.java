@@ -59,6 +59,7 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -472,6 +473,7 @@ public class AggregateRepositoryTest {
 
     @Nested
     @ExtendWith(ShardingReset.class)
+    @MuteLogging
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
@@ -596,8 +598,9 @@ public class AggregateRepositoryTest {
     }
 
     @Test
-    @DisplayName("log error when event reaction fails")
-    void logErrorWhenEventReactionFails() {
+    @DisplayName("do nothing when event reaction fails")
+    @MuteLogging
+    void doNothingWhenEventReactionFails() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext().register(repository);
 

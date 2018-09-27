@@ -35,6 +35,7 @@ import io.spine.server.stand.Stand;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -277,6 +278,7 @@ class SubscriptionServiceTest {
     }
 
     @Nested
+    @MuteLogging
     @DisplayName("handle exceptions and call observer error callback for")
     class HandleExceptionsOf {
 

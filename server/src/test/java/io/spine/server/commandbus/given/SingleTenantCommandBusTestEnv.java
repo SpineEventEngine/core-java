@@ -27,11 +27,12 @@ import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.model.Nothing;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
+import io.spine.test.command.event.CmdProjectCreated;
+import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
@@ -95,16 +96,22 @@ public class SingleTenantCommandBusTestEnv {
         }
 
         @Assign
-        Nothing handle(FirstCmdCreateProject command) {
+        CmdProjectCreated handle(FirstCmdCreateProject command) {
             commandBus.post(commandToPost, noOpObserver());
             handledCommands.add(command);
-            return nothing();
+            return CmdProjectCreated
+                    .newBuilder()
+                    .setProjectId(command.getId())
+                    .build();
         }
 
         @Assign
-        Nothing handle(SecondCmdStartProject command) {
+        CmdProjectStarted handle(SecondCmdStartProject command) {
             handledCommands.add(command);
-            return nothing();
+            return CmdProjectStarted
+                    .newBuilder()
+                    .setProjectId(command.getId())
+                    .build();
         }
 
         public List<Message> handledCommands() {

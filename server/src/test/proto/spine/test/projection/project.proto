@@ -65,7 +65,7 @@ message ProjectTaskNames {
 
     ProjectId project_id = 1;
 
-    string project_name = 2 [(required) = true];
+    string project_name = 2;
 
     repeated string task_name = 3;
 }

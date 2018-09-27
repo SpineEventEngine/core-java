@@ -43,6 +43,7 @@ import io.spine.system.server.given.command.CompanyNameProcman;
 import io.spine.system.server.given.command.CompanyNameProcmanRepo;
 import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -155,6 +156,7 @@ class CommandLifecycleTest {
 
         @Test
         @DisplayName("causes a runtime exception")
+        @MuteLogging
         void errored() {
             StartCompanyEstablishing start = StartCompanyEstablishing
                     .newBuilder()

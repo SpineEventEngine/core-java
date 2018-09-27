@@ -66,6 +66,7 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.entity.given.Given;
@@ -246,6 +247,7 @@ class ProcessManagerRepositoryTest
     }
 
     @Nested
+    @MuteLogging
     @DisplayName("not dispatch duplicate")
     class AvoidDuplicates {
 
@@ -397,6 +399,7 @@ class ProcessManagerRepositoryTest
 
     @Test
     @DisplayName("throw ISE when dispatching unknown command")
+    @MuteLogging
     void throwOnUnknownCommand() {
         Command unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);

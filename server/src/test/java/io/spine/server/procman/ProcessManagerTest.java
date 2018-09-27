@@ -22,7 +22,6 @@ package io.spine.server.procman;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -35,6 +34,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.model.Nothing;
 import io.spine.server.procman.given.pm.AddTaskDispatcher;
 import io.spine.server.procman.given.pm.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
@@ -353,14 +353,14 @@ class ProcessManagerTest {
     }
 
     @Nested
-    @DisplayName("not create an empty event")
+    @DisplayName("not create `Nothing` event")
     class NoEmpty {
 
         /**
          * This test executes two commands, thus checks for 2 Acks:
          * <ol>
-         * <li>{@link PmStartQuiz Start Quiz} — to start the process;
-         * <li>{@link PmAnswerQuestion Answer Question } — a target
+         *     <li>{@link PmStartQuiz Start Quiz} — to start the process;
+         *     <li>{@link PmAnswerQuestion Answer Question } — a target
          * command that produces either of 3 events.
          * </ol>
          *
@@ -372,7 +372,7 @@ class ProcessManagerTest {
          *
          * <p>As a reaction to {@link PmQuestionAnswered Quiestion Answered}
          * the process manager emits an {@link io.spine.server.tuple.EitherOfThree Either Of Three}
-         * containing {@link com.google.protobuf.Empty Empty}. This is done because the answered
+         * containing {@link Nothing}. This is done because the answered
          * question is not part of a quiz.
          *
          * @see io.spine.server.procman.given.pm.QuizProcman
@@ -393,15 +393,15 @@ class ProcessManagerTest {
                     .assertThat(emittedEvent(twice()))
                     .assertThat(emittedEvents(PmQuizStarted.class))
                     .assertThat(emittedEvents(PmQuestionAnswered.class))
-                    .assertThat(emittedEvent(Empty.class, none()))
+                    .assertThat(emittedEvent(Nothing.class, none()))
                     .close();
         }
 
         /**
          * This test executes two commands, thus checks for 2 Acks:
          * <ol>
-         * <li>{@link PmStartQuiz Start Quiz} — to initialize the process;
-         * <li>{@link PmAnswerQuestion Answer Question } — a target
+         *     <li>{@link PmStartQuiz Start Quiz} — to initialize the process;
+         *     <li>{@link PmAnswerQuestion Answer Question } — a target
          * command that produces either of 3 events.
          * </ol>
          *
@@ -412,7 +412,7 @@ class ProcessManagerTest {
          * an {@link PmAnswerQuestion answer question command} can not
          * match any questions. This results in emitting
          * {@link io.spine.server.tuple.EitherOfThree Either Of Three}
-         * containing {@link com.google.protobuf.Empty Empty}.
+         * containing {@link Nothing}.
          *
          * @see io.spine.server.procman.given.pm.DirectQuizProcman
          */
@@ -431,7 +431,7 @@ class ProcessManagerTest {
                     .assertThat(acked(twice()).withoutErrorsOrRejections())
                     .assertThat(emittedEvent(once()))
                     .assertThat(emittedEvents(PmQuizStarted.class))
-                    .assertThat(emittedEvent(Empty.class, none()))
+                    .assertThat(emittedEvent(Nothing.class, none()))
                     .close();
         }
     }

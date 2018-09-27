@@ -24,6 +24,7 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
 import io.spine.test.event.FailRequested;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,6 +51,7 @@ class EventSubscriberTest {
 
     @Test
     @DisplayName("catch exceptions caused by methods")
+    @MuteLogging
     void catchMethodExceptions() {
         // Create event which should fail.
         EventEnvelope eventEnvelope = createEvent(false);
