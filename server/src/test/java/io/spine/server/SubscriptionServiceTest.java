@@ -59,7 +59,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("InnerClassMayBeStatic") // For @Nested test suites
 @DisplayName("SubscriptionService should")
 class SubscriptionServiceTest {
 
