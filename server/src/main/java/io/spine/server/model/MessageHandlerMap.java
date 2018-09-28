@@ -23,6 +23,7 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.EmptyClass;
 import io.spine.server.model.declare.MethodSignature;
@@ -35,7 +36,7 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  * Provides mapping from a class of messages to a method which handles such messages.
@@ -162,10 +163,9 @@ public class MessageHandlerMap<M extends MessageClass,
 
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
-        Set<M> setToSwallowDuplicates = newHashSet();
-        for (H handler : handlerMethods) {
-            setToSwallowDuplicates.add(handler.getMessageClass());
-        }
-        return ImmutableSet.copyOf(setToSwallowDuplicates);
+        ImmutableSet<M> result = Streams.stream(handlerMethods)
+                                        .map(HandlerMethod::getMessageClass)
+                                        .collect(toImmutableSet());
+        return result;
     }
 }

@@ -20,11 +20,8 @@
 
 package io.spine.server.model.declare;
 
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.MessageEnvelope;
-import io.spine.type.TypeName;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -167,17 +164,8 @@ public final class MethodParams {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length > 0) {
             Class<?> firstParameter = parameterTypes[0];
-            if (Message.class.isAssignableFrom(firstParameter)) {
-                @SuppressWarnings("unchecked")  // ensured by the check above.
-                        Class<? extends Message> msgParameter =
-                        (Class<? extends Message>) method.getParameterTypes()[0];
-                Descriptors.FileDescriptor fileDescriptor = TypeName.of(msgParameter)
-                                                                    .getMessageDescriptor()
-                                                                    .getFile();
-                boolean isCommand = CommandMessage.File.predicate()
-                                                       .test(fileDescriptor);
-                return isCommand;
-            }
+            boolean result = CommandMessage.class.isAssignableFrom(firstParameter);
+            return result;
         }
         return false;
     }
