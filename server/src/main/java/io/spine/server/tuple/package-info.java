@@ -71,10 +71,10 @@
  *
  * <p>In order to define alternatively returned values, please use the following classes:
  * <ul>
- *     <li>{@link io.spine.server.tuple.EitherOf2 EitherOfTwo&lt;A, B&gt;}
- *     <li>{@link io.spine.server.tuple.EitherOf3 EitherOfThree&lt;A, B, C&gt;}
- *     <li>{@link io.spine.server.tuple.EitherOf4 EitherOfFour&lt;A, B, C, D&gt;}
- *     <li>{@link io.spine.server.tuple.EitherOf5 EitherOfFive&lt;A, B, C, D, E&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOf2 EitherOf2&lt;A, B&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOf3 EitherOf3&lt;A, B, C&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOf4 EitherOf4&lt;A, B, C, D&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOf5 EitherOf5&lt;A, B, C, D, E&gt;}
  * </ul>
  *
  * <p>Generic parameters for alternatives can be only {@link com.google.protobuf.Message Message}.
