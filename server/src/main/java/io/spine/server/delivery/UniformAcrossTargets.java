@@ -20,8 +20,8 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 
-import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 import java.util.Set;
 
