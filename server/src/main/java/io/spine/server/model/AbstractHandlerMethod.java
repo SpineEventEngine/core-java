@@ -206,14 +206,14 @@ public abstract class AbstractHandlerMethod<T,
         checkNotNull(target);
         checkNotNull(envelope);
         checkAttributesMatch(envelope);
-        Message message = envelope.getMessage();
-        Message context = envelope.getMessageContext();
         try {
             Object[] arguments = parameterSpec.extractArguments(envelope);
             Object rawOutput = method.invoke(target, arguments);
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            Message message = envelope.getMessage();
+            Message context = envelope.getMessageContext();
             throw new HandlerMethodFailedException(target, message, context, e);
         }
     }
