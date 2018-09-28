@@ -43,7 +43,7 @@
  * <p>It should re-iterated that the purpose of this package is limited to the scenarios
  * described above. Programmers are strongly discouraged from applying tuples for other purposes.
  *
- * <h2>Generic Types</h2>
+ * <h1>Generic Types</h1>
  *
  * <p>Classes provided by this package can support up to 5 generic parameters. They are named from
  * {@code <A>} through {@code <E>}.
@@ -54,7 +54,7 @@
  * <p>Types from {@code <B>} through {@code <E>} can be either {@code Message} or
  * {@link java.util.Optional Optional}. See sections below for details.
  *
- * <h2>Basic Tuples</h2>
+ * <h1>Basic Tuples</h1>
  *
  * <p>The following tuple classes are provided:
  * <ul>
@@ -67,14 +67,14 @@
  * <p>Basic tuple classes allow {@link java.util.Optional Optional} starting from
  * the second generic argument.
  *
- * <h2>Alternatives</h2>
+ * <h1>Alternatives</h1>
  *
  * <p>In order to define alternatively returned values, please use the following classes:
  * <ul>
- *     <li>{@link io.spine.server.tuple.EitherOfTwo EitherOfTwo&lt;A, B&gt;}
- *     <li>{@link io.spine.server.tuple.EitherOfThree EitherOfThree&lt;A, B, C&gt;}
- *     <li>{@link io.spine.server.tuple.EitherOfFour EitherOfFour&lt;A, B, C, D&gt;}
- *     <li>{@link io.spine.server.tuple.EitherOfFive EitherOfFive&lt;A, B, C, D, E&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOf2 EitherOfTwo&lt;A, B&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOf3 EitherOfThree&lt;A, B, C&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOf4 EitherOfFour&lt;A, B, C, D&gt;}
+ *     <li>{@link io.spine.server.tuple.EitherOf5 EitherOfFive&lt;A, B, C, D, E&gt;}
  * </ul>
  *
  * <p>Generic parameters for alternatives can be only {@link com.google.protobuf.Message Message}.
@@ -83,7 +83,7 @@
  * If you face a such a need, consider splitting a command into two or more independent commands
  * so that their outcome is more obvious.
  *
- * <h2>Using Tuples with Alternatives</h2>
+ * <h1>Using Tuples with Alternatives</h1>
  *
  * <p>A {@link io.spine.server.tuple.Pair Pair} can be defined with the second parameter being on
  * of the {@link io.spine.server.tuple.Either Either} subclasses, and created using

@@ -21,29 +21,27 @@
 package io.spine.server.event.model.given.reactor;
 
 import io.spine.server.event.React;
-import io.spine.server.tuple.EitherOfTwo;
+import io.spine.server.tuple.EitherOf2;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.test.reflect.event.RefProjectStarted;
 import io.spine.test.reflect.event.RefTaskAdded;
 
 /**
  * Provides a method that returns {@link Iterable}.
- *
- * @author Alexander Yevsyukov
  */
 public class RcIterableReturn extends TestEventReactor {
 
     @React
-    EitherOfTwo<RefProjectStarted, RefTaskAdded> react(RefProjectCreated event) {
+    EitherOf2<RefProjectStarted, RefTaskAdded> react(RefProjectCreated event) {
         if (event.hasProjectId()) {
-            return EitherOfTwo.withA(
+            return EitherOf2.withA(
                     RefProjectStarted.newBuilder()
                                      .setProjectId(event.getProjectId())
                                      .build()
             );
         }
 
-        return EitherOfTwo.withB(RefTaskAdded.newBuilder()
-                                             .build());
+        return EitherOf2.withB(RefTaskAdded.newBuilder()
+                                           .build());
     }
 }

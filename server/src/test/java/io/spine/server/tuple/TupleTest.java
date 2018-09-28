@@ -39,18 +39,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"LocalVariableNamingConvention", "FieldNamingConvention",
-        "InstanceVariableNamingConvention"}) // OK for tuple entry values.
+@SuppressWarnings({
+        "FieldNamingConvention",
+        "InstanceVariableNamingConvention" /* OK for tuple entry values. */
+})
 @DisplayName("Tuple should")
 class TupleTest {
 
     private final StringValue a = TestValues.newUuidValue();
-    private final EitherOfTwo<Timestamp, BoolValue> b = EitherOfTwo.withA(Time.getCurrentTime());
+    private final EitherOf2<Timestamp, BoolValue> b = EitherOf2.withA(Time.getCurrentTime());
 
-    private TTuple<StringValue, EitherOfTwo<Timestamp, BoolValue>> tuple;
+    private TTuple<StringValue, EitherOf2<Timestamp, BoolValue>> tuple;
 
     @BeforeEach
     void setUp() {

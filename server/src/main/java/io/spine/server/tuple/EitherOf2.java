@@ -23,63 +23,47 @@ package io.spine.server.tuple;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
-import io.spine.server.tuple.Element.CValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value which can be of one of three possible types.
+ * A value which can be one of two possible types.
  *
  * @param <A> the type for the first alternative
  * @param <B> the type of the second alternative
- * @param <C> the type of the third alternative
- *
- * @author Alexander Yevsyukov
  */
-public final class EitherOfThree<A extends Message, B extends Message, C extends Message>
-    extends Either
-    implements AValue<A>, BValue<B>, CValue<C> {
+public final class EitherOf2<A extends Message, B extends Message>
+        extends Either
+        implements AValue<A>, BValue<B> {
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOfThree(Message value, int index) {
+    private EitherOf2(Message value, int index) {
         super(value, index);
     }
 
     /**
      * Creates a new instance with {@code <A>} value.
      */
-    public static <A extends Message, B extends Message, C extends Message>
-    EitherOfThree<A, B, C> withA(A a) {
+    public static <A extends Message, B extends Message> EitherOf2<A, B> withA(A a) {
         checkNotNull(a);
-        EitherOfThree<A, B, C> result = new EitherOfThree<>(a, 0);
+        EitherOf2<A, B> result = new EitherOf2<>(a, 0);
         return result;
     }
 
     /**
      * Creates a new instance with {@code <B>} value.
      */
-    public static <A extends Message, B extends Message, C extends Message>
-    EitherOfThree<A, B, C> withB(B b) {
+    public static <A extends Message, B extends Message> EitherOf2<A, B> withB(B b) {
         checkNotNull(b);
-        EitherOfThree<A, B, C> result = new EitherOfThree<>(b, 1);
-        return result;
-    }
-
-    /**
-     * Creates a new instance with {@code <C>} value.
-     */
-    public static <A extends Message, B extends Message, C extends Message>
-    EitherOfThree<A, B, C> withC(C c) {
-        checkNotNull(c);
-        EitherOfThree<A, B, C> result = new EitherOfThree<>(c, 2);
+        EitherOf2<A, B> result = new EitherOf2<>(b, 1);
         return result;
     }
 
     /**
      * Obtains the value of the first alternative.
      *
-     * @throws IllegalStateException if a value of another type is stored instead.
+     * @throws IllegalStateException if the {@code <B>} value is stored instead.
      * @return the stored value.
      */
     @Override
@@ -90,22 +74,11 @@ public final class EitherOfThree<A extends Message, B extends Message, C extends
     /**
      * Obtains the value of the second alternative.
      *
-     * @throws IllegalStateException if a value of another type is stored instead.
+     * @throws IllegalStateException if the {@code <A>} value is stored instead.
      * @return the stored value.
      */
     @Override
     public B getB() {
         return get(this, 1);
-    }
-
-    /**
-     * Obtains the value of the third alternative.
-     *
-     * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
-     */
-    @Override
-    public C getC() {
-        return get(this, 2);
     }
 }

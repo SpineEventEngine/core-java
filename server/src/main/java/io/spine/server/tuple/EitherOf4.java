@@ -35,10 +35,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <B> the type of the second alternative
  * @param <C> the type of the third alternative
  * @param <D> the type of the fourth alternative
- *
- * @author Alexander Yevsyukov
  */
-public final class EitherOfFour<A extends Message,
+public final class EitherOf4<A extends Message,
                                 B extends Message,
                                 C extends Message,
                                 D extends Message>
@@ -47,7 +45,7 @@ public final class EitherOfFour<A extends Message,
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOfFour(Message value, int index) {
+    private EitherOf4(Message value, int index) {
         super(value, index);
     }
 
@@ -55,9 +53,9 @@ public final class EitherOfFour<A extends Message,
      * Creates a new instance with {@code <A>} value.
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    EitherOfFour<A, B, C, D> withA(A a) {
+    EitherOf4<A, B, C, D> withA(A a) {
         checkNotNull(a);
-        EitherOfFour<A, B, C, D> result = new EitherOfFour<>(a, 0);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(a, 0);
         return result;
     }
 
@@ -65,9 +63,9 @@ public final class EitherOfFour<A extends Message,
      * Creates a new instance with {@code <B>} value.
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    EitherOfFour<A, B, C, D> withB(B b) {
+    EitherOf4<A, B, C, D> withB(B b) {
         checkNotNull(b);
-        EitherOfFour<A, B, C, D> result = new EitherOfFour<>(b, 1);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(b, 1);
         return result;
     }
 
@@ -75,9 +73,9 @@ public final class EitherOfFour<A extends Message,
      * Creates a new instance with {@code <C>} value.
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    EitherOfFour<A, B, C, D> withC(C c) {
+    EitherOf4<A, B, C, D> withC(C c) {
         checkNotNull(c);
-        EitherOfFour<A, B, C, D> result = new EitherOfFour<>(c, 2);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(c, 2);
         return result;
     }
 
@@ -85,9 +83,9 @@ public final class EitherOfFour<A extends Message,
      * Creates a new instance with {@code <C>} value.
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    EitherOfFour<A, B, C, D> withD(D d) {
+    EitherOf4<A, B, C, D> withD(D d) {
         checkNotNull(d);
-        EitherOfFour<A, B, C, D> result = new EitherOfFour<>(d, 3);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(d, 3);
         return result;
     }
 

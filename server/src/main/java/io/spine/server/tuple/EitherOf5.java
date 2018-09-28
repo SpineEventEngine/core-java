@@ -37,10 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <C> the type of the third alternative
  * @param <D> the type of the fourth alternative
  * @param <E> the type of the fifth alternative
- *
- * @author Alexander Yevsyukov
  */
-public class EitherOfFive <A extends Message,
+public class EitherOf5<A extends Message,
                            B extends Message,
                            C extends Message,
                            D extends Message,
@@ -50,7 +48,7 @@ public class EitherOfFive <A extends Message,
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOfFive(Message value, int index) {
+    private EitherOf5(Message value, int index) {
         super(value, index);
     }
 
@@ -59,9 +57,9 @@ public class EitherOfFive <A extends Message,
      */
     public static
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
-    EitherOfFive<A, B, C, D, E> withA(A a) {
+    EitherOf5<A, B, C, D, E> withA(A a) {
         checkNotNull(a);
-        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(a, 0);
+        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(a, 0);
         return result;
     }
 
@@ -70,9 +68,9 @@ public class EitherOfFive <A extends Message,
      */
     public static
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
-    EitherOfFive<A, B, C, D, E> withB(B b) {
+    EitherOf5<A, B, C, D, E> withB(B b) {
         checkNotNull(b);
-        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(b, 1);
+        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(b, 1);
         return result;
     }
 
@@ -81,9 +79,9 @@ public class EitherOfFive <A extends Message,
      */
     public static
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
-    EitherOfFive<A, B, C, D, E> withC(C c) {
+    EitherOf5<A, B, C, D, E> withC(C c) {
         checkNotNull(c);
-        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(c, 2);
+        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(c, 2);
         return result;
     }
 
@@ -92,9 +90,9 @@ public class EitherOfFive <A extends Message,
      */
     public static
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
-    EitherOfFive<A, B, C, D, E> withD(D d) {
+    EitherOf5<A, B, C, D, E> withD(D d) {
         checkNotNull(d);
-        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(d, 3);
+        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(d, 3);
         return result;
     }
 
@@ -103,9 +101,9 @@ public class EitherOfFive <A extends Message,
      */
     public static
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
-    EitherOfFive<A, B, C, D, E> withE(E e) {
+    EitherOf5<A, B, C, D, E> withE(E e) {
         checkNotNull(e);
-        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(e, 4);
+        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(e, 4);
         return result;
     }
 
