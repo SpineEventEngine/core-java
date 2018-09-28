@@ -59,7 +59,7 @@ class ColumnValueConverterTest {
     @DisplayName("convert enum to ordinal value")
     void convertEnumToOrdinal() {
         TaskStatus value = SUCCESS;
-        ColumnValueConverter converter = new OrdinalEnumConverter(value.getClass());
+        ColumnValueConverter converter = new OrdinalEnumConverter(value.getDeclaringClass());
         Serializable convertedValue = converter.convert(value);
         assertEquals(value.ordinal(), convertedValue);
     }
@@ -68,7 +68,7 @@ class ColumnValueConverterTest {
     @DisplayName("convert enum to string value")
     void convertEnumToString() {
         TaskStatus value = SUCCESS;
-        ColumnValueConverter converter = new StringEnumConverter(value.getClass());
+        ColumnValueConverter converter = new StringEnumConverter(value.getDeclaringClass());
         Serializable convertedValue = converter.convert(value);
         assertEquals(value.name(), convertedValue);
     }
