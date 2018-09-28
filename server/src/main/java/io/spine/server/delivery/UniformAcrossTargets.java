@@ -21,6 +21,7 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableSet;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 import java.util.Set;
 
@@ -36,21 +37,22 @@ import static java.lang.Math.abs;
  * <pre>
  *     {@code
  *
- *     final UserAggregate entity = ...
+ *     UserAggregate aggregate = ...
  *
- *     final int hashValue =  entity.getId().hashCode();
- *     final int numberOfShards = 4;
+ *     int hashValue =  aggregate.getId().hashCode();
+ *     int numberOfShards = 4;
  *
  *      // possible values are 0, 1, 2, and 3.
- *     final int shardIndexValue = Math.abs(hashValue % numberOfShards);
- *     final ShardIndex shardIndex = newIndex(shardIndexValue);
+ *     int shardIndexValue = Math.abs(hashValue % numberOfShards);
+ *     ShardIndex shardIndex = newIndex(shardIndexValue);
  *     }
  * </pre>
  *
  *  <p>Such an approach isn't truly uniform — as long as the ID nature may be very specific,
  *  making the {@code hashCode()} value distribution uneven. However, it's a good enough choice
- *  in a general case
+ *  in a general case.
  */
+@Immutable
 public class UniformAcrossTargets implements ShardingStrategy {
 
     private static final long serialVersionUID = 0L;
