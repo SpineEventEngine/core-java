@@ -28,7 +28,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.Subscribe;
 import io.spine.option.EntityOption;
 import io.spine.option.OptionsProto;
-import io.spine.server.entity.EntityStateEnvelope;
+import io.spine.server.entity.EntityEnvelope;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
@@ -52,14 +52,14 @@ import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
  * @author Dmytro Dashenkov
  */
 public class EntitySubscriberSignature
-        extends MethodSignature<EntitySubscriberMethod, EntityStateEnvelope<? ,?>> {
+        extends MethodSignature<EntitySubscriberMethod, EntityEnvelope<? ,?>> {
 
     protected EntitySubscriberSignature() {
         super(Subscribe.class);
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EntityStateEnvelope<?, ?>>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EntityEnvelope<?, ?>>> getParamSpecs() {
         return copyOf(EntityStateSubscriberSpec.values());
     }
 
@@ -75,7 +75,7 @@ public class EntitySubscriberSignature
 
     @Override
     public EntitySubscriberMethod doCreate(Method method,
-                                           ParameterSpec<EntityStateEnvelope<?, ?>> parameterSpec) {
+                                           ParameterSpec<EntityEnvelope<?, ?>> parameterSpec) {
         return new EntitySubscriberMethod(method, parameterSpec);
     }
 
@@ -91,7 +91,7 @@ public class EntitySubscriberSignature
     }
 
     @Immutable
-    private enum EntityStateSubscriberSpec implements ParameterSpec<EntityStateEnvelope<?, ?>> {
+    private enum EntityStateSubscriberSpec implements ParameterSpec<EntityEnvelope<?, ?>> {
 
         PARAM_SPEC;
 
@@ -120,7 +120,7 @@ public class EntitySubscriberSignature
         }
 
         @Override
-        public Object[] extractArguments(EntityStateEnvelope<?, ?> envelope) {
+        public Object[] extractArguments(EntityEnvelope<?, ?> envelope) {
             return new Object[]{envelope.getMessage()};
         }
 

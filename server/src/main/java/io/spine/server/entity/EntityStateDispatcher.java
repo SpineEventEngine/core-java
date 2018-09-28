@@ -17,22 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.tenant;
 
-import io.spine.annotation.Internal;
-import io.spine.server.entity.EntityEnvelope;
+package io.spine.server.entity;
+
+import io.spine.logging.Logging;
+import io.spine.server.entity.model.EntityStateClass;
+import io.spine.type.ClassName;
+
+import java.util.Set;
 
 /**
- * A tenant-aware operation performed in relation to
- * a {@link io.spine.server.stand.Stand#update(io.spine.server.entity.EntityEnvelope)} entity state update},
- * executed asynchronously or in a distributed environment.
- *
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-@Internal
-public abstract class EntityUpdateOperation extends TenantAwareOperation {
+public interface EntityStateDispatcher extends Logging {
 
-    protected EntityUpdateOperation(EntityEnvelope envelope) {
-        super(envelope.getTenantId());
+    Set<EntityStateClass> getEntitySubscriptionClasses();
+
+    void dispatchEntityUpdate(EntityStateUpdateEnvelope envelope);
+
+    default void onError(EntityStateUpdateEnvelope envelope, RuntimeException exception) {
+        ClassName entityTypeName = envelope.getMessageClass().getName();
+        _error(exception, "Unable to dispatch `%s` state update.", entityTypeName);
     }
 }

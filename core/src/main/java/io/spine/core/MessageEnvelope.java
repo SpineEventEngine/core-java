@@ -27,7 +27,7 @@ import io.spine.type.MessageClass;
 /**
  * A common interface for obtaining messages from wrapping objects.
  *
- * @param <I> the the of the message id
+ * @param <I> the type of the message ID
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
  * @author Alex Tymchenko

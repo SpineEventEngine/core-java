@@ -28,7 +28,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.entity.EntityStateEnvelope;
+import io.spine.server.entity.EntityEnvelope;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestAggregate;
@@ -109,7 +109,7 @@ class StandPostTest {
             }
         }
 
-        verify(stand, times(dispatchActions.length)).update(any(EntityStateEnvelope.class));
+        verify(stand, times(dispatchActions.length)).update(any(EntityEnvelope.class));
     }
 
     private static StorageFactory storageFactory(boolean multitenant) {
@@ -179,7 +179,7 @@ class StandPostTest {
                                  .getActorContext()
                                  .getTenantId(), entity);
 
-        ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
+        ArgumentMatcher<EntityEnvelope<?, ?>> argumentMatcher =
                 argument -> {
                     boolean entityIdMatches = argument.getEntityId()
                                                       .equals(entityId);

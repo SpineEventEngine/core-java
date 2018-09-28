@@ -22,7 +22,7 @@ package io.spine.server.entity.model;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.server.entity.EntityStateEnvelope;
+import io.spine.server.entity.EntityEnvelope;
 import io.spine.server.entity.EntityStateSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
@@ -37,10 +37,10 @@ public class EntitySubscriberMethod
         extends AbstractHandlerMethod<EntityStateSubscriber,
                                       Message,
                                       EntityStateClass,
-                                      EntityStateEnvelope<?, ?>,
+                                      EntityEnvelope<?, ?>,
                                       MethodResult<Empty>> {
 
-    EntitySubscriberMethod(Method method, ParameterSpec<EntityStateEnvelope<?, ?>> parameterSpec) {
+    EntitySubscriberMethod(Method method, ParameterSpec<EntityEnvelope<?, ?>> parameterSpec) {
         super(method, parameterSpec);
     }
 

@@ -49,7 +49,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
-import io.spine.server.entity.EntityStateEnvelope;
+import io.spine.server.entity.EntityEnvelope;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
@@ -1128,14 +1128,14 @@ class StandTest extends TenantAwareTest {
     }
 
     /**
-     * Packs the parameters as {@code EntityStateEnvelope}
+     * Packs the parameters as {@code EntityEnvelope}
      * bounded by the current {@linkplain #tenantId() tenant ID}.
      */
-    protected EntityStateEnvelope asEnvelope(Object entityId,
-                                             Message entityState,
-                                             Version entityVersion) {
+    protected EntityEnvelope asEnvelope(Object entityId,
+                                        Message entityState,
+                                        Version entityVersion) {
         TenantId tenantId = isMultitenant() ? tenantId() : TenantId.getDefaultInstance();
-        return EntityStateEnvelope.of(entityId, entityState, entityVersion, tenantId);
+        return EntityEnvelope.of(entityId, entityState, entityVersion, tenantId);
     }
 
     private static Set<CustomerId> ids(Collection<Customer> customers) {
