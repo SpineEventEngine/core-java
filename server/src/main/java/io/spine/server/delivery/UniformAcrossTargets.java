@@ -112,11 +112,6 @@ public class UniformAcrossTargets implements ShardingStrategy {
         return Objects.hash(numberOfShards);
     }
 
-    private enum SingleShard {
-        INSTANCE;
-        private final UniformAcrossTargets strategy = new UniformAcrossTargets(1);
-    }
-
     /**
      * Returns a pre-defined strategy instance, which defines a single shard and puts all
      * the targets into it.
@@ -134,7 +129,7 @@ public class UniformAcrossTargets implements ShardingStrategy {
      * @return a uniform distribution strategy instance for a given shard number
      */
     public static ShardingStrategy forNumber(int totalShards) {
-        UniformAcrossTargets result = new UniformAcrossTargets(totalShards);
+        ShardingStrategy result = new UniformAcrossTargets(totalShards);
         return result;
     }
 
@@ -143,5 +138,10 @@ public class UniformAcrossTargets implements ShardingStrategy {
                          .setIndex(indexValue)
                          .setOfTotal(totalShards)
                          .build();
+    }
+
+    private enum SingleShard {
+        INSTANCE;
+        private final UniformAcrossTargets strategy = new UniformAcrossTargets(1);
     }
 }
