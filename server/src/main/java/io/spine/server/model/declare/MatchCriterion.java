@@ -126,7 +126,7 @@ public enum MatchCriterion {
 
     /**
      * The criterion for the method parameter list to conform the
-     * {@linkplain MethodSignature#getParamSpecClass() requirements}.
+     * {@linkplain MethodSignature#getParamSpecs() requirements}.
      *
      * @see MethodParams#findMatching(Method, Class)
      */
@@ -136,7 +136,7 @@ public enum MatchCriterion {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Optional<? extends ParameterSpec<?>> matching =
-                    MethodParams.findMatching(method, signature.getParamSpecClass());
+                    MethodParams.findMatching(method, signature.getParamSpecs());
             if (!matching.isPresent()) {
                 SignatureMismatch mismatch =
                         create(this,

@@ -32,6 +32,7 @@ import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
@@ -63,8 +64,8 @@ class EventApplierSignature
     }
 
     @Override
-    public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
-        return EventApplierParams.class;
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+        return copyOf(EventApplierParams.values());
     }
 
     /**

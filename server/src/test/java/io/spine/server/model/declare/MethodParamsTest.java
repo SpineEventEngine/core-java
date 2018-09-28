@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
@@ -99,8 +100,8 @@ public class MethodParamsTest extends UtilityClassTest<MethodParams> {
     @Test
     @DisplayName("find a matching signature for the method among the predefined set of values")
     public void findMatchingSignature() {
-        Optional<ScheduleCommandParamSpec> matching = findMatching(twoParamCommandAndCtx(),
-                                                                   ScheduleCommandParamSpec.class);
+        Optional<ScheduleCommandParamSpec> matching =
+                findMatching(twoParamCommandAndCtx(), copyOf(ScheduleCommandParamSpec.values()));
         assertTrue(matching.isPresent());
         assertEquals(ScheduleCommandParamSpec.MESSAGE_AND_CONTEXT, matching.get());
     }
@@ -108,8 +109,8 @@ public class MethodParamsTest extends UtilityClassTest<MethodParams> {
     @Test
     @DisplayName("return `Optional.empty()` if there is no matching signature")
     public void returnOptionalEmptyIfNoSignatureMatch() {
-        Optional<ScheduleCommandParamSpec> matching = findMatching(singleParamCommand(),
-                                                                   ScheduleCommandParamSpec.class);
+        Optional<ScheduleCommandParamSpec> matching =
+                findMatching(singleParamCommand(), copyOf(ScheduleCommandParamSpec.values()));
         assertTrue(!matching.isPresent());
     }
 

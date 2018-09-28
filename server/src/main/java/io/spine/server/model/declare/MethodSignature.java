@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.toList;
  * <ul>
  *     <li>{@linkplain #MethodSignature(Class) the method annotation},</li>
  *
- *      <li>{@linkplain #getParamSpecClass() the specification of method parameters},</li>
+ *      <li>{@linkplain #getParamSpecs() the specification of method parameters},</li>
  *
  *      <li>{@linkplain #getAllowedModifiers() the set of allowed access modifiers},</li>
  *
@@ -76,7 +76,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the specification of handler parameters to meet.
      */
-    public abstract Class<? extends ParameterSpec<E>> getParamSpecClass();
+    public abstract ImmutableSet<? extends ParameterSpec<E>> getParamSpecs();
 
     /**
      * Obtains the set of allowed access modifiers for the method.
@@ -182,8 +182,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         if (!matches) {
             return Optional.empty();
         }
-        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method,
-                                                                         getParamSpecClass());
+        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecs());
         return matchingSpec.map(spec -> {
             H handler = doCreate(method, spec);
             handler.discoverAttributes();

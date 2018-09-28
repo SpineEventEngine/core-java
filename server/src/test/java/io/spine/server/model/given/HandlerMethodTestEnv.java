@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
 import static io.spine.server.model.declare.AccessModifier.PRIVATE;
@@ -215,8 +216,8 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
-        public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
-            return OneParamSpec.class;
+        public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+            return copyOf(OneParamSpec.values());
         }
 
         @Override
