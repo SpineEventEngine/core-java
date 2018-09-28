@@ -19,14 +19,13 @@
  */
 
 /**
- * This package provides model classes and interfaces for {@code io.spine.server.entity}.
+ * This package contains tests for event-related signatures.
  */
-@Internal
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.entity.model;
+package io.spine.server.event.model.declare;
 
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.annotation.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

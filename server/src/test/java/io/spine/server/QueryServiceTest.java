@@ -44,19 +44,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("QueryService should")
 class QueryServiceTest {
 
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
 
     private QueryService service;
-
-    private BoundedContext projectsContext;
-
-    private BoundedContext customersContext;
 
     private final MemoizingObserver<QueryResponse> responseObserver =
             StreamObservers.memoizingObserver();
@@ -66,9 +59,9 @@ class QueryServiceTest {
     void setUp() {
         ModelTests.dropAllModels();
         // Create Projects Bounded Context with one repository and one projection.
-        projectsContext = BoundedContext.newBuilder()
-                                        .setName(PROJECTS_CONTEXT_NAME)
-                                        .build();
+        BoundedContext projectsContext = BoundedContext.newBuilder()
+                                                       .setName(PROJECTS_CONTEXT_NAME)
+                                                       .build();
         Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         projectDetailsRepository = spy(new ProjectDetailsRepository());
@@ -77,9 +70,9 @@ class QueryServiceTest {
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        customersContext = BoundedContext.newBuilder()
-                                         .setName("Customers")
-                                         .build();
+        BoundedContext customersContext = BoundedContext.newBuilder()
+                                                        .setName("Customers")
+                                                        .build();
         Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);

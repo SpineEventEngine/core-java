@@ -69,7 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @param <S> state message of the handling entity
  * @param <E> the type of the handling entity being tested
  * @param <X> the type of {@link AbstractExpected Expected} object
- * @author Dmytro Dashenkov
+ *
  * @see CommandHandlerTest
  * @see EventReactionTest
  */
@@ -77,7 +77,7 @@ public abstract class MessageHandlerTest<I,
                                          M extends Message,
                                          S extends Message,
                                          E extends Entity<I, S>,
-                                         X extends AbstractExpected<S, X>> {
+                                         X extends AbstractExpected<S, X>> implements Logging {
 
     @SuppressWarnings("unused")
     protected static final String BE_REJECTED_TEST_NAME = "be rejected";

@@ -22,6 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.logging.Logging;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.AbstractCommander;
@@ -29,7 +30,6 @@ import io.spine.server.model.Model;
 import io.spine.server.model.ModelClass;
 import io.spine.server.procman.ProcessManager;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
 
@@ -41,10 +41,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Ensures that there are no duplicating command handling methods among passed classes.
- *
- * @author Alexander Yevsyukov
  */
-public class DuplicateHandlerCheck {
+public final class DuplicateHandlerCheck implements Logging {
 
     /**
      * Maps a raw class to a function that creates appropriate model class, which in turn
@@ -67,6 +65,7 @@ public class DuplicateHandlerCheck {
                          (c) -> asCommanderClass((Class<? extends AbstractCommander>) c))
                     .build();
 
+    /** Prevents instantiation from outside. */
     private DuplicateHandlerCheck() {
     }
 
@@ -120,15 +119,5 @@ public class DuplicateHandlerCheck {
         @Override
         @CanIgnoreReturnValue
         ModelClass<?> apply(Class<?> aClass);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Model.class);
     }
 }

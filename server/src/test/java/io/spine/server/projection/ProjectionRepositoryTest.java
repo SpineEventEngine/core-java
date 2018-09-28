@@ -69,6 +69,7 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
+import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -80,11 +81,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("ProjectionRepository should")
 class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
@@ -144,9 +140,15 @@ class ProjectionRepositoryTest
         List<TestProjection> projections = Lists.newArrayList();
 
         for (int i = 0; i < count; i++) {
-            TestProjection projection = Given.projectionOfClass(TestProjection.class)
-                                             .withId(createId(i))
-                                             .build();
+            ProjectId id = createId(i);
+            TestProjection projection =
+                    Given.projectionOfClass(TestProjection.class)
+                         .withId(id)
+                         .withState(Project.newBuilder()
+                                           .setId(id)
+                                           .setName("Test name " + randomString())
+                                           .build())
+                         .build();
             projections.add(projection);
         }
 

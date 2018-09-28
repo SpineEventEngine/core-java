@@ -50,8 +50,6 @@ import static java.lang.Math.abs;
  *  <p>Such an approach isn't truly uniform — as long as the ID nature may be very specific,
  *  making the {@code hashCode()} value distribution uneven. However, it's a good enough choice
  *  in a general case
- *
- * @author Alex Tymchenko
  */
 public class UniformAcrossTargets implements ShardingStrategy {
 
@@ -69,17 +67,11 @@ public class UniformAcrossTargets implements ShardingStrategy {
         this.numberOfShards = numberOfShards;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getNumberOfShards() {
         return numberOfShards;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ShardIndex indexForTarget(Object targetId) {
         int hashValue = targetId.hashCode();
@@ -90,9 +82,6 @@ public class UniformAcrossTargets implements ShardingStrategy {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<ShardIndex> allIndexes() {
         ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();

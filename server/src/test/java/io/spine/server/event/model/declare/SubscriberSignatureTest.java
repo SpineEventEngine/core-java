@@ -36,9 +36,6 @@ import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findM
 import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findReturnsValue;
 import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findThrowsUnchckedException;
 
-/**
- * @author Dmytro Dashenkov
- */
 class SubscriberSignatureTest extends MethodSignatureTest<EventSubscriberSignature> {
 
     @Override

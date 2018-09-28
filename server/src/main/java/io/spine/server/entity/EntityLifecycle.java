@@ -109,8 +109,8 @@ public class EntityLifecycle {
      * {@link Entity}.
      *
      * <p>Most commands posted by the {@code EntityLifecycle} are handled by
-     * the {@link io.spine.system.server.EntityHistoryAggregate EntityHistoryAggregate}. Thus,
-     * storing an ID as a field is convenient.
+     * the {@code io.spine.system.server.EntityHistoryAggregate}.
+     * Thus, storing an ID as a field is convenient.
      */
     private final EntityHistoryId historyId;
 
@@ -119,7 +119,7 @@ public class EntityLifecycle {
      *
      * <p>Use this constructor for test purposes <b>only</b>.
      *
-     * @see Builder
+     * @see io.spine.server.entity.EntityLifecycle.Builder
      */
     @VisibleForTesting
     protected EntityLifecycle(Object entityId,
@@ -139,7 +139,7 @@ public class EntityLifecycle {
      * Posts the {@link EntityCreated} system event.
      *
      * @param entityKind
-     *         the {@link EntityOption.Kind} of the created entity
+     *         the {@linkplain io.spine.option.EntityOption.Kind kind} of the created entity
      */
     public final void onEntityCreated(EntityOption.Kind entityKind) {
         EntityCreated event = EntityCreatedVBuilder

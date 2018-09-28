@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.TestValues.newUuidValue;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -41,21 +40,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Alex Tymchenko
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("TransactionalEntity should")
 class TransactionalEntityTest {
 
     protected TransactionalEntity newEntity() {
         return new TeEntity(1L);
-    }
-
-    @Test
-    @DisplayName("have private constructor for TypeInfo")
-    void havePrivateTypeInfoCtor() {
-        assertHasPrivateParameterlessCtor(TransactionalEntity.TypeInfo.class);
     }
 
     @Nested

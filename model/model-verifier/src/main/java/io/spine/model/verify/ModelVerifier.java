@@ -49,7 +49,6 @@ import static java.util.stream.Collectors.toList;
  *
  * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
  *           string literal for security check.
- * @author Dmytro Dashenkov
  */
 final class ModelVerifier implements Logging {
 

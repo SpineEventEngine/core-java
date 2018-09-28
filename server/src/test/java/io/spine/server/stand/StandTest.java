@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -51,7 +52,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
@@ -104,6 +104,7 @@ import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.test.projection.Project.Status.CANCELLED;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.test.projection.Project.Status.UNDEFINED;
+import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.core.given.GivenUserId.of;
 import static io.spine.testing.server.entity.given.Given.projectionOfClass;
 import static java.lang.String.valueOf;
@@ -132,7 +133,6 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({
         "OverlyCoupledClass",
         "ClassWithTooManyMethods",
-        "OverlyComplexClass",
         "UnsecureRandomNumberGeneration"
 })
 @DisplayName("Stand should")
@@ -289,7 +289,6 @@ class StandTest extends TenantAwareTest {
             checkEmptyResultForTargetOnEmptyStorage(readCustomersById);
         }
 
-        @SuppressWarnings("unchecked") // Mock instance of no type params
         private void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
             Stand stand = createStand();
 
@@ -328,16 +327,16 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("for projection batch read by IDs with field mask")
         void forProjectionReadWithMask() {
-            List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor()
-                                                                     .getFields();
+            List<FieldDescriptor> projectFields = Project.getDescriptor()
+                                                         .getFields();
             doCheckReadingProjectByIdAndFieldMask(
                     projectFields.get(0)
-                                 .getFullName(), // ID
+                                 .getName(), // ID
                     projectFields.get(1)
-                                 .getFullName()); // Name
+                                 .getName()  // Name
+            );
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         private void doCheckReadingProjectByIdAndFieldMask(String... paths) {
             StandTestProjectionRepository repository = new StandTestProjectionRepository();
             Stand stand = newStand(isMultitenant(), repository);
@@ -374,7 +373,7 @@ class StandTest extends TenantAwareTest {
                     for (Any message : messages) {
                         Project project = unpack(message);
                         assertNotEquals(project, null);
-                        assertMatches(project, fieldMask);
+                        assertMatchesMask(project, fieldMask);
                     }
                 }
             };
@@ -568,11 +567,11 @@ class StandTest extends TenantAwareTest {
                         .build();
     }
 
-    private static final List<String> FIRST_NAMES = ImmutableList.of(
+    private static final ImmutableList<String> FIRST_NAMES = ImmutableList.of(
             "Emma", "Liam", "Mary", "John"
     );
 
-    private static final List<String> LAST_NAMES = ImmutableList.of(
+    private static final ImmutableList<String> LAST_NAMES = ImmutableList.of(
             "Smith", "Doe", "Steward", "Lee"
     );
 
@@ -966,13 +965,12 @@ class StandTest extends TenantAwareTest {
     }
 
 
-    @SuppressWarnings("ConstantConditions")
     private static void setupExpectedFindAllBehaviour(
             Map<ProjectId, Project> sampleProjects,
             StandTestProjectionRepository projectionRepository) {
 
         Set<ProjectId> projectIds = sampleProjects.keySet();
-        ImmutableCollection<Given.StandTestProjection> allResults =
+        ImmutableCollection<StandTestProjection> allResults =
                 toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
@@ -992,9 +990,8 @@ class StandTest extends TenantAwareTest {
                 .thenReturn(allResults.iterator());
     }
 
-    @SuppressWarnings("OverlyComplexAnonymousInnerClass")
-    private static ArgumentMatcher<EntityFilters> entityFilterMatcher(
-            Collection<ProjectId> projectIds) {
+    private static
+    ArgumentMatcher<EntityFilters> entityFilterMatcher(Collection<ProjectId> projectIds) {
         // This argument matcher does NOT mimic the exact repository behavior.
         // Instead, it only matches the EntityFilters instance in case it has EntityIdFilter with
         // ALL the expected IDs.
@@ -1016,15 +1013,15 @@ class StandTest extends TenantAwareTest {
         };
     }
 
-    private static ImmutableCollection<Given.StandTestProjection> toProjectionCollection(
-            Collection<ProjectId> values) {
-        Collection<Given.StandTestProjection> transformed = Collections2.transform(
+    private static
+    ImmutableCollection<StandTestProjection> toProjectionCollection(Collection<ProjectId> values) {
+        Collection<StandTestProjection> transformed = Collections2.transform(
                 values,
                 input -> {
                     checkNotNull(input);
                     return new StandTestProjection(input);
                 });
-        ImmutableList<Given.StandTestProjection> result = ImmutableList.copyOf(transformed);
+        ImmutableList<StandTestProjection> result = ImmutableList.copyOf(transformed);
         return result;
     }
 
@@ -1111,20 +1108,6 @@ class StandTest extends TenantAwareTest {
         return newEntityState -> {
             //do nothing
         };
-    }
-
-    private static void assertMatches(Message message, FieldMask fieldMask) {
-        List<String> paths = fieldMask.getPathsList();
-        for (Descriptors.FieldDescriptor field : message.getDescriptorForType()
-                                                        .getFields()) {
-
-            // Protobuf limitation, has no effect on the test.
-            if (field.isRepeated()) {
-                continue;
-            }
-
-            assertEquals(message.hasField(field), paths.contains(field.getFullName()));
-        }
     }
 
     /**

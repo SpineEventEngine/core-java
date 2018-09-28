@@ -67,7 +67,6 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.type.TypeUrl;
@@ -96,6 +95,7 @@ import static io.spine.server.procman.given.repo.GivenCommandMessage.projectCrea
 import static io.spine.server.procman.given.repo.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.taskAdded;
+import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
@@ -120,8 +120,6 @@ class ProcessManagerRepositoryTest
                                                 TenantId.newBuilder()
                                                         .setValue(newUuid())
                                                         .build());
-    private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(ProcessManagerRepositoryTest.class);
     private BoundedContext boundedContext;
 
     @Override
@@ -145,7 +143,15 @@ class ProcessManagerRepositoryTest
         for (int i = 0; i < count; i++) {
             ProjectId id = createId(i);
 
-            procmans.add(new TestProcessManager(id));
+            TestProcessManager pm =
+                    Given.processManagerOfClass(TestProcessManager.class)
+                         .withId(id)
+                         .withState(Project.newBuilder()
+                                           .setId(id)
+                                           .setName("Test pm name" + randomString())
+                                           .build())
+                         .build();
+            procmans.add(pm);
         }
         return procmans;
     }
