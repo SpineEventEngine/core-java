@@ -82,6 +82,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
+import static io.spine.testdata.Sample.builderForType;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
@@ -181,22 +182,16 @@ public class AggregateRepositoryTestEnv {
                                               .withId(id)
                                               .build();
 
-            AggCreateProject createProject =
-                    ((AggCreateProject.Builder) Sample.builderForType(AggCreateProject.class))
-                            .setProjectId(id)
-                            .build();
-            AggAddTask addTask =
-                    ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
-                            .setProjectId(id)
-                            .build();
-            AggStartProject startProject =
-                    ((AggStartProject.Builder) Sample.builderForType(AggStartProject.class))
-                            .setProjectId(id)
-                            .build();
+            AggCreateProject.Builder createProject = builderForType(AggCreateProject.class);
+            createProject.setProjectId(id);
+            AggAddTask.Builder addTask = builderForType(AggAddTask.class);
+            addTask.setProjectId(id);
+            AggStartProject.Builder startProject = builderForType(AggStartProject.class);
+            startProject.setProjectId(id);
 
-            dispatchCommand(aggregate, env(createProject));
-            dispatchCommand(aggregate, env(addTask));
-            dispatchCommand(aggregate, env(startProject));
+            dispatchCommand(aggregate, env(createProject.build()));
+            dispatchCommand(aggregate, env(addTask.build()));
+            dispatchCommand(aggregate, env(startProject.build()));
 
             return aggregate;
         }

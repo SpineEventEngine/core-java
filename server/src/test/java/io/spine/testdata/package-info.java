@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,27 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
-
-import java.io.Serializable;
-
 /**
- * A converter which uses {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to convert the
- * enumerated value into the {@link Integer} value.
+ * This package provides factories for creating test environments.
  */
-final class OrdinalEnumConverter extends EnumConverter {
 
-    OrdinalEnumConverter(Class<? extends Enum> sourceType) {
-        super(sourceType);
-    }
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testdata;
 
-    @Override
-    public Class<? extends Serializable> getTargetType() {
-        return Integer.class;
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Override
-    Integer convertEnumValue(Enum value) {
-        return value.ordinal();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

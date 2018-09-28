@@ -32,9 +32,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Kuzmin
- */
 @DisplayName("ColumnValueConverter should")
 class ColumnValueConverterTest {
 

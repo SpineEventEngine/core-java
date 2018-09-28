@@ -69,7 +69,6 @@ import static org.mockito.Mockito.verify;
  * @param <S> the type of storage under the test
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
 
@@ -356,7 +355,6 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
             assertFalse(optional.isPresent());
         }
 
-        @SuppressWarnings("ConstantConditions") // Converter nullability issues
         @Test
         @DisplayName("for new record")
         void forNewRecord() {
@@ -370,7 +368,6 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
             assertEquals(LifecycleFlags.getDefaultInstance(), optional.get());
         }
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
         @Test
         @DisplayName("for record with updated visibility")
         void forUpdatedRecord() {
