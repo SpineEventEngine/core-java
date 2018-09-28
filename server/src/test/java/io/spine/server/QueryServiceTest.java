@@ -70,10 +70,9 @@ class QueryServiceTest {
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        BoundedContext customersContext = BoundedContext
-                .newBuilder()
-                .setName("Customers")
-                .build();
+        BoundedContext customersContext = BoundedContext.newBuilder()
+                                                        .setName("Customers")
+                                                        .build();
         Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
