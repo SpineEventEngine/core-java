@@ -20,8 +20,8 @@
 
 package io.spine.change;
 
-import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,13 +33,10 @@ import static io.spine.change.MessageMismatch.unpackActual;
 import static io.spine.change.MessageMismatch.unpackExpected;
 import static io.spine.change.MessageMismatch.unpackNewValue;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("MessageMismatch should")
-class MessageMismatchTest {
+class MessageMismatchTest extends UtilityClassTest<MessageMismatch> {
 
     private static final StringValue EXPECTED = toMessage("expected_value");
     private static final StringValue ACTUAL = toMessage("actual-value");
@@ -47,22 +44,10 @@ class MessageMismatchTest {
     private static final StringValue DEFAULT_VALUE = StringValue.getDefaultInstance();
     private static final int VERSION = 1;
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(MessageMismatch.class);
+    MessageMismatchTest() {
+        super(MessageMismatch.class);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(MessageMismatch.class);
-    }
-
-    @SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
-                       "DuplicateStringLiteralInspection" /* Nested class display name similar to
-                                                          others */})
     @Nested
     @DisplayName("create ValueMismatch instance")
     class Create {
@@ -108,7 +93,6 @@ class MessageMismatchTest {
             assertEquals(VERSION, mismatch.getVersion());
         }
 
-        @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("for unexpected value")
         void forUnexpectedValue() {

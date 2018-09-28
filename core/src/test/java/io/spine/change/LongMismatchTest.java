@@ -20,7 +20,7 @@
 
 package io.spine.change;
 
-import com.google.common.testing.NullPointerTester;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,33 +32,19 @@ import static io.spine.change.LongMismatch.unexpectedValue;
 import static io.spine.change.LongMismatch.unpackActual;
 import static io.spine.change.LongMismatch.unpackExpected;
 import static io.spine.change.LongMismatch.unpackNewValue;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
-                   "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("LongMismatch should")
-class LongMismatchTest {
+class LongMismatchTest extends UtilityClassTest<LongMismatch> {
 
     private static final long EXPECTED = 1839L;
     private static final long ACTUAL = 1900L;
     private static final long NEW_VALUE = 1452L;
     private static final int VERSION = 7;
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(LongMismatch.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(LongMismatch.class);
+    LongMismatchTest() {
+        super(LongMismatch.class);
     }
 
     @Nested
@@ -100,7 +86,6 @@ class LongMismatchTest {
             assertEquals(VERSION, mismatch.getVersion());
         }
 
-        @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("for unexpected long value")
         void forUnexpectedLong() {
