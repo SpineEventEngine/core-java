@@ -18,32 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare;
-
-import com.google.common.base.Joiner;
-import io.spine.server.model.HandlerMethod;
+package io.spine.server.entity;
 
 /**
- * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
- * its {@link HandlerMethod#getRawMethod() wrapped method} does not match
- * {@linkplain MethodSignature method signature}, set for the handler.
- *
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-public class SignatureMismatchException extends RuntimeException {
+public interface EntityStateSubscriber {
 
-    private static final long serialVersionUID = 1L;
-
-    SignatureMismatchException(Iterable<SignatureMismatch> mismatches) {
-        this(formatMsg(mismatches));
-    }
-
-    protected SignatureMismatchException(String message) {
-        super(message);
-    }
-
-    private static String formatMsg(Iterable<SignatureMismatch> mismatches) {
-        return "Error declaring a method. Mismatches: " + Joiner.on(", ")
-                                                                .join(mismatches);
-    }
 }

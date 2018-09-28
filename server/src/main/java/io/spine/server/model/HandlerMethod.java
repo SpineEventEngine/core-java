@@ -48,7 +48,7 @@ public interface HandlerMethod<T,
                                R extends MethodResult> {
 
     /**
-     * @return the type of the incoming message class
+     * Obtains the type of the incoming message class.
      */
     C getMessageClass();
 
@@ -63,12 +63,12 @@ public interface HandlerMethod<T,
     HandlerKey key();
 
     /**
-     * @return the set of method attributes configured for this method
+     * Obtains the set of method attributes configured for this method.
      */
     Set<MethodAttribute<?>> getAttributes();
 
     /**
-     * @return the handling method
+     * Obtains the handling method.
      */
     Method getRawMethod();
 

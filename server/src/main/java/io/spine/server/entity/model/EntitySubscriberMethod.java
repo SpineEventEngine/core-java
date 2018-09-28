@@ -18,42 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.entity.model;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventEnvelope;
-import io.spine.core.Subscribe;
-import io.spine.server.model.declare.AccessModifier;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+import io.spine.server.entity.EntityStateEnvelope;
+import io.spine.server.entity.EntityStateSubscriber;
+import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
-import static com.google.common.collect.ImmutableSet.of;
-
 /**
- * A signature of {@link EventSubscriberMethod}.
- *
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-public class EventSubscriberSignature extends EventAcceptingSignature<EventSubscriberMethod> {
+public class EntitySubscriberMethod
+        extends AbstractHandlerMethod<EntityStateSubscriber,
+                                      Message,
+                                      EntityStateClass,
+                                      EntityStateEnvelope<?, ?>,
+                                      MethodResult<Empty>> {
 
-    public EventSubscriberSignature() {
-        super(Subscribe.class);
+    EntitySubscriberMethod(Method method, ParameterSpec<EntityStateEnvelope<?, ?>> parameterSpec) {
+        super(method, parameterSpec);
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PUBLIC);
+    protected MethodResult<Empty> toResult(EntityStateSubscriber target,
+                                           Object rawMethodOutput) {
+        return MethodResult.empty();
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(void.class);
-    }
-
-    @Override
-    public EventSubscriberMethod doCreate(Method method,
-                                          ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventSubscriberMethod(method, parameterSpec);
+    public EntityStateClass getMessageClass() {
+        return EntityStateClass.of(rawMessageClass());
     }
 }

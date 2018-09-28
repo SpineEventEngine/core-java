@@ -17,45 +17,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.entity.model;
 
-import com.google.protobuf.Message;
-import io.spine.server.entity.Entity;
-import io.spine.type.MessageClass;
+import io.spine.option.EntityOption.Visibility;
+import io.spine.server.model.declare.SignatureMismatchException;
+import io.spine.type.TypeName;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
- *
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-public final class EntityStateClass extends MessageClass<Message> {
+final class InsufficientVisibilityException extends SignatureMismatchException {
 
     private static final long serialVersionUID = 0L;
 
-    private EntityStateClass(Class<? extends Message> value) {
-        super(value);
+    InsufficientVisibilityException(TypeName entityType,
+                                    Visibility entityVisibility) {
+        super(formatMessage(entityType, entityVisibility));
     }
 
-    public static EntityStateClass of(Entity entity) {
-        checkNotNull(entity);
-        Message state = entity.getState();
-
-        checkNotNull(state);
-        Class<? extends Message> stateClass = state.getClass();
-
-        EntityStateClass result = new EntityStateClass(stateClass);
-        return result;
-    }
-
-    public static EntityStateClass of(Message entityState) {
-        checkNotNull(entityState);
-        return new EntityStateClass(entityState.getClass());
-    }
-
-    public static EntityStateClass of(Class<? extends Message> stateClass) {
-        checkNotNull(stateClass);
-        return new EntityStateClass(stateClass);
+    private static String formatMessage(TypeName entityType,
+                                        Visibility entityVisibility) {
+        return format("Cannot subscribe to state updates of `%s`. Entity visibility is %s.",
+                      entityType, entityVisibility);
     }
 }
