@@ -188,7 +188,6 @@ public abstract class AbstractHandlerMethod<T,
         return result;
     }
 
-    @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")   // Returning immutable impl.
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
@@ -218,9 +217,20 @@ public abstract class AbstractHandlerMethod<T,
         }
     }
 
+    /**
+     * A callback for descending classes to make sure that the passed envelope matches
+     * the attributes of a method.
+     *
+     * <p>This method does nothing. Descending classes may override this method to ensure that
+     * the passed envelope matches arguments of the method annotation.
+     *
+     * @throws IllegalArgumentException
+     *         the default implementation does not throw ever. Descending classes would throw
+     *         if the annotation arguments do not match the message of the passed envelope.
+     * @param envelope the envelope with the massed to handle
+     */
     @SuppressWarnings("NoopMethodInAbstractClass") // Optional for descendants.
-    protected void checkAttributesMatch(@SuppressWarnings("unused") // See suppression above.
-                                        E envelope) {
+    protected void checkAttributesMatch(E envelope) throws IllegalArgumentException {
         // Do nothing by default.
     }
 

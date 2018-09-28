@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import io.spine.testing.UtilityClassTest;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,21 +34,17 @@ import java.util.UUID;
 
 import static com.google.protobuf.ByteString.copyFromUtf8;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling
                                         of preconditions */,
                    "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
-                   "ClassWithTooManyMethods",
                    "OverlyCoupledClass" /* we test many data types and utility methods */,
                    "InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
                    "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("Changes utility should")
-class ChangesTest {
+class ChangesTest extends UtilityClassTest<Changes> {
 
     private static final String ERR_PREVIOUS_VALUE_CANNOT_BE_NULL =
             "do_not_accept_null_previousValue";
@@ -56,19 +53,15 @@ class ChangesTest {
     private static final String ERR_VALUES_CANNOT_BE_EQUAL =
             "do_not_accept_equal_values";
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Changes.class);
+    ChangesTest() {
+        super(Changes.class);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(ByteString.class, ByteString.EMPTY)
-                .setDefault(Timestamp.class, Time.getCurrentTime())
-                .testAllPublicStaticMethods(Changes.class);
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(ByteString.class, ByteString.EMPTY)
+               .setDefault(Timestamp.class, Time.getCurrentTime());
     }
 
     @Nested
