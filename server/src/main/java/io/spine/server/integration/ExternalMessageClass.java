@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 @Internal
-public final class ExternalMessageClass extends MessageClass {
+public final class ExternalMessageClass extends MessageClass<Message> {
 
     private static final long serialVersionUID = 0L;
 
@@ -49,7 +49,7 @@ public final class ExternalMessageClass extends MessageClass {
      * @param messageClass a message class to wrap
      * @return a new instance of {@code ExternalMessageClass}.\
      */
-    public static ExternalMessageClass of(MessageClass messageClass) {
+    public static ExternalMessageClass of(MessageClass<?> messageClass) {
         checkNotNull(messageClass);
         return of(messageClass.value());
     }

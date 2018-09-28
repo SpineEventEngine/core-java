@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.server.entity.EntityStateSubscriber;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
@@ -50,7 +51,7 @@ public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends TransactionalEntity<I, M, B>
-        implements EventPlayer, EventSubscriber {
+        implements EventPlayer, EventSubscriber, EntityStateSubscriber {
 
     /**
      * Creates a new instance.
