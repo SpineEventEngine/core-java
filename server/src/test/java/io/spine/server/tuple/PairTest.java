@@ -41,13 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings({"LocalVariableNamingConvention" /* OK for tuple element values. */,
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
-
 @DisplayName("Pair should")
 class PairTest {
 
@@ -55,7 +51,7 @@ class PairTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester().setDefault(Message.class, TestValues.newUuidValue())
-                               .setDefault(Either.class, EitherOfTwo.withB(Time.getCurrentTime()))
+                               .setDefault(Either.class, EitherOf2.withB(Time.getCurrentTime()))
                                .testAllPublicStaticMethods(Pair.class);
     }
 
@@ -176,7 +172,7 @@ class PairTest {
         reserializeAndAssert(Pair.withNullable(a, b));
         reserializeAndAssert(Pair.withNullable(a, null));
 
-        reserializeAndAssert(Pair.withEither(a, EitherOfTwo.withA(Time.getCurrentTime())));
-        reserializeAndAssert(Pair.withEither(a, EitherOfTwo.withB(TestValues.newUuidValue())));
+        reserializeAndAssert(Pair.withEither(a, EitherOf2.withA(Time.getCurrentTime())));
+        reserializeAndAssert(Pair.withEither(a, EitherOf2.withB(TestValues.newUuidValue())));
     }
 }

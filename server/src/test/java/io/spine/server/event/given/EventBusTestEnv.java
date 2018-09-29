@@ -66,7 +66,6 @@ import io.spine.test.event.Task;
 import io.spine.test.event.command.EBAddTasks;
 import io.spine.test.event.command.EBArchiveProject;
 import io.spine.test.event.command.EBCreateProject;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -81,6 +80,7 @@ import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;
+import static io.spine.testdata.Sample.builderForType;
 import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
@@ -118,18 +118,15 @@ public class EventBusTestEnv {
     }
 
     public static EBCreateProject createProject() {
-        EBCreateProject command =
-                ((EBCreateProject.Builder) Sample.builderForType(EBCreateProject.class))
-                        .setProjectId(PROJECT_ID)
-                        .build();
-        return command;
+        EBCreateProject.Builder command = builderForType(EBCreateProject.class);
+        return command.setProjectId(PROJECT_ID)
+                      .build();
     }
 
     public static EBAddTasks addTasks(Task... tasks) {
-        EBAddTasks.Builder builder =
-                ((EBAddTasks.Builder) Sample.builderForType(EBAddTasks.class))
-                        .setProjectId(PROJECT_ID)
-                        .clearTask();
+        EBAddTasks.Builder builder = builderForType(EBAddTasks.class);
+        builder.setProjectId(PROJECT_ID)
+               .clearTask();
         for (Task task : tasks) {
             builder.addTask(task);
         }
@@ -138,10 +135,9 @@ public class EventBusTestEnv {
     }
 
     public static Task newTask(boolean done) {
-        Task task = ((Task.Builder) Sample.builderForType(Task.class))
-                                          .setDone(done)
-                                          .build();
-        return task;
+        Task.Builder task = builderForType(Task.class);
+        return task.setDone(done)
+                   .build();
     }
 
     /**
@@ -149,11 +145,9 @@ public class EventBusTestEnv {
      * {@link EBArchiveProject#getReason()} field.
      */
     public static EBArchiveProject invalidArchiveProject() {
-        EBArchiveProject command =
-                ((EBArchiveProject.Builder) Sample.builderForType(EBArchiveProject.class))
-                        .setProjectId(PROJECT_ID)
-                        .build();
-        return command;
+        EBArchiveProject.Builder command = builderForType(EBArchiveProject.class);
+        return command.setProjectId(PROJECT_ID)
+                      .build();
     }
 
     public static Command command(CommandMessage message) {

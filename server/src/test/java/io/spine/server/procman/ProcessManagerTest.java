@@ -106,12 +106,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-/**
- * @author Alexander Litus
- * @author Dmytro Dashenkov
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"OverlyCoupledClass",
+@SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("ProcessManager should")
@@ -371,7 +366,7 @@ class ProcessManagerTest {
          * event.
          *
          * <p>As a reaction to {@link PmQuestionAnswered Quiestion Answered}
-         * the process manager emits an {@link io.spine.server.tuple.EitherOfThree Either Of Three}
+         * the process manager emits an {@link io.spine.server.tuple.EitherOf3 EitherOf3}
          * containing {@link Nothing}. This is done because the answered
          * question is not part of a quiz.
          *
@@ -411,7 +406,7 @@ class ProcessManagerTest {
          * <p>Because the quiz is started without any questions to solve,
          * an {@link PmAnswerQuestion answer question command} can not
          * match any questions. This results in emitting
-         * {@link io.spine.server.tuple.EitherOfThree Either Of Three}
+         * {@link io.spine.server.tuple.EitherOf3 EitherOf3}
          * containing {@link Nothing}.
          *
          * @see io.spine.server.procman.given.pm.DirectQuizProcman

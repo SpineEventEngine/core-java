@@ -176,19 +176,24 @@ public abstract class AbstractHandlerMethod<T,
         return parameterSpec;
     }
 
-    /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
+    /**
+     * Returns {@code true} if the method is declared {@code public},
+     * {@code false} otherwise.
+     */
     protected boolean isPublic() {
         boolean result = Modifier.isPublic(getModifiers());
         return result;
     }
 
-    /** Returns {@code true} if the method is declared {@code private}, {@code false} otherwise. */
+    /**
+     * Returns {@code true} if the method is declared {@code private},
+     * {@code false} otherwise.
+     */
     protected boolean isPrivate() {
         boolean result = Modifier.isPrivate(getModifiers());
         return result;
     }
 
-    @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")   // Returning immutable impl.
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
@@ -218,9 +223,19 @@ public abstract class AbstractHandlerMethod<T,
         }
     }
 
+    /**
+     * Allows to make sure that the passed envelope matches the annotation attributes of a method.
+     *
+     * <p>Default implementation does nothing. Descending classes may override for checking
+     * the match.
+     *
+     * @throws IllegalArgumentException
+     *         the default implementation does not throw ever. Descending classes would throw
+     *         if the annotation arguments do not match the message of the passed envelope.
+     * @param envelope the envelope with the massed to handle
+     */
     @SuppressWarnings("NoopMethodInAbstractClass") // Optional for descendants.
-    protected void checkAttributesMatch(@SuppressWarnings("unused") // See suppression above.
-                                        E envelope) {
+    protected void checkAttributesMatch(E envelope) throws IllegalArgumentException {
         // Do nothing by default.
     }
 

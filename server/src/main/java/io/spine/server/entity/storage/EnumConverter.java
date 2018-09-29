@@ -29,7 +29,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * An abstract base for converting the {@link Enum} entity column value into the value for
  * persistence in the data storage.
  *
- * @author Dmytro Kuzmin
  * @see EnumConverters
  * @see EnumType
  */
@@ -42,7 +41,9 @@ abstract class EnumConverter implements ColumnValueConverter {
     }
 
     /**
-     * {@inheritDoc}
+     * Converts the passed enum value to its {@linkplain #convertEnumValue(Enum)} serializable}
+     * form.
+     *
      * @throws IllegalArgumentException in case the passed value is not of the {@link Enum} type
      */
     @Override
@@ -58,9 +59,6 @@ abstract class EnumConverter implements ColumnValueConverter {
         return convertedValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<? extends Enum> getSourceType() {
         return sourceType;

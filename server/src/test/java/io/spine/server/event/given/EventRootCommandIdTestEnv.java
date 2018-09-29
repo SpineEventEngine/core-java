@@ -62,18 +62,15 @@ import io.spine.test.event.command.EvAcceptInvitation;
 import io.spine.test.event.command.EvAddTasks;
 import io.spine.test.event.command.EvAddTeamMember;
 import io.spine.test.event.command.EvInviteTeamMembers;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.testdata.Sample.builderForType;
 import static java.util.Collections.singleton;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class EventRootCommandIdTestEnv {
 
     public static final TenantId TENANT_ID = tenantId();
@@ -86,20 +83,21 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static ProjectId projectId() {
-        return ((ProjectId.Builder) Sample.builderForType(ProjectId.class))
+        return ((ProjectId.Builder) builderForType(ProjectId.class))
                 .build();
     }
 
     public static EvTeamId teamId() {
-        return ((EvTeamId.Builder) Sample.builderForType(EvTeamId.class))
+        return ((EvTeamId.Builder) builderForType(EvTeamId.class))
                 .build();
     }
 
     private static TenantId tenantId() {
         String value = EventRootCommandIdTestEnv.class.getName();
-        TenantId id = TenantId.newBuilder()
-                              .setValue(value)
-                              .build();
+        TenantId id = TenantId
+                .newBuilder()
+                .setValue(value)
+                .build();
         return id;
     }
 
@@ -122,7 +120,7 @@ public class EventRootCommandIdTestEnv {
 
         EvAddTasks.Builder builder = EvAddTasks.newBuilder();
         for (int i = 0; i < count; i++) {
-            Task task = (Task) Sample.builderForType(Task.class)
+            Task task = (Task) builderForType(Task.class)
                                      .build();
             builder.addTask(task);
         }
@@ -134,7 +132,7 @@ public class EventRootCommandIdTestEnv {
     public static EvAddTeamMember addTeamMember(EvTeamId teamId) {
         checkNotNull(teamId);
 
-        return ((EvAddTeamMember.Builder) Sample.builderForType(EvAddTeamMember.class))
+        return ((EvAddTeamMember.Builder) builderForType(EvAddTeamMember.class))
                 .setTeamId(teamId)
                 .build();
     }
@@ -143,7 +141,7 @@ public class EventRootCommandIdTestEnv {
         checkNotNull(teamId);
 
         EvMemberInvitation invitation = memberInvitation(teamId);
-        return ((EvAcceptInvitation.Builder) Sample.builderForType(EvAcceptInvitation.class))
+        return ((EvAcceptInvitation.Builder) builderForType(EvAcceptInvitation.class))
                 .setInvitation(invitation)
                 .build();
     }
@@ -153,8 +151,9 @@ public class EventRootCommandIdTestEnv {
 
         EvInviteTeamMembers.Builder builder = EvInviteTeamMembers.newBuilder();
         for (int i = 0; i < count; i++) {
-            EmailAddress task = (EmailAddress) Sample.builderForType(EmailAddress.class)
-                                                     .build();
+            EmailAddress task = (EmailAddress)
+                    builderForType(EmailAddress.class)
+                            .build();
             builder.addEmail(task);
         }
 
@@ -163,7 +162,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     private static EvMemberInvitation memberInvitation(EvTeamId teamId) {
-        return ((EvMemberInvitation.Builder) Sample.builderForType(EvMemberInvitation.class))
+        return ((EvMemberInvitation.Builder) builderForType(EvMemberInvitation.class))
                 .setTeamId(teamId)
                 .build();
     }
@@ -349,27 +348,31 @@ public class EventRootCommandIdTestEnv {
         }
 
         private EvTeamMemberAdded memberAdded(EvMember member) {
-            return EvTeamMemberAdded.newBuilder()
-                                    .setTeamId(getId())
-                                    .setMember(member)
-                                    .build();
+            return EvTeamMemberAdded
+                    .newBuilder()
+                    .setTeamId(getId())
+                    .setMember(member)
+                    .build();
         }
 
         private EvTeamMemberInvited teamMemberInvited(EmailAddress email) {
-            return EvTeamMemberInvited.newBuilder()
-                                      .setTeamId(getId())
-                                      .setEmail(email)
-                                      .build();
+            return EvTeamMemberInvited
+                    .newBuilder()
+                    .setTeamId(getId())
+                    .setEmail(email)
+                    .build();
         }
 
         private static EvMemberInvitation memberInvitation(EmailAddress email) {
-            return EvMemberInvitation.newBuilder()
-                                     .setEmail(email)
-                                     .build();
+            return EvMemberInvitation
+                    .newBuilder()
+                    .setEmail(email)
+                    .build();
         }
 
         private static EvMember member(UserId userId) {
-            return ((EvMember.Builder) Sample.builderForType(EvMember.class))
+            return EvMember
+                    .newBuilder()
                     .setUserId(userId)
                     .build();
         }
@@ -390,10 +393,11 @@ public class EventRootCommandIdTestEnv {
         }
 
         private EvInvitationAccepted invitationAccepted(EvMemberInvitation invitation) {
-            return EvInvitationAccepted.newBuilder()
-                                       .setInvitation(invitation)
-                                       .setUserId(getId())
-                                       .build();
+            return EvInvitationAccepted
+                    .newBuilder()
+                    .setInvitation(invitation)
+                    .setUserId(getId())
+                    .build();
         }
     }
 }

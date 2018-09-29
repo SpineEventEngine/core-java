@@ -27,11 +27,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Checking of parameters for working with changes.
- *
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-final class Preconditions2 {
+final class ChangePreconditions {
 
     private static final String NEW_VALUE_CANNOT_BE_EMPTY =
             "newValue cannot be empty";
@@ -43,7 +41,7 @@ final class Preconditions2 {
             "`expected` and `actual` cannot be equal in ValueMismatch";
 
     /** Prevent instantiation of this utility class. */
-    private Preconditions2() {
+    private ChangePreconditions() {
     }
 
     /**

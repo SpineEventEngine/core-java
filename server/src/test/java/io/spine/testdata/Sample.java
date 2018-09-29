@@ -48,11 +48,10 @@ import static java.lang.String.format;
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
  * {@link Command}), storage objects and else.
- *
- * @author Dmytro Dashenkov
  */
 public class Sample {
 
+    /** Prevents instantiation of this utility class. */
     private Sample() {
     }
 
@@ -64,12 +63,17 @@ public class Sample {
      * Number and {@code boolean} fields may or may not have their default values ({@code 0} and
      * {@code false}).
      *
+     * @apiNote This method casts the builder to the generic parameter {@code <B>} for brevity of
+     *          test code. It is the caller responsibility to ensure that the message
+     *          type {@code <M>} corresponds to the builder type {@code <B>}.
+     *
      * @param clazz Java class of the stub message
      * @param <M>   type of the required message
      * @param <B>   type of the {@link Message.Builder} for the message
      * @return new instance of the {@link Message.Builder} for given type
      * @see #valueFor(FieldDescriptor)
      */
+    @SuppressWarnings("TypeParameterUnusedInFormals") // See apiNote.
     public static <M extends Message, B extends Message.Builder> B builderForType(Class<M> clazz) {
         checkClass(clazz);
 

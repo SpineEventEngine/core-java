@@ -72,6 +72,20 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         }
     }
 
+    /**
+     * Ensures that the passed event matches the {@code external} attribute
+     * of the method annotation.
+     *
+     * <p>If the method annotated to accept {@code external} events, the event passed to the handler
+     * method must be produced {@linkplain io.spine.core.EventContext#getExternal() outside} of
+     * the Bounded Context to which the handling entity belongs.
+     *
+     * <p>And vice versa, if the event handling method is designed for domestic events,
+     * it does not accept external events.
+     *
+     * @see io.spine.core.Subscribe#external()
+     * @see io.spine.server.event.React#external()
+     */
     @Override
     protected void checkAttributesMatch(EventEnvelope envelope) {
         boolean external = envelope.getEventContext()
@@ -82,8 +96,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
     /**
      * {@inheritDoc}
      *
-     * @apiNote
-     * Overridden to mark {@code rawMethodOutput} argument as nullable.
+     * @apiNote Overridden to mark the {@code rawMethodOutput} parameter as {@code Nullable}.
      */
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug: `@apiNote` isn't seen as modification
     @Override
