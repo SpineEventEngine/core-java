@@ -57,6 +57,8 @@ public class UniformAcrossTargets implements ShardingStrategy {
 
     private static final long serialVersionUID = 0L;
 
+    private static final ShardingStrategy singleShardStrategy = new UniformAcrossTargets(1);
+
     private final int numberOfShards;
 
     /**
@@ -119,7 +121,7 @@ public class UniformAcrossTargets implements ShardingStrategy {
      * @return a strategy that puts all entities in a single shard
      */
     public static ShardingStrategy singleShard() {
-        return SingleShard.INSTANCE.strategy;
+        return singleShardStrategy;
     }
 
     /**
@@ -138,10 +140,5 @@ public class UniformAcrossTargets implements ShardingStrategy {
                          .setIndex(indexValue)
                          .setOfTotal(totalShards)
                          .build();
-    }
-
-    private enum SingleShard {
-        INSTANCE;
-        private final UniformAcrossTargets strategy = new UniformAcrossTargets(1);
     }
 }
