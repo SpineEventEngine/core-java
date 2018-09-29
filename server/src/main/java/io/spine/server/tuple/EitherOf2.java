@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A value which can be one of two possible types.
  *
- * @param <A> the type for the first alternative
+ * @param <A> the type of the first alternative
  * @param <B> the type of the second alternative
  */
 public final class EitherOf2<A extends Message, B extends Message>

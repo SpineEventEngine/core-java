@@ -32,17 +32,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A value which can be of one of five possible types.
  *
- * @param <A> the type for the first alternative
+ * @param <A> the type of the first alternative
  * @param <B> the type of the second alternative
  * @param <C> the type of the third alternative
  * @param <D> the type of the fourth alternative
  * @param <E> the type of the fifth alternative
  */
 public class EitherOf5<A extends Message,
-                           B extends Message,
-                           C extends Message,
-                           D extends Message,
-                           E extends Message>
+                       B extends Message,
+                       C extends Message,
+                       D extends Message,
+                       E extends Message>
         extends Either
         implements AValue<A>, BValue<B>, CValue<C>, DValue<D>, EValue<E> {
 
