@@ -176,13 +176,19 @@ public abstract class AbstractHandlerMethod<T,
         return parameterSpec;
     }
 
-    /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
+    /**
+     * Returns {@code true} if the method is declared {@code public},
+     * {@code false} otherwise.
+     */
     protected boolean isPublic() {
         boolean result = Modifier.isPublic(getModifiers());
         return result;
     }
 
-    /** Returns {@code true} if the method is declared {@code private}, {@code false} otherwise. */
+    /**
+     * Returns {@code true} if the method is declared {@code private},
+     * {@code false} otherwise.
+     */
     protected boolean isPrivate() {
         boolean result = Modifier.isPrivate(getModifiers());
         return result;
@@ -218,11 +224,10 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     /**
-     * A callback for descending classes to make sure that the passed envelope matches
-     * the attributes of a method.
+     * Allows to make sure that the passed envelope matches the annotation attributes of a method.
      *
-     * <p>This method does nothing. Descending classes may override this method to ensure that
-     * the passed envelope matches arguments of the method annotation.
+     * <p>Default implementation does nothing. Descending classes may override for checking
+     * the match.
      *
      * @throws IllegalArgumentException
      *         the default implementation does not throw ever. Descending classes would throw
