@@ -30,7 +30,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.TypeConverter;
-import io.spine.server.projection.given.ProjectionTestEnv.EntitySubscriberProjection;
+import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;

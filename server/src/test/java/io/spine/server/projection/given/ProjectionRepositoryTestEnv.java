@@ -35,6 +35,7 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.ProjectVBuilder;
+import io.spine.test.projection.Task;
 import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
@@ -43,6 +44,8 @@ import io.spine.test.projection.event.PrjTaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
+
+import static io.spine.testing.TestValues.randomString;
 
 /**
  * @author Alexander Yevsyukov
@@ -169,6 +172,7 @@ public class ProjectionRepositoryTestEnv {
             Project newState = getState().toBuilder()
                                          .setId(event.getProjectId())
                                          .setStatus(Project.Status.CREATED)
+                                         .setName(event.getName())
                                          .build();
             getBuilder().mergeFrom(newState);
         }
@@ -176,10 +180,7 @@ public class ProjectionRepositoryTestEnv {
         @Subscribe
         public void on(PrjTaskAdded event) {
             keep(event);
-            Project newState = getState().toBuilder()
-                                         .addTask(event.getTask())
-                                         .build();
-            getBuilder().mergeFrom(newState);
+            getBuilder().addTask(event.getTask());
         }
 
         /**
@@ -237,13 +238,19 @@ public class ProjectionRepositoryTestEnv {
 
         public static PrjProjectCreated projectCreated() {
             return PrjProjectCreated.newBuilder()
+                                    .setName("Projection test " + randomString())
                                     .setProjectId(ENTITY_ID)
                                     .build();
         }
 
         public static PrjTaskAdded taskAdded() {
+            Task task = Task
+                    .newBuilder()
+                    .setTitle("Test task " + randomString())
+                    .build();
             return PrjTaskAdded.newBuilder()
                                .setProjectId(ENTITY_ID)
+                               .setTask(task)
                                .build();
         }
 

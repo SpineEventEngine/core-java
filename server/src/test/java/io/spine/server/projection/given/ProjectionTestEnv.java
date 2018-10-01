@@ -23,19 +23,11 @@ package io.spine.server.projection.given;
 import com.google.protobuf.StringValue;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
-import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesVBuilder;
-import io.spine.test.projection.Task;
 import io.spine.test.projection.event.Int32Imported;
 import io.spine.test.projection.event.StringImported;
 import io.spine.validate.StringValueVBuilder;
 
-import java.util.List;
-
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static java.util.stream.Collectors.toList;
 
 public class ProjectionTestEnv {
 
@@ -73,26 +65,6 @@ public class ProjectionTestEnv {
             String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
             return toMessage(result);
-        }
-    }
-
-    public static final class EntitySubscriberProjection
-            extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
-
-        public EntitySubscriberProjection(ProjectId id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void onUpdate(Project aggregateState) {
-            List<String> taskNames = aggregateState.getTaskList()
-                                                   .stream()
-                                                   .map(Task::getTitle)
-                                                   .collect(toList());
-            getBuilder().setProjectId(aggregateState.getId())
-                        .setProjectName(aggregateState.getName())
-                        .clearTaskName()
-                        .addAllTaskName(taskNames);
         }
     }
 }
