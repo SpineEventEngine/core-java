@@ -33,9 +33,9 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.QueryService;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
@@ -179,17 +179,11 @@ public class BlackBoxBoundedContext {
      *
      * @param repositories
      *         repositories to register in the Bounded Context
-     * @param <I>
-     *         the type of IDs used in the repository
-     * @param <E>
-     *         the type of entities or aggregates
      * @return current instance
      */
-    @SafeVarargs
-    public final <I, E extends Entity<I, ?>> BlackBoxBoundedContext
-    with(Repository<I, E>... repositories) {
+    public final BlackBoxBoundedContext with(Repository<?, ?>... repositories) {
         checkNotNull(repositories);
-        for (Repository<I, E> repository : repositories) {
+        for (Repository<?, ?> repository : repositories) {
             checkNotNull(repository);
             boundedContext.register(repository);
         }
@@ -394,6 +388,16 @@ public class BlackBoxBoundedContext {
     public BlackBoxBoundedContext assertThat(VerifyCommands verifier) {
         EmittedCommands commands = emittedCommands();
         verifier.verify(commands);
+        return this;
+    }
+
+    @CanIgnoreReturnValue
+    public BlackBoxBoundedContext assertThat(VerifyState verifier) {
+        QueryService queryService = QueryService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
+        verifier.verify(queryService);
         return this;
     }
 
