@@ -18,40 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.model;
+package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.model.declare.AccessModifier;
-import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.server.model.declare.AccessModifier.PUBLIC;
 
 /**
- * @author Dmytro Dashenkov
+ * A signature of {@link SubscriberMethod}.
+ *
+ * @author Alex Tymchenko
  */
-public class EntitySubscriberSignature
-        extends MethodSignature<EntitySubscriberMethod, EventEnvelope> {
+public class SubscriberSignature extends EventAcceptingSignature<SubscriberMethod> {
 
-    protected EntitySubscriberSignature() {
+    public SubscriberSignature() {
         super(Subscribe.class);
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
-        return copyOf(EntityStateSubscriberSpec.values());
-    }
-
-    @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(PUBLIC);
+        return of(AccessModifier.PUBLIC);
     }
 
     @Override
@@ -60,19 +53,27 @@ public class EntitySubscriberSignature
     }
 
     @Override
-    public EntitySubscriberMethod doCreate(Method method,
-                                           ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EntitySubscriberMethod(method, parameterSpec);
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+        ImmutableSet<? extends ParameterSpec<EventEnvelope>> result = ImmutableSet
+                .<ParameterSpec<EventEnvelope>>builder()
+                .addAll(super.getParamSpecs())
+                .add(EntityStateSubscriberSpec.PARAM_SPEC)
+                .build();
+        return result;
     }
 
     @Override
-    protected boolean skipMethod(Method method) {
-        boolean shouldSkip = super.skipMethod(method);
-        if (shouldSkip) {
-            return true;
+    public SubscriberMethod doCreate(Method method,
+                                          ParameterSpec<EventEnvelope> parameterSpec) {
+        if (isEntitySubscriber(method)) {
+            return new EntitySubscriberMethod(method, parameterSpec);
+        } else {
+            return new EventSubscriberMethod(method, parameterSpec);
         }
-        Class<?> firstParameter = method.getParameterTypes()[0];
-        boolean eventSubscriber = EventMessage.class.isAssignableFrom(firstParameter);
-        return eventSubscriber;
+    }
+
+    private static boolean isEntitySubscriber(Method method) {
+        Class<?> firstParam = method.getParameterTypes()[0];
+        return !EventMessage.class.isAssignableFrom(firstParam);
     }
 }

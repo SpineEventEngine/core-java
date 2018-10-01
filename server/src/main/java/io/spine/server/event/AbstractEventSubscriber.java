@@ -30,7 +30,7 @@ import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.entity.EntityStateSubscriber;
 import io.spine.server.event.model.EventSubscriberClass;
-import io.spine.server.event.model.EventSubscriberMethod;
+import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
@@ -121,8 +121,8 @@ public abstract class AbstractEventSubscriber
     }
 
     private void handle(EventEnvelope envelope) {
-        EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass(),
-                                                               envelope.getOriginClass());
+        SubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass(),
+                                                          envelope.getOriginClass());
         method.invoke(this, envelope);
     }
 

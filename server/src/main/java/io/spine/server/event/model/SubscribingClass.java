@@ -33,5 +33,5 @@ public interface SubscribingClass {
     /**
      * Obtains a method that handles the passed class of events.
      */
-    EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass);
+    SubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass);
 }

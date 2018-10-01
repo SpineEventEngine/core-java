@@ -188,7 +188,6 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
             handler.discoverAttributes();
             return handler;
         });
-
     }
 
     /**

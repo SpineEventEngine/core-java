@@ -18,29 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.model;
+package io.spine.server.event.model;
 
-import io.spine.option.EntityOption.Visibility;
-import io.spine.server.model.declare.SignatureMismatchException;
-import io.spine.type.TypeName;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
+import io.spine.server.model.declare.ParameterSpec;
+import io.spine.system.server.EntityStateChanged;
 
-import static java.lang.String.format;
+import java.lang.reflect.Method;
 
 /**
  * @author Dmytro Dashenkov
  */
-final class InsufficientVisibilityException extends SignatureMismatchException {
+public class EntitySubscriberMethod extends SubscriberMethod {
 
-    private static final long serialVersionUID = 0L;
-
-    InsufficientVisibilityException(TypeName entityType,
-                                    Visibility entityVisibility) {
-        super(formatMessage(entityType, entityVisibility));
+    public EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
     }
 
-    private static String formatMessage(TypeName entityType,
-                                        Visibility entityVisibility) {
-        return format("Cannot subscribe to state updates of `%s`. Entity visibility is %s.",
-                      entityType, entityVisibility);
+    @Override
+    public EventClass getMessageClass() {
+        return EventClass.from(EntityStateChanged.class);
     }
 }

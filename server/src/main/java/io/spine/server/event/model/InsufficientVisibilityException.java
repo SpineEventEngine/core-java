@@ -20,40 +20,27 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventEnvelope;
-import io.spine.core.Subscribe;
-import io.spine.server.model.declare.AccessModifier;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.option.EntityOption.Visibility;
+import io.spine.server.model.declare.SignatureMismatchException;
+import io.spine.type.TypeName;
 
-import java.lang.reflect.Method;
-
-import static com.google.common.collect.ImmutableSet.of;
+import static java.lang.String.format;
 
 /**
- * A signature of {@link EventSubscriberMethod}.
- *
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-public class EventSubscriberSignature extends EventAcceptingSignature<EventSubscriberMethod> {
+final class InsufficientVisibilityException extends SignatureMismatchException {
 
-    public EventSubscriberSignature() {
-        super(Subscribe.class);
+    private static final long serialVersionUID = 0L;
+
+    InsufficientVisibilityException(TypeName entityType,
+                                    Visibility entityVisibility) {
+        super(formatMessage(entityType, entityVisibility));
     }
 
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PUBLIC);
-    }
-
-    @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(void.class);
-    }
-
-    @Override
-    public EventSubscriberMethod doCreate(Method method,
-                                          ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventSubscriberMethod(method, parameterSpec);
+    private static String formatMessage(TypeName entityType,
+                                        Visibility entityVisibility) {
+        return format("Cannot subscribe to state updates of `%s`. Entity visibility is %s.",
+                      entityType, entityVisibility);
     }
 }

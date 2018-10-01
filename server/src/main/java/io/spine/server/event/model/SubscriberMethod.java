@@ -18,12 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.model;
+package io.spine.server.event.model;
 
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
+import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.entity.EntityStateSubscriber;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
@@ -33,25 +34,18 @@ import java.lang.reflect.Method;
 /**
  * @author Dmytro Dashenkov
  */
-public class EntitySubscriberMethod
-        extends AbstractHandlerMethod<EntityStateSubscriber,
-                                      Message,
-                                      EntityStateClass,
-                                      EventEnvelope,
-                                      MethodResult<Empty>> {
+public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscriber,
+        EventMessage,
+        EventClass,
+        EventEnvelope,
+        MethodResult<Empty>> {
 
-    EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+    protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
     }
 
     @Override
-    protected MethodResult<Empty> toResult(EntityStateSubscriber target,
-                                           Object rawMethodOutput) {
+    protected final MethodResult<Empty> toResult(EventSubscriber target, Object rawMethodOutput) {
         return MethodResult.empty();
-    }
-
-    @Override
-    public EntityStateClass getMessageClass() {
-        return EntityStateClass.of(rawMessageClass());
     }
 }
