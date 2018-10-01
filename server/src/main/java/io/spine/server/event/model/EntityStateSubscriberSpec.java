@@ -31,11 +31,11 @@ import io.spine.server.model.declare.ParameterSpec;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeName;
 
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Sets.immutableEnumSet;
 import static io.spine.option.EntityOption.Visibility.FULL;
 import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 import static io.spine.option.EntityOption.Visibility.VISIBILITY_UNKNOWN;
@@ -52,7 +52,7 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     PARAM_SPEC;
 
     private static final Set<EntityOption.Visibility> allowedVisibilityModifiers =
-            EnumSet.of(VISIBILITY_UNKNOWN, SUBSCRIBE, FULL);
+            immutableEnumSet(VISIBILITY_UNKNOWN, SUBSCRIBE, FULL);
 
     @Override
     public boolean matches(Class<?>[] methodParams) {

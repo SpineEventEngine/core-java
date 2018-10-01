@@ -22,6 +22,10 @@ package io.spine.server.route;
 
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
+import io.spine.system.server.EntityStateChanged;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptySet;
 
 /**
  * Obtains a set of entity IDs for which to deliver an event.
@@ -53,5 +57,13 @@ public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, E
      */
     static <I> EventRoute<I, EventMessage> byFirstMessageField() {
         return new EventProducers.FromFirstMessageField<>();
+    }
+
+    static <I> EventRoute<I, EventMessage>
+    ignoreEntityUpdates(EventRoute<I, EventMessage> forOthers) {
+        checkNotNull(forOthers);
+        return (message, context) -> message instanceof EntityStateChanged
+                                     ? emptySet()
+                                     : forOthers.apply(message, context);
     }
 }

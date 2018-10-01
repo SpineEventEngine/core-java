@@ -45,7 +45,6 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.projection.model.ProjectionClass;
-import io.spine.server.route.EventRoute;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -60,6 +59,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.server.route.EventRoute.byProducerId;
+import static io.spine.server.route.EventRoute.ignoreEntityUpdates;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -86,7 +87,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(EventRoute.byProducerId());
+        super(ignoreEntityUpdates(byProducerId()));
     }
 
     @VisibleForTesting
