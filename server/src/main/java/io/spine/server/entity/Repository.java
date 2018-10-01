@@ -324,6 +324,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <ol>
      *     <li>The name of the message class.
      *     <li>The message ID.
+     *     <li>The entity type URL.
      * </ol>
      *
      * @param msgFormat the format of the message
@@ -334,7 +335,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                             MessageEnvelope envelope,
                             RuntimeException exception) {
         MessageClass messageClass = envelope.getMessageClass();
-        String errorMessage = format(msgFormat, messageClass, envelope.idAsString());
+        String stateType = getEntityStateType().value();
+        String errorMessage = format(msgFormat, messageClass, envelope.idAsString(), stateType);
         _error(errorMessage, exception);
     }
 

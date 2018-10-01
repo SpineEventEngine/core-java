@@ -365,7 +365,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        logError("Error reacting on event (class: %s id: %s).", envelope, exception);
+        logError("Error reacting on event (class: %s id: %s) in aggregate of type %s.",
+                 envelope, exception);
     }
 
     /**

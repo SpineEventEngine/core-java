@@ -133,7 +133,8 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
-        logError("Error dispatching event (class: %s, id: %s", envelope, exception);
+        logError("Error dispatching event (class: %s, id: %s) to entity of type %s.",
+                 envelope, exception);
     }
 
     /**

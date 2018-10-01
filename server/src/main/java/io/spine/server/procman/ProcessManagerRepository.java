@@ -451,8 +451,8 @@ public abstract class ProcessManagerRepository<I,
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
             checkNotNull(envelope);
             checkNotNull(exception);
-            logError("Error dispatching external event to process manager" +
-                             " (event class: %s, id: %s)",
+            logError("Error dispatching external event (class: %s, id: %s) " +
+                             "to a process manager of type %s.",
                      envelope, exception);
         }
     }
