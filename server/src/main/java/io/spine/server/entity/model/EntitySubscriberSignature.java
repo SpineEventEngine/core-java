@@ -21,45 +21,31 @@
 package io.spine.server.entity.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.option.EntityOption;
-import io.spine.option.OptionsProto;
-import io.spine.server.entity.EntityEnvelope;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.type.TypeName;
 
 import java.lang.reflect.Method;
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.option.EntityOption.Visibility.FULL;
-import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
-import static io.spine.option.EntityOption.Visibility.VISIBILITY_UNKNOWN;
-import static io.spine.option.Options.option;
 import static io.spine.server.model.declare.AccessModifier.PUBLIC;
-import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class EntitySubscriberSignature
-        extends MethodSignature<EntitySubscriberMethod, EntityEnvelope<? ,?>> {
+        extends MethodSignature<EntitySubscriberMethod, EventEnvelope> {
 
     protected EntitySubscriberSignature() {
         super(Subscribe.class);
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EntityEnvelope<?, ?>>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
         return copyOf(EntityStateSubscriberSpec.values());
     }
 
@@ -75,7 +61,7 @@ public class EntitySubscriberSignature
 
     @Override
     public EntitySubscriberMethod doCreate(Method method,
-                                           ParameterSpec<EntityEnvelope<?, ?>> parameterSpec) {
+                                           ParameterSpec<EventEnvelope> parameterSpec) {
         return new EntitySubscriberMethod(method, parameterSpec);
     }
 
@@ -88,52 +74,5 @@ public class EntitySubscriberSignature
         Class<?> firstParameter = method.getParameterTypes()[0];
         boolean eventSubscriber = EventMessage.class.isAssignableFrom(firstParameter);
         return eventSubscriber;
-    }
-
-    @Immutable
-    private enum EntityStateSubscriberSpec implements ParameterSpec<EntityEnvelope<?, ?>> {
-
-        PARAM_SPEC;
-
-        private static final Set<EntityOption.Visibility> allowedVisibilityModifiers =
-                EnumSet.of(VISIBILITY_UNKNOWN, SUBSCRIBE, FULL);
-
-        @Override
-        public boolean matches(Class<?>[] methodParams) {
-            boolean typeMatches = consistsOfSingle(methodParams, Message.class);
-            if (!typeMatches) {
-                return false;
-            }
-            @SuppressWarnings("unchecked") // Checked above.
-                    Class<? extends Message> singleParam = (Class<? extends Message>) methodParams[0];
-            TypeName messageType = TypeName.of(singleParam);
-            Optional<EntityOption> entityOption = getEntityOption(messageType);
-            if (!entityOption.isPresent()) {
-                return false;
-            }
-            EntityOption entity = entityOption.get();
-            if (visibleForSubscription(entity)) {
-                return true;
-            } else {
-                throw new InsufficientVisibilityException(messageType, entity.getVisibility());
-            }
-        }
-
-        @Override
-        public Object[] extractArguments(EntityEnvelope<?, ?> envelope) {
-            return new Object[]{envelope.getMessage()};
-        }
-
-        private static Optional<EntityOption> getEntityOption(TypeName messageType) {
-            Descriptor descriptor = messageType.getMessageDescriptor();
-            Optional<EntityOption> entityOption = option(descriptor, OptionsProto.entity);
-            return entityOption;
-        }
-
-        private static boolean visibleForSubscription(EntityOption entity) {
-            EntityOption.Visibility entityVisibility = entity.getVisibility();
-            boolean result = allowedVisibilityModifiers.contains(entityVisibility);
-            return result;
-        }
     }
 }
