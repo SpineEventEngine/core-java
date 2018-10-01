@@ -20,12 +20,8 @@
 
 package io.spine.server.event.model;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Empty;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.event.EventSubscriber;
-import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.system.server.EntityStateChanged;
 
@@ -34,17 +30,20 @@ import java.lang.reflect.Method;
 /**
  * @author Dmytro Dashenkov
  */
-public class EntitySubscriberMethod extends SubscriberMethod {
+public final class EntitySubscriberMethod extends SubscriberMethod {
 
-    public EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+    EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
     }
 
-    @CanIgnoreReturnValue
     @Override
-    public MethodResult<Empty> invoke(EventSubscriber target, EventEnvelope envelope) {
-        ensureExternalMatch(false);
-        return super.invoke(target, envelope);
+    public boolean isExternal() {
+        return true;
+    }
+
+    @Override
+    public boolean isDomestic() {
+        return false;
     }
 
     @Override

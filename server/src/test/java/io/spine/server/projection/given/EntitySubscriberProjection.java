@@ -47,7 +47,7 @@ public final class EntitySubscriberProjection
         super(id);
     }
 
-    @Subscribe(external = true)
+    @Subscribe
     public void onUpdate(Project aggregateState) {
         List<String> taskNames = aggregateState.getTaskList()
                                                .stream()
