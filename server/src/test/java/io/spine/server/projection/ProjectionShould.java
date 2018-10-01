@@ -21,26 +21,46 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
+import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.projection.given.ProjectionTestEnv.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
+import io.spine.system.server.DispatchedMessageId;
+import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityStateChanged;
+import io.spine.test.projection.Project;
+import io.spine.test.projection.ProjectId;
+import io.spine.test.projection.ProjectTaskNames;
+import io.spine.test.projection.Task;
+import io.spine.test.projection.TaskId;
 import io.spine.test.projection.event.Int32Imported;
 import io.spine.test.projection.event.StringImported;
+import io.spine.testing.TestValues;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
+import static io.spine.core.given.GivenEvent.withMessage;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.test.projection.Project.Status.STARTED;
+import static io.spine.testing.TestValues.random;
+import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.projection.ProjectionEventDispatcher.dispatch;
 import static java.lang.String.valueOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -93,6 +113,57 @@ class ProjectionShould {
                              .getValue()
                              .contains(valueOf(integerEvent.getValue())));
         assertTrue(projection.isChanged());
+    }
+
+
+
+    @Test
+    @DisplayName("receive entity state updates")
+    void handleStateUpdates() {
+        ProjectId id = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        TaskId taskId = TaskId
+                .newBuilder()
+                .setId(TestValues.random(1, 1_000))
+                .build();
+        Task task = Task
+                .newBuilder()
+                .setTaskId(taskId)
+                .setTitle("test task " + random(42))
+                .build();
+        String projectName = "test project name " + randomString();
+        Project aggregateState = Project
+                .newBuilder()
+                .setId(id)
+                .setName(projectName)
+                .setStatus(STARTED)
+                .addTask(task)
+                .build();
+        EntityHistoryId historyId = EntityHistoryId
+                .newBuilder()
+                .setTypeUrl(TypeUrl.of(aggregateState)
+                                   .value())
+                .setEntityId(EntityId.newBuilder().setId(pack(id)))
+                .build();
+        EntityStateChanged systemEvent = EntityStateChanged
+                .newBuilder()
+                .setId(historyId)
+                .setNewState(pack(aggregateState))
+                .setWhen(getCurrentTime())
+                .addMessageId(DispatchedMessageId
+                                      .newBuilder()
+                                      .setEventId(EventId.newBuilder().setValue(newUuid())))
+                .build();
+        EntitySubscriberProjection projection = new EntitySubscriberProjection(id);
+        dispatch(projection, withMessage(systemEvent));
+        assertThat(projection.getState()).isEqualTo(ProjectTaskNames
+                                                            .newBuilder()
+                                                            .setProjectId(id)
+                                                            .setProjectName(projectName)
+                                                            .addTaskName(task.getTitle())
+                                                            .build());
     }
 
     @Test
