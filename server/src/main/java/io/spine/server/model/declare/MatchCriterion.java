@@ -85,7 +85,6 @@ public enum MatchCriterion {
                     "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-
             ImmutableSet<AccessModifier> allowedModifiers = signature.getAllowedModifiers();
             boolean hasMatch = allowedModifiers
                     .stream()
@@ -128,7 +127,7 @@ public enum MatchCriterion {
      * The criterion for the method parameter list to conform the
      * {@linkplain MethodSignature#getParamSpecs() requirements}.
      *
-     * @see MethodParams#findMatching(Method, Class)
+     * @see MethodParams#findMatching(Method, Collection)
      */
     PARAMETER_LIST(ERROR,
                    "`%s` method has an invalid parameter list. " +
