@@ -22,7 +22,6 @@ package io.spine.server.projection.given;
 
 import com.google.protobuf.Message;
 import io.spine.core.Subscribe;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.system.server.EntityStateChanged;
@@ -35,6 +34,7 @@ import io.spine.test.projection.Task;
 import java.util.List;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -47,7 +47,7 @@ public final class EntitySubscriberProjection
         super(id);
     }
 
-    @Subscribe
+    @Subscribe(external = true)
     public void onUpdate(Project aggregateState) {
         List<String> taskNames = aggregateState.getTaskList()
                                                .stream()
@@ -67,7 +67,7 @@ public final class EntitySubscriberProjection
             super.onRegistered();
             getEventRouting().route(EntityStateChanged.class,
                                     (event, context) -> {
-                                        Message state = AnyPacker.unpack(event.getNewState());
+                                        Message state = unpack(event.getNewState());
                                         if (state instanceof Project) {
                                             Project project = (Project) state;
                                             return of(project.getId());
