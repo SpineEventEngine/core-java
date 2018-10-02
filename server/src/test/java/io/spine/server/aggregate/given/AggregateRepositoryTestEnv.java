@@ -88,7 +88,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
-@SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored"})
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class AggregateRepositoryTestEnv {
 
     private static final TestActorRequestFactory requestFactory = newRequestFactory();

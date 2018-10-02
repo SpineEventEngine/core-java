@@ -28,7 +28,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntityId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,6 +58,7 @@ import static io.spine.client.given.EntityIdUnpacker.unpacker;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.QueryBuilderTestEnv.newMessageId;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -181,7 +181,7 @@ class QueryBuilderTest {
                  .hasSize(1);
             Any actualValue = findByName(columnFilters, columnName).getValue();
             assertNotNull(columnValue);
-            Int32Value messageValue = (Int32Value) AnyPacker.unpack(actualValue);
+            Int32Value messageValue = (Int32Value) unpack(actualValue);
             int actualGenericValue = messageValue.getValue();
             assertEquals(columnValue, actualGenericValue);
         }
