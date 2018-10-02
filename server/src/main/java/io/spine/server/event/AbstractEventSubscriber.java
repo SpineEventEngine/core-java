@@ -105,6 +105,13 @@ public abstract class AbstractEventSubscriber
     }
 
     @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        SubscriberMethod subscriber = thisClass.getSubscriber(envelope.getMessageClass(),
+                                                              envelope.getOriginClass());
+        return subscriber.canHandle(envelope);
+    }
+
+    @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<EventClass> getMessageClasses() {
         return thisClass.getEventClasses();
