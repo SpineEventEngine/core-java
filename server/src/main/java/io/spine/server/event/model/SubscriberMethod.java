@@ -22,8 +22,11 @@ package io.spine.server.event.model;
 
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
+import io.spine.base.FieldPath;
+import io.spine.core.ByField;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
@@ -31,14 +34,18 @@ import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
+import static io.spine.base.FieldPaths.fieldAt;
+import static io.spine.base.FieldPaths.parse;
+import static io.spine.string.Stringifiers.fromString;
+
 /**
  * @author Dmytro Dashenkov
  */
 public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscriber,
-        EventMessage,
-        EventClass,
-        EventEnvelope,
-        MethodResult<Empty>> {
+                                                                     EventMessage,
+                                                                     EventClass,
+                                                                     EventEnvelope,
+                                                                     MethodResult<Empty>> {
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
@@ -47,5 +54,26 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
     @Override
     protected final MethodResult<Empty> toResult(EventSubscriber target, Object rawMethodOutput) {
         return MethodResult.empty();
+    }
+
+    public final boolean canHandle(EventEnvelope envelope) {
+        Subscribe annotation = getRawMethod().getAnnotation(Subscribe.class);
+        ByField filter = annotation.filter();
+        String fieldPath = filter.path();
+        if (fieldPath.isEmpty()) {
+            return true;
+        } else {
+            EventMessage event = envelope.getMessage();
+            return match(event, filter);
+        }
+    }
+
+    private boolean match(EventMessage event, ByField filter) {
+        FieldPath path = parse(filter.path());
+        Object valueOfField = fieldAt(event, path);
+        String expectedValueString = filter.value();
+        Object expectedValue = fromString(expectedValueString, valueOfField.getClass());
+        boolean filterMatches = valueOfField.equals(expectedValue);
+        return filterMatches;
     }
 }

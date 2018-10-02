@@ -41,6 +41,7 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -257,6 +258,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Set<EventClass> getExternalEventClasses() {
         return projectionClass().getExternalEventClasses();
+    }
+
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        SubscriberMethod subscriber = projectionClass().getSubscriber(envelope.getMessageClass(),
+                                                                      envelope.getOriginClass());
+        return subscriber.canHandle(envelope);
     }
 
     /**
