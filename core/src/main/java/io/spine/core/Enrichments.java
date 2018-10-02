@@ -86,7 +86,7 @@ public final class Enrichments {
         if (any == null) {
             return Optional.empty();
         }
-        E result = unpack(any);
+        @SuppressWarnings("unchecked") E result = (E) unpack(any);
         return Optional.ofNullable(result);
     }
 

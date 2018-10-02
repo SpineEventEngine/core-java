@@ -28,6 +28,7 @@ import io.spine.server.transport.MessageChannel;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * A utility class for working with {@link MessageChannel message channels} and their
@@ -72,9 +73,10 @@ class IntegrationChannels {
 
         TypeUrl typeUrl = TypeUrl.of(messageType);
 
-        StringValue asStringValue = StringValue.newBuilder()
-                                               .setValue(typeUrl.value())
-                                               .build();
+        StringValue asStringValue = StringValue
+                .newBuilder()
+                .setValue(typeUrl.value())
+                .build();
         Any packed = AnyPacker.pack(asStringValue);
         ChannelId channelId = ChannelId.newBuilder()
                                        .setIdentifier(packed)
@@ -94,13 +96,14 @@ class IntegrationChannels {
     static ExternalMessageType fromId(ChannelId channelId) {
         checkNotNull(channelId);
 
-        StringValue rawValue = AnyPacker.unpack(channelId.getIdentifier());
+        StringValue rawValue = (StringValue) unpack(channelId.getIdentifier());
         TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
-        ExternalMessageType result = ExternalMessageType.newBuilder()
-                                                        .setMessageTypeUrl(typeUrl.value())
-                                                        .setWrapperTypeUrl(EVENT_TYPE_URL.value())
-                                                        .build();
+        ExternalMessageType result = ExternalMessageType
+                .newBuilder()
+                .setMessageTypeUrl(typeUrl.value())
+                .setWrapperTypeUrl(EVENT_TYPE_URL.value())
+                .build();
         return result;
     }
 }

@@ -113,12 +113,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * @param <I> the type for IDs of this class of aggregates
  * @param <S> the type of the state held by the aggregate
  * @param <B> the type of the aggregate state builder
- *
- * @author Alexander Yevsyukov
- * @author Alexander Litus
- * @author Mikhail Melnik
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for this central class.
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
@@ -323,7 +318,9 @@ public abstract class Aggregate<I,
      * @param snapshot the snapshot with the state to restore
      */
     void restore(Snapshot snapshot) {
-        S stateToRestore = unpack(snapshot.getState());
+        @SuppressWarnings("unchecked") /* The cast is safe since the snapshot is created
+            with the state of this aggregate, which is bound by the type <S>. */
+        S stateToRestore = (S) unpack(snapshot.getState());
         Version versionFromSnapshot = snapshot.getVersion();
         setInitialState(stateToRestore, versionFromSnapshot);
     }

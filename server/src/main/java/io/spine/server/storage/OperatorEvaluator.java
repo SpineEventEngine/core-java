@@ -30,14 +30,13 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.ColumnFilter.Operator;
-import static io.spine.time.Timestamps2.isLaterThan;
+import static io.spine.protobuf.Timestamps2.isLaterThan;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
 /**
  * A boolean non-typed comparison operation on two given instances.
  *
- * @author Dmytro Dashenkov
  * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
  */
 @Internal

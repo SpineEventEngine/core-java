@@ -27,6 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
+import io.spine.protobuf.Durations2;
 import io.spine.string.Stringifiers;
 import io.spine.test.commands.CmdCreateProject;
 import io.spine.test.commands.CmdStartProject;
@@ -35,7 +36,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.c.CreateTask;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
@@ -52,11 +52,11 @@ import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.Commands.wereWithinPeriod;
+import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
-import static io.spine.time.Durations2.seconds;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,8 +71,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>The test suite is located under the "client" module since actor request generation
  * is required. So we want to avoid circular dependencies between "core" and "client" modules.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("Commands utility should")
 class CommandsTest {

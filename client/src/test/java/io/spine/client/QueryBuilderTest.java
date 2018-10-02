@@ -59,9 +59,9 @@ import static io.spine.client.given.EntityIdUnpacker.unpacker;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.QueryBuilderTestEnv.newMessageId;
+import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.time.Durations2.fromHours;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
@@ -181,7 +181,7 @@ class QueryBuilderTest {
                  .hasSize(1);
             Any actualValue = findByName(columnFilters, columnName).getValue();
             assertNotNull(columnValue);
-            Int32Value messageValue = AnyPacker.unpack(actualValue);
+            Int32Value messageValue = (Int32Value) AnyPacker.unpack(actualValue);
             int actualGenericValue = messageValue.getValue();
             assertEquals(columnValue, actualGenericValue);
         }

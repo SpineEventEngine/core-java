@@ -32,7 +32,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
-import io.spine.time.Timestamps2;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +41,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.core.CommandContext.Schedule;
+import static io.spine.protobuf.Timestamps2.isBetween;
+import static io.spine.protobuf.Timestamps2.isLaterThan;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -83,7 +84,7 @@ public final class Commands {
      */
     public static CommandMessage getMessage(Command command) {
         checkNotNull(command);
-        return AnyPacker.unpack(command.getMessage());
+        return (CommandMessage) AnyPacker.unpack(command.getMessage());
     }
 
     /**
@@ -129,7 +130,7 @@ public final class Commands {
         return request -> {
             checkNotNull(request);
             Timestamp timestamp = getTimestamp(request);
-            return Timestamps2.isLaterThan(timestamp, from);
+            return isLaterThan(timestamp, from);
         };
     }
 
@@ -142,7 +143,7 @@ public final class Commands {
         return request -> {
             checkNotNull(request);
             Timestamp timestamp = getTimestamp(request);
-            return Timestamps2.isBetween(timestamp, from, to);
+            return isBetween(timestamp, from, to);
         };
     }
 

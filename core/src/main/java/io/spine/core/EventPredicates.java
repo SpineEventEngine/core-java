@@ -21,7 +21,7 @@
 package io.spine.core;
 
 import com.google.protobuf.Timestamp;
-import io.spine.time.Timestamps2;
+import io.spine.protobuf.Timestamps2;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Predicate;
@@ -33,13 +33,11 @@ import static com.google.protobuf.util.Timestamps.compare;
 
 /**
  * Predicates for working with {@code Event}s.
- *
- * @author Alexander Yevsyukov
  */
 public final class EventPredicates {
 
+    /** Prevent instantiation of this utility class. */
     private EventPredicates() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

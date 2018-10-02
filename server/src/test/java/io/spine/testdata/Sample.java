@@ -48,8 +48,6 @@ import static java.lang.String.format;
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
  * {@link Command}), storage objects and else.
- *
- * @author Dmytro Dashenkov
  */
 public class Sample {
 
@@ -73,7 +71,8 @@ public class Sample {
     public static <M extends Message, B extends Message.Builder> B builderForType(Class<M> clazz) {
         checkClass(clazz);
 
-        B builder = builderFor(clazz);
+        @SuppressWarnings("unchecked") // We cast here for brevity of the test code.
+        B builder = (B) builderFor(clazz);
         Descriptor builderDescriptor = builder.getDescriptorForType();
         Collection<FieldDescriptor> fields = builderDescriptor.getFields();
 

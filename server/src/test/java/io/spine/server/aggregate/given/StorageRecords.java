@@ -35,15 +35,13 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.testing.server.TestEventFactory.newInstance;
-import static io.spine.time.Durations2.seconds;
 
 /**
  * Utilities for creating test instances and sequences of {@link AggregateEventRecord}.
- *
- * @author Alexander Yevsyukov
  */
 public class StorageRecords {
 
