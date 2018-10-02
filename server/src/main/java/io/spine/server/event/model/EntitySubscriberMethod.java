@@ -20,11 +20,14 @@
 
 package io.spine.server.event.model;
 
+import io.spine.core.ByField;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.system.server.EntityStateChanged;
+import io.spine.type.TypeUrl;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
@@ -34,6 +37,12 @@ public final class EntitySubscriberMethod extends SubscriberMethod {
 
     EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
+    }
+
+    @Override
+    protected ByField getFilter() {
+        TypeUrl targetType = TypeUrl.of(rawMessageClass());
+        return new TypeFilteringFilter(targetType);
     }
 
     @Override
@@ -49,5 +58,30 @@ public final class EntitySubscriberMethod extends SubscriberMethod {
     @Override
     public EventClass getMessageClass() {
         return EventClass.from(EntityStateChanged.class);
+    }
+
+    @SuppressWarnings("ClassExplicitlyAnnotation")
+    private static final class TypeFilteringFilter implements ByField {
+
+        private final TypeUrl targetType;
+
+        private TypeFilteringFilter(TypeUrl type) {
+            targetType = type;
+        }
+
+        @Override
+        public String path() {
+            return "id.type_url";
+        }
+
+        @Override
+        public String value() {
+            return targetType.value();
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return ByField.class;
+        }
     }
 }

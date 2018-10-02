@@ -26,7 +26,6 @@ import io.spine.base.FieldPath;
 import io.spine.core.ByField;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
@@ -56,9 +55,10 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
         return MethodResult.empty();
     }
 
+    protected abstract ByField getFilter();
+
     public final boolean canHandle(EventEnvelope envelope) {
-        Subscribe annotation = getRawMethod().getAnnotation(Subscribe.class);
-        ByField filter = annotation.filter();
+        ByField filter = getFilter();
         String fieldPath = filter.path();
         if (fieldPath.isEmpty()) {
             return true;
@@ -68,7 +68,7 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
         }
     }
 
-    private boolean match(EventMessage event, ByField filter) {
+    private static boolean match(EventMessage event, ByField filter) {
         FieldPath path = parse(filter.path());
         Object valueOfField = fieldAt(event, path);
         String expectedValueString = filter.value();

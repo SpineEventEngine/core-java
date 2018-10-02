@@ -22,6 +22,7 @@ package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
+import io.spine.core.ByField;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
@@ -42,6 +43,12 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     /** Creates a new instance. */
     EventSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
+    }
+
+    @Override
+    protected ByField getFilter() {
+        Subscribe subscribe = getRawMethod().getAnnotation(Subscribe.class);
+        return subscribe.filter();
     }
 
     @CanIgnoreReturnValue // since event subscriber methods do not return values
