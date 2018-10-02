@@ -21,8 +21,9 @@
 package io.spine.server.bus;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.protobuf.Message;
+import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -32,6 +33,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
@@ -42,8 +45,9 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public abstract class DispatcherRegistry<C extends MessageClass,
-                                         D extends MessageDispatcher<C, ?, ?>> {
+public abstract class DispatcherRegistry<C extends MessageClass<? extends Message>,
+                                         E extends MessageEnvelope<?, ?, ?>,
+                                         D extends MessageDispatcher<C, E, ?>> {
 
     /**
      * The map from a message class to one or more dispatchers of
@@ -104,13 +108,18 @@ public abstract class DispatcherRegistry<C extends MessageClass,
     /**
      * Obtains dispatchers for the passed message class.
      *
-     * @param messageClass the
+     * @param envelope the message envelope to find dispatchers for
      * @return a set of dispatchers or an empty set if no dispatchers are registered
      */
-    protected Set<D> getDispatchers(C messageClass) {
-        checkNotNull(messageClass);
-        Collection<D> dispatchers = this.dispatchers.get(messageClass);
-        return ImmutableSet.copyOf(dispatchers);
+    protected Set<D> getDispatchers(E envelope) {
+        checkNotNull(envelope);
+        C messageClass = classOf(envelope);
+        Set<D> dispatchers = this.dispatchers
+                .get(messageClass)
+                .stream()
+                .filter(dispatcher -> dispatcher.canDispatch(envelope))
+                .collect(toImmutableSet());
+        return dispatchers;
     }
 
     /**
@@ -120,22 +129,38 @@ public abstract class DispatcherRegistry<C extends MessageClass,
      *         if more than one dispatcher is found
      * @apiNote This method must be called only for serving {@link UnicastBus}es.
      */
-    protected Optional<? extends D> getDispatcher(C messageClass) {
-        Set<D> dispatchers = getDispatchers(messageClass);
-        if (dispatchers.isEmpty()) {
-            return Optional.empty();
-        }
+    protected Optional<? extends D> getDispatcher(E envelope) {
+        checkNotNull(envelope);
+        Set<D> dispatchers = getDispatchers(envelope);
+        checkNotMoreThanOne(dispatchers, classOf(envelope));
+        Optional<D> result = dispatchers.stream().findFirst();
+        return result;
+    }
 
+    protected Set<D> getDispatchersForType(C messageClass) {
+        checkNotNull(messageClass);
+        Collection<D> dispatchersForType = dispatchers.get(messageClass);
+        return copyOf(dispatchersForType);
+    }
+
+    protected Optional<? extends D> getDispatcherForType(C messageClass) {
+        Collection<D> dispatchersOfClass = dispatchers.get(messageClass);
+        checkNotMoreThanOne(dispatchersOfClass, messageClass);
+        Optional<D> dispatcher = dispatchersOfClass.stream().findFirst();
+        return dispatcher;
+    }
+
+    private void checkNotMoreThanOne(Collection<D> dispatchers, C messageClass) {
         int size = dispatchers.size();
-        checkState(size == 1,
+        checkState(size <= 1,
                    "More than one (%s) dispatchers found for the message class `%s`.",
                    size, messageClass);
+    }
 
-        // Since there can be only one dispatcher per message class, and the set is not empty,
-        // we get the single element.
-        Optional<? extends D> result = dispatchers.stream()
-                                                  .findFirst();
-        return result;
+    private C classOf(E envelope) {
+        @SuppressWarnings("unchecked") // Logically valid.
+        C messageClass = (C) envelope.getMessageClass();
+        return messageClass;
     }
 
     /**

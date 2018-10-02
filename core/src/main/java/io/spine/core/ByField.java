@@ -17,26 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
 
-import io.spine.server.bus.DispatcherRegistry;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package io.spine.core;
 
 /**
- * A registry of domestic subscribers which subscribe or react upon external messages.
- *
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-final class DomesticDispatcherRegistry
-        extends DispatcherRegistry<ExternalMessageClass,
-                                   ExternalMessageEnvelope,
-                                   ExternalMessageDispatcher<?>> {
-    @Override
-    protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
-            throws IllegalArgumentException {
-        // Do not call `super()`, as long as we don't want to enforce
-        // non-empty message class set for an external message dispatcher.
-        checkNotNull(dispatcher);
-    }
+public @interface ByField {
+
+    String path();
+
+    String value();
 }

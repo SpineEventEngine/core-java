@@ -64,4 +64,8 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      * @param exception the error
      */
     void onError(E envelope, RuntimeException exception);
+
+    default boolean canDispatch(E envelope) {
+        return true;
+    }
 }

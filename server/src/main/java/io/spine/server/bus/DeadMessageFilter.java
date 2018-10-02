@@ -42,14 +42,15 @@ import static io.spine.server.bus.Buses.reject;
  */
 final class DeadMessageFilter<T extends Message,
                               E extends MessageEnvelope<?, T, ?>,
-                              C extends MessageClass,
+                              C extends MessageClass<? extends Message>,
                               D extends MessageDispatcher<C, E, ?>>
         implements BusFilter<E> {
 
     private final DeadMessageHandler<E> deadMessageHandler;
-    private final DispatcherRegistry<C, D> registry;
+    private final DispatcherRegistry<C, E, D> registry;
 
-    DeadMessageFilter(DeadMessageHandler<E> deadMessageHandler, DispatcherRegistry<C, D> registry) {
+    DeadMessageFilter(DeadMessageHandler<E> deadMessageHandler,
+                      DispatcherRegistry<C, E, D> registry) {
         super();
         this.deadMessageHandler = checkNotNull(deadMessageHandler);
         this.registry = checkNotNull(registry);
@@ -57,8 +58,7 @@ final class DeadMessageFilter<T extends Message,
 
     @Override
     public Optional<Ack> accept(E envelope) {
-        @SuppressWarnings("unchecked") C cls = (C) envelope.getMessageClass();
-        Collection<D> dispatchers = registry.getDispatchers(cls);
+        Collection<D> dispatchers = registry.getDispatchers(envelope);
         if (dispatchers.isEmpty()) {
             MessageUnhandled report = deadMessageHandler.handle(envelope);
             Error error = report.asError();

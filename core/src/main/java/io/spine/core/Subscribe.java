@@ -91,4 +91,6 @@ public @interface Subscribe {
      * Bounded Context to which the annotated method's class belongs.
      */
     boolean external() default false;
+
+    ByField filter() default @ByField(path = "", value = "");
 }

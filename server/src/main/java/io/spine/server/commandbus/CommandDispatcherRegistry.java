@@ -23,6 +23,7 @@ package io.spine.server.commandbus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.DispatcherRegistry;
 
 import java.util.Map;
@@ -38,7 +39,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Alexander Yevsyukov
  */
-class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, CommandDispatcher<?>> {
+class CommandDispatcherRegistry
+        extends DispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher<?>> {
 
     /**
      * {@inheritDoc}
@@ -93,7 +95,7 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
         // Gather command classes from this dispatcher that are registered.
         for (CommandClass commandClass : commandClasses) {
             Optional<? extends CommandDispatcher<?>> registeredDispatcher =
-                    getDispatcher(commandClass);
+                    getDispatcherForType(commandClass);
             registeredDispatcher.ifPresent(d -> alreadyRegistered.put(commandClass, d));
         }
 

@@ -559,11 +559,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
-    /** The EventBus to which we post events produced by aggregates. */
-    private EventBus getEventBus() {
-        return getBoundedContext().getEventBus();
-    }
-
     /** The Stand instance for sending updated aggregate states. */
     private Stand getStand() {
         return getBoundedContext().getStand();
@@ -615,7 +610,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
-    void onImportEvent(I id, Event event) {
+    private void onImportEvent(I id, Event event) {
         lifecycleOf(id).onEventImported(event);
     }
 

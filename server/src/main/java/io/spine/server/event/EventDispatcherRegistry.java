@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.bus.DispatcherRegistry;
 
 import java.util.Set;
@@ -36,7 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-class EventDispatcherRegistry extends DispatcherRegistry<EventClass, EventDispatcher<?>> {
+class EventDispatcherRegistry
+        extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
 
     @Override
     protected void register(EventDispatcher<?> dispatcher) {
@@ -63,18 +65,18 @@ class EventDispatcherRegistry extends DispatcherRegistry<EventClass, EventDispat
      * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
      */
     @Override
-    protected Set<EventDispatcher<?>> getDispatchers(EventClass eventClass) {
-        return super.getDispatchers(eventClass);
+    protected Set<EventDispatcher<?>> getDispatchersForType(EventClass messageClass) {
+        return super.getDispatchersForType(messageClass);
     }
 
     /**
      * Checks if this registry has a dispatcher for events of the given class.
      *
-     * @param eventClass class to find dispatchers for
+     * @param event class to find dispatchers for
      * @return {@code true} if the dispatcher is present, {@code false} otherwise
      */
-    boolean hasDispatchersFor(EventClass eventClass) {
-        Set<EventDispatcher<?>> dispatchers = getDispatchers(eventClass);
+    boolean hasDispatchersFor(EventEnvelope event) {
+        Set<EventDispatcher<?>> dispatchers = getDispatchers(event);
         boolean result = !dispatchers.isEmpty();
         return result;
     }
