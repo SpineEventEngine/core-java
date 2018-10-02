@@ -20,32 +20,19 @@
 
 package io.spine.change;
 
-import com.google.common.testing.NullPointerTester;
-import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.ByteString;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.change.Preconditions2.checkNewValueNotEmpty;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.change.ChangePreconditions.checkNewValueNotEmpty;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Preconditions2 utility should")
-class Preconditions2Test {
+class ChangePreconditionsTest extends UtilityClassTest<ChangePreconditions> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Preconditions2.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testStaticMethods(Preconditions2.class, Visibility.PACKAGE);
+    protected ChangePreconditionsTest() {
+        super(ChangePreconditions.class);
     }
 
     @Test

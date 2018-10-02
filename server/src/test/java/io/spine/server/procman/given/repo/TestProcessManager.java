@@ -48,16 +48,12 @@ import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.testdata.Sample;
 
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.testdata.Sample.builderForType;
 
-@SuppressWarnings({
-        "OverlyCoupledClass",
-        "UnusedParameters" /* The parameter left to show that a projection subscriber can have
-                            two parameters. */})
 public class TestProcessManager
         extends ProcessManager<ProjectId, Project, ProjectVBuilder>
         implements TestEntityWithStringColumn {
@@ -108,39 +104,28 @@ public class TestProcessManager
     @Assign
     PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
         keep(command);
-
-        PmProjectCreated event = ((PmProjectCreated.Builder)
-                Sample.builderForType(PmProjectCreated.class))
-                      .setProjectId(command.getProjectId())
-                      .build();
-        return event;
+        PmProjectCreated.Builder event = builderForType(PmProjectCreated.class);
+        return event.setProjectId(command.getProjectId())
+                    .build();
     }
 
     @Assign
     PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
         keep(command);
-
-        PmTaskAdded event = ((PmTaskAdded.Builder)
-                Sample.builderForType(PmTaskAdded.class))
-                      .setProjectId(command.getProjectId())
-                      .build();
-        return event;
+        PmTaskAdded.Builder event = builderForType(PmTaskAdded.class);
+        return event.setProjectId(command.getProjectId())
+                    .build();
     }
 
     @Command
     Pair<PmAddTask, PmDoNothing> handle(PmStartProject command, CommandContext context) {
         keep(command);
-
         ProjectId projectId = command.getProjectId();
-        PmAddTask addTask = ((PmAddTask.Builder)
-                Sample.builderForType(PmAddTask.class))
-                .setProjectId(projectId)
-                .build();
-        PmDoNothing doNothing = ((PmDoNothing.Builder)
-                Sample.builderForType(PmDoNothing.class))
-                .setProjectId(projectId)
-                .build();
-        return Pair.of(addTask, doNothing);
+        PmAddTask.Builder addTask = builderForType(PmAddTask.class);
+        addTask.setProjectId(projectId);
+        PmDoNothing.Builder doNothing = builderForType(PmDoNothing.class);
+        doNothing.setProjectId(projectId);
+        return Pair.of(addTask.build(), doNothing.build());
     }
 
     @Assign

@@ -32,6 +32,8 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
 
+import static io.spine.testdata.Sample.builderForType;
+
 /**
  * Factory methods for command messages.
  */
@@ -44,19 +46,19 @@ public class GivenCommandMessage {
     }
 
     public static PmCreateProject createProject() {
-        return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
+        return ((PmCreateProject.Builder) builderForType(PmCreateProject.class))
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmStartProject startProject() {
-        return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
+        return ((PmStartProject.Builder) builderForType(PmStartProject.class))
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmAddTask addTask() {
-        return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
+        return ((PmAddTask.Builder) builderForType(PmAddTask.class))
                 .setProjectId(ID)
                 .build();
     }
@@ -74,25 +76,25 @@ public class GivenCommandMessage {
     }
 
     public static PmDoNothing doNothing() {
-        return ((PmDoNothing.Builder) Sample.builderForType(PmDoNothing.class))
+        return ((PmDoNothing.Builder) builderForType(PmDoNothing.class))
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmProjectStarted projectStarted() {
-        return ((PmProjectStarted.Builder) Sample.builderForType(PmProjectStarted.class))
+        return ((PmProjectStarted.Builder) builderForType(PmProjectStarted.class))
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmProjectCreated projectCreated() {
-        return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
+        return ((PmProjectCreated.Builder) builderForType(PmProjectCreated.class))
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmTaskAdded taskAdded() {
-        return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
+        return ((PmTaskAdded.Builder) builderForType(PmTaskAdded.class))
                 .setProjectId(ID)
                 .build();
     }

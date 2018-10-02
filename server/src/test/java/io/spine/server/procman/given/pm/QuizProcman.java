@@ -24,7 +24,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.tuple.EitherOfThree;
+import io.spine.server.tuple.EitherOf3;
 import io.spine.test.procman.quiz.PmAnswer;
 import io.spine.test.procman.quiz.PmQuestionId;
 import io.spine.test.procman.quiz.PmQuiz;
@@ -76,13 +76,13 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     }
 
     @React
-    EitherOfThree<PmQuestionSolved, PmQuestionFailed, Nothing> on(PmQuestionAnswered event) {
+    EitherOf3<PmQuestionSolved, PmQuestionFailed, Nothing> on(PmQuestionAnswered event) {
         PmAnswer answer = event.getAnswer();
         PmQuizId examId = event.getQuizId();
         PmQuestionId questionId = answer.getQuestionId();
 
         if (questionIsClosed(questionId)) {
-            return EitherOfThree.withC(nothing());
+            return EitherOf3.withC(nothing());
         }
 
         boolean answerIsCorrect = answer.getCorrect();
@@ -92,14 +92,14 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
                                     .setQuizId(examId)
                                     .setQuestionId(questionId)
                                     .build();
-            return EitherOfThree.withA(reaction);
+            return EitherOf3.withA(reaction);
         } else {
             PmQuestionFailed reaction =
                     PmQuestionFailed.newBuilder()
                                     .setQuizId(examId)
                                     .setQuestionId(questionId)
                                     .build();
-            return EitherOfThree.withB(reaction);
+            return EitherOf3.withB(reaction);
         }
     }
 

@@ -23,7 +23,6 @@ package io.spine.server.tuple;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -43,55 +42,46 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
         /* Short vars are OK for tuple tests. */
         "DuplicateStringLiteralInspection" /* Common test display names. */,
         "ResultOfMethodCallIgnored" /* Methods are called to throw exception. */})
-@DisplayName("EitherOfFive should")
-class EitherOfFiveTest {
+@DisplayName("EitherOfFour should")
+class EitherOf4Test {
 
     private final StringValue a = TestValues.newUuidValue();
     private final BoolValue b = BoolValue.of(true);
     private final Timestamp c = Time.getCurrentTime();
     private final UInt32Value d = UInt32Value.newBuilder()
-                                             .setValue(512)
+                                             .setValue(1024)
                                              .build();
-    private final FloatValue e = FloatValue.newBuilder()
-                                           .setValue(3.14159f)
-                                           .build();
 
-    private EitherOfFive<StringValue, BoolValue, Timestamp, UInt32Value, FloatValue> eitherWithA;
-    private EitherOfFive<StringValue, BoolValue, Timestamp, UInt32Value, FloatValue> eitherWithB;
-    private EitherOfFive<StringValue, BoolValue, Timestamp, UInt32Value, FloatValue> eitherWithC;
-    private EitherOfFive<StringValue, BoolValue, Timestamp, UInt32Value, FloatValue> eitherWithD;
-    private EitherOfFive<StringValue, BoolValue, Timestamp, UInt32Value, FloatValue> eitherWithE;
+    private EitherOf4<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithA;
+    private EitherOf4<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithB;
+    private EitherOf4<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithC;
+    private EitherOf4<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithD;
 
     @BeforeEach
     void setUp() {
-        eitherWithA = EitherOfFive.withA(a);
-        eitherWithB = EitherOfFive.withB(b);
-        eitherWithC = EitherOfFive.withC(c);
-        eitherWithD = EitherOfFive.withD(d);
-        eitherWithE = EitherOfFive.withE(e);
+        eitherWithA = EitherOf4.withA(a);
+        eitherWithB = EitherOf4.withB(b);
+        eitherWithC = EitherOf4.withC(c);
+        eitherWithD = EitherOf4.withD(d);
     }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        new NullPointerTester().testAllPublicStaticMethods(EitherOfFive.class);
+        new NullPointerTester().testAllPublicStaticMethods(EitherOf4.class);
     }
 
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        new EqualsTester().addEqualityGroup(eitherWithA, EitherOfFive.withA(a))
+        new EqualsTester().addEqualityGroup(eitherWithA, EitherOf4.withA(a))
                           .addEqualityGroup(eitherWithB)
                           .addEqualityGroup(eitherWithC)
                           .addEqualityGroup(eitherWithD)
-                          .addEqualityGroup(eitherWithE)
                           .testEquals();
     }
 
@@ -102,7 +92,6 @@ class EitherOfFiveTest {
         assertEquals(b, eitherWithB.getB());
         assertEquals(c, eitherWithC.getC());
         assertEquals(d, eitherWithD.getD());
-        assertEquals(e, eitherWithE.getE());
     }
 
     @Test
@@ -112,7 +101,6 @@ class EitherOfFiveTest {
         assertEquals(1, eitherWithB.getIndex());
         assertEquals(2, eitherWithC.getIndex());
         assertEquals(3, eitherWithD.getIndex());
-        assertEquals(4, eitherWithE.getIndex());
     }
 
     @Test
@@ -137,11 +125,6 @@ class EitherOfFiveTest {
 
         assertEquals(d, iteratorD.next());
         assertFalse(iteratorD.hasNext());
-
-        Iterator<Message> iteratorE = eitherWithE.iterator();
-
-        assertEquals(e, iteratorE.next());
-        assertFalse(iteratorE.hasNext());
     }
 
     @Test
@@ -151,7 +134,6 @@ class EitherOfFiveTest {
         reserializeAndAssert(eitherWithB);
         reserializeAndAssert(eitherWithC);
         reserializeAndAssert(eitherWithD);
-        reserializeAndAssert(eitherWithE);
     }
 
     @Nested
@@ -174,12 +156,6 @@ class EitherOfFiveTest {
         @DisplayName("D")
         void d() {
             assertThrows(IllegalStateException.class, () -> eitherWithA.getD());
-        }
-
-        @Test
-        @DisplayName("E")
-        void e() {
-            assertThrows(IllegalStateException.class, () -> eitherWithA.getE());
         }
     }
 
@@ -204,12 +180,6 @@ class EitherOfFiveTest {
         void d() {
             assertThrows(IllegalStateException.class, () -> eitherWithB.getD());
         }
-
-        @Test
-        @DisplayName("E")
-        void e() {
-            assertThrows(IllegalStateException.class, () -> eitherWithB.getE());
-        }
     }
 
     @Nested
@@ -233,12 +203,6 @@ class EitherOfFiveTest {
         void d() {
             assertThrows(IllegalStateException.class, () -> eitherWithC.getD());
         }
-
-        @Test
-        @DisplayName("E")
-        void e() {
-            assertThrows(IllegalStateException.class, () -> eitherWithC.getE());
-        }
     }
 
     @Nested
@@ -261,41 +225,6 @@ class EitherOfFiveTest {
         @DisplayName("C")
         void c() {
             assertThrows(IllegalStateException.class, () -> eitherWithD.getC());
-        }
-
-        @Test
-        @DisplayName("E")
-        void e() {
-            assertThrows(IllegalStateException.class, () -> eitherWithD.getE());
-        }
-    }
-
-    @Nested
-    @DisplayName("when E is set, prohibit obtaining")
-    class ProhibitObtainingForE {
-
-        @Test
-        @DisplayName("A")
-        void a() {
-            assertThrows(IllegalStateException.class, () -> eitherWithE.getA());
-        }
-
-        @Test
-        @DisplayName("B")
-        void b() {
-            assertThrows(IllegalStateException.class, () -> eitherWithE.getB());
-        }
-
-        @Test
-        @DisplayName("C")
-        void c() {
-            assertThrows(IllegalStateException.class, () -> eitherWithE.getC());
-        }
-
-        @Test
-        @DisplayName("D")
-        void d() {
-            assertThrows(IllegalStateException.class, () -> eitherWithE.getD());
         }
     }
 }
