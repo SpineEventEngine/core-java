@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.entity.TransactionalEntity.GenericParameter.STATE_BUILDER;
 
 /**
  * A base for entities, perform transactions {@linkplain Event events}.
@@ -247,7 +246,7 @@ public abstract class TransactionalEntity<I,
         @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
         Class<? extends TransactionalEntity<I, S, B>> cls =
                 (Class<? extends TransactionalEntity<I, S, B>>) getClass();
-        Class<B> builderClass = TypeInfo.getBuilderClass(cls);
+        Class<B> builderClass = getBuilderClass(cls);
         B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
     }
@@ -276,31 +275,19 @@ public abstract class TransactionalEntity<I,
         public int getIndex() {
             return this.index;
         }
+
     }
 
     /**
-     * Provides type information on classes extending {@code TransactionalEntity}.
+     * Obtains the class of the {@linkplain io.spine.validate.ValidatingBuilder} for the given
+     * {@code TransactionalEntity} descendant class {@code entityClass}.
      */
-    static class TypeInfo {
-
-        /**
-         * Prevents instantiation.
-         */
-        private TypeInfo() {
-        }
-
-        /**
-         * Obtains the class of the {@linkplain ValidatingBuilder} for the given
-         * {@code TransactionalEntity} descendant class {@code entityClass}.
-         */
-        private static <I,
-                        S extends Message,
-                        B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        Class<B> getBuilderClass(Class<? extends TransactionalEntity<I, S, B>> entityClass) {
-            checkNotNull(entityClass);
-            @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
-            Class<B> builderClass = (Class<B>) STATE_BUILDER.getArgumentIn(entityClass);
-            return builderClass;
-        }
+    private static <I, S extends Message, B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    Class<B> getBuilderClass(Class<? extends TransactionalEntity<I, S, B>> entityClass) {
+        checkNotNull(entityClass);
+        @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
+        Class<B> builderClass = (Class<B>)
+                    GenericParameter.STATE_BUILDER.getArgumentIn(entityClass);
+        return builderClass;
     }
 }

@@ -44,6 +44,7 @@ import java.util.Set;
 
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,12 +53,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-/**
- * @author Alexander Yevsyukov
- * @author Alexander Litus
- * @author Dmytro Dashenkov
- * @author Alex Tymchenko
- */
 @DisplayName("CommandService should")
 class CommandServiceTest {
 

@@ -31,7 +31,9 @@ import io.spine.logging.Logging;
 import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
 import org.slf4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -55,8 +57,6 @@ import static java.lang.String.format;
  *
  * <p>As long as the new enrichment functions may be appended to the parent enricher at runtime,
  * the validation result will vary for the same enricher depending on its actual state.
- *
- * @author Alexander Yevsyukov
  */
 final class ReferenceValidator implements Logging {
 
@@ -97,7 +97,7 @@ final class ReferenceValidator implements Logging {
      * functions.
      */
     ValidationResult validate() {
-        List<EnrichmentFunction<?, ?, ?>> functions = newLinkedList();
+        List<EnrichmentFunction<?, ?, ?>> functions = new ArrayList<>();
         Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
@@ -160,9 +160,9 @@ final class ReferenceValidator implements Logging {
      * @return {@link FieldDescriptor} for the field with the given name or {@code null} if the
      * field is absent and if not in the strict mode
      */
-    private FieldDescriptor findSourceFieldByName(String name,
-                                                  FieldDescriptor enrichmentField,
-                                                  boolean strict) {
+    private @Nullable FieldDescriptor findSourceFieldByName(String name,
+                                                            FieldDescriptor enrichmentField,
+                                                            boolean strict) {
         checkSourceFieldName(name, enrichmentField);
         Descriptor srcMessage = getSrcMessage(name);
         FieldDescriptor field = findField(name, srcMessage);
@@ -227,7 +227,8 @@ final class ReferenceValidator implements Logging {
         return format("Enrichment field %s targets fields of different types.", enrichmentField);
     }
 
-    private static FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
+    private static
+    @Nullable FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
         if (fieldNameFull.contains(PROTO_FQN_SEPARATOR)) { // is event field FQN or context field
             int firstCharIndex = fieldNameFull.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
             String fieldName = fieldNameFull.substring(firstCharIndex);
@@ -282,12 +283,9 @@ final class ReferenceValidator implements Logging {
                 enrichmentField.getFullName());
     }
 
-    private static void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
-        Logger log = Logging.get(ReferenceValidator.class);
-        if (log.isDebugEnabled()) {
-            log.debug("There is no enrichment function for translating {} into {}",
-                      sourceFieldClass, targetFieldClass);
-        }
+    private void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+        log().debug("There is no enrichment function for translating {} into {}",
+                    sourceFieldClass, targetFieldClass);
     }
 
     /**

@@ -38,10 +38,10 @@ import java.util.Set;
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
  *
  * <p> For asynchronous read-side updates please see {@link SubscriptionService}.
- *
- * @author Alex Tymchenko
  */
-public class QueryService extends QueryServiceGrpc.QueryServiceImplBase implements Logging {
+public class QueryService
+        extends QueryServiceGrpc.QueryServiceImplBase
+        implements Logging {
 
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 

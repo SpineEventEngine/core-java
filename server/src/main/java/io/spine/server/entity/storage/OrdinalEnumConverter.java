@@ -25,8 +25,6 @@ import java.io.Serializable;
 /**
  * A converter which uses {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to convert the
  * enumerated value into the {@link Integer} value.
- *
- * @author Dmytro Kuzmin
  */
 final class OrdinalEnumConverter extends EnumConverter {
 

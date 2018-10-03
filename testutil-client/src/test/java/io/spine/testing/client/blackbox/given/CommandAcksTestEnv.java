@@ -45,9 +45,6 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.stream.Collectors.toList;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class CommandAcksTestEnv {
 
     public static final String MISSING_ERROR_TYPE = "missing-error";

@@ -156,7 +156,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
      * Removes all the current subscriptions from the local buses.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         for (ExternalMessageType currentlyRequestedMessage : requestedTypes.keySet()) {
             unregisterInAdapter(currentlyRequestedMessage);
         }

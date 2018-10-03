@@ -33,8 +33,8 @@ import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.server.storage.RecordStorage;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -140,7 +140,7 @@ public final class EntityQueries {
 
     private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {
         EntityIdFilter idFilter = entityFilters.getIdFilter();
-        Collection<I> ids = new LinkedList<>();
+        Collection<I> ids = new ArrayList<>();
         for (EntityId entityId : idFilter.getIdsList()) {
             Any wrappedMessageId = entityId.getId();
             I genericId = Identifier.unpack(wrappedMessageId);

@@ -25,7 +25,6 @@ import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.route.EventRoute;
@@ -34,7 +33,6 @@ import io.spine.server.route.EventRouting;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
@@ -133,7 +131,7 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
-        logError("Error dispatching event (class: %s, id: %s) to entity of type %s.",
+        logError("Error dispatching event (class: `%s`, id: `%s`) to entity of type `%s`.",
                  envelope, exception);
     }
 
@@ -146,9 +144,7 @@ public abstract class EventDispatchingRepository<I,
 
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            ExternalMessage externalMessage = envelope.getOuterObject();
-            Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
             return EventDispatchingRepository.this.dispatch(eventEnvelope);
         }
     }

@@ -68,6 +68,7 @@ public abstract class Either implements Iterable<Message>, Serializable {
         return index;
     }
 
+    @SuppressWarnings("TypeParameterUnusedInFormals") // We want to save of casts at the callers.
     protected static <T> T get(Either either, int index) {
         if (index != either.getIndex()) {
             String errMsg =

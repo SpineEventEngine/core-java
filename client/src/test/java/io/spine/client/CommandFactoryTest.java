@@ -38,16 +38,13 @@ import static io.spine.client.given.ActorRequestFactoryTestEnv.ZONE_OFFSET;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder;
 import static io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND;
-import static io.spine.time.Timestamps2.isBetween;
+import static io.spine.protobuf.Timestamps2.isBetween;
 import static io.spine.time.testing.TimeTests.Future.secondsFromNow;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("Command factory should")
 class CommandFactoryTest {
 

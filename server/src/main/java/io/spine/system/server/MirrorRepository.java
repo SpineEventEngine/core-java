@@ -36,6 +36,7 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Streams.stream;
+import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.option.Options.option;
@@ -62,7 +63,7 @@ final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
     private static final FieldMask AGGREGATE_STATE_FIELD =
-            maskOf(Mirror.getDescriptor(), ID_FIELD_NUMBER, STATE_FIELD_NUMBER);
+            fromFieldNumbers(Mirror.getDescriptor(), ID_FIELD_NUMBER, STATE_FIELD_NUMBER);
 
     @Override
     public void onRegistered() {

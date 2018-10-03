@@ -28,7 +28,7 @@ import io.spine.type.MessageClass;
  *
  * @author Dmytro Dashenkov
  */
-public final class EmptyClass extends MessageClass {
+public final class EmptyClass extends MessageClass<Empty> {
 
     private static final long serialVersionUID = 0L;
     private static final EmptyClass INSTANCE = new EmptyClass();

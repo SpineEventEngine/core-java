@@ -38,8 +38,6 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @param <C> the type of the incoming message class
  * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
  * @param <R> the type of the method result object
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
 @Immutable
 public interface HandlerMethod<T,
@@ -109,7 +107,7 @@ public interface HandlerMethod<T,
      * @throws IllegalArgumentException is thrown if the value does not meet the expectation
      * @see ExternalAttribute
      */
-    default void ensureExternalMatch(boolean expectedValue) {
+    default void ensureExternalMatch(boolean expectedValue) throws IllegalArgumentException {
         checkArgument(isExternal() == expectedValue,
                       "Mismatch of `external` value for the handler method %s. " +
                               "Expected `external` = %s, but got the other way around.", this,

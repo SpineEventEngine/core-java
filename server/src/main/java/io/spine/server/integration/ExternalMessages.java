@@ -134,11 +134,12 @@ public final class ExternalMessages {
         Any packedId = Identifier.pack(messageId);
         Any packedMessage = AnyPacker.pack(message);
 
-        ExternalMessage result = ExternalMessage.newBuilder()
-                                                .setId(packedId)
-                                                .setOriginalMessage(packedMessage)
-                                                .setBoundedContextName(boundedContextName)
-                                                .build();
+        ExternalMessage result = ExternalMessage
+                .newBuilder()
+                .setId(packedId)
+                .setOriginalMessage(packedMessage)
+                .setBoundedContextName(boundedContextName)
+                .build();
         return result;
     }
 }

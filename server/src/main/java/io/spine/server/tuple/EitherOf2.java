@@ -29,35 +29,34 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A value which can be one of two possible types.
  *
- * @param <A> the type for the first alternative
+ * @param <A> the type of the first alternative
  * @param <B> the type of the second alternative
- * @author Alexander Yevsyukov
  */
-public final class EitherOfTwo<A extends Message, B extends Message>
+public final class EitherOf2<A extends Message, B extends Message>
         extends Either
         implements AValue<A>, BValue<B> {
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOfTwo(Message value, int index) {
+    private EitherOf2(Message value, int index) {
         super(value, index);
     }
 
     /**
      * Creates a new instance with {@code <A>} value.
      */
-    public static <A extends Message, B extends Message> EitherOfTwo<A, B> withA(A a) {
+    public static <A extends Message, B extends Message> EitherOf2<A, B> withA(A a) {
         checkNotNull(a);
-        EitherOfTwo<A, B> result = new EitherOfTwo<>(a, 0);
+        EitherOf2<A, B> result = new EitherOf2<>(a, 0);
         return result;
     }
 
     /**
      * Creates a new instance with {@code <B>} value.
      */
-    public static <A extends Message, B extends Message> EitherOfTwo<A, B> withB(B b) {
+    public static <A extends Message, B extends Message> EitherOf2<A, B> withB(B b) {
         checkNotNull(b);
-        EitherOfTwo<A, B> result = new EitherOfTwo<>(b, 1);
+        EitherOf2<A, B> result = new EitherOf2<>(b, 1);
         return result;
     }
 

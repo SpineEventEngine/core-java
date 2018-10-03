@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
@@ -31,7 +30,6 @@ import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.entity.EntityStateSubscriber;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.SubscriberMethod;
-import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -42,7 +40,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static java.lang.String.format;
 
@@ -63,7 +60,7 @@ public abstract class AbstractEventSubscriber
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
 
     /**
-     * {@inheritDoc}
+     * Dispatches event to the handling method.
      *
      * @param envelope the envelope with the message
      * @return a one element set with the result of {@link #toString()}

@@ -31,8 +31,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A value object holding a class of {@linkplain ExternalMessage external message}.
- *
- * @author Alex Tymchenko
  */
 @Internal
 public final class ExternalMessageClass extends MessageClass<Message> {
@@ -47,7 +45,7 @@ public final class ExternalMessageClass extends MessageClass<Message> {
      * Creates an instance of {@code ExternalMessageClass} on top of existing message class.
      *
      * @param messageClass a message class to wrap
-     * @return a new instance of {@code ExternalMessageClass}.\
+     * @return a new instance of {@code ExternalMessageClass}
      */
     public static ExternalMessageClass of(MessageClass<?> messageClass) {
         checkNotNull(messageClass);

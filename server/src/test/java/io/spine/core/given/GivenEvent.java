@@ -35,9 +35,6 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 
-/**
- * @author Alexander Yevsyukov
- */
 public final class GivenEvent {
 
     public static final TestEventFactory eventFactory =

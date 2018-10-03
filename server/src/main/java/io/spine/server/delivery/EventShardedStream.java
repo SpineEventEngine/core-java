@@ -29,7 +29,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * The stream of events sent to a specific shard.
  *
  * @param <I> the type of the identifiers of the event targets.
- * @author Alex Tymchenko
  */
 public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope> {
 
@@ -67,8 +66,8 @@ public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope
      *
      * @param <I> the type of the identifiers of the event targets.
      */
-    public static class Builder<I> extends AbstractBuilder<I, EventEnvelope,
-                                                           Builder<I>, EventShardedStream<I>> {
+    public static class Builder<I>
+            extends AbstractBuilder<I, EventEnvelope, Builder<I>, EventShardedStream<I>> {
         @Override
         protected EventShardedStream<I> createStream() {
             return new EventShardedStream<>(this);

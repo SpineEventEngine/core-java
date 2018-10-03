@@ -27,7 +27,6 @@ import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.Events;
-import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.Map;
@@ -88,8 +87,7 @@ public final class EventFieldFilter implements EventFilter {
         if (mask == null || isDefault(mask)) {
             return event;
         } else {
-            TypeUrl typeUrl = eventClass.getTypeName().toUrl();
-            EventMessage maskedEvent = applyMask(mask, event, typeUrl);
+            EventMessage maskedEvent = applyMask(mask, event);
             return maskedEvent;
         }
     }

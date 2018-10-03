@@ -20,7 +20,7 @@
 
 package io.spine.change;
 
-import com.google.common.testing.NullPointerTester;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,16 +32,11 @@ import static io.spine.change.FloatMismatch.unexpectedValue;
 import static io.spine.change.FloatMismatch.unpackActual;
 import static io.spine.change.FloatMismatch.unpackExpected;
 import static io.spine.change.FloatMismatch.unpackNewValue;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
-                   "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("FloatMismatch should")
-class FloatMismatchTest {
+class FloatMismatchTest extends UtilityClassTest<FloatMismatch> {
 
     private static final int VERSION = 100;
     private static final float EXPECTED = 18.39f;
@@ -49,17 +44,8 @@ class FloatMismatchTest {
     private static final float NEW_VALUE = 14.52f;
     private static final float DELTA = 0.01f;
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(FloatMismatch.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(FloatMismatch.class);
+    FloatMismatchTest() {
+        super(FloatMismatch.class);
     }
 
     @Nested
@@ -101,7 +87,6 @@ class FloatMismatchTest {
             assertEquals(VERSION, mismatch.getVersion());
         }
 
-        @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("for unexpected float value")
         void forUnexpectedFloat() {
