@@ -41,7 +41,6 @@ import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.option.Options.option;
 import static io.spine.option.OptionsProto.entity;
-import static io.spine.server.entity.FieldMasks.maskOf;
 import static io.spine.system.server.Mirror.ID_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
 import static io.spine.system.server.MirrorProjection.buildFilters;
@@ -63,7 +62,7 @@ final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
     private static final FieldMask AGGREGATE_STATE_FIELD =
-            fromFieldNumbers(Mirror.getDescriptor(), ID_FIELD_NUMBER, STATE_FIELD_NUMBER);
+            fromFieldNumbers(Mirror.class, ID_FIELD_NUMBER, STATE_FIELD_NUMBER);
 
     @Override
     public void onRegistered() {

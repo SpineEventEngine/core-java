@@ -83,11 +83,9 @@ public final class Enrichments {
                                   .value();
         Any any = enrichments.getItemsMap()
                              .get(typeName);
-        if (any == null) {
-            return Optional.empty();
-        }
-        E unpacked = unpack(any, enrichmentClass);
-        return Optional.ofNullable(result);
+        Optional<E> result = Optional.ofNullable(any)
+                                     .map(packed -> unpack(packed, enrichmentClass));
+        return result;
     }
 
     /**
