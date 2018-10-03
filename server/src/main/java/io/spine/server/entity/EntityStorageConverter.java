@@ -113,7 +113,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     @Override
     @SuppressWarnings("unchecked")
     protected E doBackward(EntityRecord entityRecord) {
-        S unpacked = unpack(entityRecord.getState());
+        S unpacked = (S) unpack(entityRecord.getState());
         S state = FieldMasks.applyMask(getFieldMask(), unpacked, entityStateType);
         I id = Identifier.unpack(entityRecord.getEntityId());
         E entity = entityFactory.create(id);

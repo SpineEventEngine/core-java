@@ -32,6 +32,7 @@ import io.spine.server.delivery.ShardedMessage;
 import io.spine.server.delivery.ShardedMessageId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Utilities for working with {@linkplain ExternalMessage external messages}.
@@ -123,7 +124,7 @@ public final class ExternalMessages {
     public static ShardedMessage asShardedMessage(ExternalMessage value) {
         checkNotNull(value);
         Any originalMessage = value.getOriginalMessage();
-        ShardedMessage result = AnyPacker.unpack(originalMessage);
+        ShardedMessage result = unpack(originalMessage, ShardedMessage.class);
         return result;
     }
 

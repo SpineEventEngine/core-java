@@ -122,7 +122,7 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
 
     private static EventEnvelope asEventEnvelope(ExternalMessageEnvelope envelope) {
         ExternalMessage externalMessage = envelope.getOuterObject();
-        Event event = unpack(externalMessage.getOriginalMessage());
+        Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
         return EventEnvelope.of(event);
     }
 

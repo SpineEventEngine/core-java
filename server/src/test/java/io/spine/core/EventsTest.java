@@ -55,7 +55,6 @@ import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
 import static io.spine.core.given.EventsTestEnv.tenantId;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -135,7 +134,7 @@ public class EventsTest {
         @Test
         @DisplayName("producer")
         void producer() {
-            StringValue msg = unpack(context.getProducerId());
+            StringValue msg = Identifier.unpack(context.getProducerId());
 
             String id = (String) getProducer(context);
 

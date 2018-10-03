@@ -72,11 +72,10 @@ public class Sample {
      */
     public static <M extends Message, B extends Message.Builder> B builderForType(Class<M> clazz) {
         checkClass(clazz);
-
-        B builder = builderFor(clazz);
+        @SuppressWarnings("unchecked")
+        B builder = (B) builderFor(clazz);
         Descriptor builderDescriptor = builder.getDescriptorForType();
         Collection<FieldDescriptor> fields = builderDescriptor.getFields();
-
         for (FieldDescriptor field : fields) {
             Object value = valueFor(field);
             if (field.isRepeated()) {

@@ -22,7 +22,8 @@ package io.spine.server.delivery;
 import com.google.protobuf.Any;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.protobuf.AnyPacker;
+
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * The stream of events sent to a specific shard.
@@ -55,7 +56,7 @@ public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope
 
         @Override
         protected EventEnvelope toEnvelope(Any packedEvent) {
-            Event event = AnyPacker.unpack(packedEvent);
+            Event event = unpack(packedEvent, Event.class);
             EventEnvelope result = EventEnvelope.of(event);
             return result;
         }

@@ -22,7 +22,8 @@ package io.spine.server.delivery;
 import com.google.protobuf.Any;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.protobuf.AnyPacker;
+
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * The stream of commands sent to a specific shard.
@@ -55,7 +56,7 @@ public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEn
 
         @Override
         protected CommandEnvelope toEnvelope(Any packedCommand) {
-            Command command = AnyPacker.unpack(packedCommand);
+            Command command = unpack(packedCommand, Command.class);
             CommandEnvelope result = CommandEnvelope.of(command);
             return result;
         }

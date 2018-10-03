@@ -49,6 +49,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static io.spine.testing.Tests.assertMatchesMask;
@@ -74,7 +75,7 @@ public abstract class ProjectionStorageTest
     @CanIgnoreReturnValue
     private static Project checkProjectIdIsInList(EntityRecord project, List<ProjectId> ids) {
         Any packedState = project.getState();
-        Project state = AnyPacker.unpack(packedState);
+        Project state = unpack(packedState, Project.class);
         ProjectId id = state.getId();
 
         boolean isIdPresent = false;
@@ -141,7 +142,7 @@ public abstract class ProjectionStorageTest
             Collection<EntityRecord> readRecords = newArrayList(read);
             assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
-                Project state = AnyPacker.unpack(record.getState());
+                Project state = unpack(record.getState(), Project.class);
                 ProjectId id = state.getId();
                 assertThat(ids).contains(id);
             }
@@ -164,7 +165,7 @@ public abstract class ProjectionStorageTest
             assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
                 Any packedState = record.getState();
-                Project state = AnyPacker.unpack(packedState);
+                Project state = unpack(packedState, Project.class);
                 assertMatchesMask(state, fieldMask);
             }
         }

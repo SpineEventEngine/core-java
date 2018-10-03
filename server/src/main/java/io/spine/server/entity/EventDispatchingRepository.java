@@ -147,7 +147,7 @@ public abstract class EventDispatchingRepository<I,
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
             ExternalMessage externalMessage = envelope.getOuterObject();
-            Event event = unpack(externalMessage.getOriginalMessage());
+            Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
             EventEnvelope eventEnvelope = EventEnvelope.of(event);
             return EventDispatchingRepository.this.dispatch(eventEnvelope);
         }

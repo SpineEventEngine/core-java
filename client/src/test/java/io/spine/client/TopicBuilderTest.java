@@ -185,7 +185,7 @@ class TopicBuilderTest {
                  .hasSize(1);
             Any actualValue = findByName(columnFilters, columnName).getValue();
             assertNotNull(columnValue);
-            Int32Value messageValue = AnyPacker.unpack(actualValue);
+            Int32Value messageValue = AnyPacker.unpack(actualValue, Int32Value.class);
             int actualGenericValue = messageValue.getValue();
             assertEquals(columnValue, actualGenericValue);
         }

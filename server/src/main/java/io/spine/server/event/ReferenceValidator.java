@@ -27,15 +27,14 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
+import io.spine.logging.Logging;
 import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -43,6 +42,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
@@ -58,7 +58,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-final class ReferenceValidator {
+final class ReferenceValidator implements Logging {
 
     /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";
@@ -97,7 +97,7 @@ final class ReferenceValidator {
      * functions.
      */
     ValidationResult validate() {
-        List<EnrichmentFunction<?, ?, ?>> functions = new LinkedList<>();
+        List<EnrichmentFunction<?, ?, ?>> functions = newLinkedList();
         Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
@@ -283,10 +283,10 @@ final class ReferenceValidator {
     }
 
     private static void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
-        // Using `DEBUG` level to avoid polluting the `stderr`.
-        if (log().isDebugEnabled()) {
-            log().debug("There is no enrichment function for translating {} into {}",
-                        sourceFieldClass, targetFieldClass);
+        Logger log = Logging.get(ReferenceValidator.class);
+        if (log.isDebugEnabled()) {
+            log.debug("There is no enrichment function for translating {} into {}",
+                      sourceFieldClass, targetFieldClass);
         }
     }
 
@@ -320,15 +320,5 @@ final class ReferenceValidator {
         ImmutableMultimap<FieldDescriptor, FieldDescriptor> getFieldMap() {
             return fieldMap;
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ReferenceValidator.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

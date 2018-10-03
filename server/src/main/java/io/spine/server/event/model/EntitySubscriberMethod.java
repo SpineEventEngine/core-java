@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.base.Objects;
 import io.spine.core.ByField;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -82,6 +83,24 @@ public final class EntitySubscriberMethod extends SubscriberMethod {
         @Override
         public Class<? extends Annotation> annotationType() {
             return ByField.class;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof ByField)) {
+                return false;
+            }
+            ByField filter = (ByField) o;
+            return Objects.equal(this.path(), filter.path())
+                    && Objects.equal(this.value(), filter.value());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(value());
         }
     }
 }

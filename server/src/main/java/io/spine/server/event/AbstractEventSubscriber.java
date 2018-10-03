@@ -147,7 +147,7 @@ public abstract class AbstractEventSubscriber
         @Override
         public Set<String> dispatch(ExternalMessageEnvelope envelope) {
             ExternalMessage externalMessage = envelope.getOuterObject();
-            Event event = unpack(externalMessage.getOriginalMessage());
+            Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
             EventEnvelope eventEnvelope = EventEnvelope.of(event);
             return AbstractEventSubscriber.this.dispatch(eventEnvelope);
         }

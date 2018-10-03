@@ -323,7 +323,8 @@ public abstract class Aggregate<I,
      * @param snapshot the snapshot with the state to restore
      */
     void restore(Snapshot snapshot) {
-        S stateToRestore = unpack(snapshot.getState());
+        @SuppressWarnings("unchecked")
+        S stateToRestore = (S) unpack(snapshot.getState());
         Version versionFromSnapshot = snapshot.getVersion();
         setInitialState(stateToRestore, versionFromSnapshot);
     }

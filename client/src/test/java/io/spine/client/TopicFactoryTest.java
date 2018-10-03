@@ -33,10 +33,10 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
-import static io.spine.client.given.TopicFactoryTestEnv.verifyContext;
-import static io.spine.client.given.TopicFactoryTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.TopicFactoryTestEnv.TARGET_ENTITY_TYPE_URL;
+import static io.spine.client.given.TopicFactoryTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.TopicFactoryTestEnv.entityId;
+import static io.spine.client.given.TopicFactoryTestEnv.verifyContext;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -94,7 +94,7 @@ class TopicFactoryTest {
             assertEquals(ids.size(), actualIds.size());
             for (EntityId actualId : actualIds) {
                 Any rawId = actualId.getId();
-                TestEntityId unpackedId = unpack(rawId);
+                TestEntityId unpackedId = unpack(rawId, TestEntityId.class);
                 assertTrue(ids.contains(unpackedId));
             }
         }

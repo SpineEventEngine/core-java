@@ -225,7 +225,7 @@ public abstract class CommandSequence<O extends Message,
 
     private static void checkSent(Command command, Ack ack) {
         Status status = ack.getStatus();
-        CommandId routedCommandId = unpack(ack.getMessageId());
+        CommandId routedCommandId = unpack(ack.getMessageId(), CommandId.class);
         CommandId commandId = command.getId();
         checkState(commandId.equals(routedCommandId),
                    "Unexpected command posted. Intending (%s) but was (%s).",

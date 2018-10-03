@@ -20,14 +20,11 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.system.server.EntityStateChanged;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static java.util.Collections.emptySet;
 
 /**
@@ -60,15 +57,6 @@ public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, E
      */
     static <I> EventRoute<I, EventMessage> byFirstMessageField() {
         return new EventProducers.FromFirstMessageField<>();
-    }
-
-    static <I, M extends Message> EventRoute<I, EntityStateChanged>
-    entityUpdateBy(EntityStateRoute<I, M> route) {
-        return (event, context) -> {
-            Any packedState = event.getNewState();
-            M state = unpack(packedState);
-            return route.apply(state, context);
-        };
     }
 
     static <I> EventRoute<I, EventMessage>
