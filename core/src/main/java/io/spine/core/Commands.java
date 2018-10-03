@@ -83,7 +83,8 @@ public final class Commands {
      */
     public static CommandMessage getMessage(Command command) {
         checkNotNull(command);
-        return unpack(command.getMessage(), CommandMessage.class);
+        CommandMessage result = (CommandMessage) unpack(command.getMessage());
+        return result;
     }
 
     /**
@@ -95,8 +96,8 @@ public final class Commands {
         if (commandOrMessage instanceof Command) {
             return getMessage((Command) commandOrMessage);
         }
-        Message unpacked = Messages.ensureMessage(commandOrMessage);
-        return (CommandMessage) unpacked;
+        CommandMessage unpacked = (CommandMessage) Messages.ensureMessage(commandOrMessage);
+        return unpacked;
     }
 
     /**
