@@ -28,6 +28,7 @@ import io.spine.server.transport.MessageChannel;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * A utility class for working with {@link MessageChannel message channels} and their
@@ -92,7 +93,7 @@ final class IntegrationChannels {
     static ExternalMessageType fromId(ChannelId channelId) {
         checkNotNull(channelId);
 
-        StringValue rawValue = AnyPacker.unpack(channelId.getIdentifier());
+        StringValue rawValue = (StringValue) unpack(channelId.getIdentifier());
         TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
         ExternalMessageType result = ExternalMessageType

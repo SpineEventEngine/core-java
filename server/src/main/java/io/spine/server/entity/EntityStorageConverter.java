@@ -38,8 +38,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * An abstract base for converters of entities into {@link EntityRecord}.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
         extends Converter<E, EntityRecord> implements Serializable {
@@ -97,6 +95,19 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         return builder.build();
     }
 
+    @Override
+    protected E doBackward(EntityRecord entityRecord) {
+        @SuppressWarnings("unchecked") /* The cast is safe since the type <S> is bound with
+            the type <E>, and forward conversion is performed on the entity of type <E>. */
+        S unpacked = (S) unpack(entityRecord.getState());
+        S state = FieldMasks.applyMask(getFieldMask(), unpacked);
+        I id = Identifier.unpack(entityRecord.getEntityId());
+        E entity = entityFactory.create(id);
+        checkState(entity != null, "EntityFactory produced null entity.");
+        injectState(entity, state, entityRecord);
+        return entity;
+    }
+
     /**
      * Derived classes may override to additionally tune the passed entity builder.
      *
@@ -108,17 +119,6 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     @SuppressWarnings("NoopMethodInAbstractClass") // Avoid forcing empty implementations.
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
         // Do nothing.
-    }
-
-    @Override
-    protected E doBackward(EntityRecord entityRecord) {
-        S unpacked = unpack(entityRecord.getState());
-        S state = FieldMasks.applyMask(getFieldMask(), unpacked);
-        I id = Identifier.unpack(entityRecord.getEntityId());
-        E entity = entityFactory.create(id);
-        checkState(entity != null, "EntityFactory produced null entity.");
-        injectState(entity, state, entityRecord);
-        return entity;
     }
 
     /**

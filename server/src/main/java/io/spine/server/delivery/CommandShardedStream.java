@@ -22,13 +22,13 @@ package io.spine.server.delivery;
 import com.google.protobuf.Any;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.protobuf.AnyPacker;
+
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * The stream of commands sent to a specific shard.
  *
  * @param <I> the type of the identifiers of the command targets.
- * @author Alex Tymchenko
  */
 public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEnvelope> {
 
@@ -51,11 +51,12 @@ public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEn
      *
      * @param <I> the type of the identifiers of the command targets.
      */
-    private static class Converter<I> extends ShardedMessageConverter<I, Command, CommandEnvelope> {
+    private static final class Converter<I>
+            extends ShardedMessageConverter<I, Command, CommandEnvelope> {
 
         @Override
         protected CommandEnvelope toEnvelope(Any packedCommand) {
-            Command command = AnyPacker.unpack(packedCommand);
+            Command command = (Command) unpack(packedCommand);
             CommandEnvelope result = CommandEnvelope.of(command);
             return result;
         }
@@ -66,8 +67,8 @@ public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEn
      *
      * @param <I> the type of the identifiers of the command targets.
      */
-    public static class Builder<I> extends AbstractBuilder<I, CommandEnvelope,
-                                                           Builder<I>, CommandShardedStream<I>> {
+    public static class Builder<I>
+            extends AbstractBuilder<I, CommandEnvelope, Builder<I>, CommandShardedStream<I>> {
         @Override
         protected CommandShardedStream<I> createStream() {
             return new CommandShardedStream<>(this);

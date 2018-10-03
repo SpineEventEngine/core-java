@@ -28,7 +28,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntityId;
 import io.spine.test.queries.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,9 +61,10 @@ import static io.spine.client.given.TopicBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.TopicBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.TopicBuilderTestEnv.findByName;
 import static io.spine.client.given.TopicBuilderTestEnv.newMessageId;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.time.Durations2.fromHours;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -185,7 +185,7 @@ class TopicBuilderTest {
                  .hasSize(1);
             Any actualValue = findByName(columnFilters, columnName).getValue();
             assertNotNull(columnValue);
-            Int32Value messageValue = AnyPacker.unpack(actualValue);
+            Int32Value messageValue = (Int32Value) unpack(actualValue);
             int actualGenericValue = messageValue.getValue();
             assertEquals(columnValue, actualGenericValue);
         }

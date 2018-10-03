@@ -22,16 +22,17 @@ package io.spine.server.integration;
 import com.google.protobuf.Message;
 import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
+import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * An envelope for the messages, produced outside of the current bounded context.
- *
- * @author Alex Tymchenko
  */
 public final class ExternalMessageEnvelope
         extends AbstractMessageEnvelope<Message, ExternalMessage, ActorContext> {
@@ -48,8 +49,7 @@ public final class ExternalMessageEnvelope
     /** An actor context representing the environment in which the original message was created. */
     private final ActorContext actorContext;
 
-    private ExternalMessageEnvelope(ExternalMessage externalMessage,
-                                    Message originalMessage) {
+    private ExternalMessageEnvelope(ExternalMessage externalMessage, Message originalMessage) {
         super(externalMessage);
 
         this.id = externalMessage.getId();
@@ -112,6 +112,16 @@ public final class ExternalMessageEnvelope
     @Override
     public ActorContext getMessageContext() {
         return actorContext;
+    }
+
+    /**
+     * Converts this instance to an envelope of the external event.
+     */
+    public EventEnvelope toEventEnvelope() {
+        ExternalMessage externalMessage = getOuterObject();
+        Event event = (Event) unpack(externalMessage.getOriginalMessage());
+        EventEnvelope result = EventEnvelope.of(event);
+        return result;
     }
 
     /**

@@ -28,7 +28,6 @@ import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.transport.GrpcContainer;
 import io.spine.test.commandservice.CmdServDontHandle;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -44,6 +43,7 @@ import java.util.Set;
 
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,12 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-/**
- * @author Alexander Yevsyukov
- * @author Alexander Litus
- * @author Dmytro Dashenkov
- * @author Alex Tymchenko
- */
 @DisplayName("CommandService should")
 class CommandServiceTest {
 
@@ -133,7 +127,7 @@ class CommandServiceTest {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
         Ack acked = observer.firstResponse();
-        CommandId id = AnyPacker.unpack(acked.getMessageId());
+        CommandId id = (CommandId) unpack(acked.getMessageId());
         assertEquals(cmd.getId(), id);
     }
 

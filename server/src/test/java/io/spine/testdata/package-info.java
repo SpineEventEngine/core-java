@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides factories for creating test environments.
+ * This package provides utilities for building test environments.
  */
 
 @CheckReturnValue

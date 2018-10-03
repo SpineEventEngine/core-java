@@ -33,7 +33,6 @@ import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
-import io.spine.time.Durations2;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +50,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.event.given.EventStoreTestEnv.assertDone;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static io.spine.server.event.given.EventStoreTestEnv.initEventFactory;
@@ -85,7 +85,7 @@ public class EventStoreTest {
         @Test
         @DisplayName("time bounds")
         void timeBounds() {
-            Duration delta = Durations2.seconds(111);
+            Duration delta = seconds(111);
             Timestamp present = getCurrentTime();
             Timestamp past = subtract(present, delta);
             Timestamp future = add(present, delta);
@@ -149,7 +149,7 @@ public class EventStoreTest {
         @Test
         @DisplayName("time bounds and type")
         void timeBoundsAndType() {
-            Duration delta = Durations2.seconds(111);
+            Duration delta = seconds(111);
             Timestamp present = getCurrentTime();
             Timestamp past = subtract(present, delta);
             Timestamp future = add(present, delta);

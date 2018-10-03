@@ -235,8 +235,8 @@ abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        CommandId commandId = unpack(observer.firstResponse()
-                                             .getMessageId());
+        CommandId commandId = (CommandId) unpack(observer.firstResponse()
+                                                         .getMessageId());
         assertEquals(cmd.getId(), commandId);
     }
 
