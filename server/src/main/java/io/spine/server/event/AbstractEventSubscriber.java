@@ -55,6 +55,8 @@ import static java.lang.String.format;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  * @see EventBus#register(MessageDispatcher)
+ * @see io.spine.core.Subscribe {@code @Subscribe} annotation for declaring event subscriptions
+ *                              in the derived classes
  */
 public abstract class AbstractEventSubscriber
         implements EventDispatcher<String>, EventSubscriber, EntityStateSubscriber, Logging {
@@ -70,7 +72,7 @@ public abstract class AbstractEventSubscriber
      * as the identify of the subscriber, or empty set if dispatching failed
      */
     @Override
-    public Set<String> dispatch(EventEnvelope envelope) {
+    public final Set<String> dispatch(EventEnvelope envelope) {
         EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
@@ -99,8 +101,8 @@ public abstract class AbstractEventSubscriber
         MessageClass messageClass = envelope.getMessageClass();
         String messageId = envelope.idAsString();
         String errorMessage =
-                format("Error handling event subscription (class: %s id: %s).",
-                       messageClass, messageId);
+                format("Error handling event subscription (class: %s id: %s) in %s.",
+                       messageClass, messageId, thisClass);
         log().error(errorMessage, exception);
     }
 
