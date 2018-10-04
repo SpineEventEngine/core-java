@@ -55,14 +55,38 @@ class ProjectionEndToEndTest {
                 .receivesEvents(event(id, created),
                                 event(id, firstTaskAdded),
                                 event(id, secondTaskAdded))
-                .assertThat(exactly(ProjectTaskNames.class,
-                                    of(ProjectTaskNames
-                                               .newBuilder()
-                                               .setProjectId(id)
-                                               .setProjectName(created.getName())
-                                               .addTaskName(firstTaskAdded.getTask().getTitle())
-                                               .addTaskName(secondTaskAdded.getTask().getTitle())
-                                               .build())));
+                .assertThat(exactly(ProjectTaskNames.class, of(
+                        ProjectTaskNames
+                                .newBuilder()
+                                .setProjectId(id)
+                                .setProjectName(created.getName())
+                                .addTaskName(firstTaskAdded.getTask().getTitle())
+                                .addTaskName(secondTaskAdded.getTask().getTitle())
+                                .build()
+                )));
+    }
+
+    @Test
+    @DisplayName("receive entity state updates of entities of other context")
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+        // Black box context is used in a non-fluent fashion.
+    void receiveExternal() {
+        PrjProjectCreated created = GivenEventMessage.projectCreated();
+        ProjectId id = created.getProjectId();
+        BlackBoxBoundedContext sender = BlackBoxBoundedContext
+                .newInstance()
+                .with(new TestProjection.Repository());
+        BlackBoxBoundedContext receiver = BlackBoxBoundedContext
+                .newInstance()
+                .with(new EntitySubscriberProjection.Repository());
+        sender.receivesEvent(event(id, created));
+        receiver.assertThat(exactly(ProjectTaskNames.class, of(
+                ProjectTaskNames
+                        .newBuilder()
+                        .setProjectId(id)
+                        .setProjectName(created.getName())
+                        .build()
+        )));
     }
 
     private static Event event(ProjectId producer, EventMessage eventMessage) {
