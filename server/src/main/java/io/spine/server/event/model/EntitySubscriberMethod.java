@@ -21,9 +21,15 @@
 package io.spine.server.event.model;
 
 import com.google.common.base.Objects;
+import io.spine.base.Environment;
+import io.spine.core.BoundedContextName;
 import io.spine.core.ByField;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Subscribe;
+import io.spine.logging.Logging;
+import io.spine.server.annotation.BoundedContext;
+import io.spine.server.model.Model;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
@@ -31,13 +37,27 @@ import io.spine.type.TypeUrl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.BoundedContextNames.assumingTests;
+
 /**
  * @author Dmytro Dashenkov
  */
-public final class EntitySubscriberMethod extends SubscriberMethod {
+public final class EntitySubscriberMethod extends SubscriberMethod implements Logging {
+
+    private final BoundedContextName contextOfSubscriber;
 
     EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
+        this.contextOfSubscriber = contextOf(method.getDeclaringClass());
+        checkNotFiltered(method);
+    }
+
+    private static void checkNotFiltered(Method method) {
+        Subscribe subscribe = method.getAnnotation(Subscribe.class);
+        ByField filter = subscribe.filter();
+        checkState(filter.path().isEmpty() && filter.value().isEmpty(),
+                   "Entity state subscriber cannot declare filters but method `%s` does.", method);
     }
 
     @Override
@@ -47,18 +67,35 @@ public final class EntitySubscriberMethod extends SubscriberMethod {
     }
 
     @Override
-    public boolean isExternal() {
-        return true;
+    protected void checkAttributesMatch(EventEnvelope envelope) throws IllegalArgumentException {
+        super.checkAttributesMatch(envelope);
+        checkExternal(envelope);
     }
 
-    @Override
-    public boolean isDomestic() {
-        return false;
+    private void checkExternal(EventEnvelope envelope) {
+        EntityStateChanged event = (EntityStateChanged) envelope.getMessage();
+        TypeUrl typeUrl = TypeUrl.ofEnclosed(event.getNewState());
+        BoundedContextName originContext = contextOf(typeUrl.getJavaClass());
+        boolean external = !originContext.equals(contextOfSubscriber);
+        ensureExternalMatch(external);
     }
 
     @Override
     public EventClass getMessageClass() {
         return EventClass.from(EntityStateChanged.class);
+    }
+
+    @SuppressWarnings("TestOnlyProblems")
+        // Checks that the resulting context is not `AssumingTests` in production environment.
+    private BoundedContextName contextOf(Class<?> cls) {
+        Model model = Model.getInstance(cls);
+        BoundedContextName name = model.contextName();
+        if (Environment.getInstance().isProduction() && name.equals(assumingTests())) {
+            _warn("Class '%s' belongs to the '%s', which context should not be used in production."
+                          + "Please see %s.",
+                  cls.getName(), assumingTests().getValue(), BoundedContext.class.getName());
+        }
+        return name;
     }
 
     /**

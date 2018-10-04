@@ -59,13 +59,11 @@ public class Model {
         this.context = context;
     }
 
-    @SuppressWarnings("unused") // The param will be used when Model is created per BoundedContext.
-    public static <T> Model getInstance(Class<? extends T> rawClass) {
+    public static synchronized <T> Model getInstance(Class<? extends T> rawClass) {
         Model model = models.get(rawClass);
         if (model != null) {
             return model;
         }
-
         Optional<BoundedContextName> optional = findContext(rawClass);
 
         // If no name of a Bounded Context found, assume the default name.
@@ -79,7 +77,6 @@ public class Model {
                       .stream()
                       .filter((m) -> m.context.equals(context))
                       .findAny();
-
         if (alreadyAvailable.isPresent()) {
             return alreadyAvailable.get();
         }
@@ -106,6 +103,10 @@ public class Model {
                                        .value();
         BoundedContextName result = BoundedContextNames.newName(contextName);
         return Optional.of(result);
+    }
+
+    public BoundedContextName contextName() {
+        return context;
     }
 
     /**
