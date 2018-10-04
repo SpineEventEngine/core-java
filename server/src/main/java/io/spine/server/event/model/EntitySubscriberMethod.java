@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.base.Objects;
+import com.google.protobuf.Message;
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.core.ByField;
@@ -29,6 +30,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
 import io.spine.server.annotation.BoundedContext;
+import io.spine.server.model.ExternalAttribute;
 import io.spine.server.model.Model;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.system.server.EntityStateChanged;
@@ -37,10 +39,13 @@ import io.spine.type.TypeUrl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTests;
 
 /**
+ * A handler method which receives an entity state and produces no output.
+ *
  * @author Dmytro Dashenkov
  */
 public final class EntitySubscriberMethod extends SubscriberMethod implements Logging {
@@ -51,6 +56,7 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
         super(method, parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         checkNotFiltered(method);
+        checkExternal(method);
     }
 
     private static void checkNotFiltered(Method method) {
@@ -60,6 +66,19 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
                    "Entity state subscriber cannot declare filters but method `%s` does.", method);
     }
 
+    private void checkExternal(Method method) {
+        @SuppressWarnings("unchecked") // Logically checked.
+                Class<? extends Message> firstParameter =
+                (Class<? extends Message>) method.getParameterTypes()[0];
+        TypeUrl typeUrl = TypeUrl.of(firstParameter);
+        BoundedContextName originContext = contextOf(typeUrl.getJavaClass());
+        boolean external = !originContext.equals(contextOfSubscriber);
+        boolean methodIsExternal = ExternalAttribute.of(method).getValue();
+        checkArgument(methodIsExternal == external,
+                      "Entity subscriber %s should%s be `external`.",
+                      getRawMethod(), external ? "" : " NOT");
+    }
+
     @Override
     protected ByField getFilter() {
         TypeUrl targetType = TypeUrl.of(rawMessageClass());
@@ -67,17 +86,13 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     }
 
     @Override
-    protected void checkAttributesMatch(EventEnvelope envelope) throws IllegalArgumentException {
-        super.checkAttributesMatch(envelope);
-        checkExternal(envelope);
+    public boolean isExternal() {
+        return true;
     }
 
-    private void checkExternal(EventEnvelope envelope) {
-        EntityStateChanged event = (EntityStateChanged) envelope.getMessage();
-        TypeUrl typeUrl = TypeUrl.ofEnclosed(event.getNewState());
-        BoundedContextName originContext = contextOf(typeUrl.getJavaClass());
-        boolean external = !originContext.equals(contextOfSubscriber);
-        ensureExternalMatch(external);
+    @Override
+    public boolean isDomestic() {
+        return false;
     }
 
     @Override

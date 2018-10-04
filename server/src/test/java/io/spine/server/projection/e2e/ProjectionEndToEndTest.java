@@ -29,16 +29,19 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.testing.server.blackbox.VerifyState.exactly;
 
 @DisplayName("Projection should")
+@ExtendWith(ShardingReset.class)
 class ProjectionEndToEndTest {
 
     @Test
