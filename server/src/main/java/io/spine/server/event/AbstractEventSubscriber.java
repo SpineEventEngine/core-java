@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
@@ -31,7 +30,6 @@ import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.entity.EntityStateSubscriber;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.SubscriberMethod;
-import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -42,7 +40,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static java.lang.String.format;
 
@@ -148,9 +145,7 @@ public abstract class AbstractEventSubscriber
         @CanIgnoreReturnValue
         @Override
         public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-            ExternalMessage externalMessage = envelope.getOuterObject();
-            Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
             return AbstractEventSubscriber.this.dispatch(eventEnvelope);
         }
 
@@ -161,6 +156,12 @@ public abstract class AbstractEventSubscriber
             logError("Error dispatching external event to event subscriber " +
                              "(event class: %s, id: %s)",
                      envelope, exception);
+        }
+
+        @Override
+        public boolean canDispatch(ExternalMessageEnvelope envelope) {
+            EventEnvelope event = envelope.toEventEnvelope();
+            return AbstractEventSubscriber.this.canDispatch(event);
         }
 
         private void logError(String msgFormat,

@@ -144,8 +144,14 @@ public abstract class EventDispatchingRepository<I,
 
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            return EventDispatchingRepository.this.dispatch(eventEnvelope);
+            EventEnvelope event = envelope.toEventEnvelope();
+            return EventDispatchingRepository.this.dispatch(event);
+        }
+
+        @Override
+        public boolean canDispatch(ExternalMessageEnvelope envelope) {
+            EventEnvelope event = envelope.toEventEnvelope();
+            return EventDispatchingRepository.this.canDispatch(event);
         }
     }
 }

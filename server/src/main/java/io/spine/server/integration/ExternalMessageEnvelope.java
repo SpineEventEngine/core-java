@@ -119,7 +119,7 @@ public final class ExternalMessageEnvelope
      */
     public EventEnvelope toEventEnvelope() {
         ExternalMessage externalMessage = getOuterObject();
-        Event event = (Event) unpack(externalMessage.getOriginalMessage());
+        Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
         EventEnvelope result = EventEnvelope.of(event);
         return result;
     }

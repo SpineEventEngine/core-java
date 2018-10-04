@@ -66,6 +66,10 @@ public interface EventDispatcherDelegate<I> {
      */
     void onError(EventEnvelope envelope, RuntimeException exception);
 
+    default boolean canDispatchEvent(EventEnvelope envelope) {
+        return true;
+    }
+
     /**
      * Returns immutable set with one element with the identity of the multicast dispatcher
      * that dispatches messages to itself.
