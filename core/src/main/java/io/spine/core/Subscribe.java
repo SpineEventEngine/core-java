@@ -21,10 +21,11 @@
 package io.spine.core;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks a method as a subscriber for the command output.
@@ -81,8 +82,8 @@ import java.lang.annotation.Target;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target(METHOD)
 @Documented
 public @interface Subscribe {
 
@@ -92,5 +93,10 @@ public @interface Subscribe {
      */
     boolean external() default false;
 
+    /**
+     * Filter to apply to all the events.
+     *
+     * <p>If an event does not match this filter, it is not passed to the subscriber method.
+     */
     ByField filter() default @ByField(path = "", value = "");
 }

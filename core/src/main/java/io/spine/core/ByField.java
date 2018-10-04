@@ -20,12 +20,30 @@
 
 package io.spine.core;
 
+import java.lang.annotation.Target;
+
 /**
+ * The by-field message filter.
+ *
+ * <p>This annotation should not be used directly to mark anything.
+ * Instead, use the annotation instances as
+ * {@link io.spine.core.Subscribe#filter() @Subscribe.filter)} parameters.
+ *
  * @author Dmytro Dashenkov
  */
+@Target({})
 public @interface ByField {
 
+    /**
+     * The {@linkplain io.spine.base.FieldPath path to the field} to filter by.
+     */
     String path();
 
+    /**
+     * The expected value of the field.
+     *
+     * <p>The value converted with help of {@link io.spine.string.Stringifier Stringifier}s into
+     * the type of the actual value of the message field.
+     */
     String value();
 }

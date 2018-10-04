@@ -61,6 +61,13 @@ public final class EntitySubscriberMethod extends SubscriberMethod {
         return EventClass.from(EntityStateChanged.class);
     }
 
+    /**
+     * A field filter for system events.
+     *
+     * <p>Checks that the given event ID (presumably, of type
+     * {@link io.spine.system.server.EntityHistoryId}) has the {@code type_url} field with
+     * the given value.
+     */
     @SuppressWarnings("ClassExplicitlyAnnotation")
     private static final class TypeFilteringFilter implements ByField {
 
@@ -69,6 +76,7 @@ public final class EntitySubscriberMethod extends SubscriberMethod {
         private TypeFilteringFilter(TypeUrl type) {
             targetType = type;
         }
+
 
         @Override
         public String path() {
