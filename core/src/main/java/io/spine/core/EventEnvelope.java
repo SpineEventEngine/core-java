@@ -167,6 +167,11 @@ public final class EventEnvelope
         return rejection;
     }
 
+    public boolean isExternal() {
+        boolean external = Events.isExternal(getEventContext());
+        return external;
+    }
+
     /**
      * Verifies if the enrichment of the message is enabled.
      *

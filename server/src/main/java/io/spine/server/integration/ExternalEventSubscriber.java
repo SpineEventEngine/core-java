@@ -19,14 +19,10 @@
  */
 package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 
@@ -35,9 +31,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Events.isExternal;
-import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
@@ -65,18 +58,11 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
 
     @Override
     public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-        ExternalMessage externalMessage = envelope.getOuterObject();
-        Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
-        if (!(unpacked instanceof Event)) {
-            throw newIllegalStateException("Unexpected object %s while dispatching " +
-                                                   "the external event to the event subscriber.",
-                                           Stringifiers.toString(unpacked));
-        }
-        Event event = (Event) unpacked;
-        checkArgument(isExternal(event.getContext()),
+        EventEnvelope eventEnvelope = envelope.toEventEnvelope();
+        checkArgument(eventEnvelope.isExternal(),
                       "External event expected, but got %s",
-                      Stringifiers.toString(event));
-        return delegate.dispatch(EventEnvelope.of(event));
+                      Stringifiers.toString(eventEnvelope.getOuterObject()));
+        return delegate.dispatch(eventEnvelope);
     }
 
     @Override
@@ -90,6 +76,11 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
                 format("Error handling external event subscription (class: %s id: %s).",
                        messageClass, messageId);
         log().error(errorMessage, exception);
+    }
+
+    @Override
+    public boolean canDispatch(ExternalMessageEnvelope envelope) {
+        return delegate.canDispatch(envelope.toEventEnvelope());
     }
 
     @Override
