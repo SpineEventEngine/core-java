@@ -20,7 +20,7 @@ before_install:
   - chmod +x gradlew
   - chmod +x scripts/add-to-ssh.sh
   # Decrypt and un-archive Maven and Google Cloud credentials and an RSA private key (deploy_key_rsa).
-  - openssl aes-256-cbc -K $encrypted_5d9fa945eb8f_key -iv $encrypted_5d9fa945eb8f_iv -in credentials.tar.enc -out credentials.tar -d
+  - openssl aes-256-cbc -K $encrypted_e308efbe7a9a_key -iv $encrypted_e308efbe7a9a_iv -in credentials.tar.enc -out credentials.tar -d
   - tar xvf credentials.tar
   - chmod 600 deploy_key_rsa
 
