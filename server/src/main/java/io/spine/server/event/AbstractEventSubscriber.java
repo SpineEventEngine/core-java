@@ -27,7 +27,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
-import io.spine.server.entity.EntityStateSubscriber;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
@@ -56,7 +55,7 @@ import static java.lang.String.format;
  *                              in the derived classes
  */
 public abstract class AbstractEventSubscriber
-        implements EventDispatcher<String>, EventSubscriber, EntityStateSubscriber, Logging {
+        implements EventDispatcher<String>, EventSubscriber, Logging {
 
     /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
