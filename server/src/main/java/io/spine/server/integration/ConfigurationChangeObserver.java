@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
-import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -32,6 +31,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * An observer, which reacts to the configuration update messages sent by
@@ -61,7 +61,8 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
 
     @Override
     public void handle(ExternalMessage value) {
-        RequestForExternalMessages request = AnyPacker.unpack(value.getOriginalMessage());
+        RequestForExternalMessages request = (RequestForExternalMessages)
+                unpack(value.getOriginalMessage());
 
         BoundedContextName origin = value.getBoundedContextName();
         addNewSubscriptions(request.getRequestedMessageTypesList(), origin);
@@ -156,7 +157,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
      * Removes all the current subscriptions from the local buses.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         for (ExternalMessageType currentlyRequestedMessage : requestedTypes.keySet()) {
             unregisterInAdapter(currentlyRequestedMessage);
         }

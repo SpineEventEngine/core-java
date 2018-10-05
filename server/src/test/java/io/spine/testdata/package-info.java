@@ -18,29 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.client.blackbox;
-
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.RejectionMessage;
-
 /**
- * Specifies the rules a rejection must match.
- *
- * <p>Optionally can contain an the criterion description, useful for display by test assertions.
- *
- * <p>These criteria are consumed by acks verifier
- * {@link VerifyAcknowledgements#ackedWithErrors(ErrorCriterion) ackedWithError method}.
- *
- * @param <T> a domain rejection type
+ * This package provides utilities for building test environments.
  */
-@VisibleForTesting
-public interface RejectionCriterion<T extends RejectionMessage> extends MessageCriterion<T> {
 
-    /**
-     * Obtains a message specifying the reason the rejection did not match the predicate.
-     */
-    @Override
-    default String description() {
-        return "Domain rejection did not match a predicate.";
-    }
-}
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testdata;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

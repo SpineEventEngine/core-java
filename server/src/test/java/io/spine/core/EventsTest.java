@@ -35,6 +35,7 @@ import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
 import io.spine.test.core.given.GivenProjectCreated;
 import io.spine.testing.Tests;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,9 +58,6 @@ import static io.spine.core.given.EventsTestEnv.tenantId;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,15 +70,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * <p>This test suite is placed under the {@code server} module to avoid dependency on the event
  * generation code which belongs to server-side.
- *
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- * @author Mykhailo Drachuk
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
-// Simple test names duplicate random literals.
 @DisplayName("Events utility should")
-public class EventsTest {
+public class EventsTest extends UtilityClassTest<Events> {
 
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(EventsTest.class);
@@ -89,6 +81,10 @@ public class EventsTest {
 
     private Event event;
     private EventContext context;
+
+    EventsTest() {
+        super(Events.class);
+    }
 
     @BeforeEach
     void setUp() {
@@ -100,24 +96,16 @@ public class EventsTest {
         context = event.getContext();
     }
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Events.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
         EntityAlreadyArchived defaultThrowableMessage =
                 new EntityAlreadyArchived(Any.getDefaultInstance());
-        new NullPointerTester()
-                .setDefault(StringValue.class, StringValue.getDefaultInstance())
-                .setDefault(EventContext.class, GivenEvent.context())
-                .setDefault(Version.class, Version.getDefaultInstance())
-                .setDefault(Event.class, Event.getDefaultInstance())
-                .setDefault(ThrowableMessage.class, defaultThrowableMessage)
-                .testAllPublicStaticMethods(Events.class);
+        tester.setDefault(StringValue.class, StringValue.getDefaultInstance())
+              .setDefault(EventContext.class, GivenEvent.context())
+              .setDefault(Version.class, Version.getDefaultInstance())
+              .setDefault(Event.class, Event.getDefaultInstance())
+              .setDefault(ThrowableMessage.class, defaultThrowableMessage);
     }
 
     @Nested
@@ -135,7 +123,7 @@ public class EventsTest {
         @Test
         @DisplayName("producer")
         void producer() {
-            StringValue msg = unpack(context.getProducerId());
+            StringValue msg = (StringValue) unpack(context.getProducerId());
 
             String id = (String) getProducer(context);
 

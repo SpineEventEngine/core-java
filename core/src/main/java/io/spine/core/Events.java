@@ -49,11 +49,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class for working with {@link Event} objects.
- *
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
 public final class Events {
 
     /** Compares two events by their timestamps. */

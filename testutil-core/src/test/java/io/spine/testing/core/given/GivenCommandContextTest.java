@@ -27,14 +27,14 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.UserId;
 import io.spine.testing.UtilityClassTest;
-import io.spine.time.Durations2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.Durations2.hours;
+import static io.spine.protobuf.Durations2.minutes;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
-import static io.spine.time.Durations2.fromMinutes;
 import static io.spine.validate.Validate.checkValid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -71,7 +71,7 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
     @DisplayName("create CommandContext with actor and time")
     void createWithActorAndTime() {
         UserId actorId = newUuid();
-        Timestamp when = add(getCurrentTime(), fromMinutes(42));
+        Timestamp when = add(getCurrentTime(), minutes(100));
 
         CommandContext context = GivenCommandContext.withActorAndTime(actorId, when);
         checkValid(context);
@@ -85,10 +85,11 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
     @Test
     @DisplayName("create CommandContext with scheduled delay")
     void createWithScheduledDelay() {
-        Duration delay = Durations2.fromHours(42);
-        Schedule expectedSchedule = Schedule.newBuilder()
-                                            .setDelay(delay)
-                                            .build();
+        Duration delay = hours(42);
+        Schedule expectedSchedule = Schedule
+                .newBuilder()
+                .setDelay(delay)
+                .build();
 
         CommandContext context = GivenCommandContext.withScheduledDelayOf(delay);
         checkValid(context);

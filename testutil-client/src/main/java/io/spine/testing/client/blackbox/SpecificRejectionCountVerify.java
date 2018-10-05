@@ -20,7 +20,7 @@
 
 package io.spine.testing.client.blackbox;
 
-import com.google.protobuf.Message;
+import io.spine.base.RejectionMessage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,20 +29,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * specified amount of times.
  *
  * @param <T> a domain rejection type
- * @author Mykhailo Drachuk
  */
-final class SpecificRejectionCountVerify<T extends Message> extends VerifyAcknowledgements {
+final class SpecificRejectionCountVerify<T extends RejectionMessage> extends VerifyAcknowledgements {
 
     private final Count expectedCount;
     private final Class<T> type;
     private final RejectionCriterion<T> criterion;
 
     /**
+     * Creates a new instance.
+     *
      * @param type          a type of a domain rejection specified by a message class
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param criterion     a criterion filtering domain rejections
      */
-    SpecificRejectionCountVerify(Class<T> type, Count expectedCount,
+    SpecificRejectionCountVerify(Class<T> type,
+                                 Count expectedCount,
                                  RejectionCriterion<T> criterion) {
         super();
         this.expectedCount = expectedCount;

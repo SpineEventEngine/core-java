@@ -28,20 +28,17 @@ import io.spine.server.transport.MessageChannel;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * A utility class for working with {@link MessageChannel message channels} and their
  * {@link ChannelId identifiers}, when they are used for {@link IntegrationBus} needs.
- *
- * @author Alex Tymchenko
  */
-class IntegrationChannels {
+final class IntegrationChannels {
 
     private static final TypeUrl EVENT_TYPE_URL = TypeUrl.of(Event.class);
 
-    /**
-     * Prevents the creation of the class instances.
-     */
+    /** Prevents instantiation of this utility class. */
     private IntegrationChannels() {
     }
 
@@ -72,13 +69,15 @@ class IntegrationChannels {
 
         TypeUrl typeUrl = TypeUrl.of(messageType);
 
-        StringValue asStringValue = StringValue.newBuilder()
-                                               .setValue(typeUrl.value())
-                                               .build();
+        StringValue asStringValue = StringValue
+                .newBuilder()
+                .setValue(typeUrl.value())
+                .build();
         Any packed = AnyPacker.pack(asStringValue);
-        ChannelId channelId = ChannelId.newBuilder()
-                                       .setIdentifier(packed)
-                                       .build();
+        ChannelId channelId = ChannelId
+                .newBuilder()
+                .setIdentifier(packed)
+                .build();
         return channelId;
     }
 
@@ -94,13 +93,14 @@ class IntegrationChannels {
     static ExternalMessageType fromId(ChannelId channelId) {
         checkNotNull(channelId);
 
-        StringValue rawValue = AnyPacker.unpack(channelId.getIdentifier());
+        StringValue rawValue = (StringValue) unpack(channelId.getIdentifier());
         TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
-        ExternalMessageType result = ExternalMessageType.newBuilder()
-                                                        .setMessageTypeUrl(typeUrl.value())
-                                                        .setWrapperTypeUrl(EVENT_TYPE_URL.value())
-                                                        .build();
+        ExternalMessageType result = ExternalMessageType
+                .newBuilder()
+                .setMessageTypeUrl(typeUrl.value())
+                .setWrapperTypeUrl(EVENT_TYPE_URL.value())
+                .build();
         return result;
     }
 }

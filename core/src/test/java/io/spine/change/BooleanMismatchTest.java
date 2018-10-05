@@ -20,7 +20,7 @@
 
 package io.spine.change;
 
-import com.google.common.testing.NullPointerTester;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,30 +30,18 @@ import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.BooleanMismatch.unpackActual;
 import static io.spine.change.BooleanMismatch.unpackExpected;
 import static io.spine.change.BooleanMismatch.unpackNewValue;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
                    "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("BooleanMismatch should")
-class BooleanMismatchTest {
+class BooleanMismatchTest extends UtilityClassTest<BooleanMismatch> {
 
     private static final int VERSION = 2;
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(BooleanMismatch.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(BooleanMismatch.class);
+    BooleanMismatchTest() {
+        super(BooleanMismatch.class);
     }
 
     @Nested

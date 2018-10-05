@@ -29,14 +29,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithErrors;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithRejections;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.ErrorCriterion.withType;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithErrors;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithRejections;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_TASK_TITLE;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.MISSING_ERROR_TYPE;
@@ -54,9 +54,6 @@ import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.taskLimi
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Mykhailo Drachuk
- */
 @DisplayName("Acknowledgements Verifier should")
 class VerifyAcknowledgementsTest {
 

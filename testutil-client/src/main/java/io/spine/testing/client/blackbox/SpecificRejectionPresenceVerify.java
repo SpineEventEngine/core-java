@@ -20,7 +20,7 @@
 
 package io.spine.testing.client.blackbox;
 
-import com.google.protobuf.Message;
+import io.spine.base.RejectionMessage;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -29,19 +29,20 @@ import static org.junit.jupiter.api.Assertions.fail;
  * provided criterion.
  *
  * @param <T> a domain rejection type
- * @author Mykhailo Drachuk
  */
-final class SpecificRejectionPresenceVerify<T extends Message> extends VerifyAcknowledgements {
+final class SpecificRejectionPresenceVerify<T extends RejectionMessage>
+        extends VerifyAcknowledgements {
 
     private final Class<T> type;
     private final RejectionCriterion<T> criterion;
 
     /**
+     * Creates new instance.
+     *
      * @param type      a type of a domain rejection specified by a message class
      * @param criterion a criterion filtering the domain rejections
      */
-    SpecificRejectionPresenceVerify(Class<T> type,
-                                    RejectionCriterion<T> criterion) {
+    SpecificRejectionPresenceVerify(Class<T> type, RejectionCriterion<T> criterion) {
         super();
         this.type = type;
         this.criterion = criterion;

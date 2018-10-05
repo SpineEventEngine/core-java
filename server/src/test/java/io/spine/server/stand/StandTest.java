@@ -371,7 +371,7 @@ class StandTest extends TenantAwareTest {
                     List<Any> messages = value.getMessagesList();
                     assertThat(messages).hasSize(ids.size());
                     for (Any message : messages) {
-                        Project project = unpack(message);
+                        Project project = (Project) unpack(message);
                         assertNotEquals(project, null);
                         assertMatchesMask(project, fieldMask);
                     }
@@ -450,7 +450,7 @@ class StandTest extends TenantAwareTest {
             @Override
             public void onStateChanged(EntityStateUpdate update) {
                 super.onStateChanged(update);
-                Customer customerInCallback = unpack(update.getState());
+                Customer customerInCallback = (Customer) unpack(update.getState());
                 callbackStates.add(customerInCallback);
             }
         };
@@ -643,7 +643,7 @@ class StandTest extends TenantAwareTest {
                 List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                Project project = unpack(messages.get(0));
+                Project project = (Project) unpack(messages.get(0));
 
                 assertNotNull(project);
 
@@ -951,7 +951,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(sampleProjects.size(), messageList.size());
         Collection<Project> allCustomers = sampleProjects.values();
         for (Any singleRecord : messageList) {
-            Project unpackedSingleResult = unpack(singleRecord);
+            Project unpackedSingleResult = (Project) unpack(singleRecord);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
     }

@@ -30,19 +30,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A value which can be of one of three possible types.
  *
- * @param <A> the type for the first alternative
+ * @param <A> the type of the first alternative
  * @param <B> the type of the second alternative
  * @param <C> the type of the third alternative
- *
- * @author Alexander Yevsyukov
  */
-public final class EitherOfThree<A extends Message, B extends Message, C extends Message>
+public final class EitherOf3<A extends Message, B extends Message, C extends Message>
     extends Either
     implements AValue<A>, BValue<B>, CValue<C> {
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOfThree(Message value, int index) {
+    private EitherOf3(Message value, int index) {
         super(value, index);
     }
 
@@ -50,9 +48,9 @@ public final class EitherOfThree<A extends Message, B extends Message, C extends
      * Creates a new instance with {@code <A>} value.
      */
     public static <A extends Message, B extends Message, C extends Message>
-    EitherOfThree<A, B, C> withA(A a) {
+    EitherOf3<A, B, C> withA(A a) {
         checkNotNull(a);
-        EitherOfThree<A, B, C> result = new EitherOfThree<>(a, 0);
+        EitherOf3<A, B, C> result = new EitherOf3<>(a, 0);
         return result;
     }
 
@@ -60,9 +58,9 @@ public final class EitherOfThree<A extends Message, B extends Message, C extends
      * Creates a new instance with {@code <B>} value.
      */
     public static <A extends Message, B extends Message, C extends Message>
-    EitherOfThree<A, B, C> withB(B b) {
+    EitherOf3<A, B, C> withB(B b) {
         checkNotNull(b);
-        EitherOfThree<A, B, C> result = new EitherOfThree<>(b, 1);
+        EitherOf3<A, B, C> result = new EitherOf3<>(b, 1);
         return result;
     }
 
@@ -70,9 +68,9 @@ public final class EitherOfThree<A extends Message, B extends Message, C extends
      * Creates a new instance with {@code <C>} value.
      */
     public static <A extends Message, B extends Message, C extends Message>
-    EitherOfThree<A, B, C> withC(C c) {
+    EitherOf3<A, B, C> withC(C c) {
         checkNotNull(c);
-        EitherOfThree<A, B, C> result = new EitherOfThree<>(c, 2);
+        EitherOf3<A, B, C> result = new EitherOf3<>(c, 2);
         return result;
     }
 

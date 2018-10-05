@@ -20,7 +20,7 @@
 
 package io.spine.change;
 
-import com.google.common.testing.NullPointerTester;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,33 +32,19 @@ import static io.spine.change.StringMismatch.unexpectedValue;
 import static io.spine.change.StringMismatch.unpackActual;
 import static io.spine.change.StringMismatch.unpackExpected;
 import static io.spine.change.StringMismatch.unpackNewValue;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
-                   "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("StringMismatch should")
-class StringMismatchTest {
+class StringMismatchTest extends UtilityClassTest<StringMismatch> {
 
     private static final String EXPECTED = "expected string";
     private static final String ACTUAL = "actual string";
     private static final String NEW_VALUE = "new value to set";
     private static final int VERSION = 1;
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(StringMismatch.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(StringMismatch.class);
+    StringMismatchTest() {
+        super(StringMismatch.class);
     }
 
     @Nested
@@ -93,7 +79,6 @@ class StringMismatchTest {
             assertEquals(VERSION, mismatch.getVersion());
         }
 
-        @SuppressWarnings("Duplicates") // Common test case for different Mismatches.
         @Test
         @DisplayName("for unexpected value")
         void forUnexpectedValue() {
