@@ -18,11 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+@BoundedContext("Organizations")
 
-/**
- * @author Dmytro Dashenkov
- */
-public interface EntityStateSubscriber {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.organizations;
 
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.server.annotation.BoundedContext;
+
+import javax.annotation.ParametersAreNonnullByDefault;
