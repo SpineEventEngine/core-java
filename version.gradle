@@ -36,6 +36,4 @@ ext {
     spineBaseVersion = '0.11.00-SNAPSHOT'
 
     spineTimeVersion = '0.10.97-SNAPSHOT'
-
-    gRpcVersion = '1.14.0'
 }
