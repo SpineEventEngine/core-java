@@ -123,7 +123,7 @@ public final class Events {
     public static EventMessage getMessage(Event event) {
         checkNotNull(event);
         Any any = event.getMessage();
-        EventMessage result = unpack(any);
+        EventMessage result = (EventMessage) unpack(any);
         return result;
     }
 

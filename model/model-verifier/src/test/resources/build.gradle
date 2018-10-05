@@ -22,19 +22,21 @@
 
 buildscript {
 
-    // Applying from `ext.gradle` inside the `buildscript` section to reuse the properties.
+    // Applying from `version.gradle` inside the `buildscript` section to reuse the properties.
     //
     // As long as `buildscript` section is always evaluated first, we need to apply
-    // `ext.gradle` explicitly here.
+    // `version.gradle` explicitly here.
     //
     // NOTE: this file is copied from the root project in the test setup.
-    apply from: 'ext.gradle'
+    apply from: 'version.gradle'
     apply from: 'config/gradle/dependencies.gradle'
 
     repositories {
         jcenter()
         mavenLocal()
 
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
     }
@@ -57,13 +59,15 @@ apply plugin: 'io.spine.tools.spine-model-compiler'
 apply plugin: 'io.spine.tools.spine-model-verifier'
 
 // NOTE: this file is copied from the root project in the test setup.
-apply from: 'ext.gradle'
+apply from: 'version.gradle'
 
 
 repositories {
     jcenter()
     mavenLocal()
 
+    maven { url = repos.oldSpine }
+    maven { url = repos.oldSpineSnapshots }
     maven { url = repos.spine }
     maven { url = repos.spineSnapshots }
 }

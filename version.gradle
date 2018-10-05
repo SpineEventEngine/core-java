@@ -24,8 +24,8 @@
  *  This file is used in both module `build.gradle` scripts and in the integration tests,
  *  as we want to manage the versions in a single source.
  */
- 
-def final SPINE_VERSION = '0.10.93-SNAPSHOT'
+
+def final SPINE_VERSION = '0.11.00-SNAPSHOT'
 
 ext {
 
@@ -33,7 +33,7 @@ ext {
     spineVersion = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.93-SNAPSHOT'
+    spineBaseVersion = '0.11.00-SNAPSHOT'
 
     spineTimeVersion = '0.10.90-SNAPSHOT'
 
