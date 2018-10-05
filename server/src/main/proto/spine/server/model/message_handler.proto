@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package spine.server.model;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.model";
+option java_outer_classname = "MessageHandlerProto";
+option java_multiple_files = true;
+
+option (internal_all) = true;
+
+import "google/protobuf/any.proto";
+
+import "spine/base/field_path.proto";
+
+// A message handler token.
+//
+// All the message handlers of an entity must have distinct tokens.
+//
+message HandlerToken {
+
+    string message_type = 1 [(required) = true];
+
+    string origin_type = 2;
+
+    MessageFilter filter = 3 [(required) = false, (valid) = true];
+}
+
+// A filter to apply to a handled message.
+//
+message MessageFilter {
+
+    // The path to the field.
+    base.FieldPath field = 1 [(valid) = true];
+
+    // The expected value of the field.
+    google.protobuf.Any value = 2 [(valid) = true];
+}
