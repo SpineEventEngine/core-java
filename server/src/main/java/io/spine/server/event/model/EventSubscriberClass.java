@@ -28,6 +28,7 @@ import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.type.MessageClass;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -78,7 +79,8 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public SubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass) {
-        return eventSubscriptions.getMethod(eventClass, originClass);
+    public Collection<SubscriberMethod> getSubscribers(EventClass eventClass,
+                                                       MessageClass originClass) {
+        return eventSubscriptions.getMethods(eventClass, originClass);
     }
 }

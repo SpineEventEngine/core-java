@@ -29,7 +29,6 @@ import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.of;
 
 /**
@@ -65,17 +64,9 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
 
     @Override
     public SubscriberMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        if (isEntitySubscriber(method)) {
-            checkNotExternal(method);
-            return new EntitySubscriberMethod(method, parameterSpec);
-        } else {
-            return new EventSubscriberMethod(method, parameterSpec);
-        }
-    }
-
-    private static void checkNotExternal(Method method) {
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        checkState(!annotation.external(), "Entity subscriber method cannot be external.");
+        return isEntitySubscriber(method)
+               ? new EntitySubscriberMethod(method, parameterSpec)
+               : new EventSubscriberMethod(method, parameterSpec);
     }
 
     private static boolean isEntitySubscriber(Method method) {

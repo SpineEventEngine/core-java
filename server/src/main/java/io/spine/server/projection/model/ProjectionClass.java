@@ -30,6 +30,7 @@ import io.spine.server.event.model.SubscribingClass;
 import io.spine.server.projection.Projection;
 import io.spine.type.MessageClass;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -73,7 +74,8 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public SubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass) {
-        return delegate.getMethod(eventClass, originClass);
+    public Collection<SubscriberMethod>
+    getSubscribers(EventClass eventClass, MessageClass originClass) {
+        return delegate.getMethods(eventClass, originClass);
     }
 }

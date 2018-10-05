@@ -23,6 +23,7 @@ package io.spine.server.projection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
@@ -260,10 +261,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projectionClass().getExternalEventClasses();
     }
 
+    @OverridingMethodsMustInvokeSuper
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
-        SubscriberMethod subscriber = projectionClass().getSubscriber(envelope.getMessageClass(),
-                                                                      envelope.getOriginClass());
+        SubscriberMethod subscriber = projectionClass().getSubscriber(envelope);
         return subscriber.canHandle(envelope);
     }
 

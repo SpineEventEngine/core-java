@@ -21,7 +21,12 @@
 package io.spine.server.event.model;
 
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.type.MessageClass;
+
+import java.util.Collection;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * An interface common for model classes that subscribe to events.
@@ -32,6 +37,25 @@ public interface SubscribingClass {
 
     /**
      * Obtains a method that handles the passed class of events.
+     *
+     * @param event
+     *         the event to obtain a method for
      */
-    SubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass);
+    default SubscriberMethod getSubscriber(EventEnvelope event) {
+        Collection<SubscriberMethod> subscribers =
+                getSubscribers(event.getMessageClass(), event.getOriginClass());
+        SubscriberMethod matchingMethod = subscribers
+                .stream()
+                .filter(s -> s.canHandle(event))
+                .findFirst()
+                .orElseThrow(() -> newIllegalStateException(
+                        "None of the subscriber methods could handle %s event." +
+                                "%n  Methods: %s" +
+                                "%n  Event message: %s.",
+                        event.getMessageClass(), subscribers, event.getMessage()
+                ));
+        return matchingMethod;
+    }
+
+    Collection<SubscriberMethod> getSubscribers(EventClass eventClass, MessageClass originClass);
 }

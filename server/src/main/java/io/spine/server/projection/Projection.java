@@ -105,8 +105,7 @@ public abstract class Projection<I,
     }
 
     void apply(EventEnvelope event) {
-        SubscriberMethod method =
-                thisClass().getSubscriber(event.getMessageClass(), event.getOriginClass());
+        SubscriberMethod method = thisClass().getSubscriber(event);
         method.invoke(this, event);
     }
 

@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -265,6 +266,16 @@ public abstract class AbstractHandlerMethod<T,
     public HandlerKey key() {
         HandlerKey result = HandlerKey.of(getMessageClass());
         return result;
+    }
+
+    @Override
+    public HandlerToken token() {
+        TypeUrl messageType = getMessageClass().getTypeName()
+                                               .toUrl();
+        return HandlerToken
+                .newBuilder()
+                .setMessageType(messageType.value())
+                .build();
     }
 
     @Override

@@ -60,6 +60,8 @@ public interface HandlerMethod<T,
      */
     HandlerKey key();
 
+    HandlerToken token();
+
     /**
      * Obtains the set of method attributes configured for this method.
      */
