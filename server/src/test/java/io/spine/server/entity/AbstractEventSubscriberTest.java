@@ -29,7 +29,9 @@ import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.groups.Group;
 import io.spine.server.groups.TestSubscriber;
+import io.spine.server.integration.IntegrationBus;
 import io.spine.server.organizations.Organization;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.SystemBoundedContexts;
@@ -53,9 +55,17 @@ class AbstractEventSubscriberTest {
 
     @BeforeEach
     void setUp() {
-        groupsContext = BoundedContext.newBuilder().build();
-        organizationsContext = BoundedContext.newBuilder().build();
-
+        InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
+        groupsContext = BoundedContext
+                .newBuilder()
+                .setName("Groups")
+                .setIntegrationBus(IntegrationBus.newBuilder().setTransportFactory(transport))
+                .build();
+        organizationsContext = BoundedContext
+                .newBuilder()
+                .setName("Organizations")
+                .setIntegrationBus(IntegrationBus.newBuilder().setTransportFactory(transport))
+                .build();
         subscriber = new TestSubscriber();
         groupsContext.registerEventDispatcher(subscriber);
     }
