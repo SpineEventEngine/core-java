@@ -22,18 +22,19 @@ package io.spine.server.event.model;
 
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.logging.Logging;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
+import java.util.Optional;
 
 /**
  * An interface common for model classes that subscribe to events.
  *
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public interface SubscribingClass {
+public interface SubscribingClass extends Logging {
 
     /**
      * Obtains a method that handles the passed class of events.
@@ -41,20 +42,22 @@ public interface SubscribingClass {
      * @param event
      *         the event to obtain a method for
      */
-    default SubscriberMethod getSubscriber(EventEnvelope event) {
+    default Optional<SubscriberMethod> getSubscriber(EventEnvelope event) {
         Collection<SubscriberMethod> subscribers =
                 getSubscribers(event.getMessageClass(), event.getOriginClass());
-        SubscriberMethod matchingMethod = subscribers
+        Optional<SubscriberMethod> foundSubscriber = subscribers
                 .stream()
                 .filter(s -> s.canHandle(event))
-                .findFirst()
-                .orElseThrow(() -> newIllegalStateException(
-                        "None of the subscriber methods could handle %s event." +
-                                "%n  Methods: %s" +
-                                "%n  Event message: %s.",
-                        event.getMessageClass(), subscribers, event.getMessage()
-                ));
-        return matchingMethod;
+                .findFirst();
+        if (foundSubscriber.isPresent()) {
+            return foundSubscriber;
+        } else {
+            _debug("None of the subscriber methods could handle %s event." +
+                           "%n  Methods: %s" +
+                           "%n  Event message: %s.",
+                   event.getMessageClass(), subscribers, event.getMessage());
+            return Optional.empty();
+        }
     }
 
     Collection<SubscriberMethod> getSubscribers(EventClass eventClass, MessageClass originClass);

@@ -27,7 +27,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.validate.ValidatingBuilder;
 
@@ -105,8 +104,8 @@ public abstract class Projection<I,
     }
 
     void apply(EventEnvelope event) {
-        SubscriberMethod method = thisClass().getSubscriber(event);
-        method.invoke(this, event);
+        thisClass().getSubscriber(event)
+                   .ifPresent(method -> method.invoke(this, event));
     }
 
     @Override

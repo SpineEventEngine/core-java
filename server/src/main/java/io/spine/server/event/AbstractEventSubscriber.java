@@ -104,8 +104,8 @@ public abstract class AbstractEventSubscriber
 
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
-        SubscriberMethod subscriber = thisClass.getSubscriber(envelope);
-        return subscriber.canHandle(envelope);
+        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(envelope);
+        return subscriber.isPresent();
     }
 
     @Override
@@ -125,8 +125,8 @@ public abstract class AbstractEventSubscriber
     }
 
     private void handle(EventEnvelope envelope) {
-        SubscriberMethod method = thisClass.getSubscriber(envelope);
-        method.invoke(this, envelope);
+        thisClass.getSubscriber(envelope)
+                 .ifPresent(method -> method.invoke(this, envelope));
     }
 
     /**
