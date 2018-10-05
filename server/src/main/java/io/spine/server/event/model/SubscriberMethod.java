@@ -27,19 +27,18 @@ import io.spine.base.FieldPath;
 import io.spine.core.ByField;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.protobuf.FieldPaths;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerToken;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.string.Stringifiers;
 
 import java.lang.reflect.Method;
 
 import static io.spine.protobuf.FieldPaths.fieldAt;
 import static io.spine.protobuf.FieldPaths.parse;
+import static io.spine.protobuf.FieldPaths.typeOfFieldAt;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.string.Stringifiers.fromString;
 
@@ -69,8 +68,8 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
             return typeBasedToken;
         } else {
             FieldPath field = parse(filter.path());
-            Class<?> fieldType = FieldPaths.typeOfFieldAt(field);
-            Object expectedValue = Stringifiers.fromString(filter.value(), fieldType);
+            Class<?> fieldType = typeOfFieldAt(rawMessageClass(), field);
+            Object expectedValue = fromString(filter.value(), fieldType);
             Any packedValue = toAny(expectedValue);
             MessageFilter messageFilter = MessageFilter
                     .newBuilder()
@@ -81,6 +80,11 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
                                  .setFilter(messageFilter)
                                  .build();
         }
+    }
+
+    @Override
+    public EventClass getMessageClass() {
+        return EventClass.from(rawMessageClass());
     }
 
     protected abstract ByField getFilter();

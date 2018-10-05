@@ -21,7 +21,6 @@
 package io.spine.server.event.model;
 
 import io.spine.core.ByField;
-import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.model.declare.ParameterSpec;
@@ -51,10 +50,5 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     protected void checkAttributesMatch(EventEnvelope envelope) throws IllegalArgumentException {
         super.checkAttributesMatch(envelope);
         ensureExternalMatch(envelope.getEventContext().getExternal());
-    }
-
-    @Override
-    public EventClass getMessageClass() {
-        return EventClass.from(rawMessageClass());
     }
 }

@@ -23,9 +23,9 @@ package io.spine.server.event.model;
 import com.google.common.base.Objects;
 import com.google.protobuf.Message;
 import io.spine.base.Environment;
+import io.spine.base.EventMessage;
 import io.spine.core.BoundedContextName;
 import io.spine.core.ByField;
-import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
@@ -67,11 +67,7 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     }
 
     private void checkExternal(Method method) {
-        @SuppressWarnings("unchecked") // Logically checked.
-                Class<? extends Message> firstParameter =
-                (Class<? extends Message>) method.getParameterTypes()[0];
-        TypeUrl typeUrl = TypeUrl.of(firstParameter);
-        BoundedContextName originContext = contextOf(typeUrl.getJavaClass());
+        BoundedContextName originContext = contextOf(entityType());
         boolean external = !originContext.equals(contextOfSubscriber);
         boolean methodIsExternal = ExternalAttribute.of(method).getValue();
         checkArgument(methodIsExternal == external,
@@ -81,8 +77,12 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
 
     @Override
     protected ByField getFilter() {
-        TypeUrl targetType = TypeUrl.of(rawMessageClass());
+        TypeUrl targetType = TypeUrl.of(entityType());
         return new TypeFilteringFilter(targetType);
+    }
+
+    private Class<? extends Message> entityType() {
+        return getFirstParamType(getRawMethod());
     }
 
     @Override
@@ -96,8 +96,8 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     }
 
     @Override
-    public EventClass getMessageClass() {
-        return EventClass.from(EntityStateChanged.class);
+    protected Class<? extends EventMessage> rawMessageClass() {
+        return EntityStateChanged.class;
     }
 
     @SuppressWarnings("TestOnlyProblems")

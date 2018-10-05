@@ -143,7 +143,7 @@ public abstract class AbstractHandlerMethod<T,
         return ImmutableSet.of(ExternalAttribute::of);
     }
 
-    protected final Class<M> rawMessageClass() {
+    protected Class<? extends M> rawMessageClass() {
         return messageClass;
     }
 
@@ -157,7 +157,7 @@ public abstract class AbstractHandlerMethod<T,
      * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
-    static <M extends Message> Class<M> getFirstParamType(Method handler) {
+    protected static <M extends Message> Class<M> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked")
             // We always expect first param as a Message of required type.
         Class<M> result = (Class<M>) handler.getParameterTypes()[0];
