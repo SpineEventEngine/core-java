@@ -47,8 +47,6 @@ import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Client-side utilities for working with commands.
- *
- * @author Alexander Yevsyukov
  */
 public final class Commands {
 
@@ -59,8 +57,8 @@ public final class Commands {
                            .register(idStringifier(), CommandId.class);
     }
 
+    /** Prevent instantiation of this utility class. */
     private Commands() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

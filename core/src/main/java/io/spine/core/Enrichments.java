@@ -32,8 +32,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Utility class for working with event enrichments.
- *
- * @author Alexander Yevsyukov
  */
 public final class Enrichments {
 

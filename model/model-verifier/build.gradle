@@ -19,7 +19,7 @@
  */
 
 buildscript {
-    apply from: "$rootDir/ext.gradle"
+    apply from: "$rootDir/version.gradle"
 }
 
 ext {
