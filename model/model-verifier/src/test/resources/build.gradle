@@ -45,7 +45,7 @@ buildscript {
         classpath deps.build.protobuf
         classpath deps.build.gradlePlugins.protobuf
         classpath "io.spine.tools:spine-model-compiler:${spineBaseVersion}"
-        classpath "io.spine.tools:spine-model-verifier:${spineVersion}"
+        classpath "io.spine.tools:spine-model-verifier:${versionToPublish}"
     }
 
     configurations.all({
@@ -78,9 +78,9 @@ compileJava {
 
 dependencies {
     implementation deps.build.protobuf
-    implementation "io.spine:spine-server:$spineVersion"
+    implementation "io.spine:spine-server:$versionToPublish"
 
-    annotationProcessor "io.spine.tools:spine-model-assembler:$spineVersion"
+    annotationProcessor "io.spine.tools:spine-model-assembler:$versionToPublish"
 }
 
 sourceSets {

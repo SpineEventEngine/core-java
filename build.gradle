@@ -76,7 +76,7 @@ allprojects {
     apply plugin: 'project-report'
 
     group = 'io.spine'
-    version = spineVersion
+    version = versionToPublish
 }
 
 final boolean isTravis = System.env.TRAVIS == 'true'
