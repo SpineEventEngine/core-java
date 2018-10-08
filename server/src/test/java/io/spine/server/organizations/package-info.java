@@ -18,6 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * A bounded context for testing entity state updates.
+ *
+ * <p>This package hosts a number of Protobuf definitions marked an {@code (entity)}-s.
+ */
+
 @BoundedContext("Organizations")
 
 @CheckReturnValue

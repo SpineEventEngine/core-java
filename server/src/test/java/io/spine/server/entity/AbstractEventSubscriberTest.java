@@ -29,6 +29,8 @@ import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.groups.Group;
 import io.spine.server.groups.TestSubscriber;
+import io.spine.server.groups.WronglyDomesticSubscriber;
+import io.spine.server.groups.WronglyExternalSubscriber;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.organizations.Organization;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -45,6 +47,7 @@ import java.util.Optional;
 import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AbstractEventSubscriberTest {
@@ -117,6 +120,18 @@ class AbstractEventSubscriberTest {
         assertTrue(receivedState.isPresent());
         assertEquals(state, receivedState.get());
         assertFalse(subscriber.domestic().isPresent());
+    }
+
+    @Test
+    @DisplayName("fail to subscribe to external events without `external = true`")
+    void failIfNotExternal() {
+        assertThrows(IllegalStateException.class, WronglyDomesticSubscriber::new);
+    }
+
+    @Test
+    @DisplayName("fail to subscribe to domestic events without `external = false`")
+    void failIfNotDomestic() {
+        assertThrows(IllegalStateException.class, WronglyExternalSubscriber::new);
     }
 
     private static EntityHistoryId historyId(Class<? extends Message> type) {

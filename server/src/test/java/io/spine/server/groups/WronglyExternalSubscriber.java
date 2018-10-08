@@ -18,21 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-/**
- * A bounded context for testing entity state updates.
- *
- * <p>This package hosts a number of Protobuf definitions marked an {@code (entity)}-s and event
- * subscribers which receive updates of those entities.
- */
-
-@BoundedContext("Groups")
-
-@CheckReturnValue
-@ParametersAreNonnullByDefault
 package io.spine.server.groups;
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.server.annotation.BoundedContext;
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class WronglyExternalSubscriber extends AbstractEventSubscriber {
+
+    @Subscribe(external = true) // <-- Error here. Should be domestic.
+    public void on(Group group) {
+        fail(WronglyExternalSubscriber.class.getSimpleName() +
+                     " should not be able to receive domestic updates.");
+    }
+}

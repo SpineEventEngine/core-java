@@ -41,7 +41,6 @@ import io.spine.type.TypeUrl;
 
 import java.lang.reflect.Method;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTests;
 import static io.spine.protobuf.TypeConverter.toAny;
@@ -78,9 +77,9 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
         BoundedContextName originContext = contextOf(entityType());
         boolean external = !originContext.equals(contextOfSubscriber);
         boolean methodIsExternal = ExternalAttribute.of(getRawMethod()).getValue();
-        checkArgument(methodIsExternal == external,
-                      "Entity subscriber %s should%s be `external`.",
-                      getRawMethod(), external ? "" : " NOT");
+        checkState(methodIsExternal == external,
+                   "Entity subscriber %s should%s be `external`.",
+                   getRawMethod(), external ? "" : " NOT");
     }
 
     private Class<? extends Message> entityType() {
