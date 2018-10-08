@@ -42,7 +42,7 @@ import static io.spine.util.Exceptions.unsupported;
  *
  * @author Alex Tymchenko
  */
-public final class EntityEnvelope<I, S extends Message>
+public final class EntityStateEnvelope<I, S extends Message>
         implements MessageEnvelope<Any, Entity<I, S>, Empty> {
 
     /**
@@ -73,7 +73,7 @@ public final class EntityEnvelope<I, S extends Message>
      */
     private final @Nullable Version entityVersion;
 
-    private EntityEnvelope(Entity<I, S> entity, TenantId tenantId) {
+    private EntityStateEnvelope(Entity<I, S> entity, TenantId tenantId) {
         this(entity.getId(), entity.getState(),
              tenantId,
              entity instanceof VersionableEntity
@@ -81,8 +81,8 @@ public final class EntityEnvelope<I, S extends Message>
                     : null);
     }
 
-    private EntityEnvelope(I entityId, S entityState,
-                           TenantId tenantId, @Nullable Version entityVersion) {
+    private EntityStateEnvelope(I entityId, S entityState,
+                                TenantId tenantId, @Nullable Version entityVersion) {
         this.entityState = entityState;
         this.entityId = Identifier.pack(entityId);
         this.entityStateClass = EntityStateClass.of(entityState);
@@ -90,15 +90,15 @@ public final class EntityEnvelope<I, S extends Message>
         this.tenantId = tenantId;
     }
 
-    public static <I, S extends Message> EntityEnvelope of(Entity<I, S> entity,
-                                                           TenantId tenantId) {
-        return new EntityEnvelope<>(entity, tenantId);
+    public static <I, S extends Message> EntityStateEnvelope of(Entity<I, S> entity,
+                                                                TenantId tenantId) {
+        return new EntityStateEnvelope<>(entity, tenantId);
     }
 
-    public static <I, S extends Message> EntityEnvelope of(I entityId, S entityState,
-                                                           @Nullable Version entityVersion,
-                                                           TenantId tenantId) {
-        return new EntityEnvelope<>(entityId, entityState, tenantId, entityVersion);
+    public static <I, S extends Message> EntityStateEnvelope of(I entityId, S entityState,
+                                                                @Nullable Version entityVersion,
+                                                                TenantId tenantId) {
+        return new EntityStateEnvelope<>(entityId, entityState, tenantId, entityVersion);
     }
 
     @Override
@@ -174,10 +174,10 @@ public final class EntityEnvelope<I, S extends Message>
         if (this == o) {
             return true;
         }
-        if (!(o instanceof EntityEnvelope)) {
+        if (!(o instanceof EntityStateEnvelope)) {
             return false;
         }
-        EntityEnvelope<?, ?> that = (EntityEnvelope<?, ?>) o;
+        EntityStateEnvelope<?, ?> that = (EntityStateEnvelope<?, ?>) o;
         return Objects.equal(entityState, that.entityState) &&
                 Objects.equal(entityId, that.entityId) &&
                 Objects.equal(entityVersion, that.entityVersion);

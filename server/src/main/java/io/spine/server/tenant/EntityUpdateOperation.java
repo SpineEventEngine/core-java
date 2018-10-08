@@ -20,11 +20,11 @@
 package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
-import io.spine.server.entity.EntityEnvelope;
+import io.spine.server.entity.EntityStateEnvelope;
 
 /**
  * A tenant-aware operation performed in relation to
- * a {@link io.spine.server.stand.Stand#update(io.spine.server.entity.EntityEnvelope)} entity state update},
+ * a {@link io.spine.server.stand.Stand#update(io.spine.server.entity.EntityStateEnvelope)} entity state update},
  * executed asynchronously or in a distributed environment.
  *
  * @author Alex Tymchenko
@@ -32,7 +32,7 @@ import io.spine.server.entity.EntityEnvelope;
 @Internal
 public abstract class EntityUpdateOperation extends TenantAwareOperation {
 
-    protected EntityUpdateOperation(EntityEnvelope envelope) {
+    protected EntityUpdateOperation(EntityStateEnvelope envelope) {
         super(envelope.getTenantId());
     }
 }

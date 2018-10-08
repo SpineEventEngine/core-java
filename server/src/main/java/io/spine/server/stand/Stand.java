@@ -39,7 +39,7 @@ import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityEnvelope;
+import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
@@ -130,7 +130,7 @@ public class Stand implements AutoCloseable {
      * @param entity the entity which state should be delivered to the {@code Stand}
      */
     public void post(TenantId tenantId, VersionableEntity<?, ?> entity) {
-        EntityEnvelope<?, ?> envelope = EntityEnvelope.of(entity, tenantId);
+        EntityStateEnvelope<?, ?> envelope = EntityStateEnvelope.of(entity, tenantId);
         update(envelope);
     }
 
@@ -147,9 +147,9 @@ public class Stand implements AutoCloseable {
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
      *
      * @param envelope the updated entity state,
-     *                 packed as {@linkplain io.spine.server.entity.EntityEnvelope envelope}
+     *                 packed as {@linkplain io.spine.server.entity.EntityStateEnvelope envelope}
      */
-    void update(EntityEnvelope<?, ?> envelope) {
+    void update(EntityStateEnvelope<?, ?> envelope) {
         EntityUpdateOperation op = new EntityUpdateOperation(envelope) {
             @Override
             public void run() {
@@ -339,7 +339,7 @@ public class Stand implements AutoCloseable {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
      *
-     * @see #update(io.spine.server.entity.EntityEnvelope)
+     * @see #update(io.spine.server.entity.EntityStateEnvelope)
      */
     public <I, E extends VersionableEntity<I, ?>>
            void registerTypeSupplier(Repository<I, E> repository) {
