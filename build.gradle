@@ -20,14 +20,16 @@
 
 buildscript {
 
-    // Applying from `ext.gradle` inside the `buildscript` section to reuse the properties.
+    // Applying from `version.gradle` inside the `buildscript` section to reuse the properties.
     //
     // As long as `buildscript` section is always evaluated first, we need to apply
-    // `ext.gradle` explicitly here.
-    apply from: 'ext.gradle'
+    // `version.gradle` explicitly here.
+    apply from: 'version.gradle'
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
         google()
@@ -49,7 +51,7 @@ buildscript {
     })
 }
 
-apply from: 'ext.gradle'
+apply from: 'version.gradle'
 
 ext {
     spineJacocoScript = "${rootDir}/config/gradle/jacoco.gradle"
@@ -74,7 +76,7 @@ allprojects {
     apply plugin: 'project-report'
 
     group = 'io.spine'
-    version = spineVersion
+    version = versionToPublish
 }
 
 final boolean isTravis = System.env.TRAVIS == 'true'
@@ -161,6 +163,8 @@ subprojects {
         google()
         maven { url = repos.gradlePlugins }
         mavenLocal()
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
     }
