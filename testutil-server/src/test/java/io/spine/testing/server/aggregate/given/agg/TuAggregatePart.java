@@ -64,6 +64,11 @@ public final class TuAggregatePart
                              .build();
     }
 
+    @Apply
+    void on(TuCommentAdded event) {
+        getBuilder().setId(event.getId())
+                    .setTimestamp(fromMillis(1234567));
+    }
     @Apply(allowImport = true)
     void on(TuCommentRecievedByEmail event) {
         getBuilder().setId(event.getId())
