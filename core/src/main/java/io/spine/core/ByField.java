@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  *
  * <p>This annotation should not be used directly to mark anything.
  * Instead, use the annotation instances as
- * {@link io.spine.core.Subscribe#filter() @Subscribe.filter)} parameters.
+ * a {@link io.spine.core.Subscribe#filter() @Subscribe.filter)} parameter.
  *
  * @author Dmytro Dashenkov
  */
