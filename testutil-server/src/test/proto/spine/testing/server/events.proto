@@ -50,6 +50,10 @@ message TuCommentAdded {
     TuTaskId id = 2;
 }
 
+message TuCommentLimitReached {
+    TuTaskId id = 2;
+}
+
 message TuTaskCreated {
     TuTaskId id = 2;
 }

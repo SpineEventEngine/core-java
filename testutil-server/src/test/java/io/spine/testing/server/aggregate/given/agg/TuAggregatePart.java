@@ -20,16 +20,19 @@
 
 package io.spine.testing.server.aggregate.given.agg;
 
-import com.google.protobuf.util.Timestamps;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuCommentsVBuilder;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAddComment;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
+import io.spine.testing.server.given.entity.event.TuCommentLimitReached;
+
+import static com.google.protobuf.util.Timestamps.fromMillis;
 
 /**
  * A sample aggregate part that handles commands.
@@ -62,8 +65,15 @@ public final class TuAggregatePart
                              .build();
     }
 
+    @React
+    TuCommentLimitReached on(TuCommentAdded event) {
+        return TuCommentLimitReached.newBuilder()
+                                    .setId(event.getId())
+                                    .build();
+    }
+
     @Apply
-    void on(TuCommentAdded event) {
-        getBuilder().setTimestamp(Timestamps.fromMillis(123));
+    void on(TuCommentLimitReached event) {
+        getBuilder().setTimestamp(fromMillis(123));
     }
 }
