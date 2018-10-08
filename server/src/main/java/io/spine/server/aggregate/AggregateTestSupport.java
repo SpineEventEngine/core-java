@@ -100,7 +100,6 @@ public final class AggregateTestSupport {
     void importEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
         checkArguments(repository, aggregate, event);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
-
         EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(repository, event);
         endpoint.dispatchInTx(aggregate);
     }
