@@ -25,8 +25,6 @@ import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.string.StringifierRegistry;
-import io.spine.string.Stringifiers;
 import io.spine.test.projection.event.Int32Imported;
 import io.spine.test.projection.event.PairImported;
 import io.spine.test.projection.event.StringImported;
@@ -36,6 +34,8 @@ import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ProjectionTestEnv {
+
+    private static final String VALUE_FIELD_PATH = "value";
 
     /** Prevents instantiation of this utility class. */
     private ProjectionTestEnv() {
@@ -77,8 +77,6 @@ public class ProjectionTestEnv {
     public static final class FilteringProjection
             extends Projection<String, StringValue, StringValueVBuilder> {
 
-        private static final String VALUE_FIELD_PATH = "value";
-
         public static final String SET_A = "ONE_UNDER_SCOPE";
 
         public static final String SET_B = "TWO_UNDER_SCOPES";
@@ -103,6 +101,21 @@ public class ProjectionTestEnv {
         }
     }
 
+    public static final class NoDefaultOptionProjection
+            extends Projection<String, StringValue, StringValueVBuilder> {
+
+        public static final String ACCEPTED_VALUE = "AAA";
+
+        private NoDefaultOptionProjection(String id) {
+            super(id);
+        }
+
+        @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = ACCEPTED_VALUE))
+        public void on(StringImported event) {
+            getBuilder().setValue(event.getValue());
+        }
+    }
+
     public static final class MalformedProjection
             extends Projection<String, StringValue, StringValueVBuilder> {
 
@@ -120,17 +133,34 @@ public class ProjectionTestEnv {
             halt();
         }
 
-        private static void halt() {
-            fail("Should never be called.");
+        public static final class Repository
+                extends ProjectionRepository<String, MalformedProjection, StringValue> {
+        }
+    }
+
+    public static final class DuplicateFilterProjection
+            extends Projection<String, StringValue, StringValueVBuilder> {
+
+        private DuplicateFilterProjection(String id) {
+            super(id);
+        }
+
+        @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "1"))
+        public void onString1(Int32Imported event) {
+            halt();
+        }
+
+        @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "+1"))
+        public void onStringOne(Int32Imported event) {
+            halt();
         }
 
         public static final class Repository
-                extends ProjectionRepository<String, MalformedProjection, StringValue> {
-
-            static {
-                StringifierRegistry.getInstance()
-                                   .register(Stringifiers.forInteger(), Integer.TYPE);
-            }
+                extends ProjectionRepository<String, DuplicateFilterProjection, StringValue> {
         }
+    }
+
+    private static void halt() {
+        fail("Should never be called.");
     }
 }
