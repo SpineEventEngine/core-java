@@ -30,7 +30,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Marks a method as a subscriber for the command output.
  *
- * <p>Use it to subscribe to either events or business rejections
+ * <p>Use it to subscribe to either events, business rejections, or entity state updates.
  *
  * <h1>Subscribing to Events</h1>
  *
@@ -75,8 +75,24 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *         by the subscriber.
  * </ul>
  *
+ * <h1>Subscribing to entity state updates</h1>
+ *
+ * <p>An entity state subscriber method:
+ * <ul>
+ *     <li>is annotated with {@link Subscribe};
+ *     <li>is {@code public};
+ *     <li>returns {@code void};
+ *     <li>accepts an entity state message marked with the {@code (entity)} option as the only
+ *         parameter.
+ * </ul>
+ *
+ * <h1>Filtering events by a field value</h1>
+ * <p>If a {@linkplain ByField field filter} is defined, only the events matching this filter are
+ * passed to the subscriber.
+ *
  * <p>Any combination of {@code external} and {@code filter} is valid, i.e. it is possible
- * to filter external event subscriptions.
+ * to filter external event subscriptions. Though, it is not possible to filter entity state
+ * updates.
  *
  * <p>A single subscribing class may define a number of subscriber methods with different field
  * filters. Though, all the field filters must target the same field. For example, this event
@@ -119,6 +135,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 @Retention(RUNTIME)
 @Target(METHOD)
