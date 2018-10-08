@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.StringValue;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -30,7 +31,10 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.model.HandlerFieldFilterClashError;
 import io.spine.server.projection.given.EntitySubscriberProjection;
+import io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection;
+import io.spine.server.projection.given.ProjectionTestEnv.MalformedProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
@@ -57,6 +61,8 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenEvent.withMessage;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_A;
+import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_B;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.testing.TestValues.random;
@@ -120,10 +126,7 @@ class ProjectionShould {
     @Test
     @DisplayName("receive entity state updates")
     void handleStateUpdates() {
-        ProjectId id = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
+        ProjectId id = newId();
         TaskId taskId = TaskId
                 .newBuilder()
                 .setId(TestValues.random(1, 1_000))
@@ -208,5 +211,51 @@ class ProjectionShould {
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(stringImported.getValue()));
         assertTrue(projectionState.contains(valueOf(integerImported.getValue())));
+    }
+
+    @Test
+    @DisplayName("subscribe to events with specific field values")
+    void subscribeToEventsWithSpecificFields() {
+        TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+        ProjectId id = newId();
+        StringImported setB = StringImported
+                .newBuilder()
+                .setValue(SET_B)
+                .build();
+        StringImported setA = StringImported
+                .newBuilder()
+                .setValue(SET_A)
+                .build();
+        StringImported setText = StringImported
+                .newBuilder()
+                .setValue("Test project name")
+                .build();
+        FilteringProjection projection =
+                Given.projectionOfClass(FilteringProjection.class)
+                     .withId(id.getId())
+                     .withVersion(42)
+                     .withState(StringValue.getDefaultInstance())
+                     .build();
+        dispatch(projection, eventFactory.createEvent(setB));
+        assertThat(projection.getState().getValue()).isEqualTo("B");
+
+        dispatch(projection, eventFactory.createEvent(setA));
+        assertThat(projection.getState().getValue()).isEqualTo("A");
+
+        dispatch(projection, eventFactory.createEvent(setText));
+        assertThat(projection.getState().getValue()).isEqualTo(setText.getValue());
+    }
+
+    @Test
+    @DisplayName("fail to subscribe to the same event filtering by different fields")
+    void failToSubscribeByDifferentFields() {
+        assertThrows(HandlerFieldFilterClashError.class, MalformedProjection.Repository::new);
+    }
+
+    private static ProjectId newId() {
+        return ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
     }
 }

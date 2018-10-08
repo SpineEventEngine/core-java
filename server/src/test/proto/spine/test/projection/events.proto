@@ -60,3 +60,8 @@ message StringImported {
 message Int32Imported {
     int32 value = 1;
 }
+
+message PairImported {
+    string str = 1;
+    int32 integer = 2;
+}

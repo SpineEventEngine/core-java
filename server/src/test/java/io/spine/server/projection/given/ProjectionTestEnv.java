@@ -21,13 +21,19 @@
 package io.spine.server.projection.given;
 
 import com.google.protobuf.StringValue;
+import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.string.StringifierRegistry;
+import io.spine.string.Stringifiers;
 import io.spine.test.projection.event.Int32Imported;
+import io.spine.test.projection.event.PairImported;
 import io.spine.test.projection.event.StringImported;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ProjectionTestEnv {
 
@@ -65,6 +71,66 @@ public class ProjectionTestEnv {
             String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
             return toMessage(result);
+        }
+    }
+
+    public static final class FilteringProjection
+            extends Projection<String, StringValue, StringValueVBuilder> {
+
+        private static final String VALUE_FIELD_PATH = "value";
+
+        public static final String SET_A = "ONE_UNDER_SCOPE";
+
+        public static final String SET_B = "TWO_UNDER_SCOPES";
+
+        private FilteringProjection(String id) {
+            super(id);
+        }
+
+        @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = SET_A))
+        public void onReserved(StringImported event) {
+            getBuilder().setValue("A");
+        }
+
+        @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = SET_B))
+        public void onSecret(StringImported event) {
+            getBuilder().setValue("B");
+        }
+
+        @Subscribe
+        public void on(StringImported event) {
+            getBuilder().setValue(event.getValue());
+        }
+    }
+
+    public static final class MalformedProjection
+            extends Projection<String, StringValue, StringValueVBuilder> {
+
+        private MalformedProjection(String id) {
+            super(id);
+        }
+
+        @Subscribe(filter = @ByField(path = "integer", value = "42"))
+        public void onInt(PairImported event) {
+            halt();
+        }
+
+        @Subscribe(filter = @ByField(path = "str", value = "42"))
+        public void onString(PairImported event) {
+            halt();
+        }
+
+        private static void halt() {
+            fail("Should never be called.");
+        }
+
+        public static final class Repository
+                extends ProjectionRepository<String, MalformedProjection, StringValue> {
+
+            static {
+                StringifierRegistry.getInstance()
+                                   .register(Stringifiers.forInteger(), Integer.TYPE);
+            }
         }
     }
 }
