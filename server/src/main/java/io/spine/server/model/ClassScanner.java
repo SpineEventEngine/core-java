@@ -171,6 +171,12 @@ public final class ClassScanner {
         }
     }
 
+    /**
+     * A pair of a {@link HandlerMethod} and the field to filter its events by.
+     *
+     * @param <H>
+     *         the type of handler method
+     */
     private static final class FilteredHandler<H extends HandlerMethod<?, ?, ?, ?>> {
 
         private final H handler;
