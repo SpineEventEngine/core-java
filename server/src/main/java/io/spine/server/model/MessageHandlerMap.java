@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
- * Provides mapping from a class of messages to a method which handles such messages.
+ * Provides mapping from a class of messages to methods which handle such messages.
  *
  * @param <M>
  *         the type of messages
@@ -49,10 +49,11 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  *         the type of handler methods
  * @author Alexander Yevsyukov
  * @author Dmytro Grankin
+ * @author Dmytro Dashenkov
  */
 @Immutable(containerOf = {"M", "H"})
-public class MessageHandlerMap<M extends MessageClass,
-                               H extends HandlerMethod<?, M, ?, ?>>
+public final class MessageHandlerMap<M extends MessageClass,
+                                     H extends HandlerMethod<?, M, ?, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -130,10 +131,10 @@ public class MessageHandlerMap<M extends MessageClass,
     }
 
     /**
-     * Obtains the method for handling by the passed message and origin classes.
+     * Obtains methods for handling messages of the given class and with the given origin.
      *
-     * <p>If there is no handler matching both the message and origin class,
-     * a handler will be searched by a message class only.
+     * <p>If there is no handler matching both the message and origin class, handlers will be
+     * searched by the message class only.
      *
      * @param messageClass
      *         the message class of the handled message
@@ -151,17 +152,32 @@ public class MessageHandlerMap<M extends MessageClass,
         return getMethods(presentKey);
     }
 
+    /**
+     * Obtains a single handler method for messages of the given class and with the given origin.
+     *
+     * <p>If there is no handler matching both the message and origin class, a handler will be
+     * searched by the message class only.
+     *
+     * <p>If there is no such method or several such methods, an {@link IllegalStateException} is
+     * thrown.
+     *
+     * @param messageClass
+     *         the message class of the handled message
+     * @return a handler method
+     * @throws IllegalStateException
+     *         if there is no such method or several such methods found in the map
+     */
     public H getSingleMethod(M messageClass, MessageClass originClass) {
         ImmutableCollection<H> methods = getMethods(messageClass, originClass);
         return checkSingle(methods, messageClass);
     }
 
     /**
-     * Obtains the method for handling by the passed message classes.
+     * Obtains methods for handling messages of the given class.
      *
      * @param messageClass
      *         the message class of the handled message
-     * @return a handler method
+     * @return handlers method
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
@@ -169,6 +185,17 @@ public class MessageHandlerMap<M extends MessageClass,
         return getMethods(messageClass, EmptyClass.instance());
     }
 
+    /**
+     * Obtains a single handler method for messages of the given class.
+     *
+     * <p>If there is no such method or several such methods, an {@link IllegalStateException} is
+     * thrown.
+     *
+     * @param messageClass the message class of the handled message
+     * @return a handler method
+     * @throws IllegalStateException
+     *         if there is no such method or several such methods found in the map
+     */
     public H getSingleMethod(M messageClass) {
         ImmutableCollection<H> methods = getMethods(messageClass);
         return checkSingle(methods, messageClass);

@@ -123,8 +123,10 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     }
 
     /**
-     * Obtains a single dispatcher (if available) for the passed message class.
+     * Obtains a single dispatcher (if available) for the passed message.
      *
+     * @param envelope
+     *         the message to find a dispatcher for
      * @throws IllegalStateException
      *         if more than one dispatcher is found
      * @apiNote This method must be called only for serving {@link UnicastBus}es.
@@ -133,16 +135,31 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
         checkNotNull(envelope);
         Set<D> dispatchers = getDispatchers(envelope);
         checkNotMoreThanOne(dispatchers, classOf(envelope));
-        Optional<D> result = dispatchers.stream().findFirst();
+        Optional<D> result = dispatchers.stream()
+                                        .findFirst();
         return result;
     }
 
+    /**
+     * Obtains all the dispatchers for the passed message class.
+     *
+     * @param messageClass the target message class
+     * @return all the registered dispatchers of the given class
+     */
     protected Set<D> getDispatchersForType(C messageClass) {
         checkNotNull(messageClass);
         Collection<D> dispatchersForType = dispatchers.get(messageClass);
         return copyOf(dispatchersForType);
     }
 
+    /**
+     * Obtains a single dispatcher (if available) for the passed message.
+     *
+     * @param messageClass
+     *         the class of the message to find a dispatcher for
+     * @throws IllegalStateException
+     *         if more than one dispatcher is found
+     */
     protected Optional<? extends D> getDispatcherForType(C messageClass) {
         Collection<D> dispatchersOfClass = dispatchers.get(messageClass);
         checkNotMoreThanOne(dispatchersOfClass, messageClass);

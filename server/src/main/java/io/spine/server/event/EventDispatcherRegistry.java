@@ -70,18 +70,6 @@ class EventDispatcherRegistry
     }
 
     /**
-     * Checks if this registry has a dispatcher for events of the given class.
-     *
-     * @param event class to find dispatchers for
-     * @return {@code true} if the dispatcher is present, {@code false} otherwise
-     */
-    boolean hasDispatchersFor(EventEnvelope event) {
-        Set<EventDispatcher<?>> dispatchers = getDispatchers(event);
-        boolean result = !dispatchers.isEmpty();
-        return result;
-    }
-
-    /**
      * Ensures that the dispatcher forwards at least one event.
      *
      * @throws IllegalArgumentException if the dispatcher returns empty set of event classes
