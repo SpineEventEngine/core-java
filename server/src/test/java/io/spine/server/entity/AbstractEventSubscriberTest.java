@@ -27,6 +27,7 @@ import io.spine.client.EntityId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
+import io.spine.server.groups.FilteredStateSubscriber;
 import io.spine.server.groups.Group;
 import io.spine.server.groups.TestSubscriber;
 import io.spine.server.groups.WronglyDomesticSubscriber;
@@ -132,6 +133,12 @@ class AbstractEventSubscriberTest {
     @DisplayName("fail to subscribe to domestic events without `external = false`")
     void failIfNotDomestic() {
         assertThrows(IllegalStateException.class, WronglyExternalSubscriber::new);
+    }
+
+    @Test
+    @DisplayName("fail to subscribe to entity states with filters")
+    void failToSubscribeToStateWithFilters() {
+        assertThrows(IllegalStateException.class, FilteredStateSubscriber::new);
     }
 
     private static EntityHistoryId historyId(Class<? extends Message> type) {
