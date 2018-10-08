@@ -270,8 +270,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @Override
     public HandlerToken token() {
-        TypeUrl messageType = getMessageClass().getTypeName()
-                                               .toUrl();
+        TypeUrl messageType = TypeUrl.of(getMessageClass().value());
         return HandlerToken
                 .newBuilder()
                 .setMessageType(messageType.value())
