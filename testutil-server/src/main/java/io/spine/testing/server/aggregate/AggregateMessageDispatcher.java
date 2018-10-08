@@ -77,6 +77,15 @@ public class AggregateMessageDispatcher {
         return AggregateTestSupport.dispatchEvent(mockRepository(), aggregate, event);
     }
 
+    /**
+     * Imports the {@linkplain EventEnvelope event envelope} to the given {@code Aggregate}.
+     */
+    public static void importEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
+        checkNotNull(aggregate);
+        checkNotNull(event);
+        AggregateTestSupport.importEvent(mockRepository(), aggregate, event);
+    }
+
     @SuppressWarnings("unchecked") // It is OK when mocking
     private static <I, A extends Aggregate<I, ?, ?>> AggregateRepository<I, A> mockRepository() {
         TestAggregateRepository mockedRepo = mock(TestAggregateRepository.class);

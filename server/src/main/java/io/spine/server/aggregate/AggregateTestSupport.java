@@ -89,6 +89,22 @@ public final class AggregateTestSupport {
         );
     }
 
+    /**
+     * Imports an event to an instance of {@code Aggregate} into the applier method annotated
+     * as {@code allowImport = true}.
+     *
+     * @param <I> the type of {@code Aggregate} identifier
+     * @param <A> the type of {@code Aggregate}
+     */
+    public static <I, A extends Aggregate<I, ?, ?>>
+    void importEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
+        checkArguments(repository, aggregate, event);
+        InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
+
+        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(repository, event);
+        endpoint.dispatchInTx(aggregate);
+    }
+
     private static <I, A extends Aggregate<I, ?, ?>> List<Message>
     dispatchAndCollect(AggregateEndpoint<I, A, ?> endpoint, A aggregate) {
         List<Message> result =
