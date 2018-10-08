@@ -80,11 +80,6 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     }
 
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        return delegate.canDispatchEvent(envelope);
-    }
-
-    @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         delegate.onError(envelope, exception);
     }
@@ -97,7 +92,7 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     @Override
     public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
         return dispatchesExternalEvents()
-               ? Optional.of(new DelegatingExternalMessageDispatcher<>(delegate))
+               ? Optional.of(new ExternalDispatcher<>(delegate))
                : Optional.empty();
     }
 
@@ -114,12 +109,18 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
                           .toString();
     }
 
-    private static final class DelegatingExternalMessageDispatcher<I>
+    /**
+     * An implementation of {@link ExternalMessageDispatcher} which delegates all its calls to
+     * a given {@link EventDispatcherDelegate}.
+     *
+     * @param <I> the type of the dispatcher ID
+     */
+    private static final class ExternalDispatcher<I>
             implements ExternalMessageDispatcher<I> {
 
         private final EventDispatcherDelegate<I> delegate;
 
-        private DelegatingExternalMessageDispatcher(EventDispatcherDelegate<I> delegate) {
+        private ExternalDispatcher(EventDispatcherDelegate<I> delegate) {
             this.delegate = delegate;
         }
 
@@ -140,12 +141,6 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
             EventEnvelope eventEnvelope = envelope.toEventEnvelope();
             delegate.onError(eventEnvelope, exception);
-        }
-
-        @Override
-        public boolean canDispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope event = envelope.toEventEnvelope();
-            return delegate.canDispatchEvent(event);
         }
     }
 }

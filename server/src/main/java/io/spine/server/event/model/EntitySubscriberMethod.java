@@ -30,7 +30,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
 import io.spine.server.annotation.BoundedContext;
-import io.spine.server.model.ExternalAttribute;
 import io.spine.server.model.Model;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.system.server.EntityStateChanged;
@@ -39,7 +38,6 @@ import io.spine.type.TypeUrl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTests;
 
@@ -56,7 +54,7 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
         super(method, parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         checkNotFiltered(method);
-        checkExternal(method);
+        checkExternal();
     }
 
     private static void checkNotFiltered(Method method) {
@@ -66,13 +64,10 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
                    "Entity state subscriber cannot declare filters but method `%s` does.", method);
     }
 
-    private void checkExternal(Method method) {
+    private void checkExternal() {
         BoundedContextName originContext = contextOf(entityType());
         boolean external = !originContext.equals(contextOfSubscriber);
-        boolean methodIsExternal = ExternalAttribute.of(method).getValue();
-        checkArgument(methodIsExternal == external,
-                      "Entity subscriber %s should%s be `external`.",
-                      getRawMethod(), external ? "" : " NOT");
+        ensureExternalMatch(external);
     }
 
     @Override
