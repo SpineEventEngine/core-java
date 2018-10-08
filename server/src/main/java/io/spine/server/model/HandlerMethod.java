@@ -111,6 +111,13 @@ public interface HandlerMethod<T,
     }
 
     /**
+     * Obtains the {@link MessageFilter} to apply to the messages received by this method.
+     */
+    default MessageFilter filter() {
+        return MessageFilter.getDefaultInstance();
+    }
+
+    /**
      * Ensures that the {@code external} attribute of the method is the one expected.
      *
      * <p>This method is for checking that an {@code external} attribute of a message context

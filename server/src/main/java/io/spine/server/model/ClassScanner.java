@@ -20,10 +20,13 @@
 
 package io.spine.server.model;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import io.spine.base.FieldPath;
 import io.spine.server.model.declare.MethodSignature;
+import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -32,6 +35,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMultimap.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * A scanner of a model class.
@@ -92,6 +96,7 @@ public final class ClassScanner {
         private final Multimap<HandlerKey, H> handlers;
         private final Map<HandlerToken, H> seenMethods;
         private final MethodSignature<H, ?> signature;
+        private final Map<MessageClass, FilteredHandler<H>> fieldFilters;
 
         private MethodScan(Class<?> declaringClass,
                            MethodSignature<H, ?> signature) {
@@ -99,6 +104,7 @@ public final class ClassScanner {
             this.signature = signature;
             this.handlers = HashMultimap.create();
             this.seenMethods = newHashMap();
+            this.fieldFilters = newHashMap();
         }
 
         /**
@@ -127,6 +133,7 @@ public final class ClassScanner {
 
         private void remember(H handler) {
             checkNotRemembered(handler);
+            checkNotClashes(handler);
             HandlerKey key = handler.key();
             handlers.put(key, handler);
         }
@@ -145,6 +152,55 @@ public final class ClassScanner {
             } else {
                 seenMethods.put(token, handler);
             }
+        }
+
+        private void checkNotClashes(H handler) {
+            MessageClass handledClass = handler.getMessageClass();
+            FieldPath field = handler.filter().getField();
+            if (isNotDefault(field)) {
+                FilteredHandler<H> previousValue = fieldFilters.put(
+                        handledClass,
+                        new FilteredHandler<>(handler, field)
+                );
+                if (previousValue != null && previousValue.fieldDiffersFrom(field)) {
+                    throw new HandlerFieldFilterClashError(declaringClass,
+                                                           handler.getRawMethod(),
+                                                           previousValue.handler.getRawMethod());
+                }
+            }
+        }
+    }
+
+    private static final class FilteredHandler<H extends HandlerMethod<?, ?, ?, ?>> {
+
+        private final H handler;
+        private final FieldPath filteredField;
+
+        private FilteredHandler(H handler, FieldPath field) {
+            this.handler = handler;
+            this.filteredField = field;
+        }
+
+        private boolean fieldDiffersFrom(FieldPath path) {
+            return !filteredField.equals(path);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            FilteredHandler<?> handler1 = (FilteredHandler<?>) o;
+            return Objects.equal(handler, handler1.handler) &&
+                    Objects.equal(filteredField, handler1.filteredField);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(handler, filteredField);
         }
     }
 }

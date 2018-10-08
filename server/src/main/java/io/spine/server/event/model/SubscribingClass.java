@@ -26,7 +26,10 @@ import io.spine.logging.Logging;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Optional;
+
+import static java.util.Comparator.comparing;
 
 /**
  * An interface common for model classes that subscribe to events.
@@ -45,8 +48,12 @@ public interface SubscribingClass extends Logging {
     default Optional<SubscriberMethod> getSubscriber(EventEnvelope event) {
         Collection<SubscriberMethod> subscribers =
                 getSubscribers(event.getMessageClass(), event.getOriginClass());
+        Comparator<SubscriberMethod> methodOrder = comparing(
+                (SubscriberMethod subscriber) -> subscriber.filter().getField().getFieldNameCount()
+        ).reversed();
         Optional<SubscriberMethod> foundSubscriber = subscribers
                 .stream()
+                .sorted(methodOrder)
                 .filter(s -> s.canHandle(event))
                 .findFirst();
         if (foundSubscriber.isPresent()) {

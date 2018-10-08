@@ -20,26 +20,31 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.base.Objects;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Environment;
 import io.spine.base.EventMessage;
+import io.spine.base.FieldPath;
 import io.spine.core.BoundedContextName;
 import io.spine.core.ByField;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
+import io.spine.protobuf.FieldPaths;
 import io.spine.server.annotation.BoundedContext;
+import io.spine.server.model.ExternalAttribute;
+import io.spine.server.model.MessageFilter;
 import io.spine.server.model.Model;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTests;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * A handler method which receives an entity state and produces no output.
@@ -48,13 +53,18 @@ import static io.spine.core.BoundedContextNames.assumingTests;
  */
 public final class EntitySubscriberMethod extends SubscriberMethod implements Logging {
 
+    private static final FieldPath TYPE_URL_PATH = FieldPaths.parse("id.type_url");
+
     private final BoundedContextName contextOfSubscriber;
+    private final Any typeUrlAsAny;
 
     EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
-        this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         checkNotFiltered(method);
         checkExternal();
+        this.contextOfSubscriber = contextOf(method.getDeclaringClass());
+        TypeUrl targetType = TypeUrl.of(entityType());
+        this.typeUrlAsAny = toAny(targetType.value());
     }
 
     private static void checkNotFiltered(Method method) {
@@ -67,13 +77,10 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     private void checkExternal() {
         BoundedContextName originContext = contextOf(entityType());
         boolean external = !originContext.equals(contextOfSubscriber);
-        ensureExternalMatch(external);
-    }
-
-    @Override
-    protected ByField getFilter() {
-        TypeUrl targetType = TypeUrl.of(entityType());
-        return new TypeFilteringFilter(targetType);
+        boolean methodIsExternal = ExternalAttribute.of(getRawMethod()).getValue();
+        checkArgument(methodIsExternal == external,
+                      "Entity subscriber %s should%s be `external`.",
+                      getRawMethod(), external ? "" : " NOT");
     }
 
     private Class<? extends Message> entityType() {
@@ -107,6 +114,15 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     }
 
     @Override
+    public MessageFilter filter() {
+        return MessageFilter
+                .newBuilder()
+                .setField(TYPE_URL_PATH)
+                .setValue(typeUrlAsAny)
+                .build();
+    }
+
+    @Override
     protected Class<? extends EventMessage> rawMessageClass() {
         return EntityStateChanged.class;
     }
@@ -122,56 +138,5 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
                   cls.getName(), assumingTests().getValue(), BoundedContext.class.getName());
         }
         return name;
-    }
-
-    /**
-     * A field filter for system events.
-     *
-     * <p>Checks that the given event ID (presumably, of type
-     * {@link io.spine.system.server.EntityHistoryId}) has the {@code type_url} field with
-     * the given value.
-     */
-    @SuppressWarnings("ClassExplicitlyAnnotation")
-    private static final class TypeFilteringFilter implements ByField {
-
-        private final TypeUrl targetType;
-
-        private TypeFilteringFilter(TypeUrl type) {
-            targetType = type;
-        }
-
-
-        @Override
-        public String path() {
-            return "id.type_url";
-        }
-
-        @Override
-        public String value() {
-            return targetType.value();
-        }
-
-        @Override
-        public Class<? extends Annotation> annotationType() {
-            return ByField.class;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof ByField)) {
-                return false;
-            }
-            ByField filter = (ByField) o;
-            return Objects.equal(this.path(), filter.path())
-                    && Objects.equal(this.value(), filter.value());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(value());
-        }
     }
 }
