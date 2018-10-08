@@ -60,9 +60,9 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
 
     EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
+        this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         checkNotFiltered(method);
         checkExternal();
-        this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         TypeUrl targetType = TypeUrl.of(entityType());
         this.typeUrlAsAny = toAny(targetType.value());
     }

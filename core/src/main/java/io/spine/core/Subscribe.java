@@ -85,12 +85,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <pre>
  *     {@code
  *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
- *     public void on(UserLoggedIn event) {
+ *     public void onExpired(UserLoggedIn event) {
  *         // Handle expired subscription.
  *     }
  *
  *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "INACTIVE"))
- *     public void on(UserLoggedIn event) {
+ *     public void onInactive(UserLoggedIn event) {
  *         // Handle inactive subscription.
  *     }
  *
@@ -104,11 +104,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <pre>
  *     {@code
  *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
- *     public void on(UserLoggedIn event) {
+ *     public void onExpired(UserLoggedIn event) {
  *     }
  *
  *     \@Subscribe(filter = @ByField(path = "payment_method.status", value = "UNSET"))
- *     public void on(UserLoggedIn event) {
+ *     public void onUnknownBilling(UserLoggedIn event) {
  *         // Error, different field paths used in the same class for the same event type.
  *     }
  *     }
