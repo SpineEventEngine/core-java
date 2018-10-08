@@ -75,6 +75,45 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *         by the subscriber.
  * </ul>
  *
+ * // TODO:2018-10-08:dmytro.dashenkov: Simplify next paragraph.
+ * <p>If a {@linkplain ByField field filter} is defined, only the events matching this filter are
+ * passed to the subscriber. A single event subscriber class may define a number of subscribing
+ * methods which would differ from each other only by the filter. In this case, it is allowed to
+ * define several methods with the same filtered field and without a filter at all, but it's illegal
+ * to define multiple methods with different filtered fields. For example, the next event handling
+ * is valid:
+ * <pre>
+ *     {@code
+ *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
+ *     public void on(UserLoggedIn event) {
+ *         // Handle expired subscription.
+ *     }
+ *
+ *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "INACTIVE"))
+ *     public void on(UserLoggedIn event) {
+ *         // Handle inactive subscription.
+ *     }
+ *
+ *     \@Subscribe
+ *     public void on(UserLoggedIn event) {
+ *         // Handle other cases.
+ *     }
+ *     }
+ * </pre>
+ * <p>And this is not valid:
+ * <pre>
+ *     {@code
+ *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
+ *     public void on(UserLoggedIn event) {
+ *     }
+ *
+ *     \@Subscribe(filter = @ByField(path = "payment_method.status", value = "UNSET"))
+ *     public void on(UserLoggedIn event) {
+ *         // Error, different field paths used in the same class for the same event type.
+ *     }
+ *     }
+ * </pre>
+ *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
  * this method is not considered as a subscriber and is not registered for the command output
  * delivery.
@@ -94,9 +133,12 @@ public @interface Subscribe {
     boolean external() default false;
 
     /**
-     * Filter to apply to all the events.
+     * Filter to apply to all the event messages.
      *
      * <p>If an event does not match this filter, it is not passed to the subscriber method.
+     *
+     * <p>If the {@link ByField#path() @ByField.path} if empty, the filter is not
+     * applied.
      */
     ByField filter() default @ByField(path = "", value = "");
 }
