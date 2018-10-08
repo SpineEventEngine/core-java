@@ -58,7 +58,7 @@ message TuProject {
 // A state of an aggregate part.
 message TuComments {
 
-    TuProjectId id = 1;
+    TuTaskId id = 1;
 
     google.protobuf.Timestamp timestamp = 2;
 }

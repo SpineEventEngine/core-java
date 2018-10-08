@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregatePartEventReactionTest;
 import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
-import io.spine.testing.server.aggregate.given.agg.TuAggregatePartRepository;
 import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
 import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart;
 import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePartRepository;

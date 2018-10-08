@@ -23,14 +23,13 @@ package io.spine.testing.server.aggregate.given.agg;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.React;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuCommentsVBuilder;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAddComment;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
-import io.spine.testing.server.given.entity.event.TuCommentLimitReached;
+import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmail;
 
 import static com.google.protobuf.util.Timestamps.fromMillis;
 
@@ -65,15 +64,9 @@ public final class TuAggregatePart
                              .build();
     }
 
-    @React
-    TuCommentLimitReached on(TuCommentAdded event) {
-        return TuCommentLimitReached.newBuilder()
-                                    .setId(event.getId())
-                                    .build();
-    }
-
-    @Apply
-    void on(TuCommentLimitReached event) {
-        getBuilder().setTimestamp(fromMillis(123));
+    @Apply(allowImport = true)
+    void on(TuCommentRecievedByEmail event) {
+        getBuilder().setId(event.getId())
+                    .setTimestamp(fromMillis(1234567));
     }
 }

@@ -31,6 +31,7 @@ import io.spine.testing.server.given.entity.command.TuAssignProject;
 import io.spine.testing.server.given.entity.command.TuCreateProject;
 import io.spine.testing.server.given.entity.event.TuProjectAssigned;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
+import io.spine.testing.server.given.entity.event.TuTrelloProjectCreated;
 import io.spine.testing.server.given.entity.rejection.TuFailedToAssignProject;
 
 import static com.google.protobuf.util.Timestamps.fromMillis;
@@ -71,6 +72,11 @@ public final class TuAggregate
 
     @Apply
     void on(TuProjectCreated event) {
+        getBuilder().setTimestamp(fromMillis(1234567));
+    }
+
+    @Apply(allowImport = true)
+    void on(TuTrelloProjectCreated event) {
         getBuilder().setTimestamp(fromMillis(1234567));
     }
 }

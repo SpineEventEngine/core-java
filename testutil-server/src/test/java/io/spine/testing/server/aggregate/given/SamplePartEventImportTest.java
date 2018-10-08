@@ -22,46 +22,45 @@ package io.spine.testing.server.aggregate.given;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
-import io.spine.testing.server.aggregate.AggregatePartEventReactionTest;
+import io.spine.testing.server.aggregate.AggregatePartEventImportTest;
 import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
 import io.spine.testing.server.aggregate.given.agg.TuAggregatePartRepository;
 import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
-import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart;
-import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePartRepository;
 import io.spine.testing.server.expected.EventReactorExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuTaskId;
-import io.spine.testing.server.given.entity.event.TuCommentAdded;
+import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmail;
 
 /**
- * The test class for checking an aggregate part reacting to an event.
+ * The test class for checking an import of an event into an aggregate part.
  *
- * @see io.spine.testing.server.aggregate.AggregatePartEventReactionTestShould
+ * @author Vladyslav Lubenskyi
+ * @see io.spine.testing.server.aggregate.AggregatePartEventImportTestShould
  */
-public class SamplePartEventTest
-        extends AggregatePartEventReactionTest<TuTaskId,
-                                               TuCommentAdded,
-                                               TuComments,
-                                               TuReactingAggregatePart,
-                                               TuAggregateRoot> {
+public class SamplePartEventImportTest
+        extends AggregatePartEventImportTest<TuTaskId,
+                                             TuCommentRecievedByEmail,
+                                             TuComments,
+                                             TuAggregatePart,
+                                             TuAggregateRoot> {
 
-    public static final TuCommentAdded TEST_EVENT =
-            TuCommentAdded.newBuilder()
-                          .setId(TuReactingAggregatePart.ID)
-                          .build();
+    public static final TuCommentRecievedByEmail TEST_EVENT =
+            TuCommentRecievedByEmail.newBuilder()
+                                    .setId(TuAggregatePart.ID)
+                                    .build();
 
-    public SamplePartEventTest() {
+    public SamplePartEventImportTest() {
         super(TuAggregatePart.ID, TEST_EVENT);
     }
 
     @Override
-    protected Repository<TuTaskId, TuReactingAggregatePart> createEntityRepository() {
-        return new TuReactingAggregatePartRepository();
+    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
+        return new TuAggregatePartRepository();
     }
 
     @Override
     public EventReactorExpected<TuComments>
-    expectThat(TuReactingAggregatePart entity) {
+    expectThat(TuAggregatePart entity) {
         return super.expectThat(entity);
     }
 
@@ -74,13 +73,12 @@ public class SamplePartEventTest
         return TuAggregateRoot.newInstance(id);
     }
 
-    public TuReactingAggregatePart createPart(TuTaskId id) {
+    public TuAggregatePart createPart(TuTaskId id) {
         return newPart(id);
     }
 
-
     @Override
-    protected TuReactingAggregatePart newPart(TuAggregateRoot root) {
-        return TuReactingAggregatePart.newInstance(root);
+    protected TuAggregatePart newPart(TuAggregateRoot root) {
+        return TuAggregatePart.newInstance(root);
     }
 }
