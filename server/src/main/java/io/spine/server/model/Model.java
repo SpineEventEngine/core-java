@@ -105,6 +105,7 @@ public class Model {
         return Optional.of(result);
     }
 
+    /** Obtains the name of the bounded context which encapsulates this model. */
     public BoundedContextName contextName() {
         return context;
     }

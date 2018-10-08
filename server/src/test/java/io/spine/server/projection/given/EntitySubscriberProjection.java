@@ -37,9 +37,6 @@ import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static java.util.stream.Collectors.toList;
 
-/**
- * @author Dmytro Dashenkov
- */
 public final class EntitySubscriberProjection
         extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
 

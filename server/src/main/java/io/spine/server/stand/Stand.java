@@ -147,7 +147,7 @@ public class Stand implements AutoCloseable {
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
      *
      * @param envelope the updated entity state,
-     *                 packed as {@linkplain io.spine.server.entity.EntityStateEnvelope envelope}
+     *                 packed as {@linkplain EntityStateEnvelope envelope}
      */
     void update(EntityStateEnvelope<?, ?> envelope) {
         EntityUpdateOperation op = new EntityUpdateOperation(envelope) {
@@ -339,7 +339,7 @@ public class Stand implements AutoCloseable {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
      *
-     * @see #update(io.spine.server.entity.EntityStateEnvelope)
+     * @see #update(EntityStateEnvelope)
      */
     public <I, E extends VersionableEntity<I, ?>>
            void registerTypeSupplier(Repository<I, E> repository) {

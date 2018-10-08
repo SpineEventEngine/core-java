@@ -27,6 +27,8 @@ import io.spine.server.organizations.Organization;
 import java.util.Optional;
 
 /**
+ * A test entity state subscriber.
+ *
  * @author Dmytro Dashenkov
  */
 public final class TestSubscriber extends AbstractEventSubscriber {

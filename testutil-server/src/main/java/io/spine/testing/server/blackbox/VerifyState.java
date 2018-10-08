@@ -39,6 +39,8 @@ import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 
 /**
+ * Verifies the states of entities currently present in a bounded context.
+ *
  * @author Dmytro Dashenkov
  */
 @VisibleForTesting
@@ -52,6 +54,12 @@ public abstract class VerifyState {
         expectedResult = result;
     }
 
+    /**
+     * Verifies the entity states.
+     *
+     * @param queryService
+     *         the query service to obtain entity states from
+     */
     public final void verify(QueryService queryService) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
         queryService.read(query, observer);
@@ -64,9 +72,23 @@ public abstract class VerifyState {
         compare(expectedResult, actualEntities);
     }
 
+    /**
+     * Compares the expected and the actual entity states.
+     */
     protected abstract void compare(ImmutableCollection<? extends Message> expected,
                                     ImmutableCollection<? extends Message> actual);
 
+    /**
+     * Obtains a verifier which checks that the system contains exactly the passed entity states.
+     *
+     * @param entityType
+     *         the type of the entity to query
+     * @param expected
+     *         the expected entity states
+     * @param <T>
+     *         the type of the entity state
+     * @return new instance of {@code VerifyState}
+     */
     public static <T extends Message> VerifyState exactly(Class<T> entityType,
                                                           Iterable<T> expected) {
         QueryFactory queries = newInstance(VerifyState.class).query();
