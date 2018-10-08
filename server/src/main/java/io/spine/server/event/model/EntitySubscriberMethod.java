@@ -80,11 +80,27 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
         return getFirstParamType(getRawMethod());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>An entity state subscriber is always external since {@link EntityStateChanged} is
+     * an external event to any domain context.
+     *
+     * @return always {@code true}
+     */
     @Override
     public boolean isExternal() {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>An entity state subscriber never domestic since {@link EntityStateChanged} is
+     * an external event to any domain context.
+     *
+     * @return always {@code false}
+     */
     @Override
     public boolean isDomestic() {
         return false;

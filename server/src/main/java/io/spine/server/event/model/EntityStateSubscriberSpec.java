@@ -44,6 +44,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
+ * A {@link ParameterSpec} of an entity state subscriber method.
+ *
  * @author Dmytro Dashenkov
  */
 @Immutable
@@ -51,6 +53,10 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     PARAM_SPEC;
 
+    /**
+     * The set of {@link io.spine.option.EntityOption.Visibility Visibility} modifiers which allow
+     * an entity state to be subscribed to.
+     */
     private static final Set<EntityOption.Visibility> allowedVisibilityModifiers =
             immutableEnumSet(VISIBILITY_UNKNOWN, SUBSCRIBE, FULL);
 

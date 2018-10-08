@@ -75,8 +75,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         return selectBySignature(
                 (eventClass) -> HandlerToken
                         .newBuilder()
-                        .setMessageType(TypeUrl.of(eventClass)
-                                               .value())
+                        .setMessageType(TypeUrl.of(eventClass).value())
                         .build(),
                 (eventClass, commandClass) -> HandlerToken
                         .newBuilder()

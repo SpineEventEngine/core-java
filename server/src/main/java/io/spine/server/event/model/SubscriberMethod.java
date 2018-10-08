@@ -43,6 +43,11 @@ import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.string.Stringifiers.fromString;
 
 /**
+ * An event handler method which may have side effects, but provides no visible output.
+ *
+ * <p>A subscriber method must be annotated with the {@link io.spine.core.Subscribe @Subscribe}
+ * annotation.
+ *
  * @author Dmytro Dashenkov
  */
 public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscriber,
@@ -87,9 +92,23 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
         return EventClass.from(rawMessageClass());
     }
 
+    /**
+     * Obtains the field filter to apply to the handled messages.
+     *
+     * @return an instance of {@link ByField} filter
+     */
     protected abstract ByField getFilter();
 
-    public final boolean canHandle(EventEnvelope envelope) {
+    /**
+     * Checks if this method can handle the given event.
+     *
+     * <p>It is assumed that the type of the event is correct and only the field filter should be
+     * checked.
+     *
+     * @param envelope the event to check
+     * @return {@code true} if this method can handle the given event, {@code false} otherwise
+     */
+    final boolean canHandle(EventEnvelope envelope) {
         ByField filter = getFilter();
         String fieldPath = filter.path();
         if (fieldPath.isEmpty()) {
