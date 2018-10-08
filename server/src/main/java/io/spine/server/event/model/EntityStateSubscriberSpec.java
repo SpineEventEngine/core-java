@@ -77,7 +77,7 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         if (visibleForSubscription(entity)) {
             return true;
         } else {
-            throw new InsufficientVisibilityException(messageType, entity.getVisibility());
+            throw new InsufficientVisibilityError(messageType, entity.getVisibility());
         }
     }
 

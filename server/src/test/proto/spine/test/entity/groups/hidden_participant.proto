@@ -6,21 +6,16 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.groups";
-option java_outer_classname = "GroupProto";
+option java_outer_classname = "HiddenProto";
 option java_multiple_files = true;
 
-import "spine/core/user_id.proto";
+import "spine/test/entity/groups/group.proto";
 
-message GroupId {
-    string uuid = 1;
-}
-
-message Group {
+message HiddenParticipant {
     option (entity).kind = AGGREGATE;
+    option (entity).visibility = NONE;
 
-    GroupId id = 1;
+    string name = 1;
 
-    string name = 2;
-
-    repeated spine.core.UserId participants = 3;
+    GroupId group_id = 2;
 }

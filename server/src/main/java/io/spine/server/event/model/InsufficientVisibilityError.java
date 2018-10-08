@@ -21,7 +21,7 @@
 package io.spine.server.event.model;
 
 import io.spine.option.EntityOption.Visibility;
-import io.spine.server.model.declare.SignatureMismatchException;
+import io.spine.server.model.ModelError;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;
@@ -32,12 +32,12 @@ import static java.lang.String.format;
  *
  * @author Dmytro Dashenkov
  */
-final class InsufficientVisibilityException extends SignatureMismatchException {
+public final class InsufficientVisibilityError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    InsufficientVisibilityException(TypeName entityType,
-                                    Visibility entityVisibility) {
+    InsufficientVisibilityError(TypeName entityType,
+                                Visibility entityVisibility) {
         super(formatMessage(entityType, entityVisibility));
     }
 

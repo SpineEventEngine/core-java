@@ -27,8 +27,10 @@ import io.spine.client.EntityId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
+import io.spine.server.event.model.InsufficientVisibilityError;
 import io.spine.server.groups.FilteredStateSubscriber;
 import io.spine.server.groups.Group;
+import io.spine.server.groups.HiddenEntitySubscriber;
 import io.spine.server.groups.TestSubscriber;
 import io.spine.server.groups.WronglyDomesticSubscriber;
 import io.spine.server.groups.WronglyExternalSubscriber;
@@ -140,6 +142,13 @@ class AbstractEventSubscriberTest {
     void failToSubscribeToStateWithFilters() {
         assertThrows(IllegalStateException.class, FilteredStateSubscriber::new);
     }
+
+    @Test
+    @DisplayName("fail to subscribe to entity states with insufficient visibility level")
+    void failOnInsufficientVisibility() {
+        assertThrows(InsufficientVisibilityError.class, HiddenEntitySubscriber::new);
+    }
+
 
     private static EntityHistoryId historyId(Class<? extends Message> type) {
         EntityId entityId = EntityId

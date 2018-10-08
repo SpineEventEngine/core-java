@@ -35,11 +35,7 @@ public class SignatureMismatchException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     SignatureMismatchException(Iterable<SignatureMismatch> mismatches) {
-        this(formatMsg(mismatches));
-    }
-
-    protected SignatureMismatchException(String message) {
-        super(message);
+        super(formatMsg(mismatches));
     }
 
     private static String formatMsg(Iterable<SignatureMismatch> mismatches) {

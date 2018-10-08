@@ -18,22 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.groups;
 
-/**
- * A programming error of message processing definition.
- *
- * @author Alexander Yevsyukov
- */
-public class ModelError extends Error {
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
 
-    private static final long serialVersionUID = 0L;
+import static org.junit.jupiter.api.Assertions.fail;
 
-    protected ModelError(String message) {
-        super(message);
-    }
+public class HiddenEntitySubscriber extends AbstractEventSubscriber {
 
-    public ModelError(Throwable cause) {
-        super(cause);
+    @Subscribe
+    public void on(HiddenParticipant organization) {
+        fail(HiddenEntitySubscriber.class.getSimpleName() +
+                     " should not be able to receive updates from hidden entities.");
     }
 }
