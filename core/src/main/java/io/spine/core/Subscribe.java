@@ -75,13 +75,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *         by the subscriber.
  * </ul>
  *
- * // TODO:2018-10-08:dmytro.dashenkov: Simplify next paragraph.
- * <p>If a {@linkplain ByField field filter} is defined, only the events matching this filter are
- * passed to the subscriber. A single event subscriber class may define a number of subscribing
- * methods which would differ from each other only by the filter. In this case, it is allowed to
- * define several methods with the same filtered field and without a filter at all, but it's illegal
- * to define multiple methods with different filtered fields. For example, the next event handling
- * is valid:
+ * <p>Any combination of {@code external} and {@code filter} is valid, i.e. it is possible
+ * to filter external event subscriptions.
+ *
+ * <p>A single subscribing class may define a number of subscriber methods with different field
+ * filters. Though, all the field filters must target the same field. For example, this event
+ * handling is valid:
  * <pre>
  *     {@code
  *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
@@ -100,7 +99,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *     }
  *     }
  * </pre>
- * <p>And this is not valid:
+ * <p>And this one is not:
  * <pre>
  *     {@code
  *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
