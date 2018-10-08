@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Vladyslav Lubenskyi
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
-@DisplayName("ProcessManagerEventReactionTest should")
+@DisplayName("AggregateEventReactionTest should")
 class AggregateEventReactionTestShould {
 
     private SampleEventReactionTest aggregateEventTest;
@@ -59,14 +59,14 @@ class AggregateEventReactionTestShould {
 
     @Test
     @DisplayName("store tested event")
-    void shouldStoreCommand() {
+    void shouldStoreEvent() {
         assertEquals(aggregateEventTest.storedMessage(), TEST_EVENT);
     }
 
     @Test
     @DisplayName("dispatch tested event and store results")
     @SuppressWarnings("CheckReturnValue")
-    void shouldDispatchCommand() {
+    void shouldDispatchEvent() {
         TuReactingAggregate aggregate = newInstance();
         EventReactorExpected<TuProject> expected = aggregateEventTest.expectThat(aggregate);
 

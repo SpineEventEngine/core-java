@@ -26,6 +26,8 @@ import io.spine.testing.server.aggregate.AggregatePartEventReactionTest;
 import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
 import io.spine.testing.server.aggregate.given.agg.TuAggregatePartRepository;
 import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePartRepository;
 import io.spine.testing.server.expected.EventReactorExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuTaskId;
@@ -40,12 +42,12 @@ public class SamplePartEventTest
         extends AggregatePartEventReactionTest<TuTaskId,
                                                TuCommentAdded,
                                                TuComments,
-                                               TuAggregatePart,
+                                               TuReactingAggregatePart,
                                                TuAggregateRoot> {
 
     public static final TuCommentAdded TEST_EVENT =
             TuCommentAdded.newBuilder()
-                          .setId(TuAggregatePart.ID)
+                          .setId(TuReactingAggregatePart.ID)
                           .build();
 
     public SamplePartEventTest() {
@@ -53,13 +55,13 @@ public class SamplePartEventTest
     }
 
     @Override
-    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
-        return new TuAggregatePartRepository();
+    protected Repository<TuTaskId, TuReactingAggregatePart> createEntityRepository() {
+        return new TuReactingAggregatePartRepository();
     }
 
     @Override
     public EventReactorExpected<TuComments>
-    expectThat(TuAggregatePart entity) {
+    expectThat(TuReactingAggregatePart entity) {
         return super.expectThat(entity);
     }
 
@@ -72,13 +74,13 @@ public class SamplePartEventTest
         return TuAggregateRoot.newInstance(id);
     }
 
-    public TuAggregatePart createPart(TuTaskId id) {
+    public TuReactingAggregatePart createPart(TuTaskId id) {
         return newPart(id);
     }
 
 
     @Override
-    protected TuAggregatePart newPart(TuAggregateRoot root) {
-        return TuAggregatePart.newInstance(root);
+    protected TuReactingAggregatePart newPart(TuAggregateRoot root) {
+        return TuReactingAggregatePart.newInstance(root);
     }
 }

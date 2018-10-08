@@ -26,14 +26,13 @@ import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
 
 /**
- * The implementation base for testing a single event reactor handling in an
- * {@link io.spine.server.aggregate.AggregatePart}.
+ * The implementation base for testing a single event reactor handling in an {@link AggregatePart}.
  *
  * @param <I> ID message of the aggregate
  * @param <E> type of the event to test
  * @param <S> the aggregate part state type
- * @param <P> the {@link io.spine.server.aggregate.AggregatePart} type
- * @param <R> the {@link io.spine.server.aggregate.AggregateRoot} type
+ * @param <P> the {@link AggregatePart} type
+ * @param <R> the {@link AggregateRoot} type
  * @author Vladyslav Lubenskyi
  */
 public abstract class AggregatePartEventReactionTest<I,

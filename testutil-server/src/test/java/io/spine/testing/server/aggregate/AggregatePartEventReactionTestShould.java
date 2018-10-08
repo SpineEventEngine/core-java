@@ -20,17 +20,17 @@
 
 package io.spine.testing.server.aggregate;
 
-import io.spine.testing.server.aggregate.given.SamplePartEventTest;
-import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
+import io.spine.testing.server.aggregate.given.SamplePartEventReactionTest;
 import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart;
 import io.spine.testing.server.given.entity.event.TuCommentLimitReached;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.aggregate.given.SamplePartEventTest.TEST_EVENT;
-import static io.spine.testing.server.aggregate.given.agg.TuAggregatePart.ID;
-import static io.spine.testing.server.aggregate.given.agg.TuAggregatePart.newInstance;
+import static io.spine.testing.server.aggregate.given.SamplePartEventReactionTest.TEST_EVENT;
+import static io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart.ID;
+import static io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart.newInstance;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,26 +42,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregatePartEventReactionTest should")
 class AggregatePartEventReactionTestShould {
 
-    private SamplePartEventTest aggregatePartEventTest;
+    private SamplePartEventReactionTest aggregatePartEventTest;
 
     @BeforeEach
     void setUp() {
-        aggregatePartEventTest = new SamplePartEventTest();
+        aggregatePartEventTest = new SamplePartEventReactionTest();
     }
 
     @Test
     @DisplayName("store tested event")
-    void shouldStoreCommand() {
+    void shouldStoreEvent() {
         aggregatePartEventTest.setUp();
         assertEquals(aggregatePartEventTest.storedMessage(), TEST_EVENT);
     }
 
     @Test
     @DisplayName("dispatch tested event")
-    void shouldDispatchCommand() {
+    void shouldDispatchEvent() {
         aggregatePartEventTest.setUp();
-        TuAggregatePart testPart = newInstance(
-                TuAggregateRoot.newInstance(ID));
+        TuReactingAggregatePart testPart = newInstance(TuAggregateRoot.newInstance(ID));
         aggregatePartEventTest.expectThat(testPart)
                               .hasState(state -> {
                                   assertTrue(isNotDefault(state.getTimestamp()));
