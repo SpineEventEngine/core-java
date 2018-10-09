@@ -33,8 +33,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A routing schema used by an {@link io.spine.server.event.EventDispatcher EventDispatcher} for
- * delivering events.
+ * A routing schema used to deliver events.
  *
  * <p>A routing schema consists of a default route and custom routes per event class.
  * When calculating a set of event targets, {@code EventRouting} would see if there is
@@ -42,7 +41,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@linkplain EventRoute#apply(Message, Message) applied}.
  *
  * @param <I> the type of the entity IDs to which events are routed
- * @author Alexander Yevsyukov
  */
 public final class EventRouting<I>
         extends MessageRouting<EventMessage, EventContext, EventClass, Set<I>>
@@ -108,11 +106,15 @@ public final class EventRouting<I>
      * <p>If there is no specific route for the class of the passed event, the routing will use
      * the {@linkplain #getDefault() default route}.
      *
-     * @param eventClass the class of events to route
-     * @param via        the instance of the route to be used
-     * @param <E>        the type of the event message
+     * @param eventClass
+     *         the class of events to route
+     * @param via
+     *         the instance of the route to be used
+     * @param <E>
+     *         the type of the event message
      * @return {@code this} to allow chained calls when configuring the routing
-     * @throws IllegalStateException if the route for this event class is already set
+     * @throws IllegalStateException
+     *         if the route for this event class is already set
      */
     @CanIgnoreReturnValue
     public <E extends EventMessage> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
