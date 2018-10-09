@@ -610,10 +610,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
-    private void onImportEvent(I id, Event event) {
-        lifecycleOf(id).onEventImported(event);
-    }
-
     private void onCommandTargetSet(I id, CommandId commandId) {
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
