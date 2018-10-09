@@ -110,9 +110,7 @@ class AggregateEventImportTestShould {
             TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
             TuAggregatePart part = TuAggregatePart.newInstance(root);
             EventReactorExpected<TuComments> expected = partImportEventTest.expectThat(part);
-            expected.hasState(state -> {
-                assertEquals(1, state.getCommentsRecievedByEmail());
-            });
+            expected.hasState(state -> assertEquals(1, state.getCommentsRecievedByEmail()));
         }
     }
 }

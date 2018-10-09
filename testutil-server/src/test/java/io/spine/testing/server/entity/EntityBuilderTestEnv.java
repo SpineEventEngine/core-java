@@ -53,5 +53,5 @@ class EntityBuilderTestEnv {
         protected void setState(TestEntity result, StringValue state, Version version) {
             // NoOp.
         }
-    };
+    }
 }

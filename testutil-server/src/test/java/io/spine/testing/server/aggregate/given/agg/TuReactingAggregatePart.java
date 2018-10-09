@@ -30,8 +30,6 @@ import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
 import io.spine.testing.server.given.entity.event.TuCommentLimitReached;
 
-import static com.google.protobuf.util.Timestamps.fromMillis;
-
 /**
  * A sample aggregate part that handles commands.
  */
