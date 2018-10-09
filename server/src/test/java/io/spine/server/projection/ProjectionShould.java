@@ -137,8 +137,6 @@ class ProjectionShould {
         assertTrue(projection.isChanged());
     }
 
-
-
     @Test
     @DisplayName("receive entity state updates")
     void handleStateUpdates() {
@@ -162,8 +160,7 @@ class ProjectionShould {
                 .build();
         EntityHistoryId historyId = EntityHistoryId
                 .newBuilder()
-                .setTypeUrl(TypeUrl.of(aggregateState)
-                                   .value())
+                .setTypeUrl(TypeUrl.of(aggregateState).value())
                 .setEntityId(EntityId.newBuilder().setId(pack(id)))
                 .build();
         EntityStateChanged systemEvent = EntityStateChanged
