@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.aggregate.given;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
@@ -61,6 +62,7 @@ public class SampleCommandTest
         return super.expectThat(entity);
     }
 
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }

@@ -64,6 +64,7 @@ public class SamplePartEventImportTest
         return new TuAggregatePartRepository();
     }
 
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }

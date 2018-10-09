@@ -61,6 +61,7 @@ public class SampleEventReactionTest
         return new TuReactingAggregateRepository();
     }
 
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }

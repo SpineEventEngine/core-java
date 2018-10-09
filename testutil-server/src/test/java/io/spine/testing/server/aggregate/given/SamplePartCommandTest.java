@@ -59,6 +59,7 @@ public class SamplePartCommandTest
         return super.expectThat(entity);
     }
 
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }

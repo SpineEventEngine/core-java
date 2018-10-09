@@ -60,6 +60,7 @@ public class SampleEventImportTest
         return super.expectThat(entity);
     }
 
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }

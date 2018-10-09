@@ -65,6 +65,7 @@ public class SamplePartEventReactionTest
         return new TuReactingAggregatePartRepository();
     }
 
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }
