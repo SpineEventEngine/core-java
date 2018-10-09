@@ -23,21 +23,19 @@ package io.spine.server.event.model;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
-import io.spine.server.model.HandlerTypeInfo;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static io.spine.server.model.Handlers.createId;
 
 /**
  * An abstract base for methods handling events.
@@ -63,35 +61,15 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
 
     @Override
     public HandlerId id() {
-        HandlerTypeInfo type = selectBySignature(
-                (eventClass) -> HandlerTypeInfo
-                        .newBuilder()
-                        .setMessageType(TypeUrl.of(eventClass)
-                                               .value())
-                        .build(),
-                (eventClass, commandClass) -> HandlerTypeInfo
-                        .newBuilder()
-                        .setMessageType(TypeUrl.of(eventClass)
-                                               .value())
-                        .setOriginType(TypeUrl.of(commandClass)
-                                              .value())
-                        .build());
-        return HandlerId
-                .newBuilder()
-                .setType(type)
-                .build();
-    }
-
-    private <U> U
-    selectBySignature(Function<Class<EventMessage>, U> forCommandUnaware,
-                      BiFunction<Class<EventMessage>, Class<CommandMessage>, U> forCommandAware) {
-        Class<?>[] types = getRawMethod().getParameterTypes();
-        Class<EventMessage> eventMessageClass = castClass(types[0], EventMessage.class);
+        EventClass eventClass = getMessageClass();
         if (!getParameterSpec().isAwareOfCommandType()) {
-            return forCommandUnaware.apply(eventMessageClass);
+            return createId(eventClass);
         } else {
-            Class<CommandMessage> commandMessageClass = castClass(types[1], CommandMessage.class);
-            return forCommandAware.apply(eventMessageClass, commandMessageClass);
+            Class<?>[] parameters = getRawMethod().getParameterTypes();
+            Class<? extends CommandMessage> commandMessageClass =
+                    castClass(parameters[1], CommandMessage.class);
+            CommandClass commandClass = CommandClass.from(commandMessageClass);
+            return createId(eventClass, commandClass);
         }
     }
 
