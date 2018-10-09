@@ -265,7 +265,7 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public HandlerId id() {
         TypeUrl messageType = TypeUrl.of(getMessageClass().value());
-        HandlerType type = HandlerType
+        HandlerTypeInfo type = HandlerTypeInfo
                 .newBuilder()
                 .setMessageType(messageType.value())
                 .build();

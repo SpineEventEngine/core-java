@@ -59,10 +59,10 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableMultimap<HandlerType, H> map;
+    private final ImmutableMultimap<HandlerTypeInfo, H> map;
     private final ImmutableSet<M> messageClasses;
 
-    private MessageHandlerMap(ImmutableMultimap<HandlerType, H> map,
+    private MessageHandlerMap(ImmutableMultimap<HandlerTypeInfo, H> map,
                               ImmutableSet<M> messageClasses) {
         this.map = map;
         this.messageClasses = messageClasses;
@@ -84,7 +84,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         checkNotNull(signature);
 
         ClassScanner scanner = ClassScanner.of(declaringClass);
-        ImmutableMultimap<HandlerType, H> map = scanner.findMethodsBy(signature);
+        ImmutableMultimap<HandlerTypeInfo, H> map = scanner.findMethodsBy(signature);
         ImmutableSet<M> messageClasses = messageClasses(map.values());
         return new MessageHandlerMap<>(map, messageClasses);
     }
@@ -111,7 +111,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      *         a predicate for handler methods to filter the corresponding message classes
      */
     public ImmutableSet<M> getMessageClasses(Predicate<? super H> predicate) {
-        Multimap<HandlerType, H> filtered = Multimaps.filterValues(map, predicate::test);
+        Multimap<HandlerTypeInfo, H> filtered = Multimaps.filterValues(map, predicate::test);
         return messageClasses(filtered.values());
     }
 
@@ -124,7 +124,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    private ImmutableCollection<H> getMethods(HandlerType handlerKey) {
+    private ImmutableCollection<H> getMethods(HandlerTypeInfo handlerKey) {
         ImmutableCollection<H> handlers = map.get(handlerKey);
         checkState(!handlers.isEmpty(),
                    "Unable to find handler with key %s", handlerKey);
@@ -146,12 +146,12 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      *         if there is no method found in the map
      */
     public ImmutableCollection<H> getMethods(M messageClass, MessageClass originClass) {
-        HandlerType keyWithOrigin = HandlerType
+        HandlerTypeInfo keyWithOrigin = HandlerTypeInfo
                 .newBuilder()
                 .setMessageType(typeUrl(messageClass).value())
                 .setOriginType(typeUrl(originClass).value())
                 .build();
-        HandlerType presentKey = map.containsKey(keyWithOrigin)
+        HandlerTypeInfo presentKey = map.containsKey(keyWithOrigin)
                                  ? keyWithOrigin
                                  : keyWithOrigin.toBuilder()
                                                 .clearOriginType()

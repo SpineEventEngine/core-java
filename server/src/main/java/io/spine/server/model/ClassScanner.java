@@ -73,12 +73,12 @@ public final class ClassScanner {
      *         the handler {@linkplain MethodSignature signature}
      * @param <H>
      *         the type of the handler methods
-     * @return map of {@link HandlerType}s to the handler methods of the given type
+     * @return map of {@link HandlerTypeInfo}s to the handler methods of the given type
      */
-    <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMultimap<HandlerType, H>
+    <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMultimap<HandlerTypeInfo, H>
     findMethodsBy(MethodSignature<H, ?> signature) {
         MethodScan<H> operation = new MethodScan<>(declaringClass, signature);
-        ImmutableMultimap<HandlerType, H> result = operation.perform();
+        ImmutableMultimap<HandlerTypeInfo, H> result = operation.perform();
         return result;
     }
 
@@ -93,7 +93,7 @@ public final class ClassScanner {
     private static final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
         private final Class<?> declaringClass;
-        private final Multimap<HandlerType, H> handlers;
+        private final Multimap<HandlerTypeInfo, H> handlers;
         private final Map<HandlerId, H> seenMethods;
         private final MethodSignature<H, ?> signature;
         private final Map<MessageClass, FilteredHandler<H>> fieldFilters;
@@ -112,9 +112,9 @@ public final class ClassScanner {
          *
          * <p>Multiple calls to this method may cause {@link DuplicateHandlerMethodError}s.
          *
-         * @return a map of {@link HandlerType}s to the method handlers
+         * @return a map of {@link HandlerTypeInfo}s to the method handlers
          */
-        private ImmutableMultimap<HandlerType, H> perform() {
+        private ImmutableMultimap<HandlerTypeInfo, H> perform() {
             Method[] declaredMethods = declaringClass.getDeclaredMethods();
             for (Method method : declaredMethods) {
                 scanMethod(method);

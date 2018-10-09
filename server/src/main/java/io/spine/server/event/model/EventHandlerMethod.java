@@ -27,7 +27,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
-import io.spine.server.model.HandlerType;
+import io.spine.server.model.HandlerTypeInfo;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.TypeUrl;
@@ -63,13 +63,13 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
 
     @Override
     public HandlerId id() {
-        HandlerType type = selectBySignature(
-                (eventClass) -> HandlerType
+        HandlerTypeInfo type = selectBySignature(
+                (eventClass) -> HandlerTypeInfo
                         .newBuilder()
                         .setMessageType(TypeUrl.of(eventClass)
                                                .value())
                         .build(),
-                (eventClass, commandClass) -> HandlerType
+                (eventClass, commandClass) -> HandlerTypeInfo
                         .newBuilder()
                         .setMessageType(TypeUrl.of(eventClass)
                                                .value())

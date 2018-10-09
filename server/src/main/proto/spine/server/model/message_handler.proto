@@ -22,15 +22,15 @@ import "spine/base/field_path.proto";
 message HandlerId {
 
     // The information about the handled message type.
-    HandlerType type = 1 [(valid) = true];
+    HandlerTypeInfo type = 1 [(valid) = true];
 
     // The filter which the handled messages must match.
     MessageFilter filter = 2 [(required) = false, (valid) = true];
 }
 
-// A message handler type description.
+// A message handler type information.
 //
-message HandlerType {
+message HandlerTypeInfo {
 
     // The type URL of the handled message.
     string message_type = 1 [(required) = true];
