@@ -74,8 +74,8 @@ class AggregateEventImportTestShould {
         @SuppressWarnings("CheckReturnValue")
         void shouldDispatchEvent() {
             TuAggregate aggregate = TuAggregate.newInstance();
-            EventReactorExpected<TuProject> expected = aggregateImportEventTest.expectThat(
-                    aggregate);
+            EventReactorExpected<TuProject> expected =
+                    aggregateImportEventTest.expectThat(aggregate);
             expected.hasState(state -> assertTrue(isNotDefault(state.getTimestamp())));
         }
     }

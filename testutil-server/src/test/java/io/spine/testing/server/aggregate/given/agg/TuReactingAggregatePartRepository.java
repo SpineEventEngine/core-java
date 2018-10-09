@@ -28,5 +28,4 @@ import io.spine.testing.server.given.entity.TuTaskId;
  */
 public final class TuReactingAggregatePartRepository
         extends AggregatePartRepository<TuTaskId, TuReactingAggregatePart, TuAggregateRoot> {
-
 }
