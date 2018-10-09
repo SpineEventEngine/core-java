@@ -132,10 +132,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
  * this method is not considered as a subscriber and is not registered for the command output
  * delivery.
- *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
  */
 @Retention(RUNTIME)
 @Target(METHOD)

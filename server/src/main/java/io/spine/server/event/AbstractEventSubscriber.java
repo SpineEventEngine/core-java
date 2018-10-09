@@ -48,8 +48,6 @@ import static java.lang.String.format;
  * <p>Objects may also receive events via {@link EventDispatcher}s that can be
  * registered with {@code EventBus}.
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  * @see EventBus#register(MessageDispatcher)
  * @see io.spine.core.Subscribe {@code @Subscribe} annotation for declaring event subscriptions
  *                              in the derived classes

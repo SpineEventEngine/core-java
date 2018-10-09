@@ -36,8 +36,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * The registry of objects dispatching command request to where they are processed.
  *
  * <p>There can be only one dispatcher per command class.
- *
- * @author Alexander Yevsyukov
  */
 class CommandDispatcherRegistry
         extends DispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher<?>> {

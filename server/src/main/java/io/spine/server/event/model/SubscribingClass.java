@@ -33,9 +33,6 @@ import static java.util.Comparator.comparing;
 
 /**
  * An interface common for model classes that subscribe to events.
- *
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 public interface SubscribingClass extends Logging {
 

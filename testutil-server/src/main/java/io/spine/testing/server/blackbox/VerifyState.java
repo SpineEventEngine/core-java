@@ -40,8 +40,6 @@ import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 
 /**
  * Verifies the states of entities currently present in a bounded context.
- *
- * @author Dmytro Dashenkov
  */
 @VisibleForTesting
 public abstract class VerifyState {

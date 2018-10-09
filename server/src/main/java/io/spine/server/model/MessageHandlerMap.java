@@ -48,9 +48,6 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  *         the type of messages
  * @param <H>
  *         the type of handler methods
- * @author Alexander Yevsyukov
- * @author Dmytro Grankin
- * @author Dmytro Dashenkov
  */
 @Immutable(containerOf = {"M", "H"})
 public final class MessageHandlerMap<M extends MessageClass<?>,

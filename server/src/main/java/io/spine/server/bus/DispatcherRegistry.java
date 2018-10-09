@@ -42,8 +42,6 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
  *
  * @param <C> the type of the class of dispatched messages
  * @param <D> the type of the message dispatchers
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
 public abstract class DispatcherRegistry<C extends MessageClass<? extends Message>,
                                          E extends MessageEnvelope<?, ?, ?>,

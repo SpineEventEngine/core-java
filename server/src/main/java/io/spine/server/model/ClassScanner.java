@@ -42,8 +42,6 @@ import static io.spine.validate.Validate.isNotDefault;
  *
  * <p>An instance of this class helps to disassemble a Java class into several parts, which are of
  * interest of a domain model.
- *
- * @author Dmytro Dashenkov
  */
 public final class ClassScanner {
 

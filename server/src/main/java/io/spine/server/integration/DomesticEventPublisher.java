@@ -45,8 +45,6 @@ import static io.spine.server.integration.IntegrationChannels.toId;
  * <p>The events to subscribe are those that are required by external application components
  * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
  * configuration messages}, received by this instance of {@code IntegrationBus}.
- *
- * @author Alex Tymchenko
  */
 final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
 

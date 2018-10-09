@@ -33,9 +33,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * The registry of objects that dispatch event to handlers.
  *
  * <p>There can be multiple dispatchers per event class.
- *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
 class EventDispatcherRegistry
         extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {

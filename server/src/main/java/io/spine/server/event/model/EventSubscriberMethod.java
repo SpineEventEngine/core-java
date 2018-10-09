@@ -37,9 +37,6 @@ import static io.spine.string.Stringifiers.fromString;
 
 /**
  * A wrapper for an event subscriber method.
- *
- * @author Alexander Yevsyukov
- * @see Subscribe
  */
 public final class EventSubscriberMethod extends SubscriberMethod {
 

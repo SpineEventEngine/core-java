@@ -29,8 +29,6 @@ import static java.lang.String.format;
 /**
  * An exception thrown when trying to subscribe to updates of state of entity, which is not visible
  * for subscription.
- *
- * @author Dmytro Dashenkov
  */
 public final class InsufficientVisibilityError extends ModelError {
 

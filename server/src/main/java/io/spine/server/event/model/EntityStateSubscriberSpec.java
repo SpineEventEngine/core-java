@@ -45,8 +45,6 @@ import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
  * A {@link ParameterSpec} of an entity state subscriber method.
- *
- * @author Dmytro Dashenkov
  */
 @Immutable
 enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {

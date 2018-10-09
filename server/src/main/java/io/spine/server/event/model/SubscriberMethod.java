@@ -44,7 +44,7 @@ import static io.spine.protobuf.TypeConverter.toObject;
  * <p>A subscriber method must be annotated with the {@link io.spine.core.Subscribe @Subscribe}
  * annotation.
  *
- * @author Dmytro Dashenkov
+ * @see io.spine.core.Subscribe
  */
 public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscriber,
                                                                      EventMessage,

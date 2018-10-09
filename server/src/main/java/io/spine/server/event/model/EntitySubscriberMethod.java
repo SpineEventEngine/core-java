@@ -47,8 +47,6 @@ import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * A handler method which receives an entity state and produces no output.
- *
- * @author Dmytro Dashenkov
  */
 public final class EntitySubscriberMethod extends SubscriberMethod implements Logging {
 

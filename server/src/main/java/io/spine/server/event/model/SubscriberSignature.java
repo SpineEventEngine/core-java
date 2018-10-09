@@ -33,8 +33,6 @@ import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * A signature of {@link SubscriberMethod}.
- *
- * @author Alex Tymchenko
  */
 public class SubscriberSignature extends EventAcceptingSignature<SubscriberMethod> {
 

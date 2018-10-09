@@ -30,8 +30,6 @@ import io.spine.type.MessageClass;
  * @param <I> the type of the message ID
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  */
 public interface MessageEnvelope<I extends Message, T, C extends Message> {
 

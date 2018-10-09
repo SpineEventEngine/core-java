@@ -45,8 +45,6 @@ import static java.lang.String.format;
  * <p>Both methods {@code onProject} and {@code onStarted} subscribe to {@code ProjectStarted} but
  * filter the events by {@code member_count} and {@code by.admin} fields respectively. This is
  * an invalid situation, since both filters could be satisfied simultaneously.
- *
- * @author Dmytro Dashenkov
  */
 public class HandlerFieldFilterClashError extends ModelError {
 
