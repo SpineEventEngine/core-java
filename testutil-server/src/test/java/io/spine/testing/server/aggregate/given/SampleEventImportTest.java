@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.aggregate.given;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregateEventImportTest;
@@ -54,6 +55,7 @@ public class SampleEventImportTest
     }
 
     @Override
+    @VisibleForTesting
     public EventReactorExpected<TuProject> expectThat(TuAggregate entity) {
         return super.expectThat(entity);
     }

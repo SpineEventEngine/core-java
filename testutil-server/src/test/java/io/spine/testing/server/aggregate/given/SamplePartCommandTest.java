@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.aggregate.given;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregatePartCommandTest;
@@ -53,18 +54,18 @@ public class SamplePartCommandTest
     }
 
     @Override
-    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
-        return new TuAggregatePartRepository();
-    }
-
-    @Override
-    public CommandHandlerExpected<TuComments>
-    expectThat(TuAggregatePart entity) {
+    @VisibleForTesting
+    public CommandHandlerExpected<TuComments> expectThat(TuAggregatePart entity) {
         return super.expectThat(entity);
     }
 
     public Message storedMessage() {
         return message();
+    }
+
+    @Override
+    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
+        return new TuAggregatePartRepository();
     }
 
     @Override
@@ -75,7 +76,6 @@ public class SamplePartCommandTest
     public TuAggregatePart createPart(TuTaskId id) {
         return newPart(id);
     }
-
 
     @Override
     protected TuAggregatePart newPart(TuAggregateRoot root) {

@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.aggregate.given;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregatePartEventImportTest;
@@ -53,14 +54,14 @@ public class SamplePartEventImportTest
     }
 
     @Override
-    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
-        return new TuAggregatePartRepository();
+    @VisibleForTesting
+    public EventReactorExpected<TuComments> expectThat(TuAggregatePart entity) {
+        return super.expectThat(entity);
     }
 
     @Override
-    public EventReactorExpected<TuComments>
-    expectThat(TuAggregatePart entity) {
-        return super.expectThat(entity);
+    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
+        return new TuAggregatePartRepository();
     }
 
     public Message storedMessage() {
@@ -70,10 +71,6 @@ public class SamplePartEventImportTest
     @Override
     protected TuAggregateRoot newRoot(TuTaskId id) {
         return TuAggregateRoot.newInstance(id);
-    }
-
-    public TuAggregatePart createPart(TuTaskId id) {
-        return newPart(id);
     }
 
     @Override
