@@ -32,8 +32,10 @@ message HandlerId {
 //
 message HandlerType {
 
+    // The type URL of the handled message.
     string message_type = 1 [(required) = true];
 
+    // The type URL of the handled message origin message.
     string origin_type = 2;
 }
 
