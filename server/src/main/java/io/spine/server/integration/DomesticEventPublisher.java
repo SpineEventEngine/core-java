@@ -56,8 +56,8 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
                            PublisherHub publisherHub,
                            EventClass messageClass) {
         super();
-        this.originContextName = originContextName;
-        this.publisherHub = publisherHub;
+        this.originContextName = checkNotNull(originContextName);
+        this.publisherHub = checkNotNull(publisherHub);
         this.eventClasses = ImmutableSet.of(messageClass);
     }
 
