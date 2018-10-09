@@ -36,7 +36,7 @@ import java.util.Collection;
  */
 public abstract class MulticastBus<M extends Message,
                                    E extends MessageEnvelope<?, M, ?>,
-                                   C extends MessageClass,
+                                   C extends MessageClass<? extends Message>,
                                    D extends MessageDispatcher<C, E, ?>>
         extends Bus<M, E, C, D> {
 
@@ -51,9 +51,7 @@ public abstract class MulticastBus<M extends Message,
      * @return the number of the dispatchers called, or {@code 0} if there weren't any.
      */
     protected int callDispatchers(E messageEnvelope) {
-        @SuppressWarnings("unchecked")  // it's fine, since the message is validated previously.
-        C messageClass = (C) messageEnvelope.getMessageClass();
-        Collection<D> dispatchers = registry().getDispatchers(messageClass);
+        Collection<D> dispatchers = registry().getDispatchers(messageEnvelope);
         for (D dispatcher : dispatchers) {
             dispatcher.dispatch(messageEnvelope);
         }

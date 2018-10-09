@@ -54,11 +54,11 @@ public interface HandlerMethod<T,
     void discoverAttributes();
 
     /**
-     * Creates a new instance of {@link HandlerKey handler key} for this method.
+     * Creates a new instance of {@linkplain HandlerId handler id} for this method.
      *
-     * @return the key of the handler method
+     * @return the id of the handler method
      */
-    HandlerKey key();
+    HandlerId id();
 
     /**
      * Obtains the set of method attributes configured for this method.
@@ -66,7 +66,7 @@ public interface HandlerMethod<T,
     Set<MethodAttribute<?>> getAttributes();
 
     /**
-     * Returns the handling method reference.
+     * Obtains the handling method.
      */
     Method getRawMethod();
 
@@ -95,6 +95,13 @@ public interface HandlerMethod<T,
      */
     default boolean isDomestic() {
         return !isExternal();
+    }
+
+    /**
+     * Obtains the {@link MessageFilter} to apply to the messages received by this method.
+     */
+    default MessageFilter filter() {
+        return MessageFilter.getDefaultInstance();
     }
 
     /**

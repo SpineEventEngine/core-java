@@ -141,12 +141,13 @@ public class EventBus
 
     @VisibleForTesting
     Set<? extends EventDispatcher<?>> getDispatchers(EventClass eventClass) {
-        return registry().getDispatchers(eventClass);
+        return registry().getDispatchersForType(eventClass);
     }
 
     @VisibleForTesting
     boolean hasDispatchers(EventClass eventClass) {
-        return registry().hasDispatchersFor(eventClass);
+        Set<?> dispatchers = getDispatchers(eventClass);
+        return !dispatchers.isEmpty();
     }
 
     @Override

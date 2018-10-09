@@ -168,6 +168,14 @@ public final class EventEnvelope
     }
 
     /**
+     * Returns {@code true} is the wrapped event is external, {@code false} otherwise.
+     */
+    public boolean isExternal() {
+        boolean external = Events.isExternal(getEventContext());
+        return external;
+    }
+
+    /**
      * Verifies if the enrichment of the message is enabled.
      *
      * @see Enrichment.Builder#setDoNotEnrich(boolean)

@@ -28,9 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Write operation should")
 class WriteTest {
 

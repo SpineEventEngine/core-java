@@ -166,7 +166,6 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
             R result = func.apply(message, context);
             return result;
         }
-
         R result = getDefault().apply(message, context);
         return result;
     }

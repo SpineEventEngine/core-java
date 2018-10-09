@@ -174,7 +174,7 @@ class ColumnFiltersTest {
             ColumnFilter filter = le("doubleColumn", number);
             assertNotNull(filter);
             assertEquals(LESS_OR_EQUAL, filter.getOperator());
-            DoubleValue value = (DoubleValue) unpack(filter.getValue());
+            DoubleValue value = unpack(filter.getValue(), DoubleValue.class);
             assertEquals(number, value.getValue());
         }
 
@@ -185,7 +185,7 @@ class ColumnFiltersTest {
             ColumnFilter filter = gt("stringColumn", theString);
             assertNotNull(filter);
             assertEquals(GREATER_THAN, filter.getOperator());
-            StringValue value = (StringValue) unpack(filter.getValue());
+            StringValue value = unpack(filter.getValue(), StringValue.class);
             assertEquals(theString, value.getValue());
         }
     }

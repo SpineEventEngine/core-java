@@ -282,11 +282,8 @@ final class ReferenceValidator implements Logging {
     }
 
     private void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
-        // Using `DEBUG` level to avoid polluting the `stderr`.
-        if (log().isDebugEnabled()) {
-            log().debug("There is no enrichment function for translating {} into {}",
-                        sourceFieldClass, targetFieldClass);
-        }
+        log().debug("There is no enrichment function for translating {} into {}",
+                    sourceFieldClass, targetFieldClass);
     }
 
     /**

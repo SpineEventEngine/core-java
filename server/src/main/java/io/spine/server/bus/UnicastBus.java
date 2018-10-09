@@ -35,7 +35,7 @@ import static java.lang.String.format;
  */
 public abstract class UnicastBus<T extends Message,
                                  E extends MessageEnvelope<?, T, ?>,
-                                 C extends MessageClass,
+                                 C extends MessageClass<? extends Message>,
                                  D extends MessageDispatcher<C, E, ?>> extends Bus<T, E, C, D> {
 
     protected UnicastBus(BusBuilder<E, T, ?> builder) {
@@ -43,9 +43,7 @@ public abstract class UnicastBus<T extends Message,
     }
 
     protected D getDispatcher(E envelope) {
-        @SuppressWarnings("unchecked") // protected by overloaded return values of envelope classes
-        C messageClass = (C) envelope.getMessageClass();
-        return registry().getDispatcher(messageClass)
+        return registry().getDispatcher(envelope)
                          .orElseThrow(() -> noDispatcherFound(envelope));
     }
 

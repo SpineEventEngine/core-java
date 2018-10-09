@@ -124,7 +124,7 @@ public final class ExternalMessages {
     public static ShardedMessage asShardedMessage(ExternalMessage value) {
         checkNotNull(value);
         Any originalMessage = value.getOriginalMessage();
-        ShardedMessage result = (ShardedMessage) unpack(originalMessage);
+        ShardedMessage result = unpack(originalMessage, ShardedMessage.class);
         return result;
     }
 

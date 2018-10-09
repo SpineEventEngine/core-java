@@ -25,11 +25,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A registry of domestic subscribers which subscribe or react upon external messages.
- *
- * @author Alex Tymchenko
  */
 final class DomesticDispatcherRegistry
-        extends DispatcherRegistry<ExternalMessageClass, ExternalMessageDispatcher<?>> {
+        extends DispatcherRegistry<ExternalMessageClass,
+                                   ExternalMessageEnvelope,
+                                   ExternalMessageDispatcher<?>> {
     @Override
     protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
             throws IllegalArgumentException {

@@ -62,7 +62,7 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
     @Override
     ExternalMessageEnvelope markExternal(ExternalMessage externalMsg) {
         Any packedEvent = externalMsg.getOriginalMessage();
-        Event event = (Event) unpack(packedEvent);
+        Event event = unpack(packedEvent, Event.class);
         Event.Builder eventBuilder = event.toBuilder();
         EventContext modifiedContext = eventBuilder.getContext()
                                                    .toBuilder()

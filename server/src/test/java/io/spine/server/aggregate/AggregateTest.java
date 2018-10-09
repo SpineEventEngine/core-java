@@ -113,6 +113,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@SuppressWarnings({
+        "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
+})
 @DisplayName("Aggregate should")
 public class AggregateTest {
 
@@ -501,7 +504,7 @@ public class AggregateTest {
         dispatchCommand(aggregate, env(createProject));
 
         Snapshot snapshot = aggregate().toSnapshot();
-        Project state = (Project) unpack(snapshot.getState());
+        Project state = unpack(snapshot.getState(), Project.class);
 
         assertEquals(ID, state.getId());
         assertEquals(Status.CREATED, state.getStatus());

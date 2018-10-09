@@ -142,7 +142,7 @@ public abstract class AbstractHandlerMethod<T,
         return ImmutableSet.of(ExternalAttribute::of);
     }
 
-    protected final Class<M> rawMessageClass() {
+    protected Class<? extends M> rawMessageClass() {
         return messageClass;
     }
 
@@ -156,7 +156,7 @@ public abstract class AbstractHandlerMethod<T,
      * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
-    static <M extends Message> Class<M> getFirstParamType(Method handler) {
+    protected static <M extends Message> Class<M> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked")
             // We always expect first param as a Message of required type.
         Class<M> result = (Class<M>) handler.getParameterTypes()[0];
@@ -211,14 +211,14 @@ public abstract class AbstractHandlerMethod<T,
         checkNotNull(target);
         checkNotNull(envelope);
         checkAttributesMatch(envelope);
-        Message message = envelope.getMessage();
-        Message context = envelope.getMessageContext();
         try {
             Object[] arguments = parameterSpec.extractArguments(envelope);
             Object rawOutput = method.invoke(target, arguments);
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            Message message = envelope.getMessage();
+            Message context = envelope.getMessageContext();
             throw new HandlerMethodFailedException(target, message, context, e);
         }
     }
@@ -262,9 +262,8 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public HandlerKey key() {
-        HandlerKey result = HandlerKey.of(getMessageClass());
-        return result;
+    public HandlerId id() {
+        return Handlers.createId(getMessageClass());
     }
 
     @Override

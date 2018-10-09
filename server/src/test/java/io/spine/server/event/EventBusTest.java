@@ -463,7 +463,7 @@ public class EventBusTest {
         assertThat(storedEvents).hasSize(2);
 
         for (Event event : storedEvents) {
-            EBTaskAdded contents = (EBTaskAdded) unpack(event.getMessage());
+            EBTaskAdded contents = unpack(event.getMessage(), EBTaskAdded.class);
             Task task = contents.getTask();
             assertFalse(task.getDone());
         }

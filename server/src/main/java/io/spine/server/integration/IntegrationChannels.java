@@ -93,7 +93,7 @@ final class IntegrationChannels {
     static ExternalMessageType fromId(ChannelId channelId) {
         checkNotNull(channelId);
 
-        StringValue rawValue = (StringValue) unpack(channelId.getIdentifier());
+        StringValue rawValue = unpack(channelId.getIdentifier(), StringValue.class);
         TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
         ExternalMessageType result = ExternalMessageType

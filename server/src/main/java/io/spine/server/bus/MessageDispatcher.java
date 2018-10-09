@@ -64,4 +64,22 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      * @param exception the error
      */
     void onError(E envelope, RuntimeException exception);
+
+    /**
+     * Checks if this dispatcher can dispatch the given message.
+     *
+     * <p>This method does not check that the type of the message is one of
+     * the {@linkplain #getMessageClasses() dispatched message classes}. Instead, it validates
+     * the message upon some custom rules of this dispatcher.
+     *
+     * <p>Extend this method to forbid messages from being dispatched to this instance.
+     *
+     * @param envelope
+     *         the message to check
+     * @return {@code true} is the given message can be dispatched by this dispatcher,
+     *         {@code false} otherwise
+     */
+    default boolean canDispatch(E envelope) {
+        return true;
+    }
 }

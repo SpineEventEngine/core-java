@@ -41,6 +41,7 @@ import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.option.Options.option;
 import static io.spine.option.OptionsProto.entity;
+import static io.spine.system.server.Mirror.ID_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
 import static io.spine.system.server.MirrorProjection.buildFilters;
 
@@ -60,11 +61,8 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
-    // TODO:2018-09-06:dmytro.dashenkov: Use for querying projection states.
-    // todo            https://github.com/SpineEventEngine/core-java/issues/840
-    @SuppressWarnings("unused") // See the TO-DO.
     private static final FieldMask AGGREGATE_STATE_FIELD =
-            fromFieldNumbers(Mirror.class, STATE_FIELD_NUMBER);
+            fromFieldNumbers(Mirror.class, ID_FIELD_NUMBER, STATE_FIELD_NUMBER);
 
     @Override
     public void onRegistered() {
@@ -128,7 +126,7 @@ final class MirrorRepository
         FieldMask aggregateFields = query.getFieldMask();
         Target target = query.getTarget();
         EntityFilters filters = buildFilters(target);
-        Iterator<MirrorProjection> mirrors = find(filters, FieldMask.getDefaultInstance());
+        Iterator<MirrorProjection> mirrors = find(filters, AGGREGATE_STATE_FIELD);
         Iterator<Any> result = aggregateStates(mirrors, aggregateFields);
         return result;
     }

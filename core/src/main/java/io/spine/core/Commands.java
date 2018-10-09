@@ -43,6 +43,7 @@ import static io.spine.core.CommandContext.Schedule;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Timestamps2.isBetween;
 import static io.spine.protobuf.Timestamps2.isLaterThan;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -82,7 +83,8 @@ public final class Commands {
      */
     public static CommandMessage getMessage(Command command) {
         checkNotNull(command);
-        return (CommandMessage) unpack(command.getMessage());
+        CommandMessage result = (CommandMessage) unpack(command.getMessage());
+        return result;
     }
 
     /**
@@ -94,8 +96,8 @@ public final class Commands {
         if (commandOrMessage instanceof Command) {
             return getMessage((Command) commandOrMessage);
         }
-        Message unpacked = Messages.ensureMessage(commandOrMessage);
-        return (CommandMessage) unpacked;
+        CommandMessage unpacked = (CommandMessage) Messages.ensureMessage(commandOrMessage);
+        return unpacked;
     }
 
     /**

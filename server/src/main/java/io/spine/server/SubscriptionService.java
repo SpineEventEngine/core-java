@@ -31,7 +31,6 @@ import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.core.Responses;
-import io.spine.grpc.StreamObservers;
 import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
@@ -40,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -100,9 +100,7 @@ public class SubscriptionService
                 responseObserver.onNext(update);
             };
             Stand targetStand = boundedContext.getStand();
-            targetStand.activate(subscription,
-                                 updateCallback,
-                                 StreamObservers.forwardErrorsOnly(responseObserver));
+            targetStand.activate(subscription, updateCallback, forwardErrorsOnly(responseObserver));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error activating the subscription", e);
             responseObserver.onError(e);

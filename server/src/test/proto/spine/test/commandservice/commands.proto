@@ -28,8 +28,6 @@ option java_package="io.spine.test.commandservice.command";
 option java_outer_classname = "CommandServiceCommandsProto";
 option java_multiple_files = true;
 
-import "spine/core/event.proto";
-
 import "spine/test/commandservice/project.proto";
 
 message CsCreateProject {

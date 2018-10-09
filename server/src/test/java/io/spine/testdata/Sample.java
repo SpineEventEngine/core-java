@@ -76,12 +76,10 @@ public class Sample {
     @SuppressWarnings("TypeParameterUnusedInFormals") // See apiNote.
     public static <M extends Message, B extends Message.Builder> B builderForType(Class<M> clazz) {
         checkClass(clazz);
-
         @SuppressWarnings("unchecked") // We cast here for brevity of the test code.
         B builder = (B) builderFor(clazz);
         Descriptor builderDescriptor = builder.getDescriptorForType();
         Collection<FieldDescriptor> fields = builderDescriptor.getFields();
-
         for (FieldDescriptor field : fields) {
             Object value = valueFor(field);
             if (field.isRepeated()) {
