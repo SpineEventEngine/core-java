@@ -20,10 +20,12 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.option.EntityOption;
 import io.spine.option.OptionsProto;
@@ -35,13 +37,14 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static io.spine.option.EntityOption.Visibility.FULL;
 import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 import static io.spine.option.EntityOption.Visibility.VISIBILITY_UNKNOWN;
 import static io.spine.option.Options.option;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
+import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 
 /**
  * A {@link ParameterSpec} of an entity state subscriber method.
@@ -49,7 +52,19 @@ import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 @Immutable
 enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
-    PARAM_SPEC;
+    MESSAGE(of(Message.class)) {
+        @Override
+        protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
+            return new Object[]{entityState};
+        }
+    },
+
+    MESSAGE_AND_EVENT_CONTEXT(of(Message.class, EventContext.class)) {
+        @Override
+        protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
+            return new Object[]{entityState, event.getEventContext()};
+        }
+    };
 
     /**
      * The set of {@link io.spine.option.EntityOption.Visibility Visibility} modifiers which allow
@@ -58,15 +73,21 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     private static final Set<EntityOption.Visibility> allowedVisibilityModifiers =
             immutableEnumSet(VISIBILITY_UNKNOWN, SUBSCRIBE, FULL);
 
+    private final ImmutableList<Class<?>> parameters;
+
+    EntityStateSubscriberSpec(ImmutableList<Class<?>> parameters) {
+        this.parameters = parameters;
+    }
+
     @Override
     public boolean matches(Class<?>[] methodParams) {
-        boolean typeMatches = consistsOfSingle(methodParams, Message.class);
-        if (!typeMatches) {
+        boolean typesMatch = consistsOfTypes(methodParams, parameters);
+        if (!typesMatch) {
             return false;
         }
         @SuppressWarnings("unchecked") // Checked above.
-        Class<? extends Message> singleParam = (Class<? extends Message>) methodParams[0];
-        TypeName messageType = TypeName.of(singleParam);
+        Class<? extends Message> firstParameter = (Class<? extends Message>) methodParams[0];
+        TypeName messageType = TypeName.of(firstParameter);
         Optional<EntityOption> entityOption = getEntityOption(messageType);
         if (!entityOption.isPresent()) {
             return false;
@@ -86,8 +107,10 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
                       "Must be an %s event.", EntityStateChanged.class.getSimpleName());
         EntityStateChanged systemEvent = (EntityStateChanged) eventMessage;
         Message entityState = unpack(systemEvent.getNewState());
-        return new Object[]{entityState};
+        return arrangeArguments(entityState, envelope);
     }
+
+    protected abstract Object[] arrangeArguments(Message entityState, EventEnvelope event);
 
     private static Optional<EntityOption> getEntityOption(TypeName messageType) {
         Descriptors.Descriptor descriptor = messageType.getMessageDescriptor();
