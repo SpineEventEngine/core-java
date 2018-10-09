@@ -167,6 +167,9 @@ public final class EventEnvelope
         return rejection;
     }
 
+    /**
+     * Returns {@code true} is the wrapped event is external, {@code false} otherwise.
+     */
     public boolean isExternal() {
         boolean external = Events.isExternal(getEventContext());
         return external;
