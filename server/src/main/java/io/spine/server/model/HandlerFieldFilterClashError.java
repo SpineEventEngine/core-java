@@ -28,6 +28,24 @@ import static java.lang.String.format;
  * An error indicating that two message handlers have clashing {@link io.spine.core.ByField ByField}
  * signatures.
  *
+ * <p>Two handlers clash if they handle the same type of message but filter messages by different
+ * fields. For example:
+ * <pre>
+ *     {@code
+ *     \@Subscribe(filter = @ByField(path = "member_count", value = "0"))
+ *     public void onProject(ProjectStarted event) {
+ *     }
+ *
+       \@Subscribe(filter = @ByField(path = "by.admin", value = "false"))
+ *     public void onStarted(ProjectStarted event) {
+ *     }
+ *     }
+ * </pre>
+ *
+ * <p>Both methods {@code onProject} and {@code onStarted} subscribe to {@code ProjectStarted} but
+ * filter the events by {@code member_count} and {@code by.admin} fields respectively. This is
+ * an invalid situation, since both filters could be satisfied simultaneously.
+ *
  * @author Dmytro Dashenkov
  */
 public class HandlerFieldFilterClashError extends ModelError {
