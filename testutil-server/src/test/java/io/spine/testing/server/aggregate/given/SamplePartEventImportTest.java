@@ -34,7 +34,6 @@ import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmail;
 /**
  * The test class for checking an import of an event into an aggregate part.
  *
- * @author Vladyslav Lubenskyi
  * @see io.spine.testing.server.aggregate.AggregatePartEventImportTestShould
  */
 public class SamplePartEventImportTest

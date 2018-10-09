@@ -33,7 +33,6 @@ import io.spine.server.aggregate.AggregateRoot;
  * @param <S> the aggregate part state type
  * @param <P> the {@link AggregatePart} type
  * @param <R> the {@link AggregateRoot} type
- * @author Vladyslav Lubenskyi
  */
 public abstract class AggregatePartEventReactionTest<I,
                                                      E extends EventMessage,

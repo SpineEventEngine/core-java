@@ -34,8 +34,6 @@ import static com.google.protobuf.util.Timestamps.fromMillis;
 
 /**
  * A sample aggregate part that handles commands.
- *
- * @author Vladyslav Lubenskyi
  */
 public final class TuReactingAggregatePart
         extends AggregatePart<TuTaskId, TuComments, TuCommentsVBuilder, TuAggregateRoot> {

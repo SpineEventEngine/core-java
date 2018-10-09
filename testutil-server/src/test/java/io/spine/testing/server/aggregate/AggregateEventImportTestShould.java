@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * @author Vladyslav Lubenskyi
+ * A unit test for {@link io.spine.testing.server.aggregate.AggregateEventImportTest}.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("AggregateEventImportTest should")

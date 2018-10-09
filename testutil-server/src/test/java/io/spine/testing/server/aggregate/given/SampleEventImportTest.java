@@ -32,8 +32,6 @@ import io.spine.testing.server.given.entity.event.TuTrelloProjectCreated;
 
 /**
  * The test class for checking an import of an event into an aggregate.
- *
- * @author Vladyslav Lubenskyi
  */
 public class SampleEventImportTest
         extends AggregateEventImportTest<TuProjectId,
@@ -43,8 +41,8 @@ public class SampleEventImportTest
 
     public static final TuTrelloProjectCreated TEST_EVENT =
             TuTrelloProjectCreated.newBuilder()
-                            .setId(TuAggregate.ID)
-                            .build();
+                                  .setId(TuAggregate.ID)
+                                  .build();
 
     public SampleEventImportTest() {
         super(TuAggregate.ID, TEST_EVENT);

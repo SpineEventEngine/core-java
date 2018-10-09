@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * @author Vladyslav Lubenskyi
+ * A unit tst fot {@link io.spine.testing.server.aggregate.AggregateEventReactionTest}.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("AggregateEventReactionTest should")

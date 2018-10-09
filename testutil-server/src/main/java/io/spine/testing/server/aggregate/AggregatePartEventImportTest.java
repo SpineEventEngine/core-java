@@ -34,7 +34,6 @@ import io.spine.server.aggregate.AggregateRoot;
  * @param <P> the {@link AggregatePart} type
  * @param <R> the {@link AggregateRoot} type
  *
- * @author Vladyslav Lubenskyi
  * @see io.spine.server.aggregate.Apply#allowImport()
  */
 public abstract class AggregatePartEventImportTest<I,

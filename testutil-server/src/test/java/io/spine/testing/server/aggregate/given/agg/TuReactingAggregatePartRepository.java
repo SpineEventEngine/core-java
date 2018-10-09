@@ -24,7 +24,7 @@ import io.spine.server.aggregate.AggregatePartRepository;
 import io.spine.testing.server.given.entity.TuTaskId;
 
 /**
- * @author Vladyslav Lubenskyi
+ * The repository for {@link TuReactingAggregatePart}
  */
 public final class TuReactingAggregatePartRepository
         extends AggregatePartRepository<TuTaskId, TuReactingAggregatePart, TuAggregateRoot> {

@@ -39,8 +39,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * A test utility to dispatch commands to an {@code Aggregate} in test purposes.
- *
- * @author Alex Tymchenko
  */
 @VisibleForTesting
 public class AggregateMessageDispatcher {

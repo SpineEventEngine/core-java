@@ -37,8 +37,6 @@ import static java.util.stream.Collectors.toList;
 /**
  * Internal utility class for assisting in aggregate tests.
  *
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  * @apiNote This internal class is designed to be called only from Testutil Server library.
  *          Calling it other code would result in run-time error.
  */

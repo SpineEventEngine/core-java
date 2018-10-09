@@ -40,7 +40,6 @@ import static java.util.Collections.emptyList;
  * @param <S> the aggregate state type
  * @param <A> the {@link Aggregate} type
  *
- * @author Vladyslav Lubenskyi
  * @see io.spine.server.aggregate.Apply#allowImport()
  */
 public abstract class AggregateEventImportTest<I,
