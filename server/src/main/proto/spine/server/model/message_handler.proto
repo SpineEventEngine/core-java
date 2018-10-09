@@ -21,8 +21,10 @@ import "spine/base/field_path.proto";
 //
 message HandlerId {
 
+    // The information about the handled message type.
     HandlerType type = 1 [(valid) = true];
 
+    // The filter which the handled messages must match.
     MessageFilter filter = 2 [(required) = false, (valid) = true];
 }
 
