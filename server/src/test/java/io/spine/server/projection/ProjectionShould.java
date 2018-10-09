@@ -83,9 +83,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests {@link io.spine.server.projection.Projection}.
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
  * @apiNote This class is named using the old-fashoned {@code Should} suffix to avoid the name clash
  * with {@link io.spine.testing.server.projection.ProjectionTest ProjectionTest} class, which is
  * a part of Testutil Server library.
