@@ -30,7 +30,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
+import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
@@ -161,7 +161,7 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
-        public HandlerKey key() {
+        public HandlerId id() {
             throw new IllegalStateException("The method is not a target of the test.");
         }
     }
@@ -188,7 +188,7 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
-        public HandlerKey key() {
+        public HandlerId id() {
             throw new IllegalStateException("The method is not a target of the test.");
         }
     }

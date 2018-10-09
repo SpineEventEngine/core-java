@@ -23,12 +23,11 @@ package io.spine.server.event.model;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerToken;
+import io.spine.server.model.HandlerId;
+import io.spine.server.model.HandlerType;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.TypeUrl;
@@ -63,25 +62,24 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
     }
 
     @Override
-    public HandlerKey key() {
-        return selectBySignature(
-                (eventClass) -> HandlerKey.of(EventClass.from(eventClass)),
-                (eventClass, commandClass) -> HandlerKey.of(EventClass.from(eventClass),
-                                                            CommandClass.from(commandClass)));
-    }
-
-    @Override
-    public HandlerToken token() {
-        return selectBySignature(
-                (eventClass) -> HandlerToken
+    public HandlerId id() {
+        HandlerType type = selectBySignature(
+                (eventClass) -> HandlerType
                         .newBuilder()
-                        .setMessageType(TypeUrl.of(eventClass).value())
+                        .setMessageType(TypeUrl.of(eventClass)
+                                               .value())
                         .build(),
-                (eventClass, commandClass) -> HandlerToken
+                (eventClass, commandClass) -> HandlerType
                         .newBuilder()
-                        .setMessageType(TypeUrl.of(eventClass).value())
-                        .setOriginType(TypeUrl.of(commandClass).value())
+                        .setMessageType(TypeUrl.of(eventClass)
+                                               .value())
+                        .setOriginType(TypeUrl.of(commandClass)
+                                              .value())
                         .build());
+        return HandlerId
+                .newBuilder()
+                .setType(type)
+                .build();
     }
 
     private <U> U

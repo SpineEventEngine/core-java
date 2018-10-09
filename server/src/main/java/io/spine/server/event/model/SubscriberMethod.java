@@ -28,7 +28,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerToken;
+import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
@@ -62,8 +62,8 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
     }
 
     @Override
-    public HandlerToken token() {
-        HandlerToken typeBasedToken = super.token();
+    public HandlerId id() {
+        HandlerId typeBasedToken = super.id();
         MessageFilter filter = filter();
         FieldPath fieldPath = filter.getField();
         return fieldPath.getFieldNameList().isEmpty()

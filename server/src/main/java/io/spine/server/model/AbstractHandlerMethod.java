@@ -263,17 +263,15 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public HandlerKey key() {
-        HandlerKey result = HandlerKey.of(getMessageClass());
-        return result;
-    }
-
-    @Override
-    public HandlerToken token() {
+    public HandlerId id() {
         TypeUrl messageType = TypeUrl.of(getMessageClass().value());
-        return HandlerToken
+        HandlerType type = HandlerType
                 .newBuilder()
                 .setMessageType(messageType.value())
+                .build();
+        return HandlerId
+                .newBuilder()
+                .setType(type)
                 .build();
     }
 

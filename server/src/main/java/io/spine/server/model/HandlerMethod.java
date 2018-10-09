@@ -54,24 +54,11 @@ public interface HandlerMethod<T,
     void discoverAttributes();
 
     /**
-     * Creates a new instance of {@linkplain HandlerKey handler key} for this method.
+     * Creates a new instance of {@linkplain HandlerId handler id} for this method.
      *
-     * <p>Unlike the {@linkplain #token() handler token}, handler keys in a subscriber class may
-     * repeat.
-     *
-     * @return the key of the handler method
+     * @return the id of the handler method
      */
-    HandlerKey key();
-
-    /**
-     * Creates a new instance of {@linkplain HandlerToken handler token} for this method.
-     *
-     * <p>Unlike the {@linkplain #key() handler key}, each method in a subscriber class should have
-     * a distinct token.
-     *
-     * @return the token of the handler method
-     */
-    HandlerToken token();
+    HandlerId id();
 
     /**
      * Obtains the set of method attributes configured for this method.

@@ -15,17 +15,24 @@ import "google/protobuf/any.proto";
 
 import "spine/base/field_path.proto";
 
-// A message handler token.
+// A message handler identifier.
 //
-// All the message handlers of an entity must have distinct tokens.
+// All the message handlers of an entity must have distinct IDs.
 //
-message HandlerToken {
+message HandlerId {
+
+    HandlerType type = 1 [(valid) = true];
+
+    MessageFilter filter = 2 [(required) = false, (valid) = true];
+}
+
+// A message handler type description.
+//
+message HandlerType {
 
     string message_type = 1 [(required) = true];
 
     string origin_type = 2;
-
-    MessageFilter filter = 3 [(required) = false, (valid) = true];
 }
 
 // A filter to apply to a handled message.

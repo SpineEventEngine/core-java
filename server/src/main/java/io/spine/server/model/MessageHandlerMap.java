@@ -30,6 +30,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.core.EmptyClass;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -52,16 +53,16 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  * @author Dmytro Dashenkov
  */
 @Immutable(containerOf = {"M", "H"})
-public final class MessageHandlerMap<M extends MessageClass,
+public final class MessageHandlerMap<M extends MessageClass<?>,
                                      H extends HandlerMethod<?, M, ?, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableMultimap<HandlerKey, H> map;
+    private final ImmutableMultimap<HandlerType, H> map;
     private final ImmutableSet<M> messageClasses;
 
-    private MessageHandlerMap(ImmutableMultimap<HandlerKey, H> map,
+    private MessageHandlerMap(ImmutableMultimap<HandlerType, H> map,
                               ImmutableSet<M> messageClasses) {
         this.map = map;
         this.messageClasses = messageClasses;
@@ -77,13 +78,13 @@ public final class MessageHandlerMap<M extends MessageClass,
      * @return new {@code MessageHandlerMap} of methods of the given class matching the given
      *         signature
      */
-    public static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
+    public static <M extends MessageClass<?>, H extends HandlerMethod<?, M, ?, ?>>
     MessageHandlerMap<M, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
 
         ClassScanner scanner = ClassScanner.of(declaringClass);
-        ImmutableMultimap<HandlerKey, H> map = scanner.findMethodsBy(signature);
+        ImmutableMultimap<HandlerType, H> map = scanner.findMethodsBy(signature);
         ImmutableSet<M> messageClasses = messageClasses(map.values());
         return new MessageHandlerMap<>(map, messageClasses);
     }
@@ -110,7 +111,7 @@ public final class MessageHandlerMap<M extends MessageClass,
      *         a predicate for handler methods to filter the corresponding message classes
      */
     public ImmutableSet<M> getMessageClasses(Predicate<? super H> predicate) {
-        Multimap<HandlerKey, H> filtered = Multimaps.filterValues(map, predicate::test);
+        Multimap<HandlerType, H> filtered = Multimaps.filterValues(map, predicate::test);
         return messageClasses(filtered.values());
     }
 
@@ -123,7 +124,7 @@ public final class MessageHandlerMap<M extends MessageClass,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    private ImmutableCollection<H> getMethods(HandlerKey handlerKey) {
+    private ImmutableCollection<H> getMethods(HandlerType handlerKey) {
         ImmutableCollection<H> handlers = map.get(handlerKey);
         checkState(!handlers.isEmpty(),
                    "Unable to find handler with key %s", handlerKey);
@@ -145,10 +146,16 @@ public final class MessageHandlerMap<M extends MessageClass,
      *         if there is no method found in the map
      */
     public ImmutableCollection<H> getMethods(M messageClass, MessageClass originClass) {
-        HandlerKey keyWithOrigin = HandlerKey.of(messageClass, originClass);
-        HandlerKey presentKey = map.containsKey(keyWithOrigin)
-                                ? keyWithOrigin
-                                : HandlerKey.of(messageClass);
+        HandlerType keyWithOrigin = HandlerType
+                .newBuilder()
+                .setMessageType(typeUrl(messageClass).value())
+                .setOriginType(typeUrl(originClass).value())
+                .build();
+        HandlerType presentKey = map.containsKey(keyWithOrigin)
+                                 ? keyWithOrigin
+                                 : keyWithOrigin.toBuilder()
+                                                .clearOriginType()
+                                                .build();
         return getMethods(presentKey);
     }
 
@@ -219,5 +226,9 @@ public final class MessageHandlerMap<M extends MessageClass,
                                         .map(HandlerMethod::getMessageClass)
                                         .collect(toImmutableSet());
         return result;
+    }
+
+    private static TypeUrl typeUrl(MessageClass<?> cls) {
+        return TypeUrl.of(cls.value());
     }
 }
