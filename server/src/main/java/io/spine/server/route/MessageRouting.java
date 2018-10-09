@@ -102,7 +102,7 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
      * @param via          the instance of the route to be used
      * @throws IllegalStateException if the route for this message class is already set
      */
-    MessageRouting<M, C, K, R> doRoute(Class<? extends M> messageClass, Route<M, C, R> via)
+    void doRoute(Class<? extends M> messageClass, Route<M, C, R> via)
             throws IllegalStateException {
         checkNotNull(messageClass);
         checkNotNull(via);
@@ -115,7 +115,6 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
         }
         K cls = toMessageClass(messageClass);
         routes.put(cls, via);
-        return this;
     }
 
     /**

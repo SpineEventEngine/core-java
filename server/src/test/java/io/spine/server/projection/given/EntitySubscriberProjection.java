@@ -20,11 +20,10 @@
 
 package io.spine.server.projection.given;
 
-import com.google.protobuf.Message;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.server.route.EntityStateRouting;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -34,7 +33,6 @@ import io.spine.test.projection.Task;
 import java.util.List;
 
 import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static java.util.stream.Collectors.toList;
 
 public final class EntitySubscriberProjection
@@ -62,16 +60,11 @@ public final class EntitySubscriberProjection
         @Override
         public void onRegistered() {
             super.onRegistered();
-            getEventRouting().route(EntityStateChanged.class,
-                                    (event, context) -> {
-                                        Message state = unpack(event.getNewState());
-                                        if (state instanceof Project) {
-                                            Project project = (Project) state;
-                                            return of(project.getId());
-                                        } else {
-                                            return of();
-                                        }
-                                    });
+            getEventRouting().routeEntityStateUpdates(
+                    EntityStateRouting
+                            .<ProjectId>newInstance()
+                            .route(Project.class, (state, context) -> of(state.getId()))
+            );
         }
     }
 }

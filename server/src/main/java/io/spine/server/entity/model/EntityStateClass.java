@@ -53,4 +53,9 @@ public final class EntityStateClass extends MessageClass<Message> {
         checkNotNull(entityState);
         return new EntityStateClass(entityState.getClass());
     }
+
+    public static EntityStateClass from(Class<? extends Message> value) {
+        checkNotNull(value);
+        return new EntityStateClass(value);
+    }
 }

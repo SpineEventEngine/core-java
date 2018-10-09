@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.system.server.EntityStateChanged;
 
 import java.util.Optional;
 import java.util.Set;
@@ -98,10 +99,10 @@ public final class EventRouting<I>
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     * <li>An an event message should be matched to more than one entity (e.g. several projections
-     * updated in response to one event).
-     * <li>The type of an event producer ID (stored in the event context) differs from the type
-     * of entity identifiers ({@code <I>}.
+     *     <li>An an event message should be matched to more than one entity (e.g. several
+     *         projections updated in response to one event).
+     *     <li>The type of an event producer ID (stored in the event context) differs from the type
+     *         of entity identifiers ({@code <I>}.
      * </ul>
      *
      * <p>If there is no specific route for the class of the passed event, the routing will use
@@ -119,7 +120,14 @@ public final class EventRouting<I>
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<EventMessage, EventContext, Set<I>> casted =
                 (Route<EventMessage, EventContext, Set<I>>) via;
-        return (EventRouting<I>) doRoute(eventClass, casted);
+        doRoute(eventClass, casted);
+        return this;
+    }
+
+    @CanIgnoreReturnValue
+    public EventRouting<I> routeEntityStateUpdates(EntityStateRouting<I> routing) {
+        checkNotNull(routing);
+        return route(EntityStateChanged.class, routing.eventRoute());
     }
 
     /**
