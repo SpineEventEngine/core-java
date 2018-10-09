@@ -24,41 +24,41 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregateEventReactionTest;
-import io.spine.testing.server.aggregate.given.agg.TuReactingAggregate;
-import io.spine.testing.server.aggregate.given.agg.TuReactingAggregateRepository;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePartRepository;
 import io.spine.testing.server.expected.EventReactorExpected;
-import io.spine.testing.server.given.entity.TuProject;
-import io.spine.testing.server.given.entity.TuProjectId;
-import io.spine.testing.server.given.entity.event.TuProjectCreated;
+import io.spine.testing.server.given.entity.TuComments;
+import io.spine.testing.server.given.entity.TuTaskId;
+import io.spine.testing.server.given.entity.event.TuCommentAdded;
 
 /**
- * The test class for the {@link TuProjectCreated} event handler in
- * {@link TuReactingAggregate}.
+ * The test class for the {@link TuCommentAdded} event handler in
+ * {@link TuReactingAggregatePart}.
  */
-public class SampleEventReactionTest
-        extends AggregateEventReactionTest<TuProjectId,
-                                           TuProjectCreated,
-                                           TuProject,
-                                           TuReactingAggregate> {
+public class SamplePartEventReactionTest
+        extends AggregateEventReactionTest<TuTaskId,
+                                           TuCommentAdded,
+                                           TuComments,
+                                           TuReactingAggregatePart> {
 
-    public static final TuProjectCreated TEST_EVENT =
-            TuProjectCreated.newBuilder()
-                            .setId(TuReactingAggregate.ID)
-                            .build();
+    public static final TuCommentAdded TEST_EVENT =
+            TuCommentAdded.newBuilder()
+                          .setId(TuReactingAggregatePart.ID)
+                          .build();
 
-    public SampleEventReactionTest() {
-        super(TuReactingAggregate.ID, TEST_EVENT);
+    public SamplePartEventReactionTest() {
+        super(TuReactingAggregatePart.ID, TEST_EVENT);
     }
 
     @Override
     @VisibleForTesting
-    public EventReactorExpected<TuProject> expectThat(TuReactingAggregate entity) {
+    public EventReactorExpected<TuComments> expectThat(TuReactingAggregatePart entity) {
         return super.expectThat(entity);
     }
 
     @Override
-    protected Repository<TuProjectId, TuReactingAggregate> createEntityRepository() {
-        return new TuReactingAggregateRepository();
+    protected Repository<TuTaskId, TuReactingAggregatePart> createEntityRepository() {
+        return new TuReactingAggregatePartRepository();
     }
 
     @VisibleForTesting

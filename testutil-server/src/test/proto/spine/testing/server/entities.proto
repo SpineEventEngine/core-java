@@ -63,6 +63,8 @@ message TuComments {
     google.protobuf.Timestamp timestamp = 2;
 
     bool comment_limit_reached = 3;
+
+    int32 comments_recieved_by_email = 4;
 }
 
 // A state of a process manager.

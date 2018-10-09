@@ -28,8 +28,11 @@ import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuCommentsVBuilder;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAddComment;
+import io.spine.testing.server.given.entity.command.TuRemoveComment;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
 import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmail;
+import io.spine.testing.server.given.entity.event.TuCommentRemoved;
+import io.spine.testing.server.given.entity.rejection.TuFailedToRemoveComment;
 
 import static com.google.protobuf.util.Timestamps.fromMillis;
 
@@ -64,14 +67,21 @@ public final class TuAggregatePart
                              .build();
     }
 
+    @Assign
+    public TuCommentRemoved handle(TuRemoveComment command) throws TuFailedToRemoveComment {
+        throw new TuFailedToRemoveComment(getId());
+    }
+
     @Apply
     void on(TuCommentAdded event) {
         getBuilder().setId(event.getId())
                     .setTimestamp(fromMillis(1234567));
     }
+
     @Apply(allowImport = true)
     void on(TuCommentRecievedByEmail event) {
         getBuilder().setId(event.getId())
+                    .setCommentsRecievedByEmail(getState().getCommentsRecievedByEmail() + 1)
                     .setTimestamp(fromMillis(1234567));
     }
 }

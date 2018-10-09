@@ -21,16 +21,19 @@
 package io.spine.testing.server.aggregate;
 
 import io.spine.testing.server.aggregate.given.SampleEventImportTest;
+import io.spine.testing.server.aggregate.given.SamplePartEventImportTest;
 import io.spine.testing.server.aggregate.given.agg.TuAggregate;
+import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
+import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
 import io.spine.testing.server.expected.EventReactorExpected;
+import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuProject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.aggregate.given.SampleEventImportTest.TEST_EVENT;
-import static io.spine.testing.server.aggregate.given.agg.TuAggregate.newInstance;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,31 +45,74 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregateEventImportTest should")
 class AggregateEventImportTestShould {
 
-    private SampleEventImportTest aggregateImportEventTest;
+    @Nested
+    @DisplayName("for aggregate")
+    class ForAggregate {
 
-    @BeforeEach
-    void setUp() {
-        aggregateImportEventTest = new SampleEventImportTest();
-        aggregateImportEventTest.setUp();
+        private SampleEventImportTest aggregateImportEventTest;
+
+        @BeforeEach
+        void setUp() {
+            aggregateImportEventTest = new SampleEventImportTest();
+            aggregateImportEventTest.setUp();
+        }
+
+        @AfterEach
+        void tearDown() {
+            aggregateImportEventTest.tearDown();
+        }
+
+        @Test
+        @DisplayName("store tested event")
+        void shouldStoreEvent() {
+            assertEquals(aggregateImportEventTest.storedMessage(),
+                         SampleEventImportTest.TEST_EVENT);
+        }
+
+        @Test
+        @DisplayName("dispatch tested event and store results")
+        @SuppressWarnings("CheckReturnValue")
+        void shouldDispatchEvent() {
+            TuAggregate aggregate = TuAggregate.newInstance();
+            EventReactorExpected<TuProject> expected = aggregateImportEventTest.expectThat(
+                    aggregate);
+            expected.hasState(state -> assertTrue(isNotDefault(state.getTimestamp())));
+        }
     }
 
-    @AfterEach
-    void tearDown() {
-        aggregateImportEventTest.tearDown();
-    }
+    @Nested
+    @DisplayName("for aggregate part")
+    class ForAggregatePart {
 
-    @Test
-    @DisplayName("store tested event")
-    void shouldStoreEvent() {
-        assertEquals(aggregateImportEventTest.storedMessage(), TEST_EVENT);
-    }
+        private SamplePartEventImportTest partImportEventTest;
 
-    @Test
-    @DisplayName("dispatch tested event and store results")
-    @SuppressWarnings("CheckReturnValue")
-    void shouldDispatchEvent() {
-        TuAggregate aggregate = newInstance();
-        EventReactorExpected<TuProject> expected = aggregateImportEventTest.expectThat(aggregate);
-        expected.hasState(state -> assertTrue(isNotDefault(state.getTimestamp())));
+        @BeforeEach
+        void setUp() {
+            partImportEventTest = new SamplePartEventImportTest();
+            partImportEventTest.setUp();
+        }
+
+        @AfterEach
+        void tearDown() {
+            partImportEventTest.tearDown();
+        }
+
+        @Test
+        @DisplayName("store tested event")
+        void shouldStoreEvent() {
+            assertEquals(partImportEventTest.storedMessage(), SamplePartEventImportTest.TEST_EVENT);
+        }
+
+        @Test
+        @DisplayName("dispatch tested event and store results")
+        @SuppressWarnings("CheckReturnValue")
+        void shouldDispatchEvent() {
+            TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
+            TuAggregatePart part = TuAggregatePart.newInstance(root);
+            EventReactorExpected<TuComments> expected = partImportEventTest.expectThat(part);
+            expected.hasState(state -> {
+                assertEquals(1, state.getCommentsRecievedByEmail());
+            });
+        }
     }
 }

@@ -54,6 +54,10 @@ message TuAddComment {
     TuTaskId id = 1;
 }
 
+message TuRemoveComment {
+    TuTaskId id = 1;
+}
+
 message TuAssignTask {
     TuTaskId id = 1;
 }
