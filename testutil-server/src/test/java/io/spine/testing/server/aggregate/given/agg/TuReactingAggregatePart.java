@@ -65,6 +65,6 @@ public final class TuReactingAggregatePart
 
     @Apply
     void on(TuCommentLimitReached event) {
-        getBuilder().setTimestamp(fromMillis(123));
+        getBuilder().setCommentLimitReached(true);
     }
 }

@@ -63,7 +63,7 @@ class AggregatePartEventReactionTestShould {
         TuReactingAggregatePart testPart = newInstance(TuAggregateRoot.newInstance(ID));
         aggregatePartEventTest.expectThat(testPart)
                               .hasState(state -> {
-                                  assertTrue(isNotDefault(state.getTimestamp()));
+                                  assertTrue(state.getCommentLimitReached());
                               })
                               .producesEvents(TuCommentLimitReached.class);
     }
