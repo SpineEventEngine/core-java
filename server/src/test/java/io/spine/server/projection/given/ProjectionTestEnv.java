@@ -77,9 +77,9 @@ public class ProjectionTestEnv {
     public static final class FilteringProjection
             extends Projection<String, StringValue, StringValueVBuilder> {
 
-        public static final String SET_A = "ONE_UNDER_SCOPE";
+        public static final String SET_A = "SET A";
 
-        public static final String SET_B = "TWO_UNDER_SCOPES";
+        public static final String SET_B = "SET B";
 
         private FilteringProjection(String id) {
             super(id);
