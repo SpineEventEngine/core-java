@@ -33,6 +33,8 @@ import io.spine.testing.server.given.entity.command.TuRemoveComment;
 
 /**
  * The test class for verifying that rejection was thrown.
+ *
+ * @see io.spine.testing.server.aggregate.AggregateCommandTestShould
  */
 public class SamplePartRejectionThrowingTest
         extends AggregateCommandTest<TuTaskId, TuRemoveComment, TuComments, TuAggregatePart> {

@@ -34,6 +34,8 @@ import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmailVBuild
 
 /**
  * The test class for checking an import of an event into an aggregate part.
+ *
+ * @see io.spine.testing.server.aggregate.AggregateEventImportTestShould
  */
 public class SamplePartEventImportTest
         extends AggregateEventImportTest<TuTaskId,

@@ -33,6 +33,8 @@ import io.spine.testing.server.given.entity.event.TuTrelloProjectCreated;
 
 /**
  * The test class for checking an import of an event into an aggregate.
+ *
+ * @see io.spine.testing.server.aggregate.AggregateEventImportTestShould
  */
 public class SampleEventImportTest
         extends AggregateEventImportTest<TuProjectId,

@@ -32,8 +32,9 @@ import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
 
 /**
- * The test class for the {@link TuCommentAdded} event handler in
- * {@link TuReactingAggregatePart}.
+ * The test class for the {@link TuCommentAdded} event handler in {@link TuReactingAggregatePart}.
+ *
+ * @see io.spine.testing.server.aggregate.AggregateEventReactionTestShould
  */
 public class SamplePartEventReactionTest
         extends AggregateEventReactionTest<TuTaskId,

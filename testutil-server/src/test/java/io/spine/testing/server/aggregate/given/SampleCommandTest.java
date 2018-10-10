@@ -50,15 +50,13 @@ public class SampleCommandTest
     }
 
     @Override
-    protected Repository<TuProjectId, TuAggregate>
-    createEntityRepository() {
+    protected Repository<TuProjectId, TuAggregate> createEntityRepository() {
         return new TuAggregateRepository();
     }
 
     @CanIgnoreReturnValue
     @Override
-    public CommandHandlerExpected<TuProject>
-    expectThat(TuAggregate entity) {
+    public CommandHandlerExpected<TuProject> expectThat(TuAggregate entity) {
         return super.expectThat(entity);
     }
 

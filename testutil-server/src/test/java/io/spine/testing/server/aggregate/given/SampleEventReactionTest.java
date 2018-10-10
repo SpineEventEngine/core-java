@@ -32,8 +32,9 @@ import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
 /**
- * The test class for the {@link TuProjectCreated} event handler in
- * {@link TuReactingAggregate}.
+ * The test class for the {@link TuProjectCreated} event handler in {@link TuReactingAggregate}.
+ *
+ * @see io.spine.testing.server.aggregate.AggregateEventReactionTestShould
  */
 public class SampleEventReactionTest
         extends AggregateEventReactionTest<TuProjectId,

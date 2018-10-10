@@ -33,6 +33,8 @@ import io.spine.testing.server.given.entity.command.TuAssignProject;
 
 /**
  * The test class for verifying that rejection was thrown.
+ *
+ * @see io.spine.testing.server.aggregate.AggregateCommandTestShould
  */
 public class SampleRejectionThrowingTest
         extends AggregateCommandTest<TuProjectId, TuAssignProject, TuProject, TuAggregate> {
