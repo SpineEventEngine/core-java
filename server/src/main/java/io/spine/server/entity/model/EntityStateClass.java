@@ -38,22 +38,26 @@ public final class EntityStateClass extends MessageClass<Message> {
         super(value);
     }
 
+    /**
+     * Obtains the class of the state of the given entity.
+     */
     public static EntityStateClass of(Entity entity) {
         checkNotNull(entity);
         Message state = entity.getState();
-
-        checkNotNull(state);
-        Class<? extends Message> stateClass = state.getClass();
-
-        EntityStateClass result = new EntityStateClass(stateClass);
-        return result;
+        return of(state);
     }
 
+    /**
+     * Creates an instance of {@code EntityStateClass} from the class of the given message.
+     */
     public static EntityStateClass of(Message entityState) {
         checkNotNull(entityState);
-        return new EntityStateClass(entityState.getClass());
+        return from(entityState.getClass());
     }
 
+    /**
+     * Creates an instance of {@code EntityStateClass} from the given class.
+     */
     public static EntityStateClass from(Class<? extends Message> value) {
         checkNotNull(value);
         return new EntityStateClass(value);
