@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.system.server.EntityStateChanged;
 
 import java.util.Optional;
 import java.util.Set;
@@ -32,8 +33,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A routing schema used by an {@link io.spine.server.event.EventDispatcher EventDispatcher} for
- * delivering events.
+ * A routing schema used to deliver events.
  *
  * <p>A routing schema consists of a default route and custom routes per event class.
  * When calculating a set of event targets, {@code EventRouting} would see if there is
@@ -41,7 +41,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@linkplain EventRoute#apply(Message, Message) applied}.
  *
  * @param <I> the type of the entity IDs to which events are routed
- * @author Alexander Yevsyukov
  */
 public final class EventRouting<I>
         extends MessageRouting<EventMessage, EventContext, EventClass, Set<I>>
@@ -98,20 +97,24 @@ public final class EventRouting<I>
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     * <li>An an event message should be matched to more than one entity (e.g. several projections
-     * updated in response to one event).
-     * <li>The type of an event producer ID (stored in the event context) differs from the type
-     * of entity identifiers ({@code <I>}.
+     *     <li>An an event message should be matched to more than one entity (e.g. several
+     *         projections updated in response to one event).
+     *     <li>The type of an event producer ID (stored in the event context) differs from the type
+     *         of entity identifiers ({@code <I>}.
      * </ul>
      *
      * <p>If there is no specific route for the class of the passed event, the routing will use
      * the {@linkplain #getDefault() default route}.
      *
-     * @param eventClass the class of events to route
-     * @param via        the instance of the route to be used
-     * @param <E>        the type of the event message
+     * @param eventClass
+     *         the class of events to route
+     * @param via
+     *         the instance of the route to be used
+     * @param <E>
+     *         the type of the event message
      * @return {@code this} to allow chained calls when configuring the routing
-     * @throws IllegalStateException if the route for this event class is already set
+     * @throws IllegalStateException
+     *         if the route for this event class is already set
      */
     @CanIgnoreReturnValue
     public <E extends EventMessage> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
@@ -119,7 +122,27 @@ public final class EventRouting<I>
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<EventMessage, EventContext, Set<I>> casted =
                 (Route<EventMessage, EventContext, Set<I>>) via;
-        return (EventRouting<I>) doRoute(eventClass, casted);
+        doRoute(eventClass, casted);
+        return this;
+    }
+
+    /**
+     * Sets a custom routing schema for entity state updates.
+     *
+     * <p>Setting a routing for state updates is equivalent to setting a route for events of type
+     * {@link EntityStateChanged io.spine.system.server.EntityStateChanged}. It is illegal to do
+     * both things simultaneously.
+     *
+     * @param routing
+     *         the routing schema for entity state updates
+     * @return {@code this} to allow chained calls when configuring the routing
+     * @throws IllegalStateException
+     *         if a route for {@link EntityStateChanged} is already set
+     */
+    @CanIgnoreReturnValue
+    public EventRouting<I> routeEntityStateUpdates(StateUpdateRouting<I> routing) {
+        checkNotNull(routing);
+        return route(EntityStateChanged.class, routing.eventRoute());
     }
 
     /**

@@ -40,16 +40,7 @@ import "spine/core/enrichment.proto";
 // Event identifier.
 message EventId {
 
-    // An event is generated in response to a message. The event ID is based on the value of the
-    // incoming message:
-    //
-    //     `<originId>-<sequenceNumber>`
-    //
-    // where the `sequenceNumber` is a number in the sequence of events generated in response to
-    // the incoming message.
-    //
-    // See `io.spine.server.event.EventIdSequence` for details on event ID generation.
-    //
+    // A random UUID string value.
     string value = 1;
 }
 

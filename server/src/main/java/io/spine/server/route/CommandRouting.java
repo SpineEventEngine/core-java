@@ -103,7 +103,8 @@ public final class CommandRouting<I>
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<CommandMessage, CommandContext, I> casted =
                 (Route<CommandMessage, CommandContext, I>) via;
-        return (CommandRouting<I>) doRoute(commandClass, casted);
+        doRoute(commandClass, casted);
+        return this;
     }
 
     /**
