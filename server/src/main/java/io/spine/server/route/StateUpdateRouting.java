@@ -35,34 +35,34 @@ import static com.google.common.collect.ImmutableSet.of;
  * A routing schema used to deliver entity state updates.
  *
  * <p>A routing schema consists of a default route and custom routes per event class.
- * When calculating a set of update targets, {@code EntityStateRouting} would see if there is
+ * When calculating a set of update targets, {@code StateUpdateRouting} would see if there is
  * a custom route set for the type of the event. If not found, the default route will be
  * {@linkplain EventRoute#apply(Message, Message) applied}.
  *
  * @param <I>
  *         the type of the entity IDs to which the updates are routed
  */
-public class EntityStateRouting<I>
+public class StateUpdateRouting<I>
         extends MessageRouting<Message, EventContext, EntityStateClass, Set<I>> {
 
     private static final long serialVersionUID = 0L;
 
-    private EntityStateRouting() {
+    private StateUpdateRouting() {
         super(((message, context) -> of()));
     }
 
     /**
-     * Creates a new {@code EntityStateRouting}.
+     * Creates a new {@code StateUpdateRouting}.
      *
      * <p>The resulting routing schema has the ignoring default route, i.e. if a custom route is not
      * set, the entity state update is ignored.
      *
      * @param <I>
      *         the type of the entity IDs to which the updates are routed
-     * @return new {@code EntityStateRouting}
+     * @return new {@code StateUpdateRouting}
      */
-    public static <I> EntityStateRouting<I> newInstance() {
-        return new EntityStateRouting<>();
+    public static <I> StateUpdateRouting<I> newInstance() {
+        return new StateUpdateRouting<>();
     }
 
     @Override
@@ -92,8 +92,8 @@ public class EntityStateRouting<I>
      *         if the route for this class is already set
      */
     @CanIgnoreReturnValue
-    public <S extends Message> EntityStateRouting<I> route(Class<S> stateClass,
-                                                           EntityStateRoute<I, S> via)
+    public <S extends Message> StateUpdateRouting<I> route(Class<S> stateClass,
+                                                           StateUpdateRoute<I, S> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // Logically valid.
         Route<Message, EventContext, Set<I>> route = (Route<Message, EventContext, Set<I>>) via;

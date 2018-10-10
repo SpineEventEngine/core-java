@@ -35,21 +35,21 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 
-@DisplayName("EntityStateRouting should")
-class EntityStateRoutingTest {
+@DisplayName("StateUpdateRouting should")
+class StateUpdateRoutingTest {
 
     @Test
     @DisplayName("not accept nulls")
     void notAcceptNulls() {
         new NullPointerTester()
                 .setDefault(EventContext.class, EventContext.getDefaultInstance())
-                .testAllPublicInstanceMethods(EntityStateRouting.newInstance());
+                .testAllPublicInstanceMethods(StateUpdateRouting.newInstance());
     }
 
     @Test
     @DisplayName("skip all messages be default")
     void routeNothingByDefault() {
-        EntityStateRouting<?> routing = EntityStateRouting.newInstance();
+        StateUpdateRouting<?> routing = StateUpdateRouting.newInstance();
         Set<?> emptyTargets = routing.apply(Empty.getDefaultInstance(),
                                        EventContext.getDefaultInstance());
         assertThat(emptyTargets).isEmpty();
@@ -63,7 +63,7 @@ class EntityStateRoutingTest {
     @DisplayName("route messages with defined routes")
     void routeMessagesByRoutes() {
         String counterKey = "sample_key";
-        EntityStateRouting<Integer> routing = EntityStateRouting
+        StateUpdateRouting<Integer> routing = StateUpdateRouting
                 .<Integer>newInstance()
                 .route(LogState.class, (log, context) -> of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
@@ -79,7 +79,7 @@ class EntityStateRoutingTest {
     @DisplayName("compose an EventRoute for EntityStateChanged events")
     void createEventRoute() {
         String counterKey = "test_key";
-        EntityStateRouting<Integer> routing = EntityStateRouting
+        StateUpdateRouting<Integer> routing = StateUpdateRouting
                 .<Integer>newInstance()
                 .route(LogState.class, (log, context) -> of(log.getCountersOrThrow(counterKey)));
         int counter = 42;

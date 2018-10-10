@@ -30,5 +30,5 @@ import io.spine.core.EventContext;
  * @param <M> the type of entity states to get IDs from
  */
 @FunctionalInterface
-public interface EntityStateRoute<I, M extends Message> extends Multicast<I, M, EventContext> {
+public interface StateUpdateRoute<I, M extends Message> extends Multicast<I, M, EventContext> {
 }

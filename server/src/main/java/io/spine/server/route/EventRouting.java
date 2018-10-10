@@ -140,7 +140,7 @@ public final class EventRouting<I>
      *         if a route for {@link EntityStateChanged} is already set
      */
     @CanIgnoreReturnValue
-    public EventRouting<I> routeEntityStateUpdates(EntityStateRouting<I> routing) {
+    public EventRouting<I> routeEntityStateUpdates(StateUpdateRouting<I> routing) {
         checkNotNull(routing);
         return route(EntityStateChanged.class, routing.eventRoute());
     }

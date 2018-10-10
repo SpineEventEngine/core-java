@@ -26,7 +26,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.route.EntityStateRouting;
+import io.spine.server.route.StateUpdateRouting;
 
 import static com.google.common.collect.ImmutableSet.of;
 
@@ -51,7 +51,7 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
         @Override
         public void onRegistered() {
             super.onRegistered();
-            EntityStateRouting<GroupId> routing = EntityStateRouting.newInstance();
+            StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
             routing.route(Organization.class, (org, eventContext) ->
                     of(GroupId.newBuilder()
                               .setUuid(org.getHead().getValue())

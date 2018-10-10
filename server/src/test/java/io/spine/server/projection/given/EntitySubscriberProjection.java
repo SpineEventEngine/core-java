@@ -23,7 +23,7 @@ package io.spine.server.projection.given;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.route.EntityStateRouting;
+import io.spine.server.route.StateUpdateRouting;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -61,7 +61,7 @@ public final class EntitySubscriberProjection
         public void onRegistered() {
             super.onRegistered();
             getEventRouting().routeEntityStateUpdates(
-                    EntityStateRouting
+                    StateUpdateRouting
                             .<ProjectId>newInstance()
                             .route(Project.class, (state, context) -> of(state.getId()))
             );
