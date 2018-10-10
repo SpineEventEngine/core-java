@@ -42,6 +42,10 @@ message TuAssignProject {
     TuProjectId id = 1;
 }
 
+message TuRemoveProject {
+    TuProjectId id = 1;
+}
+
 //
 // Task commands
 //

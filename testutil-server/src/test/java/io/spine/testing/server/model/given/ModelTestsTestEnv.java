@@ -24,7 +24,7 @@ import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
 import io.spine.server.model.Nothing;
-import io.spine.testing.server.given.entity.command.TuCreateProject;
+import io.spine.testing.server.given.entity.command.TuRemoveProject;
 
 /**
  * @author Alexander Yevsyukov
@@ -42,7 +42,7 @@ public class ModelTestsTestEnv {
         }
 
         @Assign
-        Nothing handle(TuCreateProject cmd) {
+        Nothing handle(TuRemoveProject cmd) {
             return nothing();
         }
     }
@@ -53,10 +53,10 @@ public class ModelTestsTestEnv {
         }
 
         /**
-         * Handles the same command as {@link TestCommandHandler#handle(TuCreateProject)}.
+         * Handles the same command as {@link TestCommandHandler#handle(TuRemoveProject)}.
          */
         @Assign
-        Nothing handle(TuCreateProject cmd) {
+        Nothing handle(TuRemoveProject cmd) {
             return nothing();
         }
     }
