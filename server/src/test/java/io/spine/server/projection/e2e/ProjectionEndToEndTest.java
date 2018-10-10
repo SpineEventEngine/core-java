@@ -20,11 +20,26 @@
 
 package io.spine.server.projection.e2e;
 
+import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
+import io.spine.base.Time;
+import io.spine.client.EntityId;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
+import io.spine.core.UserId;
+import io.spine.server.BoundedContext;
+import io.spine.server.groups.Group;
+import io.spine.server.groups.GroupId;
+import io.spine.server.groups.GroupProjection;
+import io.spine.server.organizations.Organization;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.TestProjection;
+import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
@@ -32,13 +47,23 @@ import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.testing.server.blackbox.VerifyState.exactly;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Projection should")
 @ExtendWith(ShardingReset.class)
@@ -90,6 +115,62 @@ class ProjectionEndToEndTest {
                         .setProjectName(created.getName())
                         .build()
         )));
+    }
+
+    @Test
+    @DisplayName("receive entity state updates along with system event context")
+    void receiveEntityStateUpdatesAndEventContext() {
+        GroupProjection.Repository repository = new GroupProjection.Repository();
+        BoundedContext
+                .newBuilder()
+                .build()
+                .register(repository);
+        UserId organizationHead = UserId
+                .newBuilder()
+                .build();
+        EntityHistoryId historyId = EntityHistoryId
+                .newBuilder()
+                .setTypeUrl(TypeUrl.of(Organization.class).value())
+                .setEntityId(EntityId.newBuilder().setId(pack(organizationHead)))
+                .build();
+        String organizationName = "Contributors";
+        Organization newState = Organization
+                .newBuilder()
+                .setHead(organizationHead)
+                .setName(organizationName)
+                .addMembers(UserId.getDefaultInstance())
+                .build();
+        EntityStateChanged stateChanged = EntityStateChanged
+                .newBuilder()
+                .setId(historyId)
+                .setNewState(pack(newState))
+                .setWhen(getCurrentTime())
+                .build();
+        Timestamp producedAt = Time.getCurrentTime();
+        EventContext eventContext = EventContext
+                .newBuilder()
+                .setTimestamp(producedAt)
+                .setExternal(true)
+                .build();
+        Event event = Event
+                .newBuilder()
+                .setId(Events.generateId())
+                .setMessage(pack(stateChanged))
+                .setContext(eventContext)
+                .build();
+        Set<GroupId> targets = repository.dispatch(EventEnvelope.of(event));
+        assertThat(targets).isNotEmpty();
+
+        Iterator<GroupProjection> allGroups = repository.loadAll();
+        assertTrue(allGroups.hasNext());
+        GroupProjection singleGroup = allGroups.next();
+        assertFalse(allGroups.hasNext());
+
+        Group actualGroup = singleGroup.getState();
+        assertEquals(actualGroup.getName(), organizationName + producedAt);
+        IterableSubject assertParticipants = assertThat(actualGroup.getParticipantsList());
+        assertParticipants.containsAllIn(newState.getMembersList());
+        assertParticipants.contains(organizationHead);
     }
 
     private static Event event(ProjectId producer, EventMessage eventMessage) {

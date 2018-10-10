@@ -18,53 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.projection.given;
+package io.spine.server.groups;
 
+import com.google.protobuf.Timestamp;
+import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;
-import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesVBuilder;
-import io.spine.test.projection.Task;
-
-import java.util.List;
 
 import static com.google.common.collect.ImmutableSet.of;
-import static java.util.stream.Collectors.toList;
 
-public final class EntitySubscriberProjection
-        extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
+public final class GroupProjection extends Projection<GroupId, Group, GroupVBuilder> {
 
-    public EntitySubscriberProjection(ProjectId id) {
+    private GroupProjection(GroupId id) {
         super(id);
     }
 
-    @Subscribe
-    public void onUpdate(Project aggregateState) {
-        List<String> taskNames = aggregateState.getTaskList()
-                                               .stream()
-                                               .map(Task::getTitle)
-                                               .collect(toList());
-        getBuilder().setProjectId(aggregateState.getId())
-                    .setProjectName(aggregateState.getName())
-                    .clearTaskName()
-                    .addAllTaskName(taskNames);
+    @Subscribe(external = true)
+    public void on(Organization organization, EventContext systemContext) {
+        Timestamp updateTime = systemContext.getTimestamp();
+        getBuilder().setId(getId())
+                    .setName(organization.getName() + updateTime)
+                    .addAllParticipants(organization.getMembersList())
+                    .addParticipants(organization.getHead());
     }
 
     public static final class Repository
-            extends ProjectionRepository<ProjectId, EntitySubscriberProjection, ProjectTaskNames> {
+            extends ProjectionRepository<GroupId, GroupProjection, Group> {
 
         @Override
         public void onRegistered() {
             super.onRegistered();
-            getEventRouting().routeEntityStateUpdates(
-                    StateUpdateRouting
-                            .<ProjectId>newInstance()
-                            .route(Project.class, (state, context) -> of(state.getId()))
-            );
+            StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
+            routing.route(Organization.class, (org, eventContext) ->
+                    of(GroupId.newBuilder()
+                              .setUuid(org.getHead().getValue())
+                               .build()));
+            getEventRouting().routeEntityStateUpdates(routing);
         }
     }
 }

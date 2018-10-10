@@ -275,7 +275,7 @@ public class EntityLifecycle {
      *         {@link io.spine.core.EventId EventId}s or {@link CommandId}s
      */
     final void onStateChanged(EntityRecordChange change,
-                                  Set<? extends Message> messageIds) {
+                              Set<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);

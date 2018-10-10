@@ -29,6 +29,7 @@ import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
+import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableSet.of;
 
 /**
@@ -55,7 +56,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
         ImmutableSet<? extends ParameterSpec<EventEnvelope>> result = ImmutableSet
                 .<ParameterSpec<EventEnvelope>>builder()
                 .addAll(super.getParamSpecs())
-                .add(EntityStateSubscriberSpec.PARAM_SPEC)
+                .addAll(copyOf(EntityStateSubscriberSpec.values()))
                 .build();
         return result;
     }

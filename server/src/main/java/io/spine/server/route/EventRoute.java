@@ -32,7 +32,6 @@ import static java.util.Collections.emptySet;
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of event messages to get IDs from
- * @author Alexander Yevsyukov
  */
 @FunctionalInterface
 public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, EventContext> {
