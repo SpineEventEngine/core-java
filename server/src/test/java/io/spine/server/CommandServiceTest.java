@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.common.collect.Sets;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
@@ -127,7 +128,7 @@ class CommandServiceTest {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
         Ack acked = observer.firstResponse();
-        CommandId id = (CommandId) unpack(acked.getMessageId());
+        CommandId id = Identifier.unpack(acked.getMessageId());
         assertEquals(cmd.getId(), id);
     }
 

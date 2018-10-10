@@ -28,7 +28,7 @@ import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.event.model.EventSubscriberClass;
-import io.spine.server.event.model.EventSubscriberMethod;
+import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -48,9 +48,9 @@ import static java.lang.String.format;
  * <p>Objects may also receive events via {@link EventDispatcher}s that can be
  * registered with {@code EventBus}.
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  * @see EventBus#register(MessageDispatcher)
+ * @see io.spine.core.Subscribe {@code @Subscribe} annotation for declaring event subscriptions
+ *                              in the derived classes
  */
 public abstract class AbstractEventSubscriber
         implements EventDispatcher<String>, EventSubscriber, Logging {
@@ -66,7 +66,7 @@ public abstract class AbstractEventSubscriber
      * as the identify of the subscriber, or empty set if dispatching failed
      */
     @Override
-    public Set<String> dispatch(EventEnvelope envelope) {
+    public final Set<String> dispatch(EventEnvelope envelope) {
         EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
@@ -95,9 +95,15 @@ public abstract class AbstractEventSubscriber
         MessageClass messageClass = envelope.getMessageClass();
         String messageId = envelope.idAsString();
         String errorMessage =
-                format("Error handling event subscription (class: %s id: %s).",
-                       messageClass, messageId);
+                format("Error handling event subscription (class: %s id: %s) in %s.",
+                       messageClass, messageId, thisClass);
         log().error(errorMessage, exception);
+    }
+
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(envelope);
+        return subscriber.isPresent();
     }
 
     @Override
@@ -117,9 +123,8 @@ public abstract class AbstractEventSubscriber
     }
 
     private void handle(EventEnvelope envelope) {
-        EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass(),
-                                                               envelope.getOriginClass());
-        method.invoke(this, envelope);
+        thisClass.getSubscriber(envelope)
+                 .ifPresent(method -> method.invoke(this, envelope));
     }
 
     /**
@@ -146,6 +151,12 @@ public abstract class AbstractEventSubscriber
             logError("Error dispatching external event to event subscriber " +
                              "(event class: %s, id: %s)",
                      envelope, exception);
+        }
+
+        @Override
+        public boolean canDispatch(ExternalMessageEnvelope envelope) {
+            EventEnvelope event = envelope.toEventEnvelope();
+            return AbstractEventSubscriber.this.canDispatch(event);
         }
 
         private void logError(String msgFormat,

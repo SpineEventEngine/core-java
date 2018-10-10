@@ -30,7 +30,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
+import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
 import static io.spine.server.model.declare.AccessModifier.PRIVATE;
@@ -160,7 +161,7 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
-        public HandlerKey key() {
+        public HandlerId id() {
             throw new IllegalStateException("The method is not a target of the test.");
         }
     }
@@ -187,7 +188,7 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
-        public HandlerKey key() {
+        public HandlerId id() {
             throw new IllegalStateException("The method is not a target of the test.");
         }
     }
@@ -215,8 +216,8 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
-        public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
-            return OneParamSpec.class;
+        public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+            return copyOf(OneParamSpec.values());
         }
 
         @Override

@@ -56,7 +56,7 @@ public class CommandShardedStream<I> extends ShardedStream<I, Command, CommandEn
 
         @Override
         protected CommandEnvelope toEnvelope(Any packedCommand) {
-            Command command = (Command) unpack(packedCommand);
+            Command command = unpack(packedCommand, Command.class);
             CommandEnvelope result = CommandEnvelope.of(command);
             return result;
         }

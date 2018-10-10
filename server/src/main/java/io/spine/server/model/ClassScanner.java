@@ -20,24 +20,28 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Objects;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import io.spine.base.FieldPath;
 import io.spine.server.model.declare.MethodSignature;
+import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMap.copyOf;
+import static com.google.common.collect.ImmutableMultimap.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * A scanner of a model class.
  *
  * <p>An instance of this class helps to disassemble a Java class into several parts, which are of
  * interest of a domain model.
- *
- * @author Dmytro Dashenkov
  */
 public final class ClassScanner {
 
@@ -67,12 +71,12 @@ public final class ClassScanner {
      *         the handler {@linkplain MethodSignature signature}
      * @param <H>
      *         the type of the handler methods
-     * @return map of {@link HandlerKey}s to the handler methods of the given type
+     * @return map of {@link HandlerTypeInfo}s to the handler methods of the given type
      */
-    <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMap<HandlerKey, H>
+    <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMultimap<HandlerTypeInfo, H>
     findMethodsBy(MethodSignature<H, ?> signature) {
         MethodScan<H> operation = new MethodScan<>(declaringClass, signature);
-        ImmutableMap<HandlerKey, H> result = operation.perform();
+        ImmutableMultimap<HandlerTypeInfo, H> result = operation.perform();
         return result;
     }
 
@@ -87,14 +91,18 @@ public final class ClassScanner {
     private static final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
         private final Class<?> declaringClass;
-        private final Map<HandlerKey, H> foundMethods;
+        private final Multimap<HandlerTypeInfo, H> handlers;
+        private final Map<HandlerId, H> seenMethods;
         private final MethodSignature<H, ?> signature;
+        private final Map<MessageClass, FilteredHandler<H>> fieldFilters;
 
         private MethodScan(Class<?> declaringClass,
                            MethodSignature<H, ?> signature) {
             this.declaringClass = declaringClass;
             this.signature = signature;
-            this.foundMethods = newHashMap();
+            this.handlers = HashMultimap.create();
+            this.seenMethods = newHashMap();
+            this.fieldFilters = newHashMap();
         }
 
         /**
@@ -102,14 +110,14 @@ public final class ClassScanner {
          *
          * <p>Multiple calls to this method may cause {@link DuplicateHandlerMethodError}s.
          *
-         * @return a map of {@link HandlerKey}s to the method handlers
+         * @return a map of {@link HandlerTypeInfo}s to the method handlers
          */
-        private ImmutableMap<HandlerKey, H> perform() {
+        private ImmutableMultimap<HandlerTypeInfo, H> perform() {
             Method[] declaredMethods = declaringClass.getDeclaredMethods();
             for (Method method : declaredMethods) {
                 scanMethod(method);
             }
-            return copyOf(foundMethods);
+            return copyOf(handlers);
         }
 
         private void scanMethod(Method method) {
@@ -122,22 +130,79 @@ public final class ClassScanner {
         }
 
         private void remember(H handler) {
-            HandlerKey key = handler.key();
-            checkNotRemembered(key, handler);
-            foundMethods.put(key, handler);
+            checkNotRemembered(handler);
+            checkNotClashes(handler);
+            HandlerId id = handler.id();
+            handlers.put(id.getType(), handler);
         }
 
-        private void checkNotRemembered(HandlerKey key, H handler) {
-            if (foundMethods.containsKey(key)) {
-                Method alreadyPresent = foundMethods.get(key)
-                                                    .getRawMethod();
-                throw new DuplicateHandlerMethodError(
-                        declaringClass,
-                        key,
-                        alreadyPresent.getName(),
-                        handler.getRawMethod().getName()
-                );
+        private void checkNotRemembered(H handler) {
+            HandlerId id = handler.id();
+            if (seenMethods.containsKey(id)) {
+                Method alreadyPresent = seenMethods.get(id)
+                                                   .getRawMethod();
+                String methodName = alreadyPresent.getName();
+                String duplicateMethodName = handler.getRawMethod().getName();
+                throw new DuplicateHandlerMethodError(declaringClass, id,
+                                                      methodName, duplicateMethodName);
+            } else {
+                seenMethods.put(id, handler);
             }
+        }
+
+        private void checkNotClashes(H handler) {
+            MessageClass handledClass = handler.getMessageClass();
+            FieldPath field = handler.filter().getField();
+            if (isNotDefault(field)) {
+                FilteredHandler<H> previousValue = fieldFilters.put(
+                        handledClass,
+                        new FilteredHandler<>(handler, field)
+                );
+                if (previousValue != null && previousValue.fieldDiffersFrom(field)) {
+                    throw new HandlerFieldFilterClashError(declaringClass,
+                                                           handler.getRawMethod(),
+                                                           previousValue.handler.getRawMethod());
+                }
+            }
+        }
+    }
+
+    /**
+     * A pair of a {@link HandlerMethod} and the field to filter its events by.
+     *
+     * @param <H>
+     *         the type of handler method
+     */
+    private static final class FilteredHandler<H extends HandlerMethod<?, ?, ?, ?>> {
+
+        private final H handler;
+        private final FieldPath filteredField;
+
+        private FilteredHandler(H handler, FieldPath field) {
+            this.handler = handler;
+            this.filteredField = field;
+        }
+
+        private boolean fieldDiffersFrom(FieldPath path) {
+            return !filteredField.equals(path);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            FilteredHandler<?> handler1 = (FilteredHandler<?>) o;
+            return Objects.equal(handler, handler1.handler) &&
+                    Objects.equal(filteredField, handler1.filteredField);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(handler, filteredField);
         }
     }
 }

@@ -94,7 +94,7 @@ class TopicFactoryTest {
             assertEquals(ids.size(), actualIds.size());
             for (EntityId actualId : actualIds) {
                 Any rawId = actualId.getId();
-                TestEntityId unpackedId = (TestEntityId) unpack(rawId);
+                TestEntityId unpackedId = unpack(rawId, TestEntityId.class);
                 assertTrue(ids.contains(unpackedId));
             }
         }

@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.truth.IterableSubject;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.ActorContext;
@@ -235,8 +236,7 @@ abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        CommandId commandId = (CommandId) unpack(observer.firstResponse()
-                                                         .getMessageId());
+        CommandId commandId = Identifier.unpack(observer.firstResponse().getMessageId());
         assertEquals(cmd.getId(), commandId);
     }
 

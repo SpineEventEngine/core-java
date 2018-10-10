@@ -123,10 +123,8 @@ public class EventsTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("producer")
         void producer() {
-            StringValue msg = (StringValue) unpack(context.getProducerId());
-
+            StringValue msg = unpack(context.getProducerId(), StringValue.class);
             String id = (String) getProducer(context);
-
             assertEquals(msg.getValue(), id);
         }
     }

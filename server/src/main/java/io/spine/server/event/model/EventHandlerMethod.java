@@ -20,18 +20,22 @@
 
 package io.spine.server.event.model;
 
+import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
+import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static io.spine.server.model.Handlers.createId;
 
 /**
  * An abstract base for methods handling events.
@@ -56,20 +60,24 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
     }
 
     @Override
-    public HandlerKey key() {
-        Class<?>[] types = getRawMethod().getParameterTypes();
-        @SuppressWarnings("unchecked")
-        Class<? extends EventMessage> eventMessageClass = (Class<? extends EventMessage>) types[0];
-        EventClass eventClass = EventClass.from(eventMessageClass);
+    public HandlerId id() {
+        EventClass eventClass = getMessageClass();
         if (!getParameterSpec().isAwareOfCommandType()) {
-            return HandlerKey.of(eventClass);
+            return createId(eventClass);
         } else {
-            @SuppressWarnings("unchecked")
+            Class<?>[] parameters = getRawMethod().getParameterTypes();
             Class<? extends CommandMessage> commandMessageClass =
-                    (Class<? extends CommandMessage>) types[1];
+                    castClass(parameters[1], CommandMessage.class);
             CommandClass commandClass = CommandClass.from(commandMessageClass);
-            return HandlerKey.of(eventClass, commandClass);
+            return createId(eventClass, commandClass);
         }
+    }
+
+    private static <T extends Message> Class<T> castClass(Class<?> raw, Class<T> targetBound) {
+        checkArgument(targetBound.isAssignableFrom(raw));
+        @SuppressWarnings("unchecked") // Checked above.
+        Class<T> result = (Class<T>) raw;
+        return result;
     }
 
     /**

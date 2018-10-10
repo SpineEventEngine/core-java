@@ -106,6 +106,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
+@SuppressWarnings({"OverlyCoupledClass",
+        "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
 
@@ -188,7 +191,7 @@ class ProcessManagerTest {
         assertEquals(1, events.size());
         Event event = events.get(0);
         assertNotNull(event);
-        PmProjectCreated message = (PmProjectCreated) unpack(event.getMessage());
+        PmProjectCreated message = unpack(event.getMessage(), PmProjectCreated.class);
         assertEquals(TestProcessManager.ID, message.getProjectId());
     }
 

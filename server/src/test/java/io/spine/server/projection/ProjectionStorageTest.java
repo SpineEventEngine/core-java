@@ -73,7 +73,7 @@ public abstract class ProjectionStorageTest
     @CanIgnoreReturnValue
     private static Project checkProjectIdIsInList(EntityRecord project, List<ProjectId> ids) {
         Any packedState = project.getState();
-        Project state = (Project) unpack(packedState);
+        Project state = unpack(packedState, Project.class);
         ProjectId id = state.getId();
 
         boolean isIdPresent = false;
@@ -131,7 +131,7 @@ public abstract class ProjectionStorageTest
             Collection<EntityRecord> readRecords = newArrayList(read);
             assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
-                Project state = (Project) unpack(record.getState());
+                Project state = unpack(record.getState(), Project.class);
                 ProjectId id = state.getId();
                 assertThat(ids).contains(id);
             }
@@ -149,7 +149,7 @@ public abstract class ProjectionStorageTest
             assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
                 Any packedState = record.getState();
-                Project state = (Project) unpack(packedState);
+                Project state = unpack(packedState, Project.class);
                 assertMatchesMask(state, fieldMask);
             }
         }

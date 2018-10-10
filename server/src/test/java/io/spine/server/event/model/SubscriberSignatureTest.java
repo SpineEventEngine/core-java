@@ -18,9 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.declare;
+package io.spine.server.event.model;
 
-import io.spine.server.event.model.EventSubscriberSignature;
 import io.spine.server.model.declare.MethodSignatureTest;
 
 import java.lang.reflect.Method;
@@ -36,7 +35,7 @@ import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findM
 import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findReturnsValue;
 import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findThrowsUnchckedException;
 
-class SubscriberSignatureTest extends MethodSignatureTest<EventSubscriberSignature> {
+class SubscriberSignatureTest extends MethodSignatureTest<SubscriberSignature> {
 
     @Override
     protected Stream<Method> validMethods() {
@@ -56,7 +55,7 @@ class SubscriberSignatureTest extends MethodSignatureTest<EventSubscriberSignatu
     }
 
     @Override
-    protected EventSubscriberSignature signature() {
-        return new EventSubscriberSignature();
+    protected SubscriberSignature signature() {
+        return new SubscriberSignature();
     }
 }

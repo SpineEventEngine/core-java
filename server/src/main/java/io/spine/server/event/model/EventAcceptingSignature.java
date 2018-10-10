@@ -20,11 +20,15 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.declare.MethodSignature;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.annotation.Annotation;
+
+import static com.google.common.collect.ImmutableSet.copyOf;
 
 /**
  * An abstract base of signatures for methods that accept {@code Event}s.
@@ -40,7 +44,7 @@ abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelo
     }
 
     @Override
-    public Class<EventAcceptingMethodParams> getParamSpecClass() {
-        return EventAcceptingMethodParams.class;
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+        return copyOf(EventAcceptingMethodParams.values());
     }
 }

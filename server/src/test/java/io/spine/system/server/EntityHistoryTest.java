@@ -200,7 +200,8 @@ class EntityHistoryTest {
             EntityStateChanged stateChanged =
                     eventAccumulator.assertNextEventIs(EntityStateChanged.class);
             assertId(stateChanged.getId());
-            PersonCreation startedState = (PersonCreation) unpack(stateChanged.getNewState());
+            PersonCreation startedState = unpack(stateChanged.getNewState(),
+                                                 PersonCreation.class);
             assertFalse(startedState.getCreated());
             eventAccumulator.forgetEvents();
 
@@ -214,8 +215,8 @@ class EntityHistoryTest {
             EntityStateChanged stateChangedAgain = eventAccumulator.assertNextEventIs(
                     EntityStateChanged.class);
             assertId(stateChangedAgain.getId());
-            PersonCreation completedState = (PersonCreation)
-                    unpack(stateChangedAgain.getNewState());
+            PersonCreation completedState = unpack(stateChangedAgain.getNewState(),
+                                                   PersonCreation.class);
             assertTrue(completedState.getCreated());
         }
 
@@ -241,7 +242,8 @@ class EntityHistoryTest {
 
             EntityStateChanged stateChanged = eventAccumulator.assertNextEventIs(
                     EntityStateChanged.class);
-            PersonCreation processState = (PersonCreation) unpack(stateChanged.getNewState());
+            PersonCreation processState = unpack(stateChanged.getNewState(),
+                                                 PersonCreation.class);
             assertEquals(id, processState.getId());
             assertTrue(processState.getCreated());
         }
@@ -320,7 +322,7 @@ class EntityHistoryTest {
             EventDispatchedToSubscriber event =
                     eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
             EntityHistoryId receiver = event.getReceiver();
-            PersonId actualIdValue = (PersonId) unpack(receiver.getEntityId()
+            PersonId actualIdValue = Identifier.unpack(receiver.getEntityId()
                                                                .getId());
             PersonCreated payload = (PersonCreated) getMessage(event.getPayload());
             assertEquals(id, actualIdValue);
@@ -340,7 +342,7 @@ class EntityHistoryTest {
             CommandDispatchedToHandler commandDispatchedEvent =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
-            PersonId actualIdValue = (PersonId) unpack(receiver.getEntityId()
+            PersonId actualIdValue = Identifier.unpack(receiver.getEntityId()
                                                                .getId());
             CreatePerson payload = (CreatePerson) getMessage(commandDispatchedEvent.getPayload());
             assertEquals(id, actualIdValue);

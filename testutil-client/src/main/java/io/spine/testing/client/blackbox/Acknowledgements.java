@@ -208,10 +208,12 @@ public class Acknowledgements {
     private static class RejectionFilter<T extends RejectionMessage> implements Predicate<Event> {
 
         private final TypeUrl typeUrl;
+        private final Class<T> rejectionType;
         private final RejectionCriterion<T> predicate;
 
         private RejectionFilter(Class<T> rejectionType, RejectionCriterion<T> predicate) {
             this.typeUrl = TypeUrl.of(rejectionType);
+            this.rejectionType = rejectionType;
             this.predicate = predicate;
         }
 
@@ -222,7 +224,7 @@ public class Acknowledgements {
                 return false;
             }
             @SuppressWarnings("unchecked") /* The cast is protected by the check above. */
-            T message = (T) unpacked;
+                    T message = (T) unpacked;
             return typeUrl.equals(TypeUrl.of(message)) && predicate.matches(message);
         }
     }

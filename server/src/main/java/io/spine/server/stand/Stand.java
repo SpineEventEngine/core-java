@@ -151,7 +151,6 @@ public class Stand implements AutoCloseable {
      */
     void update(EntityStateEnvelope<?, ?> envelope) {
         EntityUpdateOperation op = new EntityUpdateOperation(envelope) {
-
             @Override
             public void run() {
                 Object id = envelope.getEntityId();

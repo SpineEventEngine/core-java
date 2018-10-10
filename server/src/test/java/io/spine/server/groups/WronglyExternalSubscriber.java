@@ -18,43 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.groups;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.server.model.declare.AccessModifier;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.event.AbstractEventSubscriber;
 
-import java.lang.reflect.Method;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import static com.google.common.collect.ImmutableSet.of;
+public class WronglyExternalSubscriber extends AbstractEventSubscriber {
 
-/**
- * A signature of {@link EventSubscriberMethod}.
- *
- * @author Alex Tymchenko
- */
-public class EventSubscriberSignature extends EventAcceptingSignature<EventSubscriberMethod> {
-
-    public EventSubscriberSignature() {
-        super(Subscribe.class);
+    @Subscribe(external = true) // <-- Error here. Should be domestic.
+    public void on(Group group) {
+        fail(WronglyExternalSubscriber.class.getSimpleName() +
+                     " should not be able to receive domestic updates.");
     }
-
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PUBLIC);
-    }
-
-    @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(void.class);
-    }
-
-    @Override
-    public EventSubscriberMethod doCreate(Method method,
-                                          ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventSubscriberMethod(method, parameterSpec);
-    }
-
 }

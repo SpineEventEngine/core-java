@@ -21,26 +21,59 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.StringValue;
+import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.model.DuplicateHandlerMethodError;
+import io.spine.server.model.HandlerFieldFilterClashError;
+import io.spine.server.projection.given.EntitySubscriberProjection;
+import io.spine.server.projection.given.ProjectionTestEnv.DuplicateFilterProjection;
+import io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection;
+import io.spine.server.projection.given.ProjectionTestEnv.MalformedProjection;
+import io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
+import io.spine.string.StringifierRegistry;
+import io.spine.string.Stringifiers;
+import io.spine.system.server.DispatchedMessageId;
+import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityStateChanged;
+import io.spine.test.projection.Project;
+import io.spine.test.projection.ProjectId;
+import io.spine.test.projection.ProjectTaskNames;
+import io.spine.test.projection.Task;
+import io.spine.test.projection.TaskId;
 import io.spine.test.projection.event.Int32Imported;
 import io.spine.test.projection.event.StringImported;
+import io.spine.testing.TestValues;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.base.Time.getCurrentTime;
+import static io.spine.core.given.GivenEvent.withMessage;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_A;
+import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_B;
+import static io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection.ACCEPTED_VALUE;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.test.projection.Project.Status.STARTED;
+import static io.spine.testing.TestValues.random;
+import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.projection.ProjectionEventDispatcher.dispatch;
 import static java.lang.String.valueOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,7 +93,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Projection should")
 class ProjectionShould {
 
+    private static final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(ProjectionShould.class);
+
     private TestProjection projection;
+
+    @BeforeAll
+    static void prepare() {
+        StringifierRegistry.getInstance()
+                           .register(Stringifiers.forInteger(), Integer.TYPE);
+    }
 
     @BeforeEach
     void setUp() {
@@ -95,6 +137,54 @@ class ProjectionShould {
         assertTrue(projection.isChanged());
     }
 
+
+
+    @Test
+    @DisplayName("receive entity state updates")
+    void handleStateUpdates() {
+        ProjectId id = newId();
+        TaskId taskId = TaskId
+                .newBuilder()
+                .setId(TestValues.random(1, 1_000))
+                .build();
+        Task task = Task
+                .newBuilder()
+                .setTaskId(taskId)
+                .setTitle("test task " + random(42))
+                .build();
+        String projectName = "test project name " + randomString();
+        Project aggregateState = Project
+                .newBuilder()
+                .setId(id)
+                .setName(projectName)
+                .setStatus(STARTED)
+                .addTask(task)
+                .build();
+        EntityHistoryId historyId = EntityHistoryId
+                .newBuilder()
+                .setTypeUrl(TypeUrl.of(aggregateState)
+                                   .value())
+                .setEntityId(EntityId.newBuilder().setId(pack(id)))
+                .build();
+        EntityStateChanged systemEvent = EntityStateChanged
+                .newBuilder()
+                .setId(historyId)
+                .setNewState(pack(aggregateState))
+                .setWhen(getCurrentTime())
+                .addMessageId(DispatchedMessageId
+                                      .newBuilder()
+                                      .setEventId(EventId.newBuilder().setValue(newUuid())))
+                .build();
+        EntitySubscriberProjection projection = new EntitySubscriberProjection(id);
+        dispatch(projection, withMessage(systemEvent));
+        assertThat(projection.getState()).isEqualTo(ProjectTaskNames
+                                                            .newBuilder()
+                                                            .setProjectId(id)
+                                                            .setProjectName(projectName)
+                                                            .addTaskName(task.getTitle())
+                                                            .build());
+    }
+
     @Test
     @DisplayName("throw ISE if no handler is present for event")
     void throwIfNoHandlerPresent() {
@@ -118,7 +208,6 @@ class ProjectionShould {
     @Test
     @DisplayName("expose `play events` operation to package")
     void exposePlayingEvents() {
-        TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         StringImported stringImported = StringImported
                 .newBuilder()
                 .setValue("eins zwei drei")
@@ -137,5 +226,78 @@ class ProjectionShould {
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(stringImported.getValue()));
         assertTrue(projectionState.contains(valueOf(integerImported.getValue())));
+    }
+
+    @Test
+    @DisplayName("subscribe to events with specific field values")
+    void subscribeToEventsWithSpecificFields() {
+        ProjectId id = newId();
+        StringImported setB = StringImported
+                .newBuilder()
+                .setValue(SET_B)
+                .build();
+        StringImported setA = StringImported
+                .newBuilder()
+                .setValue(SET_A)
+                .build();
+        StringImported setText = StringImported
+                .newBuilder()
+                .setValue("Test project name")
+                .build();
+        FilteringProjection projection =
+                Given.projectionOfClass(FilteringProjection.class)
+                     .withId(id.getId())
+                     .withVersion(42)
+                     .withState(StringValue.getDefaultInstance())
+                     .build();
+        dispatch(projection, eventFactory.createEvent(setB));
+        assertThat(projection.getState().getValue()).isEqualTo("B");
+
+        dispatch(projection, eventFactory.createEvent(setA));
+        assertThat(projection.getState().getValue()).isEqualTo("A");
+
+        dispatch(projection, eventFactory.createEvent(setText));
+        assertThat(projection.getState().getValue()).isEqualTo(setText.getValue());
+    }
+
+    @Test
+    @DisplayName("fail to subscribe to the same event filtering by different fields")
+    void failToSubscribeByDifferentFields() {
+        assertThrows(HandlerFieldFilterClashError.class, MalformedProjection.Repository::new);
+    }
+
+    @Test
+    @DisplayName("not dispatch event if it does not match filters")
+    void notDeliverIfNotFits() {
+        NoDefaultOptionProjection projection =
+                Given.projectionOfClass(NoDefaultOptionProjection.class)
+                     .withId(newUuid())
+                     .build();
+        StringImported skipped = StringImported
+                .newBuilder()
+                .setValue("BBB")
+                .build();
+        dispatch(projection, eventFactory.createEvent(skipped));
+        assertThat(projection.getState()).isEqualTo(StringValue.getDefaultInstance());
+
+        StringImported dispatched = StringImported
+                .newBuilder()
+                .setValue(ACCEPTED_VALUE)
+                .build();
+        dispatch(projection, eventFactory.createEvent(dispatched));
+        assertThat(projection.getState().getValue()).isEqualTo(ACCEPTED_VALUE);
+    }
+
+    @Test
+    @DisplayName("fail on duplicate filter values")
+    void failOnDuplicateFilters() {
+        assertThrows(DuplicateHandlerMethodError.class, DuplicateFilterProjection.Repository::new);
+    }
+
+    private static ProjectId newId() {
+        return ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
     }
 }

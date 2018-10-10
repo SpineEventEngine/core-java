@@ -116,6 +116,6 @@ public class AggregateClass<A extends Aggregate>
      * Obtains event applier method for the passed class of events.
      */
     public final EventApplier getApplier(EventClass eventClass) {
-        return stateEvents.getMethod(eventClass);
+        return stateEvents.getSingleMethod(eventClass);
     }
 }

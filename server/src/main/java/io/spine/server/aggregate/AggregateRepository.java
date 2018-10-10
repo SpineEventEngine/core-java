@@ -365,7 +365,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        logError("Error reacting on event (class: %s id: %s).", envelope, exception);
+        logError("Error reacting on event (class: %s id: %s) in aggregate of type %s.",
+                 envelope, exception);
     }
 
     /**
@@ -558,11 +559,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
-    /** The EventBus to which we post events produced by aggregates. */
-    private EventBus getEventBus() {
-        return getBoundedContext().getEventBus();
-    }
-
     /** The Stand instance for sending updated aggregate states. */
     private Stand getStand() {
         return getBoundedContext().getStand();
@@ -612,10 +608,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
-    }
-
-    void onImportEvent(I id, Event event) {
-        lifecycleOf(id).onEventImported(event);
     }
 
     private void onCommandTargetSet(I id, CommandId commandId) {
