@@ -225,7 +225,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Reads multiple items from the storage and apply {@link FieldMask} to each of the results.
+     * Reads multiple active items from the storage and apply {@link FieldMask} to the results.
      *
      * @param ids       the IDs of the items to read
      * @param fieldMask the mask to apply
@@ -246,7 +246,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Reads all items from the storage and apply {@link FieldMask} to each of the results.
+     * Reads all active items from the storage and apply {@link FieldMask} to each of the results.
      *
      * @param fieldMask the {@code FieldMask} to apply
      * @return all items from this repository with the given {@code FieldMask} applied
@@ -261,9 +261,9 @@ public abstract class RecordStorage<I>
      * Reads all the records matching the given {@link EntityQuery} and applies the given
      * {@link FieldMask} to the resulting record states.
      *
-     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags}, but the entity
-     * supports them, all the resulting records are active. Otherwise the records obey
-     * the constraints provided by the query.
+     * <p>By default, the entities supporting lifecycle will be returned only if they are active. 
+     * To get inactive entities, the lifecycle attribute must be set to the 
+     * {@linkplain EntityQuery provided query}.
      *
      * @param  query     the query to execute
      * @param  fieldMask the fields to retrieve

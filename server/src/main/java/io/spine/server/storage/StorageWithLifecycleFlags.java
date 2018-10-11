@@ -34,18 +34,18 @@ public interface StorageWithLifecycleFlags<I, M extends Message, R extends ReadR
         extends Storage<I, M, R> {
 
     /**
-     * Reads the activity status for the entity with the passed ID.
+     * Reads the lifecycle status for the entity with the passed ID.
      *
      * <p>This method returns {@code Optional.empty()} if none of the
      * flags were set before.
      *
      * @param id the ID of the entity
-     * @return the aggregate activity status or {@code Optional.empty()}
+     * @return the aggregate lifecycle flags or {@code Optional.empty()}
      */
     Optional<LifecycleFlags> readLifecycleFlags(I id);
 
     /**
-     * Writes the activity status for the entity with the passed ID.
+     * Writes the lifecycle status for the entity with the passed ID.
      *
      * @param id         the ID of the entity for which to update the status
      * @param flags the status to write

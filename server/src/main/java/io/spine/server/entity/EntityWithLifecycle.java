@@ -29,17 +29,17 @@ import java.util.function.Predicate;
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
  *
- * <p>Lifecycle flags determine the activity status of an entity.
+ * <p>Lifecycle flags determine if an entity is active.
  * An entity is considered to be active if the lifecycle flags are missing.
- * If its {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted}, then an entity
- * is regarded as inactive.
+ * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted}, 
+ * then its regarded to be inactive.
  *
  * @author Alexander Yevsyukov
  */
 public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> {
 
     /**
-     * Obtains the current activity status.
+     * Obtains the current lifecycle flags.
      */
     LifecycleFlags getLifecycleFlags();
 
@@ -56,7 +56,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
     boolean isDeleted();
 
     /**
-     * Tells whether activity status of the entity changed since its initialization.
+     * Tells whether lifecycle flags of the entity changed since its initialization.
      */
     boolean lifecycleFlagsChanged();
 
