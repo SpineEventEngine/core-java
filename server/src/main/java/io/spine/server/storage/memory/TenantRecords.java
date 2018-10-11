@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
@@ -45,7 +44,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsActive;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
-import static java.util.Collections.emptyIterator;
 
 /**
  * The memory-based storage for {@link EntityRecord} that represents
@@ -88,23 +86,38 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     }
 
     Iterator<EntityRecord> readAllRecords() {
-        return activeRecords().values()
-                              .stream()
-                              .map(UNPACKER)
-                              .iterator();
+        return activeRecords()
+                .values()
+                .stream()
+                .map(UNPACKER)
+                .iterator();
+    }
+
+    Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
+        if (fieldMask.getPathsCount() == 0) {
+            return readAllRecords();
+        }
+
+        return activeRecords()
+                .values()
+                .stream()
+                .map(UNPACKER)
+                .map(new FieldMaskApplier(fieldMask))
+                .iterator();
     }
 
     Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        return findRecords(query).map(UNPACKER)
-                                 .map(new FieldMaskApplier(fieldMask))
-                                 .iterator();
+        return findRecords(query)
+                .map(UNPACKER)
+                .map(new FieldMaskApplier(fieldMask))
+                .iterator();
     }
 
     private Stream<EntityRecordWithColumns> findRecords(EntityQuery<I> query) {
-        Map<I, EntityRecordWithColumns> filtered = filterRecords(query);
+        Map<I, EntityRecordWithColumns> records = filterRecords(query);
         QueryParameters parameters = query.getParameters();
-        Stream<EntityRecordWithColumns> stream = filtered.values()
-                                                         .stream();
+        Stream<EntityRecordWithColumns> stream = records.values()
+                                                        .stream();
         if (parameters.ordered()) {
             stream = stream.sorted(orderedBy(parameters.orderBy()));
         }
@@ -123,7 +136,6 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return filterValues(records, matcher::test);
     }
 
-    @SuppressWarnings("CheckReturnValue") // calling builder
     @Nullable
     EntityRecord findAndApplyFieldMask(I targetId, FieldMask fieldMask) {
         EntityRecordWithColumns recordWithColumns = activeRecords().get(targetId);
@@ -139,38 +151,12 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return maskedRecord;
     }
 
-    Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        if (fieldMask.getPathsList()
-                     .isEmpty()) {
-            return readAllRecords();
-        }
-
-        if (isEmpty()) {
-            return emptyIterator();
-        }
-
-        return activeRecords()
-                .values()
-                .stream()
-                .map(EntityRecordWithColumns::getRecord)
-                .map(EntityRecord::getState)
-                .map(state -> maskAny(state, fieldMask))
-                .map(TenantRecords::newEntityRecord)
-                .iterator();
-    }
-
     private static Any maskAny(Any message, FieldMask mask) {
         TypeUrl type = TypeUrl.parse(message.getTypeUrl());
         Message stateMessage = unpack(message);
         Message maskedMessage = applyMask(mask, stateMessage, type);
         Any result = pack(maskedMessage);
         return result;
-    }
-
-    private static EntityRecord newEntityRecord(Any state) {
-        return EntityRecordVBuilder.newBuilder()
-                                   .setState(state)
-                                   .build();
     }
 
     @Override
