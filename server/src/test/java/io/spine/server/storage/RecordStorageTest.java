@@ -333,7 +333,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityQuery<ProjectId> query =
                 from(filters, OrderBy.getDefaultInstance(),
                      Pagination.getDefaultInstance(), storage)
-                        .withLifecycleFlags(storage);
+                        .withActiveLifecycle(storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(stayingRecord, read);
     }
@@ -425,7 +425,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         RecordStorage<ProjectId> storage = getStorage();
         EntityQuery<ProjectId> query =
                 from(filters, OrderBy.getDefaultInstance(),
-                     Pagination.getDefaultInstance(), storage).withLifecycleFlags(storage);
+                     Pagination.getDefaultInstance(), storage).withActiveLifecycle(storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         List<EntityRecord> readRecords = newArrayList(read);
         assertEquals(1, readRecords.size());

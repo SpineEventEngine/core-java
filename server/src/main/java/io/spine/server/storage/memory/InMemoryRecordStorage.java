@@ -111,7 +111,10 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        return getStorage().readAllRecords(query, fieldMask);
+        EntityQuery<I> queryWithLifecycle = query.isLifecycleAttributesSet()
+                                            ? query
+                                            : query.withActiveLifecycle(this);
+        return getStorage().readAllRecords(queryWithLifecycle, fieldMask);
     }
 
     private TenantRecords<I> getStorage() {

@@ -133,8 +133,7 @@ public final class EntityQuery<I> implements Serializable {
 
     /**
      * Creates a new instance of {@code EntityQuery} with all the parameters from current instance
-     * and the default values of the {@link io.spine.server.entity.LifecycleFlags LifecycleFlags}
-     * expected.
+     * and the default values of the {@link io.spine.server.entity.LifecycleFlags LifecycleFlags}.
      *
      * <p>The precondition for this method is that current instance
      * {@linkplain #isLifecycleAttributesSet() does not specify the values}.
@@ -144,7 +143,7 @@ public final class EntityQuery<I> implements Serializable {
      * @return new instance of {@code EntityQuery}
      */
     @Internal
-    public EntityQuery<I> withLifecycleFlags(RecordStorage<I> storage) {
+    public EntityQuery<I> withActiveLifecycle(RecordStorage<I> storage) {
         checkState(canAppendLifecycleFlags(),
                    "The query overrides Lifecycle Flags default values.");
         Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
