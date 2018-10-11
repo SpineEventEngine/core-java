@@ -128,15 +128,19 @@ public final class ModelVerifierPlugin extends SpinePlugin {
             if (project.getExtensions().findByName(pluginExtensionName) != null) {
                 String path = Extension.getMainDescriptorSetPath(project);
                 File descriptorFile = new File(path);
-                if (descriptorFile.exists()) {
-                    _debug("Extending known types with types from {}.", descriptorFile);
-                    MoreKnownTypes.extendWith(descriptorFile);
-                } else {
-                    _warn("Descriptor file {} does not exist.", descriptorFile);
-                }
+                tryExtend(descriptorFile);
             } else {
                 _warn("{} plugin extension is not found. Apply the Spine model compiler plugin.",
                       pluginExtensionName);
+            }
+        }
+
+        private void tryExtend(File descriptorFile) {
+            if (descriptorFile.exists()) {
+                _debug("Extending known types with types from {}.", descriptorFile);
+                MoreKnownTypes.extendWith(descriptorFile);
+            } else {
+                _warn("Descriptor file {} does not exist.", descriptorFile);
             }
         }
 
