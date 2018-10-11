@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import io.spine.type.MessageClass;
+import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 /**
@@ -71,7 +72,8 @@ public final class Handlers {
     }
 
     private static String typeUrl(MessageClass<?> messageClass) {
-        TypeUrl typeUrl = TypeUrl.of(messageClass.value());
+        TypeName typeName = messageClass.getTypeName();
+        TypeUrl typeUrl = typeName.toUrl();
         return typeUrl.value();
     }
 }
