@@ -55,9 +55,9 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     private LifecycleFlags lifecycleFlags;
 
     /**
-     * If {@code true} the visibility of the entity was changed since initialization.
+     * If {@code true} the activeness of the entity was changed since initialization.
      *
-     * <p>If so, the visibility status of the entity should be updated when
+     * <p>If so, the activity status of the entity should be updated when
      * {@linkplain Repository#store(Entity) storing}.
      */
     private volatile boolean lifecycleFlagsChanged;

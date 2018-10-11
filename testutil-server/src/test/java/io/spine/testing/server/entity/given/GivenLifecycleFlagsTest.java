@@ -40,14 +40,14 @@ class GivenLifecycleFlagsTest {
     }
 
     @Test
-    @DisplayName("create `archived` visibility")
-    void createArchivedVisibility() {
+    @DisplayName("create `archived` lifecycle flag")
+    void createArchived() {
         assertTrue(GivenLifecycleFlags.archived().getArchived());
     }
 
     @Test
-    @DisplayName("create `deleted` visibility")
-    void createDeletedVisibility() {
+    @DisplayName("create `deleted` lifecycle flag")
+    void createDeleted() {
         assertTrue(GivenLifecycleFlags.deleted().getDeleted());
     }
 }

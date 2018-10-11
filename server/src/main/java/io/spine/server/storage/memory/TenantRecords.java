@@ -42,7 +42,7 @@ import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsVisible;
+import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsActive;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
 import static java.util.Collections.emptyIterator;
@@ -57,14 +57,14 @@ import static java.util.Collections.emptyIterator;
 class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
-    private final Map<I, EntityRecordWithColumns> visibleRecords =
-            filterValues(records, isRecordWithColumnsVisible()::test);
+    private final Map<I, EntityRecordWithColumns> activeRecords =
+            filterValues(records, isRecordWithColumnsActive()::test);
     private static final EntityRecordUnpacker UNPACKER = EntityRecordUnpacker.INSTANCE;
 
     @Override
     public Iterator<I> index() {
-        Iterator<I> result = visibleRecords.keySet()
-                                           .iterator();
+        Iterator<I> result = activeRecords.keySet()
+                                          .iterator();
         return result;
     }
 
@@ -83,15 +83,15 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return records.remove(id) != null;
     }
 
-    private Map<I, EntityRecordWithColumns> visibleRecords() {
-        return visibleRecords;
+    private Map<I, EntityRecordWithColumns> activeRecords() {
+        return activeRecords;
     }
 
     Iterator<EntityRecord> readAllRecords() {
-        return visibleRecords().values()
-                               .stream()
-                               .map(UNPACKER)
-                               .iterator();
+        return activeRecords().values()
+                              .stream()
+                              .map(UNPACKER)
+                              .iterator();
     }
 
     Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
@@ -125,28 +125,18 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Nullable
-    EntityRecord findAndApplyFieldMask(I givenId, FieldMask fieldMask) {
-        EntityRecord result = null;
-        for (I recordId : visibleRecords.keySet()) {
-            if (recordId.equals(givenId)) {
-                Optional<EntityRecordWithColumns> record = get(recordId);
-                if (!record.isPresent()) {
-                    continue;
-                }
-                EntityRecord.Builder matchingRecord = record.get()
-                                                            .getRecord()
-                                                            .toBuilder();
-                Any state = matchingRecord.getState();
-                TypeUrl typeUrl = TypeUrl.parse(state.getTypeUrl());
-                Message wholeState = unpack(state);
-                Message maskedState = applyMask(fieldMask, wholeState, typeUrl);
-                Any processed = pack(maskedState);
-
-                matchingRecord.setState(processed);
-                result = matchingRecord.build();
-            }
+    EntityRecord findAndApplyFieldMask(I targetId, FieldMask fieldMask) {
+        EntityRecordWithColumns recordWithColumns = activeRecords().get(targetId);
+        if (recordWithColumns == null) {
+            return null;
         }
-        return result;
+        EntityRecord record = recordWithColumns.getRecord();
+        Any recordState = record.getState();
+        Any maskedState = maskAny(recordState, fieldMask);
+        EntityRecord maskedRecord = record.toBuilder()
+                                          .setState(maskedState)
+                                          .build();
+        return maskedRecord;
     }
 
     Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
@@ -159,27 +149,33 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             return emptyIterator();
         }
 
-        return visibleRecords()
+        return activeRecords()
                 .values()
                 .stream()
-                .map(storageEntry -> {
-                    EntityRecord rawRecord = storageEntry.getRecord();
-                    Any recordState = rawRecord.getState();
-                    TypeUrl type = TypeUrl.parse(recordState.getTypeUrl());
-                    Message stateAsMessage = unpack(recordState);
-                    Message processedState = applyMask(fieldMask, stateAsMessage, type);
-                    Any packedState = pack(processedState);
-                    return EntityRecordVBuilder
-                            .newBuilder()
-                            .setState(packedState)
-                            .build();
-                })
+                .map(EntityRecordWithColumns::getRecord)
+                .map(EntityRecord::getState)
+                .map(state -> maskAny(state, fieldMask))
+                .map(TenantRecords::newEntityRecord)
                 .iterator();
+    }
+
+    private static Any maskAny(Any message, FieldMask mask) {
+        TypeUrl type = TypeUrl.parse(message.getTypeUrl());
+        Message stateMessage = unpack(message);
+        Message maskedMessage = applyMask(mask, stateMessage, type);
+        Any result = pack(maskedMessage);
+        return result;
+    }
+
+    private static EntityRecord newEntityRecord(Any state) {
+        return EntityRecordVBuilder.newBuilder()
+                                   .setState(state)
+                                   .build();
     }
 
     @Override
     public boolean isEmpty() {
-        return visibleRecords.isEmpty();
+        return activeRecords.isEmpty();
     }
 
     /**

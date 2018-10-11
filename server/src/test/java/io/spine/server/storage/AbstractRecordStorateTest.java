@@ -177,7 +177,7 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
     }
 
     @Test
-    @DisplayName("fail to write visibility to non-existing record")
+    @DisplayName("fail to write lifecycle flags to non-existing record")
     void notWriteStatusToNonExistent() {
         I id = newId();
         RecordStorage<I> storage = getStorage();
@@ -338,8 +338,8 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
     }
 
     @Nested
-    @DisplayName("return visibility")
-    class ReturnVisibility {
+    @DisplayName("return Lifecycle Flags")
+    class ReturnLifecycleFlags {
 
         @Test
         @DisplayName("for missing record")
@@ -366,7 +366,7 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
         @Test
-        @DisplayName("for record with updated visibility")
+        @DisplayName("for record with updated lifecycle flags")
         void forUpdatedRecord() {
             I id = newId();
             EntityRecord record = newStorageRecord(id);

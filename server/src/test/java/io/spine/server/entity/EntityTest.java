@@ -337,8 +337,8 @@ class EntityTest {
     }
 
     @Nested
-    @DisplayName("have visibility status such that")
-    class HaveVisibilityStatus {
+    @DisplayName("have lifecycle flags status such that")
+    class HaveLifecycleFlagsStatus {
 
         @Test
         @DisplayName("entity has default status after construction")

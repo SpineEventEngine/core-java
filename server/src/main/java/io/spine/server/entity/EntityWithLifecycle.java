@@ -29,12 +29,17 @@ import java.util.function.Predicate;
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
  *
+ * <p>Lifecycle flags determine the activity status of an entity.
+ * An entity is considered to be active if the lifecycle flags are missing.
+ * If its {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted}, then an entity
+ * is regarded as inactive.
+ *
  * @author Alexander Yevsyukov
  */
 public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> {
 
     /**
-     * Obtains the current visibility status.
+     * Obtains the current activity status.
      */
     LifecycleFlags getLifecycleFlags();
 
@@ -51,7 +56,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
     boolean isDeleted();
 
     /**
-     * Tells whether visibility of the entity changed since its initialization.
+     * Tells whether activity status of the entity changed since its initialization.
      */
     boolean lifecycleFlagsChanged();
 
@@ -60,27 +65,27 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
      */
     class Predicates {
 
-        private static final Predicate<LifecycleFlags> isEntityVisible =
+        private static final Predicate<LifecycleFlags> isEntityActive =
                 input -> input == null ||
                         !(input.getArchived() || input.getDeleted());
 
-        private static final Predicate<EntityRecord> isRecordVisible =
+        private static final Predicate<EntityRecord> isRecordActive =
                 input -> {
                     if (input == null) {
                         return true;
                     }
                     LifecycleFlags flags = input.getLifecycleFlags();
-                    boolean result = isEntityVisible.test(flags);
+                    boolean result = isEntityActive.test(flags);
                     return result;
                 };
 
-        private static final Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible =
+        private static final Predicate<EntityRecordWithColumns> isRecordWithColumnsActive =
                 input -> {
                     if (input == null) {
                         return false;
                     }
                     EntityRecord record = input.getRecord();
-                    return isRecordVisible().test(record);
+                    return isRecordActive().test(record);
                 };
 
         private Predicates() {
@@ -91,30 +96,37 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
          * Obtains the predicate for checking if an entity has
          * any of the {@link LifecycleFlags} set.
          *
-         * <p>If so, an entity becomes "invisible" to load methods of a repository.
+         * <p>If so, an entity becomes inactive to load methods of a repository.
          * Entities with flags set must be treated by special {@linkplain RepositoryView views}
          * of a repository.
          *
          * @return the filter predicate
          * @see LifecycleFlags
          */
-        public static Predicate<LifecycleFlags> isEntityVisible() {
-            return isEntityVisible;
+        public static Predicate<LifecycleFlags> isEntityActive() {
+            return isEntityActive;
         }
 
         /**
          * Obtains the predicate for checking if an entity record has any
          * of the {@link LifecycleFlags} set.
          *
-         * @return the predicate that filters "invisible" {@code EntityStorageRecord}s
+         * @return the predicate that filters inactive {@link EntityRecord}s
          * @see EntityRecord#getLifecycleFlags()
          */
-        public static Predicate<EntityRecord> isRecordVisible() {
-            return isRecordVisible;
+        public static Predicate<EntityRecord> isRecordActive() {
+            return isRecordActive;
         }
 
-        public static Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible() {
-            return isRecordWithColumnsVisible;
+        /**
+         * Obtains the predicate for checking if an {@link EntityRecordWithColumns entity record
+         * with columns} has any of the {@link LifecycleFlags} set.
+         *
+         * @return the predicate that filters inactive {@link EntityRecordWithColumns}s
+         * @see EntityRecord#getLifecycleFlags()
+         */
+        public static Predicate<EntityRecordWithColumns> isRecordWithColumnsActive() {
+            return isRecordWithColumnsActive;
         }
     }
 }

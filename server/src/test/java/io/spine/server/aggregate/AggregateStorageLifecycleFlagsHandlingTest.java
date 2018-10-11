@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Dmytro Dashenkov.
  */
-public abstract class AggregateStorageVisibilityHandlingTest {
+public abstract class AggregateStorageLifecycleFlagsHandlingTest {
 
     protected abstract AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass);
