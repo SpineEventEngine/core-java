@@ -27,7 +27,7 @@ import io.spine.model.assemble.AssignLookup;
 import io.spine.tools.gradle.SpinePlugin;
 import io.spine.tools.gradle.compiler.Extension;
 import io.spine.tools.gradle.compiler.ModelCompilerPlugin;
-import io.spine.typehack.MoreKnownTypes;
+import io.spine.tools.type.MoreKnownTypes;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
