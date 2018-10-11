@@ -22,8 +22,10 @@ package io.spine.server.route;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.system.server.EntityStateChanged;
 
 import java.util.Optional;
 import java.util.Set;
@@ -31,8 +33,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A routing schema used by an {@link io.spine.server.event.EventDispatcher EventDispatcher} for
- * delivering events.
+ * A routing schema used to deliver events.
  *
  * <p>A routing schema consists of a default route and custom routes per event class.
  * When calculating a set of event targets, {@code EventRouting} would see if there is
@@ -40,10 +41,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@linkplain EventRoute#apply(Message, Message) applied}.
  *
  * @param <I> the type of the entity IDs to which events are routed
- * @author Alexander Yevsyukov
  */
-public final class EventRouting<I> extends MessageRouting<EventContext, EventClass, Set<I>>
-        implements EventRoute<I, Message> {
+public final class EventRouting<I>
+        extends MessageRouting<EventMessage, EventContext, EventClass, Set<I>>
+        implements EventRoute<I, EventMessage> {
 
     private static final long serialVersionUID = 0L;
 
@@ -53,7 +54,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @param defaultRoute
      *        the route to use if a custom one is not {@linkplain #route(Class, EventRoute) set}
      */
-    private EventRouting(EventRoute<I, Message> defaultRoute) {
+    private EventRouting(EventRoute<I, EventMessage> defaultRoute) {
         super(defaultRoute);
     }
 
@@ -65,7 +66,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @return new routing instance
      */
     @CanIgnoreReturnValue
-    public static <I> EventRouting<I> withDefault(EventRoute<I, Message> defaultRoute) {
+    public static <I> EventRouting<I> withDefault(EventRoute<I, EventMessage> defaultRoute) {
         checkNotNull(defaultRoute);
         return new EventRouting<>(defaultRoute);
     }
@@ -76,8 +77,8 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * <p>Overrides for return type covariance.
      */
     @Override
-    public final EventRoute<I, Message> getDefault() {
-        return (EventRoute<I, Message>) super.getDefault();
+    public final EventRoute<I, EventMessage> getDefault() {
+        return (EventRoute<I, EventMessage>) super.getDefault();
     }
 
     /**
@@ -87,7 +88,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @return {@code this} to allow chained calls when configuring the routing
      */
     @CanIgnoreReturnValue
-    public EventRouting<I> replaceDefault(EventRoute<I, Message> newDefault) {
+    public EventRouting<I> replaceDefault(EventRoute<I, EventMessage> newDefault) {
         return (EventRouting<I>) super.replaceDefault(newDefault);
     }
 
@@ -96,27 +97,52 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     * <li>An an event message should be matched to more than one entity (e.g. several projections
-     * updated in response to one event).
-     * <li>The type of an event producer ID (stored in the event context) differs from the type
-     * of entity identifiers ({@code <I>}.
+     *     <li>An an event message should be matched to more than one entity (e.g. several
+     *         projections updated in response to one event).
+     *     <li>The type of an event producer ID (stored in the event context) differs from the type
+     *         of entity identifiers ({@code <I>}.
      * </ul>
      *
      * <p>If there is no specific route for the class of the passed event, the routing will use
      * the {@linkplain #getDefault() default route}.
      *
-     * @param eventClass the class of events to route
-     * @param via        the instance of the route to be used
-     * @param <E>        the type of the event message
+     * @param eventClass
+     *         the class of events to route
+     * @param via
+     *         the instance of the route to be used
+     * @param <E>
+     *         the type of the event message
      * @return {@code this} to allow chained calls when configuring the routing
-     * @throws IllegalStateException if the route for this event class is already set
+     * @throws IllegalStateException
+     *         if the route for this event class is already set
      */
     @CanIgnoreReturnValue
-    public <E extends Message> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
+    public <E extends EventMessage> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        Route<Message, EventContext, Set<I>> casted = (Route<Message, EventContext, Set<I>>) via;
-        return (EventRouting<I>) doRoute(eventClass, casted);
+        Route<EventMessage, EventContext, Set<I>> casted =
+                (Route<EventMessage, EventContext, Set<I>>) via;
+        doRoute(eventClass, casted);
+        return this;
+    }
+
+    /**
+     * Sets a custom routing schema for entity state updates.
+     *
+     * <p>Setting a routing for state updates is equivalent to setting a route for events of type
+     * {@link EntityStateChanged io.spine.system.server.EntityStateChanged}. It is illegal to do
+     * both things simultaneously.
+     *
+     * @param routing
+     *         the routing schema for entity state updates
+     * @return {@code this} to allow chained calls when configuring the routing
+     * @throws IllegalStateException
+     *         if a route for {@link EntityStateChanged} is already set
+     */
+    @CanIgnoreReturnValue
+    public EventRouting<I> routeEntityStateUpdates(StateUpdateRouting<I> routing) {
+        checkNotNull(routing);
+        return route(EntityStateChanged.class, routing.eventRoute());
     }
 
     /**
@@ -126,8 +152,8 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @param <M>        the type of the event message
      * @return optionally available route
      */
-    public <M extends Message> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
-        Optional<? extends Route<Message, EventContext, Set<I>>> optional = doGet(eventClass);
+    public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
+        Optional<? extends Route<EventMessage, EventContext, Set<I>>> optional = doGet(eventClass);
         if (optional.isPresent()) {
             @SuppressWarnings("unchecked") // Cast to external API.
             EventRoute<I, M> route = (EventRoute<I, M>) optional.get();
@@ -140,7 +166,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * Creates {@link EventClass} by the passed class value.
      */
     @Override
-    EventClass toMessageClass(Class<? extends Message> classOfEvents) {
+    EventClass toMessageClass(Class<? extends EventMessage> classOfEvents) {
         return EventClass.from(classOfEvents);
     }
 

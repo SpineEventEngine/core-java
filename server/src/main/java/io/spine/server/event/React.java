@@ -33,14 +33,11 @@ import java.lang.annotation.Target;
  * <p>A reacting method <strong>must:</strong>
  * <ul>
  *     <li>be annotated with {@link React @React};
- *
  *     <li>have package-private visibility;
- *
- *     <li>accept an event message (derived from {@link com.google.protobuf.Message
- *     Message}), as the first parameter;
- *
- *     <li>return an event message derived from {@link com.google.protobuf.Message Message}
- *     <strong>or</strong> several event messages returned as a {@link java.util.List List}.
+ *     <li>accept an event message (derived from {@link io.spine.base.EventMessage
+ *         EventMessage}), as the first parameter;
+ *     <li>return an event message derived from {@link io.spine.base.EventMessage Message}
+ *         <strong>or</strong> several event messages returned as an {@code Iterable}.
  * </ul>
  *
  * <p>If the annotation is applied to a method which does not satisfy any of these requirements,

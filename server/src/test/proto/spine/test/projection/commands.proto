@@ -32,6 +32,7 @@ import "spine/test/projection/project.proto";
 
 message PrjCreateProject {
     ProjectId project_id = 1;
+    string name = 2;
 }
 
 message PrjAddTask {

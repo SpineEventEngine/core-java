@@ -20,19 +20,20 @@
 
 package io.spine.server.model.declare;
 
-import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
-import io.spine.server.model.declare.given.MethodParamsTestEnv.DeleteEntityParamSpec;
-import io.spine.system.server.DeleteEntity;
+import io.spine.server.model.declare.given.MethodParamsTestEnv.ScheduleCommandParamSpec;
+import io.spine.system.server.ScheduleCommand;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
@@ -40,11 +41,8 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 import static io.spine.server.model.declare.MethodParams.findMatching;
 import static io.spine.server.model.declare.MethodParams.isFirstParamCommand;
 import static io.spine.server.model.declare.given.MethodParamsTestEnv.fiveParamMethodStringAnyEmptyInt32UserId;
-import static io.spine.server.model.declare.given.MethodParamsTestEnv.singleParamDeleteEntity;
-import static io.spine.server.model.declare.given.MethodParamsTestEnv.twoParamDeleteEntityAndCtx;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.server.model.declare.given.MethodParamsTestEnv.singleParamCommand;
+import static io.spine.server.model.declare.given.MethodParamsTestEnv.twoParamCommandAndCtx;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,42 +52,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings("WeakerAccess")   // JUnit test methods are `public` as per the library contract
 @DisplayName("`MethodParams` utility should ")
-public class MethodParamsTest {
+public class MethodParamsTest extends UtilityClassTest<MethodParams> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveParameterlessCtor() {
-        assertHasPrivateParameterlessCtor(MethodParams.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(MethodParams.class);
+    private MethodParamsTest() {
+        super(MethodParams.class);
     }
 
     @Test
     @DisplayName("detect that a method has exactly one parameter of an expected type")
     public void detectSingleParam() {
-        assertTrue(consistsOfSingle(singleParamDeleteEntity().getParameterTypes(),
-                                    DeleteEntity.class));
-        assertFalse(consistsOfSingle(twoParamDeleteEntityAndCtx().getParameterTypes(),
-                                     DeleteEntity.class));
+        assertTrue(consistsOfSingle(singleParamCommand().getParameterTypes(),
+                                    ScheduleCommand.class));
+        assertFalse(consistsOfSingle(twoParamCommandAndCtx().getParameterTypes(),
+                                     ScheduleCommand.class));
         assertFalse(consistsOfSingle(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
-                                     DeleteEntity.class));
+                                     ScheduleCommand.class));
 
     }
 
     @Test
     @DisplayName("detect that a method has exactly two parameters of expected types")
     public void detectTwoParams() {
-        assertTrue(consistsOfTwo(twoParamDeleteEntityAndCtx().getParameterTypes(),
-                                 DeleteEntity.class, CommandContext.class));
-        assertFalse(consistsOfTwo(singleParamDeleteEntity().getParameterTypes(),
-                                  DeleteEntity.class, CommandContext.class));
+        assertTrue(consistsOfTwo(twoParamCommandAndCtx().getParameterTypes(),
+                                 ScheduleCommand.class, CommandContext.class));
+        assertFalse(consistsOfTwo(singleParamCommand().getParameterTypes(),
+                                  ScheduleCommand.class, CommandContext.class));
         assertFalse(consistsOfTwo(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
-                                  DeleteEntity.class, CommandContext.class));
+                                  ScheduleCommand.class, CommandContext.class));
 
     }
 
@@ -99,10 +88,10 @@ public class MethodParamsTest {
         assertTrue(consistsOfTypes(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
                                    of(String.class, Any.class,
                                       Empty.class, Int32Value.class, UserId.class)));
-        assertFalse(consistsOfTypes(singleParamDeleteEntity().getParameterTypes(),
+        assertFalse(consistsOfTypes(singleParamCommand().getParameterTypes(),
                                     of(String.class, Any.class,
                                        Empty.class, Int32Value.class, UserId.class)));
-        assertFalse(consistsOfTypes(twoParamDeleteEntityAndCtx().getParameterTypes(),
+        assertFalse(consistsOfTypes(twoParamCommandAndCtx().getParameterTypes(),
                                     of(String.class, Any.class,
                                        Empty.class, Int32Value.class, UserId.class)));
 
@@ -111,25 +100,25 @@ public class MethodParamsTest {
     @Test
     @DisplayName("find a matching signature for the method among the predefined set of values")
     public void findMatchingSignature() {
-        Optional<DeleteEntityParamSpec> matching = findMatching(twoParamDeleteEntityAndCtx(),
-                                                                DeleteEntityParamSpec.class);
+        Optional<ScheduleCommandParamSpec> matching =
+                findMatching(twoParamCommandAndCtx(), copyOf(ScheduleCommandParamSpec.values()));
         assertTrue(matching.isPresent());
-        assertEquals(DeleteEntityParamSpec.MESSAGE_AND_CONTEXT, matching.get());
+        assertEquals(ScheduleCommandParamSpec.MESSAGE_AND_CONTEXT, matching.get());
     }
 
     @Test
     @DisplayName("return `Optional.empty()` if there is no matching signature")
     public void returnOptionalEmptyIfNoSignatureMatch() {
-        Optional<DeleteEntityParamSpec> matching = findMatching(singleParamDeleteEntity(),
-                                                                DeleteEntityParamSpec.class);
+        Optional<ScheduleCommandParamSpec> matching =
+                findMatching(singleParamCommand(), copyOf(ScheduleCommandParamSpec.values()));
         assertTrue(!matching.isPresent());
     }
 
     @Test
     @DisplayName("detect if the first method parameter is a Command message")
     public void detectFirstCommandParameter() {
-        assertTrue(isFirstParamCommand(singleParamDeleteEntity()));
-        assertTrue(isFirstParamCommand(twoParamDeleteEntityAndCtx()));
+        assertTrue(isFirstParamCommand(singleParamCommand()));
+        assertTrue(isFirstParamCommand(twoParamCommandAndCtx()));
         assertFalse(isFirstParamCommand(fiveParamMethodStringAnyEmptyInt32UserId()));
     }
 }

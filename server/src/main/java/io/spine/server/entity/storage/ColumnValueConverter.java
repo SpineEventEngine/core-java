@@ -26,8 +26,6 @@ import java.io.Serializable;
 
 /**
  * An interface for converting the {@link EntityColumn} values to their persisted type.
- *
- * @author Dmytro Kuzmin
  */
 interface ColumnValueConverter {
 

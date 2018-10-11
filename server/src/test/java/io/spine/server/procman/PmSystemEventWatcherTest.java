@@ -23,8 +23,8 @@ package io.spine.server.procman;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -258,7 +258,7 @@ class PmSystemEventWatcherTest {
         }
 
         @SuppressWarnings("ResultOfMethodCallIgnored")
-        private void dispatch(Message eventMessage, EntityHistoryId producer) {
+        private void dispatch(EventMessage eventMessage, EntityHistoryId producer) {
             TestEventFactory eventFactory =
                     TestEventFactory.newInstance(producer, PmSystemEventWatcher.class);
             Event event = eventFactory.createEvent(eventMessage);

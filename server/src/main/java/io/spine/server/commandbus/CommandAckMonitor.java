@@ -21,8 +21,8 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.CommandId;
@@ -85,7 +85,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
     private void postSystemEvent(Ack ack) {
         Status status = ack.getStatus();
         CommandId commandId = commandIdFrom(ack);
-        Message systemEvent = systemEventFor(status, commandId);
+        EventMessage systemEvent = systemEventFor(status, commandId);
         gateway.postEvent(systemEvent);
     }
 
@@ -95,7 +95,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Default values.
-    private static Message systemEventFor(Status status, CommandId commandId) {
+    private static EventMessage systemEventFor(Status status, CommandId commandId) {
         switch (status.getStatusCase()) {
             case OK:
                 return CommandAcknowledged.newBuilder()

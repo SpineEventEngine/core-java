@@ -23,6 +23,7 @@ package io.spine.server.projection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
@@ -41,11 +42,11 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.projection.model.ProjectionClass;
-import io.spine.server.route.EventRoute;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -60,6 +61,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.server.route.EventRoute.byProducerId;
+import static io.spine.server.route.EventRoute.ignoreEntityUpdates;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -86,7 +89,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(EventRoute.byProducerId());
+        super(ignoreEntityUpdates(byProducerId()));
     }
 
     @VisibleForTesting
@@ -258,6 +261,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projectionClass().getExternalEventClasses();
     }
 
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(envelope);
+        return subscriber.isPresent();
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -362,7 +372,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
             checkNotNull(envelope);
             checkNotNull(exception);
-            logError("Error dispatching external event to projection (class: %s, id: %s)",
+            logError("Error dispatching external event (class: %s, id: %s)" +
+                             " to projection of type %s.",
                      envelope, exception);
         }
     }

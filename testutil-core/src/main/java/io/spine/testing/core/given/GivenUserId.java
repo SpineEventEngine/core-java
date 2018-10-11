@@ -27,18 +27,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Factory methods for creating test values of {@link io.spine.core.UserId UserId}.
- *
- * @author Alexander Yevsyukov
  */
-public class GivenUserId {
+public final class GivenUserId {
 
     /**
      * The prefix for generated user identifiers.
      */
     private static final String USER_PREFIX = "user-";
 
+    /** Prevent instantiation of this utility class. */
     private GivenUserId() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,7 +56,7 @@ import static java.lang.String.format;
  * <p>An entity can inherit the columns from its parent classes and interfaces.
  * In this case, column getter is annotated only once when its first declared.
  *
- * <h2>Column names</h2>
+ * <h1>Column names</h1>
  *
  * <p>A column can have different names for storing and for querying.
  *
@@ -120,7 +121,7 @@ import static java.lang.String.format;
  *      }
  * </pre>
  *
- * <h2>Type policy</h2>
+ * <h1>Type policy</h1>
  *
  * <p>An entity column can be of any type. Most common types are already supported if an existing 
  * implementation of the {@link io.spine.server.storage.Storage Spine Storage} is used.
@@ -133,7 +134,7 @@ import static java.lang.String.format;
  * <p>Note that the column type must either be a primitive or implement {@link Serializable}.
  * To order the query results on a column value it is also required to implement {@link Comparable}.
  *
- * <h2>Nullability</h2>
+ * <h1>Nullability</h1>
  *
  * <p>A column may contain {@code null} value if the getter which declares it is annotated as
  * {@link javax.annotation.Nullable javax.annotation.Nullable}.
@@ -159,9 +160,9 @@ import static java.lang.String.format;
  * <p>This class is effectively {@code final} since it has a single {@code private} constructor.
  * Though the modifier "{@code final}" is absent to make it possible to create mocks for testing.
  *
- * @author Dmytro Dashenkov
  * @see ColumnType
  */
+@Immutable
 public class EntityColumn implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -182,6 +183,7 @@ public class EntityColumn implements Serializable {
      * <p>The only place where this field is updated, except the constructor, is
      * {@link #readObject(ObjectInputStream)} method.
      */
+    @SuppressWarnings("Immutable") // See Javadoc.
     private /*final*/ transient Method getter;
 
     private final Class<?> entityType;
@@ -203,6 +205,7 @@ public class EntityColumn implements Serializable {
      * <p>The only place where this field is updated, except the constructor, is
      * {@link #readObject(ObjectInputStream)} method.
      */
+    @SuppressWarnings("Immutable") // See Javadoc.
     private transient ColumnValueConverter valueConverter;
 
     private EntityColumn(Method getter,
@@ -334,25 +337,24 @@ public class EntityColumn implements Serializable {
     /**
      * Converts the column value into the value for persistence in the data storage.
      *
-     * <p>This method can be used to transform the value obtained through the {@link EntityColumn}
+     * <p>This method can be used to transform the value obtained through the {@code EntityColumn}
      * getter into the corresponding value used for persistence in the data storage.
      *
-     * <p>The value type should be the same as the one obtained through the {@link #getType()}. The
-     * output value type will be the same as {@link #getPersistedType()}.
+     * <p>The value type should be the same as the one obtained through the {@link #getType()}.
+     * The output value type will be the same as {@link #getPersistedType()}.
      *
      * <p>As the column value may be {@linkplain #isNullable() nullable}, and all {@code null}
      * values are persisted in the data storage as {@code null}, i.e. without any conversion, for
      * the {@code null} input argument this method will always return {@code null}.
      *
-     * <p>The method is accessible outside of the {@link EntityColumn} class to enable the proper
+     * <p>The method is accessible outside of the {@code EntityColumn} class to enable the proper
      * {@link io.spine.client.ColumnFilter} conversion for the {@link Enumerated} column values.
      *
      * @param columnValue
      *         the column value to convert
      * @return the column value converted to the form used for persistence in the data storage
      * @throws IllegalArgumentException
-     *         if the value type is not equal to the {@linkplain #getType()
-     *         entity column type}
+     *         if the value type is not equal to the {@linkplain #getType() entity column type}
      */
     public @Nullable Serializable toPersistedValue(@Nullable Object columnValue) {
         if (columnValue == null) {
@@ -391,8 +393,8 @@ public class EntityColumn implements Serializable {
     }
 
     /**
-     * Checks that the passed value's type is the same as the {@linkplain #getType() entity column
-     * type}.
+     * Checks that the passed value's type is the same as
+     * the {@linkplain #getType() entity column type}.
      *
      * @param value
      *         the value to check
@@ -400,7 +402,8 @@ public class EntityColumn implements Serializable {
      *         in case the check fails
      */
     private void checkTypeMatches(Object value) {
-        Class<?> columnType = wrap(getType());
+        Class<?> type = getType();
+        Class<?> columnType = wrap(type);
         Class<?> valueType = wrap(value.getClass());
         if (!columnType.isAssignableFrom(valueType)) {
             throw newIllegalArgumentException(
@@ -411,8 +414,8 @@ public class EntityColumn implements Serializable {
         }
     }
 
-    private void readObject(ObjectInputStream inputStream) throws IOException,
-                                                                  ClassNotFoundException {
+    private void readObject(ObjectInputStream inputStream)
+            throws IOException, ClassNotFoundException {
         inputStream.defaultReadObject();
         getter = restoreGetter();
         valueConverter = restoreValueConverter();
@@ -475,7 +478,7 @@ public class EntityColumn implements Serializable {
         }
 
         /**
-         * @return the {@link EntityColumn} representing this column
+         * Returns the {@link EntityColumn} representing this column.
          */
         public EntityColumn getSourceColumn() {
             return sourceColumn;

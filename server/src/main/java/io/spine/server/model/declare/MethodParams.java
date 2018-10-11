@@ -20,20 +20,16 @@
 
 package io.spine.server.model.declare;
 
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.MessageEnvelope;
-import io.spine.type.TypeName;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Verify.verify;
 import static java.util.Arrays.asList;
-import static java.util.Arrays.stream;
 
 /**
  * The utility class for working with {@link Method} parameters.
@@ -126,7 +122,7 @@ public final class MethodParams {
      *
      * @param method
      *         the method, which parameter list is used to match the parameter specification
-     * @param paramSpecClass
+     * @param paramSpecs
      *         the class of parameter specification
      * @param <E>
      *         the type of message envelope, which the parameter specification class handles
@@ -136,19 +132,11 @@ public final class MethodParams {
      *         or {@link Optional#empty() Optional.empty()} if no matching specification is found
      */
     static <E extends MessageEnvelope<?, ?, ?>, S extends ParameterSpec<E>>
-    Optional<S> findMatching(Method method, Class<S> paramSpecClass) {
-
+    Optional<S> findMatching(Method method, Collection<S> paramSpecs) {
         Class<?>[] parameterTypes = method.getParameterTypes();
-        S[] specs = paramSpecClass.getEnumConstants();
-        verify(specs != null,
-               "`ParameterSpec` implementations are expected " +
-                       "to be enumerations, but that's not true for %s",
-               paramSpecClass);
-
-        @SuppressWarnings("ConstantConditions") // the argument is not `null`, as verified above.
-                Optional<S> result = stream(specs)
-                .filter(s -> s.matches(parameterTypes))
-                .findFirst();
+        Optional<S> result = paramSpecs.stream()
+                                       .filter(spec -> spec.matches(parameterTypes))
+                                       .findFirst();
         return result;
     }
 
@@ -167,17 +155,8 @@ public final class MethodParams {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length > 0) {
             Class<?> firstParameter = parameterTypes[0];
-            if (Message.class.isAssignableFrom(firstParameter)) {
-                @SuppressWarnings("unchecked")  // ensured by the check above.
-                        Class<? extends Message> msgParameter =
-                        (Class<? extends Message>) method.getParameterTypes()[0];
-                Descriptors.FileDescriptor fileDescriptor = TypeName.of(msgParameter)
-                                                                    .getMessageDescriptor()
-                                                                    .getFile();
-                boolean isCommand = CommandMessage.File.predicate()
-                                                       .test(fileDescriptor);
-                return isCommand;
-            }
+            boolean result = CommandMessage.class.isAssignableFrom(firstParameter);
+            return result;
         }
         return false;
     }

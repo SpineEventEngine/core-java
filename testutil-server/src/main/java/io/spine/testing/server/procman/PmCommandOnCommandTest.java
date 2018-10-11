@@ -21,6 +21,7 @@
 package io.spine.testing.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -40,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract
 class PmCommandOnCommandTest<I,
-                             M extends Message,
+                             M extends CommandMessage,
                              S extends Message,
                              P extends ProcessManager<I, S, ?>>
     extends PmCommandGenerationTest<I, M, S, P, CommandEnvelope> {

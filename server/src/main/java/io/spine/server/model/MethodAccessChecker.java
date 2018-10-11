@@ -22,8 +22,8 @@ package io.spine.server.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
+import io.spine.logging.Logging;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -36,13 +36,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>If the access level check fails, the {@linkplain Logger#warn(String) warning} will be output
  * to the log. If the check passes, no action is performed.
  *
- * <p>This class is effectively {@code final} since it has a single {@code private} constructor.
- * Though the modifier "{@code final}" is absent to make it possible to create mocks for testing.
- *
- * @author Dmytro Kuzmin
+ * @implNote This class is effectively {@code final} since it has a single {@code private}
+ *           constructor. Though, the modifier "{@code final}" is absent to make it possible to
+ *           create mocks for testing.
  */
 @Internal
-public class MethodAccessChecker {
+public class MethodAccessChecker implements Logging {
 
     private final Method method;
 
@@ -51,7 +50,7 @@ public class MethodAccessChecker {
     }
 
     /**
-     * Creates a new instance of the {@link MethodAccessChecker} for the specified {@link Method}.
+     * Creates a new instance of the {@code MethodAccessChecker} for the specified {@link Method}.
      *
      * @param method the method to create new instance for
      * @return a new instance of {@code MethodAccessChecker}
@@ -143,16 +142,5 @@ public class MethodAccessChecker {
                          || Modifier.isProtected(modifiers)
                          || Modifier.isPrivate(modifiers));
         return result;
-    }
-
-    /** The logger used by the MethodAccessChecker class. */
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(AbstractHandlerMethod.class);
     }
 }

@@ -21,6 +21,7 @@
 package io.spine.server.command;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
@@ -40,8 +41,8 @@ public class CommandInterceptor extends AbstractCommandHandler {
     private final CommandHistory history = new CommandHistory();
 
     @SafeVarargs
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // already configured
-    CommandInterceptor(BoundedContext context, Class<? extends Message>... commandClasses) {
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // Already configured.
+    CommandInterceptor(BoundedContext context, Class<? extends CommandMessage>... commandClasses) {
         super(context.getEventBus());
         this.intercept = setOf(commandClasses);
         context.getCommandBus()

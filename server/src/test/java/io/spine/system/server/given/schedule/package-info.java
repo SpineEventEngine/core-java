@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides teste environment for {@link io.spine.system.server.ScheduledCommandTest}.
+ * This package provides test environment for {@link io.spine.system.server.ScheduledCommandTest}.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

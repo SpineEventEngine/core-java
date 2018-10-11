@@ -28,7 +28,6 @@ option java_package="io.spine.test.aggregate.command";
 option java_outer_classname = "AggregateCommandsProto";
 option java_multiple_files = true;
 
-import "spine/core/event.proto";
 import "spine/core/user_id.proto";
 
 import "spine/test/aggregate/project.proto";
@@ -57,11 +56,6 @@ message AggAddTask {
 message AggStartProject {
     ProjectId project_id = 1;
     repeated ProjectId child_project_id = 3;
-}
-
-message ImportEvents {
-    ProjectId project_id = 1;
-    repeated core.Event event = 2;
 }
 
 message AggPauseProject {

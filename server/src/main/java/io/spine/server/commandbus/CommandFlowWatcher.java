@@ -20,7 +20,8 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
@@ -73,12 +74,12 @@ final class CommandFlowWatcher {
         postSystemCommand(systemCommand, command.getTenantId());
     }
 
-    private void postSystemEvent(Message systemEvent, TenantId tenantId) {
+    private void postSystemEvent(EventMessage systemEvent, TenantId tenantId) {
         SystemGateway gateway = this.gateway.get(tenantId);
         gateway.postEvent(systemEvent);
     }
 
-    private void postSystemCommand(Message systemCommand, TenantId tenantId) {
+    private void postSystemCommand(CommandMessage systemCommand, TenantId tenantId) {
         SystemGateway gateway = this.gateway.get(tenantId);
         gateway.postCommand(systemCommand);
     }

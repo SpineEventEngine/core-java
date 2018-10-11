@@ -20,6 +20,8 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableSet;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.model.declare.MethodParams;
@@ -44,6 +46,11 @@ public class CommandSubstituteSignature
     public CommandSubstituteMethod doCreate(Method method,
                                             ParameterSpec<CommandEnvelope> parameterSpec) {
         return new CommandSubstituteMethod(method, parameterSpec);
+    }
+
+    @Override
+    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+        return ImmutableSet.of(CommandMessage.class, Iterable.class);
     }
 
     /**

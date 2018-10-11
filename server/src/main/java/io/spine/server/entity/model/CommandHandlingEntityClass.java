@@ -59,6 +59,6 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
 
     @Override
     public CommandHandlerMethod getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
+        return commands.getSingleMethod(commandClass);
     }
 }

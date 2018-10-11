@@ -22,8 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.protobuf.FloatValue;
-import com.google.protobuf.UInt64Value;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
@@ -36,6 +34,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
@@ -57,7 +56,10 @@ import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
+import io.spine.test.aggregate.number.FloatEncountered;
+import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -85,7 +87,8 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBo
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
-import static io.spine.testing.server.blackbox.VerifyEvents.emmiterEventsHadVersions;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -96,9 +99,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
@@ -160,7 +160,8 @@ public class AggregateRepositoryTest {
             ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
             UncommittedEvents events = ((Aggregate<?, ?, ?>) expected).getUncommittedEvents();
-            repository().setSnapshotTrigger(events.list().size());
+            repository().setSnapshotTrigger(events.list()
+                                                  .size());
             repository().store(expected);
 
             ProjectAggregate actual = assertFound(id);
@@ -200,7 +201,8 @@ public class AggregateRepositoryTest {
             ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
             // This should make the repository write the snapshot.
             UncommittedEvents events = ((Aggregate<?, ?, ?>) aggregate).getUncommittedEvents();
-            repository().setSnapshotTrigger(events.list().size());
+            repository().setSnapshotTrigger(events.list()
+                                                  .size());
 
             repository().store(aggregate);
             AggregateStateRecord record = readRecord(aggregate);
@@ -471,6 +473,7 @@ public class AggregateRepositoryTest {
 
     @Nested
     @ExtendWith(ShardingReset.class)
+    @MuteLogging
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
@@ -500,7 +503,7 @@ public class AggregateRepositoryTest {
             BlackBoxBoundedContext.newInstance()
                                   .with(repository())
                                   .receivesCommands(create, addTask, start)
-                                  .assertThat(emmiterEventsHadVersions(1, 2, 3));
+                                  .assertThat(emittedEventsHadVersions(1, 2, 3));
         }
 
         @Test
@@ -526,11 +529,37 @@ public class AggregateRepositoryTest {
                                   .with(repository())
                                   .receivesCommands(create, start)
                                   .receivesEvent(archived)
-                                  .assertThat(emmiterEventsHadVersions(
+                                  .assertThat(emittedEventsHadVersions(
                                           1, 2, // Product creation
                                           0,    // Manually assembled event (`archived`)
                                           3     // Event produced in response to `archived` event
                                   ));
+        }
+
+        @Test
+        @DisplayName("through the repository EventFilter")
+        void throughEventFilter() {
+            ProjectId id = givenAggregateId(Identifier.newUuid());
+            AggCreateProject create = AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setName("Test Project")
+                    .build();
+            AggStartProject start = AggStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            ProjectId parent = givenAggregateId(Identifier.newUuid());
+            AggProjectArchived archived = AggProjectArchived
+                    .newBuilder()
+                    .setProjectId(parent)
+                    .addChildProjectId(id)
+                    .build();
+            BlackBoxBoundedContext.newInstance()
+                                  .with(new EventDiscardingAggregateRepository())
+                                  .receivesCommands(create, start)
+                                  .receivesEvent(archived)
+                                  .assertThat(emittedEvents(AggProjectArchived.class));
         }
     }
 
@@ -569,8 +598,9 @@ public class AggregateRepositoryTest {
     }
 
     @Test
-    @DisplayName("log error when event reaction fails")
-    void logErrorWhenEventReactionFails() {
+    @DisplayName("do nothing when event reaction fails")
+    @MuteLogging
+    void doNothingWhenEventReactionFails() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext().register(repository);
 
@@ -578,9 +608,9 @@ public class AggregateRepositoryTest {
 
         // Passing negative float value should cause an exception.
         EventEnvelope envelope =
-                EventEnvelope.of(factory.createEvent(FloatValue.newBuilder()
-                                                               .setValue(-412.0f)
-                                                               .build()));
+                EventEnvelope.of(factory.createEvent(FloatEncountered.newBuilder()
+                                                                     .setNumber(-412.0f)
+                                                                     .build()));
         boundedContext().getEventBus()
                         .post(envelope.getOuterObject());
 
@@ -608,9 +638,9 @@ public class AggregateRepositoryTest {
 
         // Passing negative long value to `FailingAggregate` should cause a rejection.
         CommandEnvelope ce = CommandEnvelope.of(
-                requestFactory().createCommand(UInt64Value.newBuilder()
-                                                          .setValue(-100_000_000L)
-                                                          .build()));
+                requestFactory().createCommand(RejectNegativeLong.newBuilder()
+                                                                 .setNumber(-100_000_000L)
+                                                                 .build()));
         boundedContext().getCommandBus()
                         .post(ce.getCommand(), StreamObservers.noOpObserver());
 

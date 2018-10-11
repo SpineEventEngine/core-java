@@ -20,11 +20,13 @@
 
 package io.spine.client;
 
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.CommandMessage;
+import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
+import io.spine.test.commands.CmdCreateProject;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,16 +38,13 @@ import static io.spine.client.given.ActorRequestFactoryTestEnv.ZONE_OFFSET;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder;
 import static io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND;
-import static io.spine.time.Timestamps2.isBetween;
+import static io.spine.protobuf.Timestamps2.isBetween;
 import static io.spine.time.testing.TimeTests.Future.secondsFromNow;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("Command factory should")
 class CommandFactoryTest {
 
@@ -73,20 +72,23 @@ class CommandFactoryTest {
         @DisplayName("with current time")
         void withTimestamp() {
             Timestamp beforeCall = secondsAgo(1);
-            Command command = factory.create(StringValue.getDefaultInstance());
+            CmdCreateProject commandMessage = CmdCreateProject
+                    .newBuilder()
+                    .setId(Identifier.newUuid())
+                    .build();
+            Command command = factory.create(commandMessage);
             Timestamp afterCall = secondsFromNow(1);
 
             Timestamp timestamp = command.getContext()
                                          .getActorContext()
                                          .getTimestamp();
-            assertTrue(isBetween(timestamp, beforeCall, afterCall)
-            );
+            assertTrue(isBetween(timestamp, beforeCall, afterCall));
         }
 
         @Test
         @DisplayName("with given entity version")
         void withEntityVersion() {
-            Command command = factory.create(StringValue.getDefaultInstance(), 2);
+            Command command = factory.create(command(), 2);
 
             CommandContext context = command.getContext();
             assertEquals(2, context.getTargetVersion());
@@ -104,14 +106,19 @@ class CommandFactoryTest {
                     .setActor(ACTOR)
                     .setZoneOffset(ZONE_OFFSET)
                     .build();
-            Command command = mtFactory.command()
-                                       .create(StringValue.getDefaultInstance());
-
+            Command command = mtFactory.command().create(command());
             assertEquals(tenantId, command.getContext()
                                           .getActorContext()
                                           .getTenantId());
         }
 
+        private CommandMessage command() {
+            CmdCreateProject commandMessage = CmdCreateProject
+                    .newBuilder()
+                    .setId(Identifier.newUuid())
+                    .build();
+            return commandMessage;
+        }
     }
 
     @Nested

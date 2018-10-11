@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
@@ -32,7 +32,6 @@ import io.spine.server.aggregate.given.part.TaskRepository;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
@@ -43,14 +42,10 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.testdata.Sample.builderForType;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Illia Shepilov
- */
-@SuppressWarnings({"OverlyCoupledClass",
-        "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("AggregatePart should")
 class AggregatePartTest {
 
@@ -63,7 +58,7 @@ class AggregatePartTest {
     private TaskDescriptionPart taskDescriptionPart;
     private TaskRepository taskRepository;
 
-    private static CommandEnvelope env(Message commandMessage) {
+    private static CommandEnvelope env(CommandMessage commandMessage) {
         return CommandEnvelope.of(factory.command()
                                          .create(commandMessage));
     }
@@ -110,11 +105,10 @@ class AggregatePartTest {
     }
 
     private void prepareAggregatePart() {
-        AggAddTask addTask =
-                ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
-                        .setProjectId(ProjectId.newBuilder()
-                                               .setId("agg-part-ID"))
-                        .build();
-        AggregateMessageDispatcher.dispatchCommand(taskPart, env(addTask));
+        AggAddTask.Builder addTask = builderForType(AggAddTask.class);
+        addTask.setProjectId(ProjectId.newBuilder()
+                                      .setId("agg-part-ID"))
+               .build();
+        AggregateMessageDispatcher.dispatchCommand(taskPart, env(addTask.build()));
     }
 }

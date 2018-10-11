@@ -21,12 +21,12 @@
 package io.spine.server.procman.given.pm;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.ProjectId;
@@ -67,7 +67,7 @@ public class TestProcessManager
     }
 
     /** Updates the state with putting incoming message.*/
-    void remember(Message incoming) {
+    private void remember(Message incoming) {
         getBuilder().mergeFrom(pack(incoming));
     }
 
@@ -198,15 +198,15 @@ public class TestProcessManager
      ************************/
 
     @React
-    Empty on(PmProjectCreated event) {
+    Nothing on(PmProjectCreated event) {
         remember(event);
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @React
-    Empty on(PmTaskAdded event) {
+    Nothing on(PmTaskAdded event) {
         remember(event);
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @React
@@ -220,14 +220,14 @@ public class TestProcessManager
      **************************/
 
     @React
-    Empty on(EntityAlreadyArchived rejection, PmAddTask command) {
+    Nothing on(EntityAlreadyArchived rejection, PmAddTask command) {
         remember(command); // We check the command in the test.
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @React
-    Empty on(EntityAlreadyArchived rejection) {
+    Nothing on(EntityAlreadyArchived rejection) {
         remember(rejection);
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 }

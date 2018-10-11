@@ -23,6 +23,7 @@ package io.spine.system.server.given.mirror;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -45,9 +46,6 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
-/**
- * @author Dmytro Dashenkov
- */
 public class RepositoryTestEnv {
 
     public static final TestEventFactory events = newInstance(RepositoryTestEnv.class);
@@ -78,11 +76,11 @@ public class RepositoryTestEnv {
                 .build();
         Url fullSizeUrl = Url
                 .newBuilder()
-                .setRaw(url)
+                .setSpec(url)
                 .build();
         Url thumbnail = Url
                 .newBuilder()
-                .setRaw(url + "-thumbnail")
+                .setSpec(url + "-thumbnail")
                 .build();
         Photo photo = PhotoVBuilder
                 .newBuilder()
@@ -143,7 +141,7 @@ public class RepositoryTestEnv {
         return event(archived);
     }
 
-    public static Event deleled(Photo aggregate) {
+    public static Event deleted(Photo aggregate) {
         EntityHistoryId historyId = historyIdOf(aggregate);
         EntityDeleted deleted = EntityDeleted
                 .newBuilder()
@@ -154,7 +152,7 @@ public class RepositoryTestEnv {
         return event(deleted);
     }
 
-    public static Event event(Message eventMessage) {
+    public static Event event(EventMessage eventMessage) {
         return events.createEvent(eventMessage);
     }
 }

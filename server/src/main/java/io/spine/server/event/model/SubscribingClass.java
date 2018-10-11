@@ -21,17 +21,48 @@
 package io.spine.server.event.model;
 
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
+import io.spine.logging.Logging;
 import io.spine.type.MessageClass;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
+
+import static java.util.Comparator.comparing;
 
 /**
  * An interface common for model classes that subscribe to events.
- *
- * @author Alexander Yevsyukov
  */
-public interface SubscribingClass {
+public interface SubscribingClass extends Logging {
 
     /**
      * Obtains a method that handles the passed class of events.
+     *
+     * @param event
+     *         the event to obtain a method for
      */
-    EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass);
+    default Optional<SubscriberMethod> getSubscriber(EventEnvelope event) {
+        Collection<SubscriberMethod> subscribers =
+                getSubscribers(event.getMessageClass(), event.getOriginClass());
+        Comparator<SubscriberMethod> methodOrder = comparing(
+                (SubscriberMethod subscriber) -> subscriber.filter().getField().getFieldNameCount()
+        ).reversed();
+        Optional<SubscriberMethod> foundSubscriber = subscribers
+                .stream()
+                .sorted(methodOrder)
+                .filter(s -> s.canHandle(event))
+                .findFirst();
+        if (foundSubscriber.isPresent()) {
+            return foundSubscriber;
+        } else {
+            _debug("None of the subscriber methods could handle %s event." +
+                           "%n  Methods: %s" +
+                           "%n  Event message: %s.",
+                   event.getMessageClass(), subscribers, event.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    Collection<SubscriberMethod> getSubscribers(EventClass eventClass, MessageClass originClass);
 }

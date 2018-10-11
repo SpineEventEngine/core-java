@@ -20,7 +20,7 @@
 
 package io.spine.testing.server.blackbox.given;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -46,7 +46,7 @@ public class EmittedEventsTestEnv {
         // Does nothing.
     }
 
-    public static List<Event> events(int count, Supplier<Message> messageSupplier) {
+    public static List<Event> events(int count, Supplier<EventMessage> messageSupplier) {
         List<Event> events = newArrayList();
         for (int i = 0; i < count; i++) {
             events.add(event(messageSupplier.get()));
@@ -54,7 +54,7 @@ public class EmittedEventsTestEnv {
         return events;
     }
 
-    public static Event event(Message domainEvent) {
+    public static Event event(EventMessage domainEvent) {
         TestEventFactory factory = eventFactory(requestFactory(newTenantId()));
         return factory.createEvent(domainEvent);
     }

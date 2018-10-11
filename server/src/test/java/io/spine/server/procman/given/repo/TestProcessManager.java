@@ -22,7 +22,6 @@ package io.spine.server.procman.given.repo;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -33,6 +32,7 @@ import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
@@ -49,16 +49,12 @@ import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.testdata.Sample;
 
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.testdata.Sample.builderForType;
 
-@SuppressWarnings({
-        "OverlyCoupledClass",
-        "UnusedParameters" /* The parameter left to show that a projection subscriber can have
-                            two parameters. */})
 public class TestProcessManager
         extends ProcessManager<ProjectId, Project, ProjectVBuilder>
         implements TestEntityWithStringColumn {
@@ -82,10 +78,6 @@ public class TestProcessManager
     /** Keeps the event message for further inspection in tests. */
     private void keep(Message commandOrEventMsg) {
         messagesDelivered.put(getState().getId(), commandOrEventMsg);
-    }
-
-    private static Empty withNothing() {
-        return Empty.getDefaultInstance();
     }
 
     private void handleProjectCreated(ProjectId projectId) {
@@ -113,59 +105,48 @@ public class TestProcessManager
     @Assign
     PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
         keep(command);
-
-        PmProjectCreated event = ((PmProjectCreated.Builder)
-                Sample.builderForType(PmProjectCreated.class))
-                .setProjectId(command.getProjectId())
-                .build();
-        return event;
+        PmProjectCreated.Builder event = builderForType(PmProjectCreated.class);
+        return event.setProjectId(command.getProjectId())
+                    .build();
     }
 
     @Assign
     PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
         keep(command);
-
-        PmTaskAdded event = ((PmTaskAdded.Builder)
-                Sample.builderForType(PmTaskAdded.class))
-                .setProjectId(command.getProjectId())
-                .build();
-        return event;
+        PmTaskAdded.Builder event = builderForType(PmTaskAdded.class);
+        return event.setProjectId(command.getProjectId())
+                    .build();
     }
 
     @Command
     Pair<PmAddTask, PmDoNothing> handle(PmStartProject command, CommandContext context) {
         keep(command);
-
         ProjectId projectId = command.getProjectId();
-        PmAddTask addTask = ((PmAddTask.Builder)
-                Sample.builderForType(PmAddTask.class))
-                .setProjectId(projectId)
-                .build();
-        PmDoNothing doNothing = ((PmDoNothing.Builder)
-                Sample.builderForType(PmDoNothing.class))
-                .setProjectId(projectId)
-                .build();
-        return Pair.of(addTask, doNothing);
+        PmAddTask.Builder addTask = builderForType(PmAddTask.class);
+        addTask.setProjectId(projectId);
+        PmDoNothing.Builder doNothing = builderForType(PmDoNothing.class);
+        doNothing.setProjectId(projectId);
+        return Pair.of(addTask.build(), doNothing.build());
     }
 
     @Assign
-    Empty handle(PmArchiveProcess command) {
+    Nothing handle(PmArchiveProcess command) {
         keep(command);
         setArchived(true);
-        return withNothing();
+        return nothing();
     }
 
     @Assign
-    Empty handle(PmDeleteProcess command) {
+    Nothing handle(PmDeleteProcess command) {
         keep(command);
         setDeleted(true);
-        return withNothing();
+        return nothing();
     }
 
     @Assign
-    Empty handle(PmDoNothing command, CommandContext ignored) {
+    Nothing handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
-        return withNothing();
+        return nothing();
     }
 
     @Assign
@@ -175,40 +156,40 @@ public class TestProcessManager
     }
 
     @React
-    Empty on(StandardRejections.EntityAlreadyArchived rejection) {
+    Nothing on(StandardRejections.EntityAlreadyArchived rejection) {
         keep(rejection);
-        return withNothing();
+        return nothing();
     }
 
     @React
-    Empty on(StandardRejections.EntityAlreadyDeleted rejection) {
+    Nothing on(StandardRejections.EntityAlreadyDeleted rejection) {
         keep(rejection);
-        return withNothing();
+        return nothing();
     }
 
     @React
-    Empty on(PmTaskAdded event) {
+    Nothing on(PmTaskAdded event) {
         keep(event);
 
         Task task = event.getTask();
         handleTaskAdded(task);
-        return withNothing();
+        return nothing();
     }
 
     @React
-    Empty on(PmProjectStarted event) {
+    Nothing on(PmProjectStarted event) {
         keep(event);
 
         handleProjectStarted();
-        return withNothing();
+        return nothing();
     }
 
     @React
-    Empty on(PmProjectCreated event, EventContext ignored) {
+    Nothing on(PmProjectCreated event, EventContext ignored) {
         keep(event);
 
         handleProjectCreated(event.getProjectId());
-        return withNothing();
+        return nothing();
     }
 
     @Column

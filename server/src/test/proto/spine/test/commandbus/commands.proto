@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package spine.test.commandbus;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.commandbus";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+message CmdBusStartProject {
+    string id = 1;
+}

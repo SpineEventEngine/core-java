@@ -24,19 +24,19 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.UserId;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.system.server.DeleteEntity;
-import io.spine.util.Exceptions;
+import io.spine.system.server.ScheduleCommand;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The test environment for {@link io.spine.server.model.declare.MethodParamsTest MethodParamsTest}
@@ -46,11 +46,11 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
  */
 public class MethodParamsTestEnv {
 
-    public static Method singleParamDeleteEntity() {
+    public static Method singleParamCommand() {
         return findMethod("singleParam");
     }
 
-    public static Method twoParamDeleteEntityAndCtx() {
+    public static Method twoParamCommandAndCtx() {
         return findMethod("twoParam");
     }
 
@@ -58,10 +58,10 @@ public class MethodParamsTestEnv {
         return findMethod("fiveParam");
     }
 
-    public void singleParam(DeleteEntity command) {
+    public void singleParam(ScheduleCommand command) {
     }
 
-    public void twoParam(DeleteEntity command, CommandContext context) {
+    public void twoParam(ScheduleCommand command, CommandContext context) {
     }
 
     public void fiveParam(String eurasia,
@@ -73,25 +73,21 @@ public class MethodParamsTestEnv {
 
     private static Method findMethod(String methodName) {
         Optional<Method> method = Arrays.stream(MethodParamsTestEnv.class.getDeclaredMethods())
-                                        .filter(m -> {
-
-                                            return m.getName()
-                                                    .equals(methodName);
-                                        })
+                                        .filter(m -> m.getName().equals(methodName))
                                         .findFirst();
         if (!method.isPresent()) {
-            throw Exceptions.newIllegalStateException("Test method `%s` is missing.", methodName);
+            throw newIllegalStateException("Test method `%s` is missing.", methodName);
         }
         return method.get();
     }
 
     @Immutable
-    public enum DeleteEntityParamSpec implements ParameterSpec<CommandEnvelope> {
+    public enum ScheduleCommandParamSpec implements ParameterSpec<CommandEnvelope> {
 
         MESSAGE_AND_CONTEXT {
             @Override
             public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, Message.class, CommandContext.class);
+                return consistsOfTwo(methodParams, CommandMessage.class, CommandContext.class);
             }
 
             @Override

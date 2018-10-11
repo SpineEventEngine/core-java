@@ -57,15 +57,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Litus
- */
 @SuppressWarnings({"DuplicateStringLiteralInspection", /* Common test display names. */
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */})
 @DisplayName("EventSubscriberMethod should")
 class EventSubscriberMethodTest {
 
-    private static final EventSubscriberSignature signature = new EventSubscriberSignature();
+    private static final SubscriberSignature signature = new SubscriberSignature();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -84,10 +81,9 @@ class EventSubscriberMethodTest {
     void invokeSubscriberMethod() {
         ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
-        Optional<EventSubscriberMethod> createdMethod =
-                signature.create(subscriberObject.getMethod());
+        Optional<SubscriberMethod> createdMethod = signature.create(subscriberObject.getMethod());
         assertTrue(createdMethod.isPresent());
-        EventSubscriberMethod subscriber = createdMethod.get();
+        SubscriberMethod subscriber = createdMethod.get();
         RefProjectCreated msg = Given.EventMessage.projectCreated();
 
         Event event = Event
@@ -205,9 +201,9 @@ class EventSubscriberMethodTest {
 
         private void check(TestEventSubscriber subscriber, boolean external) {
             Method method = subscriber.getMethod();
-            Optional<EventSubscriberMethod> created = signature.create(method);
+            Optional<SubscriberMethod> created = signature.create(method);
             assertTrue(created.isPresent());
-            EventSubscriberMethod modelMethod = created.get();
+            SubscriberMethod modelMethod = created.get();
             EventContext context = EventContext
                     .newBuilder()
                     .setExternal(external)

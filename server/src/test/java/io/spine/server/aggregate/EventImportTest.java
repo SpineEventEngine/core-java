@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.given.klasse.EngineId;
@@ -182,7 +182,7 @@ class EventImportTest {
      *        of the producer.
      * @return generated event wrapped into the envelope
      */
-    private EventEnvelope createEvent(Message eventMessage, @Nullable EngineId producerId) {
+    private EventEnvelope createEvent(EventMessage eventMessage, @Nullable EngineId producerId) {
         TestEventFactory eventFactory = producerId == null
                                         ? boundedContext.newEventFactory()
                                         : boundedContext.newEventFactory(producerId);

@@ -29,7 +29,7 @@ public class ModelError extends Error {
 
     private static final long serialVersionUID = 0L;
 
-    ModelError(String message) {
+    protected ModelError(String message) {
         super(message);
     }
 

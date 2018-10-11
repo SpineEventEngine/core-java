@@ -20,68 +20,25 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Descriptors.Descriptor;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
-import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.protobuf.util.FieldMaskUtil;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * A utility class for creating instances of {@code FieldMask} and processing them
  * against instances of {@link Message}.
- *
- * @author Dmytro Dashenkov
  */
-@SuppressWarnings("UtilityClass")
-public class FieldMasks {
+public final class FieldMasks {
 
-    private static final String CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN =
-            "Constructor for type %s could not be found or called: ";
-
-    private static final String TYPE_CAST_ERROR_LOGGING_PATTERN =
-            "Class %s must be assignable from com.google.protobuf.Message. " +
-            "Try to rebuild the project. Make sure type URL is valid.";
-
+    /** Prevent instantiation of this utility class. */
     private FieldMasks() {
-        // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Creates a new instance of {@code FieldMask} basing on the target type
-     * {@link Descriptor descriptor} and field tags defined in the Protobuf message.
-     *
-     * @param typeDescriptor {@link Descriptor descriptor} of the type to create a mask for.
-     * @param fieldTags      field tags to include into the mask.
-     * @return an instance of {@code FieldMask} for the target type with the fields specified.
-     */
-    public static FieldMask maskOf(Descriptor typeDescriptor, int... fieldTags) {
-        if (fieldTags.length == 0) {
-            return FieldMask.getDefaultInstance();
-        }
-
-        FieldMask.Builder result = FieldMask.newBuilder();
-        for (int fieldNumber : fieldTags) {
-            Descriptors.FieldDescriptor field = typeDescriptor.findFieldByNumber(fieldNumber);
-            String fieldPath = field.getFullName();
-            result.addPaths(fieldPath);
-        }
-
-        return result.build();
     }
 
     /**
@@ -93,43 +50,14 @@ public class FieldMasks {
      *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param messages {@link Message}s to filter.
-     * @param type     type of the {@link Message}s.
      * @return messages with the {@code FieldMask} applied
      */
     @Nonnull
-    public static <M extends Message, B extends Message.Builder>
-    Collection<M> applyMask(FieldMask mask, Collection<M> messages, TypeUrl type) {
+    public static <M extends Message>
+    Collection<M> applyMask(FieldMask mask, Collection<M> messages) {
         checkNotNull(mask);
         checkNotNull(messages);
-        checkNotNull(type);
-
-        List<M> filtered = new ArrayList<>();
-        ProtocolStringList filter = mask.getPathsList();
-        Class<B> builderClass = getBuilderForType(type);
-
-        if (filter.isEmpty() || builderClass == null) {
-            return Collections.unmodifiableCollection(messages);
-        }
-
-        try {
-            Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
-            builderConstructor.setAccessible(true);
-
-            for (Message wholeMessage : messages) {
-                M message = messageForFilter(filter, builderConstructor, wholeMessage);
-                filtered.add(message);
-            }
-        } catch (NoSuchMethodException |
-                InvocationTargetException |
-                IllegalAccessException |
-                InstantiationException e) {
-            // If any reflection failure happens, return all the data without any mask applied.
-            log().warn(format(CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN,
-                              builderClass.getCanonicalName()),
-                       e);
-            return Collections.unmodifiableCollection(messages);
-        }
-        return Collections.unmodifiableList(filtered);
+        return doApplyMany(mask, messages);
     }
 
     /**
@@ -141,93 +69,45 @@ public class FieldMasks {
      *
      * @param mask    the {@code FieldMask} to apply.
      * @param message the {@link Message} to apply given mask to.
-     * @param typeUrl type of given {@link Message}.
      * @return the message of the same type as the given one with only selected fields if
      * the {@code mask} is valid, original message otherwise.
      */
-    public static <M extends Message> M applyMask(FieldMask mask, M message, TypeUrl typeUrl) {
-        if (!mask.getPathsList()
-                 .isEmpty()) {
-            return doApply(mask, message, typeUrl);
-        }
-        return message;
-    }
-
-    private static <M extends Message, B extends Message.Builder> M doApply(FieldMask mask,
-                                                                            M message,
-                                                                            TypeUrl type) {
+    public static <M extends Message> M applyMask(FieldMask mask, M message) {
         checkNotNull(mask);
         checkNotNull(message);
-        checkNotNull(type);
-
-        ProtocolStringList filter = mask.getPathsList();
-        Class<B> builderClass = getBuilderForType(type);
-
-        if (builderClass == null) {
+        if (mask.getPathsList()
+                .isEmpty()) {
             return message;
         }
-
-        try {
-            Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
-            builderConstructor.setAccessible(true);
-
-            M result = messageForFilter(filter, builderConstructor, message);
-            return result;
-        } catch (NoSuchMethodException |
-                InvocationTargetException |
-                IllegalAccessException |
-                InstantiationException e) {
-            log().warn(format(CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN,
-                              builderClass.getCanonicalName()),
-                       e);
-            return message;
-        }
-    }
-
-    private static <M extends Message, B extends Message.Builder> M messageForFilter(
-            ProtocolStringList filter,
-            Constructor<B> builderConstructor, Message wholeMessage)
-            throws InstantiationException,
-                   IllegalAccessException,
-                   InvocationTargetException {
-        B builder = builderConstructor.newInstance();
-
-        List<Descriptors.FieldDescriptor> fields = wholeMessage.getDescriptorForType()
-                                                               .getFields();
-        for (Descriptors.FieldDescriptor field : fields) {
-            if (filter.contains(field.getFullName())) {
-                builder.setField(field, wholeMessage.getField(field));
-            }
-        }
-        @SuppressWarnings("unchecked")
-        // It's fine as the constructor is of {@code MessageCls.Builder} type.
-        M result = (M) builder.build();
+        M result = distill(message, mask);
         return result;
     }
 
-    @SuppressWarnings("unchecked") // We assume that TypeUrl.getMessageClass() works properly.
-    private static @Nullable <B extends Message.Builder> Class<B>
-    getBuilderForType(TypeUrl typeUrl) {
-        Class<? extends Message> msgClass = typeUrl.getMessageClass();
-        Class<B> builderClass;
-        try {
-            builderClass = (Class<B>) msgClass.getClasses()[0];
-        } catch (ClassCastException e) {
-            String message = format(TYPE_CAST_ERROR_LOGGING_PATTERN, msgClass.getCanonicalName());
-            log().warn(message, e);
-            builderClass = null;
+    private static <M extends Message> M distill(M wholeMessage, FieldMask mask) {
+        Message.Builder builder = wholeMessage.newBuilderForType();
+        FieldMaskUtil.merge(mask, wholeMessage, builder);
+        @SuppressWarnings("unchecked") // safe as we got builder of `M`.
+                M result = (M) builder.build();
+        return result;
+    }
+
+    private static <M extends Message>
+    ImmutableList<M> doApplyMany(FieldMask mask, Collection<M> messages) {
+        ImmutableList<M> input = ImmutableList.copyOf(messages);
+        if (input.isEmpty()) {
+            return input;
         }
 
-        return builderClass;
-    }
+        ProtocolStringList filter = mask.getPathsList();
+        if (filter.isEmpty()) {
+            return input;
+        }
 
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(FieldMasks.class);
+        ImmutableList.Builder<M> filtered = ImmutableList.builder();
+        for (M wholeMessage : messages) {
+            M distilled = distill(wholeMessage, mask);
+            filtered.add(distilled);
+        }
+        return filtered.build();
     }
 }

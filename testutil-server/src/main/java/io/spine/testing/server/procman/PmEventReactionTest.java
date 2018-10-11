@@ -21,6 +21,7 @@
 package io.spine.testing.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -44,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Vladyslav Lubenskyi
  */
 public abstract class PmEventReactionTest<I,
-                                          E extends Message,
+                                          E extends EventMessage,
                                           S extends Message,
                                           P extends ProcessManager<I, S, ?>>
         extends EventReactionTest<I, E, S, P> {

@@ -34,21 +34,15 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.testing.Helpers.assertEmpty;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertEmpty;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-/**
- * @author Dmytro Kuzmin
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Many string literals for method names. */})
 @DisplayName("ColumnValueExtractor should")
 class ColumnValueExtractorTest {
 
@@ -70,7 +64,7 @@ class ColumnValueExtractorTest {
             EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
-            assertSize(3, columnValues);
+            assertThat(columnValues).hasSize(3);
             assertEquals(entity.getSomeMessage(), columnValues.get("someMessage")
                                                               .getValue());
         }
@@ -81,7 +75,7 @@ class ColumnValueExtractorTest {
             PrivateEntity entity = new PrivateEntity(TEST_ENTITY_ID);
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
-            assertSize(1, columnValues);
+            assertThat(columnValues).hasSize(1);
             assertEquals(entity.getIntValue(), columnValues.get("intValue")
                                                            .getValue());
         }

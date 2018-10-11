@@ -33,6 +33,7 @@ import "spine/test/projection/project.proto";
 
 message PrjProjectCreated {
     ProjectId project_id = 1;
+    string name = 2;
 }
 
 message PrjTaskAdded {
@@ -50,4 +51,17 @@ message PrjProjectArchived {
 
 message PrjProjectDeleted {
     ProjectId project_id = 1;
+}
+
+message StringImported {
+    string value = 1;
+}
+
+message Int32Imported {
+    int32 value = 1;
+}
+
+message PairImported {
+    string str = 1;
+    int32 integer = 2;
 }

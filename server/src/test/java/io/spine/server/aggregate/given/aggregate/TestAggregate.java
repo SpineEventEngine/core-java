@@ -21,17 +21,15 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Commands;
-import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -39,7 +37,6 @@ import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
-import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -48,6 +45,7 @@ import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.Commands.getMessage;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
@@ -110,11 +108,6 @@ public class TestAggregate
         return newArrayList(message);
     }
 
-    @Assign
-    List<Event> handle(ImportEvents command, CommandContext ctx) {
-        return command.getEventList();
-    }
-
     @Apply
     void event(AggProjectCreated event) {
         getBuilder().setId(event.getProjectId())
@@ -138,21 +131,21 @@ public class TestAggregate
     }
 
     @React
-    Empty on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
+    Nothing on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
         isRejectionWithCmdHandled = true;
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @React
-    Empty on(StandardRejections.CannotModifyDeletedEntity rejection) {
+    Nothing on(StandardRejections.CannotModifyDeletedEntity rejection) {
         isRejectionHandled = true;
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @VisibleForTesting
     public void dispatchCommands(Command... commands) {
         for (Command cmd : commands) {
-            Message commandMessage = Commands.getMessage(cmd);
+            CommandMessage commandMessage = getMessage(cmd);
             AggregateMessageDispatcher.dispatchCommand(this, env(commandMessage));
         }
     }

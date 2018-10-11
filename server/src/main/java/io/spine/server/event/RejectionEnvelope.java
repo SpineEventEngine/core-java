@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
@@ -120,7 +121,7 @@ public final class RejectionEnvelope
         Any producerId = throwableMessage.producerId()
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
-        Message thrownMessage = throwableMessage.getMessageThrown();
+        RejectionMessage thrownMessage = throwableMessage.getMessageThrown();
         RejectionEventContext context = rejectionContext(origin.getMessage(), throwableMessage);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
@@ -142,14 +143,17 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public Message getMessage() {
-        return event.getMessage();
+    public RejectionMessage getMessage() {
+        return (RejectionMessage) event.getMessage();
     }
 
     @Override
     public RejectionClass getMessageClass() {
         EventClass eventClass = event.getMessageClass();
-        RejectionClass rejectionClass = RejectionClass.of(eventClass.value());
+        @SuppressWarnings("unchecked") // Checked at runtime.
+        Class<? extends RejectionMessage> value =
+                (Class<? extends RejectionMessage>) eventClass.value();
+        RejectionClass rejectionClass = RejectionClass.of(value);
         return rejectionClass;
     }
 

@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus.given;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -32,6 +31,8 @@ import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
+import io.spine.test.command.event.CmdProjectCreated;
+import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
@@ -95,16 +96,22 @@ public class SingleTenantCommandBusTestEnv {
         }
 
         @Assign
-        Empty handle(FirstCmdCreateProject command) {
+        CmdProjectCreated handle(FirstCmdCreateProject command) {
             commandBus.post(commandToPost, noOpObserver());
             handledCommands.add(command);
-            return Empty.getDefaultInstance();
+            return CmdProjectCreated
+                    .newBuilder()
+                    .setProjectId(command.getId())
+                    .build();
         }
 
         @Assign
-        Empty handle(SecondCmdStartProject command) {
+        CmdProjectStarted handle(SecondCmdStartProject command) {
             handledCommands.add(command);
-            return Empty.getDefaultInstance();
+            return CmdProjectStarted
+                    .newBuilder()
+                    .setProjectId(command.getId())
+                    .build();
         }
 
         public List<Message> handledCommands() {

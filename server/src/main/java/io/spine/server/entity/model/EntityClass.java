@@ -34,6 +34,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
@@ -91,13 +92,25 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     public E createEntity(Object constructorArgument) {
         checkNotNull(constructorArgument);
         Constructor<E> ctor = getConstructor();
-        E result;
+        checkArgumentMatches(ctor, constructorArgument);
         try {
-            result = ctor.newInstance(constructorArgument);
+            E result = ctor.newInstance(constructorArgument);
+            return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-        return result;
+    }
+
+    private static void checkArgumentMatches(Constructor<?> ctor, Object argument) {
+        Class<?> actualArgumentType = argument.getClass();
+        Class<?> firstParameter = ctor.getParameterTypes()[0];
+        String errorMessage =
+                "Constructor argument type mismatch: expected `%s`, but was `%s`. " +
+                        "Check for message routing mistakes.";
+        checkArgument(firstParameter.isAssignableFrom(actualArgumentType),
+                      errorMessage,
+                      actualArgumentType.getName(),
+                      firstParameter.getName());
     }
 
     private static ModelError noSuchConstructor(String entityClass, String idClass) {

@@ -110,7 +110,7 @@ final class DuplicateLookup {
     boolean isDuplicate(Command candidate) {
         CommandId candidateId = candidate.getId();
         boolean duplicate = history.stream()
-                                   .filter(DuplicateLookup::isCommandDispatchedToHanlder)
+                                   .filter(DuplicateLookup::isCommandDispatchedToHandler)
                                    .map(Events::getMessage)
                                    .map(CommandDispatchedToHandler.class::cast)
                                    .map(CommandDispatchedToHandler::getPayload)
@@ -127,7 +127,7 @@ final class DuplicateLookup {
         return instanceOf(candidate, EVENT_DISPATCHED_TO_REACTOR_EVENT_TYPE);
     }
 
-    private static boolean isCommandDispatchedToHanlder(Event candidate) {
+    private static boolean isCommandDispatchedToHandler(Event candidate) {
         return instanceOf(candidate, COMMAND_DISPATCHED_EVENT_TYPE);
     }
 

@@ -137,9 +137,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                                                             .getRecord()
                                                             .toBuilder();
                 Any state = matchingRecord.getState();
-                TypeUrl typeUrl = TypeUrl.parse(state.getTypeUrl());
                 Message wholeState = unpack(state);
-                Message maskedState = applyMask(fieldMask, wholeState, typeUrl);
+                Message maskedState = applyMask(fieldMask, wholeState);
                 Any processed = pack(maskedState);
 
                 matchingRecord.setState(processed);
@@ -202,8 +201,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             checkNotNull(input);
             Any packedState = input.getState();
             Message state = unpack(packedState);
-            TypeUrl typeUrl = TypeUrl.ofEnclosed(packedState);
-            Message maskedState = applyMask(fieldMask, state, typeUrl);
+            Message maskedState = applyMask(fieldMask, state);
             Any repackedState = pack(maskedState);
             EntityRecord result = EntityRecord
                     .newBuilder(input)

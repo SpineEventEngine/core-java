@@ -20,6 +20,7 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
@@ -127,14 +128,14 @@ class PmTransactionTest
     }
 
     @Override
-    protected Message createEventMessage() {
+    protected EventMessage createEventMessage() {
         return PmProjectCreated.newBuilder()
                                .setProjectId(ID)
                                .build();
     }
 
     @Override
-    protected Message createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventMessageThatFailsInHandler() {
         return PmTaskAdded.newBuilder()
                           .setProjectId(ID)
                           .build();

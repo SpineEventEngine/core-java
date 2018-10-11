@@ -20,6 +20,7 @@
 
 package io.spine.server.projection;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -38,34 +39,31 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Durations.fromSeconds;
+import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertSize;
-import static io.spine.testing.Verify.assertThrows;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Projection storage tests.
- *
- * @author Alexander Litus
  */
-@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class ProjectionStorageTest
         extends RecordStorageTest<ProjectionStorage<ProjectId>> {
 
@@ -75,7 +73,7 @@ public abstract class ProjectionStorageTest
     @CanIgnoreReturnValue
     private static Project checkProjectIdIsInList(EntityRecord project, List<ProjectId> ids) {
         Any packedState = project.getState();
-        Project state = AnyPacker.unpack(packedState);
+        Project state = unpack(packedState, Project.class);
         ProjectId id = state.getId();
 
         boolean isIdPresent = false;
@@ -90,14 +88,6 @@ public abstract class ProjectionStorageTest
         return state;
     }
 
-    private static FieldMask maskForPaths(String... paths) {
-        FieldMask mask = FieldMask
-                .newBuilder()
-                .addAllPaths(Arrays.asList(paths))
-                .build();
-        return mask;
-    }
-
     @Override
     protected Message newState(ProjectId id) {
         String uniqueName = format("Projection_name-%s-%s", id.getId(), System.nanoTime());
@@ -105,7 +95,6 @@ public abstract class ProjectionStorageTest
         return state;
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     protected EntityRecord newStorageRecord() {
         return newEntityStorageRecord();
@@ -140,11 +129,11 @@ public abstract class ProjectionStorageTest
 
             Iterator<EntityRecord> read = storage.readAll();
             Collection<EntityRecord> readRecords = newArrayList(read);
-            assertSize(ids.size(), readRecords);
+            assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
-                Project state = AnyPacker.unpack(record.getState());
+                Project state = unpack(record.getState(), Project.class);
                 ProjectId id = state.getId();
-                assertContains(id, ids);
+                assertThat(ids).contains(id);
             }
         }
 
@@ -153,19 +142,14 @@ public abstract class ProjectionStorageTest
         void allWithFieldMask() {
             List<ProjectId> ids = fillStorage(5);
 
-            String projectDescriptor = Project.getDescriptor()
-                                              .getFullName();
-            @SuppressWarnings("DuplicateStringLiteralInspection")
-            // clashes with non-related tests.
-                    FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
-                                                       projectDescriptor + ".name");
+            FieldMask fieldMask = fromStringList(Project.class, ImmutableList.of("id", "name"));
 
             Iterator<EntityRecord> read = storage.readAll(fieldMask);
             Collection<EntityRecord> readRecords = newArrayList(read);
-            assertSize(ids.size(), readRecords);
+            assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
                 Any packedState = record.getState();
-                Project state = AnyPacker.unpack(packedState);
+                Project state = unpack(packedState, Project.class);
                 assertMatchesMask(state, fieldMask);
             }
         }
@@ -178,7 +162,7 @@ public abstract class ProjectionStorageTest
 
             Iterator<EntityRecord> read = storage.readMultiple(ids);
             Collection<EntityRecord> readRecords = newArrayList(read);
-            assertSize(ids.size(), readRecords);
+            assertThat(readRecords).hasSize(ids.size());
 
             // Check data consistency
             for (EntityRecord record : readRecords) {
@@ -192,14 +176,11 @@ public abstract class ProjectionStorageTest
             // Get a subset of IDs
             List<ProjectId> ids = fillStorage(10).subList(0, 5);
 
-            String projectDescriptor = Project.getDescriptor()
-                                              .getFullName();
-            FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
-                                               projectDescriptor + ".status");
+            FieldMask fieldMask = fromStringList(Project.class, ImmutableList.of("id", "status"));
 
             Iterator<EntityRecord> read = storage.readMultiple(ids, fieldMask);
             Collection<EntityRecord> readRecords = newArrayList(read);
-            assertSize(ids.size(), readRecords);
+            assertThat(readRecords).hasSize(ids.size());
 
             // Check data consistency
             for (EntityRecord record : readRecords) {

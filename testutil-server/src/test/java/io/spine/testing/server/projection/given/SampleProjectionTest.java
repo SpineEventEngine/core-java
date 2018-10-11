@@ -24,6 +24,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.expected.EventSubscriberExpected;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.event.TuProjectCreated;
 import io.spine.testing.server.projection.ProjectionTest;
 import io.spine.testing.server.projection.given.prj.TuProjection;
 import io.spine.testing.server.projection.given.prj.TuProjectionRepository;
@@ -32,12 +34,15 @@ import io.spine.testing.server.projection.given.prj.TuProjectionRepository;
  * The test class for the {@code StringValue} event handler in {@code TestProjection}.
  */
 public class SampleProjectionTest
-        extends ProjectionTest<Long, StringValue, StringValue, TuProjection> {
+        extends ProjectionTest<Long, TuProjectCreated, StringValue, TuProjection> {
 
-    public static final StringValue TEST_EVENT =
-            StringValue.newBuilder()
-                       .setValue("test projection event")
-                       .build();
+    public static final TuProjectCreated TEST_EVENT =
+            TuProjectCreated.newBuilder()
+                            .setId(TuProjectId
+                                           .newBuilder()
+                                           .setValue("test projection event")
+                                           .build())
+                            .build();
 
     public SampleProjectionTest() {
         super(TuProjection.ID, TEST_EVENT);

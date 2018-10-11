@@ -25,17 +25,17 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.time.Durations2;
+import io.spine.test.commandbus.CmdBusStartProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.Durations2.minutes;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
-import static io.spine.time.Durations2.minutes;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -113,10 +113,9 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("scheduling options")
         void schedulingOptions() {
-            Command cmd = requestFactory.command()
-                                        .create(toMessage(newUuid()));
+            Command cmd = createCommand();
             Timestamp schedulingTime = getCurrentTime();
-            Duration delay = Durations2.minutes(5);
+            Duration delay = minutes(5);
 
             Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
             CommandContext.Schedule schedule = cmdUpdated.getContext()
@@ -130,8 +129,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("scheduling time")
         void schedulingTime() {
-            Command cmd = requestFactory.command()
-                                        .create(toMessage(newUuid()));
+            Command cmd = createCommand();
             Timestamp schedulingTime = getCurrentTime();
 
             Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
@@ -139,11 +137,20 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
                                                    .getSchedulingTime());
         }
+
+        private Command createCommand() {
+            CmdBusStartProject command = CmdBusStartProject.newBuilder()
+                                                           .setId(newUuid())
+                                                           .build();
+            Command cmd = requestFactory.command()
+                                        .create(toMessage(command));
+            return cmd;
+        }
     }
 
     private static Command createScheduledCommand() {
         Timestamp schedulingTime = minutesAgo(3);
-        Duration delayPrimary = Durations2.fromMinutes(5);
+        Duration delayPrimary = minutes(5);
         return setSchedule(createProject(), delayPrimary, schedulingTime);
     }
 }

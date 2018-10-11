@@ -20,6 +20,7 @@
 
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -28,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.Targets.composeTarget;
 import static java.util.Arrays.asList;
@@ -110,9 +112,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
         if (fieldMask == null || fieldMask.isEmpty()) {
             return null;
         }
-        FieldMask mask = FieldMask.newBuilder()
-                                  .addAllPaths(fieldMask)
-                                  .build();
+        FieldMask mask = fromStringList(null, ImmutableList.copyOf(fieldMask));
         return mask;
     }
 

@@ -28,8 +28,6 @@ option java_package="io.spine.test.commandservice.command";
 option java_outer_classname = "CommandServiceCommandsProto";
 option java_multiple_files = true;
 
-import "spine/core/event.proto";
-
 import "spine/test/commandservice/project.proto";
 
 message CsCreateProject {
@@ -43,9 +41,4 @@ message CsAddTask {
 
 message CsStartProject {
     ProjectId project_id = 1;
-}
-
-message ImportEvents {
-    ProjectId project_id = 1;
-    repeated core.Event event = 2;
 }

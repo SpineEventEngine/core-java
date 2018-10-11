@@ -72,7 +72,7 @@ abstract class AggregateEndpoint<I,
     protected final List<Event> dispatchInTx(A aggregate) {
         List<Event> events = doDispatch(aggregate, envelope());
         AggregateTransaction tx = startTransaction(aggregate);
-        List<Event> producedEvents = aggregate.apply(events, envelope());
+        List<Event> producedEvents = aggregate.apply(events);
         tx.commit();
         onDispatched(aggregate, envelope(), producedEvents);
         return producedEvents;

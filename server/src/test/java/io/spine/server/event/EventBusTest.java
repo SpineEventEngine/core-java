@@ -62,6 +62,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -73,7 +74,6 @@ import static io.spine.server.event.given.EventBusTestEnv.eventBusBuilder;
 import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.server.event.given.EventBusTestEnv.newTask;
 import static io.spine.server.event.given.EventBusTestEnv.readEvents;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -87,10 +87,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Mykhailo Drachuk
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names
 @DisplayName("EventBus should")
 public class EventBusTest {
 
@@ -327,6 +323,13 @@ public class EventBusTest {
 
             verify(enricher, never()).enrich(any(EventEnvelope.class));
         }
+
+        private void closeBoundedContext() {
+            try {
+                bc.close();
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Test
@@ -349,7 +352,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> events = readEvents(eventBus);
-            assertSize(1, events);
+            assertThat(events).hasSize(1);
         }
 
         @Test
@@ -360,7 +363,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> events = readEvents(eventBus);
-            assertSize(1, events);
+            assertThat(events).hasSize(1);
         }
 
         /**
@@ -382,7 +385,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> storedEvents = readEvents(eventBus);
-            assertSize(3, storedEvents);
+            assertThat(storedEvents).hasSize(3);
         }
     }
 
@@ -399,7 +402,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> events = readEvents(eventBus);
-            assertSize(0, events);
+            assertThat(events).isEmpty();
         }
 
         @Test
@@ -410,7 +413,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> events = readEvents(eventBus);
-            assertSize(0, events);
+            assertThat(events).isEmpty();
         }
 
         /**
@@ -432,7 +435,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> storedEvents = readEvents(eventBus);
-            assertSize(0, storedEvents);
+            assertThat(storedEvents).isEmpty();
         }
     }
 
@@ -457,10 +460,10 @@ public class EventBusTest {
         commandBus.post(command, StreamObservers.noOpObserver());
 
         List<Event> storedEvents = readEvents(eventBus);
-        assertSize(2, storedEvents);
+        assertThat(storedEvents).hasSize(2);
 
         for (Event event : storedEvents) {
-            EBTaskAdded contents = unpack(event.getMessage());
+            EBTaskAdded contents = unpack(event.getMessage(), EBTaskAdded.class);
             Task task = contents.getTask();
             assertFalse(task.getDone());
         }
@@ -533,12 +536,5 @@ public class EventBusTest {
             Thread.sleep(100);
         }
         executor.shutdownNow();
-    }
-
-    private void closeBoundedContext() {
-        try {
-            bc.close();
-        } catch (Exception ignored) {
-        }
     }
 }

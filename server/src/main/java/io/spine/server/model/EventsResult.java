@@ -20,7 +20,7 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class EventsResult extends MethodResult<Message> {
+public abstract class EventsResult extends MethodResult<EventMessage> {
 
     private final EventProducer producer;
 
@@ -57,7 +57,7 @@ public abstract class EventsResult extends MethodResult<Message> {
      * Transforms the messages of the result into a list of events.
      */
     public List<Event> produceEvents(MessageEnvelope origin) {
-        List<? extends Message> messages = asMessages();
+        List<? extends EventMessage> messages = asMessages();
         List<Event> result =
                 messages.stream()
                         .map(toEvent(origin))
@@ -65,14 +65,14 @@ public abstract class EventsResult extends MethodResult<Message> {
         return result;
     }
 
-    private Function<Message, Event> toEvent(MessageEnvelope origin) {
+    private Function<EventMessage, Event> toEvent(MessageEnvelope origin) {
         return new ToEvent(producer, origin);
     }
 
     /**
      * Converts an event message into an {@link Event}.
      */
-    private static final class ToEvent implements Function<Message, Event> {
+    private static final class ToEvent implements Function<EventMessage, Event> {
 
         private final EventFactory eventFactory;
         private final Version version;
@@ -83,7 +83,7 @@ public abstract class EventsResult extends MethodResult<Message> {
         }
 
         @Override
-        public Event apply(Message message) {
+        public Event apply(EventMessage message) {
             return eventFactory.createEvent(message, version);
         }
     }

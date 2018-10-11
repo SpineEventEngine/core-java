@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -45,6 +46,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class QueryParameters implements Iterable<CompositeQueryParameter>, Serializable {
 
     private static final long serialVersionUID = 0L;
+    static final String FIELD_PARAMETERS = "parameters";
 
     private final ImmutableCollection<CompositeQueryParameter> parameters;
 
@@ -67,6 +69,10 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         this.limit = builder.limit();
         this.orderBy = builder.orderBy();
         this.hasLifecycle = builder.hasLifecycle;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
@@ -99,8 +105,8 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
     }
 
     /**
-     * @return whether this parameters include filters by
-     *         the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags} or not
+     * Verifies whether this parameters include filters by
+     * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags} or not.
      */
     public boolean isLifecycleAttributesSet() {
         return hasLifecycle;
@@ -123,8 +129,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         return Objects.hashCode(parameters);
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add(FIELD_PARAMETERS, parameters)
+                          .add("hasLifecycle", hasLifecycle)
+                          .toString();
     }
 
     /**

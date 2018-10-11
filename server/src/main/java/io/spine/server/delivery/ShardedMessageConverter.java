@@ -41,7 +41,6 @@ import io.spine.protobuf.TypeConverter;
  * @param <I> the identifier of the message targets
  * @param <M> the type of the messages being converted
  * @param <E> the type of the message envelopes
- * @author Alex Tymchenko
  */
 abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEnvelope<?, M, ?>> {
 
@@ -57,12 +56,13 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
         Any packedOriginalMsg = AnyPacker.pack(originalMessage);
         Message message = TypeConverter.toMessage(targetId);
         Any packedTargetId = AnyPacker.pack(message);
-        ShardedMessage result = ShardedMessage.newBuilder()
-                                              .setId(shardedMessageId)
-                                              .setTargetId(packedTargetId)
-                                              .setOriginalMessage(packedOriginalMsg)
-                                              .setWhenSharded(Time.getCurrentTime())
-                                              .build();
+        ShardedMessage result = ShardedMessage
+                .newBuilder()
+                .setId(shardedMessageId)
+                .setTargetId(packedTargetId)
+                .setOriginalMessage(packedOriginalMsg)
+                .setWhenSharded(Time.getCurrentTime())
+                .build();
         return result;
     }
 

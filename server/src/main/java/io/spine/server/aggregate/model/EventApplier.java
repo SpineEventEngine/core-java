@@ -23,6 +23,7 @@ package io.spine.server.aggregate.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Empty;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
@@ -41,7 +42,11 @@ import java.util.function.Function;
  * @author Alexander Yevsyukov
  */
 public final class EventApplier
-        extends AbstractHandlerMethod<Aggregate, EventClass, EventEnvelope, MethodResult<Empty>> {
+        extends AbstractHandlerMethod<Aggregate,
+                                      EventMessage,
+                                      EventClass,
+                                      EventEnvelope,
+                                      MethodResult<Empty>> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.

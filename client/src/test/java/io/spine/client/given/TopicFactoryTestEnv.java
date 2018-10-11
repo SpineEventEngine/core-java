@@ -25,13 +25,10 @@ import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
 
-import static io.spine.time.Timestamps2.isLaterThan;
+import static io.spine.protobuf.Timestamps2.isLaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class TopicFactoryTestEnv {
 
     // See {@code client_requests.proto} for declaration.

@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
@@ -38,6 +39,7 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -123,8 +125,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Returns the {@link TypeUrl} for the state objects wrapped by entities
-     * managed by this repository
+     * Obtains the {@link TypeUrl} for the state objects wrapped by entities
+     * managed by this repository.
      */
     public TypeUrl getEntityStateType() {
         return entityClass().getStateType();
@@ -322,6 +324,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <ol>
      *     <li>The name of the message class.
      *     <li>The message ID.
+     *     <li>The entity type URL.
      * </ol>
      *
      * @param msgFormat the format of the message
@@ -332,7 +335,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                             MessageEnvelope envelope,
                             RuntimeException exception) {
         MessageClass messageClass = envelope.getMessageClass();
-        String errorMessage = format(msgFormat, messageClass, envelope.idAsString());
+        String stateType = getEntityStateType().value();
+        String errorMessage = format(msgFormat, messageClass, envelope.idAsString(), stateType);
         _error(errorMessage, exception);
     }
 
@@ -348,8 +352,38 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Internal
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
+        TypeUrl stateType = getEntityStateType();
         SystemGateway gateway = getBoundedContext().getSystemGateway();
-        return EntityLifecycle.create(id, getEntityStateType(), gateway);
+        EventFilter eventFilter = eventFilter();
+        EntityLifecycle lifecycle = EntityLifecycle
+                .newBuilder()
+                .setEntityId(id)
+                .setEntityType(stateType)
+                .setGateway(gateway)
+                .setEventFilter(eventFilter)
+                .build();
+        return lifecycle;
+    }
+
+    /**
+     * Creates an {@link EventFilter} for this repository.
+     *
+     * <p>All the events posted by this repository, domain and system, are first passed through this
+     * filter.
+     *
+     * <p>By default, the filter {@linkplain EventFilter#allowAll() allows all} the events to be
+     * posted. Override this method to change this behaviour.
+     *
+     * @return an {@link EventFilter} to apply to all posted events
+     * @implNote This method may be called many times for a single repository. It is reasonable that
+     *           it does not re-initialize the filter each time. Also, it is necessary that
+     *           the filter returned from this method is always (at least effectively) the same.
+     *           See {@link Pure @Pure} for the details on the expected behaviour.
+     */
+    @SPI
+    @Pure
+    protected EventFilter eventFilter() {
+        return EventFilter.allowAll();
     }
 
     /**

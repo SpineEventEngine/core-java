@@ -35,6 +35,7 @@ import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.server.storage.RecordStorage;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -153,7 +154,8 @@ public final class EntityQueries {
     private static EntityColumn findMatchingColumn(ColumnFilter filter,
                                                    Collection<EntityColumn> entityColumns) {
         for (EntityColumn column : entityColumns) {
-            if (column.getName().equals(filter.getColumnName())) {
+            if (column.getName()
+                      .equals(filter.getColumnName())) {
                 return column;
             }
         }
@@ -176,7 +178,7 @@ public final class EntityQueries {
 
     private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {
         EntityIdFilter idFilter = entityFilters.getIdFilter();
-        Collection<I> ids = new LinkedList<>();
+        Collection<I> ids = new ArrayList<>();
         for (EntityId entityId : idFilter.getIdsList()) {
             Any wrappedMessageId = entityId.getId();
             I genericId = Identifier.unpack(wrappedMessageId);

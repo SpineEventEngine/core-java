@@ -33,13 +33,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.MOCK_COLUMNS_COUNT;
 import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.getNonNullColumnValues;
 import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.setupMockColumnsAllowingNulls;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertContainsAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -48,9 +48,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("ColumnRecords utility should")
 class ColumnRecordsTest {
 
@@ -110,6 +107,6 @@ class ColumnRecordsTest {
 
         int indexOfNull = destination.indexOf(null);
         assertTrue(indexOfNull >= 0, "Null value was not saved to the destination");
-        assertContainsAll(destination, getNonNullColumnValues().toArray());
+        assertThat(destination).containsAllIn(getNonNullColumnValues());
     }
 }

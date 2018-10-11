@@ -24,11 +24,11 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.test.commandbus.CmdBusStartProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +54,7 @@ class BusesTest {
     void passNullToleranceCheck() {
         Command command = Command
                 .newBuilder()
-                .setMessage(pack(Time.getCurrentTime()))
+                .setMessage(pack(CmdBusStartProject.getDefaultInstance()))
                 .build();
         CannotModifyArchivedEntity throwable = new CannotModifyArchivedEntity(
                 Any.getDefaultInstance()

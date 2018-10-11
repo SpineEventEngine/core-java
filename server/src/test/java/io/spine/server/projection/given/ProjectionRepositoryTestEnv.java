@@ -20,10 +20,6 @@
 
 package io.spine.server.projection.given;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Subscribe;
@@ -36,6 +32,7 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.ProjectVBuilder;
+import io.spine.test.projection.Task;
 import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
@@ -43,18 +40,12 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Set;
+import static io.spine.testing.TestValues.randomString;
 
-/**
- * @author Alexander Yevsyukov
- * @author Alexander Aleksandrov
- * @author Dmytro Grankin
- * @author Alex Tymchenko
- */
 public class ProjectionRepositoryTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private ProjectionRepositoryTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -64,7 +55,6 @@ public class ProjectionRepositoryTestEnv {
      * does not modify the state of an {@code Entity}. For the newly created entities it could lead
      * to an invalid entry created in the storage.
      */
-    @SuppressWarnings("unused")
     public static class NoOpTaskNamesProjection
             extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
 
@@ -85,7 +75,7 @@ public class ProjectionRepositoryTestEnv {
 
     /** Stub projection repository. */
     public static class TestProjectionRepository
-            extends ProjectionRepository<ProjectId, TestProjection, Project> {
+            extends TestProjection.Repository {
 
         private @Nullable MessageEnvelope lastErrorEnvelope;
         private @Nullable RuntimeException lastException;
@@ -213,7 +203,7 @@ public class ProjectionRepositoryTestEnv {
             keep(event);
             setDeleted(true);
         }
-        
+
         @Column
         public String getName() {
             return getState().getName();
@@ -243,13 +233,19 @@ public class ProjectionRepositoryTestEnv {
 
         public static PrjProjectCreated projectCreated() {
             return PrjProjectCreated.newBuilder()
+                                    .setName("Projection test " + randomString())
                                     .setProjectId(ENTITY_ID)
                                     .build();
         }
 
         public static PrjTaskAdded taskAdded() {
+            Task task = Task
+                    .newBuilder()
+                    .setTitle("Test task " + randomString())
+                    .build();
             return PrjTaskAdded.newBuilder()
                                .setProjectId(ENTITY_ID)
+                               .setTask(task)
                                .build();
         }
 

@@ -20,23 +20,17 @@
 
 package io.spine.server.entity.given;
 
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
-import io.spine.server.entity.FieldMasks;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.TaskId;
-import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
 
+import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static java.lang.String.format;
 
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
 public class FieldMasksTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -45,10 +39,7 @@ public class FieldMasksTestEnv {
 
     public static class Given {
 
-        private static final Descriptors.Descriptor TYPE_DESCRIPTOR = Project.getDescriptor();
-
         public static final TypeUrl TYPE = TypeUrl.of(Project.class);
-        public static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
 
         /** Prevents instantiation of this utility class. */
         private Given() {
@@ -83,7 +74,7 @@ public class FieldMasksTestEnv {
         }
 
         public static FieldMask fieldMask(int... fieldIndices) {
-            return FieldMasks.maskOf(TYPE_DESCRIPTOR, fieldIndices);
+            return fromFieldNumbers(Project.class, fieldIndices);
         }
     }
 }

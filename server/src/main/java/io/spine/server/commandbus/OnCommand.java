@@ -20,7 +20,7 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandId;
 
@@ -32,8 +32,8 @@ import io.spine.core.CommandId;
  * @param <S> the type of the sequence for the return type covariance
  * @author Alexander Yevsyukov
  */
-abstract class OnCommand<R extends Message,
-                         B extends Message.Builder,
+abstract class OnCommand<R extends EventMessage,
+                         B extends EventMessage.Builder,
                          S extends CommandSequence<CommandId, R, B, S>>
         extends CommandSequence<CommandId, R, B, S> {
 

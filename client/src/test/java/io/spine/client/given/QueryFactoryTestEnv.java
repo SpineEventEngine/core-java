@@ -38,15 +38,12 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.testing.Verify.assertContainsAll;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class QueryFactoryTestEnv {
 
     // See {@code client_requests.proto} for declaration.
@@ -171,8 +168,7 @@ public class QueryFactoryTestEnv {
         Collection<EntityId> builderEntityIds = builderIdFilter.getIdsList();
 
         // Order may differ but all the elements are the same
-        assertEquals(factoryEntityIds.size(), builderEntityIds.size());
-        assertContainsAll(builderEntityIds,
-                          factoryEntityIds.toArray(new EntityId[builderEntityIds.size()]));
+        assertThat(builderEntityIds).hasSize(factoryEntityIds.size());
+        assertThat(builderEntityIds).containsAllIn(factoryEntityIds);
     }
 }

@@ -54,7 +54,7 @@ import static java.util.Collections.singleton;
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
-                          C extends MessageClass,
+                          C extends MessageClass<? extends Message>,
                           D extends MessageDispatcher<C, E, ?>> implements AutoCloseable {
 
     /** A queue of envelopes to post. */
@@ -62,7 +62,7 @@ public abstract class Bus<T extends Message,
 
     /** Dispatchers of messages by their class. */
     @LazyInit
-    private @MonotonicNonNull DispatcherRegistry<C, D> registry;
+    private @MonotonicNonNull DispatcherRegistry<C, E, D> registry;
 
     /** The chain of filters for this bus, {@linkplain #filterChain() lazily initialized}. */
     @LazyInit
@@ -210,7 +210,7 @@ public abstract class Bus<T extends Message,
     /**
      * Obtains the dispatcher registry.
      */
-    protected DispatcherRegistry<C, D> registry() {
+    protected DispatcherRegistry<C, E, D> registry() {
         if (registry == null) {
             registry = createRegistry();
         }
@@ -295,7 +295,7 @@ public abstract class Bus<T extends Message,
     /**
      * Factory method for creating an instance of the registry for dispatchers of the bus.
      */
-    protected abstract DispatcherRegistry<C, D> createRegistry();
+    protected abstract DispatcherRegistry<C, E, D> createRegistry();
 
     /**
      * Filters the given messages.

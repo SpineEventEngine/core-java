@@ -21,6 +21,7 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
@@ -43,6 +44,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Versions.newVersion;
+import static io.spine.core.given.GivenEvent.withMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -115,9 +117,9 @@ public abstract class TransactionTest<I,
 
     protected abstract void checkEventReceived(E entity, Event event);
 
-    protected abstract Message createEventMessage();
+    protected abstract EventMessage createEventMessage();
 
-    protected abstract Message createEventMessageThatFailsInHandler();
+    protected abstract EventMessage createEventMessageThatFailsInHandler();
 
     protected abstract void breakEntityValidation(E entity, RuntimeException toThrow);
 
@@ -185,7 +187,7 @@ public abstract class TransactionTest<I,
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
 
         checkEventReceived(entity, event);
@@ -197,7 +199,7 @@ public abstract class TransactionTest<I,
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
 
         assertEquals(1, tx.getPhases()
@@ -214,7 +216,7 @@ public abstract class TransactionTest<I,
 
         Transaction<I, E, S, B> tx = createTx(entity);
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
         S stateBeforeCommit = entity.getState();
         Version versionBeforeCommit = entity.getVersion();
@@ -233,7 +235,7 @@ public abstract class TransactionTest<I,
 
         Transaction<I, E, S, B> tx = createTx(entity);
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
         S stateBeforeRollback = entity.getState();
         Version versionBeforeRollback = entity.getVersion();
@@ -251,7 +253,7 @@ public abstract class TransactionTest<I,
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
 
         Version ctxVersion = event.getContext()
                                   .getVersion();
@@ -269,7 +271,7 @@ public abstract class TransactionTest<I,
         TransactionListener<I, E, S, B> listener = mock(TransactionListener.class);
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTxWithListener(entity, listener);
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
 
         verifyZeroInteractions(listener);
         applyEvent(tx, event);
@@ -301,7 +303,7 @@ public abstract class TransactionTest<I,
 
             Transaction<I, E, S, B> tx = createTx(entity);
 
-            Event event = createEvent(createEventMessageThatFailsInHandler());
+            Event event = withMessage(createEventMessageThatFailsInHandler());
 
             assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
         }
@@ -337,7 +339,7 @@ public abstract class TransactionTest<I,
 
             Transaction<I, E, S, B> tx = createTx(entity);
 
-            Event event = createEvent(createEventMessageThatFailsInHandler());
+            Event event = withMessage(createEventMessageThatFailsInHandler());
             try {
                 applyEvent(tx, event);
                 fail("Expected an `Exception` due to a failed phase execution.");
@@ -398,7 +400,7 @@ public abstract class TransactionTest<I,
         Transaction<I, E, S, B> tx = createTx(entity);
         assertEquals(entity.getVersion(), tx.getVersion());
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         EventEnvelope envelope = EventEnvelope.of(event);
         tx.apply(envelope);
 
@@ -407,11 +409,6 @@ public abstract class TransactionTest<I,
         assertEquals(versionFromEvent, tx.getVersion());
         tx.commit();
         assertEquals(versionFromEvent, entity.getVersion());
-    }
-
-    protected final Event createEvent(Message eventMessage) {
-        return eventFactory.createEvent(eventMessage,
-                                        someVersion());
     }
 
     private ArgumentMatcher<Phase<I, E, S, B>> matchesSuccessfulPhaseFor(Event event) {

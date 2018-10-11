@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides model classes and interfaces for {@link io.spine.server.entity}.
+ * This package provides model classes and interfaces for {@code io.spine.server.entity}.
  */
 @Internal
 @CheckReturnValue

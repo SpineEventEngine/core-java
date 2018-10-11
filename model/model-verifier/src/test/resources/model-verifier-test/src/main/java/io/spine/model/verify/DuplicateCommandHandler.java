@@ -21,12 +21,9 @@
 package io.spine.model.verify;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
 import io.spine.validate.AnyVBuilder;
-
-import java.util.List;
 
 import static java.util.Collections.singletonList;
 
@@ -40,12 +37,16 @@ public class DuplicateCommandHandler extends Aggregate<String, Any, AnyVBuilder>
     }
 
     @Assign
-    public List<UInt64Value> handle(UInt64Value command) {
-        return singletonList(command);
+    public Iterable<LinkSent> handle(SendLink command) {
+        return singletonList(LinkSent.newBuilder()
+                                     .setLink(command.getLink())
+                                     .build());
     }
 
     @Assign
-    public List<Any> onCommandAny(Any command) {
-        return singletonList(command);
+    public MessageSent onCommandAny(SendMessage command) {
+        return MessageSent.newBuilder()
+                          .setMessage(command.getMessage())
+                          .build();
     }
 }

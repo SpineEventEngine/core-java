@@ -23,9 +23,11 @@ package io.spine.testing.server;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Ack;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -37,8 +39,6 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @param <S> state message of the handling entity
  * @param <E> the type of the handling entity being tested
  * @param <X> the type of {@link AbstractExpected Expected} object
- * @author Dmytro Dashenkov
+ *
  * @see CommandHandlerTest
  * @see EventReactionTest
  */
@@ -77,7 +77,7 @@ public abstract class MessageHandlerTest<I,
                                          M extends Message,
                                          S extends Message,
                                          E extends Entity<I, S>,
-                                         X extends AbstractExpected<S, X>> {
+                                         X extends AbstractExpected<S, X>> implements Logging {
 
     @SuppressWarnings("unused")
     protected static final String BE_REJECTED_TEST_NAME = "be rejected";
@@ -196,7 +196,7 @@ public abstract class MessageHandlerTest<I,
         Class<?> cls = type.getJavaClass();
         if (Message.class.isAssignableFrom(cls)) {
             @SuppressWarnings("unchecked")
-            Class<? extends Message> messageType = (Class<? extends Message>) cls;
+            Class<? extends CommandMessage> messageType = (Class<? extends CommandMessage>) cls;
             CommandClass commandClass = CommandClass.from(messageType);
             return of(commandClass);
         } else {
@@ -222,7 +222,7 @@ public abstract class MessageHandlerTest<I,
      *
      * <p>This class is needed to accept commands and pass it further to filtering.
      */
-    private static class VoidCommandDispatcher implements CommandDispatcher<String> {
+    private static class VoidCommandDispatcher implements CommandDispatcher<String>, Logging {
 
         private final Set<CommandClass> expectedCommands;
 
@@ -247,7 +247,7 @@ public abstract class MessageHandlerTest<I,
 
         @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            log().error("Error while dispatching a command during the unit test");
+            _error("Error while dispatching a command during the unit test");
         }
     }
 
@@ -262,17 +262,5 @@ public abstract class MessageHandlerTest<I,
                                                    .getMessage()));
             return empty();
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(MessageHandlerTest.class);
-    }
-
-    @SuppressWarnings("MethodOnlyUsedFromInnerClass")
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

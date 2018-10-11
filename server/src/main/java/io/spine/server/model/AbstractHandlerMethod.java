@@ -47,24 +47,27 @@ import static java.lang.String.format;
  * same object (not class).
  *
  * @param <T> the type of the target object
- * @param <M> the type of the message class
+ * @param <M> the type of the message handled by this method
+ * @param <C> the type of the message class
  * @param <E> the type of message envelopes, in which the messages to handle are wrapped
+ * @param <R> the type of the method invocation result
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @Immutable
 public abstract class AbstractHandlerMethod<T,
-                                            M extends MessageClass,
+                                            M extends Message,
+                                            C extends MessageClass<M>,
                                             E extends MessageEnvelope<?, ?, ?>,
                                             R extends MethodResult>
-        implements HandlerMethod<T, M, E, R> {
+        implements HandlerMethod<T, C, E, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
     private final Method method;
 
     /** The class of the first parameter. */
-    private final Class<? extends Message> messageClass;
+    private final Class<M> messageClass;
 
     /**
      * The set of the metadata attributes set via method annotations.
@@ -139,7 +142,7 @@ public abstract class AbstractHandlerMethod<T,
         return ImmutableSet.of(ExternalAttribute::of);
     }
 
-    protected final Class<? extends Message> rawMessageClass() {
+    protected Class<? extends M> rawMessageClass() {
         return messageClass;
     }
 
@@ -153,16 +156,13 @@ public abstract class AbstractHandlerMethod<T,
      * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
-    static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") /* We always expect first param as `Message`. */
-        Class<? extends Message> result =
-                (Class<? extends Message>) handler.getParameterTypes()[0];
+    protected static <M extends Message> Class<M> getFirstParamType(Method handler) {
+        @SuppressWarnings("unchecked")
+            // We always expect first param as a Message of required type.
+        Class<M> result = (Class<M>) handler.getParameterTypes()[0];
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Method getRawMethod() {
         return method;
@@ -176,19 +176,24 @@ public abstract class AbstractHandlerMethod<T,
         return parameterSpec;
     }
 
-    /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
+    /**
+     * Returns {@code true} if the method is declared {@code public},
+     * {@code false} otherwise.
+     */
     protected boolean isPublic() {
         boolean result = Modifier.isPublic(getModifiers());
         return result;
     }
 
-    /** Returns {@code true} if the method is declared {@code private}, {@code false} otherwise. */
+    /**
+     * Returns {@code true} if the method is declared {@code private},
+     * {@code false} otherwise.
+     */
     protected boolean isPrivate() {
         boolean result = Modifier.isPrivate(getModifiers());
         return result;
     }
 
-    @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")   // Returning immutable impl.
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
@@ -206,20 +211,31 @@ public abstract class AbstractHandlerMethod<T,
         checkNotNull(target);
         checkNotNull(envelope);
         checkAttributesMatch(envelope);
-        Message message = envelope.getMessage();
-        Message context = envelope.getMessageContext();
         try {
             Object[] arguments = parameterSpec.extractArguments(envelope);
             Object rawOutput = method.invoke(target, arguments);
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            Message message = envelope.getMessage();
+            Message context = envelope.getMessageContext();
             throw new HandlerMethodFailedException(target, message, context, e);
         }
     }
 
-    @SuppressWarnings("NoopMethodInAbstractClass") // to make it optional for descendants
-    protected void checkAttributesMatch(E envelope) {
+    /**
+     * Allows to make sure that the passed envelope matches the annotation attributes of a method.
+     *
+     * <p>Default implementation does nothing. Descending classes may override for checking
+     * the match.
+     *
+     * @throws IllegalArgumentException
+     *         the default implementation does not throw ever. Descending classes would throw
+     *         if the annotation arguments do not match the message of the passed envelope.
+     * @param envelope the envelope with the massed to handle
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // Optional for descendants.
+    protected void checkAttributesMatch(E envelope) throws IllegalArgumentException {
         // Do nothing by default.
     }
 
@@ -246,9 +262,8 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public HandlerKey key() {
-        HandlerKey result = HandlerKey.of(getMessageClass());
-        return result;
+    public HandlerId id() {
+        return Handlers.createId(getMessageClass());
     }
 
     @Override
@@ -271,7 +286,8 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     /**
-     * @return full name of the handler method
+     * Obtains the full name of the handler method.
+     *
      * @see #getFullName()
      */
     @Override

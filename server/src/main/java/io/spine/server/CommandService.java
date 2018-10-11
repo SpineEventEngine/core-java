@@ -22,16 +22,17 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
+import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +45,9 @@ import static io.spine.server.bus.Buses.reject;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
+public class CommandService
+        extends CommandServiceGrpc.CommandServiceImplBase
+        implements Logging {
 
     private final ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
 
@@ -76,8 +79,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         }
     }
 
-    private static void handleUnsupported(Command request,
-                                          StreamObserver<Ack> responseObserver) {
+    private void handleUnsupported(Command request, StreamObserver<Ack> responseObserver) {
         UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
         Error error = unsupported.asError();
@@ -86,6 +88,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @CanIgnoreReturnValue
     public static class Builder {
 
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
@@ -113,6 +116,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * @param boundedContext the instance to check
          * @return {@code true} if the instance was added to the builder, {@code false} otherwise
          */
+        @CheckReturnValue
         public boolean contains(BoundedContext boundedContext) {
             boolean contains = boundedContexts.contains(boundedContext);
             return contains;
@@ -121,6 +125,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         /**
          * Builds a new {@link CommandService}.
          */
+        @CheckReturnValue
         public CommandService build() {
             ImmutableMap<CommandClass, BoundedContext> map = createMap();
             CommandService result = new CommandService(map);
@@ -131,6 +136,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * Creates a map from {@code CommandClass}es to {@code BoundedContext}s that
          * handle such commands.
          */
+        @CheckReturnValue
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
             ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
@@ -151,15 +157,5 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
                 builder.put(commandClass, boundedContext);
             }
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandService.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

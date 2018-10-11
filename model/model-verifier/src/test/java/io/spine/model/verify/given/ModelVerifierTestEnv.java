@@ -21,24 +21,28 @@
 package io.spine.model.verify.given;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
+import io.spine.test.model.verify.ChangeTitle;
+import io.spine.test.model.verify.EditPhoto;
+import io.spine.test.model.verify.PhotoEdited;
+import io.spine.test.model.verify.PhotoUploaded;
+import io.spine.test.model.verify.TitleChanged;
+import io.spine.test.model.verify.UploadPhoto;
 import io.spine.validate.AnyVBuilder;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 
-import java.util.Collections;
+import static com.google.protobuf.Any.pack;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class ModelVerifierTestEnv {
+public final class ModelVerifierTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private ModelVerifierTestEnv() {
@@ -50,60 +54,73 @@ public class ModelVerifierTestEnv {
         return result;
     }
 
-    public static class AnyCommandHandler extends AbstractCommandHandler {
+    public static class UploadCommandHandler extends AbstractCommandHandler {
 
-        protected AnyCommandHandler(EventBus eventBus) {
+        protected UploadCommandHandler(EventBus eventBus) {
             super(eventBus);
         }
 
-        @SuppressWarnings("unused") // Used for the Model construction
         @Assign
-        Iterable<Message> handle(Any command) {
-            // NoOp for test
-            return Collections.emptySet();
+        PhotoUploaded handle(UploadPhoto command) {
+            return PhotoUploaded
+                    .newBuilder()
+                    .setPhoto(command.getPhoto())
+                    .build();
         }
     }
 
-    public static class Int32HandlerAggregate extends Aggregate<String, Any, AnyVBuilder> {
+    public static class EditAggregate extends Aggregate<String, Any, AnyVBuilder> {
 
-        protected Int32HandlerAggregate(String id) {
+        protected EditAggregate(String id) {
             super(id);
         }
 
-        @SuppressWarnings("unused") // Used for the Model construction
         @Assign
-        Iterable<Message> handle(Int32Value command) {
-            // NoOp for test
-            return Collections.emptySet();
+        PhotoEdited handle(EditPhoto command) {
+            return PhotoEdited
+                    .newBuilder()
+                    .setNewPhoto(command.getNewPhoto())
+                    .build();
+        }
+
+        @Apply
+        private void on(PhotoEdited event) {
+            getBuilder().setOriginalState(pack(event));
         }
     }
 
-    public static class Int64HandlerProcMan extends ProcessManager<String, Any, AnyVBuilder> {
+    public static class RenameProcMan extends ProcessManager<String, Any, AnyVBuilder> {
 
-        protected Int64HandlerProcMan(String id) {
+        protected RenameProcMan(String id) {
             super(id);
         }
 
-        @SuppressWarnings("unused") // Used for the Model construction
         @Assign
-        Iterable<Message> handle(Int64Value command) {
-            // NoOp for test
-            return Collections.emptySet();
+        TitleChanged handle(ChangeTitle command) {
+            return TitleChanged
+                    .newBuilder()
+                    .setNewTitle(command.getNewTitle())
+                    .build();
+        }
+
+        @Apply
+        private void on(TitleChanged event) {
+            getBuilder().setOriginalState(pack(event));
         }
     }
 
-    public static class DuplicateAnyCommandHandler extends AbstractCommandHandler {
+    public static class DuplicateCommandHandler extends AbstractCommandHandler {
 
-        protected DuplicateAnyCommandHandler(EventBus eventBus) {
+        protected DuplicateCommandHandler(EventBus eventBus) {
             super(eventBus);
         }
 
-        @SuppressWarnings("unused") // Used for the Model construction
         @Assign
-        Iterable<Message> handle(Any command) {
-            // NoOp for test
-            return Collections.emptySet();
-
+        PhotoUploaded handle(UploadPhoto command) {
+            return PhotoUploaded
+                    .newBuilder()
+                    .setPhoto(command.getPhoto())
+                    .build();
         }
     }
 }
