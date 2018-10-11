@@ -21,14 +21,19 @@
 package io.spine.model.verify;
 
 import io.spine.annotation.Experimental;
+import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.assemble.AssignLookup;
 import io.spine.tools.gradle.SpinePlugin;
+import io.spine.tools.gradle.compiler.Extension;
+import io.spine.tools.gradle.compiler.ModelCompilerPlugin;
+import io.spine.typehack.MoreKnownTypes;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -97,7 +102,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
      * <p>Reads the {@link CommandHandlers} from the given file and
      * {@linkplain #verifyModel processes} the model.
      */
-    private static class VerifierAction implements Action<Task> {
+    private static class VerifierAction implements Action<Task>, Logging {
 
         private final ModelVerifierPlugin parent;
         private final Path rawModelPath;
@@ -107,32 +112,56 @@ public final class ModelVerifierPlugin extends SpinePlugin {
             this.rawModelPath = rawModelPath;
         }
 
+        @Override
+        public void execute(Task task) {
+            if (!exists(rawModelPath)) {
+                _warn("No Spine model definition found under {}.", rawModelPath);
+            } else {
+                Project project = task.getProject();
+                extendKnownTypes(project);
+                verifyModel(project);
+            }
+        }
+
+        private void extendKnownTypes(Project project) {
+            String pluginExtensionName = ModelCompilerPlugin.extensionName();
+            if (project.getExtensions().findByName(pluginExtensionName) != null) {
+                String path = Extension.getMainDescriptorSetPath(project);
+                File descriptorFile = new File(path);
+                if (descriptorFile.exists()) {
+                    _debug("Extending known types with types from {}.", descriptorFile);
+                    MoreKnownTypes.extendWith(descriptorFile);
+                } else {
+                    _warn("Descriptor file {} does not exist.", descriptorFile);
+                }
+            } else {
+                _warn("{} plugin extension is not found. Apply the Spine model compiler plugin.",
+                      pluginExtensionName);
+            }
+        }
+
         /**
          * Verifies the {@link CommandHandlers} upon the {@linkplain Project Gradle project}.
          *
          * @param project the Gradle project to process the model upon
-         * @param commandHandlers   the Spine model to process
          */
-        private static void verifyModel(Project project, CommandHandlers commandHandlers) {
+        private void verifyModel(Project project) {
             ModelVerifier verifier = new ModelVerifier(project);
+            CommandHandlers commandHandlers = readCommandHandlers();
             verifier.verify(commandHandlers);
         }
 
-        @Override
-        public void execute(Task task) {
-            if (!exists(rawModelPath)) {
-                Logger log = parent.log();
-                log.warn("No Spine model definition found under {}. Completing the task.",
-                         rawModelPath);
-                return;
-            }
-            CommandHandlers commandHandlers;
+        private CommandHandlers readCommandHandlers() {
             try (InputStream in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
-                commandHandlers = CommandHandlers.parseFrom(in);
+                return CommandHandlers.parseFrom(in);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
-            verifyModel(task.getProject(), commandHandlers);
+        }
+
+        @Override
+        public Logger log() {
+            return parent.log();
         }
     }
 }
