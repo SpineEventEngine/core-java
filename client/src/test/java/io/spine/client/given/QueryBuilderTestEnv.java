@@ -23,6 +23,10 @@ package io.spine.client.given;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.EntityId;
+import io.spine.client.OrderBy;
+import io.spine.client.OrderByVBuilder;
+import io.spine.client.Pagination;
+import io.spine.client.PaginationVBuilder;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
@@ -41,6 +45,10 @@ public class QueryBuilderTestEnv {
 
     public static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
     public static final TypeUrl TEST_ENTITY_TYPE_URL = TypeUrl.of(TEST_ENTITY_TYPE);
+    public static final Pagination EMPTY_PAGINATION = Pagination.getDefaultInstance();
+    public static final OrderBy EMPTY_ORDER_BY = OrderBy.getDefaultInstance();
+    public static final String SECOND_FIELD = "second_field";
+    public static final String FIRST_FIELD = "first_field";
 
     /** Prevents instantiation of this test environment class. */
     private QueryBuilderTestEnv() {
@@ -50,6 +58,19 @@ public class QueryBuilderTestEnv {
         return TestEntityId.newBuilder()
                            .setValue(current().nextInt(-1000, 1000))
                            .build();
+    }
+
+    public static Pagination pagination(int pageSize) {
+        return PaginationVBuilder.newBuilder()
+                                 .setPageSize(pageSize)
+                                 .build();
+    }
+
+    public static OrderBy orderBy(String column, OrderBy.Direction direction) {
+        return OrderByVBuilder.newBuilder()
+                              .setColumn(column)
+                              .setDirection(direction)
+                              .build();
     }
 
     public static class EntityIdUnpacker<T> implements Function<EntityId, T> {

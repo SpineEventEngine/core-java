@@ -18,15 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.entity.storage.given;
+
+import io.spine.client.OrderBy;
+import io.spine.client.OrderByVBuilder;
+import io.spine.client.Pagination;
+import io.spine.client.PaginationVBuilder;
+
 /**
- * This package contains gRPC-based implementation of client-server communication.
- *
- * <p>This package is not a part of public API of the framework.
+ * @author Mykhahilo Drachuhk
  */
+public class EntityQueriesTestEnv {
 
-@Internal
-@CheckReturnValue
-package io.spine.client.grpc;
+    private EntityQueriesTestEnv() {
+        // Prevent instantiation of this utility class.
+    }
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.annotation.Internal;
+    public static Pagination pagination(int size) {
+        return PaginationVBuilder.newBuilder()
+                                 .setPageSize(size)
+                                 .build();
+    }
+
+    public static OrderBy order(String column, OrderBy.Direction direction) {
+        return OrderByVBuilder.newBuilder()
+                              .setColumn(column)
+                              .setDirection(direction)
+                              .build();
+    }
+}
