@@ -28,6 +28,7 @@ import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
@@ -38,7 +39,6 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -72,6 +72,7 @@ public abstract class RecordStorage<I>
      * @see RecordStorage(boolean)
      */
     private final @MonotonicNonNull EntityColumnCache entityColumnCache;
+    private final boolean lifecycleSupported;
 
     /**
      * Creates an instance of {@code RecordStorage} which does not support
@@ -87,6 +88,7 @@ public abstract class RecordStorage<I>
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
         this.entityColumnCache = null;
+        lifecycleSupported = false;
     }
 
     /**
@@ -95,6 +97,7 @@ public abstract class RecordStorage<I>
     protected RecordStorage(boolean multitenant, Class<? extends Entity> entityClass) {
         super(multitenant);
         this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);
+        this.lifecycleSupported = EntityWithLifecycle.class.isAssignableFrom(entityClass);
     }
 
     /**
@@ -305,6 +308,17 @@ public abstract class RecordStorage<I>
     }
 
     /**
+     * Indicates if the entity managed by this storage supports the {@link LifecycleFlags
+     * lifecycle flags}.
+     *
+     * @return {@code true} if the stored entities inherit {@link EntityWithLifecycle},
+     *         {@code false} otherwise
+     */
+    public boolean isLifecycleSupported() {
+        return lifecycleSupported;
+    }
+
+    /**
      * Returns a {@code Map} of {@linkplain EntityColumn columns} corresponded to the
      * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed
      * by this storage.
@@ -374,6 +388,9 @@ public abstract class RecordStorage<I>
 
     /**
      * Obtains an iterator for reading all records.
+     * 
+     * <p>Only active entities are returned if the entity class inherits 
+     * {@link io.spine.server.entity.EntityWithLifecycle}.
      *
      * @see BulkStorageOperationsMixin#readAll()
      */
@@ -382,6 +399,9 @@ public abstract class RecordStorage<I>
     /**
      * Obtains an iterator for reading all records, and applying the passed field mask to
      * the results.
+     * 
+     * <p>Only active entities are returned if the entity class inherits 
+     * {@link io.spine.server.entity.EntityWithLifecycle} 
      *
      * @see BulkStorageOperationsMixin#readAll()
      */
@@ -390,6 +410,12 @@ public abstract class RecordStorage<I>
     /**
      * Obtains an iterator for reading records matching the query,
      * and applying the passed field mask to the results.
+     * 
+     * <p>Returns only active entities if the query does not specify the {@linkplain LifecycleFlags
+     * lifecycle flags} when the entity supports them (i.e. inherits 
+     * {@link io.spine.server.entity.EntityWithLifecycle EntityWithLifecycle}). 
+     * In order to read inactive entities, the corresponding filters must be set to the provided 
+     * {@link EntityQuery query}. 
      *
      * @see #readAll(EntityQuery, FieldMask)
      */

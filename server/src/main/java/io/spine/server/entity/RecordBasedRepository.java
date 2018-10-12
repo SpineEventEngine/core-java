@@ -322,51 +322,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         RecordStorage<I> storage = recordStorage();
         EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
-        EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
-        Iterator<EntityRecord> records = storage.readAll(completeQuery, fieldMask);
+        Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
-    }
-
-    /**
-     * Creates an {@link EntityQuery} instance which has:
-     * <ul>
-     * <li>All the parameters from the {@code src} query;
-     * <li>At least one parameter limiting
-     * the {@link LifecycleFlagField Lifecycle Flags Columns}.
-     * </ul>
-     *
-     * <p>If the {@code src} instance
-     * {@linkplain EntityQuery#isLifecycleAttributesSet() contains the lifecycle attributes}, then
-     * it is returned with no change. Otherwise, a new instance containing the default values for
-     * the Lifecycle attributes is returned.
-     *
-     * <p>The default values are:
-     * <pre>
-     *     {@code
-     *     archived -> false,
-     *     deleted  -> false
-     *     }
-     * </pre>
-     *
-     * <p>If the type of the Entity which this repository works with is not derived from
-     * the {@link EntityWithLifecycle}, then no lifecycle attributes are appended and
-     * the {@code src} query is returned.
-     *
-     * @param src
-     *         the source {@link EntityQuery} to take the parameters from
-     * @return an {@link EntityQuery} which includes
-     *         the {@link LifecycleFlagField Lifecycle Flags Columns} unless
-     *         they are not supported
-     */
-    private EntityQuery<I> toCompleteQuery(EntityQuery<I> src) {
-        EntityQuery<I> completeQuery;
-        completeQuery = !src.isLifecycleAttributesSet()
-                                && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())
-                        ? src.withActiveLifecycle(recordStorage())
-                        : src;
-        return completeQuery;
     }
 
     /**
