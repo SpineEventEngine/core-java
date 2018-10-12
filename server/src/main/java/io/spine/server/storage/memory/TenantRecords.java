@@ -166,7 +166,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                     Any recordState = rawRecord.getState();
                     TypeUrl type = TypeUrl.parse(recordState.getTypeUrl());
                     Message stateAsMessage = unpack(recordState);
-                    Message processedState = applyMask(fieldMask, stateAsMessage, type);
+                    Message processedState = applyMask(fieldMask, stateAsMessage);
                     Any packedState = pack(processedState);
                     return EntityRecordVBuilder
                             .newBuilder()
