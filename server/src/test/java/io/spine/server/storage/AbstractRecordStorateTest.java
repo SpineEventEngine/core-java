@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import io.spine.testing.core.given.GivenVersion;
@@ -322,12 +323,12 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
                 v2Records.put(id, alternateRecord);
             }
 
-            storage.write(transformValues(v1Records, RecordStorageTest::withLifecycleColumns));
+            storage.write(transformValues(v1Records, RecordStorageTestEnv::withLifecycleColumns));
             Iterator<EntityRecord> firstRevision = storage.readAll();
             assertIteratorsEqual(v1Records.values()
                                           .iterator(), firstRevision);
 
-            storage.write(transformValues(v2Records, RecordStorageTest::withLifecycleColumns));
+            storage.write(transformValues(v2Records, RecordStorageTestEnv::withLifecycleColumns));
             Iterator<EntityRecord> secondRevision = storage.readAll();
             assertIteratorsEqual(v2Records.values()
                                           .iterator(), secondRevision);

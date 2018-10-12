@@ -20,7 +20,6 @@
 
 package io.spine.server.storage;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
@@ -31,30 +30,21 @@ import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.core.Version;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.given.RecordStorageTestEnv.LifecycleColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.testing.core.given.GivenVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -64,20 +54,24 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
+import static io.spine.server.storage.given.RecordStorageTestEnv.assertSingleRecord;
+import static io.spine.server.storage.given.RecordStorageTestEnv.buildStorageRecord;
+import static io.spine.server.storage.given.RecordStorageTestEnv.delete;
+import static io.spine.server.storage.given.RecordStorageTestEnv.emptyOrderBy;
+import static io.spine.server.storage.given.RecordStorageTestEnv.emptyPagination;
+import static io.spine.server.storage.given.RecordStorageTestEnv.newEntity;
+import static io.spine.server.storage.given.RecordStorageTestEnv.toEntityId;
 import static io.spine.test.storage.Project.Status.CANCELLED;
 import static io.spine.test.storage.Project.Status.DONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Dmytro Dashenkov
@@ -96,32 +90,6 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         return ProjectId.newBuilder()
                         .setId(newUuid())
                         .build();
-    }
-
-    private static EntityRecord newStorageRecord(ProjectId id, Message state) {
-        Any wrappedState = pack(state);
-        EntityRecord record = EntityRecord
-                .newBuilder()
-                .setEntityId(pack(id))
-                .setState(wrappedState)
-                .setVersion(GivenVersion.withNumber(0))
-                .build();
-        return record;
-    }
-
-    /**
-     * Creates new instance of the test entity.
-     */
-    private static TestCounterEntity newEntity(ProjectId id) {
-        return new TestCounterEntity(id);
-    }
-
-    private static void archive(TransactionalEntity<ProjectId, ?, ?> entity) {
-        TestTransaction.archive(entity);
-    }
-
-    private static void delete(TransactionalEntity<ProjectId, ?, ?> entity) {
-        TestTransaction.delete(entity);
     }
 
     @Test
@@ -169,8 +137,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(filters, OrderBy.getDefaultInstance(),
-                                            Pagination.getDefaultInstance(), storage);
+        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
         ProjectId idMatching = newId();
         ProjectId idWrong1 = newId();
         ProjectId idWrong2 = newId();
@@ -190,9 +157,9 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         // After the mutation above the single matching record is the one under the `idMatching` ID
 
-        EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
-        EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
-        EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
+        EntityRecord fineRecord = buildStorageRecord(idMatching, newState(idMatching));
+        EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
+        EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
         EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
         EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1, storage);
@@ -232,9 +199,9 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         Entity<ProjectId, ?> wrongEntity1 = newEntity(idWrong1);
         Entity<ProjectId, ?> wrongEntity2 = newEntity(idWrong2);
 
-        EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
-        EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
-        EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
+        EntityRecord fineRecord = buildStorageRecord(idMatching, newState(idMatching));
+        EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
+        EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
         RecordStorage<ProjectId> storage = getStorage();
 
@@ -261,8 +228,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
-        EntityQuery<ProjectId> query = from(filters, OrderBy.getDefaultInstance(),
-                                            Pagination.getDefaultInstance(), storage);
+        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
 
         // Perform the query
         Iterator<EntityRecord> readRecords = storage.readAll(query);
@@ -277,9 +243,9 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         ProjectId archivedRecordId = newId();
 
         EntityRecord activeRecord =
-                newStorageRecord(activeRecordId, newState(activeRecordId));
+                buildStorageRecord(activeRecordId, newState(activeRecordId));
         EntityRecord archivedRecord =
-                newStorageRecord(archivedRecordId, newState(archivedRecordId));
+                buildStorageRecord(archivedRecordId, newState(archivedRecordId));
         TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeRecordId);
         TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedRecordId);
 
@@ -293,8 +259,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .addFilter(all(eq(archived.toString(), true)))
                 .build();
-        EntityQuery<ProjectId> query = from(filters, OrderBy.getDefaultInstance(),
-                                            Pagination.getDefaultInstance(), storage);
+        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(archivedRecord, read);
     }
@@ -312,9 +277,9 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         archive(archivedEntity);
         delete(deletedEntity);
 
-        EntityRecord stayingRecord = newStorageRecord(activeId, stayingEntity.getState());
-        EntityRecord archivedRecord = newStorageRecord(archivedId, archivedEntity.getState());
-        EntityRecord deletedRecord = newStorageRecord(deletedId, deletedEntity.getState());
+        EntityRecord stayingRecord = buildStorageRecord(activeId, stayingEntity.getState());
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState());
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState());
 
         RecordStorage<ProjectId> storage = getStorage();
         storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
@@ -331,8 +296,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setIdFilter(idFilter)
                 .build();
         EntityQuery<ProjectId> query =
-                from(filters, OrderBy.getDefaultInstance(),
-                     Pagination.getDefaultInstance(), storage)
+                from(filters, emptyOrderBy(), emptyPagination(), storage)
                         .withActiveLifecycle(storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(stayingRecord, read);
@@ -361,15 +325,14 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(filters, OrderBy.getDefaultInstance(),
-                                            Pagination.getDefaultInstance(), storage);
+        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
 
         ProjectId id = newId();
         TestCounterEntity entity = newEntity(id);
 
         entity.assignStatus(initialStatus);
 
-        EntityRecord record = newStorageRecord(id, newState(id));
+        EntityRecord record = buildStorageRecord(id, newState(id));
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
 
         FieldMask fieldMask = FieldMask.getDefaultInstance();
@@ -424,8 +387,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .build();
         RecordStorage<ProjectId> storage = getStorage();
         EntityQuery<ProjectId> query =
-                from(filters, OrderBy.getDefaultInstance(),
-                     Pagination.getDefaultInstance(), storage).withActiveLifecycle(storage);
+                from(filters, emptyOrderBy(), emptyPagination(), storage)
+                        .withActiveLifecycle(storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         List<EntityRecord> readRecords = newArrayList(read);
         assertEquals(1, readRecords.size());
@@ -470,8 +433,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(filters, OrderBy.getDefaultInstance(),
-                                            Pagination.getDefaultInstance(), storage);
+        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
         ProjectId idMatching = newId();
         ProjectId idWrong = newId();
 
@@ -481,8 +443,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         matchingEntity.assignStatus(requiredValue);
         wrongEntity.assignStatus(CANCELLED);
 
-        EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
-        EntityRecord notFineRecord = newStorageRecord(idWrong, newState(idWrong));
+        EntityRecord fineRecord = buildStorageRecord(idMatching, newState(idMatching));
+        EntityRecord notFineRecord = buildStorageRecord(idWrong, newState(idWrong));
 
         EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
         EntityRecordWithColumns recordWrong = create(notFineRecord, wrongEntity, storage);
@@ -494,44 +456,9 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         assertSingleRecord(fineRecord, readRecords);
     }
 
-    protected static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
-        LifecycleFlags flags = record.getLifecycleFlags();
-        Map<String, MemoizedValue> columns = ImmutableMap.of(
-                LifecycleColumns.ARCHIVED.columnName(),
-                booleanColumn(LifecycleColumns.ARCHIVED.column(), flags.getArchived()),
-                LifecycleColumns.DELETED.columnName(),
-                booleanColumn(LifecycleColumns.DELETED.column(), flags.getDeleted())
-        );
-        EntityRecordWithColumns result = createRecord(record, columns);
-        return result;
-    }
-
-    private static MemoizedValue booleanColumn(EntityColumn column, boolean value) {
-        MemoizedValue memoizedValue = mock(MemoizedValue.class);
-        when(memoizedValue.getSourceColumn()).thenReturn(column);
-        when(memoizedValue.getValue()).thenReturn(value);
-        return memoizedValue;
-    }
-
-    private static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
-        assertTrue(actual.hasNext());
-        EntityRecord singleRecord = actual.next();
-        assertFalse(actual.hasNext());
-        assertEquals(expected, singleRecord);
-    }
-
-    private static EntityId toEntityId(ProjectId id) {
-        Any packed = Identifier.pack(id);
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(packed)
-                .build();
-        return entityId;
-    }
-
     private void write(Entity<ProjectId, ?> entity) {
         RecordStorage<ProjectId> storage = getStorage();
-        EntityRecord record = newStorageRecord(entity.getId(), entity.getState());
+        EntityRecord record = buildStorageRecord(entity.getId(), entity.getState());
         storage.write(entity.getId(), create(record, entity, storage));
     }
 }
