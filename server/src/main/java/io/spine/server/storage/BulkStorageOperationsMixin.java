@@ -47,9 +47,9 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * in the result. In this way {@code readMultiple()} callers are able to track
      * the absence of a certain element by comparing the input IDs and resulting {@code Iterable}.
      *
-     * <p>E.g. {@code readMultiple(Lists.newArrayList(idPresentInStorage, idNonPresentInStorage) )}
-     * will return an {@code Iterable} with two elements, first of which is non-null
-     * and the second is null.
+     * <p>E.g. {@code readMultiple(Lists.newArrayList(idPresentInStorage, idNonPresentInStorage, 
+     * idPresentForInactiveEntity))} will return an {@code Iterable} with three elements,
+     * first of which is non-{@code null} and the other two are {@code null}.
      * 
      * @param ids
      *         IDs of record of interest
