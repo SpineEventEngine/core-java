@@ -49,9 +49,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
-import static com.google.common.collect.Lists.reverse;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
@@ -72,7 +72,6 @@ import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -172,7 +171,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
     @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
     private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
-        return repository.find(filters, firstFieldOnly);
+        return repository.find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
     }
 
     /*
@@ -293,7 +292,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities);
-            assertSize(count, foundList);
+            assertThat(foundList).hasSize(count);
             assertEquals(expectedList, foundList);
         }
 
@@ -309,7 +308,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = reverse(orderedByName(entities));
-            assertSize(count, foundList);
+            assertThat(foundList).hasSize(count);
             assertEquals(expectedList, foundList);
         }
 
@@ -326,7 +325,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities).subList(0, pageSize);
-            assertSize(pageSize, foundList);
+            assertThat(foundList).hasSize(pageSize);
             assertEquals(expectedList, foundList);
         }
 

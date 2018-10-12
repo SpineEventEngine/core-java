@@ -485,10 +485,9 @@ class ProcessManagerRepositoryTest
                                             .build();
         Command command = requestFactory.createCommand(commandMsg);
         dispatchCommand(command);
-        StandardRejections.EntityAlreadyArchived expected =
-                StandardRejections.EntityAlreadyArchived.newBuilder()
-                                                        .setEntityId(pack(id))
-                                                        .build();
+        EntityAlreadyArchived expected = EntityAlreadyArchived.newBuilder()
+                                                              .setEntityId(pack(id))
+                                                              .build();
         assertTrue(TestProcessManager.processed(expected));
     }
 
