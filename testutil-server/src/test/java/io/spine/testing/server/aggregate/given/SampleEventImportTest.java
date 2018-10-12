@@ -26,7 +26,7 @@ import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregateEventImportTest;
 import io.spine.testing.server.aggregate.given.agg.TuAggregate;
 import io.spine.testing.server.aggregate.given.agg.TuAggregateRepository;
-import io.spine.testing.server.expected.EventReactorExpected;
+import io.spine.testing.server.expected.EventApplierExpected;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.event.TuTrelloProjectCreated;
@@ -58,7 +58,7 @@ public class SampleEventImportTest
 
     @Override
     @VisibleForTesting
-    public EventReactorExpected<TuProject> expectThat(TuAggregate entity) {
+    public EventApplierExpected<TuProject> expectThat(TuAggregate entity) {
         return super.expectThat(entity);
     }
 

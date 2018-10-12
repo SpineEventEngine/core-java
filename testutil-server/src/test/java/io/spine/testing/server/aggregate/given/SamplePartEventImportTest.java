@@ -26,7 +26,7 @@ import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregateEventImportTest;
 import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
 import io.spine.testing.server.aggregate.given.agg.TuAggregatePartRepository;
-import io.spine.testing.server.expected.EventReactorExpected;
+import io.spine.testing.server.expected.EventApplierExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmail;
@@ -59,7 +59,7 @@ public class SamplePartEventImportTest
 
     @Override
     @VisibleForTesting
-    public EventReactorExpected<TuComments> expectThat(TuAggregatePart entity) {
+    public EventApplierExpected<TuComments> expectThat(TuAggregatePart entity) {
         return super.expectThat(entity);
     }
 

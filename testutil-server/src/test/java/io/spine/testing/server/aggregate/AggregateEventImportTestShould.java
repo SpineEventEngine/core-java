@@ -25,7 +25,7 @@ import io.spine.testing.server.aggregate.given.SamplePartEventImportTest;
 import io.spine.testing.server.aggregate.given.agg.TuAggregate;
 import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
 import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
-import io.spine.testing.server.expected.EventReactorExpected;
+import io.spine.testing.server.expected.EventApplierExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuProject;
 import org.junit.jupiter.api.AfterEach;
@@ -74,7 +74,7 @@ class AggregateEventImportTestShould {
         @SuppressWarnings("CheckReturnValue")
         void shouldDispatchEvent() {
             TuAggregate aggregate = TuAggregate.newInstance();
-            EventReactorExpected<TuProject> expected =
+            EventApplierExpected<TuProject> expected =
                     aggregateImportEventTest.expectThat(aggregate);
             expected.hasState(state -> assertTrue(isNotDefault(state.getTimestamp())));
         }
@@ -109,7 +109,7 @@ class AggregateEventImportTestShould {
         void shouldDispatchEvent() {
             TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
             TuAggregatePart part = TuAggregatePart.newInstance(root);
-            EventReactorExpected<TuComments> expected = partImportEventTest.expectThat(part);
+            EventApplierExpected<TuComments> expected = partImportEventTest.expectThat(part);
             expected.hasState(state -> assertEquals(1, state.getCommentsRecievedByEmail()));
         }
     }
