@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
@@ -34,6 +35,7 @@ import io.spine.core.Version;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -50,6 +52,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
@@ -62,6 +65,7 @@ import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
 import static io.spine.server.storage.given.RecordStorageTestEnv.assertSingleRecord;
 import static io.spine.server.storage.given.RecordStorageTestEnv.buildStorageRecord;
 import static io.spine.server.storage.given.RecordStorageTestEnv.delete;
+import static io.spine.server.storage.given.RecordStorageTestEnv.emptyFilters;
 import static io.spine.server.storage.given.RecordStorageTestEnv.emptyOrderBy;
 import static io.spine.server.storage.given.RecordStorageTestEnv.emptyPagination;
 import static io.spine.server.storage.given.RecordStorageTestEnv.newEntity;
@@ -265,26 +269,72 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
     }
 
     @Test
-    @DisplayName("filter archived or deleted records by ID on bulk read")
-    void filterByIdAndStatusInBulk() {
+    @DisplayName("filter inactive records on bulk read by default")
+    void filterWithEmptyQuery() {
         ProjectId activeId = newId();
         ProjectId archivedId = newId();
         ProjectId deletedId = newId();
 
-        TransactionalEntity<ProjectId, ?, ?> stayingEntity = newEntity(activeId);
+        TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeId);
         TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedId);
         TransactionalEntity<ProjectId, ?, ?> deletedEntity = newEntity(deletedId);
         archive(archivedEntity);
         delete(deletedEntity);
 
-        EntityRecord stayingRecord = buildStorageRecord(activeId, stayingEntity.getState());
-        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState());
-        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState());
+        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.getState(),
+                                                       activeEntity.getLifecycleFlags());
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState(),
+                                                         archivedEntity.getLifecycleFlags());
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState(),
+                                                        deletedEntity.getLifecycleFlags());
 
         RecordStorage<ProjectId> storage = getStorage();
         storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(stayingRecord, stayingEntity, storage));
+        storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+
+        EntityIdFilter idFilter = EntityIdFilter
+                .newBuilder()
+                .addIds(toEntityId(activeId))
+                .addIds(toEntityId(archivedId))
+                .addIds(toEntityId(deletedId))
+                .build();
+        EntityFilters filters = EntityFilters
+                .newBuilder()
+                .setIdFilter(idFilter)
+                .build();
+        EntityQuery<ProjectId> query =
+                from(emptyFilters(), emptyOrderBy(), emptyPagination(), storage);
+
+        Iterator<EntityRecord> read = storage.readAll(query);
+        assertSingleRecord(activeRecord, read);
+    }
+
+    @Test
+    @DisplayName("filter archived or deleted records on bulk read with query containing IDs")
+    void filterWithQueryIdsAndStatusFilter() {
+        ProjectId activeId = newId();
+        ProjectId archivedId = newId();
+        ProjectId deletedId = newId();
+
+        TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeId);
+        TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedId);
+        TransactionalEntity<ProjectId, ?, ?> deletedEntity = newEntity(deletedId);
+        archive(archivedEntity);
+        delete(deletedEntity);
+
+        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.getState(),
+                                                       activeEntity.getLifecycleFlags());
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState(),
+                                                         archivedEntity.getLifecycleFlags());
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState(),
+                                                        deletedEntity.getLifecycleFlags());
+
+        RecordStorage<ProjectId> storage = getStorage();
+        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
+        storage.write(activeId, create(activeRecord, activeEntity, storage));
+        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+
         EntityIdFilter idFilter = EntityIdFilter
                 .newBuilder()
                 .addIds(toEntityId(activeId))
@@ -298,8 +348,93 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityQuery<ProjectId> query =
                 from(filters, emptyOrderBy(), emptyPagination(), storage)
                         .withActiveLifecycle(storage);
+
         Iterator<EntityRecord> read = storage.readAll(query);
-        assertSingleRecord(stayingRecord, read);
+        assertSingleRecord(activeRecord, read);
+    }
+
+    @Test
+    @DisplayName("filter inactive records on bulk read with query containing IDs by default")
+    void filterWithQueryIdsFilterByDefault() {
+        ProjectId activeId = newId();
+        ProjectId archivedId = newId();
+        ProjectId deletedId = newId();
+
+        TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeId);
+        TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedId);
+        TransactionalEntity<ProjectId, ?, ?> deletedEntity = newEntity(deletedId);
+        archive(archivedEntity);
+        delete(deletedEntity);
+
+        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.getState(),
+                                                       activeEntity.getLifecycleFlags());
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState(),
+                                                         archivedEntity.getLifecycleFlags());
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState(),
+                                                        deletedEntity.getLifecycleFlags());
+
+        RecordStorage<ProjectId> storage = getStorage();
+        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
+        storage.write(activeId, create(activeRecord, activeEntity, storage));
+        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+
+        EntityIdFilter idFilter = EntityIdFilter
+                .newBuilder()
+                .addIds(toEntityId(activeId))
+                .addIds(toEntityId(archivedId))
+                .addIds(toEntityId(deletedId))
+                .build();
+        EntityFilters filters = EntityFilters
+                .newBuilder()
+                .setIdFilter(idFilter)
+                .build();
+        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
+
+        Iterator<EntityRecord> read = storage.readAll(query);
+        assertSingleRecord(activeRecord, read);
+    }
+
+    @Test
+    @DisplayName("filter inactive records on bulk read by IDs by default")
+    void filterByIdByDefaultInBulk() {
+        ProjectId activeId = newId();
+        ProjectId archivedId = newId();
+        ProjectId deletedId = newId();
+
+        TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeId);
+        TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedId);
+        TransactionalEntity<ProjectId, ?, ?> deletedEntity = newEntity(deletedId);
+        archive(archivedEntity);
+        delete(deletedEntity);
+
+        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.getState(),
+                                                       activeEntity.getLifecycleFlags());
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState(),
+                                                         archivedEntity.getLifecycleFlags());
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState(),
+                                                        deletedEntity.getLifecycleFlags());
+
+        RecordStorage<ProjectId> storage = getStorage();
+        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
+        storage.write(activeId, create(activeRecord, activeEntity, storage));
+        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+
+        ImmutableSet<ProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
+        Iterable<EntityRecord> read = () -> storage.readMultiple(targetIds);
+
+        assertSingleValueAndNulls(2, read);
+    }
+
+    private static void assertSingleValueAndNulls(int expectedNullCount,
+                                                  Iterable<EntityRecord> values) {
+        assertThat(values).hasSize(expectedNullCount + 1);
+        int nullCount = 0;
+        for (EntityRecord record : values) {
+            if (record == null) {
+                nullCount++;
+            }
+        }
+        assertEquals(expectedNullCount, nullCount, "An unexpected amount of nulls.");
     }
 
     @Test
@@ -456,9 +591,10 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         assertSingleRecord(fineRecord, readRecords);
     }
 
-    private void write(Entity<ProjectId, ?> entity) {
+    private void write(EntityWithLifecycle<ProjectId, ?> entity) {
         RecordStorage<ProjectId> storage = getStorage();
-        EntityRecord record = buildStorageRecord(entity.getId(), entity.getState());
+        EntityRecord record = buildStorageRecord(entity.getId(), entity.getState(),
+                                                 entity.getLifecycleFlags());
         storage.write(entity.getId(), create(record, entity, storage));
     }
 }

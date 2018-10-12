@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
+import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
@@ -76,6 +77,19 @@ public class RecordStorageTestEnv {
                 .setEntityId(pack(id))
                 .setState(wrappedState)
                 .setVersion(GivenVersion.withNumber(0))
+                .build();
+        return record;
+    }
+
+    public static EntityRecord buildStorageRecord(ProjectId id, Message state,
+                                                  LifecycleFlags lifecycleFlags) {
+        Any wrappedState = pack(state);
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(pack(id))
+                .setState(wrappedState)
+                .setVersion(GivenVersion.withNumber(0))
+                .setLifecycleFlags(lifecycleFlags)
                 .build();
         return record;
     }
@@ -136,6 +150,10 @@ public class RecordStorageTestEnv {
 
     public static Pagination emptyPagination() {
         return Pagination.getDefaultInstance();
+    }
+
+    public static EntityFilters emptyFilters() {
+        return EntityFilters.getDefaultInstance();
     }
 
     @SuppressWarnings("unused") // Reflective access
