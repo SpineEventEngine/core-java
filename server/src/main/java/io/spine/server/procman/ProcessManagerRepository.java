@@ -43,6 +43,7 @@ import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -52,8 +53,11 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
+import io.spine.system.server.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.dataflow.qual.Pure;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -62,6 +66,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
+import static io.spine.server.entity.EventBlackList.discardEvents;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -92,6 +97,8 @@ public abstract class ProcessManagerRepository<I,
 
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
             memoize(this::createEventDelivery);
+
+    private final EventFilter entityStateChangedFilter = discardEvents(EntityStateChanged.class);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -294,13 +301,17 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Posts passed events to {@link EventBus}.
      */
-    void postEvents(Iterable<Event> events) {
-        EventBus eventBus = getBoundedContext().getEventBus();
-        for (Event event : events) {
-            eventBus.post(event);
-        }
+    void postEvents(Collection<Event> events) {
+        Iterable<Event> filteredEvents = eventFilter().filter(events);
+        EventBus bus = getBoundedContext().getEventBus();
+        bus.post(filteredEvents);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose the method into current package.
+     */
     @Override
     protected EntityLifecycle lifecycleOf(I id) {
         return super.lifecycleOf(id);
@@ -393,6 +404,22 @@ public abstract class ProcessManagerRepository<I,
         return name;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code ProcessManagerRepository} changes the default behaviour and allows all
+     * the events <b>except</b> for {@link EntityStateChanged}. It is supposed that the changes of
+     * a process manager state are not worth being published.
+     *
+     * <p>Override this method to change the behaviour.
+     */
+    @Pure
+    @SPI
+    @Override
+    protected EventFilter eventFilter() {
+        return entityStateChangedFilter;
+    }
+
     @Override
     public void close() {
         unregisterWithSharding();
@@ -424,8 +451,8 @@ public abstract class ProcessManagerRepository<I,
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
             checkNotNull(envelope);
             checkNotNull(exception);
-            logError("Error dispatching external event to process manager" +
-                             " (event class: %s, id: %s)",
+            logError("Error dispatching external event (class: %s, id: %s) " +
+                             "to a process manager of type %s.",
                      envelope, exception);
         }
     }

@@ -21,14 +21,14 @@
 package io.spine.server.commandbus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
-import io.spine.system.server.MarkCausedCommand;
+import io.spine.system.server.EventCausedCommand;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @Internal
 public class SingleCommand
-        extends OnEvent<MarkCausedCommand, MarkCausedCommand.Builder, SingleCommand> {
+        extends OnEvent<EventCausedCommand, EventCausedCommand.Builder, SingleCommand> {
 
     private SingleCommand(EventId origin, ActorContext actorContext) {
         super(origin, actorContext);
@@ -55,29 +55,29 @@ public class SingleCommand
         return new SingleCommand(event.getId(), event.getActorContext());
     }
 
-    public SingleCommand produce(Message commandMessage) {
+    public SingleCommand produce(CommandMessage commandMessage) {
         add(commandMessage);
         return this;
     }
 
     @Override
-    protected MarkCausedCommand.Builder newBuilder() {
-        return MarkCausedCommand.newBuilder()
+    protected EventCausedCommand.Builder newBuilder() {
+        return EventCausedCommand.newBuilder()
                 .setId(origin());
     }
 
     @Override
     @SuppressWarnings("CheckReturnValue") // calling builder
     protected
-    void addPosted(MarkCausedCommand.Builder builder, Command command, SystemGateway gateway) {
+    void addPosted(EventCausedCommand.Builder builder, Command command, SystemGateway gateway) {
         CommandId commandId = command.getId();
         builder.setProduced(commandId);
     }
 
     @CanIgnoreReturnValue
-    public MarkCausedCommand post(CommandBus bus) {
+    public EventCausedCommand post(CommandBus bus) {
         checkState(size() == 1, "This sequence must contain exactly one command message");
-        MarkCausedCommand result = postAll(bus);
+        EventCausedCommand result = postAll(bus);
         return result;
     }
 }

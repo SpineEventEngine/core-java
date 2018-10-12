@@ -31,11 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A value object holding a class of {@linkplain ExternalMessage external message}.
- *
- * @author Alex Tymchenko
  */
 @Internal
-public final class ExternalMessageClass extends MessageClass {
+public final class ExternalMessageClass extends MessageClass<Message> {
 
     private static final long serialVersionUID = 0L;
 
@@ -47,9 +45,9 @@ public final class ExternalMessageClass extends MessageClass {
      * Creates an instance of {@code ExternalMessageClass} on top of existing message class.
      *
      * @param messageClass a message class to wrap
-     * @return a new instance of {@code ExternalMessageClass}.\
+     * @return a new instance of {@code ExternalMessageClass}
      */
-    public static ExternalMessageClass of(MessageClass messageClass) {
+    public static ExternalMessageClass of(MessageClass<?> messageClass) {
         checkNotNull(messageClass);
         return of(messageClass.value());
     }

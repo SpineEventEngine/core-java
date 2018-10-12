@@ -45,13 +45,11 @@ public final class ErrorAttributeCriterion implements ErrorCriterion {
         this.name = name;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String description() {
         return format("Error contains an attribute \"%s\"", name);
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean matches(Error error) {
         Map<String, Value> attributes = error.getAttributesMap();

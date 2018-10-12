@@ -21,20 +21,21 @@ package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.DoubleValue;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.base.Time;
 import io.spine.core.given.EventsTestEnv;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
+import io.spine.test.core.given.GivenProjectCreated;
 import io.spine.testing.Tests;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getMessage;
@@ -55,11 +55,9 @@ import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
 import static io.spine.core.given.EventsTestEnv.tenantId;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,15 +70,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * <p>This test suite is placed under the {@code server} module to avoid dependency on the event
  * generation code which belongs to server-side.
- *
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- * @author Mykhailo Drachuk
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
-// Simple test names duplicate random literals.
 @DisplayName("Events utility should")
-public class EventsTest {
+public class EventsTest extends UtilityClassTest<Events> {
 
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(EventsTest.class);
@@ -90,10 +82,9 @@ public class EventsTest {
     private Event event;
     private EventContext context;
 
-    private final StringValue stringValue = toMessage(newUuid());
-    private final BoolValue boolValue = toMessage(true);
-    @SuppressWarnings("MagicNumber")
-    private final DoubleValue doubleValue = toMessage(10.1);
+    EventsTest() {
+        super(Events.class);
+    }
 
     @BeforeEach
     void setUp() {
@@ -101,28 +92,20 @@ public class EventsTest {
         CommandEnvelope cmd = requestFactory.generateEnvelope();
         StringValue producerId = toMessage(getClass().getSimpleName());
         eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
-        event = eventFactory.createEvent(Time.getCurrentTime(), null);
+        event = eventFactory.createEvent(GivenEvent.message(), null);
         context = event.getContext();
     }
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Events.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
         EntityAlreadyArchived defaultThrowableMessage =
                 new EntityAlreadyArchived(Any.getDefaultInstance());
-        new NullPointerTester()
-                .setDefault(StringValue.class, StringValue.getDefaultInstance())
-                .setDefault(EventContext.class, GivenEvent.context())
-                .setDefault(Version.class, Version.getDefaultInstance())
-                .setDefault(Event.class, Event.getDefaultInstance())
-                .setDefault(ThrowableMessage.class, defaultThrowableMessage)
-                .testAllPublicStaticMethods(Events.class);
+        tester.setDefault(StringValue.class, StringValue.getDefaultInstance())
+              .setDefault(EventContext.class, GivenEvent.context())
+              .setDefault(Version.class, Version.getDefaultInstance())
+              .setDefault(Event.class, Event.getDefaultInstance())
+              .setDefault(ThrowableMessage.class, defaultThrowableMessage);
     }
 
     @Nested
@@ -140,10 +123,8 @@ public class EventsTest {
         @Test
         @DisplayName("producer")
         void producer() {
-            StringValue msg = unpack(context.getProducerId());
-
+            StringValue msg = unpack(context.getProducerId(), StringValue.class);
             String id = (String) getProducer(context);
-
             assertEquals(msg.getValue(), id);
         }
     }
@@ -155,9 +136,9 @@ public class EventsTest {
         @Test
         @DisplayName("message")
         void message() {
-            createEventAndAssertReturnedMessageFor(stringValue);
-            createEventAndAssertReturnedMessageFor(boolValue);
-            createEventAndAssertReturnedMessageFor(doubleValue);
+            EventMessage message = GivenEvent.message();
+            Event event = GivenEvent.withMessage(message);
+            assertEquals(message, getMessage(event));
         }
 
         @Test
@@ -175,7 +156,7 @@ public class EventsTest {
             CommandEnvelope command = requestFactory.generateEnvelope();
             StringValue producerId = toMessage(getClass().getSimpleName());
             EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-            Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+            Event event = ef.createEvent(GivenEvent.message(), null);
 
             assertEquals(command.getId(), Events.getRootCommandId(event));
         }
@@ -186,18 +167,12 @@ public class EventsTest {
             CommandEnvelope command = requestFactory.generateEnvelope();
             StringValue producerId = toMessage(getClass().getSimpleName());
             EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-            Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+            Event event = ef.createEvent(GivenEvent.message(), null);
 
             TypeName typeName = EventEnvelope.of(event)
                                              .getTypeName();
             assertNotNull(typeName);
-            assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
-        }
-
-        private void createEventAndAssertReturnedMessageFor(Message msg) {
-            Event event = GivenEvent.withMessage(msg);
-
-            assertEquals(msg, getMessage(event));
+            assertEquals(GivenProjectCreated.class.getSimpleName(), typeName.getSimpleName());
         }
     }
 
@@ -341,8 +316,12 @@ public class EventsTest {
                 .newBuilder()
                 .setStacktrace("at package.name.Class.method(Class.java:42)")
                 .build();
+        RejectionMessage message = StandardRejections.EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(pack(Time.getCurrentTime()))
+                .build();
         Event event =
-                eventFactory.createRejectionEvent(Time.getCurrentTime(), null, rejectionContext);
+                eventFactory.createRejectionEvent(message, null, rejectionContext);
         assertTrue(Events.isRejection(event));
     }
 

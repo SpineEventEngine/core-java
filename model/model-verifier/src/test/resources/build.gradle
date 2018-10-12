@@ -22,19 +22,21 @@
 
 buildscript {
 
-    // Applying from `ext.gradle` inside the `buildscript` section to reuse the properties.
+    // Applying from `version.gradle` inside the `buildscript` section to reuse the properties.
     //
     // As long as `buildscript` section is always evaluated first, we need to apply
-    // `ext.gradle` explicitly here.
+    // `version.gradle` explicitly here.
     //
     // NOTE: this file is copied from the root project in the test setup.
-    apply from: 'ext.gradle'
+    apply from: 'version.gradle'
     apply from: 'config/gradle/dependencies.gradle'
 
     repositories {
         jcenter()
         mavenLocal()
 
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
     }
@@ -42,7 +44,8 @@ buildscript {
     dependencies {
         classpath deps.build.protobuf
         classpath deps.build.gradlePlugins.protobuf
-        classpath "io.spine.tools:spine-model-verifier:${spineVersion}"
+        classpath "io.spine.tools:spine-model-compiler:${spineBaseVersion}"
+        classpath "io.spine.tools:spine-model-verifier:${versionToPublish}"
     }
 
     configurations.all({
@@ -52,16 +55,19 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
+apply plugin: 'io.spine.tools.spine-model-compiler'
 apply plugin: 'io.spine.tools.spine-model-verifier'
 
 // NOTE: this file is copied from the root project in the test setup.
-apply from: 'ext.gradle'
+apply from: 'version.gradle'
 
 
 repositories {
     jcenter()
     mavenLocal()
 
+    maven { url = repos.oldSpine }
+    maven { url = repos.oldSpineSnapshots }
     maven { url = repos.spine }
     maven { url = repos.spineSnapshots }
 }
@@ -71,9 +77,10 @@ compileJava {
 }
 
 dependencies {
-    compile deps.build.protobuf
+    implementation deps.build.protobuf
+    implementation "io.spine:spine-server:$versionToPublish"
 
-    compileOnly "io.spine.tools:spine-model-assembler:$spineVersion"
+    annotationProcessor "io.spine.tools:spine-model-assembler:$versionToPublish"
 }
 
 sourceSets {

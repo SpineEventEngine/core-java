@@ -20,11 +20,11 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.protobuf.Empty;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.tuple.EitherOfThree;
+import io.spine.server.tuple.EitherOf3;
 import io.spine.test.procman.quiz.PmAnswer;
 import io.spine.test.procman.quiz.PmQuestionId;
 import io.spine.test.procman.quiz.PmQuiz;
@@ -46,8 +46,6 @@ import java.util.List;
  * <p>Differs from the {@link QuizProcman} by scarcing the interjacent
  * {@link PmQuestionAnswered Question Answered event} and emits 
  * either of three when handling a command.
- * 
- * @author Mykhailo Drachuk
  */
 class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 
@@ -64,14 +62,13 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @Assign
-    @SuppressWarnings("Duplicates")
-    EitherOfThree<PmQuestionSolved, PmQuestionFailed, Empty> handle(PmAnswerQuestion command) {
+    EitherOf3<PmQuestionSolved, PmQuestionFailed, Nothing> handle(PmAnswerQuestion command) {
         PmAnswer answer = command.getAnswer();
         PmQuizId examId = command.getQuizId();
         PmQuestionId questionId = answer.getQuestionId();
 
         if (questionIsClosed(questionId)) {
-            return EitherOfThree.withC(nothing());
+            return EitherOf3.withC(nothing());
         }
 
         boolean answerIsCorrect = answer.getCorrect();
@@ -81,14 +78,14 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
                                     .setQuizId(examId)
                                     .setQuestionId(questionId)
                                     .build();
-            return EitherOfThree.withA(reaction);
+            return EitherOf3.withA(reaction);
         } else {
             PmQuestionFailed reaction =
                     PmQuestionFailed.newBuilder()
                                     .setQuizId(examId)
                                     .setQuestionId(questionId)
                                     .build();
-            return EitherOfThree.withB(reaction);
+            return EitherOf3.withB(reaction);
         }
     }
 
@@ -99,13 +96,13 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @React
-    Empty on(PmQuizStarted event) {
+    Nothing on(PmQuizStarted event) {
         getBuilder().setId(event.getQuizId());
         return nothing();
     }
 
     @React
-    Empty on(PmQuestionSolved event) {
+    Nothing on(PmQuestionSolved event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addSolvedQuestion(questionId);
@@ -113,7 +110,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @React
-    Empty on(PmQuestionFailed event) {
+    Nothing on(PmQuestionFailed event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addFailedQuestion(questionId);
@@ -124,9 +121,5 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
         List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
         int index = openQuestions.indexOf(questionId);
         getBuilder().removeOpenQuestion(index);
-    }
-
-    private static Empty nothing() {
-        return Empty.getDefaultInstance();
     }
 }

@@ -20,15 +20,9 @@
 
 package io.spine.server.projection.given;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.server.entity.TestEntityWithStringColumn;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
@@ -36,6 +30,7 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.ProjectVBuilder;
+import io.spine.test.projection.Task;
 import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
@@ -43,18 +38,12 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Set;
+import static io.spine.testing.TestValues.randomString;
 
-/**
- * @author Alexander Yevsyukov
- * @author Alexander Aleksandrov
- * @author Dmytro Grankin
- * @author Alex Tymchenko
- */
 public class ProjectionRepositoryTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private ProjectionRepositoryTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -64,7 +53,6 @@ public class ProjectionRepositoryTestEnv {
      * does not modify the state of an {@code Entity}. For the newly created entities it could lead
      * to an invalid entry created in the storage.
      */
-    @SuppressWarnings("unused")
     public static class NoOpTaskNamesProjection
             extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
 
@@ -85,7 +73,7 @@ public class ProjectionRepositoryTestEnv {
 
     /** Stub projection repository. */
     public static class TestProjectionRepository
-            extends ProjectionRepository<ProjectId, TestProjection, Project> {
+            extends TestProjection.Repository {
 
         private @Nullable MessageEnvelope lastErrorEnvelope;
         private @Nullable RuntimeException lastException;
@@ -122,108 +110,6 @@ public class ProjectionRepositoryTestEnv {
     }
 
     /** The projection stub used in tests. */
-    public static class TestProjection
-            extends Projection<ProjectId, Project, ProjectVBuilder>
-            implements TestEntityWithStringColumn {
-
-        /** The event message history we store for inspecting in delivery tests. */
-        private static final Multimap<ProjectId, Message> eventMessagesDelivered =
-                HashMultimap.create();
-
-        public TestProjection(ProjectId id) {
-            super(id);
-        }
-
-        public static boolean processed(Message eventMessage) {
-            boolean result = eventMessagesDelivered.containsValue(eventMessage);
-            return result;
-        }
-
-        /**
-         * Returns the IDs of projection instances, which processed the given message.
-         *
-         * <p>Empty set is returned if no instance processed the given message.
-         */
-        public static Set<ProjectId> whoProcessed(Message eventMessage) {
-            ImmutableSet.Builder<ProjectId> builder = ImmutableSet.builder();
-            for (ProjectId projectId : eventMessagesDelivered.keySet()) {
-                if (eventMessagesDelivered.get(projectId).contains(eventMessage)) {
-                    builder.add(projectId);
-                }
-            }
-            return builder.build();
-        }
-
-        public static void clearMessageDeliveryHistory() {
-            eventMessagesDelivered.clear();
-        }
-
-        private void keep(Message eventMessage) {
-            eventMessagesDelivered.put(getId(), eventMessage);
-        }
-
-        @Subscribe
-        public void on(PrjProjectCreated event) {
-            // Keep the event message for further inspection in tests.
-            keep(event);
-
-            Project newState = getState().toBuilder()
-                                         .setId(event.getProjectId())
-                                         .setStatus(Project.Status.CREATED)
-                                         .build();
-            getBuilder().mergeFrom(newState);
-        }
-
-        @Subscribe
-        public void on(PrjTaskAdded event) {
-            keep(event);
-            Project newState = getState().toBuilder()
-                                         .addTask(event.getTask())
-                                         .build();
-            getBuilder().mergeFrom(newState);
-        }
-
-        /**
-         * Handles the {@link PrjProjectStarted} event.
-         *
-         * @param event
-         *         the event message
-         * @param ignored
-         *         this parameter is left to show that a projection subscriber
-         *         can have two parameters
-         */
-        @Subscribe
-        public void on(PrjProjectStarted event,
-                       @SuppressWarnings("UnusedParameters") EventContext ignored) {
-            keep(event);
-            Project newState = getState().toBuilder()
-                                         .setStatus(Project.Status.STARTED)
-                                         .build();
-            getBuilder().mergeFrom(newState);
-        }
-
-        @Subscribe
-        public void on(PrjProjectArchived event) {
-            keep(event);
-            setArchived(true);
-        }
-
-        @Subscribe
-        public void on(PrjProjectDeleted event) {
-            keep(event);
-            setDeleted(true);
-        }
-        
-        @Column
-        public String getName() {
-            return getState().getName();
-        }
-
-        @Override
-        public String getIdString() {
-            return getId().toString();
-        }
-    }
 
     public static class GivenEventMessage {
 
@@ -243,13 +129,19 @@ public class ProjectionRepositoryTestEnv {
 
         public static PrjProjectCreated projectCreated() {
             return PrjProjectCreated.newBuilder()
+                                    .setName("Projection test " + randomString())
                                     .setProjectId(ENTITY_ID)
                                     .build();
         }
 
         public static PrjTaskAdded taskAdded() {
+            Task task = Task
+                    .newBuilder()
+                    .setTitle("Test task " + randomString())
+                    .build();
             return PrjTaskAdded.newBuilder()
                                .setProjectId(ENTITY_ID)
+                               .setTask(task)
                                .build();
         }
 
@@ -286,5 +178,6 @@ public class ProjectionRepositoryTestEnv {
      */
     public static class SensoryDeprivedProjectionRepository
             extends ProjectionRepository<ProjectId, SensoryDeprivedProjection, Project> {
+
     }
 }

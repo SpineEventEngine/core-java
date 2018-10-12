@@ -28,6 +28,7 @@ import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.type.MessageClass;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,13 +44,13 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventSubscriberMethod> eventSubscriptions;
+    private final MessageHandlerMap<EventClass, SubscriberMethod> eventSubscriptions;
     private final ImmutableSet<EventClass> domesticSubscriptions;
     private final ImmutableSet<EventClass> externalSubscriptions;
 
     private EventSubscriberClass(Class<? extends S> cls) {
         super(cls);
-        this.eventSubscriptions = MessageHandlerMap.create(cls, new EventSubscriberSignature());
+        this.eventSubscriptions = MessageHandlerMap.create(cls, new SubscriberSignature());
         this.domesticSubscriptions =
                     eventSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
         this.externalSubscriptions =
@@ -78,7 +79,8 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass) {
-        return eventSubscriptions.getMethod(eventClass, originClass);
+    public Collection<SubscriberMethod> getSubscribers(EventClass eventClass,
+                                                       MessageClass originClass) {
+        return eventSubscriptions.getMethods(eventClass, originClass);
     }
 }

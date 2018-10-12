@@ -21,7 +21,7 @@
 package io.spine.core;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 
@@ -40,7 +40,7 @@ public final class EventEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
         implements ActorMessageEnvelope<EventId, Event, EventContext> {
 
-    private final Message eventMessage;
+    private final EventMessage eventMessage;
     private final EventClass eventClass;
     private final EventContext eventContext;
     private final boolean rejection;
@@ -82,7 +82,7 @@ public final class EventEnvelope
      * Obtains the event message.
      */
     @Override
-    public Message getMessage() {
+    public EventMessage getMessage() {
         return this.eventMessage;
     }
 
@@ -165,6 +165,14 @@ public final class EventEnvelope
      */
     public boolean isRejection() {
         return rejection;
+    }
+
+    /**
+     * Returns {@code true} is the wrapped event is external, {@code false} otherwise.
+     */
+    public boolean isExternal() {
+        boolean external = Events.isExternal(getEventContext());
+        return external;
     }
 
     /**

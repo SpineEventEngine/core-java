@@ -32,8 +32,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Utility class for working with event enrichments.
- *
- * @author Alexander Yevsyukov
  */
 public final class Enrichments {
 
@@ -67,8 +65,8 @@ public final class Enrichments {
      * @param  <E>             a type of the event enrichment
      * @return an optional of the enrichment
      */
-    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass,
-                                                                EventContext context) {
+    public static <E extends Message>
+    Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
         checkNotNull(enrichmentClass);
         Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
         if (!container.isPresent()) {
@@ -83,11 +81,9 @@ public final class Enrichments {
                                   .value();
         Any any = enrichments.getItemsMap()
                              .get(typeName);
-        if (any == null) {
-            return Optional.empty();
-        }
-        E result = unpack(any);
-        return Optional.ofNullable(result);
+        Optional<E> result = Optional.ofNullable(any)
+                                     .map(packed -> unpack(packed, enrichmentClass));
+        return result;
     }
 
     /**

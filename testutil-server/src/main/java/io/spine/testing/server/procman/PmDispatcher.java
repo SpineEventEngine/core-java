@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
  */
 @VisibleForTesting
 @CanIgnoreReturnValue
-public class PmDispatcher {
+public final class PmDispatcher {
 
     @SuppressWarnings("unchecked") // casts are ensured by type matching in key-value pairs
     private static final

@@ -20,7 +20,7 @@
 
 package io.spine.change;
 
-import com.google.common.testing.NullPointerTester;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,16 +32,11 @@ import static io.spine.change.DoubleMismatch.unexpectedValue;
 import static io.spine.change.DoubleMismatch.unpackActual;
 import static io.spine.change.DoubleMismatch.unpackExpected;
 import static io.spine.change.DoubleMismatch.unpackNewValue;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
-                   "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("DoubleMismatch should")
-class DoubleMismatchTest {
+class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
 
     private static final int VERSION = 100;
     private static final double EXPECTED = 18.39;
@@ -49,17 +44,8 @@ class DoubleMismatchTest {
     private static final double NEW_VALUE = 14.52;
     private static final double DELTA = 0.01;
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(DoubleMismatch.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(DoubleMismatch.class);
+    DoubleMismatchTest() {
+        super(DoubleMismatch.class);
     }
 
     @Nested

@@ -56,7 +56,7 @@ public class ServerEnvironment {
      * Returns a singleton instance.
      */
     public static ServerEnvironment getInstance() {
-        return Singleton.INSTANCE.value;
+        return Singleton.INSTANCE;
     }
 
     /**
@@ -101,11 +101,7 @@ public class ServerEnvironment {
      *
      * <p>Server environment is a singleton in scope of JVM.
      */
-    private enum Singleton {
-
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final ServerEnvironment value = new ServerEnvironment();
+    private static final class Singleton {
+        private static final ServerEnvironment INSTANCE = new ServerEnvironment();
     }
 }

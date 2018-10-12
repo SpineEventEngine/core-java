@@ -161,13 +161,13 @@ public final class ImportBus
      * The registry of import dispatchers.
      */
     private static final class Registry
-            extends DispatcherRegistry<EventClass, EventImportDispatcher<?>> {
+            extends DispatcherRegistry<EventClass, EventEnvelope, EventImportDispatcher<?>> {
 
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
         protected
-        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventClass messageClass) {
-            return super.getDispatcher(messageClass);
+        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventEnvelope envelope) {
+            return super.getDispatcher(envelope);
         }
     }
 

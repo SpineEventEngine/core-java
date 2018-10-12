@@ -21,16 +21,21 @@
 package io.spine.server.event.model;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
+import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static io.spine.server.model.Handlers.createId;
 
 /**
  * An abstract base for methods handling events.
@@ -38,7 +43,7 @@ import java.lang.reflect.Method;
  * @author Dmytro Dashenkov
  */
 public abstract class EventHandlerMethod<T, R extends MethodResult>
-        extends AbstractHandlerMethod<T, EventClass, EventEnvelope, R> {
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -55,21 +60,40 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
     }
 
     @Override
-    public HandlerKey key() {
-        Class<?>[] types = getRawMethod().getParameterTypes();
-        @SuppressWarnings("unchecked")
-        Class<? extends Message> eventMessageClass = (Class<? extends Message>) types[0];
-        EventClass eventClass = EventClass.from(eventMessageClass);
+    public HandlerId id() {
+        EventClass eventClass = getMessageClass();
         if (!getParameterSpec().isAwareOfCommandType()) {
-            return HandlerKey.of(eventClass);
+            return createId(eventClass);
         } else {
-            @SuppressWarnings("unchecked")
-            Class<? extends Message> commandMessageClass = (Class<? extends Message>) types[1];
+            Class<?>[] parameters = getRawMethod().getParameterTypes();
+            Class<? extends CommandMessage> commandMessageClass =
+                    castClass(parameters[1], CommandMessage.class);
             CommandClass commandClass = CommandClass.from(commandMessageClass);
-            return HandlerKey.of(eventClass, commandClass);
+            return createId(eventClass, commandClass);
         }
     }
 
+    private static <T extends Message> Class<T> castClass(Class<?> raw, Class<T> targetBound) {
+        checkArgument(targetBound.isAssignableFrom(raw));
+        @SuppressWarnings("unchecked") // Checked above.
+        Class<T> result = (Class<T>) raw;
+        return result;
+    }
+
+    /**
+     * Ensures that the passed event matches the {@code external} attribute
+     * of the method annotation.
+     *
+     * <p>If the method annotated to accept {@code external} events, the event passed to the handler
+     * method must be produced {@linkplain io.spine.core.EventContext#getExternal() outside} of
+     * the Bounded Context to which the handling entity belongs.
+     *
+     * <p>And vice versa, if the event handling method is designed for domestic events,
+     * it does not accept external events.
+     *
+     * @see io.spine.core.Subscribe#external()
+     * @see io.spine.server.event.React#external()
+     */
     @Override
     protected void checkAttributesMatch(EventEnvelope envelope) {
         boolean external = envelope.getEventContext()
@@ -80,8 +104,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
     /**
      * {@inheritDoc}
      *
-     * @apiNote
-     * Overridden to mark {@code rawMethodOutput} argument as nullable.
+     * @apiNote Overridden to mark the {@code rawMethodOutput} parameter as {@code Nullable}.
      */
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug: `@apiNote` isn't seen as modification
     @Override

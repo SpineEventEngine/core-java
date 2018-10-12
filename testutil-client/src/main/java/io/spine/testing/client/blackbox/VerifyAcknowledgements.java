@@ -21,8 +21,8 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.RejectionMessage;
 import io.spine.core.RejectionClass;
 
 /**
@@ -35,10 +35,8 @@ import io.spine.core.RejectionClass;
  * <p>Allows combining verifiers using {@link #and(VerifyAcknowledgements) and()} or factory
  * method shortcuts: {@code ackedWithoutErrors().and(ackedWithRejection(rej))} can be simplified
  * to {@code ackedWithoutErrors().withRejection(rej)}.
- *
- * @author Mykhailo Drachuk
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "unused", "RedundantSuppression"})
 @VisibleForTesting
 public abstract class VerifyAcknowledgements {
 
@@ -148,7 +146,8 @@ public abstract class VerifyAcknowledgements {
      * @param type rejection type in a form of message class
      * @return a new instance
      */
-    public static VerifyAcknowledgements ackedWithRejections(Class<? extends Message> type) {
+    public static VerifyAcknowledgements
+    ackedWithRejections(Class<? extends RejectionMessage> type) {
         RejectionClass rejectionClass = RejectionClass.of(type);
         return ackedWithRejections(rejectionClass);
     }
@@ -173,7 +172,7 @@ public abstract class VerifyAcknowledgements {
      * @param <T>       a domain rejection type
      * @return a new instance
      */
-    public static <T extends Message> VerifyAcknowledgements
+    public static <T extends RejectionMessage> VerifyAcknowledgements
     ackedWithRejections(Class<T> type, RejectionCriterion<T> predicate) {
         return new SpecificRejectionPresenceVerify<>(type, predicate);
     }
@@ -197,7 +196,7 @@ public abstract class VerifyAcknowledgements {
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @return a new instance
      */
-    public static VerifyAcknowledgements ackedWithRejections(Class<? extends Message> type,
+    public static VerifyAcknowledgements ackedWithRejections(Class<? extends RejectionMessage> type,
                                                              Count expectedCount) {
         RejectionClass rejectionClass = RejectionClass.of(type);
         return ackedWithRejections(rejectionClass, expectedCount);
@@ -226,8 +225,10 @@ public abstract class VerifyAcknowledgements {
      * @param criterion     a criterion filtering domain rejections
      * @return a new instance
      */
-    public static <T extends Message> VerifyAcknowledgements
-    ackedWithRejections(Class<T> type, Count expectedCount, RejectionCriterion<T> criterion) {
+    public static <T extends RejectionMessage>
+    VerifyAcknowledgements ackedWithRejections(Class<T> type,
+                                               Count expectedCount,
+                                               RejectionCriterion<T> criterion) {
         return new SpecificRejectionCountVerify<>(type, expectedCount, criterion);
     }
 
@@ -280,8 +281,8 @@ public abstract class VerifyAcknowledgements {
      * Creates a new verifier adding a check to contain an {@link Error error} that matches
      * the criterion.
      *
-     * @param criterion an error criterion specifying which kind of error should be a part
-     *                  of acknowledgement
+     * @param criterion
+     *         an error criterion specifying which kind of error should be a part of acknowledgement
      * @return a new instance
      */
     public VerifyAcknowledgements withErrors(ErrorCriterion criterion) {
@@ -293,9 +294,10 @@ public abstract class VerifyAcknowledgements {
      * Creates a new verifier adding a check to contain an {@link Error error} that matches
      * the criterion.
      *
-     * @param criterion     an error criterion specifying which kind of error should be a part
-     *                      of acknowledgement
-     * @param expectedCount an amount of errors that are expected to match the criterion
+     * @param criterion
+     *         an error criterion specifying which kind of error should be a part of acknowledgement
+     * @param expectedCount
+     *         an amount of errors that are expected to match the criterion
      * @return a new instance
      */
     public VerifyAcknowledgements withErrors(ErrorCriterion criterion, Count expectedCount) {
@@ -341,7 +343,7 @@ public abstract class VerifyAcknowledgements {
      * @param type a type of a domain rejection specified by message class
      * @return a new instance
      */
-    public VerifyAcknowledgements withRejections(Class<? extends Message> type) {
+    public VerifyAcknowledgements withRejections(Class<? extends RejectionMessage> type) {
         VerifyAcknowledgements rejectedType = ackedWithRejections(type);
         return this.and(rejectedType);
     }
@@ -366,7 +368,7 @@ public abstract class VerifyAcknowledgements {
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @return a new instance
      */
-    public VerifyAcknowledgements withRejections(Class<? extends Message> type,
+    public VerifyAcknowledgements withRejections(Class<? extends RejectionMessage> type,
                                                  Count expectedCount) {
         VerifyAcknowledgements rejectedType = ackedWithRejections(type, expectedCount);
         return this.and(rejectedType);
@@ -393,8 +395,8 @@ public abstract class VerifyAcknowledgements {
      * @param <T>       a domain rejection type
      * @return a new instance
      */
-    public <T extends Message> VerifyAcknowledgements
-    withRejections(Class<T> type, RejectionCriterion<T> predicate) {
+    public <T extends RejectionMessage>
+    VerifyAcknowledgements withRejections(Class<T> type, RejectionCriterion<T> predicate) {
         VerifyAcknowledgements oneRejection = ackedWithRejections(type, predicate);
         return this.and(oneRejection);
     }
@@ -408,8 +410,10 @@ public abstract class VerifyAcknowledgements {
      * @param predicate     a predicate filtering domain rejections
      * @return a new instance
      */
-    public <T extends Message> VerifyAcknowledgements
-    withRejections(Class<T> type, Count expectedCount, RejectionCriterion<T> predicate) {
+    public <T extends RejectionMessage>
+    VerifyAcknowledgements withRejections(Class<T> type,
+                                          Count expectedCount,
+                                          RejectionCriterion<T> predicate) {
         VerifyAcknowledgements oneRejection = ackedWithRejections(type, expectedCount, predicate);
         return this.and(oneRejection);
     }

@@ -24,12 +24,13 @@ import io.spine.core.EventClass;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
-import io.spine.server.event.model.EventSubscriberMethod;
-import io.spine.server.event.model.EventSubscriberSignature;
+import io.spine.server.event.model.SubscriberMethod;
+import io.spine.server.event.model.SubscriberSignature;
 import io.spine.server.event.model.SubscribingClass;
 import io.spine.server.projection.Projection;
 import io.spine.type.MessageClass;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,11 +46,11 @@ public final class ProjectionClass<P extends Projection>
         implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<P, EventSubscriberMethod> delegate;
+    private final EventReceivingClassDelegate<P, SubscriberMethod> delegate;
 
     private ProjectionClass(Class<P> cls) {
         super(cls);
-        this.delegate = new EventReceivingClassDelegate<>(cls, new EventSubscriberSignature());
+        this.delegate = new EventReceivingClassDelegate<>(cls, new SubscriberSignature());
     }
 
     /**
@@ -73,7 +74,8 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass) {
-        return delegate.getMethod(eventClass, originClass);
+    public Collection<SubscriberMethod>
+    getSubscribers(EventClass eventClass, MessageClass originClass) {
+        return delegate.getMethods(eventClass, originClass);
     }
 }

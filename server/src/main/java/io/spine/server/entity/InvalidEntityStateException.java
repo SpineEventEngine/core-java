@@ -109,9 +109,9 @@ public final class InvalidEntityStateException extends RuntimeException {
      */
     private static class ConstraintViolationExceptionFactory
             extends ExceptionFactory<InvalidEntityStateException,
-            Message,
-            EntityStateClass,
-            EntityStateValidationError> {
+                                     Message,
+                                     EntityStateClass,
+                                     EntityStateValidationError> {
 
         /**
          * The name of the attribute of the entity state type reported in an error.

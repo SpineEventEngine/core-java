@@ -20,33 +20,18 @@
 
 package io.spine.testing.core.given;
 
-import com.google.common.testing.NullPointerTester;
 import io.spine.base.Identifier;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("GivenTenantId should")
-class GivenTenantIdTest {
+class GivenTenantIdTest extends UtilityClassTest<GivenTenantId> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(GivenTenantId.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(GivenTenantId.class);
+    GivenTenantIdTest() {
+        super(GivenTenantId.class);
     }
 
     @Test

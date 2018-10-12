@@ -169,7 +169,7 @@ public class GrpcContainer {
     }
 
     // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-    @SuppressWarnings("UseOfSystemOutOrSystemErr")
+    @SuppressWarnings({"UseOfSystemOutOrSystemErr", "CatchAndPrintStackTrace"})
     @VisibleForTesting
     Runnable getOnShutdownCallback() {
         return () -> {

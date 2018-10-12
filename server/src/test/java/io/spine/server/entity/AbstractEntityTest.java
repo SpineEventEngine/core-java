@@ -32,19 +32,14 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.given.AbstractEntityTestEnv.newNaturalNumber;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Illia Shepilov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"})
-// JUnit nested classes cannot be static.
 @DisplayName("AbstractEntity should")
 class AbstractEntityTest {
 
@@ -92,9 +87,9 @@ class AbstractEntityTest {
 
             fail("Exception expected.");
         } catch (InvalidEntityStateException e) {
-            assertSize(1, e.getError()
-                           .getValidationError()
-                           .getConstraintViolationList());
+            assertThat(e.getError()
+                        .getValidationError()
+                        .getConstraintViolationList()).hasSize(1);
         }
     }
 

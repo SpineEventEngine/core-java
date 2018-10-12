@@ -24,8 +24,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.change.Preconditions2.checkNewValueNotEmpty;
-import static io.spine.change.Preconditions2.checkNotEqual;
+import static io.spine.change.ChangePreconditions.checkNewValueNotEmpty;
+import static io.spine.change.ChangePreconditions.checkNotEqual;
 
 /**
  * Utility class for working with field changes.

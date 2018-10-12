@@ -21,6 +21,7 @@
 package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.model.DuplicateHandlerCheck;
 import io.spine.server.model.Model;
@@ -28,8 +29,6 @@ import io.spine.tools.gradle.ProjectHierarchy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -50,9 +49,8 @@ import static java.util.stream.Collectors.toList;
  *
  * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
  *           string literal for security check.
- * @author Dmytro Dashenkov
  */
-final class ModelVerifier {
+final class ModelVerifier implements Logging {
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
@@ -83,7 +81,7 @@ final class ModelVerifier {
     /**
      * Creates a ClassLoader for the passed project.
      */
-    private static URLClassLoader createClassLoader(Project project) {
+    private URLClassLoader createClassLoader(Project project) {
         Collection<JavaCompile> tasks = allJavaCompile(project);
         URL[] compiledCodePath = extractDestinationDirs(tasks);
         log().debug("Initializing ClassLoader for URLs: {}", deepToString(compiledCodePath));
@@ -144,16 +142,5 @@ final class ModelVerifier {
                         task.getName()), e);
             }
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ModelVerifier.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

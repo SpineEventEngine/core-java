@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.Tests.nullRef;
-import static io.spine.testing.Verify.assertContainsAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -61,11 +61,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @param <I> the type of IDs of storage records
  * @param <M> the type of records kept in the storage
  * @param <R> the type of read requests for the storage
- * @author Alexander Litus
  */
-@SuppressWarnings({"ClassWithTooManyMethods",
-        "unused" /* JUnit nested classes considered unused in the abstract class. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 public abstract class AbstractStorageTest<I,
                                           M extends Message,
                                           R extends ReadRequest<I>,
@@ -143,7 +139,6 @@ public abstract class AbstractStorageTest<I,
     }
 
     /** Writes a record, reads it and asserts it is the same as the expected one. */
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We do check.
     private void writeAndReadRecordTest(I id) {
         M expected = writeRecord(id);
 
@@ -244,7 +239,6 @@ public abstract class AbstractStorageTest<I,
             assertNotNull(index);
         }
 
-        @SuppressWarnings("unchecked") // Simplified for test.
         @Test
         @DisplayName("counts all IDs")
         void countingAllIds() {
@@ -260,7 +254,7 @@ public abstract class AbstractStorageTest<I,
             Collection<I> indexValues = newHashSet(index);
 
             assertEquals(ids.size(), indexValues.size());
-            assertContainsAll(indexValues, (I[]) ids.toArray());
+            assertThat(indexValues).containsExactlyElementsIn(ids);
         }
 
         @Test

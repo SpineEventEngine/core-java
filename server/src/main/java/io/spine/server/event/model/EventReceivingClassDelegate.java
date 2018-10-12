@@ -30,6 +30,7 @@ import io.spine.server.model.ModelClass;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -86,7 +87,17 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *
      * @throws IllegalStateException if there is such method in the class
      */
-    public M getMethod(EventClass eventClass, MessageClass originClass) {
-        return events.getMethod(eventClass, originClass);
+    public Collection<M> getMethods(EventClass eventClass, MessageClass originClass) {
+        return events.getMethods(eventClass, originClass);
     }
+
+    /**
+     * Obtains the method which handles the passed event class.
+     *
+     * @throws IllegalStateException if there is such method in the class
+     */
+    public M getMethod(EventClass eventClass, MessageClass originClass) {
+        return events.getSingleMethod(eventClass, originClass);
+    }
+
 }

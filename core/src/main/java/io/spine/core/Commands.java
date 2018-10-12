@@ -26,11 +26,11 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
-import io.spine.time.Timestamps2;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,12 +40,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.core.CommandContext.Schedule;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Timestamps2.isBetween;
+import static io.spine.protobuf.Timestamps2.isLaterThan;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Client-side utilities for working with commands.
- *
- * @author Alexander Yevsyukov
  */
 public final class Commands {
 
@@ -56,8 +58,8 @@ public final class Commands {
                            .register(idStringifier(), CommandId.class);
     }
 
+    /** Prevent instantiation of this utility class. */
     private Commands() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -79,21 +81,23 @@ public final class Commands {
      * @param command a command to extract a message from
      * @return an unpacked message
      */
-    public static Message getMessage(Command command) {
+    public static CommandMessage getMessage(Command command) {
         checkNotNull(command);
-        return AnyPacker.unpack(command.getMessage());
+        CommandMessage result = (CommandMessage) unpack(command.getMessage());
+        return result;
     }
 
     /**
      * Extracts a command message if the passed instance is a {@link Command} object or
      * {@link com.google.protobuf.Any Any}, otherwise returns the passed message.
      */
-    public static Message ensureMessage(Message commandOrMessage) {
+    public static CommandMessage ensureMessage(Message commandOrMessage) {
         checkNotNull(commandOrMessage);
         if (commandOrMessage instanceof Command) {
             return getMessage((Command) commandOrMessage);
         }
-        return io.spine.protobuf.Messages.ensureMessage(commandOrMessage);
+        CommandMessage unpacked = (CommandMessage) Messages.ensureMessage(commandOrMessage);
+        return unpacked;
     }
 
     /**
@@ -126,7 +130,7 @@ public final class Commands {
         return request -> {
             checkNotNull(request);
             Timestamp timestamp = getTimestamp(request);
-            return Timestamps2.isLaterThan(timestamp, from);
+            return isLaterThan(timestamp, from);
         };
     }
 
@@ -139,7 +143,7 @@ public final class Commands {
         return request -> {
             checkNotNull(request);
             Timestamp timestamp = getTimestamp(request);
-            return Timestamps2.isBetween(timestamp, from, to);
+            return isBetween(timestamp, from, to);
         };
     }
 

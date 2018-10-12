@@ -22,6 +22,7 @@ package io.spine.testing.server;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.server.entity.Entity;
 import io.spine.testing.server.expected.EventSubscriberExpected;
@@ -39,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @CheckReturnValue
 public abstract class EventSubscriptionTest<I,
-                                            M extends Message,
+                                            M extends EventMessage,
                                             S extends Message,
                                             E extends Entity<I, S>>
         extends MessageHandlerTest<I, M, S, E, EventSubscriberExpected<S>> {
@@ -62,7 +63,7 @@ public abstract class EventSubscriptionTest<I,
      * Creates {@link Event} from the tested message.
      */
     protected final Event createEvent() {
-        Message eventMessage = message();
+        EventMessage eventMessage = message();
         checkNotNull(eventMessage);
         Event result = eventFactory.createEvent(eventMessage);
         return result;

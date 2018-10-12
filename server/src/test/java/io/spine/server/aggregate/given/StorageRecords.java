@@ -21,8 +21,8 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.test.aggregate.ProjectId;
@@ -35,15 +35,13 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.testing.server.TestEventFactory.newInstance;
-import static io.spine.time.Durations2.seconds;
 
 /**
  * Utilities for creating test instances and sequences of {@link AggregateEventRecord}.
- *
- * @author Alexander Yevsyukov
  */
 public class StorageRecords {
 
@@ -64,7 +62,7 @@ public class StorageRecords {
      * Creates a sample {@linkplain AggregateEventRecord record} with the passed timestamp.
      */
     public static AggregateEventRecord create(Timestamp timestamp) {
-        Message eventMessage = Sample.messageOfType(AggProjectCreated.class);
+        EventMessage eventMessage = Sample.messageOfType(AggProjectCreated.class);
         Event event = eventFactory.createEvent(eventMessage);
         return newRecordWith(timestamp)
                 .setEvent(event)

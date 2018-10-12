@@ -34,14 +34,13 @@ public class DuplicateHandlerMethodError extends ModelError {
 
     public DuplicateHandlerMethodError(
             Class<?> targetClass,
-            HandlerKey handlerKey,
+            HandlerId handlerId,
             String firstMethodName,
             String secondMethodName) {
 
-        super(format(
-                "The %s class defines more than one method with key %s." +
-                        " Methods encountered: %s, %s.",
-                targetClass.getName(), handlerKey,
-                firstMethodName, secondMethodName));
+        super(format("The %s class defines more than one method with ID %s." +
+                             " Methods encountered: %s, %s.",
+                     targetClass.getName(), handlerId,
+                     firstMethodName, secondMethodName));
     }
 }

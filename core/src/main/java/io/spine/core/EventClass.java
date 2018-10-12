@@ -23,23 +23,24 @@ package io.spine.core;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.type.MessageClass;
 
 import java.util.Arrays;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Events.ensureMessage;
 
 /**
  * A value object holding a class of events.
  *
  * @author Alexander Yevsyukov
  */
-public class EventClass extends MessageClass {
+public class EventClass extends MessageClass<EventMessage> {
 
     private static final long serialVersionUID = 0L;
 
-    EventClass(Class<? extends Message> value) {
+    EventClass(Class<? extends EventMessage> value) {
         super(value);
     }
 
@@ -49,7 +50,7 @@ public class EventClass extends MessageClass {
      * @param value a value to hold
      * @return new instance
      */
-    public static EventClass from(Class<? extends Message> value) {
+    public static EventClass from(Class<? extends EventMessage> value) {
         return new EventClass(checkNotNull(value));
     }
 
@@ -66,32 +67,22 @@ public class EventClass extends MessageClass {
      * @return new instance
      */
     public static EventClass of(Message eventOrMessage) {
-        Message eventMessage = Events.ensureMessage(eventOrMessage);
+        EventMessage eventMessage = ensureMessage(eventOrMessage);
         return from(eventMessage.getClass());
     }
 
-    /**
-     * Creates a new instance of the event class.
-     *
-     * @param value a value to hold
-     * @return new instance
-     */
-    public static EventClass of(Class<? extends Message> value) {
-        return new EventClass(checkNotNull(value));
-    }
-
     /** Creates immutable set of {@code EventClass} from the passed set. */
-    public static Set<EventClass> setOf(Iterable<Class<? extends Message>> classes) {
+    public static ImmutableSet<EventClass> setOf(Iterable<Class<? extends EventMessage>> classes) {
         ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
-        for (Class<? extends Message> cls : classes) {
-            builder.add(of(cls));
+        for (Class<? extends EventMessage> cls : classes) {
+            builder.add(from(cls));
         }
         return builder.build();
     }
 
     /** Creates immutable set of {@code EventClass} from the passed classes. */
     @SafeVarargs
-    public static Set<EventClass> setOf(Class<? extends Message>... classes) {
+    public static ImmutableSet<EventClass> setOf(Class<? extends EventMessage>... classes) {
         return setOf(Arrays.asList(classes));
     }
 }

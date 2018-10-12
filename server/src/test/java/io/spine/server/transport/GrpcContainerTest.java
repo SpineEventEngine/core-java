@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.testing.Verify.assertSize;
+import static com.google.common.truth.Truth.assertThat;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,9 +49,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("GrpcContainer should")
 class GrpcContainerTest {
     private Server server;
@@ -102,7 +99,7 @@ class GrpcContainerTest {
         assertEquals(builder, builder.removeService(definitions.get(count)));
 
         Set<ServerServiceDefinition> serviceSet = builder.getServices();
-        assertSize(count, serviceSet);
+        assertThat(serviceSet).hasSize(count);
 
         GrpcContainer container = builder.build();
         assertNotNull(container);
@@ -118,7 +115,7 @@ class GrpcContainerTest {
 
     @Test
     @DisplayName("shutdown server")
-    void shutdownItself() throws IOException, InterruptedException {
+    void shutdownItself() throws IOException {
         grpcContainer.start();
         grpcContainer.shutdown();
 
@@ -220,7 +217,7 @@ class GrpcContainerTest {
 
         @Test
         @DisplayName("not started")
-        void notStarted() throws IOException {
+        void notStarted() {
             assertTrue(grpcContainer.isShutdown());
         }
 

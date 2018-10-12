@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides model classes for {@link io.spine.server.procman}.
+ * This package provides model classes for {@code io.spine.server.procman}.
  */
 @Internal
 @CheckReturnValue

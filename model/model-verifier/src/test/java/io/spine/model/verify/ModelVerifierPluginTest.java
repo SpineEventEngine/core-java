@@ -20,6 +20,8 @@
 
 package io.spine.model.verify;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
@@ -27,7 +29,6 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +52,10 @@ class ModelVerifierPluginTest {
     private static final String PROJECT_NAME = "model-verifier-test";
     private static final String VALID_AGGREGATE_JAVA =
             "io/spine/model/verify/ValidAggregate.java";
+    private static final ImmutableCollection<String> PROTO_FILES = ImmutableList.of(
+            "spine/model/verify/commands.proto",
+            "spine/model/verify/events.proto"
+    );
 
     private Path tempDir;
 
@@ -77,9 +82,9 @@ class ModelVerifierPluginTest {
                 "io/spine/model/verify/DuplicateCommandHandler.java")
                 .executeAndFail(VERIFY_MODEL);
         BuildTask task = result.task(toPath(VERIFY_MODEL));
-        assertNotNull(task);
+        assertNotNull(task, result.getOutput());
         TaskOutcome generationResult = task.getOutcome();
-        assertEquals(FAILED, generationResult);
+        assertEquals(FAILED, generationResult, result.getOutput());
     }
 
     @Test
@@ -90,18 +95,15 @@ class ModelVerifierPluginTest {
         project.executeTask(VERIFY_MODEL);
     }
 
-    @Disabled // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of
-              // checking the handler methods.
-              // https://github.com/SpineEventEngine/base/issues/49
     @Test
     @DisplayName("halt build on malformed command handling methods")
     void rejectMalformedHandlingMethods() {
         BuildResult result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
                 .executeAndFail(VERIFY_MODEL);
         BuildTask task = result.task(toPath(VERIFY_MODEL));
-        assertNotNull(task);
+        assertNotNull(task, result.getOutput());
         TaskOutcome generationResult = task.getOutcome();
-        assertEquals(FAILED, generationResult);
+        assertEquals(FAILED, generationResult, result.getOutput());
     }
 
     private GradleProject newProjectWithJava(String... fileNames) {
@@ -109,6 +111,7 @@ class ModelVerifierPluginTest {
                             .setProjectName(PROJECT_NAME)
                             .setProjectFolder(tempDir.toFile())
                             .addJavaFiles(fileNames)
+                            .addProtoFiles(PROTO_FILES)
                             .build();
     }
 

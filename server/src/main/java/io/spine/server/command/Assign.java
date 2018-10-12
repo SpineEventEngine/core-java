@@ -31,15 +31,12 @@ import java.lang.annotation.Target;
  * <p>A command handler method <strong>must</strong>:
  * <ul>
  *     <li>be annotated with {@link Assign @Assign};
- *
  *     <li>have package-private visibility;
- *
- *     <li>return an event message derived from {@link com.google.protobuf.Message Message}
- *     if there is only one event generated;
- *     <strong>or</strong> an {@link java.lang.Iterable Iterable} of event messages for two or
- *     more events;
- *
- *     <li>accept a command message derived from {@link com.google.protobuf.Message Message}
+ *     <li>return an event message derived from {@link io.spine.base.EventMessage EventMessage}
+ *         if there is only one event generated;
+ *         <strong>or</strong> an {@code Iterable} of event messages for two or
+ *         more events;
+ *     <li>accept a command message derived from {@link io.spine.base.CommandMessage CommandMessage}
  *         as the first parameter.
  * </ul>
  *
@@ -54,7 +51,7 @@ import java.lang.annotation.Target;
  * calling this method from tests. The method should not be {@code public} because it is not
  * supposed to be called directly.
  *
- * <h2>One Handler per Command</h2>
+ * <h1>One Handler per Command</h1>
  *
  * <p>An application must have one and only one handler per command message class.
  * This includes {@linkplain io.spine.server.command.Command the case} of transforming an incoming
@@ -62,8 +59,7 @@ import java.lang.annotation.Target;
  *
  * <p>Declaring two methods that handle the same command class will result in run-time error.
  *
- * @author Alexander Yevsyukov
- * @see io.spine.server.tuple Returning Two or More Event Messages
+ * @see io.spine.server.tuple.Tuple Returning Two or More Event Messages
  * @see io.spine.server.command.Command Converting Commands
  */
 @Retention(RetentionPolicy.RUNTIME)

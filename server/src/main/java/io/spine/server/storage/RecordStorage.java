@@ -132,10 +132,9 @@ public abstract class RecordStorage<I>
 
         EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
         Any state = builder.getState();
-        TypeUrl type = TypeUrl.parse(state.getTypeUrl());
         Message stateAsMessage = AnyPacker.unpack(state);
 
-        Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
+        Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage);
 
         Any packedState = AnyPacker.pack(maskedState);
         builder.setState(packedState);
@@ -331,7 +330,7 @@ public abstract class RecordStorage<I>
     /**
      * Obtains the entity column cache.
      *
-     * @throws IllegalStateException if the storage {@linkplain RecordStorage(boolean)
+     * @throws IllegalStateException if the storage {@linkplain RecordStorage#RecordStorage(boolean)
      * does not support} the cache
      */
     @Internal
@@ -357,20 +356,41 @@ public abstract class RecordStorage<I>
      */
     protected abstract Optional<EntityRecord> readRecord(I id);
 
-    /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
+    /**
+     * Obtains an iterator for reading multiple records by IDs.
+     *
+     * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
+     */
     protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids);
 
-    /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
+    /**
+     * Obtains an iterator for reading multiple records by IDs, and
+     * applying the passed field mask to the results.
+     *
+     * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
+     */
     protected abstract
     Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask);
 
-    /** @see BulkStorageOperationsMixin#readAll() */
+    /**
+     * Obtains an iterator for reading all records.
+     *
+     * @see BulkStorageOperationsMixin#readAll()
+     */
     protected abstract Iterator<EntityRecord> readAllRecords();
 
-    /** @see BulkStorageOperationsMixin#readAll() */
+    /**
+     * Obtains an iterator for reading all records, and applying the passed field mask to
+     * the results.
+     *
+     * @see BulkStorageOperationsMixin#readAll()
+     */
     protected abstract Iterator<EntityRecord> readAllRecords(FieldMask fieldMask);
 
     /**
+     * Obtains an iterator for reading records matching the query,
+     * and applying the passed field mask to the results.
+     *
      * @see #readAll(EntityQuery, FieldMask)
      */
     protected abstract

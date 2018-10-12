@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.change.Preconditions2.checkNotNullOrEqual;
+import static io.spine.change.ChangePreconditions.checkNotNullOrEqual;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toAny;
 

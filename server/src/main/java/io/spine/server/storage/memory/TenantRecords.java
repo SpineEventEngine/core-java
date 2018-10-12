@@ -152,9 +152,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     }
 
     private static Any maskAny(Any message, FieldMask mask) {
-        TypeUrl type = TypeUrl.parse(message.getTypeUrl());
         Message stateMessage = unpack(message);
-        Message maskedMessage = applyMask(mask, stateMessage, type);
+        Message maskedMessage = applyMask(mask, stateMessage);
         Any result = pack(maskedMessage);
         return result;
     }
@@ -184,8 +183,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             checkNotNull(input);
             Any packedState = input.getState();
             Message state = unpack(packedState);
-            TypeUrl typeUrl = TypeUrl.ofEnclosed(packedState);
-            Message maskedState = applyMask(fieldMask, state, typeUrl);
+            Message maskedState = applyMask(fieldMask, state);
             Any repackedState = pack(maskedState);
             EntityRecord result = EntityRecord
                     .newBuilder(input)

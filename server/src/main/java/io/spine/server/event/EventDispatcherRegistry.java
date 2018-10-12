@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.bus.DispatcherRegistry;
 
 import java.util.Set;
@@ -32,11 +33,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * The registry of objects that dispatch event to handlers.
  *
  * <p>There can be multiple dispatchers per event class.
- *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
-class EventDispatcherRegistry extends DispatcherRegistry<EventClass, EventDispatcher<?>> {
+class EventDispatcherRegistry
+        extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
 
     @Override
     protected void register(EventDispatcher<?> dispatcher) {
@@ -63,20 +62,8 @@ class EventDispatcherRegistry extends DispatcherRegistry<EventClass, EventDispat
      * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
      */
     @Override
-    protected Set<EventDispatcher<?>> getDispatchers(EventClass eventClass) {
-        return super.getDispatchers(eventClass);
-    }
-
-    /**
-     * Checks if this registry has a dispatcher for events of the given class.
-     *
-     * @param eventClass class to find dispatchers for
-     * @return {@code true} if the dispatcher is present, {@code false} otherwise
-     */
-    boolean hasDispatchersFor(EventClass eventClass) {
-        Set<EventDispatcher<?>> dispatchers = getDispatchers(eventClass);
-        boolean result = !dispatchers.isEmpty();
-        return result;
+    protected Set<EventDispatcher<?>> getDispatchersForType(EventClass messageClass) {
+        return super.getDispatchersForType(messageClass);
     }
 
     /**

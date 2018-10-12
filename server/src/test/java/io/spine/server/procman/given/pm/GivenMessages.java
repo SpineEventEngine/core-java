@@ -21,7 +21,7 @@
 package io.spine.server.procman.given.pm;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -81,7 +81,8 @@ public class GivenMessages {
                                  .build();
     }
 
-    public static RejectionEnvelope entityAlreadyArchived(Class<? extends Message> commandClass) {
+    public static RejectionEnvelope
+    entityAlreadyArchived(Class<? extends CommandMessage> commandClass) {
         Any id = Identifier.pack(TestProcessManager.class.getName());
         Command command = Given.ACommand.withMessage(messageOfType(commandClass));
         RejectionEnvelope result = RejectionEnvelope.from(CommandEnvelope.of(command),

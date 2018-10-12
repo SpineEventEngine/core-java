@@ -30,15 +30,15 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  *
  * @author Alexander Yevsyukov
  */
-public class GivenTenantId {
+public final class GivenTenantId {
 
     /**
      * The prefix for generated tenant identifiers.
      */
     private static final String TENANT_PREFIX = "tenant-";
 
+    /** Prevent instantiation of this utility class. */
     private GivenTenantId() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

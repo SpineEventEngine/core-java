@@ -54,13 +54,11 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      *
      * <p>Other entries can be either {@link GeneratedMessageV3} or {@link Optional}.
      */
-    @SuppressWarnings("NonSerializableFieldInSerializableClass") // ensured in constructor
     private final List<Element> values;
 
     /**
      * Creates a new instance with the passed values.
      */
-    @SuppressWarnings("ChainOfInstanceofChecks") // Need for supporting optional entries.
     protected Tuple(Object... values) {
         super();
 
@@ -76,8 +74,6 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
     /**
      * Ensures that the passed message is not an instance of {@link Empty}.
-     *
-     * <p>If the passed
      *
      * @return the passed value
      * @throws IllegalArgumentException if the passed value is {@link Empty}
@@ -98,11 +94,13 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return value;
     }
 
+    @SuppressWarnings("ConstantConditions") // Cannot return null if passed value is non-null.
     @CanIgnoreReturnValue
     static <M extends Message, T extends Tuple>
     M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
         checkNotNull(value);
-        return checkNotEmpty(checkingClass, value);
+        M result = checkNotEmpty(checkingClass, value);
+        return result;
     }
 
     static <T extends Tuple>

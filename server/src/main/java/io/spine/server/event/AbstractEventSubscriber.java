@@ -22,15 +22,13 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.event.model.EventSubscriberClass;
-import io.spine.server.event.model.EventSubscriberMethod;
-import io.spine.server.integration.ExternalMessage;
+import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -41,7 +39,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static java.lang.String.format;
 
@@ -51,9 +48,9 @@ import static java.lang.String.format;
  * <p>Objects may also receive events via {@link EventDispatcher}s that can be
  * registered with {@code EventBus}.
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  * @see EventBus#register(MessageDispatcher)
+ * @see io.spine.core.Subscribe {@code @Subscribe} annotation for declaring event subscriptions
+ *                              in the derived classes
  */
 public abstract class AbstractEventSubscriber
         implements EventDispatcher<String>, EventSubscriber, Logging {
@@ -62,14 +59,14 @@ public abstract class AbstractEventSubscriber
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
 
     /**
-     * {@inheritDoc}
+     * Dispatches event to the handling method.
      *
      * @param envelope the envelope with the message
      * @return a one element set with the result of {@link #toString()}
      * as the identify of the subscriber, or empty set if dispatching failed
      */
     @Override
-    public Set<String> dispatch(EventEnvelope envelope) {
+    public final Set<String> dispatch(EventEnvelope envelope) {
         EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
@@ -98,9 +95,15 @@ public abstract class AbstractEventSubscriber
         MessageClass messageClass = envelope.getMessageClass();
         String messageId = envelope.idAsString();
         String errorMessage =
-                format("Error handling event subscription (class: %s id: %s).",
-                       messageClass, messageId);
+                format("Error handling event subscription (class: %s id: %s) in %s.",
+                       messageClass, messageId, thisClass);
         log().error(errorMessage, exception);
+    }
+
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(envelope);
+        return subscriber.isPresent();
     }
 
     @Override
@@ -120,9 +123,8 @@ public abstract class AbstractEventSubscriber
     }
 
     private void handle(EventEnvelope envelope) {
-        EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass(),
-                                                               envelope.getOriginClass());
-        method.invoke(this, envelope);
+        thisClass.getSubscriber(envelope)
+                 .ifPresent(method -> method.invoke(this, envelope));
     }
 
     /**
@@ -138,9 +140,7 @@ public abstract class AbstractEventSubscriber
         @CanIgnoreReturnValue
         @Override
         public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-            ExternalMessage externalMessage = envelope.getOuterObject();
-            Event event = unpack(externalMessage.getOriginalMessage());
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
             return AbstractEventSubscriber.this.dispatch(eventEnvelope);
         }
 
@@ -151,6 +151,12 @@ public abstract class AbstractEventSubscriber
             logError("Error dispatching external event to event subscriber " +
                              "(event class: %s, id: %s)",
                      envelope, exception);
+        }
+
+        @Override
+        public boolean canDispatch(ExternalMessageEnvelope envelope) {
+            EventEnvelope event = envelope.toEventEnvelope();
+            return AbstractEventSubscriber.this.canDispatch(event);
         }
 
         private void logError(String msgFormat,

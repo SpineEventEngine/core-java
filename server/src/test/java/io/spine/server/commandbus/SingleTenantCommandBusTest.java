@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -32,6 +33,7 @@ import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHand
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -124,10 +126,11 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         List<Message> handledCommands = handler.handledCommands();
         assertEquals(2, handledCommands.size());
-        assertTrue(FirstCmdCreateProject.class.isInstance(handledCommands.get(0)));
-        assertTrue(SecondCmdStartProject.class.isInstance(handledCommands.get(1)));
+        assertTrue(handledCommands.get(0) instanceof FirstCmdCreateProject);
+        assertTrue(handledCommands.get(1) instanceof SecondCmdStartProject);
     }
 
+    @MuteLogging
     @Test
     @DisplayName("do not propagate dispatching errors")
     void doNotPropagateExceptions() {
@@ -153,7 +156,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
     @Override
     protected Command newCommand() {
-        Message commandMessage = Given.CommandMessage.createProjectMessage();
+        CommandMessage commandMessage = Given.CommandMessage.createProjectMessage();
         return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
                                       .createCommand(commandMessage);
     }

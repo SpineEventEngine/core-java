@@ -34,17 +34,11 @@ final class StringEnumConverter extends EnumConverter {
         super(sourceType);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<? extends Serializable> getTargetType() {
         return String.class;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     String convertEnumValue(Enum value) {
         return value.name();

@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -82,17 +83,17 @@ public class TestEventFactory extends EventFactory {
     /**
      * Creates an event without version information.
      */
-    public Event createEvent(Message messageOrAny) {
-        return createEvent(messageOrAny, null);
+    public Event createEvent(EventMessage message) {
+        return createEvent(message, null);
     }
 
     /**
      * Creates an event produced at the passed time.
      */
-    public Event createEvent(Message messageOrAny, @Nullable Version version, Timestamp atTime) {
-        checkNotNull(messageOrAny);
+    public Event createEvent(EventMessage message, @Nullable Version version, Timestamp atTime) {
+        checkNotNull(message);
         checkNotNull(atTime);
-        Event event = createEvent(messageOrAny, version);
+        Event event = createEvent(message, version);
         EventContext context = event.getContext()
                                     .toBuilder()
                                     .setTimestamp(atTime)

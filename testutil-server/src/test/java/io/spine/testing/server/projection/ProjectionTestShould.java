@@ -65,6 +65,6 @@ class ProjectionTestShould {
     void shouldDispatchCommand() {
         TuProjection aggregate = newInstance();
         EventSubscriberExpected<StringValue> expected = projectionTest.expectThat(aggregate);
-        expected.hasState(state -> assertEquals(state.getValue(), TEST_EVENT.getValue()));
+        expected.hasState(state -> assertEquals(state.getValue(), TEST_EVENT.getId().getValue()));
     }
 }

@@ -23,13 +23,12 @@ package io.spine.server.entity;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.testing.TestValues.newUuidValue;
+import static io.spine.core.given.GivenEvent.arbitrary;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,15 +43,11 @@ import static org.mockito.Mockito.when;
 @DisplayName("TransactionalEventPlayer should")
 class TransactionalEventPlayerTest {
 
-    private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(TransactionalEntityTest.class);
-
     @Test
     @DisplayName("require active transaction to play events")
     void requireActiveTx() {
         assertThrows(IllegalStateException.class,
-                     () -> new TxPlayingEntity().play(
-                             eventFactory.createEvent(StringValue.getDefaultInstance())));
+                     () -> new TxPlayingEntity().play(arbitrary()));
     }
 
     @Test
@@ -61,8 +56,8 @@ class TransactionalEventPlayerTest {
         TxPlayingEntity entity = entityWithActiveTx(false);
         Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);
-        Event firstEvent = eventFactory.createEvent(newUuidValue());
-        Event secondEvent = eventFactory.createEvent(newUuidValue());
+        Event firstEvent = arbitrary();
+        Event secondEvent = arbitrary();
 
         entity.play(newArrayList(firstEvent, secondEvent));
 

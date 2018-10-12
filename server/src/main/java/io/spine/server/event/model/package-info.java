@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides model classes for {@link io.spine.server.event}.
+ * This package provides model classes for {@code io.spine.server.event}.
  */
 @Internal
 @CheckReturnValue

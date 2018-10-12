@@ -21,8 +21,8 @@
 package io.spine.server.commandbus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.system.server.CommandSplit;
@@ -52,8 +52,8 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
     }
 
     @CanIgnoreReturnValue
-    public Split addAll(Iterable<? extends Message> commandMessages) {
-        for (Message message : commandMessages) {
+    public Split addAll(Iterable<? extends CommandMessage> commandMessages) {
+        for (CommandMessage message : commandMessages) {
             add(message);
         }
         checkState(size() >= 2,

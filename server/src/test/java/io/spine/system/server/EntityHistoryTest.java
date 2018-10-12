@@ -22,6 +22,7 @@ package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
@@ -60,9 +61,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @ExtendWith(ShardingReset.class)
 @DisplayName("EntityHistory should")
 @SuppressWarnings("InnerClassMayBeStatic")
@@ -191,7 +189,7 @@ class EntityHistoryTest {
         @Test
         @DisplayName("command is dispatched to handler in procman")
         void commandToPm() {
-            Message startCommand = StartPersonCreation
+            CommandMessage startCommand = StartPersonCreation
                     .newBuilder()
                     .setId(id)
                     .build();
@@ -202,11 +200,12 @@ class EntityHistoryTest {
             EntityStateChanged stateChanged =
                     eventAccumulator.assertNextEventIs(EntityStateChanged.class);
             assertId(stateChanged.getId());
-            PersonCreation startedState = unpack(stateChanged.getNewState());
+            PersonCreation startedState = unpack(stateChanged.getNewState(),
+                                                 PersonCreation.class);
             assertFalse(startedState.getCreated());
             eventAccumulator.forgetEvents();
 
-            Message domainCommand = CompletePersonCreation
+            CommandMessage domainCommand = CompletePersonCreation
                     .newBuilder()
                     .setId(id)
                     .build();
@@ -216,7 +215,8 @@ class EntityHistoryTest {
             EntityStateChanged stateChangedAgain = eventAccumulator.assertNextEventIs(
                     EntityStateChanged.class);
             assertId(stateChangedAgain.getId());
-            PersonCreation completedState = unpack(stateChangedAgain.getNewState());
+            PersonCreation completedState = unpack(stateChangedAgain.getNewState(),
+                                                   PersonCreation.class);
             assertTrue(completedState.getCreated());
         }
 
@@ -242,7 +242,8 @@ class EntityHistoryTest {
 
             EntityStateChanged stateChanged = eventAccumulator.assertNextEventIs(
                     EntityStateChanged.class);
-            PersonCreation processState = unpack(stateChanged.getNewState());
+            PersonCreation processState = unpack(stateChanged.getNewState(),
+                                                 PersonCreation.class);
             assertEquals(id, processState.getId());
             assertTrue(processState.getCreated());
         }
@@ -321,8 +322,8 @@ class EntityHistoryTest {
             EventDispatchedToSubscriber event =
                     eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
             EntityHistoryId receiver = event.getReceiver();
-            PersonId actualIdValue = unpack(receiver.getEntityId()
-                                                    .getId());
+            PersonId actualIdValue = Identifier.unpack(receiver.getEntityId()
+                                                               .getId());
             PersonCreated payload = (PersonCreated) getMessage(event.getPayload());
             assertEquals(id, actualIdValue);
             assertEquals(PersonProjection.TYPE.value(), receiver.getTypeUrl());
@@ -341,8 +342,8 @@ class EntityHistoryTest {
             CommandDispatchedToHandler commandDispatchedEvent =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
-            PersonId actualIdValue = unpack(receiver.getEntityId()
-                                                    .getId());
+            PersonId actualIdValue = Identifier.unpack(receiver.getEntityId()
+                                                               .getId());
             CreatePerson payload = (CreatePerson) getMessage(commandDispatchedEvent.getPayload());
             assertEquals(id, actualIdValue);
             assertEquals(PersonAggregate.TYPE.value(), receiver.getTypeUrl());
@@ -395,7 +396,7 @@ class EntityHistoryTest {
             assertEquals(id, actualId);
         }
 
-        private void postCommand(Message commandMessage) {
+        private void postCommand(CommandMessage commandMessage) {
             Command command = requestFactory.createCommand(commandMessage);
             context.getCommandBus()
                    .post(command, noOpObserver());

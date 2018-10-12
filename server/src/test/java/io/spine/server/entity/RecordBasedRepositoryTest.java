@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
+import com.google.common.truth.IterableSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -50,6 +50,8 @@ import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
@@ -66,15 +68,10 @@ import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyPag
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.orderByName;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.pagination;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertNotContains;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -85,11 +82,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *         {@link TestEntityWithStringColumn} at runtime
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings({"ConstantConditions",
-        "DuplicateStringLiteralInspection" /* Common test display names. */,
-        "unused" /* JUnit nested classes considered unused in abstract class. */})
-public abstract class RecordBasedRepositoryTest
-        <E extends AbstractVersionableEntity<I, S>, I, S extends Message>
+public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
+        I,
+        S extends Message>
         extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
@@ -165,8 +160,18 @@ public abstract class RecordBasedRepositoryTest
         return repository.loadAll(ids);
     }
 
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
+    private Iterator<E> loadAll() {
+        return repository.loadAll();
+    }
+
     private E loadOrCreate(I id) {
         return repository.findOrCreate(id);
+    }
+
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
+    private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
+        return repository.find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
     }
 
     /*
@@ -200,7 +205,6 @@ public abstract class RecordBasedRepositoryTest
             assertEquals(found, entity);
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("multiple entities by IDs")
         void multipleEntitiesByIds() {
@@ -217,11 +221,8 @@ public abstract class RecordBasedRepositoryTest
 
             Collection<E> found = newArrayList(loadMany(ids));
 
-            assertSize(ids.size(), found);
-
-            for (E entity : found) {
-                assertContains(entity, entities);
-            }
+            assertThat(found).hasSize(ids.size());
+            assertThat(entities).containsAllIn(found);
         }
 
         @Test
@@ -251,9 +252,11 @@ public abstract class RecordBasedRepositoryTest
             Collection<E> found = newArrayList(
                     repository.find(filters, emptyOrder(), emptyPagination(), emptyFieldMask())
             );
-            assertSize(1, found);
-            assertContains(entity1, found);
-            assertNotContains(entity2, found);
+
+            IterableSubject assertThatFound = assertThat(found);
+            assertThatFound.hasSize(1);
+            assertThatFound.contains(entity1);
+            assertThatFound.doesNotContain(entity2);
         }
 
         @Test
@@ -271,7 +274,7 @@ public abstract class RecordBasedRepositoryTest
             Iterator<E> readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
 
-            assertSize(ids.size(), foundList);
+            assertThat(foundList).hasSize(ids.size());
             for (E entity : foundList) {
                 assertMatches(entity, firstFieldOnly);
             }
@@ -289,7 +292,7 @@ public abstract class RecordBasedRepositoryTest
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities);
-            assertSize(count, foundList);
+            assertThat(foundList).hasSize(count);
             assertEquals(expectedList, foundList);
         }
 
@@ -305,7 +308,7 @@ public abstract class RecordBasedRepositoryTest
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = reverse(orderedByName(entities));
-            assertSize(count, foundList);
+            assertThat(foundList).hasSize(count);
             assertEquals(expectedList, foundList);
         }
 
@@ -322,7 +325,7 @@ public abstract class RecordBasedRepositoryTest
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities).subList(0, pageSize);
-            assertSize(pageSize, foundList);
+            assertThat(foundList).hasSize(pageSize);
             assertEquals(expectedList, foundList);
         }
 
@@ -332,18 +335,19 @@ public abstract class RecordBasedRepositoryTest
         void allEntities() {
             List<E> entities = createAndStoreEntities(repository, 150);
             Collection<E> found = newArrayList(loadAll());
-            assertSize(entities.size(), found);
 
-            for (E entity : found) {
-                assertContains(entity, entities);
-            }
+            IterableSubject assertFoundEntities = assertThat(found);
+
+            assertFoundEntities.hasSize(entities.size());
+
+            assertThat(entities).containsExactlyElementsIn(found);
         }
 
         @Test
         @DisplayName("no entities if repository is empty")
         void noEntitiesIfEmpty() {
             Collection<E> found = newArrayList(loadAll());
-            assertSize(0, found);
+            assertThat(found).isEmpty();
         }
 
         private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
@@ -383,10 +387,9 @@ public abstract class RecordBasedRepositoryTest
         }
 
         private FieldMask createFirstFieldOnlyMask(List<E> entities) {
-            Descriptor entityDescriptor = entities.get(0)
-                                                  .getState()
-                                                  .getDescriptorForType();
-            FieldMask fieldMask = FieldMasks.maskOf(entityDescriptor, 1);
+            E firstEntity = entities.get(0);
+            FieldMask fieldMask = fromFieldNumbers(firstEntity.getDefaultState()
+                                                              .getClass(), 1);
             return fieldMask;
         }
 
@@ -408,7 +411,6 @@ public abstract class RecordBasedRepositoryTest
         assertEquals(id, entity.getId());
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     @DisplayName("handle wrong passed IDs")
     void handleWrongPassedIds() {
@@ -423,11 +425,9 @@ public abstract class RecordBasedRepositoryTest
         ids.add(sideEntity.getId());
 
         Collection<E> found = newArrayList(loadMany(ids));
-        assertSize(ids.size() - 1, found); // Check we've found all existing items
-
-        for (E entity : found) {
-            assertContains(entity, entities);
-        }
+        IterableSubject assertThatFound = assertThat(found);
+        assertThatFound.hasSize(ids.size() - 1); // Check we've found all existing items
+        assertThatFound.containsExactlyElementsIn(entities);
     }
 
     @Nested
@@ -498,7 +498,7 @@ public abstract class RecordBasedRepositoryTest
                                             emptyFieldMask());
         List<E> foundList = newArrayList(found);
         // Check results
-        assertSize(1, foundList);
+        assertThat(foundList).hasSize(1);
         E actualEntity = foundList.get(0);
         assertEquals(activeEntity, actualEntity);
     }
@@ -531,8 +531,9 @@ public abstract class RecordBasedRepositoryTest
                                             emptyFieldMask());
         Collection<E> foundList = newArrayList(found);
         // Check result
-        assertSize(2, foundList);
-        assertContainsAll(foundList, activeEntity, deletedEntity);
+        IterableSubject assertFoundList = assertThat(foundList);
+        assertFoundList.hasSize(2);
+        assertFoundList.containsExactly(activeEntity, deletedEntity);
     }
 
     @Test

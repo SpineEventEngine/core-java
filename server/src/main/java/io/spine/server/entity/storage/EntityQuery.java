@@ -37,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.server.entity.storage.QueryParameters.FIELD_PARAMETERS;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
@@ -186,7 +187,7 @@ public final class EntityQuery<I> implements Serializable {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("idFilter", ids)
-                          .add("parameters", parameters)
+                          .add(FIELD_PARAMETERS, parameters)
                           .toString();
     }
 

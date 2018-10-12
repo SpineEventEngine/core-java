@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -53,7 +54,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
@@ -91,6 +91,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
@@ -105,7 +106,7 @@ import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.test.projection.Project.Status.CANCELLED;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.test.projection.Project.Status.UNDEFINED;
-import static io.spine.testing.Verify.assertSize;
+import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.core.given.GivenUserId.of;
 import static io.spine.testing.server.entity.given.Given.projectionOfClass;
 import static java.lang.String.valueOf;
@@ -130,16 +131,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
- */
-//It's OK for a test.
+//It's OK for this test.
 @SuppressWarnings({
         "OverlyCoupledClass",
         "ClassWithTooManyMethods",
-        "OverlyComplexClass",
-        "DuplicateStringLiteralInspection", /* Common test display names */
         "UnsecureRandomNumberGeneration"
 })
 @DisplayName("Stand should")
@@ -288,14 +283,25 @@ class StandTest extends TenantAwareTest {
         @DisplayName("on read by IDs when empty")
         void onReadByIdWhenEmpty() {
 
-            Query readCustomersById = requestFactory.query()
-                                                    .byIds(Customer.class,
-                                                           newHashSet(
-                                                                   customerIdFor(1),
-                                                                   customerIdFor(2)
-                                                           ));
+            Query readCustomersById =
+                    requestFactory.query()
+                                  .byIds(Customer.class,
+                                         newHashSet(customerIdFor(1), customerIdFor(2)));
 
             checkEmptyResultForTargetOnEmptyStorage(readCustomersById);
+        }
+
+        private void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
+            Stand stand = createStand();
+
+            MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+            stand.execute(readCustomersQuery, responseObserver);
+
+            List<Any> messageList = checkAndGetMessageList(responseObserver);
+            assertTrue(
+                messageList.isEmpty(),
+                "Query returned a non-empty response message list though the target had been empty"
+            );
         }
     }
 
@@ -323,13 +329,60 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("for projection batch read by IDs with field mask")
         void forProjectionReadWithMask() {
-            List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor()
-                                                                     .getFields();
+            List<FieldDescriptor> projectFields = Project.getDescriptor()
+                                                         .getFields();
             doCheckReadingProjectByIdAndFieldMask(
                     projectFields.get(0)
-                                 .getFullName(), // ID
+                                 .getName(), // ID
                     projectFields.get(1)
-                                 .getFullName()); // Name
+                                 .getName()  // Name
+            );
+        }
+
+        private void doCheckReadingProjectByIdAndFieldMask(String... paths) {
+            StandTestProjectionRepository repository = new StandTestProjectionRepository();
+            Stand stand = newStand(isMultitenant(), repository);
+
+            int querySize = 2;
+
+            Set<ProjectId> ids = new HashSet<>();
+            for (int i = 0; i < querySize; i++) {
+                Project project = Project
+                        .newBuilder()
+                        .setId(projectIdFor(i))
+                        .setName(valueOf(i))
+                        .setStatus(STARTED)
+                        .build();
+                repository.store(projectionOfClass(StandTestProjection.class)
+                                         .withId(project.getId())
+                                         .withState(project)
+                                         .withVersion(1)
+                                         .build());
+                ids.add(project.getId());
+            }
+
+            Query query = requestFactory.query().byIdsWithMask(Project.class, ids, paths);
+
+            FieldMask fieldMask = FieldMask.newBuilder()
+                                           .addAllPaths(asList(paths))
+                                           .build();
+            MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
+                @Override
+                public void onNext(QueryResponse value) {
+                    super.onNext(value);
+                    List<Any> messages = value.getMessagesList();
+                    assertThat(messages).hasSize(ids.size());
+                    for (Any message : messages) {
+                        Project project = unpack(message, Project.class);
+                        assertNotEquals(project, null);
+                        assertMatchesMask(project, fieldMask);
+                    }
+                }
+            };
+
+            stand.execute(query, observer);
+
+            verifyObserver(observer);
         }
     }
 
@@ -399,7 +452,7 @@ class StandTest extends TenantAwareTest {
             @Override
             public void onStateChanged(EntityStateUpdate update) {
                 super.onStateChanged(update);
-                Customer customerInCallback = unpack(update.getState());
+                Customer customerInCallback = unpack(update.getState(), Customer.class);
                 callbackStates.add(customerInCallback);
             }
         };
@@ -516,11 +569,11 @@ class StandTest extends TenantAwareTest {
                         .build();
     }
 
-    private static final List<String> FIRST_NAMES = ImmutableList.of(
+    private static final ImmutableList<String> FIRST_NAMES = ImmutableList.of(
             "Emma", "Liam", "Mary", "John"
     );
 
-    private static final List<String> LAST_NAMES = ImmutableList.of(
+    private static final ImmutableList<String> LAST_NAMES = ImmutableList.of(
             "Smith", "Doe", "Steward", "Lee"
     );
 
@@ -592,7 +645,7 @@ class StandTest extends TenantAwareTest {
                 List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                Project project = unpack(messages.get(0));
+                Project project = unpack(messages.get(0), Project.class);
 
                 assertNotNull(project);
 
@@ -877,55 +930,6 @@ class StandTest extends TenantAwareTest {
         assertNull(observer.throwable());
     }
 
-    private static MemoizeQueryResponseObserver getDuplicateCustomerStreamObserver() {
-        return new MemoizeQueryResponseObserver() {
-            @Override
-            public void onNext(QueryResponse value) {
-                super.onNext(value);
-
-                List<Any> messages = value.getMessagesList();
-                assertFalse(messages.isEmpty());
-
-                Customer customer = unpack(messages.get(0));
-                Customer sampleCustomer = getSampleCustomer();
-
-                assertEquals(sampleCustomer.getName(), customer.getName());
-                assertEquals(sampleCustomer.getNicknamesList(), customer.getNicknamesList());
-                assertTrue(customer.hasId());
-            }
-        };
-    }
-
-    private static Customer getSampleCustomer() {
-        //noinspection NumericCastThatLosesPrecision
-        return Customer.newBuilder()
-                       .setId(CustomerId.newBuilder()
-                                        .setNumber((int) UUID.randomUUID()
-                                                             .getLeastSignificantBits()))
-                       .setName(PersonName.newBuilder()
-                                          .setGivenName("John")
-                                          .build())
-                       .addNicknames(PersonName.newBuilder()
-                                               .setGivenName("Johnny"))
-                       .addNicknames(PersonName.newBuilder()
-                                               .setGivenName("Big Guy"))
-                       .build();
-
-    }
-
-    @SuppressWarnings("unchecked") // Mock instance of no type params
-    private void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
-        Stand stand = createStand();
-
-        MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
-        stand.execute(readCustomersQuery, responseObserver);
-
-        List<Any> messageList = checkAndGetMessageList(responseObserver);
-        assertTrue(messageList.isEmpty(),
-                   "Query returned a non-empty response message list though the target had been " +
-                           "empty");
-    }
-
     private void doCheckReadingProjectsById(int numberOfProjects) {
         // Define the types and values used as a test data.
         Map<ProjectId, Project> sampleProjects = newHashMap();
@@ -949,7 +953,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(sampleProjects.size(), messageList.size());
         Collection<Project> allCustomers = sampleProjects.values();
         for (Any singleRecord : messageList) {
-            Project unpackedSingleResult = unpack(singleRecord);
+            Project unpackedSingleResult = unpack(singleRecord, Project.class);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
     }
@@ -962,60 +966,13 @@ class StandTest extends TenantAwareTest {
         return stand;
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")
-    private void doCheckReadingProjectByIdAndFieldMask(String... paths) {
-        StandTestProjectionRepository repository = new StandTestProjectionRepository();
-        Stand stand = newStand(isMultitenant(), repository);
 
-        int querySize = 2;
-
-        Set<ProjectId> ids = new HashSet<>();
-        for (int i = 0; i < querySize; i++) {
-            Project project = Project
-                    .newBuilder()
-                    .setId(projectIdFor(i))
-                    .setName(valueOf(i))
-                    .setStatus(STARTED)
-                    .build();
-            repository.store(projectionOfClass(StandTestProjection.class)
-                                     .withId(project.getId())
-                                     .withState(project)
-                                     .withVersion(1)
-                                     .build());
-            ids.add(project.getId());
-        }
-
-        Query query = requestFactory.query().byIdsWithMask(Project.class, ids, paths);
-
-        FieldMask fieldMask = FieldMask.newBuilder()
-                                       .addAllPaths(asList(paths))
-                                       .build();
-        MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
-            @Override
-            public void onNext(QueryResponse value) {
-                super.onNext(value);
-                List<Any> messages = value.getMessagesList();
-                assertSize(ids.size(), messages);
-                for (Any message : messages) {
-                    Project project = unpack(message);
-                    assertNotEquals(project, null);
-                    assertMatches(project, fieldMask);
-                }
-            }
-        };
-
-        stand.execute(query, observer);
-
-        verifyObserver(observer);
-    }
-
-    @SuppressWarnings("ConstantConditions")
     private static void setupExpectedFindAllBehaviour(
             Map<ProjectId, Project> sampleProjects,
             StandTestProjectionRepository projectionRepository) {
 
         Set<ProjectId> projectIds = sampleProjects.keySet();
-        ImmutableCollection<Given.StandTestProjection> allResults =
+        ImmutableCollection<StandTestProjection> allResults =
                 toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
@@ -1037,9 +994,8 @@ class StandTest extends TenantAwareTest {
                 .thenReturn(allResults.iterator());
     }
 
-    @SuppressWarnings("OverlyComplexAnonymousInnerClass")
-    private static ArgumentMatcher<EntityFilters> entityFilterMatcher(
-            Collection<ProjectId> projectIds) {
+    private static
+    ArgumentMatcher<EntityFilters> entityFilterMatcher(Collection<ProjectId> projectIds) {
         // This argument matcher does NOT mimic the exact repository behavior.
         // Instead, it only matches the EntityFilters instance in case it has EntityIdFilter with
         // ALL the expected IDs.
@@ -1061,15 +1017,15 @@ class StandTest extends TenantAwareTest {
         };
     }
 
-    private static ImmutableCollection<Given.StandTestProjection> toProjectionCollection(
-            Collection<ProjectId> values) {
-        Collection<Given.StandTestProjection> transformed = Collections2.transform(
+    private static
+    ImmutableCollection<StandTestProjection> toProjectionCollection(Collection<ProjectId> values) {
+        Collection<StandTestProjection> transformed = Collections2.transform(
                 values,
                 input -> {
                     checkNotNull(input);
                     return new StandTestProjection(input);
                 });
-        ImmutableList<Given.StandTestProjection> result = ImmutableList.copyOf(transformed);
+        ImmutableList<StandTestProjection> result = ImmutableList.copyOf(transformed);
         return result;
     }
 
@@ -1156,20 +1112,6 @@ class StandTest extends TenantAwareTest {
         return newEntityState -> {
             //do nothing
         };
-    }
-
-    private static void assertMatches(Message message, FieldMask fieldMask) {
-        List<String> paths = fieldMask.getPathsList();
-        for (Descriptors.FieldDescriptor field : message.getDescriptorForType()
-                                                        .getFields()) {
-
-            // Protobuf limitation, has no effect on the test.
-            if (field.isRepeated()) {
-                continue;
-            }
-
-            assertEquals(message.hasField(field), paths.contains(field.getFullName()));
-        }
     }
 
     /**

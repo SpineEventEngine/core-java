@@ -40,6 +40,7 @@ import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -52,6 +53,7 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -134,7 +136,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         {@link io.spine.server.aggregate.ImportBus ImportBus} of
      *         the parent {@code BoundedContext} for dispatching messages to its aggregates;
      *     <li>{@link io.spine.server.delivery.Sharding#register(io.spine.server.delivery.Shardable)
-     *     Sharding} for groupping of messages sent to its aggregates.
+     *     Sharding} for grouping of messages sent to its aggregates.
      * </ul>
      */
     @Override
@@ -363,7 +365,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        logError("Error reacting on event (class: %s id: %s).", envelope, exception);
+        logError("Error reacting on event (class: %s id: %s) in aggregate of type %s.",
+                 envelope, exception);
     }
 
     /**
@@ -408,8 +411,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Posts passed events to {@link EventBus}.
      */
-    void postEvents(Iterable<Event> events) {
-        getEventBus().post(events);
+    void postEvents(Collection<Event> events) {
+        EventFilter filter = eventFilter();
+        Iterable<Event> filteredEvents = filter.filter(events);
+        EventBus bus = getBoundedContext().getEventBus();
+        bus.post(filteredEvents);
     }
 
     private void updateStand(TenantId tenantId, A aggregate) {
@@ -552,11 +558,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
-    /** The EventBus to which we post events produced by aggregates. */
-    private EventBus getEventBus() {
-        return getBoundedContext().getEventBus();
-    }
-
     /** The Stand instance for sending updated aggregate states. */
     private Stand getStand() {
         return getBoundedContext().getStand();
@@ -594,6 +595,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return commandDeliverySupplier.get();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose the method into current package.
+     */
     @Override
     protected EntityLifecycle lifecycleOf(I id) {
         return super.lifecycleOf(id);
@@ -601,10 +607,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
-    }
-
-    void onImportEvent(I id, Event event) {
-        lifecycleOf(id).onEventImported(event);
     }
 
     private void onCommandTargetSet(I id, CommandId commandId) {

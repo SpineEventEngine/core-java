@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -32,10 +33,6 @@ import java.util.Optional;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Element should")
 class ElementTest {
 
@@ -49,12 +46,27 @@ class ElementTest {
                           .testEquals();
     }
 
-    @Test
-    @DisplayName("be serializable")
-    void serialize() {
-        reserializeAndAssert(new Element(Time.getCurrentTime()));
-        reserializeAndAssert(new Element(Optional.of(Time.getCurrentTime())));
-        reserializeAndAssert(new Element(Optional.empty()));
+    @Nested
+    @DisplayName("serialize if contains")
+    class Serialize {
+
+        @Test
+        @DisplayName("Message")
+        void message() {
+            reserializeAndAssert(new Element(Time.getCurrentTime()));
+        }
+
+        @Test
+        @DisplayName("Optional with Message")
+        void optionalMessage() {
+            reserializeAndAssert(new Element(Optional.of(Time.getCurrentTime())));
+        }
+
+        @Test
+        @DisplayName("empty Optional")
+        void emptyOptional() {
+            reserializeAndAssert(new Element(Optional.empty()));
+        }
     }
 
     @Test

@@ -22,6 +22,8 @@ package io.spine.system.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
@@ -32,6 +34,7 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyIterator;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * A {@link SystemGateway} which memoizes the posted system commands.
@@ -77,7 +80,7 @@ public final class MemoizingGateway implements SystemGateway {
      * @see #lastSeenCommand()
      */
     @Override
-    public void postCommand(Message systemCommand) {
+    public void postCommand(CommandMessage systemCommand) {
         TenantId tenantId = currentTenant();
         lastSeenCommand = new MemoizedMessage(systemCommand, tenantId);
     }
@@ -90,7 +93,7 @@ public final class MemoizingGateway implements SystemGateway {
      * @see #lastSeenEvent()
      */
     @Override
-    public void postEvent(Message systemEvent) {
+    public void postEvent(EventMessage systemEvent) {
         TenantId tenantId = currentTenant();
         lastSeenEvent = new MemoizedMessage(systemEvent, tenantId);
     }
@@ -153,6 +156,15 @@ public final class MemoizingGateway implements SystemGateway {
     public MemoizedMessage lastSeenEvent() {
         assertNotNull(lastSeenEvent);
         return lastSeenEvent;
+    }
+
+    /**
+     * Checks that this gateway has never seen an event.
+     *
+     * <p>Fails if the check does not pass.
+     */
+    public void assertNoEvents() {
+        assertNull(lastSeenEvent, () -> lastSeenEvent.message().toString());
     }
 
     /**

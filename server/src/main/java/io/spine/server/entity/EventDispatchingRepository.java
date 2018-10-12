@@ -21,10 +21,10 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.route.EventRoute;
@@ -33,7 +33,6 @@ import io.spine.server.route.EventRouting;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
@@ -54,7 +53,7 @@ public abstract class EventDispatchingRepository<I,
      *
      * @param defaultFunction the default function for getting target entity IDs
      */
-    protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(EventRoute<I, EventMessage> defaultFunction) {
         super();
         this.eventRouting = EventRouting.withDefault(defaultFunction);
     }
@@ -132,7 +131,8 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
-        logError("Error dispatching event (class: %s, id: %s", envelope, exception);
+        logError("Error dispatching event (class: `%s`, id: `%s`) to entity of type `%s`.",
+                 envelope, exception);
     }
 
     /**
@@ -144,10 +144,14 @@ public abstract class EventDispatchingRepository<I,
 
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            ExternalMessage externalMessage = envelope.getOuterObject();
-            Event event = unpack(externalMessage.getOriginalMessage());
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            return EventDispatchingRepository.this.dispatch(eventEnvelope);
+            EventEnvelope event = envelope.toEventEnvelope();
+            return EventDispatchingRepository.this.dispatch(event);
+        }
+
+        @Override
+        public boolean canDispatch(ExternalMessageEnvelope envelope) {
+            EventEnvelope event = envelope.toEventEnvelope();
+            return EventDispatchingRepository.this.canDispatch(event);
         }
     }
 }

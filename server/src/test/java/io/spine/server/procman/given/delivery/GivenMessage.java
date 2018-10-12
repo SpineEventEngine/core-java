@@ -21,6 +21,7 @@ package io.spine.server.procman.given.delivery;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -82,7 +83,7 @@ public class GivenMessage {
                         .build();
     }
 
-    private static Command createCommand(Message cmdMessage) {
+    private static Command createCommand(CommandMessage cmdMessage) {
         Command result = TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
                                                 .createCommand(cmdMessage);
         return result;

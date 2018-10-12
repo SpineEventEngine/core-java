@@ -20,7 +20,7 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.server.EventProducer;
 
 import java.util.List;
@@ -35,8 +35,8 @@ public final class ReactorMethodResult extends EventsResult {
 
     public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
         super(producer, rawMethodOutput);
-        List<Message> messages = toMessages(rawMethodOutput);
-        List<Message> filtered = filterEmpty(messages);
+        List<EventMessage> messages = toMessages(rawMethodOutput);
+        List<EventMessage> filtered = filterIgnored(messages);
         setMessages(filtered);
     }
 }

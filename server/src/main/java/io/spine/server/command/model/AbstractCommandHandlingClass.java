@@ -56,7 +56,7 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
     /** Obtains the handler method for the passed command class. */
     @Override
     public H getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
+        return commands.getSingleMethod(commandClass);
     }
 
     boolean contains(CommandClass commandClass) {

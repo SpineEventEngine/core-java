@@ -51,5 +51,5 @@ message EventCausedCommands {
     spine.core.EventId id = 1;
 
     // Two or more IDs of commands generated in response to the event.
-    spine.core.CommandId produced = 2 [(required) = true];
+    repeated spine.core.CommandId produced = 2 [(required) = true];
 }

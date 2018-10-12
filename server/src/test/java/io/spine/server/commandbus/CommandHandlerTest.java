@@ -125,12 +125,11 @@ class CommandHandlerTest {
 
         handler.handle(cmd);
 
-        ImmutableList<Message> expectedMessages = handler.getEventsOnStartProjectCmd();
+        ImmutableList<? extends Message> expectedMessages = handler.getEventsOnStartProjectCmd();
         List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
         for (int i = 0; i < expectedMessages.size(); i++) {
             Message expected = expectedMessages.get(i);
-            Message actual = Events.getMessage(actualEvents.get(i)
-                                                           .getOuterObject());
+            Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
             assertEquals(expected, actual);
         }
     }

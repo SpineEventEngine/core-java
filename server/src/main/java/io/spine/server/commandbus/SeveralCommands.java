@@ -21,14 +21,14 @@
 package io.spine.server.commandbus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
-import io.spine.system.server.MarkCausedCommands;
+import io.spine.system.server.EventCausedCommands;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @Internal
 public class SeveralCommands
-        extends OnEvent<MarkCausedCommands, MarkCausedCommands.Builder, SeveralCommands> {
+        extends OnEvent<EventCausedCommands, EventCausedCommands.Builder, SeveralCommands> {
 
     private SeveralCommands(EventId origin, ActorContext actorContext) {
         super(origin, actorContext);
@@ -57,8 +57,8 @@ public class SeveralCommands
 
     @CanIgnoreReturnValue
     @SuppressWarnings("CheckReturnValue") // calling builder
-    public SeveralCommands addAll(Iterable<? extends Message> commandMessage) {
-        for (Message message : commandMessage) {
+    public SeveralCommands addAll(Iterable<? extends CommandMessage> commandMessage) {
+        for (CommandMessage message : commandMessage) {
             add(message);
         }
         checkState(size() > 1, "This sequence must have more than one message");
@@ -66,15 +66,15 @@ public class SeveralCommands
     }
 
     @Override
-    protected MarkCausedCommands.Builder newBuilder() {
-        return MarkCausedCommands.newBuilder()
-                                 .setId(origin());
+    protected EventCausedCommands.Builder newBuilder() {
+        return EventCausedCommands.newBuilder()
+                                  .setId(origin());
     }
 
     @Override
     @SuppressWarnings("CheckReturnValue") // calling builder
     protected void
-    addPosted(MarkCausedCommands.Builder builder, Command command, SystemGateway gateway) {
+    addPosted(EventCausedCommands.Builder builder, Command command, SystemGateway gateway) {
         CommandId commandId = command.getId();
         builder.addProduced(commandId);
     }
@@ -86,7 +86,7 @@ public class SeveralCommands
      */
     @Override
     @CanIgnoreReturnValue
-    public MarkCausedCommands postAll(CommandBus bus) {
+    public EventCausedCommands postAll(CommandBus bus) {
         return super.postAll(bus);
     }
 }

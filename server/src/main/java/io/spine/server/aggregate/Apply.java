@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * <ul>
  *     <li>is annotated with {@link Apply};
  *     <li>is {@code void};
- *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
+ *     <li>accepts an event derived from {@link io.spine.base.EventMessage EventMessage}
  *         as the only parameter.
  * </ul>
  *
@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * {@code true}, the aggregate would be able receive incoming events as if they were produced
  * by the aggregate.
  *
- * @author Alexander YevsyukovA
+ * @author Alexander Yevsyukov
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

@@ -35,40 +35,38 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Describes a method that accepts a message and optionally its context.
  *
  * @param <T> the type of the target object
- * @param <M> the type of the incoming message class
+ * @param <C> the type of the incoming message class
  * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
  * @param <R> the type of the method result object
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
 @Immutable
 public interface HandlerMethod<T,
-                               M extends MessageClass,
+                               C extends MessageClass,
                                E extends MessageEnvelope<?, ?, ?>,
                                R extends MethodResult> {
 
     /**
-     * @return the type of the incoming message class
+     * Obtains the type of the incoming message class.
      */
-    M getMessageClass();
+    C getMessageClass();
 
     @PostConstruct
     void discoverAttributes();
 
     /**
-     * Creates a new instance of {@link HandlerKey handler key} for this method.
+     * Creates a new instance of {@linkplain HandlerId handler id} for this method.
      *
-     * @return the key of the handler method
+     * @return the id of the handler method
      */
-    HandlerKey key();
+    HandlerId id();
 
     /**
-     * @return the set of method attributes configured for this method
+     * Obtains the set of method attributes configured for this method.
      */
     Set<MethodAttribute<?>> getAttributes();
 
     /**
-     * @return the handling method
+     * Obtains the handling method.
      */
     Method getRawMethod();
 
@@ -100,6 +98,13 @@ public interface HandlerMethod<T,
     }
 
     /**
+     * Obtains the {@link MessageFilter} to apply to the messages received by this method.
+     */
+    default MessageFilter filter() {
+        return MessageFilter.getDefaultInstance();
+    }
+
+    /**
      * Ensures that the {@code external} attribute of the method is the one expected.
      *
      * <p>This method is for checking that an {@code external} attribute of a message context
@@ -109,7 +114,7 @@ public interface HandlerMethod<T,
      * @throws IllegalArgumentException is thrown if the value does not meet the expectation
      * @see ExternalAttribute
      */
-    default void ensureExternalMatch(boolean expectedValue) {
+    default void ensureExternalMatch(boolean expectedValue) throws IllegalArgumentException {
         checkArgument(isExternal() == expectedValue,
                       "Mismatch of `external` value for the handler method %s. " +
                               "Expected `external` = %s, but got the other way around.", this,

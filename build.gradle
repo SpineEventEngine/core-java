@@ -20,21 +20,21 @@
 
 buildscript {
 
-    // Applying from `ext.gradle` inside the `buildscript` section to reuse the properties.
+    // Applying from `version.gradle` inside the `buildscript` section to reuse the properties.
     //
     // As long as `buildscript` section is always evaluated first, we need to apply
-    // `ext.gradle` explicitly here.
-    apply from: 'ext.gradle'
+    // `version.gradle` explicitly here.
+    apply from: 'version.gradle'
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
-        jcenter()
-        google()
-        maven { url = repos.gradlePlugins }
-        mavenCentral()
-        mavenLocal()
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
+        google()
+        maven { url = repos.gradlePlugins }
+        mavenLocal()
     }
 
     dependencies {
@@ -51,7 +51,7 @@ buildscript {
     })
 }
 
-apply from: 'ext.gradle'
+apply from: 'version.gradle'
 
 ext {
     spineJacocoScript = "${rootDir}/config/gradle/jacoco.gradle"
@@ -76,7 +76,7 @@ allprojects {
     apply plugin: 'project-report'
 
     group = 'io.spine'
-    version = spineVersion
+    version = versionToPublish
 }
 
 final boolean isTravis = System.env.TRAVIS == 'true'
@@ -133,6 +133,8 @@ subprojects {
     apply plugin: 'net.ltgt.errorprone'
     apply plugin: spineProtobufPluginId
 
+    apply from: deps.scripts.javacArgs
+
     // Specific setup for a Travis build,
     // which prevents appearing of warning messages in build logs.
     //
@@ -158,16 +160,21 @@ subprojects {
     // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/
 
     repositories {
-        jcenter()
         google()
         maven { url = repos.gradlePlugins }
-        mavenCentral()
         mavenLocal()
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
     }
 
     dependencies {
+        errorprone deps.build.errorProneCore
+        errorproneJavac deps.build.errorProneJavac
+        // For dependencies config. based on version of Java, see:
+        //  https://github.com/epeee/junit-jupiter-extension-testing/blob/57b7ba75ab64ed8c229d2a5b14a954d6ae359189/gradle/errorprone.gradle
+
         implementation deps.build.guava
 
         //TODO:2018-05-11:alexander.yevsyukov: Replace the below with Checker Framework
@@ -207,26 +214,9 @@ subprojects {
         }
     }
 
-    apply from: "$rootDir/config/gradle/test-output.gradle"
-
-    javadoc {
-        source = sourceSets.main.allJava
-        options.tags = ["apiNote:a:API Note:",
-                        "implSpec:a:Implementation Requirements:",
-                        "implNote:a:Implementation Note:"]
-    }
-
-    tasks.withType(JavaCompile) {
-        // Exclude generated sources from being analyzed by Error Prone.
-        options.compilerArgs += [
-                // Turn Error Prone off for generated code.
-                '-XepExcludedPaths:.*/generated/.*',
-                
-                // Turn the check off until Error Prone can handle `@Nested` JUnit classes.
-                // See issue: https://github.com/google/error-prone/issues/956
-                '-Xep:ClassCanBeStatic:OFF'
-        ]
-    }
+    apply from: deps.scripts.testOutput
+    apply from: deps.scripts.javadocOptions
+    apply from: deps.scripts.javacArgs
     
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava

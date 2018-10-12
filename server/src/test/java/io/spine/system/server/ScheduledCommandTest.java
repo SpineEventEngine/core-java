@@ -23,8 +23,8 @@ package io.spine.system.server;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
 import com.google.protobuf.util.Durations;
+import io.spine.base.CommandMessage;
 import io.spine.client.EntityFilters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
@@ -195,13 +195,13 @@ class ScheduledCommandTest {
     }
 
     private static Command createCommand() {
-        Message commandMessage = createCommandMessage();
+        CommandMessage commandMessage = createCommandMessage();
         Command command = requestFactory.command()
                                         .create(commandMessage);
         return command;
     }
 
-    private static Message createCommandMessage() {
+    private static CommandMessage createCommandMessage() {
         CompanyId id = CompanyId
                 .newBuilder()
                 .setUuid(newUuid())

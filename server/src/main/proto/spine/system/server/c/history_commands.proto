@@ -37,19 +37,6 @@ import "spine/core/event.proto";
 import "spine/core/command.proto";
 import "spine/system/server/entity_history.proto";
 
-// A command to create a new entity.
-//
-// This command is sent when the first message is dispatched to the entity.
-//
-message CreateEntity {
-
-    // The ID of the entity.
-    EntityHistoryId id = 1;
-
-    // The kind of the entity.
-    EntityOption.Kind kind = 2 [(required) = true];
-}
-
 // A command to dispatch an event to a subscriber.
 //
 // This command is relevant only to histories of Projections.
@@ -90,92 +77,4 @@ message DispatchCommandToHandler {
 
     // The command to dispatch.
     core.Command command = 2 [(valid) = true];
-}
-
-// A command to change the state of the entity.
-//
-// This command is posted only when an actual state change occures. If a message handler does NOT
-// change the state of the entity, this command is NOT posted.
-//
-message ChangeEntityState {
-
-    // The ID of the entity.
-    EntityHistoryId id = 1;
-
-    // The new state of the entity.
-    google.protobuf.Any new_state = 2 [(required) = true];
-
-    // The IDs of the messages which caused the mutation.
-    //
-    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
-    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
-    // this list contains a single entry.
-    //
-    // TODO:2018-07-09:dmytro.dashenkov: Make required as soon as Procman is completely transactional.
-    // todo https://github.com/SpineEventEngine/core-java/issues/755
-    repeated DispatchedMessageId message_id = 3;
-}
-
-// A command to mark the entity as archived.
-//
-message ArchiveEntity {
-
-    // The ID of the entity.
-    //
-    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
-    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
-    // this list will contain a single entry.
-    //
-    EntityHistoryId id = 1;
-
-    // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
-}
-
-// A command to mark the entity as deleted.
-//
-message DeleteEntity {
-
-    // The ID of the entity.
-    EntityHistoryId id = 1;
-
-    // The IDs of the messages which caused the mutation.
-    //
-    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
-    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
-    // this list contains a single entry.
-    //
-    repeated DispatchedMessageId message_id = 2;
-}
-
-// A command to mark the entity as NOT archived.
-//
-message ExtractEntityFromArchive {
-
-    // The ID of the entity.
-    EntityHistoryId id = 1;
-
-    // The IDs of the messages which caused the mutation.
-    //
-    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
-    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
-    // this list contains a single entry.
-    //
-    repeated DispatchedMessageId message_id = 2;
-}
-
-// A command to mark the entity as NOT deleted.
-//
-message RestoreEntity {
-
-    // The ID of the entity.
-    EntityHistoryId id = 1;
-
-    // The IDs of the messages which caused the mutation.
-    //
-    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
-    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
-    // this list contains a single entry.
-    //
-    repeated DispatchedMessageId message_id = 2;
 }

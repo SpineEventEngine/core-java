@@ -27,6 +27,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.core.Ack;
@@ -58,8 +60,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 @Internal
 public abstract class CommandSequence<O extends Message,
-                                      R extends Message,
-                                      B extends Message.Builder,
+                                      R extends EventMessage,
+                                      B extends EventMessage.Builder,
                                       S extends CommandSequence<O, R, B, S>> {
 
     /** The ID of the message which caused the sequence. */
@@ -72,7 +74,7 @@ public abstract class CommandSequence<O extends Message,
     private final CommandFactory commandFactory;
 
     /** Command messages for commands that we are going to post. */
-    private final Queue<Message> queue;
+    private final Queue<CommandMessage> queue;
 
     /** The handler for the posting errors. */
     private ErrorHandler errorHandler = new DefaultErrorHandler();
@@ -103,7 +105,7 @@ public abstract class CommandSequence<O extends Message,
      * Adds a command message to the sequence of commands to be posted.
      */
     @CanIgnoreReturnValue
-    protected  S add(Message commandMessage) {
+    protected  S add(CommandMessage commandMessage) {
         queue.add(commandMessage);
         return getThis();
     }
@@ -143,8 +145,8 @@ public abstract class CommandSequence<O extends Message,
     /**
      * Gets and removes the next command message from the queue.
      */
-    private Message next() throws NoSuchElementException {
-        Message result = queue.remove();
+    private CommandMessage next() throws NoSuchElementException {
+        CommandMessage result = queue.remove();
         return result;
     }
 
@@ -158,7 +160,7 @@ public abstract class CommandSequence<O extends Message,
         SystemGateway gateway = gateway(bus);
         B builder = newBuilder();
         while (hasNext()) {
-            Message message = next();
+            CommandMessage message = next();
             Optional<Command> posted = post(message, bus);
             if (posted.isPresent()) {
                 Command command = posted.get();
@@ -184,7 +186,7 @@ public abstract class CommandSequence<O extends Message,
      * <p>This method waits till the posting of the command is finished.
      * @return the created and posted {@code Command}
      */
-    private Optional<Command> post(Message message, CommandBus bus) {
+    private Optional<Command> post(CommandMessage message, CommandBus bus) {
         Command command = commandFactory.create(message);
         SettableFuture<Ack> finishFuture = SettableFuture.create();
         StreamObserver<Ack> observer = newAckObserver(finishFuture);
@@ -223,7 +225,7 @@ public abstract class CommandSequence<O extends Message,
 
     private static void checkSent(Command command, Ack ack) {
         Status status = ack.getStatus();
-        CommandId routedCommandId = unpack(ack.getMessageId());
+        CommandId routedCommandId = unpack(ack.getMessageId(), CommandId.class);
         CommandId commandId = command.getId();
         checkState(commandId.equals(routedCommandId),
                    "Unexpected command posted. Intending (%s) but was (%s).",

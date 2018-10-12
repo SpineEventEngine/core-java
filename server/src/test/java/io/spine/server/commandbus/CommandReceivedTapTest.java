@@ -20,13 +20,14 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.system.server.CommandReceived;
 import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.MemoizingGateway;
+import io.spine.test.commands.CmdCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -108,7 +109,7 @@ class CommandReceivedTapTest {
         return tenant;
     }
 
-    private static Command command(Message message, @Nullable TenantId tenantId) {
+    private static Command command(CommandMessage message, @Nullable TenantId tenantId) {
         TestActorRequestFactory requestFactory =
                 tenantId == null
                 ? newInstance(CommandReceivedTapTest.class)
@@ -117,7 +118,10 @@ class CommandReceivedTapTest {
         return command;
     }
 
-    private static Message commandMessage() {
-        return getCurrentTime();
+    private static CommandMessage commandMessage() {
+        return CmdCreateProject
+                .newBuilder()
+                .setId(newUuid())
+                .build();
     }
 }

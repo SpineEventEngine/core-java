@@ -36,20 +36,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings({"ConstantConditions" /* Some of the methods test `null` arguments. */,
-        "ResultOfMethodCallIgnored" /* We ignore when we test for `null`s. */})
 @DisplayName("EntityBuilder should")
 class EntityBuilderTest {
 
@@ -141,8 +135,8 @@ class EntityBuilderTest {
             List<ConstraintViolation> violations = e.getError()
                                                     .getValidationError()
                                                     .getConstraintViolationList();
-            assertSize(user.getAllFields()
-                           .size(), violations);
+            assertThat(violations).hasSize(user.getAllFields()
+                                               .size());
         }
     }
 

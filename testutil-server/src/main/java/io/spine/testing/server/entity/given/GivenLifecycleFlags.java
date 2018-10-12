@@ -21,6 +21,7 @@
 package io.spine.testing.server.entity.given;
 
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.LifecycleFlagsVBuilder;
 
 /**
  * @author Alexander Yevsyukov
@@ -35,17 +36,19 @@ public class GivenLifecycleFlags {
      * Creates an instance with archived flag set to {@code true}.
      */
     public static LifecycleFlags archived() {
-        return LifecycleFlags.newBuilder()
-                             .setArchived(true)
-                             .build();
+        return LifecycleFlagsVBuilder
+                .newBuilder()
+                .setArchived(true)
+                .build();
     }
 
     /**
      * Creates an instance with deleted flag set to {@code true}.
      */
     public static LifecycleFlags deleted() {
-        return LifecycleFlags.newBuilder()
-                             .setDeleted(true)
-                             .build();
+        return LifecycleFlagsVBuilder
+                .newBuilder()
+                .setDeleted(true)
+                .build();
     }
 }

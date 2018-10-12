@@ -21,11 +21,10 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.test.storage.Project;
@@ -45,11 +44,11 @@ import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.transformValues;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.Tests.assertMatchesMask;
-import static io.spine.testing.Verify.assertIteratorsEqual;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.server.entity.given.GivenLifecycleFlags.archived;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.stream.Collectors.toList;
@@ -70,7 +69,6 @@ import static org.mockito.Mockito.verify;
  * @param <S> the type of storage under the test
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
 
@@ -219,8 +217,9 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
             RecordStorage<I> storage = getStorage();
             storage.write(id, record);
 
-            Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
-            FieldMask idMask = FieldMasks.maskOf(descriptor, 1);
+            Message state = newState(id);
+            Descriptor descriptor = state.getDescriptorForType();
+            FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
 
             RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
             Optional<EntityRecord> optional = storage.read(readRequest, idMask);
@@ -231,35 +230,33 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
             assertFalse(isDefault(unpacked));
         }
 
-        @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"})
-        // Converter nullability issues.
+        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("multiple records")
         void multipleRecords() {
             RecordStorage<I> storage = getStorage();
             int count = 10;
             List<I> ids = new ArrayList<>();
-            Descriptors.Descriptor typeDescriptor = null;
+            Class<? extends Message> messageClass = null;
 
             for (int i = 0; i < count; i++) {
                 I id = newId();
                 Message state = newState(id);
+                if (messageClass == null) {
+                    messageClass = state.getClass();
+                }
                 EntityRecord record = newStorageRecord(state);
                 storage.write(id, record);
                 ids.add(id);
-
-                if (typeDescriptor == null) {
-                    typeDescriptor = state.getDescriptorForType();
-                }
             }
 
             int bulkCount = count / 2;
-            FieldMask fieldMask = FieldMasks.maskOf(typeDescriptor, 2);
+            FieldMask fieldMask = fromFieldNumbers(messageClass, 2);
             Iterator<EntityRecord> readRecords = storage.readMultiple(
                     ids.subList(0, bulkCount),
                     fieldMask);
             List<EntityRecord> readList = newArrayList(readRecords);
-            assertSize(bulkCount, readList);
+            assertThat(readList).hasSize(bulkCount);
             for (EntityRecord record : readList) {
                 Message state = unpack(record.getState());
                 assertMatchesMask(state, fieldMask);
@@ -335,6 +332,14 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
             assertIteratorsEqual(v2Records.values()
                                           .iterator(), secondRevision);
         }
+
+        private <E> void assertIteratorsEqual(Iterator<? extends E> first,
+                                              Iterator<? extends E> second) {
+            Collection<? extends E> firstCollection = newArrayList(first);
+            Collection<? extends E> secondCollection = newArrayList(second);
+            assertEquals(firstCollection.size(), secondCollection.size());
+            assertThat(firstCollection).containsExactlyElementsIn(secondCollection);
+        }
     }
 
     @Nested
@@ -350,7 +355,6 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
             assertFalse(optional.isPresent());
         }
 
-        @SuppressWarnings("ConstantConditions") // Converter nullability issues
         @Test
         @DisplayName("for new record")
         void forNewRecord() {
@@ -364,7 +368,6 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
             assertEquals(LifecycleFlags.getDefaultInstance(), optional.get());
         }
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
         @Test
         @DisplayName("for record with updated lifecycle flags")
         void forUpdatedRecord() {

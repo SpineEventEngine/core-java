@@ -21,17 +21,18 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Events.getMessage;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * An adapter for {@link EventBus} to use it along with {@link IntegrationBus}.
@@ -52,17 +53,16 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
 
     @Override
     ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
-        Message unpacked = AnyPacker.unpack(message.getOriginalMessage());
+        Message unpacked = unpack(message.getOriginalMessage());
         Event event = (Event) unpacked;
-        ExternalMessageEnvelope result = ExternalMessageEnvelope.of(message,
-                                                                    Events.getMessage(event));
+        ExternalMessageEnvelope result = ExternalMessageEnvelope.of(message, getMessage(event));
         return result;
     }
 
     @Override
     ExternalMessageEnvelope markExternal(ExternalMessage externalMsg) {
         Any packedEvent = externalMsg.getOriginalMessage();
-        Event event = AnyPacker.unpack(packedEvent);
+        Event event = unpack(packedEvent, Event.class);
         Event.Builder eventBuilder = event.toBuilder();
         EventContext modifiedContext = eventBuilder.getContext()
                                                    .toBuilder()
@@ -72,7 +72,7 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
         Event marked = eventBuilder.setContext(modifiedContext)
                                    .build();
         ExternalMessage result = ExternalMessages.of(marked, externalMsg.getBoundedContextName());
-        return ExternalMessageEnvelope.of(result, Events.getMessage(event));
+        return ExternalMessageEnvelope.of(result, getMessage(event));
     }
 
     @Override
@@ -82,9 +82,12 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
 
     @Override
     EventDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
+        @SuppressWarnings("unchecked") // Logically checked.
+        Class<? extends EventMessage> eventClass = (Class<? extends EventMessage>) messageClass;
+        EventClass eventType = EventClass.from(eventClass);
         DomesticEventPublisher result = new DomesticEventPublisher(getBoundedContextName(),
                                                                    getPublisherHub(),
-                                                                   EventClass.from(messageClass));
+                                                                   eventType);
         return result;
     }
 
