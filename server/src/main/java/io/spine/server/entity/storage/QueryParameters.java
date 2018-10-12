@@ -75,6 +75,13 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         return new Builder();
     }
 
+    public static Builder newBuilder(QueryParameters parameters) {
+        return new Builder()
+                .addAll(parameters)
+                .orderBy(parameters.orderBy())
+                .limit(parameters.limit());
+    }
+
     /**
      * Returns an iterator over the {@linkplain ColumnFilter column filters}.
      *

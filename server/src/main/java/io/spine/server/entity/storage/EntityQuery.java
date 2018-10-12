@@ -155,11 +155,8 @@ public final class EntityQuery<I> implements Serializable {
                                      deletedColumn, eq(deletedColumn.getName(), false)),
                 ALL
         );
-        QueryParameters parameters = QueryParameters.newBuilder()
-                                                    .addAll(getParameters())
+        QueryParameters parameters = QueryParameters.newBuilder(getParameters())
                                                     .add(lifecycleParameter)
-                                                    .orderBy(getParameters().orderBy())
-                                                    .limit(getParameters().limit())
                                                     .build();
         EntityQuery<I> result = new EntityQuery<>(ids, parameters);
         return result;
