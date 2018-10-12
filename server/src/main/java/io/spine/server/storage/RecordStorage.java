@@ -132,7 +132,6 @@ public abstract class RecordStorage<I>
 
         EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
         Any state = builder.getState();
-        TypeUrl type = TypeUrl.parse(state.getTypeUrl());
         Message stateAsMessage = AnyPacker.unpack(state);
 
         Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage);

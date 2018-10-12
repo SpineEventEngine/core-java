@@ -195,10 +195,41 @@ public final class QueryFactory {
     }
 
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
-        checkNotNull(target, "Target must be specified to compose a Query");
+        checkTargetNotNull(target);
         QueryVBuilder builder = queryBuilderFor(target, fieldMask);
         Query query = newQuery(builder);
         return query;
+    }
+
+    Query composeQuery(Target target,
+                       OrderBy orderBy,
+                       @Nullable FieldMask fieldMask) {
+        checkTargetNotNull(target);
+        checkNotNull(orderBy);
+        QueryVBuilder builder =
+                queryBuilderFor(target, fieldMask)
+                        .setOrderBy(orderBy);
+        Query query = newQuery(builder);
+        return query;
+    }
+
+    Query composeQuery(Target target,
+                       OrderBy orderBy,
+                       Pagination pagination,
+                       @Nullable FieldMask fieldMask) {
+        checkTargetNotNull(target);
+        checkNotNull(orderBy);
+        checkNotNull(pagination);
+        QueryVBuilder builder =
+                queryBuilderFor(target, fieldMask)
+                        .setOrderBy(orderBy)
+                        .setPagination(pagination);
+        Query query = newQuery(builder);
+        return query;
+    }
+
+    private static void checkTargetNotNull(Target target) {
+        checkNotNull(target, "Target must be specified to compose a Query");
     }
 
     private Query newQuery(QueryVBuilder builder) {

@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -40,7 +39,6 @@ import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
-import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.event.DuplicateEventException;
@@ -55,6 +53,7 @@ import io.spine.system.server.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
+import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmArchiveProcess;
 import io.spine.test.procman.command.PmCreateProject;
@@ -78,8 +77,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.getMessage;
@@ -101,6 +103,8 @@ import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static java.lang.String.format;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -111,9 +115,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ProcessManagerRepository should")
 class ProcessManagerRepositoryTest
-        extends RecordBasedRepositoryTest<TestProcessManager,
-                                          ProjectId,
-                                          Project> {
+        extends RecordBasedRepositoryTest<TestProcessManager, ProjectId, Project> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass(),
@@ -138,10 +140,25 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected List<TestProcessManager> createEntities(int count) {
-        List<TestProcessManager> procmans = Lists.newArrayList();
+        return createEntitiesWithState(count, id -> Project.getDefaultInstance());
+    }
+
+    @Override
+    protected List<TestProcessManager> createNamed(int count, Supplier<String> nameSupplier) {
+        return createEntitiesWithState(count, id -> ProjectVBuilder.newBuilder()
+                                                                   .setId(id)
+                                                                   .setName(nameSupplier.get())
+                                                                   .build());
+    }
+
+    private List<TestProcessManager>
+    createEntitiesWithState(int count, Function<ProjectId, Project> initialStateSupplier) {
+        List<TestProcessManager> procmans = newArrayList();
 
         for (int i = 0; i < count; i++) {
             ProjectId id = createId(i);
+            TestProcessManager procman = new TestProcessManager(id);
+            setEntityState(procman, initialStateSupplier.apply(id));
 
             TestProcessManager pm =
                     Given.processManagerOfClass(TestProcessManager.class)
@@ -154,6 +171,18 @@ class ProcessManagerRepositoryTest
             procmans.add(pm);
         }
         return procmans;
+    }
+
+    @Override
+    protected List<TestProcessManager> orderedByName(List<TestProcessManager> entities) {
+        return entities.stream()
+                       .sorted(comparing(ProcessManagerRepositoryTest::entityName))
+                       .collect(toList());
+    }
+
+    private static String entityName(TestProcessManager entity) {
+        return entity.getState()
+                     .getName();
     }
 
     @Override
@@ -456,10 +485,9 @@ class ProcessManagerRepositoryTest
                                             .build();
         Command command = requestFactory.createCommand(commandMsg);
         dispatchCommand(command);
-        StandardRejections.EntityAlreadyArchived expected =
-                StandardRejections.EntityAlreadyArchived.newBuilder()
-                                                        .setEntityId(pack(id))
-                                                        .build();
+        EntityAlreadyArchived expected = EntityAlreadyArchived.newBuilder()
+                                                              .setEntityId(pack(id))
+                                                              .build();
         assertTrue(TestProcessManager.processed(expected));
     }
 

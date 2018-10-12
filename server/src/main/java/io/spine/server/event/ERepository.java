@@ -27,10 +27,11 @@ import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
+import io.spine.client.OrderBy;
+import io.spine.client.Pagination;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
-import io.spine.server.storage.RecordStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -74,21 +75,13 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
                 }
             };
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to open the method to the package.
-     */
-    @Override
-    protected RecordStorage<EventId> recordStorage() {
-        return super.recordStorage();
-    }
-
     Iterator<Event> iterator(EventStreamQuery query) {
         checkNotNull(query);
 
         EntityFilters filters = toEntityFilters(query);
-        Iterator<EEntity> entities = find(filters, FieldMask.getDefaultInstance());
+        Iterator<EEntity> entities = find(filters, OrderBy.getDefaultInstance(),
+                                          Pagination.getDefaultInstance(),
+                                          FieldMask.getDefaultInstance());
         // A predicate on the Event message and EventContext fields.
         Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
         Iterator<EEntity> filtered = Streams.stream(entities)
@@ -131,7 +124,8 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
      * of the source query and by the {@code eventType} field of the underlying
      * {@linkplain EventFilter EventFilters}.
      *
-     * @param query the source {@link EventStreamQuery} to get the info from
+     * @param query
+     *         the source {@link EventStreamQuery} to get the info from
      * @return new instance of {@link EntityFilters} filtering the events
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
@@ -186,9 +180,10 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     /**
      * Obtains a {@code CompositeColumnFilter} from the specified builder.
      *
-     * @param builder the builder of the filter
+     * @param builder
+     *         the builder of the filter
      * @return {@code Optional} of the {@code CompositeColumnFilter}, if there are column filters
-     * in the builder; {@code Optional.empty()} otherwise
+     *         in the builder; {@code Optional.empty()} otherwise
      */
     private static Optional<CompositeColumnFilter> buildFilter(
             CompositeColumnFilter.Builder builder) {
