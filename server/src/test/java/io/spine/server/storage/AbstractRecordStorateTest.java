@@ -344,7 +344,7 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
     }
 
     @Nested
-    @DisplayName("return Lifecycle Flags")
+    @DisplayName("return lifecycle flags")
     class ReturnLifecycleFlags {
 
         @Test
@@ -370,7 +370,7 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
         }
 
         @Test
-        @DisplayName("for record with updated lifecycle flags")
+        @DisplayName("for a record where they were updated")
         void forUpdatedRecord() {
             I id = newId();
             EntityRecord record = newStorageRecord(id);
