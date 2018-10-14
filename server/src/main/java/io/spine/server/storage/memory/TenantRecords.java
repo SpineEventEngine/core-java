@@ -143,18 +143,11 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         }
         EntityRecord record = recordWithColumns.getRecord();
         Any recordState = record.getState();
-        Any maskedState = maskAny(recordState, fieldMask);
+        Any maskedState = new FieldMaskApplier(fieldMask).maskAny(recordState);
         EntityRecord maskedRecord = record.toBuilder()
                                           .setState(maskedState)
                                           .build();
         return maskedRecord;
-    }
-
-    private static Any maskAny(Any message, FieldMask mask) {
-        Message stateMessage = unpack(message);
-        Message maskedMessage = applyMask(mask, stateMessage);
-        Any result = pack(maskedMessage);
-        return result;
     }
 
     @Override
@@ -180,14 +173,18 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         @Override
         public @Nullable EntityRecord apply(@Nullable EntityRecord input) {
             checkNotNull(input);
-            Any packedState = input.getState();
-            Message state = unpack(packedState);
-            Message maskedState = applyMask(fieldMask, state);
-            Any repackedState = pack(maskedState);
+            Any maskedState = maskAny(input.getState());
             EntityRecord result = EntityRecord
                     .newBuilder(input)
-                    .setState(repackedState)
+                    .setState(maskedState)
                     .build();
+            return result;
+        }
+
+        private Any maskAny(Any message) {
+            Message stateMessage = unpack(message);
+            Message maskedMessage = applyMask(fieldMask, stateMessage);
+            Any result = pack(maskedMessage);
             return result;
         }
     }
