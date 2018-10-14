@@ -55,7 +55,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     private LifecycleFlags lifecycleFlags;
 
     /**
-     * {@code true} if the lifecycle flags of the entity was changed since initialization.
+     * Indicates if the lifecycle flags of the entity were changed since initialization.
      *
      * <p>Changed lifecycle flags are should be updated when
      * {@linkplain Repository#store(Entity) storing}.
