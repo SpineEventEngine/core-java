@@ -44,6 +44,7 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.SystemBus;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeName;
@@ -406,6 +407,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /** Obtains instance of {@link SystemGateway} of this {@code BoundedContext}. */
     @Internal
     public abstract SystemGateway getSystemGateway();
+
+    public abstract SystemBus getSystemBus();
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.

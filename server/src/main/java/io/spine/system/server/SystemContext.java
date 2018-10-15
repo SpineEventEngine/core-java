@@ -25,6 +25,9 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
@@ -47,6 +50,8 @@ import io.spine.server.event.EventBus;
  */
 @Internal
 public final class SystemContext extends BoundedContext {
+
+    private @MonotonicNonNull SystemBus ownBus;
 
     private SystemContext(BoundedContextBuilder builder) {
         super(builder);
@@ -82,6 +87,8 @@ public final class SystemContext extends BoundedContext {
 
         register(new ScheduledCommandRepository());
         register(new MirrorRepository());
+
+        this.ownBus = SystemBus.newInstance(this);
     }
 
     /**
@@ -93,5 +100,10 @@ public final class SystemContext extends BoundedContext {
     @Override
     public NoOpSystemGateway getSystemGateway() {
         return NoOpSystemGateway.INSTANCE;
+    }
+
+    @Override
+    public SystemBus getSystemBus() {
+        return checkNotNull(ownBus);
     }
 }

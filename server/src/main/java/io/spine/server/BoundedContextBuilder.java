@@ -35,12 +35,13 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemBus;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -247,9 +248,10 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
-        BiFunction<BoundedContextBuilder, SystemGateway, DomainContext>
-                instanceFactory = DomainContext::newInstance;
         SystemGateway systemGateway = SystemGateway.newInstance(system);
+        SystemBus systemBus = SystemBus.newInstance(system);
+        Function<BoundedContextBuilder, DomainContext> instanceFactory =
+                builder -> DomainContext.newInstance(builder, systemGateway, systemBus);
         BoundedContext result = buildPartial(instanceFactory, systemGateway, transport);
         return result;
     }
@@ -266,17 +268,15 @@ public final class BoundedContextBuilder implements Logging {
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
-        BiFunction<BoundedContextBuilder, SystemGateway, SystemContext> instanceFactory =
-                (builder, systemGateway) -> SystemContext.newInstance(builder);
         NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
-        SystemContext result = system.buildPartial(instanceFactory,
+        SystemContext result = system.buildPartial(SystemContext::newInstance,
                                                    systemGateway,
                                                    transport);
         return result;
     }
 
     private <B extends BoundedContext> B
-    buildPartial(BiFunction<BoundedContextBuilder, SystemGateway, B> instanceFactory,
+    buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
                  SystemGateway systemGateway,
                  TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
@@ -287,7 +287,7 @@ public final class BoundedContextBuilder implements Logging {
         initStand(systemGateway);
         initIntegrationBus(transport);
 
-        B result = instanceFactory.apply(this, systemGateway);
+        B result = instanceFactory.apply(this);
         return result;
     }
 

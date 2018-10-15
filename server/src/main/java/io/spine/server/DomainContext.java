@@ -21,7 +21,10 @@
 package io.spine.server;
 
 import io.spine.server.entity.Repository;
+import io.spine.system.server.SystemBus;
 import io.spine.system.server.SystemGateway;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A bounded context representing a user-specific domain model.
@@ -45,19 +48,34 @@ import io.spine.system.server.SystemGateway;
 final class DomainContext extends BoundedContext {
 
     private final SystemGateway systemGateway;
+    private final SystemBus systemBus;
 
-    private DomainContext(BoundedContextBuilder builder, SystemGateway gateway) {
+    private DomainContext(BoundedContextBuilder builder,
+                          SystemGateway gateway,
+                          SystemBus systemBus) {
         super(builder);
         this.systemGateway = gateway;
+        this.systemBus = systemBus;
     }
 
-    static DomainContext newInstance(BoundedContextBuilder builder, SystemGateway gateway) {
-        DomainContext result = new DomainContext(builder, gateway);
+    static DomainContext newInstance(BoundedContextBuilder builder,
+                                     SystemGateway gateway,
+                                     SystemBus bus) {
+        checkNotNull(builder);
+        checkNotNull(gateway);
+        checkNotNull(builder);
+
+        DomainContext result = new DomainContext(builder, gateway, bus);
         return result;
     }
 
     @Override
     public SystemGateway getSystemGateway() {
         return systemGateway;
+    }
+
+    @Override
+    public SystemBus getSystemBus() {
+        return systemBus;
     }
 }
