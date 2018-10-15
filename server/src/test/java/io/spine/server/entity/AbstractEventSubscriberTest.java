@@ -128,13 +128,13 @@ class AbstractEventSubscriberTest {
     @Test
     @DisplayName("fail to subscribe to external events without `external = true`")
     void failIfNotExternal() {
-        assertThrows(IllegalStateException.class, WronglyDomesticSubscriber::new);
+        assertThrows(IllegalArgumentException.class, WronglyDomesticSubscriber::new);
     }
 
     @Test
     @DisplayName("fail to subscribe to domestic events without `external = false`")
     void failIfNotDomestic() {
-        assertThrows(IllegalStateException.class, WronglyExternalSubscriber::new);
+        assertThrows(IllegalArgumentException.class, WronglyExternalSubscriber::new);
     }
 
     @Test

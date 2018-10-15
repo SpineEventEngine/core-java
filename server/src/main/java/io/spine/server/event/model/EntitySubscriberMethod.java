@@ -32,7 +32,6 @@ import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
 import io.spine.protobuf.FieldPaths;
 import io.spine.server.annotation.BoundedContext;
-import io.spine.server.model.ExternalAttribute;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.Model;
 import io.spine.server.model.declare.ParameterSpec;
@@ -74,40 +73,11 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     private void checkExternal() {
         BoundedContextName originContext = contextOf(entityType());
         boolean external = !originContext.equals(contextOfSubscriber);
-        boolean methodIsExternal = ExternalAttribute.of(getRawMethod()).getValue();
-        checkState(methodIsExternal == external,
-                   "Entity subscriber %s should%s be `external`.",
-                   getRawMethod(), external ? "" : " NOT");
+        ensureExternalMatch(external);
     }
 
     private Class<? extends Message> entityType() {
         return getFirstParamType(getRawMethod());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>An entity state subscriber is always external since {@link EntityStateChanged} is
-     * an external event to any domain context.
-     *
-     * @return always {@code true}
-     */
-    @Override
-    public boolean isExternal() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>An entity state subscriber never domestic since {@link EntityStateChanged} is
-     * an external event to any domain context.
-     *
-     * @return always {@code false}
-     */
-    @Override
-    public boolean isDomestic() {
-        return false;
     }
 
     @Override

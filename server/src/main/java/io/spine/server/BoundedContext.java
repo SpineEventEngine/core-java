@@ -257,6 +257,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             getEventBus().register(dispatcher);
+            getSystemBus().register(dispatcher);
         }
 
         if (dispatcher.dispatchesExternalEvents()) {
@@ -277,6 +278,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
         if (dispatcher.dispatchesEvents()) {
             getEventBus().register(delegatingDispatcher);
+            getSystemBus().register(delegatingDispatcher);
         }
 
         if (dispatcher.dispatchesExternalEvents()) {
@@ -408,6 +410,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     @Internal
     public abstract SystemGateway getSystemGateway();
 
+    /** Obtains instance of {@link SystemBus} of this {@code BoundedContext}. */
+    @Internal
     public abstract SystemBus getSystemBus();
 
     /**
