@@ -76,7 +76,6 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  *
  * @param <I>
  *         the type of the IDs of the query target
- * @author Dmytro Dashenkov
  * @see EntityRecordWithColumns
  */
 public final class EntityQuery<I> implements Serializable {

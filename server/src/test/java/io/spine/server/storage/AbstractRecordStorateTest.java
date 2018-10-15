@@ -68,7 +68,6 @@ import static org.mockito.Mockito.verify;
  *
  * @param <I> the type of identifiers a storage uses
  * @param <S> the type of storage under the test
- * @author Alexander Yevsyukov
  */
 public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {

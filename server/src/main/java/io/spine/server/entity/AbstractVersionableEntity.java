@@ -42,8 +42,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @param <I> the type of the entity ID
  * @param <S> the type of the entity state
- * @author Alexander Yevsyikov
- * @author Alexander Litus
  */
 public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntity<I, S>

@@ -65,7 +65,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <S>
  *         the type of entity state messages
- * @author Alexander Yevsyukov
  */
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
         extends Repository<I, E> {

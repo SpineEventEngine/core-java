@@ -35,7 +35,6 @@ import java.util.function.Predicate;
  *
  * @param <I> the type of IDs of entities
  * @param <E> the type of entities
- * @author Alexander Yevsyukov
  */
 public interface RepositoryView<I, E extends Entity<I, ?>> {
 

@@ -33,7 +33,6 @@ import java.util.Iterator;
  *         a type for entity identifiers
  * @param <R>
  *         stored record type
- * @author Alex Tymchenko
  */
 interface BulkStorageOperationsMixin<I, R extends Message> {
 
@@ -63,6 +62,7 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * Reads all the active records from the storage.
      * 
      * @return the {@link Iterator} containing the ID - record entries.
+     * 
      * @throws IllegalStateException
      *         if the storage was closed before finishing
      */

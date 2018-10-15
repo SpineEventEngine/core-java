@@ -38,8 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link LifecycleFlags}.
- *
- * @author Dmytro Dashenkov.
  */
 public abstract class AggregateStorageLifecycleFlagsHandlingTest {
 

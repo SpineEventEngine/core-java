@@ -39,9 +39,6 @@ import java.util.Optional;
  *
  * @param <I>
  *         the type of entity IDs
- * @author Alexander Litus
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  */
 public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 

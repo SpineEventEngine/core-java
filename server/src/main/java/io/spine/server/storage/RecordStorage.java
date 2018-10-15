@@ -56,9 +56,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A storage keeping messages with identity.
  *
  * @param <I> the type of entity IDs
- * @author Alexander Yevsyukov
- * @author Dmytro Grankin
- * @author Dmytro Dashenkov
  */
 public abstract class RecordStorage<I>
         extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>

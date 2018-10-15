@@ -77,9 +77,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         extends AbstractRecordStorateTest<ProjectId, S> {

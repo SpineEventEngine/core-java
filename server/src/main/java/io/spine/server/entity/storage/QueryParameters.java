@@ -39,8 +39,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
  * implementations.
- *
- * @author Dmytro Dashenkov
  */
 @SPI /* Available to SPI users, providing own {@code Storage} implementations. */
 public final class QueryParameters implements Iterable<CompositeQueryParameter>, Serializable {

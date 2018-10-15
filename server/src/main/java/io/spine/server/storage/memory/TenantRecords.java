@@ -47,9 +47,6 @@ import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
 /**
  * The memory-based storage for {@link EntityRecord} that represents
  * all storage operations available for data of a single tenant.
- *
- * @author Alexander Yevsyukov
- * @author Dmitry Ganzha
  */
 class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
