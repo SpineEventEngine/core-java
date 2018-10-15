@@ -8,7 +8,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE gitCOPYRIGHT
  * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
@@ -25,14 +25,14 @@
  *  as we want to manage the versions in a single source.
  */
 
-def final SPINE_VERSION = '0.11.4-SNAPSHOT'
+def final SPINE_VERSION = '0.11.5-SNAPSHOT'
 
 ext {
     // The version of the modules in this project.
     versionToPublish = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = SPINE_VERSION
+    spineBaseVersion = '0.11.5-SNAPSHOT'
 
     // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
     spineTimeVersion = '0.11.00-SNAPSHOT'
