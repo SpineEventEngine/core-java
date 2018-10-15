@@ -54,7 +54,7 @@ import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityActive;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -65,7 +65,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <S>
  *         the type of entity state messages
- * @author Alexander Yevsyukov
  */
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
         extends Repository<I, E> {
@@ -94,7 +93,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-        RecordStorage<I> storage = (RecordStorage<I>) getStorage();
+                RecordStorage<I> storage = (RecordStorage<I>) getStorage();
         return storage;
     }
 
@@ -156,12 +155,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Finds an entity with the passed ID if this entity is
-     * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible() visible}.
+     * {@linkplain EntityWithLifecycle.Predicates#isEntityActive() active}.
      *
      * @param id
      *         the ID of the entity to find
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID
-     *         or this entity is not visible
+     *         or this entity is not active
      */
     @Override
     public Optional<E> find(I id) {
@@ -170,8 +169,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.empty();
         }
         EntityRecord record = optional.get();
-        boolean recordVisible = isEntityVisible().test(record.getLifecycleFlags());
-        if (!recordVisible) {
+        boolean recordActive = isEntityActive().test(record.getLifecycleFlags());
+        if (!recordActive) {
             return Optional.empty();
         }
         E entity = toEntity(record);
@@ -180,7 +179,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Finds a record and returns it if its {@link LifecycleFlags} don't make it
-     * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible()}.
+     * {@linkplain EntityWithLifecycle.Predicates#isEntityActive()}.
      */
     private Optional<EntityRecord> findRecord(I id) {
         RecordStorage<I> storage = recordStorage();
@@ -196,9 +195,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
      *
-     * <p>An entity will be loaded despite its {@linkplain LifecycleFlags visibility}.
-     * I.e. even if the entity is either {@linkplain EntityWithLifecycle#isArchived()  archived} or
-     * {@linkplain EntityWithLifecycle#isDeleted() deleted}, it is loaded and returned.
+     * <p>An entity will be loaded whether its active or not.
+     * I.e. the entity is loaded and returned even if its
+     * {@linkplain EntityWithLifecycle#isArchived()  archived} or
+     * {@linkplain EntityWithLifecycle#isDeleted() deleted}.
      *
      * <p>The new entity is created if and only if there is no record with the corresponding ID.
      *
@@ -321,51 +321,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         RecordStorage<I> storage = recordStorage();
         EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
-        EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
-        Iterator<EntityRecord> records = storage.readAll(completeQuery, fieldMask);
+        Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
-    }
-
-    /**
-     * Creates an {@link EntityQuery} instance which has:
-     * <ul>
-     *     <li>All the parameters from the {@code src} query;
-     *     <li>At least one parameter limiting
-     *         the {@link LifecycleFlagField Lifecycle Flags Columns}.
-     * </ul>
-     *
-     * <p>If the {@code src} instance
-     * {@linkplain EntityQuery#isLifecycleAttributesSet() contains the lifecycle attributes}, then
-     * it is returned with no change. Otherwise, a new instance containing the default values for
-     * the Lifecycle attributes is returned.
-     *
-     * <p>The default values are:
-     * <pre>
-     *     {@code
-     *     archived -> false,
-     *     deleted  -> false
-     *     }
-     * </pre>
-     *
-     * <p>If the type of the Entity which this repository works with is not derived from
-     * the {@link EntityWithLifecycle}, then no lifecycle attributes are appended and
-     * the {@code src} query is returned.
-     *
-     * @param src
-     *         the source {@link EntityQuery} to take the parameters from
-     * @return an {@link EntityQuery} which includes
-     *         the {@link LifecycleFlagField Lifecycle Flags Columns} unless
-     *         they are not supported
-     */
-    private EntityQuery<I> toCompleteQuery(EntityQuery<I> src) {
-        EntityQuery<I> completeQuery;
-        completeQuery = !src.isLifecycleAttributesSet()
-                                && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())
-                        ? src.withLifecycleFlags(recordStorage())
-                        : src;
-        return completeQuery;
     }
 
     /**
@@ -443,7 +402,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
             @SuppressWarnings("unchecked") /* As the message class is the same as expected,
                                               the conversion is safe. */
-            I id = (I) idAsMessage;
+                    I id = (I) idAsMessage;
             return id;
         }
 

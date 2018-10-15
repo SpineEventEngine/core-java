@@ -42,9 +42,6 @@ import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Dmytro Dashenkov
- */
 @ExtendWith(TempDirectory.class)
 @DisplayName("ModelVerifierPlugin should")
 class ModelVerifierPluginTest {

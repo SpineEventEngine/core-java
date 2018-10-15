@@ -42,8 +42,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @param <I> the type of the entity ID
  * @param <S> the type of the entity state
- * @author Alexander Yevsyikov
- * @author Alexander Litus
  */
 public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntity<I, S>
@@ -55,9 +53,9 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     private LifecycleFlags lifecycleFlags;
 
     /**
-     * If {@code true} the visibility of the entity was changed since initialization.
+     * Indicates if the lifecycle flags of the entity were changed since initialization.
      *
-     * <p>If so, the visibility status of the entity should be updated when
+     * <p>Changed lifecycle flags are should be updated when
      * {@linkplain Repository#store(Entity) storing}.
      */
     private volatile boolean lifecycleFlagsChanged;

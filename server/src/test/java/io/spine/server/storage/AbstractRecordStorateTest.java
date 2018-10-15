@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import io.spine.testing.core.given.GivenVersion;
@@ -67,7 +68,6 @@ import static org.mockito.Mockito.verify;
  *
  * @param <I> the type of identifiers a storage uses
  * @param <S> the type of storage under the test
- * @author Alexander Yevsyukov
  */
 public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
@@ -175,7 +175,7 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
     }
 
     @Test
-    @DisplayName("fail to write visibility to non-existing record")
+    @DisplayName("fail to write lifecycle flags to non-existing record")
     void notWriteStatusToNonExistent() {
         I id = newId();
         RecordStorage<I> storage = getStorage();
@@ -322,12 +322,12 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
                 v2Records.put(id, alternateRecord);
             }
 
-            storage.write(transformValues(v1Records, RecordStorageTest::withLifecycleColumns));
+            storage.write(transformValues(v1Records, RecordStorageTestEnv::withLifecycleColumns));
             Iterator<EntityRecord> firstRevision = storage.readAll();
             assertIteratorsEqual(v1Records.values()
                                           .iterator(), firstRevision);
 
-            storage.write(transformValues(v2Records, RecordStorageTest::withLifecycleColumns));
+            storage.write(transformValues(v2Records, RecordStorageTestEnv::withLifecycleColumns));
             Iterator<EntityRecord> secondRevision = storage.readAll();
             assertIteratorsEqual(v2Records.values()
                                           .iterator(), secondRevision);
@@ -343,8 +343,8 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
     }
 
     @Nested
-    @DisplayName("return visibility")
-    class ReturnVisibility {
+    @DisplayName("return lifecycle flags")
+    class ReturnLifecycleFlags {
 
         @Test
         @DisplayName("for missing record")
@@ -369,7 +369,7 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
         }
 
         @Test
-        @DisplayName("for record with updated visibility")
+        @DisplayName("for a record where they were updated")
         void forUpdatedRecord() {
             I id = newId();
             EntityRecord record = newStorageRecord(id);

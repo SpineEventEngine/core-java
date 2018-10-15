@@ -52,6 +52,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
+import static io.spine.server.storage.given.RecordStorageTestEnv.withLifecycleColumns;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;

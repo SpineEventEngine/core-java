@@ -27,25 +27,23 @@ import java.util.Optional;
 
 /**
  * A storage that allows to update {@linkplain LifecycleFlags lifecycle flags} of entities.
- *
- * @author Alexander Yevsyukov
  */
 public interface StorageWithLifecycleFlags<I, M extends Message, R extends ReadRequest<I>>
         extends Storage<I, M, R> {
 
     /**
-     * Reads the visibility status for the entity with the passed ID.
+     * Reads the lifecycle status for the entity with the passed ID.
      *
      * <p>This method returns {@code Optional.empty()} if none of the
-     * flags of visibility flags were set before.
+     * flags were set before.
      *
      * @param id the ID of the entity
-     * @return the aggregate visibility or {@code Optional.empty()}
+     * @return the aggregate lifecycle flags or {@code Optional.empty()}
      */
     Optional<LifecycleFlags> readLifecycleFlags(I id);
 
     /**
-     * Writes the visibility status for the entity with the passed ID.
+     * Writes the lifecycle status for the entity with the passed ID.
      *
      * @param id         the ID of the entity for which to update the status
      * @param flags the status to write

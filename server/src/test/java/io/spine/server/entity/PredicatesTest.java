@@ -23,8 +23,8 @@ package io.spine.server.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordVisible;
+import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityActive;
+import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordActive;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,50 +35,50 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PredicatesTest {
 
     @Test
-    @DisplayName("consider archived entity invisible")
-    void stateArchivedEntityInvisible() {
+    @DisplayName("consider archived entity inactive")
+    void stateArchivedEntityInactive() {
         LifecycleFlags status = LifecycleFlags.newBuilder()
                                               .setArchived(true)
                                               .build();
-        assertFalse(isEntityVisible().test(status));
+        assertFalse(isEntityActive().test(status));
     }
 
     @Test
-    @DisplayName("consider deleted entity invisible")
-    void stateDeletedEntityInvisible() {
+    @DisplayName("consider deleted entity inactive")
+    void stateDeletedEntityInactive() {
         LifecycleFlags status = LifecycleFlags.newBuilder()
                                               .setDeleted(true)
                                               .build();
-        assertFalse(isEntityVisible().test(status));
+        assertFalse(isEntityActive().test(status));
     }
 
     @Test
-    @DisplayName("consider archived record invisible")
-    void stateArchivedRecordInvisible() {
+    @DisplayName("consider archived record inactive")
+    void stateArchivedRecordInactive() {
         EntityRecord record = EntityRecord.newBuilder()
                                           .setLifecycleFlags(LifecycleFlags.newBuilder()
                                                                            .setArchived(true))
                                           .build();
-        assertFalse(isRecordVisible().test(record));
+        assertFalse(isRecordActive().test(record));
     }
 
     @Test
-    @DisplayName("consider deleted record invisible")
-    void stateDeletedRecordInvisible() {
+    @DisplayName("consider deleted record inactive")
+    void stateDeletedRecordInactive() {
         EntityRecord record = EntityRecord.newBuilder()
                                           .setLifecycleFlags(LifecycleFlags.newBuilder()
                                                                            .setDeleted(true))
                                           .build();
-        assertFalse(isRecordVisible().test(record));
+        assertFalse(isRecordActive().test(record));
     }
 
     /**
      * We are not likely to encounter {@code null} records,
-     * but making such records "visible" would help identify possible bugs.
+     * but making such records active would help identify possible bugs.
      */
     @Test
-    @DisplayName("consider null records visible")
-    void stateNullRecordsVisible() {
-        assertTrue(isEntityVisible().test(null));
+    @DisplayName("consider null records active")
+    void stateNullRecordsActive() {
+        assertTrue(isEntityActive().test(null));
     }
 }
