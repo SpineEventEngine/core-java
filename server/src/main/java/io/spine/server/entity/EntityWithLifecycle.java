@@ -32,7 +32,7 @@ import java.util.function.Predicate;
  * <p>Lifecycle flags determine if an entity is active.
  * An entity is considered to be active if the lifecycle flags are missing.
  * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted}, 
- * then its regarded to be inactive.
+ * then it’s regarded to be inactive.
  *
  * @author Alexander Yevsyukov
  */
