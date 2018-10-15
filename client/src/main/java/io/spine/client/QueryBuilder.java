@@ -23,7 +23,15 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 
+import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
+import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * A builder for the {@link Query} instances.
@@ -41,6 +49,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *                                  .where(eq("type", "permanent"),
  *                                         eq("discountPercent", 10),
  *                                         eq("companySize", Company.Size.SMALL))
+ *                                  .orderBy("name", DESCENDING)
+ *                                  .limit(20)
  *                                  .build();
  *     }
  * </pre>
@@ -54,9 +64,52 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
 
     private final QueryFactory queryFactory;
 
+    private String orderingColumn;
+    private OrderBy.Direction direction;
+    private int limit = 0;
+
     QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
         super(targetType);
         this.queryFactory = checkNotNull(queryFactory);
+    }
+
+    /**
+     * Sets the sorting order to query, represented by the target column and order direction.
+     *
+     * @param column
+     *         an entity column to sort by
+     * @param direction
+     *         a direction of the sorting
+     * @return this builder instance
+     */
+    public QueryBuilder orderBy(String column, OrderBy.Direction direction) {
+        checkNotNull(column);
+        checkNotNull(direction);
+        checkArgument(
+                direction != OD_UNKNOWN && direction != UNRECOGNIZED,
+                "Invalid ordering direction"
+        );
+
+        this.orderingColumn = column;
+        this.direction = direction;
+        return self();
+    }
+
+    /**
+     * Limits the number of results returned by the query.
+     *
+     * @param count
+     *         an amount of the results to be returned
+     * @return this builder instance
+     */
+    public QueryBuilder limit(int count) {
+        checkLimit(count);
+        this.limit = count;
+        return self();
+    }
+
+    private static void checkLimit(Number count) {
+        checkArgument(count.longValue() > 0, "A Query limit must be more than 0.");
     }
 
     /**
@@ -66,10 +119,43 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
      */
     @Override
     public Query build() {
+        Optional<OrderBy> orderBy = orderBy();
+        Optional<Pagination> pagination = pagination();
+
+        checkState(orderBy.isPresent() || !pagination.isPresent(),
+                   "Pagination cannot be set for unordered Queries");
+
         Target target = buildTarget();
         FieldMask mask = composeMask();
-        Query query = queryFactory.composeQuery(target, mask);
-        return query;
+
+        if (pagination.isPresent()) {
+            return queryFactory.composeQuery(target, orderBy.get(), pagination.get(), mask);
+        }
+        if (orderBy.isPresent()) {
+            return queryFactory.composeQuery(target, orderBy.get(), mask);
+        }
+        return queryFactory.composeQuery(target, mask);
+    }
+
+    private Optional<Pagination> pagination() {
+        if (limit == 0) {
+            return empty();
+        }
+        Pagination result = PaginationVBuilder.newBuilder()
+                                              .setPageSize(limit)
+                                              .build();
+        return of(result);
+    }
+
+    private Optional<OrderBy> orderBy() {
+        if (orderingColumn == null) {
+            return empty();
+        }
+        OrderBy result = OrderByVBuilder.newBuilder()
+                                        .setColumn(orderingColumn)
+                                        .setDirection(direction)
+                                        .build();
+        return of(result);
     }
 
     @Override

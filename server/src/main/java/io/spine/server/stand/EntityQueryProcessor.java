@@ -25,6 +25,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
+import io.spine.client.OrderBy;
+import io.spine.client.Pagination;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.protobuf.AnyPacker;
@@ -60,7 +62,9 @@ class EntityQueryProcessor implements QueryProcessor {
             entities = repository.loadAll();
         } else {
             EntityFilters filters = target.getFilters();
-            entities = repository.find(filters, fieldMask);
+            OrderBy orderBy = query.getOrderBy();
+            Pagination pagination = query.getPagination();
+            entities = repository.find(filters, orderBy, pagination, fieldMask);
         }
         ImmutableList<Any> result = stream(entities)
                 .map(Entity::getState)

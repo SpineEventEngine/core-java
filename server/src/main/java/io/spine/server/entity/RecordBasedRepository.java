@@ -27,6 +27,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
+import io.spine.client.OrderBy;
+import io.spine.client.Pagination;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
@@ -61,7 +63,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>Such a repository is backed by {@link RecordStorage}.
  * Entity states are stored as {@link EntityRecord}s.
  *
- * @param <S> the type of entity state messages
+ * @param <S>
+ *         the type of entity state messages
  * @author Alexander Yevsyukov
  */
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
@@ -86,7 +89,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Ensures that the repository has the storage.
      *
      * @return storage instance
-     * @throws IllegalStateException if the storage is null
+     * @throws IllegalStateException
+     *         if the storage is null
      */
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
@@ -138,7 +142,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param entities the {@linkplain Entity Entities} to store
+     * @param entities
+     *         the {@linkplain Entity Entities} to store
      */
     public void store(Collection<E> entities) {
         Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
@@ -153,9 +158,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds an entity with the passed ID if this entity is
      * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible() visible}.
      *
-     * @param id the ID of the entity to find
+     * @param id
+     *         the ID of the entity to find
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID
-     * or this entity is not visible
+     *         or this entity is not visible
      */
     @Override
     public Optional<E> find(I id) {
@@ -196,7 +202,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>The new entity is created if and only if there is no record with the corresponding ID.
      *
-     * @param id the ID of the entity to load
+     * @param id
+     *         the ID of the entity to load
      * @return the entity with the specified ID
      */
     protected E findOrCreate(I id) {
@@ -229,7 +236,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param ids entity IDs to search for
+     * @param ids
+     *         entity IDs to search for
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids) {
@@ -247,8 +255,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param ids       entity IDs to search for
-     * @param fieldMask mask to apply on entities
+     * @param ids
+     *         entity IDs to search for
+     * @param fieldMask
+     *         mask to apply on entities
      * @return all the entities in this repository with the IDs contained in the given {@code ids}
      * @see #loadAll(Iterable)
      */
@@ -278,8 +288,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Finds all the entities passing the given filters and
-     * applies the given {@link FieldMask} to the results.
+     * Finds the entities passing the given filters and applies the given {@link FieldMask}
+     * to the results. A number of elements to retrieve can be limited by {@link Pagination}.
+     * OrderBy in which to look for and return results in is specified by the {@link OrderBy}.
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
@@ -290,18 +301,28 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param filters   entity filters
-     * @param fieldMask mask to apply to the entities
+     * @param filters
+     *         entity filters
+     * @param orderBy
+     *         an orderBy to sort the filtered results before pagination
+     * @param pagination
+     *         a pagination to apply to the sorted result set
+     * @param fieldMask
+     *         a mask to apply to the entities
      * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
-    public Iterator<E> find(EntityFilters filters, FieldMask fieldMask) {
+    public Iterator<E> find(EntityFilters filters, OrderBy orderBy,
+                            Pagination pagination, FieldMask fieldMask) {
         checkNotNull(filters);
+        checkNotNull(orderBy);
+        checkNotNull(pagination);
         checkNotNull(fieldMask);
 
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
+        RecordStorage<I> storage = recordStorage();
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
         EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
-        Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
+        Iterator<EntityRecord> records = storage.readAll(completeQuery, fieldMask);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
@@ -310,7 +331,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Creates an {@link EntityQuery} instance which has:
      * <ul>
-     *     <li>All the parameters from the {@code src} Query;
+     *     <li>All the parameters from the {@code src} query;
      *     <li>At least one parameter limiting
      *         the {@link LifecycleFlagField Lifecycle Flags Columns}.
      * </ul>
@@ -332,7 +353,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * the {@link EntityWithLifecycle}, then no lifecycle attributes are appended and
      * the {@code src} query is returned.
      *
-     * @param src the source {@link EntityQuery} to take the parameters from
+     * @param src
+     *         the source {@link EntityQuery} to take the parameters from
      * @return an {@link EntityQuery} which includes
      *         the {@link LifecycleFlagField Lifecycle Flags Columns} unless
      *         they are not supported
@@ -385,7 +407,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
      *
-     * @throws IllegalStateException in case entity column definitions are incorrect
+     * @throws IllegalStateException
+     *         in case entity column definitions are incorrect
      */
     private void cacheEntityColumns() {
         columnCache().ensureColumnsCached();
@@ -395,7 +418,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Transforms an instance of {@link EntityId} into an identifier
      * of the required type.
      *
-     * @param <I> the target type of identifiers
+     * @param <I>
+     *         the target type of identifiers
      */
     @VisibleForTesting
     static class EntityIdFunction<I> implements Function<EntityId, I> {

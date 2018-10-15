@@ -25,10 +25,15 @@ import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -87,5 +92,35 @@ class ColumnMemoizedValueTest {
                           .addEqualityGroup(valueB)
                           .addEqualityGroup(valueC)
                           .testEquals();
+    }
+
+    @Test
+    @DisplayName("support comparison")
+    void supportComparison() {
+        EntityColumn column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
+
+        TestEntity nullEntity = new TestEntity("null", null);
+        TestEntity negFirstEntity = new TestEntity("negative-first", -1);
+        TestEntity zeroEntity = new TestEntity("zero", 0);
+        TestEntity firstEntity = new TestEntity("first", 1);
+        TestEntity secondEntity = new TestEntity("second", 2);
+        TestEntity thirdEntity = new TestEntity("third", 3);
+
+        MemoizedValue firstValue = column.memoizeFor(firstEntity);
+        MemoizedValue negFirstValue = column.memoizeFor(negFirstEntity);
+        MemoizedValue zeroValue = column.memoizeFor(zeroEntity);
+        MemoizedValue secondValue = column.memoizeFor(secondEntity);
+        MemoizedValue thirdValue = column.memoizeFor(thirdEntity);
+        MemoizedValue nullValue = column.memoizeFor(nullEntity);
+
+        List<MemoizedValue> values = newArrayList(thirdValue, zeroValue, secondValue, negFirstValue,
+                                                  nullValue, firstValue);
+
+        List<MemoizedValue> expected = newArrayList(nullValue, negFirstValue, zeroValue, firstValue,
+                                                    secondValue, thirdValue);
+        List<MemoizedValue> actual = values.stream()
+                                           .sorted()
+                                           .collect(toList());
+        assertEquals(expected, actual);
     }
 }

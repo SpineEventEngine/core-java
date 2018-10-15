@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.TestEntityWithStringColumn;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
@@ -129,6 +130,11 @@ public class TestProjection
     public void on(PrjProjectDeleted event) {
         keep(event);
         setDeleted(true);
+    }
+
+    @Column
+    public String getName() {
+        return getState().getName();
     }
 
     @Override

@@ -101,23 +101,17 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        return getStorage().readAllRecords()
-                           .values()
-                           .iterator();
+        return getStorage().readAllRecords();
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return getStorage().readAllRecords(fieldMask)
-                           .values()
-                           .iterator();
+        return getStorage().readAllRecords(fieldMask);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        return getStorage().readAllRecords(query, fieldMask)
-                           .values()
-                           .iterator();
+        return getStorage().readAllRecords(query, fieldMask);
     }
 
     private TenantRecords<I> getStorage() {

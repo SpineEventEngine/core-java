@@ -27,9 +27,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.ColumnFilter;
+import io.spine.client.OrderBy;
 
 import java.io.Serializable;
 import java.util.Iterator;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The parameters of an {@link EntityQuery}.
@@ -57,10 +60,14 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      * it is {@code false}.
      */
     private final boolean hasLifecycle;
+    private final int limit;
+    private final OrderBy orderBy;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
                                  .build();
+        this.limit = builder.limit();
+        this.orderBy = builder.orderBy();
         this.hasLifecycle = builder.hasLifecycle;
     }
 
@@ -79,6 +86,22 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
     @Override
     public Iterator<CompositeQueryParameter> iterator() {
         return parameters.iterator();
+    }
+
+    public OrderBy orderBy() {
+        return orderBy;
+    }
+
+    public boolean ordered() {
+        return !orderBy.equals(OrderBy.getDefaultInstance());
+    }
+
+    public int limit() {
+        return limit;
+    }
+
+    public boolean limited() {
+        return limit != 0;
     }
 
     /**
@@ -122,9 +145,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         private final ImmutableCollection.Builder<CompositeQueryParameter> parameters;
 
         private boolean hasLifecycle;
+        private OrderBy orderBy;
+        private int limit;
 
         private Builder() {
             parameters = ImmutableList.builder();
+            orderBy = OrderBy.getDefaultInstance();
         }
 
         @CanIgnoreReturnValue
@@ -144,6 +170,25 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
 
         public ImmutableCollection.Builder<CompositeQueryParameter> getParameters() {
             return parameters;
+        }
+
+        public Builder limit(int value) {
+            limit = value;
+            return this;
+        }
+
+        public int limit() {
+            return limit;
+        }
+
+        public Builder orderBy(OrderBy orderBy) {
+            checkNotNull(orderBy);
+            this.orderBy = orderBy;
+            return this;
+        }
+
+        public OrderBy orderBy() {
+            return orderBy;
         }
 
         /**

@@ -83,7 +83,7 @@ public final class TopicFactory {
      * @param target
      *         a {@code Target} to create a topic for
      * @param fieldMask
-     *         a {@code FieldMask} defining¬ fields to be included in updates
+     *         a {@code FieldMask} defining fields to be included in updates
      * @return an instance of {@code Topic}
      */
     Topic composeTopic(Target target, @Nullable FieldMask fieldMask) {
