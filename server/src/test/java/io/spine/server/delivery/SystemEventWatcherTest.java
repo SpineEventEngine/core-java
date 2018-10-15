@@ -21,9 +21,9 @@
 package io.spine.server.delivery;
 
 import io.spine.server.BoundedContext;
-import io.spine.server.delivery.given.SystemEventWatcherTestEnv.DomesticWatcher;
-import io.spine.server.delivery.given.SystemEventWatcherTestEnv.ExternalNonSystemWatcher;
-import io.spine.server.delivery.given.SystemEventWatcherTestEnv.ExternalSystemWatcher;
+import io.spine.server.delivery.given.SystemEventWatcherTestEnv.ExternalWatcher;
+import io.spine.server.delivery.given.SystemEventWatcherTestEnv.NonSystemWatcher;
+import io.spine.server.delivery.given.SystemEventWatcherTestEnv.ValidSystemWatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +32,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("SystemEventWatcher should")
 class SystemEventWatcherTest {
 
@@ -48,7 +45,7 @@ class SystemEventWatcherTest {
     @Test
     @DisplayName("not subscribe to domestic events")
     void notDomestic() {
-        SystemEventWatcher<?> watcher = new DomesticWatcher();
+        SystemEventWatcher<?> watcher = new ExternalWatcher();
         EventBus bus = boundedContext.getEventBus();
         assertThrows(IllegalStateException.class, () -> bus.register(watcher));
     }
@@ -56,7 +53,7 @@ class SystemEventWatcherTest {
     @Test
     @DisplayName("not subscribe to external non-system events")
     void onlySystem() {
-        SystemEventWatcher<?> watcher = new ExternalNonSystemWatcher();
+        SystemEventWatcher<?> watcher = new NonSystemWatcher();
         IntegrationBus bus = boundedContext.getIntegrationBus();
         assertThrows(IllegalStateException.class, () -> bus.register(watcher));
     }
@@ -64,7 +61,7 @@ class SystemEventWatcherTest {
     @Test
     @DisplayName("subscribe to external system events")
     void subscribe() {
-        SystemEventWatcher<?> watcher = new ExternalSystemWatcher();
+        SystemEventWatcher<?> watcher = new ValidSystemWatcher();
         IntegrationBus bus = boundedContext.getIntegrationBus();
         bus.register(watcher);
     }
