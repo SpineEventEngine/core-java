@@ -21,7 +21,6 @@
 package io.spine.testing.server.aggregate.given;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregateCommandTest;
@@ -30,34 +29,33 @@ import io.spine.testing.server.aggregate.given.agg.TuAggregatePartRepository;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuTaskId;
-import io.spine.testing.server.given.entity.command.TuAddComment;
+import io.spine.testing.server.given.entity.command.TuRemoveComment;
 
 /**
- * The test class checking handling a command in an aggregate part.
+ * The test class for verifying that rejection was thrown.
  *
  * @see io.spine.testing.server.aggregate.AggregateCommandTestShould
  */
-public class SamplePartCommandTest
-        extends AggregateCommandTest<TuTaskId, TuAddComment, TuComments, TuAggregatePart> {
+public class SamplePartRejectionThrowingTest
+        extends AggregateCommandTest<TuTaskId, TuRemoveComment, TuComments, TuAggregatePart> {
 
-    public static final TuAddComment TEST_COMMAND =
-            TuAddComment.newBuilder()
-                        .setId(TuAggregatePart.ID)
-                        .build();
+    private static final TuRemoveComment TEST_COMMAND =
+            TuRemoveComment.newBuilder()
+                           .setId(TuAggregatePart.ID)
+                           .build();
 
-    public SamplePartCommandTest() {
+    public SamplePartRejectionThrowingTest() {
         super(TuAggregatePart.ID, TEST_COMMAND);
     }
 
     @Override
-    protected Repository<TuTaskId, TuAggregatePart>
-    createEntityRepository() {
+    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
         return new TuAggregatePartRepository();
     }
 
-    @CanIgnoreReturnValue
     @Override
-    public CommandHandlerExpected<TuComments> expectThat(TuAggregatePart entity) {
+    public CommandHandlerExpected<TuComments>
+    expectThat(TuAggregatePart entity) {
         return super.expectThat(entity);
     }
 

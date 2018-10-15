@@ -39,8 +39,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * A test utility to dispatch commands to an {@code Aggregate} in test purposes.
- *
- * @author Alex Tymchenko
  */
 @VisibleForTesting
 public class AggregateMessageDispatcher {
@@ -75,6 +73,15 @@ public class AggregateMessageDispatcher {
         checkNotNull(aggregate);
         checkNotNull(event);
         return AggregateTestSupport.dispatchEvent(mockRepository(), aggregate, event);
+    }
+
+    /**
+     * Imports the {@linkplain EventEnvelope event envelope} to the given {@code Aggregate}.
+     */
+    public static void importEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
+        checkNotNull(aggregate);
+        checkNotNull(event);
+        AggregateTestSupport.importEvent(mockRepository(), aggregate, event);
     }
 
     @SuppressWarnings("unchecked") // It is OK when mocking

@@ -21,43 +21,44 @@
 package io.spine.testing.server.aggregate.given;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
-import io.spine.testing.server.aggregate.AggregateCommandTest;
-import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
-import io.spine.testing.server.aggregate.given.agg.TuAggregatePartRepository;
-import io.spine.testing.server.expected.CommandHandlerExpected;
-import io.spine.testing.server.given.entity.TuComments;
-import io.spine.testing.server.given.entity.TuTaskId;
-import io.spine.testing.server.given.entity.command.TuAddComment;
+import io.spine.testing.server.aggregate.AggregateEventImportTest;
+import io.spine.testing.server.aggregate.given.agg.TuAggregate;
+import io.spine.testing.server.aggregate.given.agg.TuAggregateRepository;
+import io.spine.testing.server.expected.EventApplierExpected;
+import io.spine.testing.server.given.entity.TuProject;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.event.TuTrelloProjectCreated;
 
 /**
- * The test class checking handling a command in an aggregate part.
+ * The test class for checking an import of an event into an aggregate.
  *
- * @see io.spine.testing.server.aggregate.AggregateCommandTestShould
+ * @see io.spine.testing.server.aggregate.AggregateEventImportTestShould
  */
-public class SamplePartCommandTest
-        extends AggregateCommandTest<TuTaskId, TuAddComment, TuComments, TuAggregatePart> {
+public class SampleEventImportTest
+        extends AggregateEventImportTest<TuProjectId,
+                                         TuTrelloProjectCreated,
+                                         TuProject,
+                                         TuAggregate> {
 
-    public static final TuAddComment TEST_COMMAND =
-            TuAddComment.newBuilder()
-                        .setId(TuAggregatePart.ID)
-                        .build();
+    public static final TuTrelloProjectCreated TEST_EVENT =
+            TuTrelloProjectCreated.newBuilder()
+                                  .setId(TuAggregate.ID)
+                                  .build();
 
-    public SamplePartCommandTest() {
-        super(TuAggregatePart.ID, TEST_COMMAND);
+    public SampleEventImportTest() {
+        super(TuAggregate.ID, TEST_EVENT);
     }
 
     @Override
-    protected Repository<TuTaskId, TuAggregatePart>
-    createEntityRepository() {
-        return new TuAggregatePartRepository();
+    protected Repository<TuProjectId, TuAggregate> createEntityRepository() {
+        return new TuAggregateRepository();
     }
 
-    @CanIgnoreReturnValue
     @Override
-    public CommandHandlerExpected<TuComments> expectThat(TuAggregatePart entity) {
+    @VisibleForTesting
+    public EventApplierExpected<TuProject> expectThat(TuAggregate entity) {
         return super.expectThat(entity);
     }
 

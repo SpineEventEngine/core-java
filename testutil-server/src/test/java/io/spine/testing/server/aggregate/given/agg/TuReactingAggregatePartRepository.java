@@ -8,7 +8,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE gitCOPYRIGHT
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
  * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
@@ -18,22 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.server.aggregate.given.agg;
+
+import io.spine.server.aggregate.AggregatePartRepository;
+import io.spine.testing.server.given.entity.TuTaskId;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * The repository for {@link TuReactingAggregatePart}
  */
-
-def final SPINE_VERSION = '0.11.6-SNAPSHOT'
-
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.11.5-SNAPSHOT'
-
-    // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '0.11.00-SNAPSHOT'
+public final class TuReactingAggregatePartRepository
+        extends AggregatePartRepository<TuTaskId, TuReactingAggregatePart, TuAggregateRoot> {
 }

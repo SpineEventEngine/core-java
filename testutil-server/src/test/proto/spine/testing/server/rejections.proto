@@ -32,3 +32,7 @@ import "spine/testing/server/entities.proto";
 message TuFailedToAssignProject {
     TuProjectId id = 1;
 }
+
+message TuFailedToRemoveComment {
+    TuTaskId id = 2;
+}
