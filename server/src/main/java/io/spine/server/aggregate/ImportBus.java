@@ -25,9 +25,9 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
+import io.spine.server.bus.AbstractDispatcherRegistry;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
-import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.bus.UnicastBus;
@@ -161,7 +161,7 @@ public final class ImportBus
      * The registry of import dispatchers.
      */
     private static final class Registry
-            extends DispatcherRegistry<EventClass, EventEnvelope, EventImportDispatcher<?>> {
+            extends AbstractDispatcherRegistry<EventClass, EventEnvelope, EventImportDispatcher<?>> {
 
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override

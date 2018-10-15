@@ -47,10 +47,10 @@ final class DeadMessageFilter<T extends Message,
         implements BusFilter<E> {
 
     private final DeadMessageHandler<E> deadMessageHandler;
-    private final DispatcherRegistry<C, E, D> registry;
+    private final AbstractDispatcherRegistry<C, E, D> registry;
 
     DeadMessageFilter(DeadMessageHandler<E> deadMessageHandler,
-                      DispatcherRegistry<C, E, D> registry) {
+                      AbstractDispatcherRegistry<C, E, D> registry) {
         super();
         this.deadMessageHandler = checkNotNull(deadMessageHandler);
         this.registry = checkNotNull(registry);

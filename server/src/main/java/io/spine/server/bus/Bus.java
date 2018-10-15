@@ -62,7 +62,7 @@ public abstract class Bus<T extends Message,
 
     /** Dispatchers of messages by their class. */
     @LazyInit
-    private @MonotonicNonNull DispatcherRegistry<C, E, D> registry;
+    private @MonotonicNonNull AbstractDispatcherRegistry<C, E, D> registry;
 
     /** The chain of filters for this bus, {@linkplain #filterChain() lazily initialized}. */
     @LazyInit
@@ -188,7 +188,7 @@ public abstract class Bus<T extends Message,
     /**
      * Closes the {@linkplain BusFilter filters} of this bus and unregisters all the dispatchers.
      *
-     * @throws Exception if either filters or the {@linkplain DispatcherRegistry} throws
+     * @throws Exception if either filters or the {@linkplain AbstractDispatcherRegistry} throws
      *         an exception
      */
     @Override
@@ -210,7 +210,7 @@ public abstract class Bus<T extends Message,
     /**
      * Obtains the dispatcher registry.
      */
-    protected DispatcherRegistry<C, E, D> registry() {
+    protected AbstractDispatcherRegistry<C, E, D> registry() {
         if (registry == null) {
             registry = createRegistry();
         }
@@ -295,7 +295,7 @@ public abstract class Bus<T extends Message,
     /**
      * Factory method for creating an instance of the registry for dispatchers of the bus.
      */
-    protected abstract DispatcherRegistry<C, E, D> createRegistry();
+    protected abstract AbstractDispatcherRegistry<C, E, D> createRegistry();
 
     /**
      * Filters the given messages.

@@ -22,7 +22,7 @@ package io.spine.server.event;
 
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.bus.DispatcherRegistry;
+import io.spine.server.bus.AbstractDispatcherRegistry;
 
 import java.util.Set;
 
@@ -35,10 +35,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>There can be multiple dispatchers per event class.
  */
 class EventDispatcherRegistry
-        extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
+        extends AbstractDispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
 
     @Override
-    protected void register(EventDispatcher<?> dispatcher) {
+    public void register(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         Set<EventClass> eventClasses = dispatcher.getMessageClasses();
         checkNotEmpty(dispatcher, eventClasses);
@@ -47,7 +47,7 @@ class EventDispatcherRegistry
     }
 
     @Override
-    protected void unregister(EventDispatcher<?> dispatcher) {
+    public void unregister(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         Set<EventClass> eventClasses = dispatcher.getMessageClasses();
         checkNotEmpty(dispatcher, eventClasses);

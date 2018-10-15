@@ -86,14 +86,10 @@ import static java.lang.String.format;
  * <p>If there is no subscribers or dispatchers for the posted event, the fact is
  * logged as warning, with no further processing.
  *
- * @author Mikhail Melnik
- * @author Alexander Yevsyuov
- * @author Alex Tymchenko
  * @see io.spine.server.projection.Projection Projection
  * @see io.spine.core.Subscribe @Subscribe
  */
-public class EventBus
-        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and

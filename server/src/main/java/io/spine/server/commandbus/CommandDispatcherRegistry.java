@@ -20,11 +20,10 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.bus.DispatcherRegistry;
+import io.spine.server.bus.AbstractDispatcherRegistry;
 
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +37,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>There can be only one dispatcher per command class.
  */
 class CommandDispatcherRegistry
-        extends DispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher<?>> {
+        extends AbstractDispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher<?>> {
 
     /**
      * {@inheritDoc}
@@ -54,10 +53,9 @@ class CommandDispatcherRegistry
      * @param dispatcher the dispatcher to register
      */
     @Override
-    protected void register(CommandDispatcher<?> dispatcher) {
+    public void register(CommandDispatcher<?> dispatcher) {
         if (dispatcher instanceof DelegatingCommandDispatcher
-            && dispatcher.getMessageClasses()
-                         .isEmpty()) {
+                && dispatcher.getMessageClasses().isEmpty()) {
             return;
         }
         super.register(dispatcher);
@@ -129,17 +127,6 @@ class CommandDispatcherRegistry
     @Override
     protected Set<CommandClass> getRegisteredMessageClasses() {
         return super.getRegisteredMessageClasses();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the tests.
-     */
-    @VisibleForTesting
-    @Override
-    protected void unregister(CommandDispatcher<?> dispatcher) {
-        super.unregister(dispatcher);
     }
 
     /**
