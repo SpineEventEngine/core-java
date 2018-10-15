@@ -56,10 +56,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Litus
- * @author Dmytro Kuzmin
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
@@ -337,8 +333,8 @@ class EntityTest {
     }
 
     @Nested
-    @DisplayName("have visibility status such that")
-    class HaveVisibilityStatus {
+    @DisplayName("have lifecycle flags status such that")
+    class HaveLifecycleFlagsStatus {
 
         @Test
         @DisplayName("entity has default status after construction")

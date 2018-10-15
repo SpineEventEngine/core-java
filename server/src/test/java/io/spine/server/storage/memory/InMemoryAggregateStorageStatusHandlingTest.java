@@ -22,16 +22,13 @@ package io.spine.server.storage.memory;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
+import io.spine.server.aggregate.AggregateStorageLifecycleFlagsHandlingTest;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.jupiter.api.DisplayName;
 
-/**
- * @author Dmytro Dashenkov.
- */
 @DisplayName("InMemoryAggregateStorage, when saving aggregate with lifecycle flags, should")
 public class InMemoryAggregateStorageStatusHandlingTest
-        extends AggregateStorageVisibilityHandlingTest {
+        extends AggregateStorageLifecycleFlagsHandlingTest {
 
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(

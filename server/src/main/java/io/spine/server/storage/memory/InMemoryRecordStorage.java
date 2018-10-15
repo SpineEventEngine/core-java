@@ -37,17 +37,16 @@ import java.util.Optional;
 /**
  * Memory-based implementation of {@link RecordStorage}.
  *
- * @param <I> the type of entity IDs
- * @author Alexander Litus
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
+ * @param <I>
+ *         the type of entity IDs
  */
 public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     private final StorageSpec<I> spec;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant, Class<? extends Entity> entityClass) {
+    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant, 
+                          Class<? extends Entity> entityClass) {
         super(multitenant, entityClass);
         this.spec = spec;
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
@@ -111,7 +110,37 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        return getStorage().readAllRecords(query, fieldMask);
+        EntityQuery<I> completeQuery = toCompleteQuery(query);
+        return getStorage().readAllRecords(completeQuery, fieldMask);
+    }
+
+    /**
+     * Creates an {@link EntityQuery} instance which has:
+     * <ul>
+     *     <li>all the parameters from the {@code src} query;
+     *     <li>at least one parameter limiting the 
+     *     {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns}.
+     * </ul>
+     *
+     * <p>If the {@code query} instance {@linkplain EntityQuery#isLifecycleAttributesSet() 
+     * contains the lifecycle attributes}, then it is returned without any changes. 
+     * Otherwise, a new instance containing with active lifecycle attributes is returned.
+     *
+     * <p>If the type of the Entity which this repository works with is not derived from
+     * the {@link io.spine.server.entity.EntityWithLifecycle}, then no lifecycle attributes are
+     * appended and the {@code query} is returned as is.
+     *
+     * @param query
+     *         the source {@link EntityQuery} to take the parameters from
+     * @return an {@link EntityQuery} which includes
+     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns} 
+     *         unless they are not supported
+     */
+    private EntityQuery<I> toCompleteQuery(EntityQuery<I> query) {
+        if (isLifecycleSupported() && !query.isLifecycleAttributesSet()) {
+            return query.withActiveLifecycle(this);
+        }
+        return query;
     }
 
     private TenantRecords<I> getStorage() {
