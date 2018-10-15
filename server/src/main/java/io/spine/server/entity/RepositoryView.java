@@ -28,15 +28,13 @@ import java.util.function.Predicate;
  * A view on a repository.
  *
  * <p>A {@link Repository} may have a view that provides a different set of entities.
- * For example, there can be views that represent archived or deleted entities (that are
- * not "visible" by default).
+ * For example, there can be views that represent inactive entities (e.g. archived or deleted).
  *
  * <p>{@code Repository} itself is also a {@code RepositoryView}, which loads only
- * "visible" entities.
+ * active entities.
  *
  * @param <I> the type of IDs of entities
  * @param <E> the type of entities
- * @author Alexander Yevsyukov
  */
 public interface RepositoryView<I, E extends Entity<I, ?>> {
 
