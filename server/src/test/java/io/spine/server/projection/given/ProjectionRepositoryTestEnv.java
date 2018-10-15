@@ -109,6 +109,8 @@ public class ProjectionRepositoryTestEnv {
         }
     }
 
+    /** The projection stub used in tests. */
+
     public static class GivenEventMessage {
 
         public static final ProjectId ENTITY_ID = ProjectId.newBuilder()
@@ -176,5 +178,6 @@ public class ProjectionRepositoryTestEnv {
      */
     public static class SensoryDeprivedProjectionRepository
             extends ProjectionRepository<ProjectId, SensoryDeprivedProjection, Project> {
+
     }
 }

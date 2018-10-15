@@ -30,6 +30,7 @@ import io.spine.server.command.Command;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
@@ -189,6 +190,11 @@ public class TestProcessManager
 
         handleProjectCreated(event.getProjectId());
         return nothing();
+    }
+
+    @Column
+    public String getName() {
+        return getState().getName();
     }
 
     @Override

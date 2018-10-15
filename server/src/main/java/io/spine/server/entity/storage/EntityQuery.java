@@ -74,7 +74,8 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * com.google.protobuf.FieldMask) default behavior} will be overridden i.e. the records resulting
  * to such query may or may not be active.
  *
- * @param <I> the type of the IDs of the query target
+ * @param <I>
+ *         the type of the IDs of the query target
  * @author Dmytro Dashenkov
  * @see EntityRecordWithColumns
  */
@@ -88,10 +89,12 @@ public final class EntityQuery<I> implements Serializable {
     /**
      * Creates new instance of {@code EntityQuery}.
      *
-     * @param ids        accepted ID values
-     * @param parameters the values of the {@link EntityColumn}s stored in a mapping of the
-     *                   {@link EntityColumn}'s metadata to the (multiple) acceptable values;
-     *                   if there are no values, all the values are matched upon such a column
+     * @param ids
+     *         accepted ID values
+     * @param parameters
+     *         the values of the {@link EntityColumn}s stored in a mapping of the
+     *         {@link EntityColumn}'s metadata to the (multiple) acceptable values;
+     *         if there are no values, all the values are matched upon such a column
      * @return new instance of {@code EntityQuery}
      */
     static <I> EntityQuery<I> of(Collection<I> ids, QueryParameters parameters) {
@@ -137,7 +140,8 @@ public final class EntityQuery<I> implements Serializable {
      * <p>The precondition for this method is that current instance
      * {@linkplain #isLifecycleAttributesSet() does not specify the values}.
      *
-     * @param storage the {@linkplain RecordStorage storage} for which this {@code EntityQuery} is created
+     * @param storage
+     *         the {@linkplain RecordStorage storage} for which this {@code EntityQuery} is created
      * @return new instance of {@code EntityQuery}
      */
     @Internal
@@ -155,6 +159,8 @@ public final class EntityQuery<I> implements Serializable {
         QueryParameters parameters = QueryParameters.newBuilder()
                                                     .addAll(getParameters())
                                                     .add(lifecycleParameter)
+                                                    .orderBy(getParameters().orderBy())
+                                                    .limit(getParameters().limit())
                                                     .build();
         EntityQuery<I> result = new EntityQuery<>(ids, parameters);
         return result;
