@@ -28,10 +28,9 @@ import io.spine.testing.server.User;
 import io.spine.testing.server.UserVBuilder;
 
 /**
- * @author Alexander Yevsyukov
- * @author Dmytro Kuzmin
+ * Test environment for {@link io.spine.testing.server.entity.EntityBuilder}.
  */
-public class EntityBuilderTestEnv {
+class EntityBuilderTestEnv {
 
     /**
      * The test environment aggregate for testing validation during aggregate state transition.
@@ -54,5 +53,5 @@ public class EntityBuilderTestEnv {
         protected void setState(TestEntity result, StringValue state, Version version) {
             // NoOp.
         }
-    };
+    }
 }
