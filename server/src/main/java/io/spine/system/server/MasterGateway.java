@@ -23,7 +23,10 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 
 /**
- * A gateway which can close the underlying system context.
+ * A gateway which can control the underlying system context.
+ *
+ * <p>Such a gateway, for instance, may tell the system context
+ * to {@link io.spine.server.BoundedContext#close() close}.
  */
 @Internal
 public interface MasterGateway extends SystemGateway {
