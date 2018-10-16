@@ -51,13 +51,13 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.system.server.HistoryRejections.CannotDispatchCommandTwice;
 import static io.spine.system.server.HistoryRejections.CannotDispatchEventTwice;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @DisplayName("PmSystemEventWatcher should")
@@ -195,9 +195,7 @@ class PmSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            dispatch(systemEvent, systemEvent.getReceiver());
-
-            checkNothingHappened();
+            checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }
 
         @Test
@@ -210,9 +208,7 @@ class PmSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            dispatch(systemEvent, systemEvent.getReceiver());
-
-            checkNothingHappened();
+            checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }
 
         @Test
@@ -225,9 +221,7 @@ class PmSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            dispatch(rejection, rejection.getReceiver());
-
-            checkNothingHappened();
+            checkCannotDispatch(rejection, rejection.getReceiver());
         }
 
         @Test
@@ -240,12 +234,7 @@ class PmSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            dispatch(rejection, rejection.getReceiver());
-            checkNothingHappened();
-        }
-
-        private void checkNothingHappened() {
-            verifyNoMoreInteractions(repository);
+            checkCannotDispatch(rejection, rejection.getReceiver());
         }
 
         private EntityHistoryId wrongHistoryId() {
@@ -254,13 +243,13 @@ class PmSystemEventWatcherTest {
                               .build();
         }
 
-        @SuppressWarnings("ResultOfMethodCallIgnored")
-        private void dispatch(EventMessage eventMessage, EntityHistoryId producer) {
+        private void checkCannotDispatch(EventMessage eventMessage, EntityHistoryId producer) {
             TestEventFactory eventFactory =
                     TestEventFactory.newInstance(producer, PmSystemEventWatcher.class);
             Event event = eventFactory.createEvent(eventMessage);
             EventEnvelope envelope = EventEnvelope.of(event);
-            watcher.dispatch(envelope);
+            boolean canDispatch = watcher.canDispatch(envelope);
+            assertFalse(canDispatch);
         }
     }
 

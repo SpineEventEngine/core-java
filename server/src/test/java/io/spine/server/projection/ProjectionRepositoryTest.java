@@ -57,6 +57,7 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.AfterEach;
@@ -64,6 +65,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Iterator;
 import java.util.List;
@@ -92,6 +94,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("ProjectionRepository should")
+@ExtendWith(ShardingReset.class)
 class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
 

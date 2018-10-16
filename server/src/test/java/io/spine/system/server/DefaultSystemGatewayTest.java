@@ -29,11 +29,13 @@ import io.spine.system.server.given.gateway.ShoppingListRepository;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -48,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@ExtendWith(ShardingReset.class)
 @DisplayName("Default implementation of SystemGateway should")
 class DefaultSystemGatewayTest  {
 

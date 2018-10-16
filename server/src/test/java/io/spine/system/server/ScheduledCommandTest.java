@@ -39,10 +39,12 @@ import io.spine.server.entity.Repository;
 import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.system.server.given.schedule.TestCommandScheduler;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -57,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(ShardingReset.class)
 @DisplayName("ScheduledCommand should")
 class ScheduledCommandTest {
 
