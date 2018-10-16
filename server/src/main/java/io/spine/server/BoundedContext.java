@@ -411,7 +411,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public abstract SystemGateway getSystemGateway();
 
     /** Obtains instance of {@link SystemBus} of this {@code BoundedContext}. */
-    @Internal
     public abstract SystemBus getSystemBus();
 
     /**
