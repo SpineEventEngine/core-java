@@ -264,7 +264,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         RecordStorage<I> storage = recordStorage();
-        Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
+        Iterator<@Nullable EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
         Iterator<EntityRecord> presentRecords = filter(entityStorageRecords, Objects::nonNull);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(presentRecords, toEntity::apply);

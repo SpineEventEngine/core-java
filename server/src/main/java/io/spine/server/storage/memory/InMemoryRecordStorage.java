@@ -94,7 +94,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
+    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids) {
         return readMultipleRecords(ids, FieldMask.getDefaultInstance());
     }
 
