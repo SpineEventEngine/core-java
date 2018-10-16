@@ -39,6 +39,7 @@ import io.spine.server.entity.Repository;
 import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.system.server.given.schedule.TestCommandScheduler;
 import io.spine.testing.client.TestActorRequestFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,9 +57,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("ScheduledCommand should")
 class ScheduledCommandTest {
 
@@ -86,6 +84,11 @@ class ScheduledCommandTest {
                 (RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord>)
                         found.get();
         this.repository = repository;
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        context.close();
     }
 
     @Test

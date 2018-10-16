@@ -29,6 +29,7 @@ import io.spine.system.server.given.gateway.ShoppingListRepository;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import io.spine.testing.client.TestActorRequestFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -47,9 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Default implementation of SystemGateway should")
 class DefaultSystemGatewayTest  {
 
@@ -68,14 +66,20 @@ class DefaultSystemGatewayTest  {
     @DisplayName("post system")
     class PostMessages {
 
+        private BoundedContext domainContext;
         private BoundedContext systemContext;
 
         @BeforeEach
         void setUp() {
-            BoundedContext context = contextWithSystemAggregate();
-            gateway = context.getSystemGateway();
-            systemContext = systemOf(context);
+            domainContext = contextWithSystemAggregate();
+            gateway = domainContext.getSystemGateway();
+            systemContext = systemOf(domainContext);
             createAggregate();
+        }
+
+        @AfterEach
+        void tearDown() throws Exception {
+            domainContext.close();
         }
 
         @Test
@@ -138,6 +142,11 @@ class DefaultSystemGatewayTest  {
             domainContext = contextWithDomainAggregate();
             gateway = domainContext.getSystemGateway();
             createAggregate();
+        }
+
+        @AfterEach
+        void tearDown() throws Exception {
+            domainContext.close();
         }
 
         @Test

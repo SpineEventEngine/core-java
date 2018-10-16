@@ -503,7 +503,8 @@ public class AggregateRepositoryTest {
             BlackBoxBoundedContext.newInstance()
                                   .with(repository())
                                   .receivesCommands(create, addTask, start)
-                                  .assertThat(emittedEventsHadVersions(1, 2, 3));
+                                  .assertThat(emittedEventsHadVersions(1, 2, 3))
+                                  .close();
         }
 
         @Test
@@ -533,7 +534,8 @@ public class AggregateRepositoryTest {
                                           1, 2, // Product creation
                                           0,    // Manually assembled event (`archived`)
                                           3     // Event produced in response to `archived` event
-                                  ));
+                                  ))
+                                  .close();
         }
 
         @Test
@@ -559,7 +561,8 @@ public class AggregateRepositoryTest {
                                   .with(new EventDiscardingAggregateRepository())
                                   .receivesCommands(create, start)
                                   .receivesEvent(archived)
-                                  .assertThat(emittedEvents(AggProjectArchived.class));
+                                  .assertThat(emittedEvents(AggProjectArchived.class))
+                                  .close();
         }
     }
 

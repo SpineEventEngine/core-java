@@ -323,7 +323,7 @@ class ProjectionRepositoryTest
             // A complex test case with many test domain messages.
         @Test
         @DisplayName("entity state update")
-        void entityState() {
+        void entityState() throws Exception {
             PrjProjectCreated projectCreated = GivenEventMessage.projectCreated();
             PrjTaskAdded taskAdded = GivenEventMessage.taskAdded();
             ProjectId id = projectCreated.getProjectId();
@@ -345,7 +345,8 @@ class ProjectionRepositoryTest
                     .build();
             EntitySubscriberProjection.Repository repository =
                     new EntitySubscriberProjection.Repository();
-            BoundedContext.newBuilder().build().register(repository);
+            BoundedContext context = BoundedContext.newBuilder().build();
+            context.register(repository);
             EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
             Set<ProjectId> targets = repository.dispatch(envelope);
             assertThat(targets).containsExactly(id);
@@ -358,6 +359,8 @@ class ProjectionRepositoryTest
             Optional<EntitySubscriberProjection> projection = repository.find(id);
             assertTrue(projection.isPresent());
             assertEquals(expectedValue, projection.get().getState());
+
+            context.close();
         }
 
         private void checkDispatchesEvent(EventMessage eventMessage) {

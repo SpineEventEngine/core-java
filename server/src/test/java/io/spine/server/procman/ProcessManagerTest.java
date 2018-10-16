@@ -117,17 +117,18 @@ class ProcessManagerTest {
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
 
+    private BoundedContext context;
     private CommandBus commandBus;
     private TestProcessManager processManager;
 
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext bc = BoundedContext
+        context = BoundedContext
                 .newBuilder()
                 .setMultitenant(true)
                 .build();
-        StorageFactory storageFactory = bc.getStorageFactory();
+        StorageFactory storageFactory = context.getStorageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
         EventBus eventBus = EventBus.newBuilder()
@@ -143,6 +144,11 @@ class ProcessManagerTest {
                               .withVersion(2)
                               .withState(Any.getDefaultInstance())
                               .build();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        context.close();
     }
 
     @CanIgnoreReturnValue
