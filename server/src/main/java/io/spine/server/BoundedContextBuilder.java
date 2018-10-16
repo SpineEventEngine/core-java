@@ -34,6 +34,7 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.system.server.MasterGateway;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.system.server.SystemBus;
 import io.spine.system.server.SystemContext;
@@ -248,7 +249,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
-        SystemGateway systemGateway = SystemGateway.newInstance(system);
+        MasterGateway systemGateway = MasterGateway.newInstance(system);
         SystemBus systemBus = SystemBus.newInstance(system);
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemGateway, systemBus);

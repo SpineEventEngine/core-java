@@ -37,7 +37,6 @@ import io.spine.system.server.HistoryRejections;
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
  * related to dispatching commands and events to {@link ProcessManager}s of a given type.
  *
- * @author Dmytro Dashenkov
  * @see SystemEventWatcher
  */
 final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {

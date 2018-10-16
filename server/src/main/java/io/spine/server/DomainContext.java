@@ -21,6 +21,7 @@
 package io.spine.server;
 
 import io.spine.server.entity.Repository;
+import io.spine.system.server.MasterGateway;
 import io.spine.system.server.SystemBus;
 import io.spine.system.server.SystemGateway;
 
@@ -42,16 +43,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@link io.spine.system.server.SystemContext SystemContext}, which manages the meta information
  * about entities of this Bounded Context.
  *
- * @author Dmytro Dashenkov
  * @see io.spine.system.server.SystemContext SystemContext
  */
 final class DomainContext extends BoundedContext {
 
-    private final SystemGateway systemGateway;
+    private final MasterGateway systemGateway;
     private final SystemBus systemBus;
 
     private DomainContext(BoundedContextBuilder builder,
-                          SystemGateway gateway,
+                          MasterGateway gateway,
                           SystemBus systemBus) {
         super(builder);
         this.systemGateway = gateway;
@@ -59,7 +59,7 @@ final class DomainContext extends BoundedContext {
     }
 
     static DomainContext newInstance(BoundedContextBuilder builder,
-                                     SystemGateway gateway,
+                                     MasterGateway gateway,
                                      SystemBus bus) {
         checkNotNull(builder);
         checkNotNull(gateway);
@@ -77,5 +77,18 @@ final class DomainContext extends BoundedContext {
     @Override
     public SystemBus getSystemBus() {
         return systemBus;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Closes the system context as well.
+     *
+     * @throws Exception if the system context throws an error on closing
+     */
+    @Override
+    public void close() throws Exception {
+        super.close();
+        systemGateway.closeSystemContext();
     }
 }

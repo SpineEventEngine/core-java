@@ -44,7 +44,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Dmytro Dashenkov
  */
-final class DefaultSystemGateway implements SystemGateway {
+final class DefaultSystemGateway implements MasterGateway {
 
     /**
      * The ID of the user which is used for generating system commands and events.
@@ -97,5 +97,10 @@ final class DefaultSystemGateway implements SystemGateway {
     @VisibleForTesting
     BoundedContext target() {
         return system;
+    }
+
+    @Override
+    public void closeSystemContext() throws Exception {
+        system.close();
     }
 }
