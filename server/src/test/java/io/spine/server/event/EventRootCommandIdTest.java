@@ -69,7 +69,6 @@ public class EventRootCommandIdTest {
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
-
         ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
         TeamAggregateRepository teamRepository = new TeamAggregateRepository();
         TeamCreationRepository teamCreationRepository = new TeamCreationRepository();

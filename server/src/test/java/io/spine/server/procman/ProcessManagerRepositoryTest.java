@@ -271,8 +271,7 @@ class ProcessManagerRepositoryTest
     @DisplayName("dispatch command and post events")
     void dispatchCommandAndPostEvents() {
         RememberingSubscriber subscriber = new RememberingSubscriber();
-        boundedContext.getEventBus()
-                      .register(subscriber);
+        boundedContext.registerEventDispatcher(subscriber);
 
         testDispatchCommand(addTask());
 

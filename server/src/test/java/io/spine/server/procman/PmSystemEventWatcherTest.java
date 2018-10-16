@@ -60,9 +60,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("PmSystemEventWatcher should")
 class PmSystemEventWatcherTest {
 
