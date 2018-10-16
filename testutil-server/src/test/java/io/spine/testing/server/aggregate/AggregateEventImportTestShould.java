@@ -20,16 +20,14 @@
 
 package io.spine.testing.server.aggregate;
 
-import io.spine.testing.server.aggregate.given.SampleEventReactionTest;
-import io.spine.testing.server.aggregate.given.SamplePartEventReactionTest;
+import io.spine.testing.server.aggregate.given.SampleEventImportTest;
+import io.spine.testing.server.aggregate.given.SamplePartEventImportTest;
+import io.spine.testing.server.aggregate.given.agg.TuAggregate;
+import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
 import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
-import io.spine.testing.server.aggregate.given.agg.TuReactingAggregate;
-import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart;
-import io.spine.testing.server.expected.EventReactorExpected;
+import io.spine.testing.server.expected.EventApplierExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuProject;
-import io.spine.testing.server.given.entity.event.TuCommentLimitReached;
-import io.spine.testing.server.given.entity.event.TuProjectAssigned;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,82 +39,78 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * A unit tst fot {@link io.spine.testing.server.aggregate.AggregateEventReactionTest}.
+ * A unit test for {@link io.spine.testing.server.aggregate.AggregateEventImportTest}.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
-@DisplayName("AggregateEventReactionTest should")
-class AggregateEventReactionTestShould {
+@DisplayName("AggregateEventImportTest should")
+class AggregateEventImportTestShould {
 
     @Nested
     @DisplayName("for aggregate")
     class ForAggregate {
 
-        private SampleEventReactionTest aggregateEventTest;
+        private SampleEventImportTest aggregateImportEventTest;
 
         @BeforeEach
         void setUp() {
-            aggregateEventTest = new SampleEventReactionTest();
-            aggregateEventTest.setUp();
+            aggregateImportEventTest = new SampleEventImportTest();
+            aggregateImportEventTest.setUp();
         }
 
         @AfterEach
         void tearDown() {
-            aggregateEventTest.tearDown();
+            aggregateImportEventTest.tearDown();
         }
 
         @Test
         @DisplayName("store tested event")
         void shouldStoreEvent() {
-            assertEquals(aggregateEventTest.storedMessage(), SampleEventReactionTest.TEST_EVENT);
+            assertEquals(aggregateImportEventTest.storedMessage(),
+                         SampleEventImportTest.TEST_EVENT);
         }
 
         @Test
         @DisplayName("dispatch tested event and store results")
         @SuppressWarnings("CheckReturnValue")
         void shouldDispatchEvent() {
-            TuReactingAggregate aggregate = TuReactingAggregate.newInstance();
-            EventReactorExpected<TuProject> expected = aggregateEventTest.expectThat(aggregate);
-
-            expected.producesEvent(TuProjectAssigned.class,
-                                   event -> assertTrue(isNotDefault(event)));
+            TuAggregate aggregate = TuAggregate.newInstance();
+            EventApplierExpected<TuProject> expected =
+                    aggregateImportEventTest.expectThat(aggregate);
             expected.hasState(state -> assertTrue(isNotDefault(state.getTimestamp())));
         }
     }
 
     @Nested
     @DisplayName("for aggregate part")
-    class ForPart {
+    class ForAggregatePart {
 
-        private SamplePartEventReactionTest partEventTest;
+        private SamplePartEventImportTest partImportEventTest;
 
         @BeforeEach
         void setUp() {
-            partEventTest = new SamplePartEventReactionTest();
-            partEventTest.setUp();
+            partImportEventTest = new SamplePartEventImportTest();
+            partImportEventTest.setUp();
         }
 
         @AfterEach
         void tearDown() {
-            partEventTest.tearDown();
+            partImportEventTest.tearDown();
         }
 
         @Test
         @DisplayName("store tested event")
         void shouldStoreEvent() {
-            assertEquals(partEventTest.storedMessage(), SamplePartEventReactionTest.TEST_EVENT);
+            assertEquals(partImportEventTest.storedMessage(), SamplePartEventImportTest.TEST_EVENT);
         }
 
         @Test
         @DisplayName("dispatch tested event and store results")
         @SuppressWarnings("CheckReturnValue")
         void shouldDispatchEvent() {
-            TuAggregateRoot root = TuAggregateRoot.newInstance(TuReactingAggregatePart.ID);
-            TuReactingAggregatePart part = TuReactingAggregatePart.newInstance(root);
-            EventReactorExpected<TuComments> expected = partEventTest.expectThat(part);
-
-            expected.producesEvent(TuCommentLimitReached.class,
-                                   event -> assertTrue(isNotDefault(event)));
-            expected.hasState(state -> assertTrue(state.getCommentLimitReached()));
+            TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
+            TuAggregatePart part = TuAggregatePart.newInstance(root);
+            EventApplierExpected<TuComments> expected = partImportEventTest.expectThat(part);
+            expected.hasState(state -> assertEquals(1, state.getCommentsRecievedByEmail()));
         }
     }
 }

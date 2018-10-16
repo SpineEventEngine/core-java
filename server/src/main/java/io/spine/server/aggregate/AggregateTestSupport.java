@@ -37,8 +37,6 @@ import static java.util.stream.Collectors.toList;
 /**
  * Internal utility class for assisting in aggregate tests.
  *
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  * @apiNote This internal class is designed to be called only from Testutil Server library.
  *          Calling it other code would result in run-time error.
  */
@@ -87,6 +85,21 @@ public final class AggregateTestSupport {
                 new AggregateEventReactionEndpoint<>(repository, event),
                 aggregate
         );
+    }
+
+    /**
+     * Imports an event to an instance of {@code Aggregate} into the applier method annotated
+     * as {@code allowImport = true}.
+     *
+     * @param <I> the type of {@code Aggregate} identifier
+     * @param <A> the type of {@code Aggregate}
+     */
+    public static <I, A extends Aggregate<I, ?, ?>>
+    void importEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
+        checkArguments(repository, aggregate, event);
+        InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
+        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(repository, event);
+        endpoint.dispatchInTx(aggregate);
     }
 
     private static <I, A extends Aggregate<I, ?, ?>> List<Message>

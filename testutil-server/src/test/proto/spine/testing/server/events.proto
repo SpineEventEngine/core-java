@@ -42,11 +42,31 @@ message TuProjectAssigned {
     TuProjectId id = 1;
 }
 
+// An external event to be imported into an aggretate.
+//
+message TuTrelloProjectCreated {
+    TuProjectId id = 1;
+}
+
 //
 // Task events
 //
 
 message TuCommentAdded {
+    TuTaskId id = 2;
+}
+
+// An external event to be imported into an aggretate.
+//
+message TuCommentRecievedByEmail {
+    TuTaskId id = 2;
+}
+
+message TuCommentLimitReached {
+    TuTaskId id = 2;
+}
+
+message TuCommentRemoved {
     TuTaskId id = 2;
 }
 

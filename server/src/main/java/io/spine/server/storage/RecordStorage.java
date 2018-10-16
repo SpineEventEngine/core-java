@@ -216,7 +216,7 @@ public abstract class RecordStorage<I>
     public abstract boolean delete(I id);
 
     @Override
-    public Iterator<EntityRecord> readMultiple(Iterable<I> ids) {
+    public Iterator<@Nullable EntityRecord> readMultiple(Iterable<I> ids) {
         checkNotClosed();
         checkNotNull(ids);
 
@@ -226,11 +226,16 @@ public abstract class RecordStorage<I>
     /**
      * Reads multiple active items from the storage and apply {@link FieldMask} to the results.
      *
-     * @param ids       the IDs of the items to read
-     * @param fieldMask the mask to apply
+     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
+     * with nulls in place of missing or inactive entities.
+     *
+     * @param ids
+     *         the IDs of the items to read
+     * @param fieldMask
+     *         the mask to apply
      * @return the items with the given IDs and with the given {@code FieldMask} applied
      */
-    public Iterator<EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
+    public Iterator<@Nullable EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
         checkNotClosed();
         checkNotNull(ids);
 
@@ -377,6 +382,9 @@ public abstract class RecordStorage<I>
     /**
      * Obtains an iterator for reading multiple records by IDs, and
      * applying the passed field mask to the results.
+     *
+     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids}, 
+     * with nulls in place of missing or inactive entities.
      *
      * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
      */

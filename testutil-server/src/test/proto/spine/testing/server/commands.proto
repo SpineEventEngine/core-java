@@ -42,6 +42,10 @@ message TuAssignProject {
     TuProjectId id = 1;
 }
 
+message TuRemoveProject {
+    TuProjectId id = 1;
+}
+
 //
 // Task commands
 //
@@ -51,6 +55,10 @@ message TuCreateTask {
 }
 
 message TuAddComment {
+    TuTaskId id = 1;
+}
+
+message TuRemoveComment {
     TuTaskId id = 1;
 }
 
