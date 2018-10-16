@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.aggregate.given;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.aggregate.AggregateEventReactionTest;
@@ -31,8 +32,9 @@ import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
 /**
- * The test class for the {@code TUProjectAssigned} event handler in
- * {@code EventReactingAggregate}.
+ * The test class for the {@link TuProjectCreated} event handler in {@link TuReactingAggregate}.
+ *
+ * @see io.spine.testing.server.aggregate.AggregateEventReactionTestShould
  */
 public class SampleEventReactionTest
         extends AggregateEventReactionTest<TuProjectId,
@@ -50,15 +52,17 @@ public class SampleEventReactionTest
     }
 
     @Override
-    protected Repository<TuProjectId, TuReactingAggregate> createEntityRepository() {
-        return new TuReactingAggregateRepository();
-    }
-
-    @Override
+    @VisibleForTesting
     public EventReactorExpected<TuProject> expectThat(TuReactingAggregate entity) {
         return super.expectThat(entity);
     }
 
+    @Override
+    protected Repository<TuProjectId, TuReactingAggregate> createEntityRepository() {
+        return new TuReactingAggregateRepository();
+    }
+
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }

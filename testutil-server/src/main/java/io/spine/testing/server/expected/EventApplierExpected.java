@@ -18,22 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.server.expected;
+
+import com.google.protobuf.Message;
+
 /**
- *  The versions of the libraries used.
+ * Assertions for results of an event applier method.
  *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @param <S> the type of the state message of the handling entity
  */
+public class EventApplierExpected<S extends Message>
+        extends AbstractExpected<S, EventApplierExpected<S>> {
 
-def final SPINE_VERSION = '0.11.7-SNAPSHOT'
+    public EventApplierExpected(S initialState, S state) {
+        super(initialState, state);
+    }
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.11.5-SNAPSHOT'
-
-    // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '0.11.00-SNAPSHOT'
+    @Override
+    protected EventApplierExpected<S> self() {
+        return this;
+    }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.aggregate.given;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
@@ -49,18 +50,17 @@ public class SampleCommandTest
     }
 
     @Override
-    protected Repository<TuProjectId, TuAggregate>
-    createEntityRepository() {
+    protected Repository<TuProjectId, TuAggregate> createEntityRepository() {
         return new TuAggregateRepository();
     }
 
     @CanIgnoreReturnValue
     @Override
-    public CommandHandlerExpected<TuProject>
-    expectThat(TuAggregate entity) {
+    public CommandHandlerExpected<TuProject> expectThat(TuAggregate entity) {
         return super.expectThat(entity);
     }
 
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }

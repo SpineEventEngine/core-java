@@ -21,44 +21,45 @@
 package io.spine.testing.server.aggregate.given;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
-import io.spine.testing.server.aggregate.AggregateCommandTest;
-import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
-import io.spine.testing.server.aggregate.given.agg.TuAggregatePartRepository;
-import io.spine.testing.server.expected.CommandHandlerExpected;
+import io.spine.testing.server.aggregate.AggregateEventReactionTest;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePart;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregatePartRepository;
+import io.spine.testing.server.expected.EventReactorExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuTaskId;
-import io.spine.testing.server.given.entity.command.TuAddComment;
+import io.spine.testing.server.given.entity.event.TuCommentAdded;
 
 /**
- * The test class checking handling a command in an aggregate part.
+ * The test class for the {@link TuCommentAdded} event handler in {@link TuReactingAggregatePart}.
  *
- * @see io.spine.testing.server.aggregate.AggregateCommandTestShould
+ * @see io.spine.testing.server.aggregate.AggregateEventReactionTestShould
  */
-public class SamplePartCommandTest
-        extends AggregateCommandTest<TuTaskId, TuAddComment, TuComments, TuAggregatePart> {
+public class SamplePartEventReactionTest
+        extends AggregateEventReactionTest<TuTaskId,
+                                           TuCommentAdded,
+                                           TuComments,
+                                           TuReactingAggregatePart> {
 
-    public static final TuAddComment TEST_COMMAND =
-            TuAddComment.newBuilder()
-                        .setId(TuAggregatePart.ID)
-                        .build();
+    public static final TuCommentAdded TEST_EVENT =
+            TuCommentAdded.newBuilder()
+                          .setId(TuReactingAggregatePart.ID)
+                          .build();
 
-    public SamplePartCommandTest() {
-        super(TuAggregatePart.ID, TEST_COMMAND);
+    public SamplePartEventReactionTest() {
+        super(TuReactingAggregatePart.ID, TEST_EVENT);
     }
 
     @Override
-    protected Repository<TuTaskId, TuAggregatePart>
-    createEntityRepository() {
-        return new TuAggregatePartRepository();
-    }
-
-    @CanIgnoreReturnValue
-    @Override
-    public CommandHandlerExpected<TuComments> expectThat(TuAggregatePart entity) {
+    @VisibleForTesting
+    public EventReactorExpected<TuComments> expectThat(TuReactingAggregatePart entity) {
         return super.expectThat(entity);
+    }
+
+    @Override
+    protected Repository<TuTaskId, TuReactingAggregatePart> createEntityRepository() {
+        return new TuReactingAggregatePartRepository();
     }
 
     @VisibleForTesting
