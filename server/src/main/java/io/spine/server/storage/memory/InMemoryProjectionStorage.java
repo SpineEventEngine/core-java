@@ -112,8 +112,8 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        Iterator<EntityRecord> result = recordStorage.readMultiple(ids);
+    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids) {
+        Iterator<@Nullable EntityRecord> result = recordStorage.readMultiple(ids);
         return result;
     }
 

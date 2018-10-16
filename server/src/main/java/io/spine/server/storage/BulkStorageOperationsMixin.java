@@ -20,6 +20,7 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.Message;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 
@@ -46,23 +47,22 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * in the result. In this way {@code readMultiple()} callers are able to track
      * the absence of a certain element by comparing the input IDs and resulting {@code Iterable}.
      *
-     * <p>E.g. {@code readMultiple(Lists.newArrayList(idPresentInStorage, idNonPresentInStorage, 
+     * <p>E.g. {@code readMultiple(Lists.newArrayList(idPresentInStorage, idNonPresentInStorage,
      * idPresentForInactiveEntity))} will return an {@code Iterable} with three elements,
      * first of which is non-{@code null} and the other two are {@code null}.
-     * 
+     *
      * @param ids
      *         IDs of record of interest
      * @return an {@link Iterator} of nullable messages
      * @throws IllegalStateException
      *         if the storage was closed before finishing
      */
-    Iterator<R> readMultiple(Iterable<I> ids);
+    Iterator<@Nullable R> readMultiple(Iterable<I> ids);
 
     /**
      * Reads all the active records from the storage.
-     * 
+     *
      * @return the {@link Iterator} containing the ID - record entries.
-     * 
      * @throws IllegalStateException
      *         if the storage was closed before finishing
      */
