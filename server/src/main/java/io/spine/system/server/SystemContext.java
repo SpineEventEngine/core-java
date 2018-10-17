@@ -51,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class SystemContext extends BoundedContext {
 
-    private @MonotonicNonNull SystemBus ownBus;
+    private @MonotonicNonNull SystemReadSide ownBus;
 
     private SystemContext(BoundedContextBuilder builder) {
         super(builder);
@@ -83,7 +83,7 @@ public final class SystemContext extends BoundedContext {
     }
 
     private void init() {
-        this.ownBus = SystemBus.newInstance(this);
+        this.ownBus = SystemReadSide.newInstance(this);
     }
 
     private void registerRepositories(CommandLifecycleRepository commandLifecycle) {
@@ -106,7 +106,7 @@ public final class SystemContext extends BoundedContext {
     }
 
     @Override
-    public SystemBus getSystemBus() {
+    public SystemReadSide getSystemReadSide() {
         return checkNotNull(ownBus);
     }
 }

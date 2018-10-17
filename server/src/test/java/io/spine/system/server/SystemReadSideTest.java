@@ -45,21 +45,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("SystemBus should")
-class SystemBusTest {
+@DisplayName("SystemReadSide should")
+class SystemReadSideTest {
 
     private static final TestEventFactory events =
-            TestEventFactory.newInstance(SystemBusTest.class);
+            TestEventFactory.newInstance(SystemReadSideTest.class);
 
     private BoundedContext domainContext;
-    private SystemBus bus;
+    private SystemReadSide bus;
 
     @BeforeEach
     void setUp() {
         domainContext = BoundedContext
                 .newBuilder()
                 .build();
-        bus = domainContext.getSystemBus();
+        bus = domainContext.getSystemReadSide();
     }
 
     @AfterEach
@@ -77,7 +77,7 @@ class SystemBusTest {
                         .newBuilder()
                         .setStorageFactory(storageFactory)
                         .build())
-                .testStaticMethods(SystemBus.class, PACKAGE);
+                .testStaticMethods(SystemReadSide.class, PACKAGE);
     }
 
     @Test
@@ -91,7 +91,7 @@ class SystemBusTest {
     @DisplayName("pass system events to the domain")
     void passSystemEvents() {
         ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-        domainContext.getSystemBus().register(subscriber);
+        domainContext.getSystemReadSide().register(subscriber);
 
         EventMessage systemEvent = postSystemEvent();
         Optional<EventMessage> receivedEvent = subscriber.lastEvent();
@@ -104,9 +104,9 @@ class SystemBusTest {
     @DisplayName("unregister dispatchers")
     void unregisterDispatchers() {
         ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-        SystemBus systemBus = domainContext.getSystemBus();
-        systemBus.register(subscriber);
-        systemBus.unregister(subscriber);
+        SystemReadSide systemReadSide = domainContext.getSystemReadSide();
+        systemReadSide.register(subscriber);
+        systemReadSide.unregister(subscriber);
 
         postSystemEvent();
         Optional<EventMessage> receivedEvent = subscriber.lastEvent();
@@ -126,7 +126,11 @@ class SystemBusTest {
         return systemEvent;
     }
 
-
+    /**
+     * A subscriber for {@link SBProjectCreated} events.
+     *
+     * <p>Memoizes the last received event and reports it on {@link #lastEvent()} calls.
+     */
     private static final class ProjectCreatedSubscriber extends AbstractEventSubscriber {
 
         private EventMessage lastEvent;

@@ -35,8 +35,8 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStore;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.SystemBus;
 import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemReadSide;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.server.model.ModelTests;
@@ -356,7 +356,7 @@ class BoundedContextTest {
 
                     @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
                     @Override
-                    public SystemBus getSystemBus() {
+                    public SystemReadSide getSystemReadSide() {
                         return null;
                     }
                 }

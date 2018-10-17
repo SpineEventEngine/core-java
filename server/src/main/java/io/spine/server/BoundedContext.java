@@ -44,9 +44,9 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemBus;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
@@ -257,7 +257,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             getEventBus().register(dispatcher);
-            getSystemBus().register(dispatcher);
+            getSystemReadSide().register(dispatcher);
         }
 
         if (dispatcher.dispatchesExternalEvents()) {
@@ -278,7 +278,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
         if (dispatcher.dispatchesEvents()) {
             getEventBus().register(delegatingDispatcher);
-            getSystemBus().register(delegatingDispatcher);
+            getSystemReadSide().register(delegatingDispatcher);
         }
 
         if (dispatcher.dispatchesExternalEvents()) {
@@ -410,8 +410,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     @Internal
     public abstract SystemGateway getSystemGateway();
 
-    /** Obtains instance of {@link SystemBus} of this {@code BoundedContext}. */
-    public abstract SystemBus getSystemBus();
+    /** Obtains instance of {@link io.spine.system.server.SystemReadSide} of this {@code BoundedContext}. */
+    public abstract SystemReadSide getSystemReadSide();
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.

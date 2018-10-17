@@ -32,10 +32,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A message bus for system events.
  *
- * <p>A domain bounded context may register dispatchers of system events in the {@code SystemBus}.
+ * <p>A domain bounded context may register dispatchers of system events in the {@code SystemReadSide}.
  * All the events of a system context are broadcast by this bus.
  *
- * <p>Only the system events are allowed in the {@code SystemBus}. This class does not extend
+ * <p>Only the system events are allowed in the {@code SystemReadSide}. This class does not extend
  * the {@link io.spine.server.bus.Bus Bus} base class in order to restrict users from posting events
  * into the system bus.
  *
@@ -45,26 +45,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * the messages posted into the system event bus can be accessed via the system bus.
  */
 @SPI
-public final class SystemBus
+public final class SystemReadSide
         implements DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
 
     private final EventBus systemEventBus;
 
-    private SystemBus(EventBus systemEventBus) {
+    private SystemReadSide(EventBus systemEventBus) {
         this.systemEventBus = systemEventBus;
     }
 
     /**
-     * Creates a new instance of {@code SystemBus} for the given system context.
+     * Creates a new instance of {@code SystemReadSide} for the given system context.
      *
      * @param context
      *         the system context to broadcast the events of
-     * @return a new instance of {@code SystemBus}
+     * @return a new instance of {@code SystemReadSide}
      */
-    public static SystemBus newInstance(SystemContext context) {
+    public static SystemReadSide newInstance(SystemContext context) {
         checkNotNull(context);
         EventBus delegate = context.getEventBus();
-        return new SystemBus(delegate);
+        return new SystemReadSide(delegate);
     }
 
     @Override
