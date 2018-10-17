@@ -61,6 +61,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @CanIgnoreReturnValue
 public final class BoundedContextBuilder implements Logging {
 
+    @SuppressWarnings("TestOnlyProblems")
+        // Be default, assume test environment to simplify test data preparation.
     private BoundedContextName name = BoundedContextNames.assumingTests();
     private boolean multitenant;
     private TenantIndex tenantIndex;

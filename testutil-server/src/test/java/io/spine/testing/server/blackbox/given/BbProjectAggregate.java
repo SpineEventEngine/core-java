@@ -40,9 +40,6 @@ import static io.spine.testing.server.blackbox.BbProject.Status.COMPLETED;
 import static io.spine.testing.server.blackbox.BbProject.Status.CREATED;
 import static io.spine.testing.server.blackbox.BbProject.Status.STARTED;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBuilder> {
 
     protected BbProjectAggregate(BbProjectId id) {
@@ -61,7 +58,10 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     BbProjectStarted handle(BbStartProject command)
             throws BbProjectAlreadyStarted {
         if (getState().getStatus() != CREATED) {
-            throw new BbProjectAlreadyStarted(command.getProjectId());
+            throw BbProjectAlreadyStarted
+                    .newBuilder()
+                    .setProjectId(command.getProjectId())
+                    .build();
         }
         return BbProjectStarted
                 .newBuilder()
@@ -74,7 +74,11 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
         BbProjectId projectId = command.getProjectId();
         BbTask task = command.getTask();
         if (getState().getStatus() == COMPLETED) {
-            throw new BbTaskCreatedInCompletedProject(projectId, task);
+            throw BbTaskCreatedInCompletedProject
+                    .newBuilder()
+                    .setProjectId(projectId)
+                    .setTask(task)
+                    .build();
         }
         return BbTaskAdded
                 .newBuilder()

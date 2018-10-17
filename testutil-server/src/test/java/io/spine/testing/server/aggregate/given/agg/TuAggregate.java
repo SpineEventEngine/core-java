@@ -67,7 +67,10 @@ public final class TuAggregate
 
     @Assign
     public TuProjectAssigned handle(TuAssignProject command) throws TuFailedToAssignProject {
-        throw new TuFailedToAssignProject(getId());
+        throw TuFailedToAssignProject
+                .newBuilder()
+                .setId(getId())
+                .build();
     }
 
     @Apply

@@ -55,9 +55,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("CommandAckMonitor should")
 class CommandAckMonitorTest {
@@ -275,7 +272,10 @@ class CommandAckMonitorTest {
         CommandEnvelope envelope = CommandEnvelope.of(command);
 
         Any entityId = Identifier.pack(CommandAckMonitorTest.class.getSimpleName());
-        CannotModifyArchivedEntity rejectionThrowable = new CannotModifyArchivedEntity(entityId);
+        CannotModifyArchivedEntity rejectionThrowable = CannotModifyArchivedEntity
+                .newBuilder()
+                .setEntityId(entityId)
+                .build();
         RuntimeException wrapperThrowable = new RuntimeException(rejectionThrowable);
         RejectionEnvelope rejection = RejectionEnvelope.from(envelope, wrapperThrowable);
 

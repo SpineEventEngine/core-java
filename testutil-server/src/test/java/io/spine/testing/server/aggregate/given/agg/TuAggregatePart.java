@@ -69,7 +69,10 @@ public final class TuAggregatePart
 
     @Assign
     public TuCommentRemoved handle(TuRemoveComment command) throws TuFailedToRemoveComment {
-        throw new TuFailedToRemoveComment(getId());
+        throw TuFailedToRemoveComment
+                .newBuilder()
+                .setId(getId())
+                .build();
     }
 
     @Apply

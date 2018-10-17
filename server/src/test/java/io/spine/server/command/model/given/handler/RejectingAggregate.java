@@ -43,7 +43,10 @@ public class RejectingAggregate extends Aggregate<ProjectId, Empty, EmptyVBuilde
 
     @Assign
     RefProjectCreated on(RefCreateProject cmd) throws EntityAlreadyArchived {
-        throw new EntityAlreadyArchived(Identifier.pack(cmd.getProjectId()));
+        throw EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(Identifier.pack(cmd.getProjectId()))
+                .build();
     }
 
     @Apply
