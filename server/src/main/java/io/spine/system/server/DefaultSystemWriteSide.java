@@ -41,8 +41,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * The point of integration of the domain and the system bounded context.
  *
  * <p>All the facilities provided by the system bounded context are available through this gateway.
- *
- * @author Dmytro Dashenkov
  */
 final class DefaultSystemWriteSide implements MasterWriteSide {
 

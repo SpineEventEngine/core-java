@@ -32,8 +32,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A gateway for sending messages into a {@link SystemContext}.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface SystemWriteSide {
