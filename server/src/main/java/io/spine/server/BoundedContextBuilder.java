@@ -34,10 +34,10 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.system.server.MasterGateway;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.MasterWriteSide;
+import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.SystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -249,7 +249,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
-        MasterGateway systemGateway = MasterGateway.newInstance(system);
+        MasterWriteSide systemGateway = MasterWriteSide.newInstance(system);
         SystemReadSide systemReadSide = SystemReadSide.newInstance(system);
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemGateway, systemReadSide);
@@ -269,7 +269,7 @@ public final class BoundedContextBuilder implements Logging {
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
-        NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
+        NoOpSystemWriteSide systemGateway = NoOpSystemWriteSide.INSTANCE;
         SystemContext result = system.buildPartial(SystemContext::newInstance,
                                                    systemGateway,
                                                    transport);
@@ -278,14 +278,14 @@ public final class BoundedContextBuilder implements Logging {
 
     private <B extends BoundedContext> B
     buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
-                 SystemGateway systemGateway,
+                 SystemWriteSide systemWriteSide,
                  TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
 
         initTenantIndex(storageFactory);
-        initCommandBus(systemGateway);
+        initCommandBus(systemWriteSide);
         initEventBus(storageFactory);
-        initStand(systemGateway);
+        initStand(systemWriteSide);
         initIntegrationBus(transport);
 
         B result = instanceFactory.apply(this);
@@ -320,7 +320,7 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private void initCommandBus(SystemGateway systemGateway) {
+    private void initCommandBus(SystemWriteSide systemWriteSide) {
         if (commandBus == null) {
             commandBus = CommandBus.newBuilder()
                                    .setMultitenant(this.multitenant);
@@ -334,7 +334,7 @@ public final class BoundedContextBuilder implements Logging {
                 commandBus.setMultitenant(this.multitenant);
             }
         }
-        commandBus.injectSystemGateway(systemGateway)
+        commandBus.injectSystemGateway(systemWriteSide)
                   .injectTenantIndex(tenantIndex);
     }
 
@@ -351,7 +351,7 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private void initStand(SystemGateway systemGateway) {
+    private void initStand(SystemWriteSide systemWriteSide) {
         if (stand == null) {
             stand = createStand();
         } else {
@@ -365,7 +365,7 @@ public final class BoundedContextBuilder implements Logging {
                                standMultitenant);
             }
         }
-        stand.setSystemGateway(systemGateway);
+        stand.setSystemWriteSide(systemWriteSide);
     }
 
     private void initIntegrationBus(TransportFactory factory) {

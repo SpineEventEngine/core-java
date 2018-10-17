@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
@@ -54,7 +54,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
 
     private final ChainBuilder<E> chainBuilder;
 
-    private @Nullable SystemGateway systemGateway;
+    private @Nullable SystemWriteSide systemWriteSide;
     private @Nullable TenantIndex tenantIndex;
 
     /**
@@ -88,15 +88,15 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
+     * Inject the {@link io.spine.system.server.SystemWriteSide} of the bounded context to which the built bus belongs.
      *
      * @apiNote This method is {@link Internal} to the framework. The name of the method starts
      *          with the {@code inject} prefix so that this method does not appear in an
      *          auto-complete hint for the {@code set} prefix.
      */
     @Internal
-    public B injectSystemGateway(SystemGateway gateway) {
-        this.systemGateway = checkNotNull(gateway);
+    public B injectSystemGateway(SystemWriteSide gateway) {
+        this.systemWriteSide = checkNotNull(gateway);
         return self();
     }
 
@@ -114,10 +114,10 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Obtains a {@link SystemGateway} set in the builder.
+     * Obtains a {@link io.spine.system.server.SystemWriteSide} set in the builder.
      */
-    public Optional<SystemGateway> systemGateway() {
-        return ofNullable(systemGateway);
+    public Optional<SystemWriteSide> systemGateway() {
+        return ofNullable(systemWriteSide);
     }
 
     /**
@@ -163,7 +163,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
         }
 
         private static void check(BusBuilder builder) {
-            checkSet(builder.systemGateway, SystemGateway.class, GATEWAY_METHOD);
+            checkSet(builder.systemWriteSide, SystemWriteSide.class, GATEWAY_METHOD);
             checkSet(builder.tenantIndex, TenantIndex.class, TENANT_INDEX_METHOD);
         }
 
@@ -174,7 +174,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
         }
 
         public static Supplier<IllegalStateException> gatewayNotSet() {
-            return () -> newException(SystemGateway.class, GATEWAY_METHOD);
+            return () -> newException(SystemWriteSide.class, GATEWAY_METHOD);
         }
 
         public static Supplier<IllegalStateException> tenantIndexNotSet() {

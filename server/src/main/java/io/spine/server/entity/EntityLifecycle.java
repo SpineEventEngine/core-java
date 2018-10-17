@@ -63,7 +63,7 @@ import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.EntityStateChangedVBuilder;
 import io.spine.system.server.EventImported;
 import io.spine.system.server.EventImportedVBuilder;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -95,9 +95,9 @@ import static java.util.stream.Collectors.toList;
 public class EntityLifecycle {
 
     /**
-     * The {@link SystemGateway} which the system messages are posted into.
+     * The {@link io.spine.system.server.SystemWriteSide} which the system messages are posted into.
      */
-    private final SystemGateway systemGateway;
+    private final SystemWriteSide systemWriteSide;
 
     /**
      * The {@link EventFilter} applied to system events before posting.
@@ -124,9 +124,9 @@ public class EntityLifecycle {
     @VisibleForTesting
     protected EntityLifecycle(Object entityId,
                               TypeUrl entityType,
-                              SystemGateway gateway,
+                              SystemWriteSide gateway,
                               EventFilter eventFilter) {
-        this.systemGateway = checkNotNull(gateway);
+        this.systemWriteSide = checkNotNull(gateway);
         this.eventFilter = checkNotNull(eventFilter);
         this.historyId = historyId(entityId, entityType);
     }
@@ -376,11 +376,11 @@ public class EntityLifecycle {
     
     protected void postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        filtered.ifPresent(systemGateway::postEvent);
+        filtered.ifPresent(systemWriteSide::postEvent);
     }
     
     protected void postCommand(CommandMessage command) {
-        systemGateway.postCommand(command);
+        systemWriteSide.postCommand(command);
     }
 
     private static Collection<DispatchedMessageId>
@@ -441,7 +441,7 @@ public class EntityLifecycle {
 
         private Object entityId;
         private TypeUrl entityType;
-        private SystemGateway gateway;
+        private SystemWriteSide gateway;
         private EventFilter eventFilter;
 
         /**
@@ -460,7 +460,7 @@ public class EntityLifecycle {
             return this;
         }
 
-        Builder setGateway(SystemGateway gateway) {
+        Builder setGateway(SystemWriteSide gateway) {
             this.gateway = checkNotNull(gateway);
             return this;
         }

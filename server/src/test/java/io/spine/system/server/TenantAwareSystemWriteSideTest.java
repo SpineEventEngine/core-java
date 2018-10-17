@@ -39,15 +39,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("InnerClassMayBeStatic")
-@DisplayName("TenantAwareSystemGateway should")
-class TenantAwareSystemGatewayTest {
+@DisplayName("TenantAwareSystemWriteSide should")
+class TenantAwareSystemWriteSideTest {
 
     private static final String POST_COMMANDS = "post system commands";
     private static final String POST_EVENTS = "post system events";
     private static final String QUERY = "query system BC for domain aggregates";
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(TenantAwareSystemGatewayTest.class);
+            TestActorRequestFactory.newInstance(TenantAwareSystemWriteSideTest.class);
 
     @Nested
     @DisplayName("in single-tenant env")
@@ -55,11 +55,11 @@ class TenantAwareSystemGatewayTest {
 
         private final TenantId defaultTenant = TenantId.getDefaultInstance();
 
-        private MemoizingGateway delegate;
+        private MemoizingWriteSide delegate;
 
         @BeforeEach
         void setUp() {
-            delegate = MemoizingGateway.singleTenant();
+            delegate = MemoizingWriteSide.singleTenant();
         }
 
         @Test
@@ -86,14 +86,14 @@ class TenantAwareSystemGatewayTest {
     class Multitenant {
 
         private TenantId tenantId;
-        private MemoizingGateway delegate;
+        private MemoizingWriteSide delegate;
 
         @BeforeEach
         void setUp() {
-            delegate = MemoizingGateway.multitenant();
+            delegate = MemoizingWriteSide.multitenant();
             tenantId = TenantId
                     .newBuilder()
-                    .setValue(TenantAwareSystemGatewayTest.class.getName())
+                    .setValue(TenantAwareSystemWriteSideTest.class.getName())
                     .build();
         }
 
@@ -119,26 +119,26 @@ class TenantAwareSystemGatewayTest {
         }
     }
 
-    private static void postCommandAndCheck(MemoizingGateway delegate, TenantId tenantId) {
+    private static void postCommandAndCheck(MemoizingWriteSide delegate, TenantId tenantId) {
         CommandMessage command = Sample.messageOfType(CreateShoppingList.class);
-        SystemGateway gateway = delegatingTo(delegate).get(tenantId);
+        SystemWriteSide gateway = delegatingTo(delegate).get(tenantId);
         gateway.postCommand(command);
 
         assertEquals(command, delegate.lastSeenCommand().message());
     }
 
-    private static void postEventAndCheck(MemoizingGateway delegate, TenantId tenantId) {
+    private static void postEventAndCheck(MemoizingWriteSide delegate, TenantId tenantId) {
         EventMessage event = Sample.messageOfType(ShoppingListCreated.class);
-        SystemGateway gateway = delegatingTo(delegate).get(tenantId);
+        SystemWriteSide gateway = delegatingTo(delegate).get(tenantId);
         gateway.postEvent(event);
 
         assertEquals(event, delegate.lastSeenEvent().message());
     }
 
     @SuppressWarnings("CheckReturnValue")
-    private static void queryAndCheck(MemoizingGateway delegate, TenantId tenantId) {
+    private static void queryAndCheck(MemoizingWriteSide delegate, TenantId tenantId) {
         Query query = requestFactory.query().all(Timestamp.class);
-        SystemGateway gateway = delegatingTo(delegate).get(tenantId);
+        SystemWriteSide gateway = delegatingTo(delegate).get(tenantId);
         gateway.readDomainAggregate(query);
 
         assertEquals(query, delegate.lastSeenQuery().message());

@@ -26,7 +26,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.system.server.CommandReceived;
 import io.spine.system.server.GatewayFunction;
-import io.spine.system.server.MemoizingGateway;
+import io.spine.system.server.MemoizingWriteSide;
 import io.spine.test.commands.CmdCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @DisplayName("CommandReceivedTap should")
 class CommandReceivedTapTest {
 
-    private MemoizingGateway gateway;
+    private MemoizingWriteSide gateway;
     private CommandReceivedTap filter;
 
     @BeforeEach
@@ -56,12 +56,12 @@ class CommandReceivedTapTest {
     }
 
     private void initSingleTenant() {
-        gateway = MemoizingGateway.singleTenant();
+        gateway = MemoizingWriteSide.singleTenant();
         filter = new CommandReceivedTap(gatewayFn());
     }
 
     private void initMultitenant() {
-        gateway = MemoizingGateway.multitenant();
+        gateway = MemoizingWriteSide.multitenant();
         filter = new CommandReceivedTap(gatewayFn());
     }
 

@@ -37,12 +37,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * A {@link SystemGateway} which memoizes the posted system commands.
+ * A {@link SystemWriteSide} which memoizes the posted system commands.
  *
- * <p>This class is a test-only facility, used in order to avoid mocking {@link SystemGateway}
+ * <p>This class is a test-only facility, used in order to avoid mocking {@link SystemWriteSide}
  * instances.
  */
-public final class MemoizingGateway implements SystemGateway {
+public final class MemoizingWriteSide implements SystemWriteSide {
 
     private @MonotonicNonNull MemoizedMessage lastSeenCommand;
     private @MonotonicNonNull MemoizedMessage lastSeenEvent;
@@ -50,26 +50,26 @@ public final class MemoizingGateway implements SystemGateway {
 
     private final boolean multitenant;
 
-    private MemoizingGateway(boolean multitenant) {
+    private MemoizingWriteSide(boolean multitenant) {
         this.multitenant = multitenant;
     }
 
     /**
-     * Creates a new instance of {@code MemoizingGateway} for a single-tenant execution environment.
+     * Creates a new instance of {@code MemoizingWriteSide} for a single-tenant execution environment.
      *
-     * @return new {@code MemoizingGateway}
+     * @return new {@code MemoizingWriteSide}
      */
-    public static MemoizingGateway singleTenant() {
-        return new MemoizingGateway(false);
+    public static MemoizingWriteSide singleTenant() {
+        return new MemoizingWriteSide(false);
     }
 
     /**
-     * Creates a new instance of {@code MemoizingGateway} for a multitenant execution environment.
+     * Creates a new instance of {@code MemoizingWriteSide} for a multitenant execution environment.
      *
-     * @return new {@code MemoizingGateway}
+     * @return new {@code MemoizingWriteSide}
      */
-    public static MemoizingGateway multitenant() {
-        return new MemoizingGateway(true);
+    public static MemoizingWriteSide multitenant() {
+        return new MemoizingWriteSide(true);
     }
 
     /**
@@ -117,7 +117,7 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     /**
-     * A command received by the {@code MemoizingGateway}.
+     * A command received by the {@code MemoizingWriteSide}.
      */
     public static final class MemoizedMessage {
 
@@ -139,7 +139,7 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     /**
-     * Obtains the last command message posted to {@link SystemGateway}.
+     * Obtains the last command message posted to {@link SystemWriteSide}.
      *
      * <p>Fails if no commands were posted yet.
      */
@@ -149,7 +149,7 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     /**
-     * Obtains the last event message posted to {@link SystemGateway}.
+     * Obtains the last event message posted to {@link SystemWriteSide}.
      *
      * <p>Fails if no events were posted yet.
      */
@@ -168,7 +168,7 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     /**
-     * Obtains the last query submitted to {@link SystemGateway}.
+     * Obtains the last query submitted to {@link SystemWriteSide}.
      *
      * <p>Fails if no queries were submitted yet.
      */

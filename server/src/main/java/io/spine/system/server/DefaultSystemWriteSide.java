@@ -44,7 +44,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Dmytro Dashenkov
  */
-final class DefaultSystemGateway implements MasterGateway {
+final class DefaultSystemWriteSide implements MasterWriteSide {
 
     /**
      * The ID of the user which is used for generating system commands and events.
@@ -56,7 +56,7 @@ final class DefaultSystemGateway implements MasterGateway {
 
     private final SystemContext system;
 
-    DefaultSystemGateway(SystemContext system) {
+    DefaultSystemWriteSide(SystemContext system) {
         this.system = system;
     }
 

@@ -38,8 +38,8 @@ import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.system.server.CommandAcknowledged;
 import io.spine.system.server.CommandErrored;
-import io.spine.system.server.MemoizingGateway;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.MemoizingWriteSide;
+import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.commandbus.CmdBusStartProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -85,7 +85,7 @@ class CommandAckMonitorTest {
         @DisplayName("delegate StreamObserver")
         void delegate() {
             builder.setTenantId(TenantId.getDefaultInstance())
-                   .setSystemGateway(NoOpSystemGateway.INSTANCE);
+                   .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);
             assertFailsToBuild();
         }
 
@@ -93,7 +93,7 @@ class CommandAckMonitorTest {
         @DisplayName("tenant ID")
         void tenant() {
             builder.setDelegate(noOpObserver())
-                   .setSystemGateway(NoOpSystemGateway.INSTANCE);
+                   .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);
             assertFailsToBuild();
         }
 
@@ -115,17 +115,17 @@ class CommandAckMonitorTest {
     class PostSystemCommands {
 
         private CommandAckMonitor monitor;
-        private MemoizingGateway gateway;
+        private MemoizingWriteSide gateway;
 
         private CommandId commandId;
 
         @BeforeEach
         void setUp() {
-            gateway = MemoizingGateway.singleTenant();
+            gateway = MemoizingWriteSide.singleTenant();
             monitor = CommandAckMonitor
                     .newBuilder()
                     .setDelegate(noOpObserver())
-                    .setSystemGateway(gateway)
+                    .setSystemWriteSide(gateway)
                     .setTenantId(TenantId.getDefaultInstance())
                     .build();
             commandId = CommandId
@@ -189,7 +189,7 @@ class CommandAckMonitorTest {
             monitor = CommandAckMonitor
                     .newBuilder()
                     .setTenantId(TenantId.getDefaultInstance())
-                    .setSystemGateway(NoOpSystemGateway.INSTANCE)
+                    .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
                     .setDelegate(delegate)
                     .build();
             commandId = CommandId

@@ -26,7 +26,7 @@ import io.spine.client.Query;
 import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import java.util.Iterator;
 
@@ -42,16 +42,16 @@ import static io.spine.system.server.GatewayFunction.delegatingTo;
  */
 class AggregateQueryProcessor implements QueryProcessor {
 
-    private final SystemGateway systemGateway;
+    private final SystemWriteSide systemWriteSide;
 
-    AggregateQueryProcessor(SystemGateway systemGateway) {
-        this.systemGateway = systemGateway;
+    AggregateQueryProcessor(SystemWriteSide systemWriteSide) {
+        this.systemWriteSide = systemWriteSide;
     }
 
     @Override
     public ImmutableCollection<Any> process(Query query) {
         TenantId tenant = tenantOf(query);
-        SystemGateway gateway = delegatingTo(systemGateway).get(tenant);
+        SystemWriteSide gateway = delegatingTo(systemWriteSide).get(tenant);
         Iterator<Any> read = gateway.readDomainAggregate(query);
         ImmutableList<Any> result = copyOf(read);
         return result;

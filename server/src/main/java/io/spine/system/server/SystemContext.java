@@ -41,11 +41,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * context.
  *
  * @apiNote The framework users should not access a System Bounded Context directly.
- * Programmers extending the framework should see {@link SystemGateway} for
+ * Programmers extending the framework should see {@link SystemWriteSide} for
  * the front-facing API of the System bounded context.
  *
  * @author Dmytro Dashenkov
- * @see SystemGateway
+ * @see SystemWriteSide
  * @see BoundedContext
  */
 @Internal
@@ -98,11 +98,11 @@ public final class SystemContext extends BoundedContext {
      * {@inheritDoc}
      *
      * <p>Since a system bounded context does not have an associated system bounded context, returns
-     * a {@link NoOpSystemGateway} instance.
+     * a {@link NoOpSystemWriteSide} instance.
      */
     @Override
-    public NoOpSystemGateway getSystemGateway() {
-        return NoOpSystemGateway.INSTANCE;
+    public NoOpSystemWriteSide getSystemGateway() {
+        return NoOpSystemWriteSide.INSTANCE;
     }
 
     @Override

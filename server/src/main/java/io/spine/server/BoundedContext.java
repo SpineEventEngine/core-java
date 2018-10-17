@@ -45,7 +45,7 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeName;
 
@@ -299,8 +299,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Creates a {@code CommandErrorHandler} for objects that handle commands.
      */
     public CommandErrorHandler createCommandErrorHandler() {
-        SystemGateway systemGateway = getSystemGateway();
-        CommandErrorHandler result = CommandErrorHandler.with(systemGateway);
+        SystemWriteSide systemWriteSide = getSystemGateway();
+        CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide);
         return result;
     }
 
@@ -406,9 +406,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return tenantIndex;
     }
 
-    /** Obtains instance of {@link SystemGateway} of this {@code BoundedContext}. */
+    /** Obtains instance of {@link io.spine.system.server.SystemWriteSide} of this {@code BoundedContext}. */
     @Internal
-    public abstract SystemGateway getSystemGateway();
+    public abstract SystemWriteSide getSystemGateway();
 
     /** Obtains instance of {@link io.spine.system.server.SystemReadSide} of this {@code BoundedContext}. */
     public abstract SystemReadSide getSystemReadSide();

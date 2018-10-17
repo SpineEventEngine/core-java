@@ -30,7 +30,7 @@ import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 
@@ -115,7 +115,7 @@ public abstract class CommandHandlerTest<I,
     private RejectionEnvelope rejection(RuntimeException wrapped) {
         Command command = createCommand(message());
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        CaughtError error = CommandErrorHandler.with(NoOpSystemGateway.INSTANCE)
+        CaughtError error = CommandErrorHandler.with(NoOpSystemWriteSide.INSTANCE)
                                                .handleError(envelope, wrapped);
         Optional<RejectionEnvelope> rejectionEnvelope = error.asRejection();
         if (rejectionEnvelope.isPresent()) {

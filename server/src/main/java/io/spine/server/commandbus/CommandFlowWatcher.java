@@ -28,7 +28,7 @@ import io.spine.core.TenantId;
 import io.spine.system.server.CommandDispatched;
 import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.ScheduleCommand;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -75,12 +75,12 @@ final class CommandFlowWatcher {
     }
 
     private void postSystemEvent(EventMessage systemEvent, TenantId tenantId) {
-        SystemGateway gateway = this.gateway.get(tenantId);
+        SystemWriteSide gateway = this.gateway.get(tenantId);
         gateway.postEvent(systemEvent);
     }
 
     private void postSystemCommand(CommandMessage systemCommand, TenantId tenantId) {
-        SystemGateway gateway = this.gateway.get(tenantId);
+        SystemWriteSide gateway = this.gateway.get(tenantId);
         gateway.postCommand(systemCommand);
     }
 }

@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface SystemGateway {
+public interface SystemWriteSide {
 
     /**
      * Posts a system command.
@@ -63,9 +63,9 @@ public interface SystemGateway {
     /**
      * Creates new instance of the gateway which serves the passed System Bounded Context.
      */
-    static SystemGateway newInstance(SystemContext system) {
+    static SystemWriteSide newInstance(SystemContext system) {
         checkNotNull(system);
-        return new DefaultSystemGateway(system);
+        return new DefaultSystemWriteSide(system);
     }
 
     /**

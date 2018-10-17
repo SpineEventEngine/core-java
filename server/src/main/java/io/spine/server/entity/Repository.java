@@ -33,7 +33,7 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -353,7 +353,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         TypeUrl stateType = getEntityStateType();
-        SystemGateway gateway = getBoundedContext().getSystemGateway();
+        SystemWriteSide gateway = getBoundedContext().getSystemGateway();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()

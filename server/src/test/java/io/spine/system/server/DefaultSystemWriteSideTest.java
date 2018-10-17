@@ -51,10 +51,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(ShardingReset.class)
-@DisplayName("Default implementation of SystemGateway should")
-class DefaultSystemGatewayTest  {
+@DisplayName("Default implementation of SystemWriteSide should")
+class DefaultSystemWriteSideTest {
 
-    private SystemGateway gateway;
+    private SystemWriteSide gateway;
     private ListId aggregateId;
 
     @BeforeEach
@@ -136,7 +136,7 @@ class DefaultSystemGatewayTest  {
     class ReadDomainAggregates {
 
         private final TestActorRequestFactory actorRequestFactory =
-                TestActorRequestFactory.newInstance(DefaultSystemGatewayTest.class);
+                TestActorRequestFactory.newInstance(DefaultSystemWriteSideTest.class);
 
         private BoundedContext domainContext;
 

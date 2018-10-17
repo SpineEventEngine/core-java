@@ -27,7 +27,7 @@ import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.system.server.DefaultSystemGateway.SYSTEM_USER;
+import static io.spine.system.server.DefaultSystemWriteSide.SYSTEM_USER;
 
 /**
  * Creates a command factory for producing commands under the context of specified tenant.

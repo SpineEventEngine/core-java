@@ -27,7 +27,7 @@ import io.spine.core.TenantId;
 import io.spine.server.bus.BusFilter;
 import io.spine.system.server.CommandReceived;
 import io.spine.system.server.GatewayFunction;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import java.util.Optional;
 
@@ -56,7 +56,7 @@ final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
     public Optional<Ack> accept(CommandEnvelope envelope) {
         CommandReceived systemEvent = systemEvent(envelope.getCommand());
         TenantId tenantId = envelope.getTenantId();
-        SystemGateway gateway = this.gateway.get(tenantId);
+        SystemWriteSide gateway = this.gateway.get(tenantId);
         gateway.postEvent(systemEvent);
         return Optional.empty();
     }

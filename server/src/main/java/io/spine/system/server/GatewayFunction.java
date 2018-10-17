@@ -30,16 +30,16 @@ import java.util.function.Function;
  * @author Alexander Yevsyukov
  */
 @FunctionalInterface
-public interface GatewayFunction extends Function<TenantId, SystemGateway> {
+public interface GatewayFunction extends Function<TenantId, SystemWriteSide> {
 
     /** Obtains system gateway for the given tenant. */
-    default SystemGateway get(TenantId tenantId) {
+    default SystemWriteSide get(TenantId tenantId) {
         return apply(tenantId);
     }
 
-    static GatewayFunction delegatingTo(SystemGateway delegate) {
+    static GatewayFunction delegatingTo(SystemWriteSide delegate) {
         return (t) -> {
-            SystemGateway result = TenantAwareSystemGateway.forTenant(t, delegate);
+            SystemWriteSide result = TenantAwareSystemWriteSide.forTenant(t, delegate);
             return result;
         };
     }

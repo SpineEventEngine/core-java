@@ -30,7 +30,7 @@ import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.system.server.CommandAcknowledged;
 import io.spine.system.server.CommandErrored;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.system.server.GatewayFunction.delegatingTo;
@@ -51,11 +51,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private final StreamObserver<Ack> delegate;
-    private final SystemGateway gateway;
+    private final SystemWriteSide gateway;
 
     private CommandAckMonitor(Builder builder) {
         this.delegate = builder.delegate;
-        this.gateway = delegatingTo(builder.systemGateway).get(builder.tenantId);
+        this.gateway = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
     }
 
     /**
@@ -128,7 +128,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
 
         private StreamObserver<Ack> delegate;
         private TenantId tenantId;
-        private SystemGateway systemGateway;
+        private SystemWriteSide systemWriteSide;
 
         /**
          * Prevents direct instantiation.
@@ -153,10 +153,10 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         }
 
         /**
-         * Sets the {@link SystemGateway} to post system commands into.
+         * Sets the {@link io.spine.system.server.SystemWriteSide} to post system commands into.
          */
-        Builder setSystemGateway(SystemGateway systemGateway) {
-            this.systemGateway = checkNotNull(systemGateway);
+        Builder setSystemWriteSide(SystemWriteSide systemWriteSide) {
+            this.systemWriteSide = checkNotNull(systemWriteSide);
             return this;
         }
 
@@ -168,7 +168,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         CommandAckMonitor build() {
             checkNotNull(delegate);
             checkNotNull(tenantId);
-            checkNotNull(systemGateway);
+            checkNotNull(systemWriteSide);
 
             return new CommandAckMonitor(this);
         }

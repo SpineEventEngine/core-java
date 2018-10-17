@@ -28,8 +28,8 @@ import io.spine.base.Time;
 import io.spine.core.EventId;
 import io.spine.system.server.EntityCreated;
 import io.spine.system.server.EntityStateChanged;
-import io.spine.system.server.MemoizingGateway;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.MemoizingWriteSide;
+import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ class EntityLifecycleTest {
     void allowCreationWithoutEventFilter() {
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
-                .setGateway(NoOpSystemGateway.INSTANCE)
+                .setGateway(NoOpSystemWriteSide.INSTANCE)
                 .setEntityType(TypeUrl.of(Empty.class))
                 .setEntityId("sample-id")
                 .build();
@@ -81,7 +81,7 @@ class EntityLifecycleTest {
                    ? Optional.empty()
                    : Optional.of(event);
         };
-        MemoizingGateway gateway = MemoizingGateway.singleTenant();
+        MemoizingWriteSide gateway = MemoizingWriteSide.singleTenant();
         int entityId = 42;
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
@@ -91,7 +91,7 @@ class EntityLifecycleTest {
                 .setEventFilter(filter)
                 .build();
         lifecycle.onEntityCreated(ENTITY);
-        MemoizingGateway.MemoizedMessage lastSeenEvent = gateway.lastSeenEvent();
+        MemoizingWriteSide.MemoizedMessage lastSeenEvent = gateway.lastSeenEvent();
         assertThat(lastSeenEvent.message(), instanceOf(EntityCreated.class));
 
 

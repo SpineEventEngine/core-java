@@ -26,8 +26,8 @@ import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.NoOpSystemGateway;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +54,7 @@ import static org.mockito.Mockito.mock;
 class CommandBusBuilderTest
         extends BusBuilderTest<CommandBus.Builder, CommandEnvelope, Command> {
 
-    private static final SystemGateway SYSTEM_GATEWAY = NoOpSystemGateway.INSTANCE;
+    private static final SystemWriteSide SYSTEM_GATEWAY = NoOpSystemWriteSide.INSTANCE;
 
     private TenantIndex tenantIndex;
     private EventBus eventBus;
@@ -108,7 +108,7 @@ class CommandBusBuilderTest
     }
 
     @Test
-    @DisplayName("not allow to omit setting SystemGateway")
+    @DisplayName("not allow to omit setting SystemWriteSide")
     void neverOmitSystemGateway() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
@@ -163,11 +163,11 @@ class CommandBusBuilderTest
         @Test
         @DisplayName("system gateway")
         void gateway() {
-            SystemGateway systemGateway = mock(SystemGateway.class);
-            CommandBus.Builder builder = builder().injectSystemGateway(systemGateway);
-            Optional<SystemGateway> actual = builder.systemGateway();
+            SystemWriteSide systemWriteSide = mock(SystemWriteSide.class);
+            CommandBus.Builder builder = builder().injectSystemGateway(systemWriteSide);
+            Optional<SystemWriteSide> actual = builder.systemGateway();
             assertTrue(actual.isPresent());
-            assertSame(systemGateway, actual.get());
+            assertSame(systemWriteSide, actual.get());
         }
 
         @Test

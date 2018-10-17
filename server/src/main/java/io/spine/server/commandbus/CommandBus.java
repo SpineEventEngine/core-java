@@ -45,7 +45,7 @@ import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -78,7 +78,7 @@ public class CommandBus extends UnicastBus<Command,
 
     private final CommandScheduler scheduler;
     private final EventBus eventBus;
-    private final SystemGateway systemGateway;
+    private final SystemWriteSide systemWriteSide;
     private final TenantIndex tenantIndex;
     private final CommandErrorHandler errorHandler;
     private final CommandFlowWatcher flowWatcher;
@@ -115,12 +115,12 @@ public class CommandBus extends UnicastBus<Command,
                            : false;
         this.scheduler = builder.commandScheduler;
         this.eventBus = builder.eventBus;
-        this.systemGateway = builder.systemGateway()
-                                    .orElseThrow(gatewayNotSet());
+        this.systemWriteSide = builder.systemGateway()
+                                      .orElseThrow(gatewayNotSet());
         this.tenantIndex = builder.tenantIndex()
                                   .orElseThrow(tenantIndexNotSet());
         this.deadCommandHandler = new DeadCommandHandler();
-        this.errorHandler = CommandErrorHandler.with(systemGateway);
+        this.errorHandler = CommandErrorHandler.with(systemWriteSide);
         this.flowWatcher = builder.flowWatcher;
     }
 
@@ -182,7 +182,7 @@ public class CommandBus extends UnicastBus<Command,
                 .newBuilder()
                 .setDelegate(wrappedSource)
                 .setTenantId(tenant)
-                .setSystemGateway(systemGateway)
+                .setSystemWriteSide(systemWriteSide)
                 .build();
         return result;
     }
@@ -194,9 +194,9 @@ public class CommandBus extends UnicastBus<Command,
                       .orElse(TenantId.getDefaultInstance());
     }
 
-    SystemGateway gatewayFor(TenantId tenantId) {
+    SystemWriteSide gatewayFor(TenantId tenantId) {
         checkNotNull(tenantId);
-        SystemGateway result = delegatingTo(systemGateway).get(tenantId);
+        SystemWriteSide result = delegatingTo(systemWriteSide).get(tenantId);
         return result;
     }
 
@@ -360,8 +360,8 @@ public class CommandBus extends UnicastBus<Command,
             }
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
                 @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
-                SystemGateway gateway = systemGateway().get();
-                SystemGateway result = delegatingTo(gateway).get(tenantId);
+                        SystemWriteSide gateway = systemGateway().get();
+                SystemWriteSide result = delegatingTo(gateway).get(tenantId);
                 return result;
             });
             commandScheduler.setFlowWatcher(flowWatcher);

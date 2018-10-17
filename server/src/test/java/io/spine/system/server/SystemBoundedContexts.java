@@ -42,9 +42,9 @@ public final class SystemBoundedContexts {
      * Extracts the {@code System} bounded context from the given bounded context.
      */
     public static BoundedContext systemOf(BoundedContext context) {
-        SystemGateway systemGateway = context.getSystemGateway();
-        assertThat(systemGateway, instanceOf(DefaultSystemGateway.class));
-        DefaultSystemGateway gateway = (DefaultSystemGateway) systemGateway;
+        SystemWriteSide systemWriteSide = context.getSystemGateway();
+        assertThat(systemWriteSide, instanceOf(DefaultSystemWriteSide.class));
+        DefaultSystemWriteSide gateway = (DefaultSystemWriteSide) systemWriteSide;
         return gateway.target();
     }
 }

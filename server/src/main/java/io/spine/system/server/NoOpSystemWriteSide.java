@@ -20,31 +20,41 @@
 
 package io.spine.system.server;
 
-import io.spine.annotation.Internal;
+import com.google.protobuf.Any;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
+import io.spine.client.Query;
+
+import java.util.Iterator;
+
+import static java.util.Collections.emptyIterator;
 
 /**
- * A gateway which can control the underlying system context.
+ * An implementation of {@link SystemWriteSide} which never performs an operation.
  *
- * <p>Such a gateway, for instance, may tell the system context
- * to {@link io.spine.server.BoundedContext#close() close}.
+ * <p>All the methods inherited from {@link SystemWriteSide} exit without any action or exception.
+ *
+ * <p>This implementation is used by the system bounded context itself, since there is no system
+ * bounded context for a system bounded context.
+ *
+ * @author Dmytro Dashenkov
  */
-@Internal
-public interface MasterGateway extends SystemGateway {
+public enum NoOpSystemWriteSide implements SystemWriteSide {
 
-    /**
-     * Closes the underlying system context.
-     *
-     * @throws Exception if the context thrown an exception when closing
-     */
-    void closeSystemContext() throws Exception;
+    INSTANCE;
 
-    /**
-     * Creates a new instance of {@code MasterGateway}.
-     *
-     * @param system the underlying system context
-     * @return new gateway
-     */
-    static MasterGateway newInstance(SystemContext system) {
-        return new DefaultSystemGateway(system);
+    @Override
+    public void postCommand(CommandMessage systemCommand) {
+        // NOP.
+    }
+
+    @Override
+    public void postEvent(EventMessage systemEvent) {
+        // NOP.
+    }
+
+    @Override
+    public Iterator<Any> readDomainAggregate(Query query) {
+        return emptyIterator();
     }
 }

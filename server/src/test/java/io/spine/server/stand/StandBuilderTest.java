@@ -20,7 +20,7 @@
 
 package io.spine.server.stand;
 
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -41,11 +41,11 @@ class StandBuilderTest {
     class Create {
 
         @Test
-        @DisplayName("with SystemGateway only")
+        @DisplayName("with SystemWriteSide only")
         void onlyGateway() {
             Stand.Builder builder = Stand.newBuilder();
-            SystemGateway gateway = mock(SystemGateway.class);
-            builder.setSystemGateway(gateway);
+            SystemWriteSide gateway = mock(SystemWriteSide.class);
+            builder.setSystemWriteSide(gateway);
             Stand result = builder.build();
 
             assertNotNull(result);
@@ -58,7 +58,7 @@ class StandBuilderTest {
     class NotCreate {
 
         @Test
-        @DisplayName("without a SystemGateway")
+        @DisplayName("without a SystemWriteSide")
         void withoutGateway() {
             Stand.Builder builder = Stand.newBuilder();
             assertThrows(IllegalStateException.class, builder::build);

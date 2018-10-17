@@ -38,7 +38,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -99,7 +99,7 @@ public abstract class CommandSequence<O extends Message,
     /**
      * Adds the posted command to the result builder.
      */
-    protected abstract void addPosted(B builder, Command command, SystemGateway gateway);
+    protected abstract void addPosted(B builder, Command command, SystemWriteSide gateway);
 
     /**
      * Adds a command message to the sequence of commands to be posted.
@@ -157,7 +157,7 @@ public abstract class CommandSequence<O extends Message,
      * all the commands were posted successfully.
      */
     protected R postAll(CommandBus bus) {
-        SystemGateway gateway = gateway(bus);
+        SystemWriteSide gateway = gateway(bus);
         B builder = newBuilder();
         while (hasNext()) {
             CommandMessage message = next();
@@ -174,7 +174,7 @@ public abstract class CommandSequence<O extends Message,
         return result;
     }
 
-    private SystemGateway gateway(CommandBus bus) {
+    private SystemWriteSide gateway(CommandBus bus) {
         TenantId tenantId = actorContext.getTenantId();
         return bus.gatewayFor(tenantId);
     }

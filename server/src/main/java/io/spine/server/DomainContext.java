@@ -21,8 +21,8 @@
 package io.spine.server;
 
 import io.spine.server.entity.Repository;
-import io.spine.system.server.MasterGateway;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.MasterWriteSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.SystemReadSide;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -47,11 +47,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class DomainContext extends BoundedContext {
 
-    private final MasterGateway systemGateway;
+    private final MasterWriteSide systemGateway;
     private final SystemReadSide systemReadSide;
 
     private DomainContext(BoundedContextBuilder builder,
-                          MasterGateway gateway,
+                          MasterWriteSide gateway,
                           SystemReadSide systemReadSide) {
         super(builder);
         this.systemGateway = gateway;
@@ -59,7 +59,7 @@ final class DomainContext extends BoundedContext {
     }
 
     static DomainContext newInstance(BoundedContextBuilder builder,
-                                     MasterGateway gateway,
+                                     MasterWriteSide gateway,
                                      SystemReadSide bus) {
         checkNotNull(builder);
         checkNotNull(gateway);
@@ -70,7 +70,7 @@ final class DomainContext extends BoundedContext {
     }
 
     @Override
-    public SystemGateway getSystemGateway() {
+    public SystemWriteSide getSystemGateway() {
         return systemGateway;
     }
 

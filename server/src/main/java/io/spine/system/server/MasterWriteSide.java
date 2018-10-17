@@ -20,41 +20,31 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
-import io.spine.client.Query;
-
-import java.util.Iterator;
-
-import static java.util.Collections.emptyIterator;
+import io.spine.annotation.Internal;
 
 /**
- * An implementation of {@link SystemGateway} which never performs an operation.
+ * A gateway which can control the underlying system context.
  *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
- *
- * @author Dmytro Dashenkov
+ * <p>Such a gateway, for instance, may tell the system context
+ * to {@link io.spine.server.BoundedContext#close() close}.
  */
-public enum NoOpSystemGateway implements SystemGateway {
+@Internal
+public interface MasterWriteSide extends SystemWriteSide {
 
-    INSTANCE;
+    /**
+     * Closes the underlying system context.
+     *
+     * @throws Exception if the context thrown an exception when closing
+     */
+    void closeSystemContext() throws Exception;
 
-    @Override
-    public void postCommand(CommandMessage systemCommand) {
-        // NOP.
-    }
-
-    @Override
-    public void postEvent(EventMessage systemEvent) {
-        // NOP.
-    }
-
-    @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        return emptyIterator();
+    /**
+     * Creates a new instance of {@code MasterWriteSide}.
+     *
+     * @param system the underlying system context
+     * @return new gateway
+     */
+    static MasterWriteSide newInstance(SystemContext system) {
+        return new DefaultSystemWriteSide(system);
     }
 }

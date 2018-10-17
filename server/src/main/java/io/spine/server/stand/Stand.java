@@ -47,7 +47,7 @@ import io.spine.server.tenant.EntityUpdateOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -121,7 +121,7 @@ public class Stand implements AutoCloseable {
         this.topicValidator = builder.getTopicValidator();
         this.queryValidator = builder.getQueryValidator();
         this.subscriptionValidator = builder.getSubscriptionValidator();
-        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.getSystemGateway());
+        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.getSystemWriteSide());
     }
 
     /**
@@ -446,7 +446,7 @@ public class Stand implements AutoCloseable {
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
-        private SystemGateway systemGateway;
+        private SystemWriteSide systemWriteSide;
 
         public Executor getCallbackExecutor() {
             return callbackExecutor;
@@ -473,8 +473,8 @@ public class Stand implements AutoCloseable {
         }
 
         @Internal
-        public Builder setSystemGateway(SystemGateway gateway) {
-            this.systemGateway = checkNotNull(gateway);
+        public Builder setSystemWriteSide(SystemWriteSide gateway) {
+            this.systemWriteSide = checkNotNull(gateway);
             return this;
         }
 
@@ -503,8 +503,8 @@ public class Stand implements AutoCloseable {
             return typeRegistry;
         }
 
-        private SystemGateway getSystemGateway() {
-            return systemGateway;
+        private SystemWriteSide getSystemWriteSide() {
+            return systemWriteSide;
         }
 
         /**
@@ -518,7 +518,7 @@ public class Stand implements AutoCloseable {
         @CheckReturnValue
         @Internal
         public Stand build() {
-            checkState(systemGateway != null, "SystemGateway is not set.");
+            checkState(systemWriteSide != null, "SystemWriteSide is not set.");
 
             boolean multitenant = this.multitenant == null
                                   ? false

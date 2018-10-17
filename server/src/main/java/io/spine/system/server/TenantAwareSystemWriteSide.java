@@ -33,31 +33,31 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link SystemGateway} which works for a specified tenant.
+ * A {@link SystemWriteSide} which works for a specified tenant.
  *
  * <p>A system command is {@linkplain #postCommand(CommandMessage) posted} within
  * a {@link TenantAwareOperation} with the given tenant set.
  *
- * <p>Any call to this gateway is delegated to another instance of {@link SystemGateway}
+ * <p>Any call to this gateway is delegated to another instance of {@link SystemWriteSide}
  * passed on construction.
  *
  * @author Dmytro Dashenkov
  * @see TenantAwareOperation
  */
-final class TenantAwareSystemGateway implements SystemGateway {
+final class TenantAwareSystemWriteSide implements SystemWriteSide {
 
-    private final SystemGateway delegate;
+    private final SystemWriteSide delegate;
     private final TenantAwareRunner runner;
 
-    private TenantAwareSystemGateway(TenantId tenantId, SystemGateway delegate) {
+    private TenantAwareSystemWriteSide(TenantId tenantId, SystemWriteSide delegate) {
         this.runner = TenantAwareRunner.with(checkNotNull(tenantId));
         this.delegate = checkNotNull(delegate);
     }
 
-    static SystemGateway forTenant(TenantId tenantId, SystemGateway systemGateway) {
+    static SystemWriteSide forTenant(TenantId tenantId, SystemWriteSide systemWriteSide) {
         checkNotNull(tenantId);
-        checkNotNull(systemGateway);
-        SystemGateway result = new TenantAwareSystemGateway(tenantId, systemGateway);
+        checkNotNull(systemWriteSide);
+        SystemWriteSide result = new TenantAwareSystemWriteSide(tenantId, systemWriteSide);
         return result;
     }
 

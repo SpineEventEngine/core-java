@@ -42,7 +42,7 @@ import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
@@ -139,7 +139,7 @@ class ProcessManagerTest {
                                     .build();
         commandBus = spy(CommandBus.newBuilder()
                                    .injectTenantIndex(tenantIndex)
-                                   .injectSystemGateway(NoOpSystemGateway.INSTANCE)
+                                   .injectSystemGateway(NoOpSystemWriteSide.INSTANCE)
                                    .injectEventBus(eventBus)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
