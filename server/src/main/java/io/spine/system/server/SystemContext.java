@@ -25,7 +25,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
@@ -48,8 +47,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 @Internal
 public final class SystemContext extends BoundedContext {
-
-    private @MonotonicNonNull DefaultSystemReadSide ownBus;
 
     private SystemContext(BoundedContextBuilder builder) {
         super(builder);
