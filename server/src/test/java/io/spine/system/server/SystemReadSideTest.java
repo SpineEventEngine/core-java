@@ -52,14 +52,14 @@ class SystemReadSideTest {
             TestEventFactory.newInstance(SystemReadSideTest.class);
 
     private BoundedContext domainContext;
-    private SystemReadSide bus;
+    private SystemReadSide systemReadSide;
 
     @BeforeEach
     void setUp() {
         domainContext = BoundedContext
                 .newBuilder()
                 .build();
-        bus = domainContext.getSystemReadSide();
+        systemReadSide = domainContext.getSystemMonitor().readSide();
     }
 
     @AfterEach
@@ -77,21 +77,21 @@ class SystemReadSideTest {
                         .newBuilder()
                         .setStorageFactory(storageFactory)
                         .build())
-                .testStaticMethods(SystemReadSide.class, PACKAGE);
+                .testStaticMethods(DefaultSystemReadSide.class, PACKAGE);
     }
 
     @Test
     @DisplayName("not allow null dispatchers")
     void notAllowNullDispatchers() {
         new NullPointerTester()
-                .testAllPublicInstanceMethods(bus);
+                .testAllPublicInstanceMethods(systemReadSide);
     }
 
     @Test
     @DisplayName("pass system events to the domain")
     void passSystemEvents() {
         ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-        domainContext.getSystemReadSide().register(subscriber);
+        systemReadSide.register(subscriber);
 
         EventMessage systemEvent = postSystemEvent();
         Optional<EventMessage> receivedEvent = subscriber.lastEvent();
@@ -104,7 +104,6 @@ class SystemReadSideTest {
     @DisplayName("unregister dispatchers")
     void unregisterDispatchers() {
         ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-        SystemReadSide systemReadSide = domainContext.getSystemReadSide();
         systemReadSide.register(subscriber);
         systemReadSide.unregister(subscriber);
 

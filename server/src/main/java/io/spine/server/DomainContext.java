@@ -21,9 +21,7 @@
 package io.spine.server;
 
 import io.spine.server.entity.Repository;
-import io.spine.system.server.MasterWriteSide;
-import io.spine.system.server.SystemWriteSide;
-import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemMonitor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -47,36 +45,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class DomainContext extends BoundedContext {
 
-    private final MasterWriteSide systemGateway;
-    private final SystemReadSide systemReadSide;
+    private final SystemMonitor system;
 
     private DomainContext(BoundedContextBuilder builder,
-                          MasterWriteSide gateway,
-                          SystemReadSide systemReadSide) {
+                          SystemMonitor system) {
         super(builder);
-        this.systemGateway = gateway;
-        this.systemReadSide = systemReadSide;
+        this.system = checkNotNull(system);
     }
 
     static DomainContext newInstance(BoundedContextBuilder builder,
-                                     MasterWriteSide gateway,
-                                     SystemReadSide bus) {
+                                     SystemMonitor system) {
         checkNotNull(builder);
-        checkNotNull(gateway);
-        checkNotNull(builder);
+        checkNotNull(system);
 
-        DomainContext result = new DomainContext(builder, gateway, bus);
+        DomainContext result = new DomainContext(builder, system);
         return result;
     }
 
     @Override
-    public SystemWriteSide getSystemGateway() {
-        return systemGateway;
-    }
-
-    @Override
-    public SystemReadSide getSystemReadSide() {
-        return systemReadSide;
+    public SystemMonitor getSystemMonitor() {
+        return system;
     }
 
     /**
@@ -89,6 +77,6 @@ final class DomainContext extends BoundedContext {
     @Override
     public void close() throws Exception {
         super.close();
-        systemGateway.closeSystemContext();
+        system.closeSystemContext();
     }
 }

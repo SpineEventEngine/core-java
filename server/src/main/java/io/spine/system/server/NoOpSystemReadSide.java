@@ -20,29 +20,19 @@
 
 package io.spine.system.server;
 
-import io.spine.server.BoundedContext;
+import io.spine.server.event.EventDispatcher;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+public enum NoOpSystemReadSide implements SystemReadSide {
 
-/**
- * A test utility for working with system {@link BoundedContext}s.
- */
-public final class SystemBoundedContexts {
+    INSTANCE;
 
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private SystemBoundedContexts() {
+    @Override
+    public void register(EventDispatcher<?> dispatcher) {
+        // Do nothing.
     }
 
-    /**
-     * Extracts the {@code System} bounded context from the given bounded context.
-     */
-    public static BoundedContext systemOf(BoundedContext context) {
-        SystemMonitor monitor = context.getSystemMonitor();
-        assertThat(monitor, instanceOf(DefaultSystemMonitor.class));
-        DefaultSystemMonitor gateway = (DefaultSystemMonitor) monitor;
-        return gateway.target();
+    @Override
+    public void unregister(EventDispatcher<?> dispatcher) {
+        // Do nothing.
     }
 }

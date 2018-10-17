@@ -31,20 +31,7 @@ import io.spine.annotation.Internal;
 @Internal
 public interface MasterWriteSide extends SystemWriteSide {
 
-    /**
-     * Closes the underlying system context.
-     *
-     * @throws Exception if the context thrown an exception when closing
-     */
     void closeSystemContext() throws Exception;
 
-    /**
-     * Creates a new instance of {@code MasterWriteSide}.
-     *
-     * @param system the underlying system context
-     * @return new gateway
-     */
-    static MasterWriteSide newInstance(SystemContext system) {
-        return new DefaultSystemWriteSide(system);
-    }
+
 }

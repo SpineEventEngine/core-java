@@ -20,29 +20,35 @@
 
 package io.spine.system.server;
 
-import io.spine.server.BoundedContext;
+import io.spine.annotation.Internal;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A test utility for working with system {@link BoundedContext}s.
+ * The entry point of a system context API exposed to its domain counterpart.
  */
-public final class SystemBoundedContexts {
+@Internal
+public interface SystemMonitor {
 
     /**
-     * Prevents the utility class instantiation.
+     * Obtains the system context write side.
      */
-    private SystemBoundedContexts() {
-    }
+    SystemWriteSide writeSide();
 
     /**
-     * Extracts the {@code System} bounded context from the given bounded context.
+     * Obtains the system context read side.
      */
-    public static BoundedContext systemOf(BoundedContext context) {
-        SystemMonitor monitor = context.getSystemMonitor();
-        assertThat(monitor, instanceOf(DefaultSystemMonitor.class));
-        DefaultSystemMonitor gateway = (DefaultSystemMonitor) monitor;
-        return gateway.target();
+    SystemReadSide readSide();
+
+    /**
+     * Closes the underlying system context.
+     *
+     * @throws Exception if the context thrown an exception when closing
+     */
+    void closeSystemContext() throws Exception;
+
+    static SystemMonitor newInstance(SystemContext context) {
+        checkNotNull(context);
+        return new DefaultSystemMonitor(context);
     }
 }

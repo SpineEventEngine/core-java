@@ -27,8 +27,6 @@ import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
  *
@@ -51,7 +49,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class SystemContext extends BoundedContext {
 
-    private @MonotonicNonNull SystemReadSide ownBus;
+    private @MonotonicNonNull DefaultSystemReadSide ownBus;
 
     private SystemContext(BoundedContextBuilder builder) {
         super(builder);
@@ -68,7 +66,6 @@ public final class SystemContext extends BoundedContext {
         CommandLifecycleRepository repository = new CommandLifecycleRepository();
         BoundedContextBuilder preparedBuilder = prepareEnricher(builder, repository);
         SystemContext result = new SystemContext(preparedBuilder);
-        result.init();
         result.registerRepositories(repository);
         return result;
     }
@@ -80,10 +77,6 @@ public final class SystemContext extends BoundedContext {
         Enricher enricher = SystemEnricher.create(repository);
         EventBus.Builder builderWithEnricher = busBuilder.setEnricher(enricher);
         return builder.setEventBus(builderWithEnricher);
-    }
-
-    private void init() {
-        this.ownBus = SystemReadSide.newInstance(this);
     }
 
     private void registerRepositories(CommandLifecycleRepository commandLifecycle) {
@@ -101,12 +94,7 @@ public final class SystemContext extends BoundedContext {
      * a {@link NoOpSystemWriteSide} instance.
      */
     @Override
-    public NoOpSystemWriteSide getSystemGateway() {
-        return NoOpSystemWriteSide.INSTANCE;
-    }
-
-    @Override
-    public SystemReadSide getSystemReadSide() {
-        return checkNotNull(ownBus);
+    public NoOpSystemMonitor getSystemMonitor() {
+        return NoOpSystemMonitor.INSTANCE;
     }
 }

@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("Default implementation of SystemWriteSide should")
 class DefaultSystemWriteSideTest {
 
-    private SystemWriteSide gateway;
+    private SystemWriteSide systemWriteSide;
     private ListId aggregateId;
 
     @BeforeEach
@@ -75,7 +75,7 @@ class DefaultSystemWriteSideTest {
         @BeforeEach
         void setUp() {
             domainContext = contextWithSystemAggregate();
-            gateway = domainContext.getSystemGateway();
+            systemWriteSide = domainContext.getSystemMonitor().writeSide();
             systemContext = systemOf(domainContext);
             createAggregate();
         }
@@ -94,7 +94,7 @@ class DefaultSystemWriteSideTest {
                     .newBuilder()
                     .setListId(aggregateId)
                     .build();
-            gateway.postEvent(event);
+            systemWriteSide.postEvent(event);
 
             int newCopiesCount = aggregate().getHardCopiesCount();
             assertEquals(copiesCount + 1, newCopiesCount);
@@ -111,7 +111,7 @@ class DefaultSystemWriteSideTest {
                     .setListId(aggregateId)
                     .setItem("Milk")
                     .build();
-            gateway.postCommand(command);
+            systemWriteSide.postCommand(command);
 
             List<String> newItems = aggregate().getItemList();
             assertEquals(1, newItems.size());
@@ -127,7 +127,7 @@ class DefaultSystemWriteSideTest {
                     .newBuilder()
                     .setId(aggregateId)
                     .build();
-            gateway.postCommand(command);
+            systemWriteSide.postCommand(command);
         }
     }
 
@@ -143,7 +143,7 @@ class DefaultSystemWriteSideTest {
         @BeforeEach
         void setUp() {
             domainContext = contextWithDomainAggregate();
-            gateway = domainContext.getSystemGateway();
+            systemWriteSide = domainContext.getSystemMonitor().writeSide();
             createAggregate();
         }
 
@@ -157,7 +157,7 @@ class DefaultSystemWriteSideTest {
         void query() {
             Query query = actorRequestFactory.query()
                                              .byIds(ShoppingList.class, of(aggregateId));
-            Message foundMessage = unpack(gateway.readDomainAggregate(query).next());
+            Message foundMessage = unpack(systemWriteSide.readDomainAggregate(query).next());
             assertEquals(aggregate(), foundMessage);
         }
 

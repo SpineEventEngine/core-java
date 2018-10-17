@@ -20,29 +20,22 @@
 
 package io.spine.system.server;
 
-import io.spine.server.BoundedContext;
+public enum NoOpSystemMonitor implements SystemMonitor {
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+    INSTANCE;
 
-/**
- * A test utility for working with system {@link BoundedContext}s.
- */
-public final class SystemBoundedContexts {
-
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private SystemBoundedContexts() {
+    @Override
+    public NoOpSystemWriteSide writeSide() {
+        return NoOpSystemWriteSide.INSTANCE;
     }
 
-    /**
-     * Extracts the {@code System} bounded context from the given bounded context.
-     */
-    public static BoundedContext systemOf(BoundedContext context) {
-        SystemMonitor monitor = context.getSystemMonitor();
-        assertThat(monitor, instanceOf(DefaultSystemMonitor.class));
-        DefaultSystemMonitor gateway = (DefaultSystemMonitor) monitor;
-        return gateway.target();
+    @Override
+    public NoOpSystemReadSide readSide() {
+        return NoOpSystemReadSide.INSTANCE;
+    }
+
+    @Override
+    public void closeSystemContext() {
+        // Do nothing.
     }
 }

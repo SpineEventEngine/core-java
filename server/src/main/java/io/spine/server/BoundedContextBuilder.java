@@ -34,11 +34,10 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.system.server.MasterWriteSide;
-import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.NoOpSystemMonitor;
 import io.spine.system.server.SystemContext;
+import io.spine.system.server.SystemMonitor;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.system.server.SystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -249,11 +248,10 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
-        MasterWriteSide systemGateway = MasterWriteSide.newInstance(system);
-        SystemReadSide systemReadSide = SystemReadSide.newInstance(system);
+        SystemMonitor systemMonitor = SystemMonitor.newInstance(system);
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
-                builder -> DomainContext.newInstance(builder, systemGateway, systemReadSide);
-        BoundedContext result = buildPartial(instanceFactory, systemGateway, transport);
+                builder -> DomainContext.newInstance(builder, systemMonitor);
+        BoundedContext result = buildPartial(instanceFactory, systemMonitor, transport);
         return result;
     }
 
@@ -269,23 +267,23 @@ public final class BoundedContextBuilder implements Logging {
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
-        NoOpSystemWriteSide systemGateway = NoOpSystemWriteSide.INSTANCE;
         SystemContext result = system.buildPartial(SystemContext::newInstance,
-                                                   systemGateway,
+                                                   NoOpSystemMonitor.INSTANCE,
                                                    transport);
         return result;
     }
 
     private <B extends BoundedContext> B
     buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
-                 SystemWriteSide systemWriteSide,
+                 SystemMonitor systemWriteSide,
                  TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
+        SystemWriteSide writeSide = systemWriteSide.writeSide();
 
         initTenantIndex(storageFactory);
-        initCommandBus(systemWriteSide);
+        initCommandBus(writeSide);
         initEventBus(storageFactory);
-        initStand(systemWriteSide);
+        initStand(writeSide);
         initIntegrationBus(transport);
 
         B result = instanceFactory.apply(this);

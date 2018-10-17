@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -29,7 +28,6 @@ import io.spine.client.Query;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.UserId;
-import io.spine.server.BoundedContext;
 
 import java.util.Iterator;
 
@@ -42,7 +40,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>All the facilities provided by the system bounded context are available through this gateway.
  */
-final class DefaultSystemWriteSide implements MasterWriteSide {
+final class DefaultSystemWriteSide implements SystemWriteSide {
 
     /**
      * The ID of the user which is used for generating system commands and events.
@@ -90,15 +88,5 @@ final class DefaultSystemWriteSide implements MasterWriteSide {
                       );
         Iterator<Any> result = repository.execute(query);
         return result;
-    }
-
-    @VisibleForTesting
-    BoundedContext target() {
-        return system;
-    }
-
-    @Override
-    public void closeSystemContext() throws Exception {
-        system.close();
     }
 }

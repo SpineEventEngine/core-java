@@ -45,8 +45,9 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.SystemMonitor;
 import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
@@ -257,9 +258,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             getEventBus().register(dispatcher);
-            getSystemReadSide().register(dispatcher);
+            SystemReadSide systemReadSide = getSystemMonitor().readSide();
+            systemReadSide.register(dispatcher);
         }
-
         if (dispatcher.dispatchesExternalEvents()) {
             registerWithIntegrationBus(dispatcher);
         }
@@ -273,16 +274,14 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
-        DelegatingEventDispatcher<?> delegatingDispatcher =
-                DelegatingEventDispatcher.of(dispatcher);
-
+        DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
         if (dispatcher.dispatchesEvents()) {
-            getEventBus().register(delegatingDispatcher);
-            getSystemReadSide().register(delegatingDispatcher);
+            getEventBus().register(delegate);
+            SystemReadSide systemReadSide = getSystemMonitor().readSide();
+            systemReadSide.register(delegate);
         }
-
         if (dispatcher.dispatchesExternalEvents()) {
-            registerWithIntegrationBus(delegatingDispatcher);
+            registerWithIntegrationBus(delegate);
         }
     }
 
@@ -299,7 +298,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Creates a {@code CommandErrorHandler} for objects that handle commands.
      */
     public CommandErrorHandler createCommandErrorHandler() {
-        SystemWriteSide systemWriteSide = getSystemGateway();
+        SystemWriteSide systemWriteSide = getSystemMonitor().writeSide();
         CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide);
         return result;
     }
@@ -406,12 +405,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return tenantIndex;
     }
 
-    /** Obtains instance of {@link io.spine.system.server.SystemWriteSide} of this {@code BoundedContext}. */
+    /** Obtains instance of {@link SystemMonitor} of this {@code BoundedContext}. */
     @Internal
-    public abstract SystemWriteSide getSystemGateway();
-
-    /** Obtains instance of {@link io.spine.system.server.SystemReadSide} of this {@code BoundedContext}. */
-    public abstract SystemReadSide getSystemReadSide();
+    public abstract SystemMonitor getSystemMonitor();
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.

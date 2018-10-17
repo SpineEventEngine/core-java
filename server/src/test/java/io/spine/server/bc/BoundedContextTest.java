@@ -35,8 +35,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStore;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.SystemWriteSide;
-import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemMonitor;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.server.model.ModelTests;
@@ -350,13 +349,7 @@ class BoundedContextTest {
                     @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
                     @Internal
                     @Override
-                    public SystemWriteSide getSystemGateway() {
-                        return null;
-                    }
-
-                    @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
-                    @Override
-                    public SystemReadSide getSystemReadSide() {
+                    public SystemMonitor getSystemMonitor() {
                         return null;
                     }
                 }
