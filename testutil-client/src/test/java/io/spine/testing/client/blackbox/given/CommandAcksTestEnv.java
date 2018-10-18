@@ -58,7 +58,6 @@ public class CommandAcksTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private CommandAcksTestEnv() {
-        // Does nothing.
     }
 
     public static Ack newOkAck() {
