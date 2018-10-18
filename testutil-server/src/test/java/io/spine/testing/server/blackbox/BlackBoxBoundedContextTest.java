@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -44,6 +46,7 @@ import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@ExtendWith(ShardingReset.class)
 @DisplayName("Black Box Bounded Context should")
 class BlackBoxBoundedContextTest {
 

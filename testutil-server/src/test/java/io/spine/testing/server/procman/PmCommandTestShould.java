@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.procman;
 
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 import io.spine.testing.server.given.entity.TuPmState;
 import io.spine.testing.server.given.entity.command.TuAssignTask;
@@ -29,12 +30,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static io.spine.testing.server.procman.given.SamplePmCommandTest.TEST_COMMAND;
 import static io.spine.testing.server.procman.given.pm.CommandHandlingPm.NESTED_COMMAND;
 import static io.spine.testing.server.procman.given.pm.CommandHandlingPm.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(ShardingReset.class)
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProcessManagerCommandTest should")
 class PmCommandTestShould {
