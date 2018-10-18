@@ -30,6 +30,11 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * An implementation of {@link SystemReadSide} which executes all the operations for a given tenant.
+ *
+ * <p>The {@code SystemReadSide} delegates operations to the given delegate.
+ */
 final class TenantAwareSystemReadSide implements SystemReadSide {
 
     private final SystemReadSide delegate;
