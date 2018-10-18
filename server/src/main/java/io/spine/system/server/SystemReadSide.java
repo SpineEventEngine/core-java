@@ -28,10 +28,30 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * The read side of a system bounded context.
+ *
+ * <p>A domain context accesses its system counterpart data via a {@code SystemReadSide}.
+ */
 public interface SystemReadSide {
 
+    /**
+     * Registers an event dispatcher for system events.
+     *
+     * <p>Any system event may be passed to such dispatcher.
+     *
+     * @param dispatcher
+     *         a system event dispatcher
+     */
     void register(EventDispatcher<?> dispatcher);
 
+    /**
+     * Removes the given system event dispatcher.
+     *
+     * @param dispatcher
+     *         a registered system event dispatcher
+     * @see #register(io.spine.server.event.EventDispatcher)
+     */
     void unregister(EventDispatcher<?> dispatcher);
 
     /**
@@ -57,7 +77,7 @@ public interface SystemReadSide {
      * Creates a new instance of {@code SystemReadSide} for the given system context.
      *
      * @param context
-     *         the system context to broadcast the events of
+     *         the system context to fetch data from
      * @return a new instance of {@code SystemReadSide}
      */
     static SystemReadSide newInstance(SystemContext context) {

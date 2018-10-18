@@ -30,8 +30,6 @@ import io.spine.base.EventMessage;
  *
  * <p>This implementation is used by the system bounded context itself, since there is no system
  * bounded context for a system bounded context.
- *
- * @author Dmytro Dashenkov
  */
 public enum NoOpSystemWriteSide implements SystemWriteSide {
 

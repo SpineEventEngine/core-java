@@ -34,10 +34,12 @@ import static java.util.Collections.emptyIterator;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * A {@link io.spine.system.server.SystemWriteSide} which memoizes the posted system commands.
+ * A {@link SystemReadSide} which memoizes the queries passed to it.
  *
- * <p>This class is a test-only facility, used in order to avoid mocking {@link io.spine.system.server.SystemWriteSide}
+ * <p>This class is a test-only facility, used in order to avoid mocking {@link SystemReadSide}
  * instances.
+ *
+ * <p>Note that the
  */
 public final class MemoizingReadSide implements SystemReadSide {
 
@@ -67,16 +69,37 @@ public final class MemoizingReadSide implements SystemReadSide {
         return new MemoizingReadSide(true);
     }
 
+    /**
+     * Throws an {@link UnsupportedOperationException}.
+     *
+     * @deprecated This method is not implemented, since there are no use cases for such
+     *             an implementation in tests.
+     */
+    @Deprecated
     @Override
-    public void register(EventDispatcher<?> dispatcher) {
+    public void register(EventDispatcher<?> dispatcher) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Method register is not implemented!");
     }
 
+    /**
+     * Throws an {@link UnsupportedOperationException}.
+     *
+     * @deprecated This method is not implemented, since there are no use cases for such
+     *             an implementation in tests.
+     */
+    @Deprecated
     @Override
-    public void unregister(EventDispatcher<?> dispatcher) {
+    public void unregister(EventDispatcher<?> dispatcher) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Method unregister is not implemented!");
     }
 
+    /**
+     * Memoizes the given query and returns an empty iterator.
+     *
+     * @param query
+     *         a query to memoize
+     * @return always an empty iterator
+     */
     @Override
     public Iterator<Any> readDomainAggregate(Query query) {
         TenantId tenantId = currentTenant();
@@ -96,7 +119,7 @@ public final class MemoizingReadSide implements SystemReadSide {
     }
 
     /**
-     * Obtains the last query submitted to {@link SystemWriteSide}.
+     * Obtains the last query submitted to this {@link SystemReadSide}.
      *
      * <p>Fails if no queries were submitted yet.
      */

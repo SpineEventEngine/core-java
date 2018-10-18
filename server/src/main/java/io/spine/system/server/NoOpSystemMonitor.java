@@ -20,6 +20,14 @@
 
 package io.spine.system.server;
 
+/**
+ * An implementation of {@link SystemMonitor} which never performs an action.
+ *
+ * <p>When requested for a read/write side of a system context, always obtains a NOP implementation.
+ *
+ * <p>An instance of {@code NoOpSystemMonitor} serves as the system monitor in the system contexts
+ * themselves.
+ */
 public enum NoOpSystemMonitor implements SystemMonitor {
 
     INSTANCE;
@@ -36,6 +44,6 @@ public enum NoOpSystemMonitor implements SystemMonitor {
 
     @Override
     public void closeSystemContext() {
-        // Do nothing.
+        // NOP.
     }
 }

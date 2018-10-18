@@ -32,22 +32,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A message bus for system events.
+ * The default implementation of a {@link SystemReadSide}.
  *
- * <p>A domain bounded context may register dispatchers of system events in
- * the {@code SystemReadSide}. All the events of a system context are broadcast by this bus.
- *
- * <p>Only the system events are allowed in the {@code SystemReadSide}. This class does not extend
- * the {@link io.spine.server.bus.Bus Bus} base class in order to restrict users from posting events
- * into the system bus.
- *
- * @implNote
- * A system bus is a delegate for the system event bus. When registering a dispatcher in
- * the system bus, the dispatcher gets registered in the system event bus. This way, all
- * the messages posted into the system event bus can be accessed via the system bus.
+ * @see SystemReadSide#newInstance(SystemContext)
  */
 @Internal
-public final class DefaultSystemReadSide implements SystemReadSide {
+final class DefaultSystemReadSide implements SystemReadSide {
 
     private final SystemContext context;
     private final EventBus eventBus;

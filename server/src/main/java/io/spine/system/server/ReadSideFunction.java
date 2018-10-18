@@ -25,7 +25,7 @@ import io.spine.core.TenantId;
 import java.util.function.Function;
 
 /**
- * Obtains a gateway in a multi-tenant environment.
+ * Obtains a system read side in a multi-tenant environment.
  */
 @FunctionalInterface
 public interface ReadSideFunction extends Function<TenantId, SystemReadSide> {

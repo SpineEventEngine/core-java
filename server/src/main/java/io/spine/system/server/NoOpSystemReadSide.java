@@ -28,18 +28,26 @@ import java.util.Iterator;
 
 import static java.util.Collections.emptyIterator;
 
+/**
+ * An implementation of {@link SystemReadSide} which never performs an operation.
+ *
+ * <p>All the methods inherited from {@link SystemReadSide} exit without any action or exception.
+ *
+ * <p>This implementation is used by the system bounded context itself, since there is no system
+ * bounded context for a system bounded context.
+ */
 public enum NoOpSystemReadSide implements SystemReadSide {
 
     INSTANCE;
 
     @Override
     public void register(EventDispatcher<?> dispatcher) {
-        // Do nothing.
+        // NOP.
     }
 
     @Override
     public void unregister(EventDispatcher<?> dispatcher) {
-        // Do nothing.
+        // NOP.
     }
 
     @Override

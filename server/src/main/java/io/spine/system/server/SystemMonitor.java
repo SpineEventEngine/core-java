@@ -43,10 +43,18 @@ public interface SystemMonitor {
     /**
      * Closes the underlying system context.
      *
-     * @throws Exception if the context thrown an exception when closing
+     * @throws Exception
+     *         if the context thrown an exception when closing
      */
     void closeSystemContext() throws Exception;
 
+    /**
+     * Creates a new instance of {@code SystemMonitor} for the given system context.
+     *
+     * @param context
+     *         the system context to monitor
+     * @return new system monitor
+     */
     static SystemMonitor newInstance(SystemContext context) {
         checkNotNull(context);
         return new DefaultSystemMonitor(context);

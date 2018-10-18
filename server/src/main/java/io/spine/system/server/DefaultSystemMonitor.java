@@ -25,6 +25,13 @@ import io.spine.server.BoundedContext;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * The default implementation of {@link SystemMonitor}.
+ *
+ * <p>This monitor uses the {@linkplain SystemReadSide#newInstance default} implementation of
+ * the read side and the {@linkplain SystemWriteSide#newInstance default} implementation of
+ * the write side.
+ */
 final class DefaultSystemMonitor implements SystemMonitor {
 
     private final SystemWriteSide writeSide;
