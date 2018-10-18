@@ -137,6 +137,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
      * associated with the passed {@code BoundedContext}.
      */
+    @Internal
     public final void setBoundedContext(BoundedContext boundedContext) {
         this.boundedContext = boundedContext;
         if (!isStorageAssigned()) {
