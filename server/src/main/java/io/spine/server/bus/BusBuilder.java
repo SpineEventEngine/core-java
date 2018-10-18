@@ -95,8 +95,8 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
      *          auto-complete hint for the {@code set} prefix.
      */
     @Internal
-    public B injectSystemGateway(SystemWriteSide gateway) {
-        this.systemWriteSide = checkNotNull(gateway);
+    public B injectSystem(SystemWriteSide writeSide) {
+        this.systemWriteSide = checkNotNull(writeSide);
         return self();
     }
 
@@ -116,13 +116,15 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     /**
      * Obtains a {@link io.spine.system.server.SystemWriteSide} set in the builder.
      */
-    public Optional<SystemWriteSide> systemGateway() {
+    @Internal
+    public Optional<SystemWriteSide> system() {
         return ofNullable(systemWriteSide);
     }
 
     /**
      * Obtains a {@link TenantIndex} set in the builder.
      */
+    @Internal
     public Optional<TenantIndex> tenantIndex() {
         return ofNullable(tenantIndex);
     }
@@ -145,7 +147,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * @return {@code this} reference to avoid redundant casts
+     * Returns {@code this} reference to avoid redundant casts.
      */
     protected abstract B self();
 
@@ -154,7 +156,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
      */
     public static final class FieldCheck {
 
-        private static final String GATEWAY_METHOD = "injectSystemGateway";
+        private static final String SYSTEM_METHOD = "injectSystem";
         private static final String TENANT_INDEX_METHOD = "injectTenantIndex";
         private static final String ERROR_FORMAT = "`%s` must be set. Please call `%s()`.";
 
@@ -163,18 +165,18 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
         }
 
         private static void check(BusBuilder builder) {
-            checkSet(builder.systemWriteSide, SystemWriteSide.class, GATEWAY_METHOD);
+            checkSet(builder.systemWriteSide, SystemWriteSide.class, SYSTEM_METHOD);
             checkSet(builder.tenantIndex, TenantIndex.class, TENANT_INDEX_METHOD);
         }
 
         public static void checkSet(@Nullable Object field,
-                                     Class<?> fieldType,
-                                     String setterName) {
+                                    Class<?> fieldType,
+                                    String setterName) {
             checkState(field != null, ERROR_FORMAT, fieldType.getSimpleName(), setterName);
         }
 
-        public static Supplier<IllegalStateException> gatewayNotSet() {
-            return () -> newException(SystemWriteSide.class, GATEWAY_METHOD);
+        public static Supplier<IllegalStateException> systemNotSet() {
+            return () -> newException(SystemWriteSide.class, SYSTEM_METHOD);
         }
 
         public static Supplier<IllegalStateException> tenantIndexNotSet() {

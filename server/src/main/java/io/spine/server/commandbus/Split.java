@@ -80,7 +80,7 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
     protected
-    void addPosted(CommandSplit.Builder builder, Command command, SystemWriteSide gateway) {
+    void addPosted(CommandSplit.Builder builder, Command command, SystemWriteSide writeSide) {
         builder.addProduced(command.getId());
     }
 

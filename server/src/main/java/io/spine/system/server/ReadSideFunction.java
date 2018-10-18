@@ -30,7 +30,7 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface ReadSideFunction extends Function<TenantId, SystemReadSide> {
 
-    /** Obtains system gateway for the given tenant. */
+    /** Obtains system read side for the given tenant. */
     default SystemReadSide get(TenantId tenantId) {
         return apply(tenantId);
     }

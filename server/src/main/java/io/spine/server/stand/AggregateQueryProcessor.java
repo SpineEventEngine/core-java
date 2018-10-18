@@ -48,8 +48,8 @@ class AggregateQueryProcessor implements QueryProcessor {
     @Override
     public ImmutableCollection<Any> process(Query query) {
         TenantId tenant = tenantOf(query);
-        SystemReadSide gateway = delegatingTo(systemReadSide).get(tenant);
-        Iterator<Any> read = gateway.readDomainAggregate(query);
+        SystemReadSide readSide = delegatingTo(systemReadSide).get(tenant);
+        Iterator<Any> read = readSide.readDomainAggregate(query);
         ImmutableList<Any> result = copyOf(read);
         return result;
     }

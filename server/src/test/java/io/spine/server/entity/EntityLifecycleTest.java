@@ -66,7 +66,7 @@ class EntityLifecycleTest {
     void allowCreationWithoutEventFilter() {
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
-                .setGateway(NoOpSystemWriteSide.INSTANCE)
+                .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
                 .setEntityType(TypeUrl.of(Empty.class))
                 .setEntityId("sample-id")
                 .build();
@@ -82,17 +82,17 @@ class EntityLifecycleTest {
                    ? Optional.empty()
                    : Optional.of(event);
         };
-        MemoizingWriteSide gateway = MemoizingWriteSide.singleTenant();
+        MemoizingWriteSide writeSide = MemoizingWriteSide.singleTenant();
         int entityId = 42;
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
                 .setEntityId(entityId)
                 .setEntityType(TypeUrl.of(Timestamp.class))
-                .setGateway(gateway)
+                .setSystemWriteSide(writeSide)
                 .setEventFilter(filter)
                 .build();
         lifecycle.onEntityCreated(ENTITY);
-        MemoizedSystemMessage lastSeenEvent = gateway.lastSeenEvent();
+        MemoizedSystemMessage lastSeenEvent = writeSide.lastSeenEvent();
         assertThat(lastSeenEvent.message(), instanceOf(EntityCreated.class));
 
 
@@ -111,6 +111,6 @@ class EntityLifecycleTest {
                 .setNewValue(newRecord)
                 .build();
         lifecycle.onStateChanged(change, of(EventId.getDefaultInstance()));
-        assertSame(lastSeenEvent, gateway.lastSeenEvent());
+        assertSame(lastSeenEvent, writeSide.lastSeenEvent());
     }
 }

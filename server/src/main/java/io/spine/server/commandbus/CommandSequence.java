@@ -99,7 +99,7 @@ public abstract class CommandSequence<O extends Message,
     /**
      * Adds the posted command to the result builder.
      */
-    protected abstract void addPosted(B builder, Command command, SystemWriteSide gateway);
+    protected abstract void addPosted(B builder, Command command, SystemWriteSide writeSide);
 
     /**
      * Adds a command message to the sequence of commands to be posted.
@@ -157,26 +157,26 @@ public abstract class CommandSequence<O extends Message,
      * all the commands were posted successfully.
      */
     protected R postAll(CommandBus bus) {
-        SystemWriteSide gateway = gateway(bus);
+        SystemWriteSide writeSide = systemWriteSide(bus);
         B builder = newBuilder();
         while (hasNext()) {
             CommandMessage message = next();
             Optional<Command> posted = post(message, bus);
             if (posted.isPresent()) {
                 Command command = posted.get();
-                addPosted(builder, command, gateway);
+                addPosted(builder, command, writeSide);
             }
         }
         @SuppressWarnings("unchecked") /* The type is ensured by correct couples of R,B types passed
             to in the classes derived from `CommandSequence` that are limited to this package. */
         R result = (R) builder.build();
-        gateway.postEvent(result);
+        writeSide.postEvent(result);
         return result;
     }
 
-    private SystemWriteSide gateway(CommandBus bus) {
+    private SystemWriteSide systemWriteSide(CommandBus bus) {
         TenantId tenantId = actorContext.getTenantId();
-        return bus.gatewayFor(tenantId);
+        return bus.systemFor(tenantId);
     }
 
     /**

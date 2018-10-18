@@ -69,7 +69,7 @@ public class SingleCommand
     @Override
     @SuppressWarnings("CheckReturnValue") // calling builder
     protected
-    void addPosted(EventCausedCommand.Builder builder, Command command, SystemWriteSide gateway) {
+    void addPosted(EventCausedCommand.Builder builder, Command command, SystemWriteSide writeSide) {
         CommandId commandId = command.getId();
         builder.setProduced(commandId);
     }

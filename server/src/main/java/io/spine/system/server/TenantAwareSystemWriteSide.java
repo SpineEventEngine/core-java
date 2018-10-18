@@ -34,8 +34,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>A system command is {@linkplain #postCommand(CommandMessage) posted} within
  * a {@link TenantAwareOperation} with the given tenant set.
  *
- * <p>Any call to this gateway is delegated to another instance of {@link SystemWriteSide}
- * passed on construction.
+ * <p>Any call to this {@code TenantAwareSystemWriteSide} is delegated to another instance
+ * of {@link SystemWriteSide} passed on construction.
  *
  * @see TenantAwareOperation
  */

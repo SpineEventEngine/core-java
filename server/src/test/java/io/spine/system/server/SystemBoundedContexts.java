@@ -42,7 +42,7 @@ public final class SystemBoundedContexts {
     public static BoundedContext systemOf(BoundedContext context) {
         SystemMonitor monitor = context.getSystemMonitor();
         assertThat(monitor, instanceOf(DefaultSystemMonitor.class));
-        DefaultSystemMonitor gateway = (DefaultSystemMonitor) monitor;
-        return gateway.target();
+        DefaultSystemMonitor defaultMonitor = (DefaultSystemMonitor) monitor;
+        return defaultMonitor.target();
     }
 }

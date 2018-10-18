@@ -334,7 +334,7 @@ public final class BoundedContextBuilder implements Logging {
                 commandBus.setMultitenant(this.multitenant);
             }
         }
-        commandBus.injectSystemGateway(systemWriteSide)
+        commandBus.injectSystem(systemWriteSide)
                   .injectTenantIndex(tenantIndex);
     }
 

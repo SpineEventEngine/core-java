@@ -38,8 +38,8 @@ class StandBuilderTest {
     class Create {
 
         @Test
-        @DisplayName("with SystemWriteSide only")
-        void onlyGateway() {
+        @DisplayName("with SystemReadSide only")
+        void onlySystem() {
             Stand.Builder builder = Stand.newBuilder();
             SystemReadSide readSide = mock(SystemReadSide.class);
             builder.setSystemReadSide(readSide);

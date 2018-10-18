@@ -51,11 +51,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private final StreamObserver<Ack> delegate;
-    private final SystemWriteSide gateway;
+    private final SystemWriteSide writeSide;
 
     private CommandAckMonitor(Builder builder) {
         this.delegate = builder.delegate;
-        this.gateway = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
+        this.writeSide = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
     }
 
     /**
@@ -86,7 +86,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         Status status = ack.getStatus();
         CommandId commandId = commandIdFrom(ack);
         EventMessage systemEvent = systemEventFor(status, commandId);
-        gateway.postEvent(systemEvent);
+        writeSide.postEvent(systemEvent);
     }
 
     private static CommandId commandIdFrom(Ack ack) {

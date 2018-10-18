@@ -124,15 +124,15 @@ public class EntityLifecycle {
     @VisibleForTesting
     protected EntityLifecycle(Object entityId,
                               TypeUrl entityType,
-                              SystemWriteSide gateway,
+                              SystemWriteSide writeSide,
                               EventFilter eventFilter) {
-        this.systemWriteSide = checkNotNull(gateway);
+        this.systemWriteSide = checkNotNull(writeSide);
         this.eventFilter = checkNotNull(eventFilter);
         this.historyId = historyId(entityId, entityType);
     }
 
     private EntityLifecycle(Builder builder) {
-        this(builder.entityId, builder.entityType, builder.gateway, builder.eventFilter);
+        this(builder.entityId, builder.entityType, builder.writeSide, builder.eventFilter);
     }
 
     /**
@@ -441,7 +441,7 @@ public class EntityLifecycle {
 
         private Object entityId;
         private TypeUrl entityType;
-        private SystemWriteSide gateway;
+        private SystemWriteSide writeSide;
         private EventFilter eventFilter;
 
         /**
@@ -460,8 +460,8 @@ public class EntityLifecycle {
             return this;
         }
 
-        Builder setGateway(SystemWriteSide gateway) {
-            this.gateway = checkNotNull(gateway);
+        Builder setSystemWriteSide(SystemWriteSide writeSide) {
+            this.writeSide = checkNotNull(writeSide);
             return this;
         }
 
@@ -478,7 +478,7 @@ public class EntityLifecycle {
         EntityLifecycle build() {
             checkState(entityId != null);
             checkState(entityType != null);
-            checkState(gateway != null);
+            checkState(writeSide != null);
             if (eventFilter == null) {
                 eventFilter = allowAll();
             }

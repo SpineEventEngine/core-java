@@ -79,7 +79,7 @@ public final class Transform
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
     protected
-    void addPosted(CommandTransformed.Builder builder, Command command, SystemWriteSide gateway) {
+    void addPosted(CommandTransformed.Builder builder, Command command, SystemWriteSide writeSide) {
         builder.setProduced(command.getId());
     }
 }

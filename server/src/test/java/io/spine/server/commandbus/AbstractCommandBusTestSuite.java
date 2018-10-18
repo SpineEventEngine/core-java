@@ -181,7 +181,7 @@ abstract class AbstractCommandBusTestSuite {
                 .setMultitenant(this.multitenant)
                 .setCommandScheduler(scheduler)
                 .injectEventBus(eventBus)
-                .injectSystemGateway(systemWriteSide)
+                .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
                 .build();
         requestFactory =

@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @DisplayName("CommandReceivedTap should")
 class CommandReceivedTapTest {
 
-    private MemoizingWriteSide gateway;
+    private MemoizingWriteSide writeSide;
     private CommandReceivedTap filter;
 
     @BeforeEach
@@ -56,17 +56,17 @@ class CommandReceivedTapTest {
     }
 
     private void initSingleTenant() {
-        gateway = MemoizingWriteSide.singleTenant();
-        filter = new CommandReceivedTap(gatewayFn());
+        writeSide = MemoizingWriteSide.singleTenant();
+        filter = new CommandReceivedTap(systemFn());
     }
 
     private void initMultitenant() {
-        gateway = MemoizingWriteSide.multitenant();
-        filter = new CommandReceivedTap(gatewayFn());
+        writeSide = MemoizingWriteSide.multitenant();
+        filter = new CommandReceivedTap(systemFn());
     }
 
-    private WriteSideFunction gatewayFn() {
-        return WriteSideFunction.delegatingTo(gateway);
+    private WriteSideFunction systemFn() {
+        return WriteSideFunction.delegatingTo(writeSide);
     }
 
     @Test
@@ -85,8 +85,8 @@ class CommandReceivedTapTest {
         Command command = command(commandMessage(), expectedTenant);
         postAndCheck(command);
 
-        TenantId actualTenant = gateway.lastSeenEvent()
-                                       .tenant();
+        TenantId actualTenant = writeSide.lastSeenEvent()
+                                         .tenant();
         assertEquals(expectedTenant, actualTenant);
     }
 
@@ -96,8 +96,8 @@ class CommandReceivedTapTest {
         Optional<?> ack = filter.accept(envelope);
         assertFalse(ack.isPresent());
 
-        CommandReceived systemEvent = (CommandReceived) gateway.lastSeenEvent()
-                                                               .message();
+        CommandReceived systemEvent = (CommandReceived) writeSide.lastSeenEvent()
+                                                                 .message();
         assertEquals(envelope.getId(), systemEvent.getId());
     }
 

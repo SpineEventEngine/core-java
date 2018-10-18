@@ -95,8 +95,8 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("system gateway")
-        void systemGateway() {
+        @DisplayName("system write side")
+        void system() {
             builder.setDelegate(noOpObserver())
                    .setTenantId(TenantId.getDefaultInstance());
             assertFailsToBuild();
@@ -112,17 +112,17 @@ class CommandAckMonitorTest {
     class PostSystemCommands {
 
         private CommandAckMonitor monitor;
-        private MemoizingWriteSide gateway;
+        private MemoizingWriteSide writeSide;
 
         private CommandId commandId;
 
         @BeforeEach
         void setUp() {
-            gateway = MemoizingWriteSide.singleTenant();
+            writeSide = MemoizingWriteSide.singleTenant();
             monitor = CommandAckMonitor
                     .newBuilder()
                     .setDelegate(noOpObserver())
-                    .setSystemWriteSide(gateway)
+                    .setSystemWriteSide(writeSide)
                     .setTenantId(TenantId.getDefaultInstance())
                     .build();
             commandId = CommandId
@@ -137,8 +137,8 @@ class CommandAckMonitorTest {
             Ack ack = okAck(commandId);
             monitor.onNext(ack);
 
-            Message lastSeenEvent = gateway.lastSeenEvent()
-                                           .message();
+            Message lastSeenEvent = writeSide.lastSeenEvent()
+                                             .message();
 
             assertThat(lastSeenEvent).isInstanceOf(CommandAcknowledged.class);
 
@@ -152,8 +152,8 @@ class CommandAckMonitorTest {
             Ack ack = errorAck(commandId);
             monitor.onNext(ack);
 
-            Message lastSeenEvent = gateway.lastSeenEvent()
-                                           .message();
+            Message lastSeenEvent = writeSide.lastSeenEvent()
+                                             .message();
 
             assertThat(lastSeenEvent).isInstanceOf(CommandErrored.class);
 

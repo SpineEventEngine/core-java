@@ -30,7 +30,7 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface WriteSideFunction extends Function<TenantId, SystemWriteSide> {
 
-    /** Obtains system gateway for the given tenant. */
+    /** Obtains system write side for the given tenant. */
     default SystemWriteSide get(TenantId tenantId) {
         return apply(tenantId);
     }

@@ -101,8 +101,8 @@ class TenantAwareSystemWriteSideTest {
 
     private void postCommandAndCheck(TenantId tenantId) {
         CommandMessage command = Sample.messageOfType(CreateShoppingList.class);
-        SystemWriteSide gateway = delegatingTo(delegate).get(tenantId);
-        gateway.postCommand(command);
+        SystemWriteSide writeSide = delegatingTo(delegate).get(tenantId);
+        writeSide.postCommand(command);
 
         assertEquals(command, delegate.lastSeenCommand().message());
     }

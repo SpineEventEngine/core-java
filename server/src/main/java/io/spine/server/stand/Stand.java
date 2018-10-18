@@ -471,8 +471,8 @@ public class Stand implements AutoCloseable {
         }
 
         @Internal
-        public Builder setSystemReadSide(SystemReadSide gateway) {
-            this.systemReadSide = checkNotNull(gateway);
+        public Builder setSystemReadSide(SystemReadSide readSide) {
+            this.systemReadSide = checkNotNull(readSide);
             return this;
         }
 

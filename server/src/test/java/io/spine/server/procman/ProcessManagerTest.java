@@ -139,7 +139,7 @@ class ProcessManagerTest {
                                     .build();
         commandBus = spy(CommandBus.newBuilder()
                                    .injectTenantIndex(tenantIndex)
-                                   .injectSystemGateway(NoOpSystemWriteSide.INSTANCE)
+                                   .injectSystem(NoOpSystemWriteSide.INSTANCE)
                                    .injectEventBus(eventBus)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)

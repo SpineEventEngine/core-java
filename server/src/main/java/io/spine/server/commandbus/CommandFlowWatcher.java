@@ -39,10 +39,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class CommandFlowWatcher {
 
-    private final WriteSideFunction gateway;
+    private final WriteSideFunction function;
 
-    CommandFlowWatcher(WriteSideFunction gateway) {
-        this.gateway = checkNotNull(gateway);
+    CommandFlowWatcher(WriteSideFunction function) {
+        this.function = checkNotNull(function);
     }
 
     /**
@@ -75,12 +75,12 @@ final class CommandFlowWatcher {
     }
 
     private void postSystemEvent(EventMessage systemEvent, TenantId tenantId) {
-        SystemWriteSide gateway = this.gateway.get(tenantId);
-        gateway.postEvent(systemEvent);
+        SystemWriteSide writeSide = function.get(tenantId);
+        writeSide.postEvent(systemEvent);
     }
 
     private void postSystemCommand(CommandMessage systemCommand, TenantId tenantId) {
-        SystemWriteSide gateway = this.gateway.get(tenantId);
-        gateway.postCommand(systemCommand);
+        SystemWriteSide writeSide = function.get(tenantId);
+        writeSide.postCommand(systemCommand);
     }
 }

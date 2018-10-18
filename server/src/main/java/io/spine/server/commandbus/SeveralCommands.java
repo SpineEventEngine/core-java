@@ -74,7 +74,7 @@ public class SeveralCommands
     @Override
     @SuppressWarnings("CheckReturnValue") // calling builder
     protected void
-    addPosted(EventCausedCommands.Builder builder, Command command, SystemWriteSide gateway) {
+    addPosted(EventCausedCommands.Builder builder, Command command, SystemWriteSide writeSide) {
         CommandId commandId = command.getId();
         builder.addProduced(commandId);
     }

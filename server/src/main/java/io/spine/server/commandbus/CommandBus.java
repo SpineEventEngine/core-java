@@ -57,7 +57,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.BusBuilder.FieldCheck.checkSet;
-import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
+import static io.spine.server.bus.BusBuilder.FieldCheck.systemNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static java.util.Optional.ofNullable;
@@ -115,8 +115,8 @@ public class CommandBus extends UnicastBus<Command,
                            : false;
         this.scheduler = builder.commandScheduler;
         this.eventBus = builder.eventBus;
-        this.systemWriteSide = builder.systemGateway()
-                                      .orElseThrow(gatewayNotSet());
+        this.systemWriteSide = builder.system()
+                                      .orElseThrow(systemNotSet());
         this.tenantIndex = builder.tenantIndex()
                                   .orElseThrow(tenantIndexNotSet());
         this.deadCommandHandler = new DeadCommandHandler();
@@ -155,7 +155,7 @@ public class CommandBus extends UnicastBus<Command,
 
     @Override
     protected Collection<BusFilter<CommandEnvelope>> filterChainHead() {
-        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(this::gatewayFor);
+        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(this::systemFor);
         Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
         result.push(tap);
         return result;
@@ -194,7 +194,7 @@ public class CommandBus extends UnicastBus<Command,
                       .orElse(TenantId.getDefaultInstance());
     }
 
-    SystemWriteSide gatewayFor(TenantId tenantId) {
+    SystemWriteSide systemFor(TenantId tenantId) {
         checkNotNull(tenantId);
         SystemWriteSide result = delegatingTo(systemWriteSide).get(tenantId);
         return result;
@@ -360,8 +360,8 @@ public class CommandBus extends UnicastBus<Command,
             }
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
                 @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
-                        SystemWriteSide gateway = systemGateway().get();
-                SystemWriteSide result = delegatingTo(gateway).get(tenantId);
+                SystemWriteSide writeSide = system().get();
+                SystemWriteSide result = delegatingTo(writeSide).get(tenantId);
                 return result;
             });
             commandScheduler.setFlowWatcher(flowWatcher);

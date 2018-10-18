@@ -27,7 +27,9 @@ import io.spine.base.EventMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A gateway for sending messages into a {@link SystemContext}.
+ * The write side of a system bounded context.
+ *
+ * <p>A domain context posts messages to its system counterpart via a {@code SystemWriteSide}.
  */
 @Internal
 public interface SystemWriteSide {
@@ -55,7 +57,7 @@ public interface SystemWriteSide {
     void postEvent(EventMessage systemEvent);
 
     /**
-     * Creates new instance of the gateway which serves the passed System Bounded Context.
+     * Creates new instance of the {@code SystemWriteSide} which serves the passed system context.
      */
     static SystemWriteSide newInstance(SystemContext system) {
         checkNotNull(system);

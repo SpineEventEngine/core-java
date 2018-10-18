@@ -54,7 +54,7 @@ import static org.mockito.Mockito.mock;
 class CommandBusBuilderTest
         extends BusBuilderTest<CommandBus.Builder, CommandEnvelope, Command> {
 
-    private static final SystemWriteSide SYSTEM_GATEWAY = NoOpSystemWriteSide.INSTANCE;
+    private static final SystemWriteSide SYSTEM_WRITE_SIDE = NoOpSystemWriteSide.INSTANCE;
 
     private TenantIndex tenantIndex;
     private EventBus eventBus;
@@ -62,7 +62,7 @@ class CommandBusBuilderTest
     @Override
     protected CommandBus.Builder builder() {
         return CommandBus.newBuilder()
-                         .injectSystemGateway(SYSTEM_GATEWAY)
+                         .injectSystem(SYSTEM_WRITE_SIDE)
                          .injectTenantIndex(tenantIndex)
                          .injectEventBus(eventBus);
     }
@@ -85,7 +85,7 @@ class CommandBusBuilderTest
     void createNewInstance() {
         CommandBus commandBus = CommandBus.newBuilder()
                                           .injectTenantIndex(tenantIndex)
-                                          .injectSystemGateway(SYSTEM_GATEWAY)
+                                          .injectSystem(SYSTEM_WRITE_SIDE)
                                           .injectEventBus(eventBus)
                                           .build();
         assertNotNull(commandBus);
@@ -103,13 +103,13 @@ class CommandBusBuilderTest
     void neverOmitCommandStore() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
-                                     .injectSystemGateway(SYSTEM_GATEWAY)
+                                     .injectSystem(SYSTEM_WRITE_SIDE)
                                      .build());
     }
 
     @Test
     @DisplayName("not allow to omit setting SystemWriteSide")
-    void neverOmitSystemGateway() {
+    void neverOmitSystem() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
                                      .injectTenantIndex(tenantIndex)
@@ -161,11 +161,11 @@ class CommandBusBuilderTest
         }
 
         @Test
-        @DisplayName("system gateway")
-        void gateway() {
+        @DisplayName("system write side")
+        void system() {
             SystemWriteSide systemWriteSide = mock(SystemWriteSide.class);
-            CommandBus.Builder builder = builder().injectSystemGateway(systemWriteSide);
-            Optional<SystemWriteSide> actual = builder.systemGateway();
+            CommandBus.Builder builder = builder().injectSystem(systemWriteSide);
+            Optional<SystemWriteSide> actual = builder.system();
             assertTrue(actual.isPresent());
             assertSame(systemWriteSide, actual.get());
         }
