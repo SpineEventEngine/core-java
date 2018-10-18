@@ -20,30 +20,28 @@
 
 package io.spine.system.server;
 
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
+import com.google.protobuf.Timestamp;
+import io.spine.client.Query;
 import io.spine.core.TenantId;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.system.server.WriteSideFunction.delegatingTo;
+import static io.spine.system.server.ReadSideFunction.delegatingTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("InnerClassMayBeStatic")
-@DisplayName("TenantAwareSystemWriteSide should")
-class TenantAwareSystemWriteSideTest {
+@DisplayName("TenantAwareSystemReadSide should")
+class TenantAwareSystemReadSideTest {
 
-    private static final String POST_COMMANDS = "post system commands";
-    private static final String POST_EVENTS = "post system events";
+    private static final String QUERY = "query system BC for domain aggregates";
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(TenantAwareSystemWriteSideTest.class);
+            TestActorRequestFactory.newInstance(TenantAwareSystemReadSideTest.class);
 
-    private MemoizingWriteSide delegate;
+    private MemoizingReadSide delegate;
 
     @Nested
     @DisplayName("in single-tenant env")
@@ -53,19 +51,13 @@ class TenantAwareSystemWriteSideTest {
 
         @BeforeEach
         void setUp() {
-            delegate = MemoizingWriteSide.singleTenant();
+            delegate = MemoizingReadSide.singleTenant();
         }
 
         @Test
-        @DisplayName(POST_COMMANDS)
-        void postCommands() {
-            postCommandAndCheck(defaultTenant);
-        }
-
-        @Test
-        @DisplayName(POST_EVENTS)
-        void postEvents() {
-            postEventAndCheck(defaultTenant);
+        @DisplayName(QUERY)
+        void query() {
+            queryAndCheck(defaultTenant);
         }
     }
 
@@ -77,41 +69,27 @@ class TenantAwareSystemWriteSideTest {
 
         @BeforeEach
         void setUp() {
-            delegate = MemoizingWriteSide.multitenant();
+            delegate = MemoizingReadSide.multitenant();
             tenantId = TenantId
                     .newBuilder()
-                    .setValue(TenantAwareSystemWriteSideTest.class.getName())
+                    .setValue(TenantAwareSystemReadSideTest.class.getName())
                     .build();
         }
 
         @Test
-        @DisplayName(POST_COMMANDS)
-        void postCommands() {
-            postCommandAndCheck(tenantId);
-            assertEquals(tenantId, delegate.lastSeenCommand().tenant());
-        }
-
-        @Test
-        @DisplayName(POST_EVENTS)
-        void postEvents() {
-            postEventAndCheck(tenantId);
-            assertEquals(tenantId, delegate.lastSeenEvent().tenant());
+        @DisplayName(QUERY)
+        void query() {
+            queryAndCheck(tenantId);
+            assertEquals(tenantId, delegate.lastSeenQuery().tenant());
         }
     }
 
-    private void postCommandAndCheck(TenantId tenantId) {
-        CommandMessage command = Sample.messageOfType(CreateShoppingList.class);
-        SystemWriteSide gateway = delegatingTo(delegate).get(tenantId);
-        gateway.postCommand(command);
+    @SuppressWarnings("CheckReturnValue")
+    private void queryAndCheck(TenantId tenantId) {
+        Query query = requestFactory.query().all(Timestamp.class);
+        SystemReadSide readSide = delegatingTo(delegate).get(tenantId);
+        readSide.readDomainAggregate(query);
 
-        assertEquals(command, delegate.lastSeenCommand().message());
-    }
-
-    private void postEventAndCheck(TenantId tenantId) {
-        EventMessage event = Sample.messageOfType(ShoppingListCreated.class);
-        SystemWriteSide writeSide = delegatingTo(delegate).get(tenantId);
-        writeSide.postEvent(event);
-
-        assertEquals(event, delegate.lastSeenEvent().message());
+        assertEquals(query, delegate.lastSeenQuery().message());
     }
 }

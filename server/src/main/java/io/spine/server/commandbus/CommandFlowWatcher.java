@@ -26,9 +26,9 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.system.server.CommandDispatched;
-import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.ScheduleCommand;
 import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.WriteSideFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -39,9 +39,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class CommandFlowWatcher {
 
-    private final GatewayFunction gateway;
+    private final WriteSideFunction gateway;
 
-    CommandFlowWatcher(GatewayFunction gateway) {
+    CommandFlowWatcher(WriteSideFunction gateway) {
         this.gateway = checkNotNull(gateway);
     }
 

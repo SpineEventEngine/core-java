@@ -37,6 +37,7 @@ import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.NoOpSystemMonitor;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemMonitor;
+import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -277,15 +278,14 @@ public final class BoundedContextBuilder implements Logging {
 
     private <B extends BoundedContext> B
     buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
-                 SystemMonitor systemWriteSide,
+                 SystemMonitor monitor,
                  TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
-        SystemWriteSide writeSide = systemWriteSide.writeSide();
 
         initTenantIndex(storageFactory);
-        initCommandBus(writeSide);
+        initCommandBus(monitor.writeSide());
         initEventBus(storageFactory);
-        initStand(writeSide);
+        initStand(monitor.readSide());
         initIntegrationBus(transport);
 
         B result = instanceFactory.apply(this);
@@ -351,7 +351,7 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private void initStand(SystemWriteSide systemWriteSide) {
+    private void initStand(SystemReadSide systemWriteSide) {
         if (stand == null) {
             stand = createStand();
         } else {
@@ -365,7 +365,7 @@ public final class BoundedContextBuilder implements Logging {
                                standMultitenant);
             }
         }
-        stand.setSystemWriteSide(systemWriteSide);
+        stand.setSystemReadSide(systemWriteSide);
     }
 
     private void initIntegrationBus(TransportFactory factory) {

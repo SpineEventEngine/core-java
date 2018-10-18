@@ -20,15 +20,11 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantAwareRunner;
-
-import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -41,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Any call to this gateway is delegated to another instance of {@link SystemWriteSide}
  * passed on construction.
  *
- * @author Dmytro Dashenkov
  * @see TenantAwareOperation
  */
 final class TenantAwareSystemWriteSide implements SystemWriteSide {
@@ -79,10 +74,5 @@ final class TenantAwareSystemWriteSide implements SystemWriteSide {
     @Override
     public void postEvent(EventMessage systemEvent) {
         runner.run(() -> delegate.postEvent(systemEvent));
-    }
-
-    @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        return runner.evaluate(() -> delegate.readDomainAggregate(query));
     }
 }

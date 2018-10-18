@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server.given.gateway;
+package io.spine.system.server.given.monitor;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
@@ -33,9 +33,6 @@ import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import io.spine.test.system.server.ShoppingListVBuilder;
 
-/**
- * @author Dmytro Dashenkov
- */
 public class ShoppingListAggregate extends Aggregate<ListId, ShoppingList, ShoppingListVBuilder> {
 
     private ShoppingListAggregate(ListId id) {

@@ -18,12 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@BoundedContext("_System")
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.system.server.given.gateway;
+package io.spine.system.server;
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.server.annotation.BoundedContext;
+import com.google.protobuf.Message;
+import io.spine.core.TenantId;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+/**
+ * A command received by the {@code MemoizingWriteSide}.
+ */
+public final class MemoizedMessage {
+
+    private final Message message;
+    private final TenantId tenantId;
+
+    MemoizedMessage(Message message, TenantId id) {
+        this.message = message;
+        tenantId = id;
+    }
+
+    public Message message() {
+        return message;
+    }
+
+    public TenantId tenant() {
+        return tenantId;
+    }
+}

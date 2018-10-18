@@ -26,20 +26,18 @@ import java.util.function.Function;
 
 /**
  * Obtains a gateway in a multi-tenant environment.
- *
- * @author Alexander Yevsyukov
  */
 @FunctionalInterface
-public interface GatewayFunction extends Function<TenantId, SystemWriteSide> {
+public interface ReadSideFunction extends Function<TenantId, SystemReadSide> {
 
     /** Obtains system gateway for the given tenant. */
-    default SystemWriteSide get(TenantId tenantId) {
+    default SystemReadSide get(TenantId tenantId) {
         return apply(tenantId);
     }
 
-    static GatewayFunction delegatingTo(SystemWriteSide delegate) {
+    static ReadSideFunction delegatingTo(SystemReadSide delegate) {
         return (t) -> {
-            SystemWriteSide result = TenantAwareSystemWriteSide.forTenant(t, delegate);
+            SystemReadSide result = TenantAwareSystemReadSide.forTenant(t, delegate);
             return result;
         };
     }

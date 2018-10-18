@@ -18,27 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server.given.gateway;
+package io.spine.system.server.given.monitor;
 
 import io.spine.server.BoundedContext;
+import io.spine.test.system.server.ListId;
+import io.spine.test.system.server.ShoppingList;
 
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
+import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
-public class DefaultSystemGatewayTestEnv {
+public class SystemMonitorTestEnv {
 
     /**
      * Prevents the utility class instantiation.
      */
-    private DefaultSystemGatewayTestEnv() {
-    }
-
-    public static BoundedContext contextWithDomainAggregate() {
-        BoundedContext context = BoundedContext.newBuilder().build();
-        context.register(new ShoppingListRepository());
-        return context;
+    private SystemMonitorTestEnv() {
     }
 
     public static BoundedContext contextWithSystemAggregate() {
@@ -46,5 +40,15 @@ public class DefaultSystemGatewayTestEnv {
         BoundedContext systemContext = systemOf(context);
         systemContext.register(new ShoppingListRepository());
         return context;
+    }
+
+    public static ShoppingList findAggregate(ListId aggregateId, BoundedContext context) {
+        ShoppingListRepository repository = (ShoppingListRepository)
+                context.findRepository(ShoppingList.class)
+                       .orElseGet(() -> fail("Repository should be registered."));
+        ShoppingListAggregate aggregate =
+                repository.find(aggregateId)
+                          .orElseGet(() -> fail("Aggregate should be present."));
+        return aggregate.getState();
     }
 }

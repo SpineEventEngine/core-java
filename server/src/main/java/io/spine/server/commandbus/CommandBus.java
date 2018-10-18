@@ -59,7 +59,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.BusBuilder.FieldCheck.checkSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
-import static io.spine.system.server.GatewayFunction.delegatingTo;
+import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static java.util.Optional.ofNullable;
 
 /**

@@ -18,20 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+@BoundedContext("_System")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.system.server.given.monitor;
 
-import io.spine.annotation.Internal;
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.server.annotation.BoundedContext;
 
-/**
- * A gateway which can control the underlying system context.
- *
- * <p>Such a gateway, for instance, may tell the system context
- * to {@link io.spine.server.BoundedContext#close() close}.
- */
-@Internal
-public interface MasterWriteSide extends SystemWriteSide {
-
-    void closeSystemContext() throws Exception;
-
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

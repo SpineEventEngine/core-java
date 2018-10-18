@@ -22,28 +22,43 @@ package io.spine.system.server;
 
 import com.google.protobuf.Any;
 import io.spine.client.Query;
+import io.spine.core.TenantId;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.tenant.TenantAwareRunner;
 
 import java.util.Iterator;
 
-import static java.util.Collections.emptyIterator;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public enum NoOpSystemReadSide implements SystemReadSide {
+final class TenantAwareSystemReadSide implements SystemReadSide {
 
-    INSTANCE;
+    private final SystemReadSide delegate;
+    private final TenantAwareRunner runner;
+
+    private TenantAwareSystemReadSide(TenantId tenantId, SystemReadSide delegate) {
+        this.runner = TenantAwareRunner.with(checkNotNull(tenantId));
+        this.delegate = checkNotNull(delegate);
+    }
+
+    static SystemReadSide forTenant(TenantId tenantId, SystemReadSide delegate) {
+        checkNotNull(tenantId);
+        checkNotNull(delegate);
+        SystemReadSide result = new TenantAwareSystemReadSide(tenantId, delegate);
+        return result;
+    }
 
     @Override
     public void register(EventDispatcher<?> dispatcher) {
-        // Do nothing.
+        runner.run(() -> delegate.register(dispatcher));
     }
 
     @Override
     public void unregister(EventDispatcher<?> dispatcher) {
-        // Do nothing.
+        runner.run(() -> delegate.unregister(dispatcher));
     }
 
     @Override
     public Iterator<Any> readDomainAggregate(Query query) {
-        return emptyIterator();
+        return runner.evaluate(() -> delegate.readDomainAggregate(query));
     }
 }

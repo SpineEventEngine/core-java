@@ -47,7 +47,7 @@ import io.spine.server.tenant.EntityUpdateOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -77,8 +77,6 @@ import static io.spine.protobuf.TypeConverter.toAny;
  *
  * <p>Each {@link io.spine.server.BoundedContext BoundedContext} contains only one
  * instance of {@code Stand}.
- *
- * @author Alex Tymchenko
  */
 @SuppressWarnings("OverlyCoupledClass")
 public class Stand implements AutoCloseable {
@@ -121,7 +119,7 @@ public class Stand implements AutoCloseable {
         this.topicValidator = builder.getTopicValidator();
         this.queryValidator = builder.getQueryValidator();
         this.subscriptionValidator = builder.getSubscriptionValidator();
-        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.getSystemWriteSide());
+        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.getSystemReadSide());
     }
 
     /**
@@ -446,7 +444,7 @@ public class Stand implements AutoCloseable {
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
-        private SystemWriteSide systemWriteSide;
+        private SystemReadSide systemReadSide;
 
         public Executor getCallbackExecutor() {
             return callbackExecutor;
@@ -473,8 +471,8 @@ public class Stand implements AutoCloseable {
         }
 
         @Internal
-        public Builder setSystemWriteSide(SystemWriteSide gateway) {
-            this.systemWriteSide = checkNotNull(gateway);
+        public Builder setSystemReadSide(SystemReadSide gateway) {
+            this.systemReadSide = checkNotNull(gateway);
             return this;
         }
 
@@ -503,8 +501,8 @@ public class Stand implements AutoCloseable {
             return typeRegistry;
         }
 
-        private SystemWriteSide getSystemWriteSide() {
-            return systemWriteSide;
+        private SystemReadSide getSystemReadSide() {
+            return systemReadSide;
         }
 
         /**
@@ -518,7 +516,7 @@ public class Stand implements AutoCloseable {
         @CheckReturnValue
         @Internal
         public Stand build() {
-            checkState(systemWriteSide != null, "SystemWriteSide is not set.");
+            checkState(systemReadSide != null, "SystemWriteSide is not set.");
 
             boolean multitenant = this.multitenant == null
                                   ? false

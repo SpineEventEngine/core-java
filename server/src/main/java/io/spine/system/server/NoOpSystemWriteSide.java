@@ -20,14 +20,8 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.client.Query;
-
-import java.util.Iterator;
-
-import static java.util.Collections.emptyIterator;
 
 /**
  * An implementation of {@link SystemWriteSide} which never performs an operation.
@@ -51,10 +45,5 @@ public enum NoOpSystemWriteSide implements SystemWriteSide {
     @Override
     public void postEvent(EventMessage systemEvent) {
         // NOP.
-    }
-
-    @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        return emptyIterator();
     }
 }

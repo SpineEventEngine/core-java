@@ -20,30 +20,25 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
-import io.spine.client.Query;
-import io.spine.server.event.EventDispatcher;
+import io.spine.core.TenantId;
 
-import java.util.Iterator;
+import java.util.function.Function;
 
-import static java.util.Collections.emptyIterator;
+/**
+ * Obtains a gateway in a multi-tenant environment.
+ */
+@FunctionalInterface
+public interface WriteSideFunction extends Function<TenantId, SystemWriteSide> {
 
-public enum NoOpSystemReadSide implements SystemReadSide {
-
-    INSTANCE;
-
-    @Override
-    public void register(EventDispatcher<?> dispatcher) {
-        // Do nothing.
+    /** Obtains system gateway for the given tenant. */
+    default SystemWriteSide get(TenantId tenantId) {
+        return apply(tenantId);
     }
 
-    @Override
-    public void unregister(EventDispatcher<?> dispatcher) {
-        // Do nothing.
-    }
-
-    @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        return emptyIterator();
+    static WriteSideFunction delegatingTo(SystemWriteSide delegate) {
+        return (t) -> {
+            SystemWriteSide result = TenantAwareSystemWriteSide.forTenant(t, delegate);
+            return result;
+        };
     }
 }

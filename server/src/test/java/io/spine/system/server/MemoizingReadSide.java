@@ -20,29 +20,32 @@
 
 package io.spine.system.server;
 
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
+import com.google.protobuf.Any;
+import io.spine.client.Query;
 import io.spine.core.TenantId;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Iterator;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyIterator;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * A {@link SystemWriteSide} which memoizes the posted system commands.
+ * A {@link io.spine.system.server.SystemWriteSide} which memoizes the posted system commands.
  *
- * <p>This class is a test-only facility, used in order to avoid mocking {@link SystemWriteSide}
+ * <p>This class is a test-only facility, used in order to avoid mocking {@link io.spine.system.server.SystemWriteSide}
  * instances.
  */
-public final class MemoizingWriteSide implements SystemWriteSide {
+public final class MemoizingReadSide implements SystemReadSide {
 
-    private @MonotonicNonNull MemoizedMessage lastSeenCommand;
-    private @MonotonicNonNull MemoizedMessage lastSeenEvent;
+    private @MonotonicNonNull MemoizedMessage lastSeenQuery;
 
     private final boolean multitenant;
 
-    private MemoizingWriteSide(boolean multitenant) {
+    private MemoizingReadSide(boolean multitenant) {
         this.multitenant = multitenant;
     }
 
@@ -51,8 +54,8 @@ public final class MemoizingWriteSide implements SystemWriteSide {
      *
      * @return new {@code MemoizingWriteSide}
      */
-    public static MemoizingWriteSide singleTenant() {
-        return new MemoizingWriteSide(false);
+    public static MemoizingReadSide singleTenant() {
+        return new MemoizingReadSide(false);
     }
 
     /**
@@ -60,34 +63,25 @@ public final class MemoizingWriteSide implements SystemWriteSide {
      *
      * @return new {@code MemoizingWriteSide}
      */
-    public static MemoizingWriteSide multitenant() {
-        return new MemoizingWriteSide(true);
+    public static MemoizingReadSide multitenant() {
+        return new MemoizingReadSide(true);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Memoizes the given command message and the {@link TenantId} which it was posted for.
-     *
-     * @see #lastSeenCommand()
-     */
     @Override
-    public void postCommand(CommandMessage systemCommand) {
-        TenantId tenantId = currentTenant();
-        lastSeenCommand = new MemoizedMessage(systemCommand, tenantId);
+    public void register(EventDispatcher<?> dispatcher) {
+        throw new UnsupportedOperationException("Method register is not implemented!");
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Memoizes the given event message and the {@link TenantId} which it was posted for.
-     *
-     * @see #lastSeenEvent()
-     */
     @Override
-    public void postEvent(EventMessage systemEvent) {
+    public void unregister(EventDispatcher<?> dispatcher) {
+        throw new UnsupportedOperationException("Method unregister is not implemented!");
+    }
+
+    @Override
+    public Iterator<Any> readDomainAggregate(Query query) {
         TenantId tenantId = currentTenant();
-        lastSeenEvent = new MemoizedMessage(systemEvent, tenantId);
+        lastSeenQuery = new MemoizedMessage(query, tenantId);
+        return emptyIterator();
     }
 
     /** Obtains the ID of the current tenant. */
@@ -102,22 +96,13 @@ public final class MemoizingWriteSide implements SystemWriteSide {
     }
 
     /**
-     * Obtains the last command message posted to {@link SystemWriteSide}.
+     * Obtains the last query submitted to {@link SystemWriteSide}.
      *
-     * <p>Fails if no commands were posted yet.
+     * <p>Fails if no queries were submitted yet.
      */
-    public MemoizedMessage lastSeenCommand() {
-        assertNotNull(lastSeenCommand);
-        return lastSeenCommand;
+    public MemoizedMessage lastSeenQuery() {
+        assertNotNull(lastSeenQuery);
+        return lastSeenQuery;
     }
 
-    /**
-     * Obtains the last event message posted to {@link SystemWriteSide}.
-     *
-     * <p>Fails if no events were posted yet.
-     */
-    public MemoizedMessage lastSeenEvent() {
-        assertNotNull(lastSeenEvent);
-        return lastSeenEvent;
-    }
 }

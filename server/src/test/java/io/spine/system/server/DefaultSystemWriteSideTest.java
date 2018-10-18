@@ -20,15 +20,10 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Message;
-import io.spine.client.Query;
-import io.spine.core.Command;
 import io.spine.server.BoundedContext;
-import io.spine.system.server.given.gateway.ShoppingListAggregate;
-import io.spine.system.server.given.gateway.ShoppingListRepository;
+import io.spine.system.server.given.monitor.SystemMonitorTestEnv;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
-import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,16 +34,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.system.server.given.gateway.DefaultSystemGatewayTestEnv.contextWithDomainAggregate;
-import static io.spine.system.server.given.gateway.DefaultSystemGatewayTestEnv.contextWithSystemAggregate;
+import static io.spine.system.server.given.monitor.SystemMonitorTestEnv.contextWithSystemAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(ShardingReset.class)
 @DisplayName("Default implementation of SystemWriteSide should")
@@ -119,7 +109,7 @@ class DefaultSystemWriteSideTest {
         }
 
         private ShoppingList aggregate() {
-            return findAggregate(systemContext);
+            return SystemMonitorTestEnv.findAggregate(aggregateId, systemContext);
         }
 
         private void createAggregate() {
@@ -131,58 +121,4 @@ class DefaultSystemWriteSideTest {
         }
     }
 
-    @Nested
-    @DisplayName("read domain aggregate states")
-    class ReadDomainAggregates {
-
-        private final TestActorRequestFactory actorRequestFactory =
-                TestActorRequestFactory.newInstance(DefaultSystemWriteSideTest.class);
-
-        private BoundedContext domainContext;
-
-        @BeforeEach
-        void setUp() {
-            domainContext = contextWithDomainAggregate();
-            systemWriteSide = domainContext.getSystemMonitor().writeSide();
-            createAggregate();
-        }
-
-        @AfterEach
-        void tearDown() throws Exception {
-            domainContext.close();
-        }
-
-        @Test
-        @DisplayName("by the given query")
-        void query() {
-            Query query = actorRequestFactory.query()
-                                             .byIds(ShoppingList.class, of(aggregateId));
-            Message foundMessage = unpack(systemWriteSide.readDomainAggregate(query).next());
-            assertEquals(aggregate(), foundMessage);
-        }
-
-        private ShoppingList aggregate() {
-            return findAggregate(domainContext);
-        }
-
-        private void createAggregate() {
-            CreateShoppingList command = CreateShoppingList
-                    .newBuilder()
-                    .setId(aggregateId)
-                    .build();
-            Command cmd = actorRequestFactory.createCommand(command);
-            domainContext.getCommandBus()
-                         .post(cmd, noOpObserver());
-        }
-    }
-
-    private ShoppingList findAggregate(BoundedContext context) {
-        ShoppingListRepository repository = (ShoppingListRepository)
-                context.findRepository(ShoppingList.class)
-                             .orElseGet(() -> fail("Repository should be registered."));
-        ShoppingListAggregate aggregate =
-                repository.find(aggregateId)
-                          .orElseGet(() -> fail("Aggregate should be present."));
-        return aggregate.getState();
-    }
 }

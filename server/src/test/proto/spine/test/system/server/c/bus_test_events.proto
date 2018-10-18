@@ -31,7 +31,7 @@ option java_multiple_files = true;
 
 import "spine/test/system/server/command_lifecycle_test.proto";
 
-message SBProjectCreated {
+message SMProjectCreated {
 
     string uuid = 1;
 

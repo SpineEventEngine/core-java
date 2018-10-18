@@ -33,7 +33,7 @@ import io.spine.system.server.CommandErrored;
 import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.system.server.GatewayFunction.delegatingTo;
+import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**

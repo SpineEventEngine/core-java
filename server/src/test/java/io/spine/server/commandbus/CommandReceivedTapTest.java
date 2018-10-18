@@ -25,8 +25,8 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.system.server.CommandReceived;
-import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.MemoizingWriteSide;
+import io.spine.system.server.WriteSideFunction;
 import io.spine.test.commands.CmdCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -65,8 +65,8 @@ class CommandReceivedTapTest {
         filter = new CommandReceivedTap(gatewayFn());
     }
 
-    private GatewayFunction gatewayFn() {
-        return GatewayFunction.delegatingTo(gateway);
+    private WriteSideFunction gatewayFn() {
+        return WriteSideFunction.delegatingTo(gateway);
     }
 
     @Test

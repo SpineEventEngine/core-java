@@ -20,11 +20,16 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.client.Query;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 
+import java.util.Iterator;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A message bus for system events.
@@ -44,21 +49,39 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class DefaultSystemReadSide implements SystemReadSide {
 
-    private final EventBus systemEventBus;
+    private final SystemContext context;
+    private final EventBus eventBus;
 
-    DefaultSystemReadSide(EventBus systemEventBus) {
-        this.systemEventBus = systemEventBus;
+    DefaultSystemReadSide(SystemContext context) {
+        this.context = context;
+        this.eventBus = context.getEventBus();
     }
 
     @Override
     public void register(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
-        systemEventBus.register(dispatcher);
+        eventBus.register(dispatcher);
     }
 
     @Override
     public void unregister(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
-        systemEventBus.unregister(dispatcher);
+        eventBus.unregister(dispatcher);
+    }
+
+    @Override
+    public Iterator<Any> readDomainAggregate(Query query) {
+        @SuppressWarnings("unchecked") // Logically checked.
+        MirrorRepository repository = (MirrorRepository)
+                context.findRepository(Mirror.class)
+                       .orElseThrow(
+                               () -> newIllegalStateException(
+                                       "Mirror projection repository is not registered in %s.",
+                                       context.getName()
+                                              .getValue()
+                               )
+                       );
+        Iterator<Any> result = repository.execute(query);
+        return result;
     }
 }
