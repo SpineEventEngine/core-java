@@ -237,7 +237,14 @@ subprojects {
     idea {
         module {
             generatedSourceDirs += file(generatedJavaDir)
+            generatedSourceDirs += file(generatedGrpcDir)
+            generatedSourceDirs += file(generatedSpineDir)
+            generatedSourceDirs += file(generatedTestJavaDir)
+            generatedSourceDirs += file(generatedTestGrpcDir)
+            generatedSourceDirs += file(generatedTestSpineDir)
+
             testSourceDirs += file(generatedTestJavaDir)
+
             downloadJavadoc = true
             downloadSources = true
 
