@@ -41,7 +41,6 @@ import io.spine.server.event.EventBus;
  * Programmers extending the framework should see {@link SystemWriteSide} for
  * the front-facing API of the System bounded context.
  *
- * @author Dmytro Dashenkov
  * @see SystemWriteSide
  * @see BoundedContext
  */

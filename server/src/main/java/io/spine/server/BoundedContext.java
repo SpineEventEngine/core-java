@@ -78,10 +78,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>An instance of {@code BoundedContext} acts as a major point of configuration for all
  * the model elements which belong to it.
  *
- * @author Alexander Yevsyukov
- * @author Mikhail Melnik
- * @author Dmitry Ganzha
- * @author Dmytro Dashenkov
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
  *     Martin Fowler on bounded contexts</a>
  */

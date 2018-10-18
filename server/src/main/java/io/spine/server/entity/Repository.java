@@ -54,8 +54,6 @@ import static java.lang.String.format;
 
 /**
  * Abstract base class for repositories.
- *
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class Repository<I, E extends Entity<I, ?>>

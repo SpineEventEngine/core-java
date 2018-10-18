@@ -35,9 +35,6 @@ import static io.spine.testing.server.procman.given.pm.CommandHandlingPm.NESTED_
 import static io.spine.testing.server.procman.given.pm.CommandHandlingPm.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Vladyslav Lubenskyi
- */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProcessManagerCommandTest should")
 class PmCommandTestShould {
