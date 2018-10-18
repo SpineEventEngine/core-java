@@ -24,15 +24,22 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.ColumnFilter;
 import io.spine.client.OrderBy;
+import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
  * The parameters of an {@link EntityQuery}.
@@ -78,6 +85,18 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
                 .addAll(parameters)
                 .orderBy(parameters.orderBy())
                 .limit(parameters.limit());
+    }
+    
+    public static QueryParameters activeEntityQueryParams(RecordStorage<?> storage) {
+        Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
+        EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
+        EntityColumn deletedColumn = lifecycleColumns.get(deleted.name());
+        CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
+                ImmutableMultimap.of(archivedColumn, eq(archivedColumn.getStoredName(), false),
+                                     deletedColumn, eq(deletedColumn.getStoredName(), false)),
+                ALL
+        );
+        return newBuilder().add(lifecycleParameter).build();
     }
 
     /**

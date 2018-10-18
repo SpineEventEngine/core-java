@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.RecordStorage;
@@ -35,11 +34,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.server.entity.storage.QueryParameters.FIELD_PARAMETERS;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
 
 /**
  * A query to a {@link io.spine.server.storage.RecordStorage RecordStorage} for the records
@@ -146,16 +142,8 @@ public final class EntityQuery<I> implements Serializable {
     public EntityQuery<I> withActiveLifecycle(RecordStorage<I> storage) {
         checkState(canAppendLifecycleFlags(),
                    "The query overrides Lifecycle Flags default values.");
-        Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
-        EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
-        EntityColumn deletedColumn = lifecycleColumns.get(deleted.name());
-        CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
-                                     deletedColumn, eq(deletedColumn.getName(), false)),
-                ALL
-        );
         QueryParameters parameters = QueryParameters.newBuilder(getParameters())
-                                                    .add(lifecycleParameter)
+                                                    .addAll(activeEntityQueryParams(storage))
                                                     .build();
         EntityQuery<I> result = new EntityQuery<>(ids, parameters);
         return result;
