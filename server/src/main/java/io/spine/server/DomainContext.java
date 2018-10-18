@@ -72,7 +72,7 @@ final class DomainContext extends BoundedContext {
      *
      * <p>Closes the system context as well.
      *
-     * @throws Exception if the system context throws an error on closing
+     * @throws Exception if one of the context components throws an error when closing
      */
     @Override
     public void close() throws Exception {

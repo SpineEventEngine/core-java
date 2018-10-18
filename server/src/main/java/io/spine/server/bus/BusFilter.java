@@ -30,8 +30,6 @@ import java.util.Optional;
  * The filter for the messages posted to a bus.
  *
  * <p>A bus may have several filters which can prevent a message from being posted.
- *
- * @author Dmytro Dashenkov
  */
 @SPI
 @FunctionalInterface
