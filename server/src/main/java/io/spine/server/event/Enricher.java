@@ -245,7 +245,7 @@ public class Enricher {
         }
 
         /**
-         * Ensures that the passed enrichment function is not
+         * Ensures that the passed enrichment function is not yet registered in this builder.
          *
          * @throws IllegalArgumentException
          *         if the builder already has a function, which has the same couple of
