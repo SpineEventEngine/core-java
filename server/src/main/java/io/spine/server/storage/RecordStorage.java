@@ -377,7 +377,7 @@ public abstract class RecordStorage<I>
      *
      * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
      */
-    protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids);
+    protected abstract Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids);
 
     /**
      * Obtains an iterator for reading multiple records by IDs, and
