@@ -24,14 +24,14 @@ import com.google.protobuf.Message;
 import io.spine.core.TenantId;
 
 /**
- * A command received by the {@code MemoizingWriteSide}.
+ * A message passed to a system context.
  */
-public final class MemoizedMessage {
+public final class MemoizedSystemMessage {
 
     private final Message message;
     private final TenantId tenantId;
 
-    MemoizedMessage(Message message, TenantId id) {
+    MemoizedSystemMessage(Message message, TenantId id) {
         this.message = message;
         tenantId = id;
     }

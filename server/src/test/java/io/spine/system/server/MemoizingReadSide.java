@@ -39,11 +39,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * <p>This class is a test-only facility, used in order to avoid mocking {@link SystemReadSide}
  * instances.
  *
- * <p>Note that the
+ * <p>Note that the dispatcher registration is not implemented. See {@link #register} and
+ * {@link #unregister} for the details.
  */
 public final class MemoizingReadSide implements SystemReadSide {
 
-    private @MonotonicNonNull MemoizedMessage lastSeenQuery;
+    private @MonotonicNonNull MemoizedSystemMessage lastSeenQuery;
 
     private final boolean multitenant;
 
@@ -103,7 +104,7 @@ public final class MemoizingReadSide implements SystemReadSide {
     @Override
     public Iterator<Any> readDomainAggregate(Query query) {
         TenantId tenantId = currentTenant();
-        lastSeenQuery = new MemoizedMessage(query, tenantId);
+        lastSeenQuery = new MemoizedSystemMessage(query, tenantId);
         return emptyIterator();
     }
 
@@ -123,7 +124,7 @@ public final class MemoizingReadSide implements SystemReadSide {
      *
      * <p>Fails if no queries were submitted yet.
      */
-    public MemoizedMessage lastSeenQuery() {
+    public MemoizedSystemMessage lastSeenQuery() {
         assertNotNull(lastSeenQuery);
         return lastSeenQuery;
     }

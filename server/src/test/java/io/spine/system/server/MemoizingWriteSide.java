@@ -37,8 +37,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 public final class MemoizingWriteSide implements SystemWriteSide {
 
-    private @MonotonicNonNull MemoizedMessage lastSeenCommand;
-    private @MonotonicNonNull MemoizedMessage lastSeenEvent;
+    private @MonotonicNonNull MemoizedSystemMessage lastSeenCommand;
+    private @MonotonicNonNull MemoizedSystemMessage lastSeenEvent;
 
     private final boolean multitenant;
 
@@ -74,7 +74,7 @@ public final class MemoizingWriteSide implements SystemWriteSide {
     @Override
     public void postCommand(CommandMessage systemCommand) {
         TenantId tenantId = currentTenant();
-        lastSeenCommand = new MemoizedMessage(systemCommand, tenantId);
+        lastSeenCommand = new MemoizedSystemMessage(systemCommand, tenantId);
     }
 
     /**
@@ -87,7 +87,7 @@ public final class MemoizingWriteSide implements SystemWriteSide {
     @Override
     public void postEvent(EventMessage systemEvent) {
         TenantId tenantId = currentTenant();
-        lastSeenEvent = new MemoizedMessage(systemEvent, tenantId);
+        lastSeenEvent = new MemoizedSystemMessage(systemEvent, tenantId);
     }
 
     /** Obtains the ID of the current tenant. */
@@ -106,7 +106,7 @@ public final class MemoizingWriteSide implements SystemWriteSide {
      *
      * <p>Fails if no commands were posted yet.
      */
-    public MemoizedMessage lastSeenCommand() {
+    public MemoizedSystemMessage lastSeenCommand() {
         assertNotNull(lastSeenCommand);
         return lastSeenCommand;
     }
@@ -116,7 +116,7 @@ public final class MemoizingWriteSide implements SystemWriteSide {
      *
      * <p>Fails if no events were posted yet.
      */
-    public MemoizedMessage lastSeenEvent() {
+    public MemoizedSystemMessage lastSeenEvent() {
         assertNotNull(lastSeenEvent);
         return lastSeenEvent;
     }

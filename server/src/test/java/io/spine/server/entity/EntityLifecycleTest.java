@@ -28,7 +28,7 @@ import io.spine.base.Time;
 import io.spine.core.EventId;
 import io.spine.system.server.EntityCreated;
 import io.spine.system.server.EntityStateChanged;
-import io.spine.system.server.MemoizedMessage;
+import io.spine.system.server.MemoizedSystemMessage;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.type.TypeUrl;
@@ -92,7 +92,7 @@ class EntityLifecycleTest {
                 .setEventFilter(filter)
                 .build();
         lifecycle.onEntityCreated(ENTITY);
-        MemoizedMessage lastSeenEvent = gateway.lastSeenEvent();
+        MemoizedSystemMessage lastSeenEvent = gateway.lastSeenEvent();
         assertThat(lastSeenEvent.message(), instanceOf(EntityCreated.class));
 
 
