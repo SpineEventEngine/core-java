@@ -115,7 +115,6 @@ public class AggregateRepositoryTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        repository().close();
         boundedContext().close();
     }
 
