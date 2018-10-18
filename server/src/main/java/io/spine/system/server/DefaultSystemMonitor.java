@@ -49,7 +49,8 @@ final class DefaultSystemMonitor implements SystemMonitor {
 
     @Override
     public void closeSystemContext() throws Exception {
-        context.close();
+        // TODO:2018-10-18:dmytro.dashenkov: Close system context.
+        // todo            https://github.com/SpineEventEngine/core-java/issues/872
     }
 
     @VisibleForTesting
