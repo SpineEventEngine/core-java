@@ -46,8 +46,6 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
 /**
  * Test support of event import in {@link AggregateRepository}.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("For event import AggregateRepository should")
 class EventImportTest {

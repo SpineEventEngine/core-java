@@ -54,7 +54,6 @@ import static java.util.Collections.emptyList;
  * @param <C> the type of the command message to test
  * @param <S> state message of the handling entity
  * @param <E> the type of the {@link CommandHandlingEntity} being tested
- * @author Vladyslav Lubenskyi
  */
 @CheckReturnValue
 public abstract class CommandHandlerTest<I,
