@@ -86,7 +86,16 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
                 .orderBy(parameters.orderBy())
                 .limit(parameters.limit());
     }
-    
+
+    /**
+     * Creates a new {@code QueryParameters} instance which includes filters for column lifecycle
+     * flags to equal {@code false}. Such an entity is considered to be active.
+     *
+     * @param storage
+     *         a record storage persisting target entities
+     * @return new {@code QueryParameters} with {@linkplain io.spine.server.entity.LifecycleFlags
+     *         lifecycle flags} filters
+     */
     public static QueryParameters activeEntityQueryParams(RecordStorage<?> storage) {
         Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
         EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
