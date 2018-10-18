@@ -56,14 +56,14 @@ public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
                           D extends MessageDispatcher<C, E, ?>>
-        implements DispatcherRegistry<C, E, D>, AutoCloseable {
+        implements AutoCloseable {
 
     /** A queue of envelopes to post. */
     private @Nullable DispatchingQueue<E> queue;
 
     /** Dispatchers of messages by their class. */
     @LazyInit
-    private @MonotonicNonNull AbstractDispatcherRegistry<C, E, D> registry;
+    private @MonotonicNonNull DispatcherRegistry<C, E, D> registry;
 
     /** The chain of filters for this bus, {@linkplain #filterChain() lazily initialized}. */
     @LazyInit
@@ -84,7 +84,6 @@ public abstract class Bus<T extends Message,
      *         if the set of message classes {@linkplain MessageDispatcher#getMessageClasses()
      *         exposed} by the dispatcher is empty
      */
-    @Override
     public void register(D dispatcher) {
         registry().register(checkNotNull(dispatcher));
     }
@@ -94,7 +93,6 @@ public abstract class Bus<T extends Message,
      *
      * @param dispatcher the dispatcher to unregister
      */
-    @Override
     public void unregister(D dispatcher) {
         registry().unregister(checkNotNull(dispatcher));
     }
@@ -191,7 +189,7 @@ public abstract class Bus<T extends Message,
     /**
      * Closes the {@linkplain BusFilter filters} of this bus and unregisters all the dispatchers.
      *
-     * @throws Exception if either filters or the {@linkplain AbstractDispatcherRegistry} throws
+     * @throws Exception if either filters or the {@linkplain DispatcherRegistry} throws
      *         an exception
      */
     @Override
@@ -213,7 +211,7 @@ public abstract class Bus<T extends Message,
     /**
      * Obtains the dispatcher registry.
      */
-    protected AbstractDispatcherRegistry<C, E, D> registry() {
+    protected DispatcherRegistry<C, E, D> registry() {
         if (registry == null) {
             registry = createRegistry();
         }
@@ -298,7 +296,7 @@ public abstract class Bus<T extends Message,
     /**
      * Factory method for creating an instance of the registry for dispatchers of the bus.
      */
-    protected abstract AbstractDispatcherRegistry<C, E, D> createRegistry();
+    protected abstract DispatcherRegistry<C, E, D> createRegistry();
 
     /**
      * Filters the given messages.

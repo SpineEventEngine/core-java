@@ -23,7 +23,7 @@ package io.spine.server.commandbus;
 import com.google.common.collect.Maps;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.bus.AbstractDispatcherRegistry;
+import io.spine.server.bus.DispatcherRegistry;
 
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +37,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>There can be only one dispatcher per command class.
  */
 class CommandDispatcherRegistry
-        extends AbstractDispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher<?>> {
+        extends DispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher<?>> {
 
     /**
      * {@inheritDoc}

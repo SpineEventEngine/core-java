@@ -20,16 +20,16 @@
 
 package io.spine.system.server;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface SystemReadSide
-        extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
+public interface SystemReadSide {
+
+    void register(EventDispatcher<?> dispatcher);
+
+    void unregister(EventDispatcher<?> dispatcher);
 
     /**
      * Creates a new instance of {@code SystemReadSide} for the given system context.

@@ -22,7 +22,7 @@ package io.spine.server.event;
 
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.bus.AbstractDispatcherRegistry;
+import io.spine.server.bus.DispatcherRegistry;
 
 import java.util.Set;
 
@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>There can be multiple dispatchers per event class.
  */
 class EventDispatcherRegistry
-        extends AbstractDispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
+        extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
 
     @Override
     public void register(EventDispatcher<?> dispatcher) {

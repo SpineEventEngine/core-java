@@ -19,7 +19,7 @@
  */
 package io.spine.server.integration;
 
-import io.spine.server.bus.AbstractDispatcherRegistry;
+import io.spine.server.bus.DispatcherRegistry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -27,9 +27,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A registry of domestic subscribers which subscribe or react upon external messages.
  */
 final class DomesticDispatcherRegistry
-        extends AbstractDispatcherRegistry<ExternalMessageClass,
-                                           ExternalMessageEnvelope,
-                                           ExternalMessageDispatcher<?>> {
+        extends DispatcherRegistry<ExternalMessageClass,
+                                                   ExternalMessageEnvelope,
+                                                   ExternalMessageDispatcher<?>> {
     @Override
     protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
             throws IllegalArgumentException {
