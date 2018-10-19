@@ -83,6 +83,14 @@ public final class SystemContext extends BoundedContext {
         register(new MirrorRepository());
     }
 
+    /**
+     * Creates a client for this context.
+     *
+     * <p>The resulting {@link SystemClient} is the way for the domain context to access its system
+     * counterpart.
+     *
+     * @return new instance of {@link SystemClient}
+     */
     public SystemClient createClient() {
         return new DefaultSystemClient(this);
     }
