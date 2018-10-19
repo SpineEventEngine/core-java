@@ -88,7 +88,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Inject the {@link io.spine.system.server.SystemWriteSide} of the bounded context to which the built bus belongs.
+     * Inject the {@link SystemWriteSide} of the bounded context to which the built bus belongs.
      *
      * @apiNote This method is {@link Internal} to the framework. The name of the method starts
      *          with the {@code inject} prefix so that this method does not appear in an
