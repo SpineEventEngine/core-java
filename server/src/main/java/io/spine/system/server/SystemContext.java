@@ -41,7 +41,7 @@ import io.spine.server.event.EventBus;
  * Programmers extending the framework should see {@link SystemWriteSide} for
  * the front-facing API of the System bounded context.
  *
- * @see SystemMonitor
+ * @see SystemClient
  * @see BoundedContext
  */
 @Internal
@@ -90,7 +90,7 @@ public final class SystemContext extends BoundedContext {
      * a {@link NoOpSystemWriteSide} instance.
      */
     @Override
-    public NoOpSystemMonitor getSystemMonitor() {
-        return NoOpSystemMonitor.INSTANCE;
+    public NoOpSystemClient getSystemClient() {
+        return NoOpSystemClient.INSTANCE;
     }
 }

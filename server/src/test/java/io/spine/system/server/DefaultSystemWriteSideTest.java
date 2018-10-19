@@ -21,7 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.server.BoundedContext;
-import io.spine.system.server.given.monitor.SystemMonitorTestEnv;
+import io.spine.system.server.given.monitor.SystemClientTestEnv;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import io.spine.testing.server.ShardingReset;
@@ -36,7 +36,7 @@ import java.util.List;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.system.server.given.monitor.SystemMonitorTestEnv.contextWithSystemAggregate;
+import static io.spine.system.server.given.monitor.SystemClientTestEnv.contextWithSystemAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -65,7 +65,7 @@ class DefaultSystemWriteSideTest {
         @BeforeEach
         void setUp() {
             domainContext = contextWithSystemAggregate();
-            systemWriteSide = domainContext.getSystemMonitor().writeSide();
+            systemWriteSide = domainContext.getSystemClient().writeSide();
             systemContext = systemOf(domainContext);
             createAggregate();
         }
@@ -109,7 +109,7 @@ class DefaultSystemWriteSideTest {
         }
 
         private ShoppingList aggregate() {
-            return SystemMonitorTestEnv.findAggregate(aggregateId, systemContext);
+            return SystemClientTestEnv.findAggregate(aggregateId, systemContext);
         }
 
         private void createAggregate() {

@@ -26,19 +26,19 @@ import io.spine.server.BoundedContext;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The default implementation of {@link SystemMonitor}.
+ * The default implementation of {@link SystemClient}.
  *
  * <p>This monitor uses the {@linkplain SystemReadSide#newInstance default} implementation of
  * the read side and the {@linkplain SystemWriteSide#newInstance default} implementation of
  * the write side.
  */
-final class DefaultSystemMonitor implements SystemMonitor {
+final class DefaultSystemClient implements SystemClient {
 
     private final SystemWriteSide writeSide;
     private final SystemReadSide readSide;
     private final SystemContext context;
 
-    DefaultSystemMonitor(SystemContext system) {
+    DefaultSystemClient(SystemContext system) {
         this.context = checkNotNull(system);
         this.readSide = SystemReadSide.newInstance(context);
         this.writeSide = SystemWriteSide.newInstance(context);

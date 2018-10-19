@@ -21,7 +21,7 @@
 package io.spine.server;
 
 import io.spine.server.entity.Repository;
-import io.spine.system.server.SystemMonitor;
+import io.spine.system.server.SystemClient;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,16 +45,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class DomainContext extends BoundedContext {
 
-    private final SystemMonitor system;
+    private final SystemClient system;
 
     private DomainContext(BoundedContextBuilder builder,
-                          SystemMonitor system) {
+                          SystemClient system) {
         super(builder);
         this.system = checkNotNull(system);
     }
 
     static DomainContext newInstance(BoundedContextBuilder builder,
-                                     SystemMonitor system) {
+                                     SystemClient system) {
         checkNotNull(builder);
         checkNotNull(system);
 
@@ -63,7 +63,7 @@ final class DomainContext extends BoundedContext {
     }
 
     @Override
-    public SystemMonitor getSystemMonitor() {
+    public SystemClient getSystemClient() {
         return system;
     }
 

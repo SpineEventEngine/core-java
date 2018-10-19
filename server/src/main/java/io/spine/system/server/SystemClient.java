@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * The entry point of a system context API exposed to its domain counterpart.
  */
 @Internal
-public interface SystemMonitor {
+public interface SystemClient {
 
     /**
      * Obtains the system context write side.
@@ -49,14 +49,14 @@ public interface SystemMonitor {
     void closeSystemContext() throws Exception;
 
     /**
-     * Creates a new instance of {@code SystemMonitor} for the given system context.
+     * Creates a new instance of {@code SystemClient} for the given system context.
      *
      * @param context
      *         the system context to monitor
      * @return new system monitor
      */
-    static SystemMonitor newInstance(SystemContext context) {
+    static SystemClient newInstance(SystemContext context) {
         checkNotNull(context);
-        return new DefaultSystemMonitor(context);
+        return new DefaultSystemClient(context);
     }
 }

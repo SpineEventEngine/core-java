@@ -27,12 +27,12 @@ import io.spine.test.system.server.ShoppingList;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class SystemMonitorTestEnv {
+public class SystemClientTestEnv {
 
     /**
      * Prevents the utility class instantiation.
      */
-    private SystemMonitorTestEnv() {
+    private SystemClientTestEnv() {
     }
 
     public static BoundedContext contextWithSystemAggregate() {

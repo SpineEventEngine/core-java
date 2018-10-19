@@ -34,9 +34,9 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.system.server.NoOpSystemMonitor;
+import io.spine.system.server.NoOpSystemClient;
+import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemMonitor;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -251,10 +251,10 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
-        SystemMonitor systemMonitor = SystemMonitor.newInstance(system);
+        SystemClient systemClient = SystemClient.newInstance(system);
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
-                builder -> DomainContext.newInstance(builder, systemMonitor);
-        BoundedContext result = buildPartial(instanceFactory, systemMonitor, transport);
+                builder -> DomainContext.newInstance(builder, systemClient);
+        BoundedContext result = buildPartial(instanceFactory, systemClient, transport);
         return result;
     }
 
@@ -271,14 +271,14 @@ public final class BoundedContextBuilder implements Logging {
         tenantIndex.ifPresent(system::setTenantIndex);
 
         SystemContext result = system.buildPartial(SystemContext::newInstance,
-                                                   NoOpSystemMonitor.INSTANCE,
+                                                   NoOpSystemClient.INSTANCE,
                                                    transport);
         return result;
     }
 
     private <B extends BoundedContext> B
     buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
-                 SystemMonitor monitor,
+                 SystemClient monitor,
                  TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
 

@@ -352,7 +352,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         TypeUrl stateType = getEntityStateType();
-        SystemWriteSide writeSide = getBoundedContext().getSystemMonitor()
+        SystemWriteSide writeSide = getBoundedContext().getSystemClient()
                                                        .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle

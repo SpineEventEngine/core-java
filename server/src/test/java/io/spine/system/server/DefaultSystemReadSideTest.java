@@ -52,7 +52,7 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.system.server.given.monitor.SystemMonitorTestEnv.findAggregate;
+import static io.spine.system.server.given.monitor.SystemClientTestEnv.findAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -71,7 +71,7 @@ class DefaultSystemReadSideTest {
         domainContext = BoundedContext
                 .newBuilder()
                 .build();
-        systemReadSide = domainContext.getSystemMonitor().readSide();
+        systemReadSide = domainContext.getSystemClient().readSide();
     }
 
     @AfterEach

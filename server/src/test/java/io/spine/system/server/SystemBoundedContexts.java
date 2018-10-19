@@ -40,9 +40,9 @@ public final class SystemBoundedContexts {
      * Extracts the {@code System} bounded context from the given bounded context.
      */
     public static BoundedContext systemOf(BoundedContext context) {
-        SystemMonitor monitor = context.getSystemMonitor();
-        assertThat(monitor, instanceOf(DefaultSystemMonitor.class));
-        DefaultSystemMonitor defaultMonitor = (DefaultSystemMonitor) monitor;
+        SystemClient monitor = context.getSystemClient();
+        assertThat(monitor, instanceOf(DefaultSystemClient.class));
+        DefaultSystemClient defaultMonitor = (DefaultSystemClient) monitor;
         return defaultMonitor.target();
     }
 }

@@ -21,14 +21,14 @@
 package io.spine.system.server;
 
 /**
- * An implementation of {@link SystemMonitor} which never performs an action.
+ * An implementation of {@link SystemClient} which never performs an action.
  *
  * <p>When requested for a read/write side of a system context, always obtains a NOP implementation.
  *
- * <p>An instance of {@code NoOpSystemMonitor} serves as the system monitor in the system contexts
+ * <p>An instance of {@code NoOpSystemClient} serves as the system monitor in the system contexts
  * themselves.
  */
-public enum NoOpSystemMonitor implements SystemMonitor {
+public enum NoOpSystemClient implements SystemClient {
 
     INSTANCE;
 

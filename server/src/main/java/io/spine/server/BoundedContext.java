@@ -44,8 +44,8 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemMonitor;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeName;
@@ -254,7 +254,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             getEventBus().register(dispatcher);
-            SystemReadSide systemReadSide = getSystemMonitor().readSide();
+            SystemReadSide systemReadSide = getSystemClient().readSide();
             systemReadSide.register(dispatcher);
         }
         if (dispatcher.dispatchesExternalEvents()) {
@@ -273,7 +273,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             getEventBus().register(delegate);
-            SystemReadSide systemReadSide = getSystemMonitor().readSide();
+            SystemReadSide systemReadSide = getSystemClient().readSide();
             systemReadSide.register(delegate);
         }
         if (dispatcher.dispatchesExternalEvents()) {
@@ -294,7 +294,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Creates a {@code CommandErrorHandler} for objects that handle commands.
      */
     public CommandErrorHandler createCommandErrorHandler() {
-        SystemWriteSide systemWriteSide = getSystemMonitor().writeSide();
+        SystemWriteSide systemWriteSide = getSystemClient().writeSide();
         CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide);
         return result;
     }
@@ -401,9 +401,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return tenantIndex;
     }
 
-    /** Obtains instance of {@link SystemMonitor} of this {@code BoundedContext}. */
+    /**
+     * Obtains instance of {@link SystemClient} of this {@code BoundedContext}.
+     */
     @Internal
-    public abstract SystemMonitor getSystemMonitor();
+    public abstract SystemClient getSystemClient();
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.

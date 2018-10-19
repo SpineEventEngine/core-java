@@ -51,8 +51,6 @@ import static java.util.Collections.emptySet;
  *
  * <p>It is also expected that this subscriber is used <b>only</b> to subscribe to
  * {@linkplain Subscribe#external() external} events.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
@@ -93,7 +91,6 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
             );
         }
         return classes;
-
     }
 
     @Override
@@ -144,7 +141,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
      *         the domain bounded context to register the subscriber in
      */
     protected void registerIn(BoundedContext context) {
-        context.getSystemMonitor()
+        context.getSystemClient()
                .readSide()
                .register(this);
     }
