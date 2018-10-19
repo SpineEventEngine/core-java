@@ -419,8 +419,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
-     *     <li>{@linkplain io.spine.server.entity.Repository#close() Closes} all registered
-     *         repositories.
+     *     <li>Closes all registered {@linkplain Repository repositories}.
      * </ol>
      *
      * @throws Exception caused by closing one of the components
