@@ -113,7 +113,11 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
         UserId previousAssignee = getState().getAssignee();
 
         if (previousAssignee.equals(EMPTY_USER_ID)) {
-            throw new AggCannotReassignUnassignedTask(id, previousAssignee);
+            throw AggCannotReassignUnassignedTask
+                    .newBuilder()
+                    .setTaskId(id)
+                    .setUserId(previousAssignee)
+                    .build();
         }
 
         AggTaskAssigned event = taskAssigned(id, previousAssignee, newAssignee);

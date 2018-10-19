@@ -39,8 +39,8 @@ import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.NoOpSystemGateway;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -87,7 +87,7 @@ abstract class AbstractCommandBusTestSuite {
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
     protected TenantIndex tenantIndex;
-    protected SystemGateway systemGateway;
+    protected SystemWriteSide systemWriteSide;
 
     /**
      * A public constructor for derived test cases.
@@ -172,7 +172,7 @@ abstract class AbstractCommandBusTestSuite {
                 InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);
         tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         scheduler = spy(new ExecutorCommandScheduler());
-        systemGateway = NoOpSystemGateway.INSTANCE;
+        systemWriteSide = NoOpSystemWriteSide.INSTANCE;
         eventBus = EventBus.newBuilder()
                            .setStorageFactory(storageFactory)
                            .build();
@@ -181,7 +181,7 @@ abstract class AbstractCommandBusTestSuite {
                 .setMultitenant(this.multitenant)
                 .setCommandScheduler(scheduler)
                 .injectEventBus(eventBus)
-                .injectSystemGateway(systemGateway)
+                .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
                 .build();
         requestFactory =

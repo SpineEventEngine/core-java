@@ -26,9 +26,9 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.system.server.CommandDispatched;
-import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.ScheduleCommand;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.WriteSideFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -39,10 +39,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class CommandFlowWatcher {
 
-    private final GatewayFunction gateway;
+    private final WriteSideFunction function;
 
-    CommandFlowWatcher(GatewayFunction gateway) {
-        this.gateway = checkNotNull(gateway);
+    CommandFlowWatcher(WriteSideFunction function) {
+        this.function = checkNotNull(function);
     }
 
     /**
@@ -75,12 +75,12 @@ final class CommandFlowWatcher {
     }
 
     private void postSystemEvent(EventMessage systemEvent, TenantId tenantId) {
-        SystemGateway gateway = this.gateway.get(tenantId);
-        gateway.postEvent(systemEvent);
+        SystemWriteSide writeSide = function.get(tenantId);
+        writeSide.postEvent(systemEvent);
     }
 
     private void postSystemCommand(CommandMessage systemCommand, TenantId tenantId) {
-        SystemGateway gateway = this.gateway.get(tenantId);
-        gateway.postCommand(systemCommand);
+        SystemWriteSide writeSide = function.get(tenantId);
+        writeSide.postCommand(systemCommand);
     }
 }

@@ -29,7 +29,7 @@ import io.spine.core.CommandId;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.system.server.EventCausedCommand;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -69,7 +69,7 @@ public class SingleCommand
     @Override
     @SuppressWarnings("CheckReturnValue") // calling builder
     protected
-    void addPosted(EventCausedCommand.Builder builder, Command command, SystemGateway gateway) {
+    void addPosted(EventCausedCommand.Builder builder, Command command, SystemWriteSide writeSide) {
         CommandId commandId = command.getId();
         builder.setProduced(commandId);
     }

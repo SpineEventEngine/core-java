@@ -28,6 +28,7 @@ import io.spine.model.verify.given.ModelVerifierTestEnv.EditAggregate;
 import io.spine.model.verify.given.ModelVerifierTestEnv.RenameProcMan;
 import io.spine.model.verify.given.ModelVerifierTestEnv.UploadCommandHandler;
 import io.spine.server.model.DuplicateCommandHandlerError;
+import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.tasks.TaskCollection;
@@ -54,9 +55,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("ModelVerifier should")
 class ModelVerifierTest {
 
@@ -115,6 +113,7 @@ class ModelVerifierTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
         String invalidClassname = "non.existing.class.Name";

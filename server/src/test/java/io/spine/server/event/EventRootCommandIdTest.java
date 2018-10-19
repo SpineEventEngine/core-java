@@ -36,11 +36,13 @@ import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -59,6 +61,7 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(ShardingReset.class)
 @DisplayName("Event root CommandId should")
 public class EventRootCommandIdTest {
 
@@ -69,7 +72,6 @@ public class EventRootCommandIdTest {
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
-
         ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
         TeamAggregateRepository teamRepository = new TeamAggregateRepository();
         TeamCreationRepository teamCreationRepository = new TeamCreationRepository();

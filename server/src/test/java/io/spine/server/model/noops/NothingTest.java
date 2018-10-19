@@ -41,9 +41,9 @@ class NothingTest {
                 .newInstance()
                 .with(new ArchiverPm.Repository())
                 .receivesCommand(archiveSingleFile());
-        boundedContext.assertThat(emittedCommand(count(1)));
-        boundedContext.assertThat(emittedCommand(ArchiveFile.class));
-
-        boundedContext.assertThat(emittedEvent(count(0)));
+        boundedContext.assertThat(emittedCommand(count(1)))
+                      .assertThat(emittedCommand(ArchiveFile.class))
+                      .assertThat(emittedEvent(count(0)))
+                      .close();
     }
 }

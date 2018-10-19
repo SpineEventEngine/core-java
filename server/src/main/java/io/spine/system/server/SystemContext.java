@@ -38,11 +38,10 @@ import io.spine.server.event.EventBus;
  * context.
  *
  * @apiNote The framework users should not access a System Bounded Context directly.
- * Programmers extending the framework should see {@link SystemGateway} for
- * the front-facing API of the System bounded context.
+ * Programmers extending the framework should see {@link SystemClient} for the front-facing API
+ * of the System bounded context.
  *
- * @author Dmytro Dashenkov
- * @see SystemGateway
+ * @see SystemClient
  * @see BoundedContext
  */
 @Internal
@@ -63,7 +62,7 @@ public final class SystemContext extends BoundedContext {
         CommandLifecycleRepository repository = new CommandLifecycleRepository();
         BoundedContextBuilder preparedBuilder = prepareEnricher(builder, repository);
         SystemContext result = new SystemContext(preparedBuilder);
-        result.init(repository);
+        result.registerRepositories(repository);
         return result;
     }
 
@@ -76,7 +75,7 @@ public final class SystemContext extends BoundedContext {
         return builder.setEventBus(builderWithEnricher);
     }
 
-    private void init(CommandLifecycleRepository commandLifecycle) {
+    private void registerRepositories(CommandLifecycleRepository commandLifecycle) {
         register(commandLifecycle);
         register(new EntityHistoryRepository());
 
@@ -85,13 +84,25 @@ public final class SystemContext extends BoundedContext {
     }
 
     /**
+     * Creates a client for this context.
+     *
+     * <p>The resulting {@link SystemClient} is the way for the domain context to access its system
+     * counterpart.
+     *
+     * @return new instance of {@link SystemClient}
+     */
+    public SystemClient createClient() {
+        return new DefaultSystemClient(this);
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Since a system bounded context does not have an associated system bounded context, returns
-     * a {@link NoOpSystemGateway} instance.
+     * a {@link NoOpSystemWriteSide} instance.
      */
     @Override
-    public NoOpSystemGateway getSystemGateway() {
-        return NoOpSystemGateway.INSTANCE;
+    public NoOpSystemClient getSystemClient() {
+        return NoOpSystemClient.INSTANCE;
     }
 }

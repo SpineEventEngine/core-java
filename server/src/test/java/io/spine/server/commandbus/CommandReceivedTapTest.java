@@ -25,8 +25,8 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.system.server.CommandReceived;
-import io.spine.system.server.GatewayFunction;
-import io.spine.system.server.MemoizingGateway;
+import io.spine.system.server.MemoizingWriteSide;
+import io.spine.system.server.WriteSideFunction;
 import io.spine.test.commands.CmdCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @DisplayName("CommandReceivedTap should")
 class CommandReceivedTapTest {
 
-    private MemoizingGateway gateway;
+    private MemoizingWriteSide writeSide;
     private CommandReceivedTap filter;
 
     @BeforeEach
@@ -56,17 +56,17 @@ class CommandReceivedTapTest {
     }
 
     private void initSingleTenant() {
-        gateway = MemoizingGateway.singleTenant();
-        filter = new CommandReceivedTap(gatewayFn());
+        writeSide = MemoizingWriteSide.singleTenant();
+        filter = new CommandReceivedTap(systemFn());
     }
 
     private void initMultitenant() {
-        gateway = MemoizingGateway.multitenant();
-        filter = new CommandReceivedTap(gatewayFn());
+        writeSide = MemoizingWriteSide.multitenant();
+        filter = new CommandReceivedTap(systemFn());
     }
 
-    private GatewayFunction gatewayFn() {
-        return GatewayFunction.delegatingTo(gateway);
+    private WriteSideFunction systemFn() {
+        return WriteSideFunction.delegatingTo(writeSide);
     }
 
     @Test
@@ -85,8 +85,8 @@ class CommandReceivedTapTest {
         Command command = command(commandMessage(), expectedTenant);
         postAndCheck(command);
 
-        TenantId actualTenant = gateway.lastSeenEvent()
-                                       .tenant();
+        TenantId actualTenant = writeSide.lastSeenEvent()
+                                         .tenant();
         assertEquals(expectedTenant, actualTenant);
     }
 
@@ -96,8 +96,8 @@ class CommandReceivedTapTest {
         Optional<?> ack = filter.accept(envelope);
         assertFalse(ack.isPresent());
 
-        CommandReceived systemEvent = (CommandReceived) gateway.lastSeenEvent()
-                                                               .message();
+        CommandReceived systemEvent = (CommandReceived) writeSide.lastSeenEvent()
+                                                                 .message();
         assertEquals(envelope.getId(), systemEvent.getId());
     }
 

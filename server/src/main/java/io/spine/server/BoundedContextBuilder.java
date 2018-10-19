@@ -34,13 +34,15 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.NoOpSystemClient;
+import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -60,6 +62,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @CanIgnoreReturnValue
 public final class BoundedContextBuilder implements Logging {
 
+    @SuppressWarnings("TestOnlyProblems")
+        // Be default, assume test environment to simplify test data preparation.
     private BoundedContextName name = BoundedContextNames.assumingTests();
     private boolean multitenant;
     private TenantIndex tenantIndex;
@@ -247,10 +251,10 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
-        BiFunction<BoundedContextBuilder, SystemGateway, DomainContext>
-                instanceFactory = DomainContext::newInstance;
-        SystemGateway systemGateway = SystemGateway.newInstance(system);
-        BoundedContext result = buildPartial(instanceFactory, systemGateway, transport);
+        SystemClient systemClient = system.createClient();
+        Function<BoundedContextBuilder, DomainContext> instanceFactory =
+                builder -> DomainContext.newInstance(builder, systemClient);
+        BoundedContext result = buildPartial(instanceFactory, systemClient, transport);
         return result;
     }
 
@@ -266,28 +270,25 @@ public final class BoundedContextBuilder implements Logging {
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
-        BiFunction<BoundedContextBuilder, SystemGateway, SystemContext> instanceFactory =
-                (builder, systemGateway) -> SystemContext.newInstance(builder);
-        NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
-        SystemContext result = system.buildPartial(instanceFactory,
-                                                   systemGateway,
+        SystemContext result = system.buildPartial(SystemContext::newInstance,
+                                                   NoOpSystemClient.INSTANCE,
                                                    transport);
         return result;
     }
 
     private <B extends BoundedContext> B
-    buildPartial(BiFunction<BoundedContextBuilder, SystemGateway, B> instanceFactory,
-                 SystemGateway systemGateway,
+    buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
+                 SystemClient client,
                  TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
 
         initTenantIndex(storageFactory);
-        initCommandBus(systemGateway);
+        initCommandBus(client.writeSide());
         initEventBus(storageFactory);
-        initStand(systemGateway);
+        initStand(client.readSide());
         initIntegrationBus(transport);
 
-        B result = instanceFactory.apply(this, systemGateway);
+        B result = instanceFactory.apply(this);
         return result;
     }
 
@@ -319,7 +320,7 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private void initCommandBus(SystemGateway systemGateway) {
+    private void initCommandBus(SystemWriteSide systemWriteSide) {
         if (commandBus == null) {
             commandBus = CommandBus.newBuilder()
                                    .setMultitenant(this.multitenant);
@@ -333,7 +334,7 @@ public final class BoundedContextBuilder implements Logging {
                 commandBus.setMultitenant(this.multitenant);
             }
         }
-        commandBus.injectSystemGateway(systemGateway)
+        commandBus.injectSystem(systemWriteSide)
                   .injectTenantIndex(tenantIndex);
     }
 
@@ -350,7 +351,7 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private void initStand(SystemGateway systemGateway) {
+    private void initStand(SystemReadSide systemReadSide) {
         if (stand == null) {
             stand = createStand();
         } else {
@@ -364,7 +365,7 @@ public final class BoundedContextBuilder implements Logging {
                                standMultitenant);
             }
         }
-        stand.setSystemGateway(systemGateway);
+        stand.setSystemReadSide(systemReadSide);
     }
 
     private void initIntegrationBus(TransportFactory factory) {

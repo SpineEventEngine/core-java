@@ -34,6 +34,9 @@ import io.spine.test.reflect.event.RefProjectCreated;
 public class RejectingHandler extends TestCommandHandler {
     @Assign
     RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
-        throw new EntityAlreadyArchived(Identifier.pack(cmd.getProjectId()));
+        throw EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(Identifier.pack(cmd.getProjectId()))
+                .build();
     }
 }

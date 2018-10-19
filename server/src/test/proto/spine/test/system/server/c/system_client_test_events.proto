@@ -26,7 +26,7 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.system.server";
-option java_outer_classname = "GWEventsProto";
+option java_outer_classname = "SCEventsProto";
 option java_multiple_files = true;
 
 import "spine/test/system/server/shoppling_list.proto";

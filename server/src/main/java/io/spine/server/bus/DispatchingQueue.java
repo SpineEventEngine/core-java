@@ -32,8 +32,8 @@ import static io.spine.server.bus.Buses.acknowledge;
 /**
  * The queue that dispatches message envelopes in FIFO order.
  *
- * @param <E> the type of envelopes to dispatch
- * @author Vladyslav Lubenskyi
+ * @param <E>
+ *         the type of envelopes to dispatch
  */
 class DispatchingQueue<E extends MessageEnvelope> {
 
@@ -62,8 +62,10 @@ class DispatchingQueue<E extends MessageEnvelope> {
      * <p>Once the envelope dispatching action is finished, the queue picks the next available item
      * and starts to dispatch it until the queue is empty.
      *
-     * @param envelope the envelope to dispatch
-     * @param observer the observer to receive the outcome of the operation
+     * @param envelope
+     *         the envelope to dispatch
+     * @param observer
+     *         the observer to receive the outcome of the operation
      */
     // TODO:2018-07-11:dmytro.dashenkov: Rewrite synchronization properly.
     // todo                              https://github.com/SpineEventEngine/core-java/issues/746
@@ -103,14 +105,16 @@ class DispatchingQueue<E extends MessageEnvelope> {
     /**
      * A dispatching routine used by the queue when it's time to dispatch an envelope.
      *
-     * @param <E> the type of envelopes to dispatch
+     * @param <E>
+     *         the type of envelopes to dispatch
      */
     public interface DispatchAction<E> {
 
         /**
          * Dispatches the given envelope.
          *
-         * @param envelope the envelope to dispatch
+         * @param envelope
+         *         the envelope to dispatch
          */
         void dispatch(E envelope);
     }

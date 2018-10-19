@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
@@ -54,7 +54,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
 
     private final ChainBuilder<E> chainBuilder;
 
-    private @Nullable SystemGateway systemGateway;
+    private @Nullable SystemWriteSide systemWriteSide;
     private @Nullable TenantIndex tenantIndex;
 
     /**
@@ -88,15 +88,15 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
+     * Inject the {@link SystemWriteSide} of the bounded context to which the built bus belongs.
      *
      * @apiNote This method is {@link Internal} to the framework. The name of the method starts
      *          with the {@code inject} prefix so that this method does not appear in an
      *          auto-complete hint for the {@code set} prefix.
      */
     @Internal
-    public B injectSystemGateway(SystemGateway gateway) {
-        this.systemGateway = checkNotNull(gateway);
+    public B injectSystem(SystemWriteSide writeSide) {
+        this.systemWriteSide = checkNotNull(writeSide);
         return self();
     }
 
@@ -114,15 +114,17 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Obtains a {@link SystemGateway} set in the builder.
+     * Obtains a {@link SystemWriteSide} set in the builder.
      */
-    public Optional<SystemGateway> systemGateway() {
-        return ofNullable(systemGateway);
+    @Internal
+    public Optional<SystemWriteSide> system() {
+        return ofNullable(systemWriteSide);
     }
 
     /**
      * Obtains a {@link TenantIndex} set in the builder.
      */
+    @Internal
     public Optional<TenantIndex> tenantIndex() {
         return ofNullable(tenantIndex);
     }
@@ -145,7 +147,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * @return {@code this} reference to avoid redundant casts
+     * Returns {@code this} reference to avoid redundant casts.
      */
     protected abstract B self();
 
@@ -154,7 +156,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
      */
     public static final class FieldCheck {
 
-        private static final String GATEWAY_METHOD = "injectSystemGateway";
+        private static final String SYSTEM_METHOD = "injectSystem";
         private static final String TENANT_INDEX_METHOD = "injectTenantIndex";
         private static final String ERROR_FORMAT = "`%s` must be set. Please call `%s()`.";
 
@@ -163,18 +165,18 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
         }
 
         private static void check(BusBuilder builder) {
-            checkSet(builder.systemGateway, SystemGateway.class, GATEWAY_METHOD);
+            checkSet(builder.systemWriteSide, SystemWriteSide.class, SYSTEM_METHOD);
             checkSet(builder.tenantIndex, TenantIndex.class, TENANT_INDEX_METHOD);
         }
 
         public static void checkSet(@Nullable Object field,
-                                     Class<?> fieldType,
-                                     String setterName) {
+                                    Class<?> fieldType,
+                                    String setterName) {
             checkState(field != null, ERROR_FORMAT, fieldType.getSimpleName(), setterName);
         }
 
-        public static Supplier<IllegalStateException> gatewayNotSet() {
-            return () -> newException(SystemGateway.class, GATEWAY_METHOD);
+        public static Supplier<IllegalStateException> systemNotSet() {
+            return () -> newException(SystemWriteSide.class, SYSTEM_METHOD);
         }
 
         public static Supplier<IllegalStateException> tenantIndexNotSet() {

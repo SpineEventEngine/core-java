@@ -162,7 +162,12 @@ final class EntityHistoryAggregate
         DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
         boolean duplicate = lookup.isDuplicate(event);
         if (duplicate) {
-            throw new CannotDispatchEventTwice(getId(), event, now());
+            throw CannotDispatchEventTwice
+                    .newBuilder()
+                    .setReceiver(getId())
+                    .setPayload(event)
+                    .setWhenDispatched(now())
+                    .build();
         }
     }
 
@@ -170,7 +175,12 @@ final class EntityHistoryAggregate
         DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
         boolean duplicate = lookup.isDuplicate(command);
         if (duplicate) {
-            throw new CannotDispatchCommandTwice(getId(), command, now());
+            throw CannotDispatchCommandTwice
+                    .newBuilder()
+                    .setReceiver(getId())
+                    .setPayload(command)
+                    .setWhenDispatched(now())
+                    .build();
         }
     }
 

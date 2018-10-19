@@ -25,14 +25,14 @@
  *  as we want to manage the versions in a single source.
  */
 
-def final SPINE_VERSION = '0.11.7-SNAPSHOT'
+def final SPINE_VERSION = '0.11.8-SNAPSHOT'
 
 ext {
     // The version of the modules in this project.
     versionToPublish = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.11.5-SNAPSHOT'
+    spineBaseVersion = '0.11.8-SNAPSHOT'
 
     // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
     spineTimeVersion = '0.11.00-SNAPSHOT'

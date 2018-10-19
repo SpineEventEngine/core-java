@@ -20,7 +20,7 @@
 
 package io.spine.server.stand;
 
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemReadSide;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,9 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Stand.Builder should")
 class StandBuilderTest {
 
@@ -41,11 +38,11 @@ class StandBuilderTest {
     class Create {
 
         @Test
-        @DisplayName("with SystemGateway only")
-        void onlyGateway() {
+        @DisplayName("with SystemReadSide only")
+        void onlySystem() {
             Stand.Builder builder = Stand.newBuilder();
-            SystemGateway gateway = mock(SystemGateway.class);
-            builder.setSystemGateway(gateway);
+            SystemReadSide readSide = mock(SystemReadSide.class);
+            builder.setSystemReadSide(readSide);
             Stand result = builder.build();
 
             assertNotNull(result);
@@ -58,8 +55,8 @@ class StandBuilderTest {
     class NotCreate {
 
         @Test
-        @DisplayName("without a SystemGateway")
-        void withoutGateway() {
+        @DisplayName("without a SystemReadSide")
+        void withoutSystemReadSide() {
             Stand.Builder builder = Stand.newBuilder();
             assertThrows(IllegalStateException.class, builder::build);
         }

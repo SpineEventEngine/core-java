@@ -55,7 +55,8 @@ import static java.util.Collections.singleton;
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
-                          D extends MessageDispatcher<C, E, ?>> implements AutoCloseable {
+                          D extends MessageDispatcher<C, E, ?>>
+        implements AutoCloseable {
 
     /** A queue of envelopes to post. */
     private @Nullable DispatchingQueue<E> queue;

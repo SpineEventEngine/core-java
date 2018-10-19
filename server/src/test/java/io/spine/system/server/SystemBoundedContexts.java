@@ -27,8 +27,6 @@ import static org.hamcrest.Matchers.instanceOf;
 
 /**
  * A test utility for working with system {@link BoundedContext}s.
- *
- * @author Dmytro Dashenkov
  */
 public final class SystemBoundedContexts {
 
@@ -42,9 +40,9 @@ public final class SystemBoundedContexts {
      * Extracts the {@code System} bounded context from the given bounded context.
      */
     public static BoundedContext systemOf(BoundedContext context) {
-        SystemGateway systemGateway = context.getSystemGateway();
-        assertThat(systemGateway, instanceOf(DefaultSystemGateway.class));
-        DefaultSystemGateway gateway = (DefaultSystemGateway) systemGateway;
-        return gateway.target();
+        SystemClient client = context.getSystemClient();
+        assertThat(client, instanceOf(DefaultSystemClient.class));
+        DefaultSystemClient defaultClient = (DefaultSystemClient) client;
+        return defaultClient.target();
     }
 }

@@ -63,7 +63,7 @@ import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.EntityStateChangedVBuilder;
 import io.spine.system.server.EventImported;
 import io.spine.system.server.EventImportedVBuilder;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -95,9 +95,9 @@ import static java.util.stream.Collectors.toList;
 public class EntityLifecycle {
 
     /**
-     * The {@link SystemGateway} which the system messages are posted into.
+     * The {@link SystemWriteSide} which the system messages are posted into.
      */
-    private final SystemGateway systemGateway;
+    private final SystemWriteSide systemWriteSide;
 
     /**
      * The {@link EventFilter} applied to system events before posting.
@@ -124,22 +124,22 @@ public class EntityLifecycle {
     @VisibleForTesting
     protected EntityLifecycle(Object entityId,
                               TypeUrl entityType,
-                              SystemGateway gateway,
+                              SystemWriteSide writeSide,
                               EventFilter eventFilter) {
-        this.systemGateway = checkNotNull(gateway);
+        this.systemWriteSide = checkNotNull(writeSide);
         this.eventFilter = checkNotNull(eventFilter);
         this.historyId = historyId(entityId, entityType);
     }
 
     private EntityLifecycle(Builder builder) {
-        this(builder.entityId, builder.entityType, builder.gateway, builder.eventFilter);
+        this(builder.entityId, builder.entityType, builder.writeSide, builder.eventFilter);
     }
 
     /**
      * Posts the {@link EntityCreated} system event.
      *
      * @param entityKind
-     *         the {@linkplain io.spine.option.EntityOption.Kind kind} of the created entity
+     *         the {@linkplain EntityOption.Kind kind} of the created entity
      */
     public final void onEntityCreated(EntityOption.Kind entityKind) {
         EntityCreated event = EntityCreatedVBuilder
@@ -272,7 +272,7 @@ public class EntityLifecycle {
      *         the change in the entity state and attributes
      * @param messageIds
      *         the IDs of the messages which caused the {@code change}; typically,
-     *         {@link io.spine.core.EventId EventId}s or {@link CommandId}s
+     *         {@link EventId EventId}s or {@link CommandId}s
      */
     final void onStateChanged(EntityRecordChange change,
                               Set<? extends Message> messageIds) {
@@ -376,11 +376,11 @@ public class EntityLifecycle {
     
     protected void postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        filtered.ifPresent(systemGateway::postEvent);
+        filtered.ifPresent(systemWriteSide::postEvent);
     }
     
     protected void postCommand(CommandMessage command) {
-        systemGateway.postCommand(command);
+        systemWriteSide.postCommand(command);
     }
 
     private static Collection<DispatchedMessageId>
@@ -441,7 +441,7 @@ public class EntityLifecycle {
 
         private Object entityId;
         private TypeUrl entityType;
-        private SystemGateway gateway;
+        private SystemWriteSide writeSide;
         private EventFilter eventFilter;
 
         /**
@@ -460,8 +460,8 @@ public class EntityLifecycle {
             return this;
         }
 
-        Builder setGateway(SystemGateway gateway) {
-            this.gateway = checkNotNull(gateway);
+        Builder setSystemWriteSide(SystemWriteSide writeSide) {
+            this.writeSide = checkNotNull(writeSide);
             return this;
         }
 
@@ -478,7 +478,7 @@ public class EntityLifecycle {
         EntityLifecycle build() {
             checkState(entityId != null);
             checkState(entityType != null);
-            checkState(gateway != null);
+            checkState(writeSide != null);
             if (eventFilter == null) {
                 eventFilter = allowAll();
             }

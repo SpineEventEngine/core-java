@@ -248,7 +248,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getLifecycleFlags().getArchived()) {
             Any packedId = Identifier.pack(getId());
-            throw new CannotModifyArchivedEntity(packedId);
+            throw CannotModifyArchivedEntity
+                    .newBuilder()
+                    .setEntityId(packedId)
+                    .build();
         }
     }
 
@@ -262,7 +265,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getLifecycleFlags().getDeleted()) {
             Any packedId = Identifier.pack(getId());
-            throw new CannotModifyDeletedEntity(packedId);
+            throw CannotModifyDeletedEntity
+                    .newBuilder()
+                    .setEntityId(packedId)
+                    .build();
         }
     }
 

@@ -26,8 +26,8 @@ import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.NoOpSystemGateway;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +54,7 @@ import static org.mockito.Mockito.mock;
 class CommandBusBuilderTest
         extends BusBuilderTest<CommandBus.Builder, CommandEnvelope, Command> {
 
-    private static final SystemGateway SYSTEM_GATEWAY = NoOpSystemGateway.INSTANCE;
+    private static final SystemWriteSide SYSTEM_WRITE_SIDE = NoOpSystemWriteSide.INSTANCE;
 
     private TenantIndex tenantIndex;
     private EventBus eventBus;
@@ -62,7 +62,7 @@ class CommandBusBuilderTest
     @Override
     protected CommandBus.Builder builder() {
         return CommandBus.newBuilder()
-                         .injectSystemGateway(SYSTEM_GATEWAY)
+                         .injectSystem(SYSTEM_WRITE_SIDE)
                          .injectTenantIndex(tenantIndex)
                          .injectEventBus(eventBus);
     }
@@ -85,7 +85,7 @@ class CommandBusBuilderTest
     void createNewInstance() {
         CommandBus commandBus = CommandBus.newBuilder()
                                           .injectTenantIndex(tenantIndex)
-                                          .injectSystemGateway(SYSTEM_GATEWAY)
+                                          .injectSystem(SYSTEM_WRITE_SIDE)
                                           .injectEventBus(eventBus)
                                           .build();
         assertNotNull(commandBus);
@@ -103,13 +103,13 @@ class CommandBusBuilderTest
     void neverOmitCommandStore() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
-                                     .injectSystemGateway(SYSTEM_GATEWAY)
+                                     .injectSystem(SYSTEM_WRITE_SIDE)
                                      .build());
     }
 
     @Test
-    @DisplayName("not allow to omit setting SystemGateway")
-    void neverOmitSystemGateway() {
+    @DisplayName("not allow to omit setting SystemWriteSide")
+    void neverOmitSystem() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
                                      .injectTenantIndex(tenantIndex)
@@ -161,13 +161,13 @@ class CommandBusBuilderTest
         }
 
         @Test
-        @DisplayName("system gateway")
-        void gateway() {
-            SystemGateway systemGateway = mock(SystemGateway.class);
-            CommandBus.Builder builder = builder().injectSystemGateway(systemGateway);
-            Optional<SystemGateway> actual = builder.systemGateway();
+        @DisplayName("system write side")
+        void system() {
+            SystemWriteSide systemWriteSide = mock(SystemWriteSide.class);
+            CommandBus.Builder builder = builder().injectSystem(systemWriteSide);
+            Optional<SystemWriteSide> actual = builder.system();
             assertTrue(actual.isPresent());
-            assertSame(systemGateway, actual.get());
+            assertSame(systemWriteSide, actual.get());
         }
 
         @Test

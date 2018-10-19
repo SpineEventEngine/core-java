@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -44,32 +46,30 @@ import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Mykhailo Drachuk
- */
+@ExtendWith(ShardingReset.class)
 @DisplayName("Black Box Bounded Context should")
 class BlackBoxBoundedContextTest {
 
-    private BlackBoxBoundedContext project;
+    private BlackBoxBoundedContext projects;
 
     @BeforeEach
     void setUp() {
-        project = BlackBoxBoundedContext.newInstance()
-                                        .with(new BbProjectRepository());
+        projects = BlackBoxBoundedContext.newInstance()
+                                         .with(new BbProjectRepository());
     }
 
     @AfterEach
     void tearDown() {
-        project.close();
+        projects.close();
     }
 
     @SuppressWarnings("ReturnValueIgnored")
     @Test
     @DisplayName("receive and handle a single commands")
     void receivesACommand() {
-        project.receivesCommand(createProject())
-               .assertThat(acked(once()).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
+        projects.receivesCommand(createProject())
+                .assertThat(acked(once()).withoutErrorsOrRejections())
+                .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -77,12 +77,12 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and handle multiple commands")
     void receivesCommands() {
         BbProjectId projectId = newProjectId();
-        project.receivesCommand(createProject(projectId))
-               .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
-               .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(count(4)))
-               .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
-               .assertThat(VerifyEvents.emittedEvent(BbTaskAdded.class, thrice()));
+        projects.receivesCommand(createProject(projectId))
+                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
+                .assertThat(acked(count(4)).withoutErrorsOrRejections())
+                .assertThat(VerifyEvents.emittedEvent(count(4)))
+                .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
+                .assertThat(VerifyEvents.emittedEvent(BbTaskAdded.class, thrice()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -90,13 +90,13 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and react on single event")
     void receivesEvent() {
         BbProjectId projectId = newProjectId();
-        project.with(new BbReportRepository())
-               .receivesCommand(createReport(projectId))
-               .receivesEvent(taskAdded(projectId))
-               .assertThat(acked(twice()).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(thrice()))
-               .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
-               .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, once()));
+        projects.with(new BbReportRepository())
+                .receivesCommand(createReport(projectId))
+                .receivesEvent(taskAdded(projectId))
+                .assertThat(acked(twice()).withoutErrorsOrRejections())
+                .assertThat(VerifyEvents.emittedEvent(thrice()))
+                .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
+                .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -104,13 +104,13 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
         BbProjectId projectId = newProjectId();
-        project.with(new BbReportRepository())
-               .receivesCommand(createReport(projectId))
-               .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
-               .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(count(7)))
-               .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
-               .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, thrice()));
+        projects.with(new BbReportRepository())
+                .receivesCommand(createReport(projectId))
+                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
+                .assertThat(acked(count(4)).withoutErrorsOrRejections())
+                .assertThat(VerifyEvents.emittedEvent(count(7)))
+                .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
+                .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, thrice()));
     }
 
     @Test
