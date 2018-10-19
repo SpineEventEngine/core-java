@@ -21,6 +21,8 @@
 package io.spine.server.projection.e2e;
 
 import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.Time;
@@ -33,8 +35,12 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.groups.Group;
 import io.spine.server.groups.GroupId;
+import io.spine.server.groups.GroupNameProjection;
 import io.spine.server.groups.GroupProjection;
 import io.spine.server.organizations.Organization;
+import io.spine.server.organizations.OrganizationEstablished;
+import io.spine.server.organizations.OrganizationId;
+import io.spine.server.organizations.OrganizationProjection;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.TestProjection;
@@ -99,32 +105,31 @@ class ProjectionEndToEndTest {
     @SuppressWarnings("ResultOfMethodCallIgnored")
         // Black box context is used in a non-fluent fashion.
     void receiveExternal() {
-        PrjProjectCreated created = GivenEventMessage.projectCreated();
-        ProjectId id = created.getProjectId();
+        OrganizationEstablished established = GivenEventMessage.organizationEstablished();
         BlackBoxBoundedContext sender = BlackBoxBoundedContext
                 .newInstance()
-                .with(new TestProjection.Repository());
+                .with(new OrganizationProjection.Repository());
         BlackBoxBoundedContext receiver = BlackBoxBoundedContext
                 .newInstance()
-                .with(new EntitySubscriberProjection.Repository());
-        sender.receivesEvent(event(id, created));
-        receiver.assertThat(exactly(ProjectTaskNames.class, of(
-                ProjectTaskNames
+                .with(new GroupNameProjection.Repository());
+        OrganizationId id = established.getId();
+        sender.receivesEvent(event(id, established));
+        receiver.assertThat(exactly(StringValue.class, of(
+                StringValue
                         .newBuilder()
-                        .setProjectId(id)
-                        .setProjectName(created.getName())
+                        .setValue(established.getName())
                         .build()
         )));
     }
 
     @Test
     @DisplayName("receive entity state updates along with system event context")
-    void receiveEntityStateUpdatesAndEventContext() {
+    void receiveEntityStateUpdatesAndEventContext() throws Exception {
         GroupProjection.Repository repository = new GroupProjection.Repository();
-        BoundedContext
+        BoundedContext groups = BoundedContext
                 .newBuilder()
-                .build()
-                .register(repository);
+                .build();
+        groups.register(repository);
         UserId organizationHead = UserId
                 .newBuilder()
                 .build();
@@ -171,10 +176,12 @@ class ProjectionEndToEndTest {
         IterableSubject assertParticipants = assertThat(actualGroup.getParticipantsList());
         assertParticipants.containsAllIn(newState.getMembersList());
         assertParticipants.contains(organizationHead);
+
+        groups.close();
     }
 
-    private static Event event(ProjectId producer, EventMessage eventMessage) {
-        TestEventFactory eventFactory = newInstance(producer, ProjectionEndToEndTest.class);
+    private static Event event(Message producerId, EventMessage eventMessage) {
+        TestEventFactory eventFactory = newInstance(producerId, ProjectionEndToEndTest.class);
         Event result = eventFactory.createEvent(eventMessage);
         return result;
     }

@@ -6,24 +6,17 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.organizations";
-option java_outer_classname = "GroupProto";
+option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
+import "spine/test/entity/organizations/organization.proto";
 
-message OrganizationId {
-
-    string uid = 1;
-}
-
-message Organization {
-    option (entity).kind = AGGREGATE;
+message OrganizationEstablished {
 
     OrganizationId id = 1;
 
     string name = 2;
 
     core.UserId head = 3;
-
-    repeated core.UserId members = 4;
 }
