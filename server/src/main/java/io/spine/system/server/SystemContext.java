@@ -38,8 +38,8 @@ import io.spine.server.event.EventBus;
  * context.
  *
  * @apiNote The framework users should not access a System Bounded Context directly.
- * Programmers extending the framework should see {@link SystemWriteSide} for
- * the front-facing API of the System bounded context.
+ * Programmers extending the framework should see {@link SystemClient} for the front-facing API
+ * of the System bounded context.
  *
  * @see SystemClient
  * @see BoundedContext
