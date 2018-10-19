@@ -50,7 +50,7 @@ public interface SystemReadSide {
      *
      * @param dispatcher
      *         a registered system event dispatcher
-     * @see #register(io.spine.server.event.EventDispatcher)
+     * @see #register(EventDispatcher)
      */
     void unregister(EventDispatcher<?> dispatcher);
 

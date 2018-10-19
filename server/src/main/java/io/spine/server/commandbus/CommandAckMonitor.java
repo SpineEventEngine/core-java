@@ -153,7 +153,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         }
 
         /**
-         * Sets the {@link io.spine.system.server.SystemWriteSide} to post system commands into.
+         * Sets the {@link SystemWriteSide} to post system commands into.
          */
         Builder setSystemWriteSide(SystemWriteSide systemWriteSide) {
             this.systemWriteSide = checkNotNull(systemWriteSide);

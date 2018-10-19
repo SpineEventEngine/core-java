@@ -114,7 +114,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Obtains a {@link io.spine.system.server.SystemWriteSide} set in the builder.
+     * Obtains a {@link SystemWriteSide} set in the builder.
      */
     @Internal
     public Optional<SystemWriteSide> system() {

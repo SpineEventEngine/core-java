@@ -95,7 +95,7 @@ import static java.util.stream.Collectors.toList;
 public class EntityLifecycle {
 
     /**
-     * The {@link io.spine.system.server.SystemWriteSide} which the system messages are posted into.
+     * The {@link SystemWriteSide} which the system messages are posted into.
      */
     private final SystemWriteSide systemWriteSide;
 
@@ -139,7 +139,7 @@ public class EntityLifecycle {
      * Posts the {@link EntityCreated} system event.
      *
      * @param entityKind
-     *         the {@linkplain io.spine.option.EntityOption.Kind kind} of the created entity
+     *         the {@linkplain EntityOption.Kind kind} of the created entity
      */
     public final void onEntityCreated(EntityOption.Kind entityKind) {
         EntityCreated event = EntityCreatedVBuilder
@@ -272,7 +272,7 @@ public class EntityLifecycle {
      *         the change in the entity state and attributes
      * @param messageIds
      *         the IDs of the messages which caused the {@code change}; typically,
-     *         {@link io.spine.core.EventId EventId}s or {@link CommandId}s
+     *         {@link EventId EventId}s or {@link CommandId}s
      */
     final void onStateChanged(EntityRecordChange change,
                               Set<? extends Message> messageIds) {

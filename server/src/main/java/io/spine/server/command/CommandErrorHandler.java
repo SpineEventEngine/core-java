@@ -58,9 +58,9 @@ public final class CommandErrorHandler implements Logging {
     }
 
     /**
-     * Creates a new {@code CommandErrorHandler} with the given {@link io.spine.system.server.SystemWriteSide}.
+     * Creates a new {@code CommandErrorHandler} with the given {@link SystemWriteSide}.
      *
-     * @param systemWriteSide {@link io.spine.system.server.SystemWriteSide} to post system commands into
+     * @param systemWriteSide {@link SystemWriteSide} to post system commands into
      * @return new instance of {@code CommandErrorHandler}
      */
     public static CommandErrorHandler with(SystemWriteSide systemWriteSide) {
