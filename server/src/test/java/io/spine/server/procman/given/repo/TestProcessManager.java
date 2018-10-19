@@ -152,7 +152,10 @@ public class TestProcessManager
     @Assign
     List<Message> handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
         keep(command);
-        throw new EntityAlreadyArchived(pack(command.getProjectId()));
+        throw EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(pack(command.getProjectId()))
+                .build();
     }
 
     @React

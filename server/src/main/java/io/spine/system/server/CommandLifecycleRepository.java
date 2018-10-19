@@ -24,8 +24,6 @@ import io.spine.core.CommandId;
 
 /**
  * The repository for {@link CommandLifecycleAggregate}s.
- *
- * @author Dmytro Dashenkov
  */
 final class CommandLifecycleRepository
         extends SystemRepository<CommandId, CommandLifecycleAggregate> {

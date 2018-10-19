@@ -18,13 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server.given.gateway;
+package io.spine.system.server.given.client;
 
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.system.server.ListId;
 
-/**
- * @author Dmytro Dashenkov
- */
 public class ShoppingListRepository extends AggregateRepository<ListId, ShoppingListAggregate> {
 }

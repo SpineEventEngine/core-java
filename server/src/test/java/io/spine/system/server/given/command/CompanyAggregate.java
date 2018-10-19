@@ -48,12 +48,17 @@ public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuil
     @Assign
     CompanyEstablished handle(EstablishCompany command) throws CompanyNameAlreadyTaken {
         if (TAKEN_NAME.equals(command.getFinalName())) {
-            throw new CompanyNameAlreadyTaken(getId(), TAKEN_NAME);
+            throw CompanyNameAlreadyTaken
+                    .newBuilder()
+                    .setId(getId())
+                    .setTakenName(TAKEN_NAME)
+                    .build();
         }
-        return CompanyEstablished.newBuilder()
-                                 .setId(command.getId())
-                                 .setName(command.getFinalName())
-                                 .build();
+        return CompanyEstablished
+                .newBuilder()
+                .setId(command.getId())
+                .setName(command.getFinalName())
+                .build();
     }
 
     @Apply

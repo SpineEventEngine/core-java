@@ -33,30 +33,29 @@ import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
 import io.spine.system.server.EventDispatchedToSubscriberVBuilder;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.system.server.HistoryRejections.CannotDispatchEventTwice;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
+@ExtendWith(ShardingReset.class)
 @DisplayName("ProjectionSystemEventWatcher should")
 class ProjectionSystemEventWatcherTest {
 
@@ -138,7 +137,6 @@ class ProjectionSystemEventWatcherTest {
         @BeforeEach
         void setUp() {
             watcher = new ProjectionSystemEventWatcher<>(repository);
-            clearInvocations(repository);
         }
 
         @Test
@@ -151,9 +149,7 @@ class ProjectionSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            dispatch(systemEvent, systemEvent.getReceiver());
-
-            checkNothingHappened();
+            checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }
 
         @Test
@@ -166,28 +162,22 @@ class ProjectionSystemEventWatcherTest {
                     .setReceiver(wrongHistoryId())
                     .setWhenDispatched(getCurrentTime())
                     .build();
-            dispatch(rejection, rejection.getReceiver());
-
-            checkNothingHappened();
+            checkCannotDispatch(rejection, rejection.getReceiver());
         }
 
-        private void checkNothingHappened() {
-            verifyNoMoreInteractions(repository);
+        private void checkCannotDispatch(EventMessage eventMessage, EntityHistoryId producer) {
+            TestEventFactory eventFactory =
+                    TestEventFactory.newInstance(producer, ProjectionSystemEventWatcherTest.class);
+            Event event = eventFactory.createEvent(eventMessage);
+            EventEnvelope envelope = EventEnvelope.of(event);
+            boolean canDispatch = watcher.canDispatch(envelope);
+            assertFalse(canDispatch);
         }
 
         private EntityHistoryId wrongHistoryId() {
             return historyId().toBuilder()
                               .setTypeUrl(ANOTHER_TYPE.value())
                               .build();
-        }
-
-        @SuppressWarnings("ResultOfMethodCallIgnored")
-        private void dispatch(EventMessage eventMessage, EntityHistoryId producer) {
-            TestEventFactory eventFactory =
-                    TestEventFactory.newInstance(producer, ProjectionSystemEventWatcherTest.class);
-            Event event = eventFactory.createEvent(eventMessage);
-            EventEnvelope envelope = EventEnvelope.of(event);
-            watcher.dispatch(envelope);
         }
     }
 

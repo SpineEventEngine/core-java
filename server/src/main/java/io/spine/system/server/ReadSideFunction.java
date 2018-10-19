@@ -18,12 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@BoundedContext("_System")
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.system.server.given.gateway;
+package io.spine.system.server;
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.server.annotation.BoundedContext;
+import io.spine.core.TenantId;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Function;
+
+/**
+ * Obtains a system read side in a multi-tenant environment.
+ */
+@FunctionalInterface
+public interface ReadSideFunction extends Function<TenantId, SystemReadSide> {
+
+    /** Obtains system read side for the given tenant. */
+    default SystemReadSide get(TenantId tenantId) {
+        return apply(tenantId);
+    }
+
+    static ReadSideFunction delegatingTo(SystemReadSide delegate) {
+        return (t) -> {
+            SystemReadSide result = TenantAwareSystemReadSide.forTenant(t, delegate);
+            return result;
+        };
+    }
+}

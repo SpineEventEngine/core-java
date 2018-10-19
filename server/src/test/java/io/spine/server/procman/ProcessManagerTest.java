@@ -42,7 +42,7 @@ import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
@@ -62,6 +62,7 @@ import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.entity.given.Given;
@@ -73,6 +74,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -109,6 +111,7 @@ import static org.mockito.Mockito.spy;
 @SuppressWarnings({"OverlyCoupledClass",
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
+@ExtendWith(ShardingReset.class)
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
 
@@ -117,17 +120,18 @@ class ProcessManagerTest {
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
 
+    private BoundedContext context;
     private CommandBus commandBus;
     private TestProcessManager processManager;
 
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext bc = BoundedContext
+        context = BoundedContext
                 .newBuilder()
                 .setMultitenant(true)
                 .build();
-        StorageFactory storageFactory = bc.getStorageFactory();
+        StorageFactory storageFactory = context.getStorageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
         EventBus eventBus = EventBus.newBuilder()
@@ -135,7 +139,7 @@ class ProcessManagerTest {
                                     .build();
         commandBus = spy(CommandBus.newBuilder()
                                    .injectTenantIndex(tenantIndex)
-                                   .injectSystemGateway(NoOpSystemGateway.INSTANCE)
+                                   .injectSystem(NoOpSystemWriteSide.INSTANCE)
                                    .injectEventBus(eventBus)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
@@ -143,6 +147,11 @@ class ProcessManagerTest {
                               .withVersion(2)
                               .withState(Any.getDefaultInstance())
                               .build();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        context.close();
     }
 
     @CanIgnoreReturnValue

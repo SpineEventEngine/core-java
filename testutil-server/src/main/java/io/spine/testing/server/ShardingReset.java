@@ -46,8 +46,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  *     }
  *     }
  * </pre>
- *
- * @author Dmytro Dashenkov
  */
 public final class ShardingReset implements BeforeEachCallback, AfterEachCallback {
 

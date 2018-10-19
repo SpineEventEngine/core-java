@@ -22,21 +22,17 @@ package io.spine.server.delivery.given;
 import com.google.common.collect.Lists;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.command.Assign;
-import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
-import io.spine.server.delivery.Sharding;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.React;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
@@ -69,12 +65,6 @@ public class MessageDeliveryTestEnv {
 
     /** Prevents instantiation of this test environment class. */
     private MessageDeliveryTestEnv() {
-    }
-
-    public static void setShardingTransport(InMemoryTransportFactory transport) {
-        Sharding inProcessSharding = new InProcessSharding(transport);
-        ServerEnvironment.getInstance()
-                         .replaceSharding(inProcessSharding);
     }
 
     /**

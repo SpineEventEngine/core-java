@@ -18,29 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+@BoundedContext("_System")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.system.server.given.client;
 
-import io.spine.core.TenantId;
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.server.annotation.BoundedContext;
 
-import java.util.function.Function;
-
-/**
- * Obtains a gateway in a multi-tenant environment.
- *
- * @author Alexander Yevsyukov
- */
-@FunctionalInterface
-public interface GatewayFunction extends Function<TenantId, SystemGateway> {
-
-    /** Obtains system gateway for the given tenant. */
-    default SystemGateway get(TenantId tenantId) {
-        return apply(tenantId);
-    }
-
-    static GatewayFunction delegatingTo(SystemGateway delegate) {
-        return (t) -> {
-            SystemGateway result = TenantAwareSystemGateway.forTenant(t, delegate);
-            return result;
-        };
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

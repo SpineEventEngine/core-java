@@ -30,7 +30,6 @@ import static java.lang.String.format;
 /**
  * A bus which delivers a message to one dispatcher.
  *
- * @author Alexander Yevsyukov
  * @see MulticastBus
  */
 public abstract class UnicastBus<T extends Message,

@@ -20,56 +20,48 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Iterator;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.emptyIterator;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * A {@link SystemGateway} which memoizes the posted system commands.
+ * A {@link SystemWriteSide} which memoizes the posted system commands.
  *
- * <p>This class is a test-only facility, used in order to avoid mocking {@link SystemGateway}
+ * <p>This class is a test-only facility, used in order to avoid mocking {@link SystemWriteSide}
  * instances.
  */
-public final class MemoizingGateway implements SystemGateway {
+public final class MemoizingWriteSide implements SystemWriteSide {
 
-    private @MonotonicNonNull MemoizedMessage lastSeenCommand;
-    private @MonotonicNonNull MemoizedMessage lastSeenEvent;
-    private @MonotonicNonNull MemoizedMessage lastSeenQuery;
+    private @MonotonicNonNull MemoizedSystemMessage lastSeenCommand;
+    private @MonotonicNonNull MemoizedSystemMessage lastSeenEvent;
 
     private final boolean multitenant;
 
-    private MemoizingGateway(boolean multitenant) {
+    private MemoizingWriteSide(boolean multitenant) {
         this.multitenant = multitenant;
     }
 
     /**
-     * Creates a new instance of {@code MemoizingGateway} for a single-tenant execution environment.
+     * Creates a new instance of {@code MemoizingWriteSide} for a single-tenant execution environment.
      *
-     * @return new {@code MemoizingGateway}
+     * @return new {@code MemoizingWriteSide}
      */
-    public static MemoizingGateway singleTenant() {
-        return new MemoizingGateway(false);
+    public static MemoizingWriteSide singleTenant() {
+        return new MemoizingWriteSide(false);
     }
 
     /**
-     * Creates a new instance of {@code MemoizingGateway} for a multitenant execution environment.
+     * Creates a new instance of {@code MemoizingWriteSide} for a multitenant execution environment.
      *
-     * @return new {@code MemoizingGateway}
+     * @return new {@code MemoizingWriteSide}
      */
-    public static MemoizingGateway multitenant() {
-        return new MemoizingGateway(true);
+    public static MemoizingWriteSide multitenant() {
+        return new MemoizingWriteSide(true);
     }
 
     /**
@@ -82,7 +74,7 @@ public final class MemoizingGateway implements SystemGateway {
     @Override
     public void postCommand(CommandMessage systemCommand) {
         TenantId tenantId = currentTenant();
-        lastSeenCommand = new MemoizedMessage(systemCommand, tenantId);
+        lastSeenCommand = new MemoizedSystemMessage(systemCommand, tenantId);
     }
 
     /**
@@ -95,14 +87,7 @@ public final class MemoizingGateway implements SystemGateway {
     @Override
     public void postEvent(EventMessage systemEvent) {
         TenantId tenantId = currentTenant();
-        lastSeenEvent = new MemoizedMessage(systemEvent, tenantId);
-    }
-
-    @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        TenantId tenantId = currentTenant();
-        lastSeenQuery = new MemoizedMessage(query, tenantId);
-        return emptyIterator();
+        lastSeenEvent = new MemoizedSystemMessage(systemEvent, tenantId);
     }
 
     /** Obtains the ID of the current tenant. */
@@ -117,63 +102,22 @@ public final class MemoizingGateway implements SystemGateway {
     }
 
     /**
-     * A command received by the {@code MemoizingGateway}.
-     */
-    public static final class MemoizedMessage {
-
-        private final Message message;
-        private final TenantId tenantId;
-
-        private MemoizedMessage(Message message, TenantId id) {
-            this.message = message;
-            tenantId = id;
-        }
-
-        public Message message() {
-            return message;
-        }
-
-        public TenantId tenant() {
-            return tenantId;
-        }
-    }
-
-    /**
-     * Obtains the last command message posted to {@link SystemGateway}.
+     * Obtains the last command message posted to {@link SystemWriteSide}.
      *
      * <p>Fails if no commands were posted yet.
      */
-    public MemoizedMessage lastSeenCommand() {
+    public MemoizedSystemMessage lastSeenCommand() {
         assertNotNull(lastSeenCommand);
         return lastSeenCommand;
     }
 
     /**
-     * Obtains the last event message posted to {@link SystemGateway}.
+     * Obtains the last event message posted to {@link SystemWriteSide}.
      *
      * <p>Fails if no events were posted yet.
      */
-    public MemoizedMessage lastSeenEvent() {
+    public MemoizedSystemMessage lastSeenEvent() {
         assertNotNull(lastSeenEvent);
         return lastSeenEvent;
-    }
-
-    /**
-     * Checks that this gateway has never seen an event.
-     *
-     * <p>Fails if the check does not pass.
-     */
-    public void assertNoEvents() {
-        assertNull(lastSeenEvent, () -> lastSeenEvent.message().toString());
-    }
-
-    /**
-     * Obtains the last query submitted to {@link SystemGateway}.
-     *
-     * <p>Fails if no queries were submitted yet.
-     */
-    public MemoizedMessage lastSeenQuery() {
-        assertNotNull(lastSeenQuery);
-        return lastSeenQuery;
     }
 }

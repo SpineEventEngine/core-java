@@ -27,12 +27,10 @@ import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.NoOpSystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.stream.Stream;
@@ -40,10 +38,6 @@ import java.util.stream.Stream;
 import static io.spine.core.BoundedContextNames.assumingTests;
 import static io.spine.server.storage.StorageFactorySwitch.newInstance;
 
-/**
- * @author Alexander Yevsyukov
- * @author Dmytro Kuzmin
- */
 public class StandTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -60,7 +54,7 @@ public class StandTestEnv {
         Stand stand = Stand
                 .newBuilder()
                 .setMultitenant(multitenant)
-                .setSystemGateway(NoOpSystemGateway.INSTANCE)
+                .setSystemReadSide(NoOpSystemReadSide.INSTANCE)
                 .build();
         StorageFactorySwitch storage = newInstance(assumingTests(), multitenant);
         for (Repository repository : repositories) {

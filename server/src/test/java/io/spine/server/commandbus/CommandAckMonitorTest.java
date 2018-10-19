@@ -38,8 +38,8 @@ import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.system.server.CommandAcknowledged;
 import io.spine.system.server.CommandErrored;
-import io.spine.system.server.MemoizingGateway;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.MemoizingWriteSide;
+import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.commandbus.CmdBusStartProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,9 +55,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("CommandAckMonitor should")
 class CommandAckMonitorTest {
@@ -85,7 +82,7 @@ class CommandAckMonitorTest {
         @DisplayName("delegate StreamObserver")
         void delegate() {
             builder.setTenantId(TenantId.getDefaultInstance())
-                   .setSystemGateway(NoOpSystemGateway.INSTANCE);
+                   .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);
             assertFailsToBuild();
         }
 
@@ -93,13 +90,13 @@ class CommandAckMonitorTest {
         @DisplayName("tenant ID")
         void tenant() {
             builder.setDelegate(noOpObserver())
-                   .setSystemGateway(NoOpSystemGateway.INSTANCE);
+                   .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);
             assertFailsToBuild();
         }
 
         @Test
-        @DisplayName("system gateway")
-        void systemGateway() {
+        @DisplayName("system write side")
+        void system() {
             builder.setDelegate(noOpObserver())
                    .setTenantId(TenantId.getDefaultInstance());
             assertFailsToBuild();
@@ -115,17 +112,17 @@ class CommandAckMonitorTest {
     class PostSystemCommands {
 
         private CommandAckMonitor monitor;
-        private MemoizingGateway gateway;
+        private MemoizingWriteSide writeSide;
 
         private CommandId commandId;
 
         @BeforeEach
         void setUp() {
-            gateway = MemoizingGateway.singleTenant();
+            writeSide = MemoizingWriteSide.singleTenant();
             monitor = CommandAckMonitor
                     .newBuilder()
                     .setDelegate(noOpObserver())
-                    .setSystemGateway(gateway)
+                    .setSystemWriteSide(writeSide)
                     .setTenantId(TenantId.getDefaultInstance())
                     .build();
             commandId = CommandId
@@ -140,8 +137,8 @@ class CommandAckMonitorTest {
             Ack ack = okAck(commandId);
             monitor.onNext(ack);
 
-            Message lastSeenEvent = gateway.lastSeenEvent()
-                                           .message();
+            Message lastSeenEvent = writeSide.lastSeenEvent()
+                                             .message();
 
             assertThat(lastSeenEvent).isInstanceOf(CommandAcknowledged.class);
 
@@ -155,8 +152,8 @@ class CommandAckMonitorTest {
             Ack ack = errorAck(commandId);
             monitor.onNext(ack);
 
-            Message lastSeenEvent = gateway.lastSeenEvent()
-                                           .message();
+            Message lastSeenEvent = writeSide.lastSeenEvent()
+                                             .message();
 
             assertThat(lastSeenEvent).isInstanceOf(CommandErrored.class);
 
@@ -189,7 +186,7 @@ class CommandAckMonitorTest {
             monitor = CommandAckMonitor
                     .newBuilder()
                     .setTenantId(TenantId.getDefaultInstance())
-                    .setSystemGateway(NoOpSystemGateway.INSTANCE)
+                    .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
                     .setDelegate(delegate)
                     .build();
             commandId = CommandId
@@ -275,7 +272,10 @@ class CommandAckMonitorTest {
         CommandEnvelope envelope = CommandEnvelope.of(command);
 
         Any entityId = Identifier.pack(CommandAckMonitorTest.class.getSimpleName());
-        CannotModifyArchivedEntity rejectionThrowable = new CannotModifyArchivedEntity(entityId);
+        CannotModifyArchivedEntity rejectionThrowable = CannotModifyArchivedEntity
+                .newBuilder()
+                .setEntityId(entityId)
+                .build();
         RuntimeException wrapperThrowable = new RuntimeException(rejectionThrowable);
         RejectionEnvelope rejection = RejectionEnvelope.from(envelope, wrapperThrowable);
 

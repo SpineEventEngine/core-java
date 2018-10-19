@@ -55,7 +55,10 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     EngineStarted handle(StartEngine command) throws EngineAlreadyStarted {
         EngineId id = command.getId();
         if (getState().getStatus() == STARTED) {
-            throw new EngineAlreadyStarted(id);
+            throw EngineAlreadyStarted
+                    .newBuilder()
+                    .setId(id)
+                    .build();
         }
         return start(id);
     }
@@ -69,7 +72,10 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     EngineStopped handle(StopEngine command) throws EngineAlreadyStopped {
         EngineId id = command.getId();
         if (getState().getStatus() == STOPPED) {
-            throw new EngineAlreadyStopped(id);
+            throw EngineAlreadyStopped
+                    .newBuilder()
+                    .setId(id)
+                    .build();
         }
         return stop(id);
     }

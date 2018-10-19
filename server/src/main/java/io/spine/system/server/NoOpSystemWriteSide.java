@@ -18,33 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server.given.gateway;
+package io.spine.system.server;
 
-import io.spine.server.BoundedContext;
-
-import static io.spine.system.server.SystemBoundedContexts.systemOf;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 
 /**
- * @author Dmytro Dashenkov
+ * An implementation of {@link SystemWriteSide} which never performs an operation.
+ *
+ * <p>All the methods inherited from {@link SystemWriteSide} exit without any action or exception.
+ *
+ * <p>This implementation is used by the system bounded context itself, since there is no system
+ * bounded context for a system bounded context.
  */
-public class DefaultSystemGatewayTestEnv {
+public enum NoOpSystemWriteSide implements SystemWriteSide {
 
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private DefaultSystemGatewayTestEnv() {
+    INSTANCE;
+
+    @Override
+    public void postCommand(CommandMessage systemCommand) {
+        // NOP.
     }
 
-    public static BoundedContext contextWithDomainAggregate() {
-        BoundedContext context = BoundedContext.newBuilder().build();
-        context.register(new ShoppingListRepository());
-        return context;
-    }
-
-    public static BoundedContext contextWithSystemAggregate() {
-        BoundedContext context = BoundedContext.newBuilder().build();
-        BoundedContext systemContext = systemOf(context);
-        systemContext.register(new ShoppingListRepository());
-        return context;
+    @Override
+    public void postEvent(EventMessage systemEvent) {
+        // NOP.
     }
 }

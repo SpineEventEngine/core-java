@@ -21,9 +21,9 @@
 package io.spine.server.delivery;
 
 import io.spine.server.BoundedContext;
-import io.spine.server.delivery.given.SystemEventWatcherTestEnv.DomesticWatcher;
-import io.spine.server.delivery.given.SystemEventWatcherTestEnv.ExternalNonSystemWatcher;
-import io.spine.server.delivery.given.SystemEventWatcherTestEnv.ExternalSystemWatcher;
+import io.spine.server.delivery.given.SystemEventWatcherTestEnv.ExternalWatcher;
+import io.spine.server.delivery.given.SystemEventWatcherTestEnv.NonSystemWatcher;
+import io.spine.server.delivery.given.SystemEventWatcherTestEnv.ValidSystemWatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +32,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("SystemEventWatcher should")
 class SystemEventWatcherTest {
 
@@ -46,26 +43,26 @@ class SystemEventWatcherTest {
     }
 
     @Test
-    @DisplayName("not subscribe to domestic events")
+    @DisplayName("not subscribe to external events")
     void notDomestic() {
-        SystemEventWatcher<?> watcher = new DomesticWatcher();
-        EventBus bus = boundedContext.getEventBus();
+        SystemEventWatcher<?> watcher = new ExternalWatcher();
+        IntegrationBus bus = boundedContext.getIntegrationBus();
         assertThrows(IllegalStateException.class, () -> bus.register(watcher));
     }
 
     @Test
     @DisplayName("not subscribe to external non-system events")
     void onlySystem() {
-        SystemEventWatcher<?> watcher = new ExternalNonSystemWatcher();
-        IntegrationBus bus = boundedContext.getIntegrationBus();
+        SystemEventWatcher<?> watcher = new NonSystemWatcher();
+        EventBus bus = boundedContext.getEventBus();
         assertThrows(IllegalStateException.class, () -> bus.register(watcher));
     }
 
     @Test
-    @DisplayName("subscribe to external system events")
+    @DisplayName("subscribe to domestic system events")
     void subscribe() {
-        SystemEventWatcher<?> watcher = new ExternalSystemWatcher();
-        IntegrationBus bus = boundedContext.getIntegrationBus();
+        SystemEventWatcher<?> watcher = new ValidSystemWatcher();
+        EventBus bus = boundedContext.getEventBus();
         bus.register(watcher);
     }
 }

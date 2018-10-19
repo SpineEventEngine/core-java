@@ -55,8 +55,10 @@ public class SingleTenantCommandBusTestEnv {
      */
     public static class FaultyHandler extends AbstractCommandHandler {
 
-        private final InvalidProjectName rejection =
-                new InvalidProjectName(ProjectId.getDefaultInstance());
+        private final InvalidProjectName rejection = InvalidProjectName
+                .newBuilder()
+                .setProjectId(ProjectId.getDefaultInstance())
+                .build();
 
         public FaultyHandler(EventBus eventBus) {
             super(eventBus);

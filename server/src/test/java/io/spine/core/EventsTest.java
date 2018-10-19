@@ -99,8 +99,10 @@ public class EventsTest extends UtilityClassTest<Events> {
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
-        EntityAlreadyArchived defaultThrowableMessage =
-                new EntityAlreadyArchived(Any.getDefaultInstance());
+        EntityAlreadyArchived defaultThrowableMessage = EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(Any.getDefaultInstance())
+                .build();
         tester.setDefault(StringValue.class, StringValue.getDefaultInstance())
               .setDefault(EventContext.class, GivenEvent.context())
               .setDefault(Version.class, Version.getDefaultInstance())

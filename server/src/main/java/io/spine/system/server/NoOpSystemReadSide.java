@@ -21,35 +21,32 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Any;
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
 import io.spine.client.Query;
+import io.spine.server.event.EventDispatcher;
 
 import java.util.Iterator;
 
 import static java.util.Collections.emptyIterator;
 
 /**
- * An implementation of {@link SystemGateway} which never performs an operation.
+ * An implementation of {@link SystemReadSide} which never performs an operation.
  *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
+ * <p>All the methods inherited from {@link SystemReadSide} exit without any action or exception.
  *
  * <p>This implementation is used by the system bounded context itself, since there is no system
  * bounded context for a system bounded context.
- *
- * @author Dmytro Dashenkov
  */
-public enum NoOpSystemGateway implements SystemGateway {
+public enum NoOpSystemReadSide implements SystemReadSide {
 
     INSTANCE;
 
     @Override
-    public void postCommand(CommandMessage systemCommand) {
+    public void register(EventDispatcher<?> dispatcher) {
         // NOP.
     }
 
     @Override
-    public void postEvent(EventMessage systemEvent) {
+    public void unregister(EventDispatcher<?> dispatcher) {
         // NOP.
     }
 

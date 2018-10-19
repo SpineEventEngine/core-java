@@ -47,6 +47,7 @@ import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.Task;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -55,6 +56,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collection;
 import java.util.List;
@@ -87,6 +89,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(ShardingReset.class)
 @DisplayName("EventBus should")
 public class EventBusTest {
 
