@@ -351,7 +351,7 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private void initStand(SystemReadSide systemWriteSide) {
+    private void initStand(SystemReadSide systemReadSide) {
         if (stand == null) {
             stand = createStand();
         } else {
@@ -365,7 +365,7 @@ public final class BoundedContextBuilder implements Logging {
                                standMultitenant);
             }
         }
-        stand.setSystemReadSide(systemWriteSide);
+        stand.setSystemReadSide(systemReadSide);
     }
 
     private void initIntegrationBus(TransportFactory factory) {
