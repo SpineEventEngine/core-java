@@ -86,10 +86,12 @@ class TenantAwareSystemReadSideTest {
 
     @SuppressWarnings("CheckReturnValue")
     private void queryAndCheck(TenantId tenantId) {
-        Query query = requestFactory.query().all(Timestamp.class);
+        Query query = requestFactory.query()
+                                    .all(Timestamp.class);
         SystemReadSide readSide = delegatingTo(delegate).get(tenantId);
         readSide.readDomainAggregate(query);
 
-        assertEquals(query, delegate.lastSeenQuery().message());
+        assertEquals(query, delegate.lastSeenQuery()
+                                    .message());
     }
 }
