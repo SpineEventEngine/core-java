@@ -21,7 +21,7 @@
 @BoundedContext("_System")
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.system.server.given.monitor;
+package io.spine.system.server.given.client;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.server.annotation.BoundedContext;

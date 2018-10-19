@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server.given.monitor;
+package io.spine.system.server.given.client;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;

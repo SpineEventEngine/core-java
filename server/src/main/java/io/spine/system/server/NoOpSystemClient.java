@@ -25,7 +25,7 @@ package io.spine.system.server;
  *
  * <p>When requested for a read/write side of a system context, always obtains a NOP implementation.
  *
- * <p>An instance of {@code NoOpSystemClient} serves as the system monitor in the system contexts
+ * <p>An instance of {@code NoOpSystemClient} serves as the system client in the system contexts
  * themselves.
  */
 public enum NoOpSystemClient implements SystemClient {
