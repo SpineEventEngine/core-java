@@ -31,7 +31,6 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
 import io.spine.server.entity.VersionableEntity;
-import io.spine.server.entity.storage.given.QueryParametersTestEnv;
 import io.spine.server.storage.RecordStorage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,6 +55,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.entity.storage.QueryParameters.newBuilder;
+import static io.spine.server.entity.storage.given.QueryParametersTestEnv.mockColumn;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
@@ -93,7 +93,7 @@ class QueryParametersTest {
 
         // --- Group B ---
         // Consists of 3 instances with a single filter targeting a String column
-        EntityColumn bColumn = QueryParametersTestEnv.mockColumn();
+        EntityColumn bColumn = mockColumn();
         ColumnFilter bFilter = ColumnFilters.eq("b", "c");
         QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                .build();
@@ -104,7 +104,7 @@ class QueryParametersTest {
 
         // --- Group C ---
         // Consists of an instance with a single filter targeting an integer number column
-        EntityColumn cColumn = QueryParametersTestEnv.mockColumn();
+        EntityColumn cColumn = mockColumn();
         ColumnFilter cFilter = ColumnFilters.eq("a", 42);
         QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
                                               .build();
@@ -130,9 +130,9 @@ class QueryParametersTest {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
                 gt("thirdFilter", getCurrentTime())};
-        Multimap<EntityColumn, ColumnFilter> columnFilters = of(QueryParametersTestEnv.mockColumn(), filters[0],
-                                                                QueryParametersTestEnv.mockColumn(), filters[1],
-                                                                QueryParametersTestEnv.mockColumn(), filters[2]);
+        Multimap<EntityColumn, ColumnFilter> columnFilters = of(mockColumn(), filters[0],
+                                                                mockColumn(), filters[1],
+                                                                mockColumn(), filters[2]);
         CompositeQueryParameter parameter = from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
@@ -151,7 +151,7 @@ class QueryParametersTest {
                 eq("$1nd", 42.0),
                 eq("$2st", "entityColumnValue"),
                 gt("$3d", getCurrentTime())};
-        EntityColumn[] columns = {QueryParametersTestEnv.mockColumn(), QueryParametersTestEnv.mockColumn(), QueryParametersTestEnv.mockColumn()};
+        EntityColumn[] columns = {mockColumn(), mockColumn(), mockColumn()};
         Multimap<EntityColumn, ColumnFilter> columnFilters = of(columns[0], filters[0],
                                                                 columns[1], filters[1],
                                                                 columns[2], filters[2]);
@@ -203,17 +203,17 @@ class QueryParametersTest {
     }
 
     @Test
-    @DisplayName("create an parameters with active lifecycle flags")
+    @DisplayName("create parameters with active lifecycle flags")
     void createActiveParams() {
         RecordStorage storage = mock(RecordStorage.class);
         Map<String, EntityColumn> columns = newHashMap();
 
         String archivedStoredName = "archived-stored";
-        EntityColumn archivedColumn = QueryParametersTestEnv.mockColumn(archived, archivedStoredName);
+        EntityColumn archivedColumn = mockColumn(archived, archivedStoredName);
         columns.put(archived.name(), archivedColumn);
 
         String deletedStoredName = "deleted-stored";
-        EntityColumn deletedColumn = QueryParametersTestEnv.mockColumn(deleted, deletedStoredName);
+        EntityColumn deletedColumn = mockColumn(deleted, deletedStoredName);
         columns.put(deleted.name(), deletedColumn);
 
         when(storage.entityLifecycleColumns()).thenReturn(columns);
