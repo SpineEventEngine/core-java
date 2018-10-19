@@ -26,19 +26,14 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.system.server";
-option java_outer_classname = "GWCommandsProto";
+option java_outer_classname = "SBEventsProto";
 option java_multiple_files = true;
 
-import "spine/test/system/server/shoppling_list.proto";
+import "spine/test/system/server/command_lifecycle_test.proto";
 
-message CreateShoppingList {
+message SMProjectCreated {
 
-    ListId id = 1;
-}
+    string uuid = 1;
 
-message AddListItem {
-
-    ListId list_id = 1;
-
-    string item = 2;
+    string name = 2;
 }

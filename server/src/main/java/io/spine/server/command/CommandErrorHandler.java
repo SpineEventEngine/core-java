@@ -32,7 +32,7 @@ import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.system.server.CommandErrored;
 import io.spine.system.server.CommandRejected;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.command.Rejections.causedByRejection;
@@ -51,21 +51,21 @@ import static java.lang.String.format;
 @Internal
 public final class CommandErrorHandler implements Logging {
 
-    private final SystemGateway systemGateway;
+    private final SystemWriteSide systemWriteSide;
 
-    private CommandErrorHandler(SystemGateway systemGateway) {
-        this.systemGateway = systemGateway;
+    private CommandErrorHandler(SystemWriteSide systemWriteSide) {
+        this.systemWriteSide = systemWriteSide;
     }
 
     /**
-     * Creates a new {@code CommandErrorHandler} with the given {@link SystemGateway}.
+     * Creates a new {@code CommandErrorHandler} with the given {@link SystemWriteSide}.
      *
-     * @param systemGateway {@link SystemGateway} to post system commands into
+     * @param systemWriteSide {@link SystemWriteSide} to post system commands into
      * @return new instance of {@code CommandErrorHandler}
      */
-    public static CommandErrorHandler with(SystemGateway systemGateway) {
-        checkNotNull(systemGateway);
-        return new CommandErrorHandler(systemGateway);
+    public static CommandErrorHandler with(SystemWriteSide systemWriteSide) {
+        checkNotNull(systemWriteSide);
+        return new CommandErrorHandler(systemWriteSide);
     }
 
     /**
@@ -152,6 +152,6 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private void postSystem(EventMessage systemEvent) {
-        systemGateway.postEvent(systemEvent);
+        systemWriteSide.postEvent(systemEvent);
     }
 }

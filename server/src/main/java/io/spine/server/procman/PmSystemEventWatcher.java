@@ -37,7 +37,6 @@ import io.spine.system.server.HistoryRejections;
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
  * related to dispatching commands and events to {@link ProcessManager}s of a given type.
  *
- * @author Dmytro Dashenkov
  * @see SystemEventWatcher
  */
 final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
@@ -49,7 +48,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
         this.repository = repository;
     }
 
-    @Subscribe(external = true)
+    @Subscribe
     public void on(CommandDispatchedToHandler event) {
         I id = idFrom(event.getReceiver());
         CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
@@ -57,7 +56,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     }
 
-    @Subscribe(external = true)
+    @Subscribe
     public void on(HistoryRejections.CannotDispatchCommandTwice event) {
         Command command = event.getPayload();
         DuplicateCommandException exception = DuplicateCommandException.of(command);
@@ -65,14 +64,14 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
         repository.onError(envelope, exception);
     }
 
-    @Subscribe(external = true)
+    @Subscribe
     public void on(EventDispatchedToReactor event) {
         I id = idFrom(event.getReceiver());
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }
 
-    @Subscribe(external = true)
+    @Subscribe
     public void on(HistoryRejections.CannotDispatchEventTwice event) {
         Event payload = event.getPayload();
         DuplicateEventException exception = new DuplicateEventException(payload);

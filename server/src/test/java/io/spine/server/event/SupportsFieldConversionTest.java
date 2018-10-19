@@ -27,9 +27,6 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("SupportsFieldConversion should")
 class SupportsFieldConversionTest {
 

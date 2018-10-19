@@ -20,31 +20,20 @@
 
 package io.spine.system.server;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.client.CommandFactory;
-import io.spine.client.Query;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.UserId;
-import io.spine.server.BoundedContext;
-
-import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * The point of integration of the domain and the system bounded context.
- *
- * <p>All the facilities provided by the system bounded context are available through this gateway.
- *
- * @author Dmytro Dashenkov
+ * The default implementation of {@link SystemWriteSide}.
  */
-final class DefaultSystemGateway implements SystemGateway {
+final class DefaultSystemWriteSide implements SystemWriteSide {
 
     /**
      * The ID of the user which is used for generating system commands and events.
@@ -56,7 +45,7 @@ final class DefaultSystemGateway implements SystemGateway {
 
     private final SystemContext system;
 
-    DefaultSystemGateway(SystemContext system) {
+    DefaultSystemWriteSide(SystemContext system) {
         this.system = system;
     }
 
@@ -77,25 +66,5 @@ final class DefaultSystemGateway implements SystemGateway {
         Event event = factory.createEvent(systemEvent, null);
         system.getImportBus()
               .post(event, noOpObserver());
-    }
-
-    @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        @SuppressWarnings("unchecked") // Logically checked.
-        MirrorRepository repository = (MirrorRepository)
-                system.findRepository(Mirror.class)
-                      .orElseThrow(
-                              () -> newIllegalStateException(
-                                      "Mirror projection repository is not registered in %s.",
-                                      system.getName().getValue()
-                              )
-                      );
-        Iterator<Any> result = repository.execute(query);
-        return result;
-    }
-
-    @VisibleForTesting
-    BoundedContext target() {
-        return system;
     }
 }

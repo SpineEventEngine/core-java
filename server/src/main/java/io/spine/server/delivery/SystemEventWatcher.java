@@ -51,8 +51,6 @@ import static java.util.Collections.emptySet;
  *
  * <p>It is also expected that this subscriber is used <b>only</b> to subscribe to
  * {@linkplain Subscribe#external() external} events.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
@@ -80,15 +78,6 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     @Override
     public final Set<EventClass> getMessageClasses() {
         Set<EventClass> classes = super.getMessageClasses();
-        checkState(classes.isEmpty(),
-                   "A %s subclass cannot subscribe to domestic events.",
-                   SystemEventWatcher.class.getSimpleName());
-        return emptySet();
-    }
-
-    @Override
-    public final Set<EventClass> getExternalEventClasses() {
-        Set<EventClass> classes = super.getExternalEventClasses();
         Optional<String> invalidEventTypeName =
                 classes.stream()
                        .map(EventClass::getTypeName)
@@ -102,6 +91,15 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
             );
         }
         return classes;
+    }
+
+    @Override
+    public final Set<EventClass> getExternalEventClasses() {
+        Set<EventClass> classes = super.getExternalEventClasses();
+        checkState(classes.isEmpty(),
+                   "A %s subclass cannot subscribe to external events.",
+                   SystemEventWatcher.class.getSimpleName());
+        return emptySet();
     }
 
     /**
@@ -143,7 +141,8 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
      *         the domain bounded context to register the subscriber in
      */
     protected void registerIn(BoundedContext context) {
-        context.getIntegrationBus()
+        context.getSystemClient()
+               .readSide()
                .register(this);
     }
 }

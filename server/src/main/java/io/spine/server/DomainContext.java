@@ -21,7 +21,9 @@
 package io.spine.server;
 
 import io.spine.server.entity.Repository;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemClient;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A bounded context representing a user-specific domain model.
@@ -39,25 +41,42 @@ import io.spine.system.server.SystemGateway;
  * {@link io.spine.system.server.SystemContext SystemContext}, which manages the meta information
  * about entities of this Bounded Context.
  *
- * @author Dmytro Dashenkov
  * @see io.spine.system.server.SystemContext SystemContext
  */
 final class DomainContext extends BoundedContext {
 
-    private final SystemGateway systemGateway;
+    private final SystemClient system;
 
-    private DomainContext(BoundedContextBuilder builder, SystemGateway gateway) {
+    private DomainContext(BoundedContextBuilder builder,
+                          SystemClient system) {
         super(builder);
-        this.systemGateway = gateway;
+        this.system = checkNotNull(system);
     }
 
-    static DomainContext newInstance(BoundedContextBuilder builder, SystemGateway gateway) {
-        DomainContext result = new DomainContext(builder, gateway);
+    static DomainContext newInstance(BoundedContextBuilder builder,
+                                     SystemClient system) {
+        checkNotNull(builder);
+        checkNotNull(system);
+
+        DomainContext result = new DomainContext(builder, system);
         return result;
     }
 
     @Override
-    public SystemGateway getSystemGateway() {
-        return systemGateway;
+    public SystemClient getSystemClient() {
+        return system;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Closes the system context as well.
+     *
+     * @throws Exception if one of the context components throws an error when closing
+     */
+    @Override
+    public void close() throws Exception {
+        super.close();
+        system.closeSystemContext();
     }
 }

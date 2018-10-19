@@ -38,7 +38,7 @@ class EventDispatcherRegistry
         extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
 
     @Override
-    protected void register(EventDispatcher<?> dispatcher) {
+    public void register(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         Set<EventClass> eventClasses = dispatcher.getMessageClasses();
         checkNotEmpty(dispatcher, eventClasses);
@@ -47,7 +47,7 @@ class EventDispatcherRegistry
     }
 
     @Override
-    protected void unregister(EventDispatcher<?> dispatcher) {
+    public void unregister(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         Set<EventClass> eventClasses = dispatcher.getMessageClasses();
         checkNotEmpty(dispatcher, eventClasses);

@@ -26,7 +26,7 @@ import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.system.server.CommandSplit;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -80,7 +80,7 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
     protected
-    void addPosted(CommandSplit.Builder builder, Command command, SystemGateway gateway) {
+    void addPosted(CommandSplit.Builder builder, Command command, SystemWriteSide writeSide) {
         builder.addProduced(command.getId());
     }
 

@@ -40,7 +40,6 @@ import static io.spine.testing.server.procman.PmDispatcher.dispatch;
  * @param <C> type of the command to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
- * @author Vladyslav Lubenskyi
  */
 public abstract class PmCommandTest<I,
                                     C extends CommandMessage,

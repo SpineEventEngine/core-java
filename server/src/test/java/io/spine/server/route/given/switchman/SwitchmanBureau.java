@@ -49,7 +49,10 @@ public final class SwitchmanBureau extends AggregateRepository<String, Switchman
             public String apply(SetSwitch cmd, CommandContext context) {
                 String switchmanName = cmd.getSwitchmanName();
                 if (switchmanName.equals(MISSING_SWITCHMAN_NAME)) {
-                    throw new RuntimeException(new SwitchmanUnavailable(switchmanName));
+                    throw new RuntimeException(SwitchmanUnavailable
+                                                       .newBuilder()
+                                                       .setSwitchmanName(switchmanName)
+                                                       .build());
                 }
                 return switchmanName;
             }

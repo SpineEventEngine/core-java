@@ -46,7 +46,7 @@ final class UncommittedEvents {
     }
 
     /**
-     * @return empty list of events
+     * Returns empty list of events.
      */
     static UncommittedEvents ofNone() {
         return EMPTY;

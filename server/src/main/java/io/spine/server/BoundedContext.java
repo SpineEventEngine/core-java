@@ -44,8 +44,10 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
@@ -76,10 +78,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>An instance of {@code BoundedContext} acts as a major point of configuration for all
  * the model elements which belong to it.
  *
- * @author Alexander Yevsyukov
- * @author Mikhail Melnik
- * @author Dmitry Ganzha
- * @author Dmytro Dashenkov
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
  *     Martin Fowler on bounded contexts</a>
  */
@@ -256,8 +254,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             getEventBus().register(dispatcher);
+            SystemReadSide systemReadSide = getSystemClient().readSide();
+            systemReadSide.register(dispatcher);
         }
-
         if (dispatcher.dispatchesExternalEvents()) {
             registerWithIntegrationBus(dispatcher);
         }
@@ -271,15 +270,14 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
-        DelegatingEventDispatcher<?> delegatingDispatcher =
-                DelegatingEventDispatcher.of(dispatcher);
-
+        DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
         if (dispatcher.dispatchesEvents()) {
-            getEventBus().register(delegatingDispatcher);
+            getEventBus().register(delegate);
+            SystemReadSide systemReadSide = getSystemClient().readSide();
+            systemReadSide.register(delegate);
         }
-
         if (dispatcher.dispatchesExternalEvents()) {
-            registerWithIntegrationBus(delegatingDispatcher);
+            registerWithIntegrationBus(delegate);
         }
     }
 
@@ -296,8 +294,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Creates a {@code CommandErrorHandler} for objects that handle commands.
      */
     public CommandErrorHandler createCommandErrorHandler() {
-        SystemGateway systemGateway = getSystemGateway();
-        CommandErrorHandler result = CommandErrorHandler.with(systemGateway);
+        SystemWriteSide systemWriteSide = getSystemClient().writeSide();
+        CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide);
         return result;
     }
 
@@ -403,9 +401,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return tenantIndex;
     }
 
-    /** Obtains instance of {@link SystemGateway} of this {@code BoundedContext}. */
+    /**
+     * Obtains instance of {@link SystemClient} of this {@code BoundedContext}.
+     */
     @Internal
-    public abstract SystemGateway getSystemGateway();
+    public abstract SystemClient getSystemClient();
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.
@@ -419,8 +419,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
-     *     <li>{@linkplain io.spine.server.entity.Repository#close() Closes} all registered
-     *         repositories.
+     *     <li>Closes all registered {@linkplain Repository repositories}.
      * </ol>
      *
      * @throws Exception caused by closing one of the components

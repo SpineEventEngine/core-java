@@ -57,6 +57,7 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.AfterEach;
@@ -64,6 +65,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Iterator;
 import java.util.List;
@@ -83,8 +85,6 @@ import static io.spine.testing.server.projection.ProjectionEventDispatcher.dispa
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -94,6 +94,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("ProjectionRepository should")
+@ExtendWith(ShardingReset.class)
 class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
 
@@ -325,7 +326,7 @@ class ProjectionRepositoryTest
             // A complex test case with many test domain messages.
         @Test
         @DisplayName("entity state update")
-        void entityState() {
+        void entityState() throws Exception {
             PrjProjectCreated projectCreated = GivenEventMessage.projectCreated();
             PrjTaskAdded taskAdded = GivenEventMessage.taskAdded();
             ProjectId id = projectCreated.getProjectId();
@@ -347,7 +348,8 @@ class ProjectionRepositoryTest
                     .build();
             EntitySubscriberProjection.Repository repository =
                     new EntitySubscriberProjection.Repository();
-            BoundedContext.newBuilder().build().register(repository);
+            BoundedContext context = BoundedContext.newBuilder().build();
+            context.register(repository);
             EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
             Set<ProjectId> targets = repository.dispatch(envelope);
             assertThat(targets).containsExactly(id);
@@ -360,6 +362,8 @@ class ProjectionRepositoryTest
             Optional<EntitySubscriberProjection> projection = repository.find(id);
             assertTrue(projection.isPresent());
             assertEquals(expectedValue, projection.get().getState());
+
+            context.close();
         }
 
         private void checkDispatchesEvent(EventMessage eventMessage) {

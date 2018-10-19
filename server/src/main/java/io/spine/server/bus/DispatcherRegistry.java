@@ -57,16 +57,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
      */
     private final Multimap<C, D> dispatchers = synchronizedMultimap(HashMultimap.create());
 
-    /**
-     * Registers the passed dispatcher.
-     *
-     * <p>If the dispatcher passes the {@linkplain #checkDispatcher(MessageDispatcher) check}
-     * it is associated with the message classes it
-     * {@linkplain MessageDispatcher#getMessageClasses()}exposes.
-     *
-     * @param dispatcher the dispatcher to register
-     */
-    protected void register(D dispatcher) {
+    public void register(D dispatcher) {
         checkDispatcher(dispatcher);
         Set<C> messageClasses = dispatcher.getMessageClasses();
         for (C messageClass : messageClasses) {
@@ -74,12 +65,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
         }
     }
 
-    /**
-     * Removes registration for the passed dispatcher.
-     *
-     * @see #register(MessageDispatcher)
-     */
-    protected void unregister(D dispatcher) {
+    public void unregister(D dispatcher) {
         checkNotNull(dispatcher);
         checkNotEmpty(dispatcher);
 
@@ -106,7 +92,8 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     /**
      * Obtains dispatchers for the passed message class.
      *
-     * @param envelope the message envelope to find dispatchers for
+     * @param envelope
+     *         the message envelope to find dispatchers for
      * @return a set of dispatchers or an empty set if no dispatchers are registered
      */
     protected Set<D> getDispatchers(E envelope) {
@@ -141,7 +128,8 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     /**
      * Obtains all the dispatchers for the passed message class.
      *
-     * @param messageClass the target message class
+     * @param messageClass
+     *         the target message class
      * @return all the registered dispatchers of the given class
      */
     protected Set<D> getDispatchersForType(C messageClass) {
@@ -161,7 +149,8 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     protected Optional<? extends D> getDispatcherForType(C messageClass) {
         Collection<D> dispatchersOfClass = dispatchers.get(messageClass);
         checkNotMoreThanOne(dispatchersOfClass, messageClass);
-        Optional<D> dispatcher = dispatchersOfClass.stream().findFirst();
+        Optional<D> dispatcher = dispatchersOfClass.stream()
+                                                   .findFirst();
         return dispatcher;
     }
 
@@ -174,7 +163,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
 
     private C classOf(E envelope) {
         @SuppressWarnings("unchecked") // Logically valid.
-        C messageClass = (C) envelope.getMessageClass();
+                C messageClass = (C) envelope.getMessageClass();
         return messageClass;
     }
 
@@ -184,8 +173,10 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
      * <p>The passed dispatcher must {@linkplain MessageDispatcher#getMessageClasses() expose}
      * at least one message class.
      *
-     * @param dispatcher the dispatcher to check
-     * @throws IllegalArgumentException if the check is failed
+     * @param dispatcher
+     *         the dispatcher to check
+     * @throws IllegalArgumentException
+     *         if the check is failed
      */
     protected void checkDispatcher(D dispatcher) throws IllegalArgumentException {
         checkNotNull(dispatcher);

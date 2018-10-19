@@ -26,8 +26,8 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.BusFilter;
 import io.spine.system.server.CommandReceived;
-import io.spine.system.server.GatewayFunction;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.WriteSideFunction;
 
 import java.util.Optional;
 
@@ -46,18 +46,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
 
-    private final GatewayFunction gateway;
+    private final WriteSideFunction writeSideFunction;
 
-    CommandReceivedTap(GatewayFunction gateway) {
-        this.gateway = checkNotNull(gateway);
+    CommandReceivedTap(WriteSideFunction function) {
+        this.writeSideFunction = checkNotNull(function);
     }
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
         CommandReceived systemEvent = systemEvent(envelope.getCommand());
         TenantId tenantId = envelope.getTenantId();
-        SystemGateway gateway = this.gateway.get(tenantId);
-        gateway.postEvent(systemEvent);
+        SystemWriteSide writeSide = writeSideFunction.get(tenantId);
+        writeSide.postEvent(systemEvent);
         return Optional.empty();
     }
 

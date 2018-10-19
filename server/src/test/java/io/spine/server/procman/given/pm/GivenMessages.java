@@ -86,7 +86,10 @@ public class GivenMessages {
         Any id = Identifier.pack(TestProcessManager.class.getName());
         Command command = Given.ACommand.withMessage(messageOfType(commandClass));
         RejectionEnvelope result = RejectionEnvelope.from(CommandEnvelope.of(command),
-                                                          new EntityAlreadyArchived(id));
+                                                          EntityAlreadyArchived
+                                                                  .newBuilder()
+                                                                  .setEntityId(id)
+                                                                  .build());
         return result;
     }
 

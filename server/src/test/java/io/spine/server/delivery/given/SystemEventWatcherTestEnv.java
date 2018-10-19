@@ -40,37 +40,37 @@ public class SystemEventWatcherTestEnv {
     private SystemEventWatcherTestEnv() {
     }
 
-    public static class DomesticWatcher extends SystemEventWatcher<String> {
+    public static class ExternalWatcher extends SystemEventWatcher<String> {
 
-        public DomesticWatcher() {
-            super(TypeUrl.of(Empty.class));
-        }
-
-        @Subscribe
-        public void on(SewProjectCreated domesticEvent) {
-            fail("Domestic events are not allowed in SystemEventWatchers.");
-        }
-    }
-
-    public static class ExternalNonSystemWatcher extends SystemEventWatcher<String> {
-
-        public ExternalNonSystemWatcher() {
+        public ExternalWatcher() {
             super(TypeUrl.of(Empty.class));
         }
 
         @Subscribe(external = true)
+        public void on(SewProjectCreated domesticEvent) {
+            fail("External events are not allowed in SystemEventWatchers.");
+        }
+    }
+
+    public static class NonSystemWatcher extends SystemEventWatcher<String> {
+
+        public NonSystemWatcher() {
+            super(TypeUrl.of(Empty.class));
+        }
+
+        @Subscribe
         public void on(SewProjectCreated externalEvent) {
             fail("Only spine.system.server events are allowed.");
         }
     }
 
-    public static class ExternalSystemWatcher extends SystemEventWatcher<String> {
+    public static class ValidSystemWatcher extends SystemEventWatcher<String> {
 
-        public ExternalSystemWatcher() {
+        public ValidSystemWatcher() {
             super(TypeUrl.of(Empty.class));
         }
 
-        @Subscribe(external = true)
+        @Subscribe
         public void on(EntityCreated externalEvent) {
             // NoOp.
         }

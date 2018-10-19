@@ -57,8 +57,8 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
-import io.spine.system.server.MemoizingGateway;
-import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.MemoizingReadSide;
+import io.spine.system.server.NoOpSystemReadSide;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.projection.Project;
@@ -598,21 +598,21 @@ class StandTest extends TenantAwareTest {
     @DisplayName("query system BC for aggregate states")
     void readAggregates() {
         boolean multitenant = isMultitenant();
-        MemoizingGateway gateway = multitenant
-                                   ? MemoizingGateway.multitenant()
-                                   : MemoizingGateway.singleTenant();
+        MemoizingReadSide readSide = multitenant
+                                   ? MemoizingReadSide.multitenant()
+                                   : MemoizingReadSide.singleTenant();
         Stand stand = Stand
                 .newBuilder()
                 .setMultitenant(multitenant)
-                .setSystemGateway(gateway)
+                .setSystemReadSide(readSide)
                 .build();
         stand.registerTypeSupplier(new CustomerAggregateRepository());
         Query query = getRequestFactory().query()
                                          .all(Customer.class);
         stand.execute(query, noOpObserver());
 
-        Message actualQuery = gateway.lastSeenQuery()
-                                     .message();
+        Message actualQuery = readSide.lastSeenQuery()
+                                      .message();
         assertNotNull(actualQuery);
         assertEquals(query, actualQuery);
     }
@@ -667,7 +667,7 @@ class StandTest extends TenantAwareTest {
         @DisplayName("if querying unknown type")
         void ifQueryingUnknownType() {
             Stand stand = Stand.newBuilder()
-                               .setSystemGateway(NoOpSystemGateway.INSTANCE)
+                               .setSystemReadSide(NoOpSystemReadSide.INSTANCE)
                                .setMultitenant(isMultitenant())
                                .build();
             checkTypesEmpty(stand);
@@ -741,7 +741,7 @@ class StandTest extends TenantAwareTest {
         void ifSubscribingToUnknownType() {
             Stand stand = Stand.newBuilder()
                                .setMultitenant(isMultitenant())
-                               .setSystemGateway(NoOpSystemGateway.INSTANCE)
+                               .setSystemReadSide(NoOpSystemReadSide.INSTANCE)
                                .build();
             checkTypesEmpty(stand);
 

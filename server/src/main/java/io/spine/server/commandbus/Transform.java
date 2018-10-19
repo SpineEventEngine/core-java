@@ -26,7 +26,7 @@ import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.system.server.CommandTransformed;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -79,7 +79,7 @@ public final class Transform
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
     protected
-    void addPosted(CommandTransformed.Builder builder, Command command, SystemGateway gateway) {
+    void addPosted(CommandTransformed.Builder builder, Command command, SystemWriteSide writeSide) {
         builder.setProduced(command.getId());
     }
 }

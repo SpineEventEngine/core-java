@@ -72,8 +72,6 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  *
  * <p>Importing events which occurred before the events already stored in the aggregate
  * history may result in hard to track bugs, and is not recommended.
- *
- * @author Alexander Yevsyukov
  */
 public final class ImportBus
         extends UnicastBus<Event, EventEnvelope, EventClass, EventImportDispatcher<?>> {

@@ -56,9 +56,10 @@ class BusesTest {
                 .newBuilder()
                 .setMessage(pack(CmdBusStartProject.getDefaultInstance()))
                 .build();
-        CannotModifyArchivedEntity throwable = new CannotModifyArchivedEntity(
-                Any.getDefaultInstance()
-        );
+        CannotModifyArchivedEntity throwable = CannotModifyArchivedEntity
+                .newBuilder()
+                .setEntityId(Any.getDefaultInstance())
+                .build();
         throwable.initProducer(Any.getDefaultInstance());
         RejectionEnvelope defaultRejection = RejectionEnvelope.from(
                 CommandEnvelope.of(command),

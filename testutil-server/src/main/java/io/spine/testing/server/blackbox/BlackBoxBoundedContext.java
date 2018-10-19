@@ -44,7 +44,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.util.Exceptions;
 
 import java.util.Collection;
 import java.util.List;
@@ -54,6 +53,7 @@ import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
@@ -458,7 +458,7 @@ public class BlackBoxBoundedContext {
         try {
             boundedContext.close();
         } catch (Exception e) {
-            throw Exceptions.illegalStateWithCauseOf(e);
+            throw illegalStateWithCauseOf(e);
         }
     }
 }

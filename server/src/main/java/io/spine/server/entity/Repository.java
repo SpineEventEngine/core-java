@@ -33,7 +33,7 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -54,8 +54,6 @@ import static java.lang.String.format;
 
 /**
  * Abstract base class for repositories.
- *
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class Repository<I, E extends Entity<I, ?>>
@@ -139,6 +137,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
      * associated with the passed {@code BoundedContext}.
      */
+    @Internal
     public final void setBoundedContext(BoundedContext boundedContext) {
         this.boundedContext = boundedContext;
         if (!isStorageAssigned()) {
@@ -353,13 +352,14 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         TypeUrl stateType = getEntityStateType();
-        SystemGateway gateway = getBoundedContext().getSystemGateway();
+        SystemWriteSide writeSide = getBoundedContext().getSystemClient()
+                                                       .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
                 .setEntityId(id)
                 .setEntityType(stateType)
-                .setGateway(gateway)
+                .setSystemWriteSide(writeSide)
                 .setEventFilter(eventFilter)
                 .build();
         return lifecycle;

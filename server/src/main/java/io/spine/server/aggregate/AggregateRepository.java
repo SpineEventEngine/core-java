@@ -41,7 +41,6 @@ import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventFilter;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
@@ -152,7 +151,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             boundedContext.getImportBus()
                           .register(EventImportDispatcher.of(this));
         }
-
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         registerWithSharding();
     }

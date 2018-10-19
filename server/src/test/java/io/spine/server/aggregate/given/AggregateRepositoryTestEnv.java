@@ -419,7 +419,10 @@ public class AggregateRepositoryTestEnv {
         @Assign
         NumberPassed on(RejectNegativeLong value) throws CannotModifyArchivedEntity {
             if (value.getNumber() < 0L) {
-                throw new CannotModifyArchivedEntity(Identifier.pack(getId()));
+                throw CannotModifyArchivedEntity
+                        .newBuilder()
+                        .setEntityId(Identifier.pack(getId()))
+                        .build();
             }
             return now();
         }
@@ -661,7 +664,10 @@ public class AggregateRepositoryTestEnv {
 
         @Assign
         AggProjectStarted on(AggStartProjectWithChildren cmd) throws AggCannotStartArchivedProject {
-            throw new AggCannotStartArchivedProject(getId(), getState().getItemList());
+            throw AggCannotStartArchivedProject.newBuilder()
+                    .setProjectId(getId())
+                    .addAllChildProjectId(getState().getItemList())
+                    .build();
         }
     }
 
