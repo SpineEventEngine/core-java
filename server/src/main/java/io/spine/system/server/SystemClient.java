@@ -22,8 +22,6 @@ package io.spine.system.server;
 
 import io.spine.annotation.Internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * The entry point of a system context API exposed to its domain counterpart.
  */
@@ -47,16 +45,4 @@ public interface SystemClient {
      *         if the context thrown an exception when closing
      */
     void closeSystemContext() throws Exception;
-
-    /**
-     * Creates a new instance of {@code SystemClient} for the given system context.
-     *
-     * @param context
-     *         the system context to monitor
-     * @return new system monitor
-     */
-    static SystemClient newInstance(SystemContext context) {
-        checkNotNull(context);
-        return new DefaultSystemClient(context);
-    }
 }

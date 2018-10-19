@@ -83,6 +83,10 @@ public final class SystemContext extends BoundedContext {
         register(new MirrorRepository());
     }
 
+    public SystemClient createClient() {
+        return new DefaultSystemClient(this);
+    }
+
     /**
      * {@inheritDoc}
      *

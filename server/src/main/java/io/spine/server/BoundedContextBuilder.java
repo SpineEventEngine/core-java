@@ -251,7 +251,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
-        SystemClient systemClient = SystemClient.newInstance(system);
+        SystemClient systemClient = system.createClient();
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemClient);
         BoundedContext result = buildPartial(instanceFactory, systemClient, transport);
