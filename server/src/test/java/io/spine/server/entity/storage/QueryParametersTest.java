@@ -20,8 +20,10 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.testing.EqualsTester;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Timestamp;
@@ -29,16 +31,20 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
 import io.spine.server.entity.VersionableEntity;
+import io.spine.server.storage.RecordStorage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
@@ -49,11 +55,17 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.entity.storage.QueryParameters.newBuilder;
+import static io.spine.server.entity.storage.given.QueryParametersTestEnv.mockColumn;
 import static io.spine.server.storage.EntityField.version;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DisplayName("QueryParameters should")
 class QueryParametersTest {
@@ -190,9 +202,44 @@ class QueryParametersTest {
         assertTimeFilters.containsExactly(startTimeFilter, deadlineFilter);
     }
 
-    private static EntityColumn mockColumn() {
-        EntityColumn column = mock(EntityColumn.class);
-        return column;
+    @Test
+    @DisplayName("create parameters with active lifecycle flags")
+    void createActiveParams() {
+        RecordStorage storage = mock(RecordStorage.class);
+        Map<String, EntityColumn> columns = newHashMap();
+
+        String archivedStoredName = "archived-stored";
+        EntityColumn archivedColumn = mockColumn(archived, archivedStoredName);
+        columns.put(archived.name(), archivedColumn);
+
+        String deletedStoredName = "deleted-stored";
+        EntityColumn deletedColumn = mockColumn(deleted, deletedStoredName);
+        columns.put(deleted.name(), deletedColumn);
+
+        when(storage.entityLifecycleColumns()).thenReturn(columns);
+
+        QueryParameters parameters = QueryParameters.activeEntityQueryParams(storage);
+
+        assertTrue(parameters.isLifecycleAttributesSet());
+        assertFalse(parameters.limited());
+        assertFalse(parameters.ordered());
+
+        Iterator<CompositeQueryParameter> paramsIterator = parameters.iterator();
+        CompositeQueryParameter lifecycleParameter = paramsIterator.next();
+        assertFalse(paramsIterator.hasNext());
+        assertTrue(lifecycleParameter.hasLifecycle());
+        assertEquals(ALL, lifecycleParameter.getOperator());
+        ImmutableMultimap<EntityColumn, ColumnFilter> filters = lifecycleParameter.getFilters();
+
+        ImmutableCollection<ColumnFilter> archivedFilters = filters.get(archivedColumn);
+        UnmodifiableIterator<ColumnFilter> archivedFilterIterator = archivedFilters.iterator();
+        assertEquals(eq(archivedStoredName, false), archivedFilterIterator.next());
+        assertFalse(archivedFilterIterator.hasNext());
+
+        ImmutableCollection<ColumnFilter> deletedFilters = filters.get(deletedColumn);
+        UnmodifiableIterator<ColumnFilter> deletedFilterIterator = deletedFilters.iterator();
+        assertEquals(eq(deletedStoredName, false), deletedFilterIterator.next());
+        assertFalse(deletedFilterIterator.hasNext());
     }
 
     private static CompositeQueryParameter aggregatingParameter(EntityColumn column,
