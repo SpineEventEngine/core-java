@@ -47,7 +47,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getMessage;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -103,9 +102,7 @@ class EntityHistoryTest {
             eventAccumulator = new HistoryEventWatcher();
             system.getEventBus()
                   .register(eventAccumulator);
-            id = PersonId.newBuilder()
-                         .setUuid(newUuid())
-                         .build();
+            id = Identifier.generate(PersonId.class);
         }
 
         @Test

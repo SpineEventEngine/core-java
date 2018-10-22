@@ -33,6 +33,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
+import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
@@ -101,9 +102,7 @@ class CommandLifecycleTest {
         void setUp() {
             this.eventAccumulator = new CommandLifecycleWatcher();
             system.getEventBus().register(eventAccumulator);
-            id = CompanyId.newBuilder()
-                          .setUuid(newUuid())
-                          .build();
+            id = Identifier.generate(CompanyId.class);
         }
 
         @Test
@@ -192,10 +191,7 @@ class CommandLifecycleTest {
 
         private Command buildInvalidCommand() {
             EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
-            CommandId commandId = CommandId
-                    .newBuilder()
-                    .setUuid(newUuid())
-                    .build();
+            CommandId commandId = Commands.generateId();
             UserId actor = UserId
                     .newBuilder()
                     .setValue(newUuid())

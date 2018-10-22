@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import io.spine.base.Identifier;
 import io.spine.server.BoundedContext;
 import io.spine.server.model.contexts.tasks.TasksContext;
 import io.spine.test.model.contexts.tasks.TaskId;
@@ -28,7 +29,6 @@ import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.model.contexts.tasks.CreationRetry.retried;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -42,10 +42,7 @@ class CommandOnRejectionTest {
     @DisplayName("with the command context")
     void receive() {
         BoundedContext context = TasksContext.newInstance();
-        TaskId proposedId = TaskId
-                .newBuilder()
-                .setUuid(newUuid())
-                .build();
+        TaskId proposedId = Identifier.generate(TaskId.class);
         context.getEventBus()
                .post(eventFactory.createEvent(TaskAlreadyExists
                                                       .newBuilder()
