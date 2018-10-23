@@ -53,7 +53,7 @@ public final class GroupNameProjection
             routing.route(Organization.class, (org, ctx) -> of(
                     GroupId.newBuilder()
                            .setUuid(org.getId()
-                                       .getUid())
+                                       .getUuid())
                            .build()));
             getEventRouting().routeEntityStateUpdates(routing);
         }

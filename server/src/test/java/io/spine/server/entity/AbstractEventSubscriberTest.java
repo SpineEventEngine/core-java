@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
 import io.spine.core.UserId;
@@ -30,12 +31,14 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.model.InsufficientVisibilityError;
 import io.spine.server.groups.FilteredStateSubscriber;
 import io.spine.server.groups.Group;
+import io.spine.server.groups.GroupId;
 import io.spine.server.groups.HiddenEntitySubscriber;
 import io.spine.server.groups.TestSubscriber;
 import io.spine.server.groups.WronglyDomesticSubscriber;
 import io.spine.server.groups.WronglyExternalSubscriber;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.organizations.Organization;
+import io.spine.server.organizations.OrganizationId;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
@@ -81,6 +84,7 @@ class AbstractEventSubscriberTest {
     void receiveEntityStateUpdates() {
         Group state = Group
                 .newBuilder()
+                .setId(Identifier.generate(GroupId.class))
                 .setName("Admins")
                 .addParticipants(UserId.getDefaultInstance())
                 .addParticipants(UserId.getDefaultInstance())
@@ -105,6 +109,7 @@ class AbstractEventSubscriberTest {
     void receiveExternalEntityStateUpdates() {
         Organization state = Organization
                 .newBuilder()
+                .setId(Identifier.generate(OrganizationId.class))
                 .setName("Developers")
                 .setHead(UserId.getDefaultInstance())
                 .addMembers(UserId.getDefaultInstance())
