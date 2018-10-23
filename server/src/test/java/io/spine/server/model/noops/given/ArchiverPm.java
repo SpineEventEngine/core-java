@@ -46,7 +46,8 @@ public final class ArchiverPm extends ProcessManager<ArchiverId, Archiver, Archi
     @Assign
     Nothing handle(ArchiveFile command) {
         ArchiverVBuilder builder = getBuilder();
-        builder.setArchivedFiles(builder.getArchivedFiles() + 1);
+        builder.setId(SINGLE_ID)
+               .setArchivedFiles(builder.getArchivedFiles() + 1);
         return Nothing.getDefaultInstance();
     }
 
