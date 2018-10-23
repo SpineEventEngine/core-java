@@ -46,7 +46,9 @@ message CommandLifecycle {
     option (entity).kind = AGGREGATE;
 
     // The ID of the command.
-    spine.core.CommandId id = 1;
+    //
+    // The ID is not required since it is set only after the command was received.
+    spine.core.CommandId id = 1 [(required) = false];
 
     // The command.
     spine.core.Command command = 2;
