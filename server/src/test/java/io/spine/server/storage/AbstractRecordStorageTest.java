@@ -71,7 +71,7 @@ import static org.mockito.Mockito.verify;
  * @param <S>
  *         the type of storage under the test
  */
-public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
+public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
 
     private static EntityRecord newStorageRecord(Message state) {
