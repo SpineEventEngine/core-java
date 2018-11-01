@@ -65,11 +65,18 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base for tests of record storages.
+ * 
+ * <p>This abstract test should not contain {@linkplain org.junit.jupiter.api.Nested nested tests}
+ * because they are not under control of {@code AbstractRecordStorageTest} inheritors. 
+ * Such a control is required for overriding or disabling tests due to a lag between read and 
+ * write on remote storages, etc.
  *
- * @param <I> the type of identifiers a storage uses
- * @param <S> the type of storage under the test
+ * @param <I>
+ *         the type of identifiers a storage uses
+ * @param <S>
+ *         the type of storage under the test
  */
-public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
+public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
 
     private static EntityRecord newStorageRecord(Message state) {
@@ -95,7 +102,8 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
      *
      * <p>Two calls for the same ID should return messages, which are not equal.
      *
-     * @param id the ID for the message
+     * @param id
+     *         the ID for the message
      * @return the unique {@code Message}
      */
     protected abstract Message newState(I id);
@@ -205,183 +213,160 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
         return newStorageRecord(newState(newId()));
     }
 
-    @Nested
-    @DisplayName("given field mask, read")
-    class ReadWithMask {
+    @Test
+    @DisplayName("given field mask, read single record")
+    void singleRecord() {
+        I id = newId();
+        EntityRecord record = newStorageRecord(id);
+        RecordStorage<I> storage = getStorage();
+        storage.write(id, record);
 
-        @Test
-        @DisplayName("single record")
-        void singleRecord() {
+        Message state = newState(id);
+        Descriptor descriptor = state.getDescriptorForType();
+        FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
+
+        RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
+        Optional<EntityRecord> optional = storage.read(readRequest, idMask);
+        assertTrue(optional.isPresent());
+        EntityRecord entityRecord = optional.get();
+
+        Message unpacked = unpack(entityRecord.getState());
+        assertFalse(isDefault(unpacked));
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    @DisplayName("given field mask, read multiple records")
+    void multipleRecords() {
+        RecordStorage<I> storage = getStorage();
+        int count = 10;
+        List<I> ids = new ArrayList<>();
+        Class<? extends Message> messageClass = null;
+
+        for (int i = 0; i < count; i++) {
             I id = newId();
-            EntityRecord record = newStorageRecord(id);
-            RecordStorage<I> storage = getStorage();
-            storage.write(id, record);
-
             Message state = newState(id);
-            Descriptor descriptor = state.getDescriptorForType();
-            FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
-
-            RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
-            Optional<EntityRecord> optional = storage.read(readRequest, idMask);
-            assertTrue(optional.isPresent());
-            EntityRecord entityRecord = optional.get();
-
-            Message unpacked = unpack(entityRecord.getState());
-            assertFalse(isDefault(unpacked));
-        }
-
-        @SuppressWarnings("MethodWithMultipleLoops")
-        @Test
-        @DisplayName("multiple records")
-        void multipleRecords() {
-            RecordStorage<I> storage = getStorage();
-            int count = 10;
-            List<I> ids = new ArrayList<>();
-            Class<? extends Message> messageClass = null;
-
-            for (int i = 0; i < count; i++) {
-                I id = newId();
-                Message state = newState(id);
-                if (messageClass == null) {
-                    messageClass = state.getClass();
-                }
-                EntityRecord record = newStorageRecord(state);
-                storage.write(id, record);
-                ids.add(id);
+            if (messageClass == null) {
+                messageClass = state.getClass();
             }
-
-            int bulkCount = count / 2;
-            FieldMask fieldMask = fromFieldNumbers(messageClass, 2);
-            Iterator<EntityRecord> readRecords = storage.readMultiple(
-                    ids.subList(0, bulkCount),
-                    fieldMask);
-            List<EntityRecord> readList = newArrayList(readRecords);
-            assertThat(readList).hasSize(bulkCount);
-            for (EntityRecord record : readList) {
-                Message state = unpack(record.getState());
-                assertMatchesMask(state, fieldMask);
-            }
-        }
-    }
-
-    @Nested
-    @DisplayName("given bulk of records, write them")
-    class WriteBulk {
-
-        @Test
-        @DisplayName("for the first time")
-        void forTheFirstTime() {
-            RecordStorage<I> storage = getStorage();
-            int bulkSize = 5;
-
-            Map<I, EntityRecordWithColumns> initial = new HashMap<>(bulkSize);
-
-            for (int i = 0; i < bulkSize; i++) {
-                I id = newId();
-                EntityRecord record = newStorageRecord(id);
-                initial.put(id, EntityRecordWithColumns.of(record));
-            }
-            storage.write(initial);
-
-            Collection<EntityRecord> actual = newArrayList(
-                    storage.readMultiple(initial.keySet())
-            );
-
-            Collection<EntityRecord> expected =
-                    initial.values()
-                           .stream()
-                           .map(recordWithColumns -> recordWithColumns != null
-                                                     ? recordWithColumns.getRecord()
-                                                     : null)
-                           .collect(toList());
-
-            assertEquals(expected.size(), actual.size());
-            assertTrue(actual.containsAll(expected));
-
-            close(storage);
-        }
-
-        @Test
-        @DisplayName("re-writing existing ones")
-        void rewritingExisting() {
-            int recordCount = 3;
-            RecordStorage<I> storage = getStorage();
-
-            Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
-            Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
-
-            for (int i = 0; i < recordCount; i++) {
-                I id = newId();
-                EntityRecord record = newStorageRecord(id);
-
-                // Some records are changed and some are not
-                EntityRecord alternateRecord = (i % 2 == 0)
-                                               ? record
-                                               : newStorageRecord(id);
-                v1Records.put(id, record);
-                v2Records.put(id, alternateRecord);
-            }
-
-            storage.write(transformValues(v1Records, RecordStorageTestEnv::withLifecycleColumns));
-            Iterator<EntityRecord> firstRevision = storage.readAll();
-            assertIteratorsEqual(v1Records.values()
-                                          .iterator(), firstRevision);
-
-            storage.write(transformValues(v2Records, RecordStorageTestEnv::withLifecycleColumns));
-            Iterator<EntityRecord> secondRevision = storage.readAll();
-            assertIteratorsEqual(v2Records.values()
-                                          .iterator(), secondRevision);
-        }
-
-        private <E> void assertIteratorsEqual(Iterator<? extends E> first,
-                                              Iterator<? extends E> second) {
-            Collection<? extends E> firstCollection = newArrayList(first);
-            Collection<? extends E> secondCollection = newArrayList(second);
-            assertEquals(firstCollection.size(), secondCollection.size());
-            assertThat(firstCollection).containsExactlyElementsIn(secondCollection);
-        }
-    }
-
-    @Nested
-    @DisplayName("return lifecycle flags")
-    class ReturnLifecycleFlags {
-
-        @Test
-        @DisplayName("for missing record")
-        void forMissingRecord() {
-            I id = newId();
-            RecordStorage<I> storage = getStorage();
-            Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
-            assertFalse(optional.isPresent());
-        }
-
-        @Test
-        @DisplayName("for new record")
-        void forNewRecord() {
-            I id = newId();
-            EntityRecord record = newStorageRecord(id);
-            RecordStorage<I> storage = getStorage();
+            EntityRecord record = newStorageRecord(state);
             storage.write(id, record);
-
-            Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
-            assertTrue(optional.isPresent());
-            assertEquals(LifecycleFlags.getDefaultInstance(), optional.get());
+            ids.add(id);
         }
 
-        @Test
-        @DisplayName("for a record where they were updated")
-        void forUpdatedRecord() {
+        int bulkCount = count / 2;
+        FieldMask fieldMask = fromFieldNumbers(messageClass, 2);
+        Iterator<EntityRecord> readRecords = storage.readMultiple(
+                ids.subList(0, bulkCount),
+                fieldMask);
+        List<EntityRecord> readList = newArrayList(readRecords);
+        assertThat(readList).hasSize(bulkCount);
+        for (EntityRecord record : readList) {
+            Message state = unpack(record.getState());
+            assertMatchesMask(state, fieldMask);
+        }
+    }
+
+    @Test
+    @DisplayName("given bulk of records, write them for the first time")
+    void forTheFirstTime() {
+        RecordStorage<I> storage = getStorage();
+        int bulkSize = 5;
+
+        Map<I, EntityRecordWithColumns> initial = new HashMap<>(bulkSize);
+
+        for (int i = 0; i < bulkSize; i++) {
             I id = newId();
             EntityRecord record = newStorageRecord(id);
-            RecordStorage<I> storage = getStorage();
-            storage.write(id, EntityRecordWithColumns.of(record));
-
-            storage.writeLifecycleFlags(id, archived());
-
-            Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
-            assertTrue(optional.isPresent());
-            assertTrue(optional.get()
-                               .getArchived());
+            initial.put(id, EntityRecordWithColumns.of(record));
         }
+        storage.write(initial);
+
+        Collection<EntityRecord> actual = newArrayList(
+                storage.readMultiple(initial.keySet())
+        );
+
+        Collection<EntityRecord> expected =
+                initial.values()
+                       .stream()
+                       .map(recordWithColumns -> recordWithColumns != null
+                                                 ? recordWithColumns.getRecord()
+                                                 : null)
+                       .collect(toList());
+
+        assertEquals(expected.size(), actual.size());
+        assertTrue(actual.containsAll(expected));
+
+        close(storage);
+    }
+
+    @Test
+    @DisplayName("given bulk of records, write them re-writing existing ones")
+    void rewritingExisting() {
+        int recordCount = 3;
+        RecordStorage<I> storage = getStorage();
+
+        Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
+        Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
+
+        for (int i = 0; i < recordCount; i++) {
+            I id = newId();
+            EntityRecord record = newStorageRecord(id);
+
+            // Some records are changed and some are not
+            EntityRecord alternateRecord = (i % 2 == 0)
+                                           ? record
+                                           : newStorageRecord(id);
+            v1Records.put(id, record);
+            v2Records.put(id, alternateRecord);
+        }
+
+        storage.write(transformValues(v1Records, RecordStorageTestEnv::withLifecycleColumns));
+        Iterator<EntityRecord> firstRevision = storage.readAll();
+        RecordStorageTestEnv.assertIteratorsEqual(v1Records.values()
+                                                           .iterator(), firstRevision);
+
+        storage.write(transformValues(v2Records, RecordStorageTestEnv::withLifecycleColumns));
+        Iterator<EntityRecord> secondRevision = storage.readAll();
+        RecordStorageTestEnv.assertIteratorsEqual(v2Records.values()
+                                                           .iterator(), secondRevision);
+    }
+
+    @Test
+    @DisplayName("return lifecycle flags for missing record")
+    void forMissingRecord() {
+        I id = newId();
+        RecordStorage<I> storage = getStorage();
+        Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
+        assertFalse(optional.isPresent());
+    }
+
+    @Test
+    @DisplayName("return lifecycle flags for new record")
+    void forNewRecord() {
+        I id = newId();
+        EntityRecord record = newStorageRecord(id);
+        RecordStorage<I> storage = getStorage();
+        storage.write(id, record);
+
+        Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
+        assertTrue(optional.isPresent());
+        assertEquals(LifecycleFlags.getDefaultInstance(), optional.get());
+    }
+
+    @Test
+    @DisplayName("return lifecycle flags for a record where they were updated")
+    void forUpdatedRecord() {
+        I id = newId();
+        EntityRecord record = newStorageRecord(id);
+        RecordStorage<I> storage = getStorage();
+        storage.write(id, EntityRecordWithColumns.of(record));
+
+        storage.writeLifecycleFlags(id, archived());
+
+        Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
+        assertTrue(optional.isPresent());
+        assertTrue(optional.get()
+                           .getArchived());
     }
 }

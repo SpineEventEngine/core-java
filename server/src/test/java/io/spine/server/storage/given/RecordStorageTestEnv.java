@@ -46,9 +46,12 @@ import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testing.core.given.GivenVersion;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.storage.EnumType.STRING;
@@ -150,6 +153,14 @@ public class RecordStorageTestEnv {
 
     public static EntityFilters emptyFilters() {
         return EntityFilters.getDefaultInstance();
+    }
+
+    public static <E> void assertIteratorsEqual(Iterator<? extends E> first,
+                                                Iterator<? extends E> second) {
+        Collection<? extends E> firstCollection = newArrayList(first);
+        Collection<? extends E> secondCollection = newArrayList(second);
+        assertEquals(firstCollection.size(), secondCollection.size());
+        assertThat(firstCollection).containsExactlyElementsIn(secondCollection);
     }
 
     @SuppressWarnings("unused") // Reflective access
