@@ -65,6 +65,11 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base for tests of record storages.
+ * 
+ * <p>This abstract test should not contain {@linkplain org.junit.jupiter.api.Nested nested tests}
+ * because they are not under control of {@code AbstractStorageTest} inheritors. Such a control 
+ * is required for overriding or disabling tests due to a lag between read and writes on distributed
+ * storages, etc.
  *
  * @param <I>
  *         the type of identifiers a storage uses
