@@ -57,11 +57,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * <p>All storages should be {@linkplain #close(AbstractStorage) closed} after a test
  * to avoid the issues, which may occur due to unreleased resources.
- * 
- * <p>This abstract test should not contain {@linkplain org.junit.jupiter.api.Nested nested tests}
- * because they are not under control of {@code AbstractStorageTest} inheritors. Such a control 
- * is required for overriding or disabling tests due to a lag between read and writes on distributed
- * storages, etc.
  *
  * @param <I> the type of IDs of storage records
  * @param <M> the type of records kept in the storage
