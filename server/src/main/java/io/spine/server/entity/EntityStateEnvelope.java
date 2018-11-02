@@ -53,7 +53,12 @@ public final class EntityStateEnvelope<I, S extends Message>
     /**
      * The ID of the entity, packed as {@code Any}.
      */
-    private final Any entityId;
+    private final Any packedId;
+
+    /**
+     * The ID of the entity.
+     */
+    private final I entityId;
 
     /**
      * The class of the entity state.
@@ -84,7 +89,8 @@ public final class EntityStateEnvelope<I, S extends Message>
     private EntityStateEnvelope(I entityId, S entityState,
                                 TenantId tenantId, @Nullable Version entityVersion) {
         this.entityState = entityState;
-        this.entityId = Identifier.pack(entityId);
+        this.packedId = Identifier.pack(entityId);
+        this.entityId = entityId;
         this.entityStateClass = EntityStateClass.of(entityState);
         this.entityVersion = entityVersion;
         this.tenantId = tenantId;
@@ -103,7 +109,7 @@ public final class EntityStateEnvelope<I, S extends Message>
 
     @Override
     public Any getId() {
-        return entityId;
+        return packedId;
     }
 
     /**
@@ -152,8 +158,7 @@ public final class EntityStateEnvelope<I, S extends Message>
      * Obtains the {@link Entity} ID.
      */
     public I getEntityId() {
-        I result = Identifier.unpack(entityId);
-        return result;
+        return entityId;
     }
 
     public Optional<Version> getEntityVersion() {
@@ -166,7 +171,7 @@ public final class EntityStateEnvelope<I, S extends Message>
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(entityState, entityId, entityVersion);
+        return Objects.hashCode(entityState, packedId, entityVersion);
     }
 
     @Override
@@ -179,7 +184,7 @@ public final class EntityStateEnvelope<I, S extends Message>
         }
         EntityStateEnvelope<?, ?> that = (EntityStateEnvelope<?, ?>) o;
         return Objects.equal(entityState, that.entityState) &&
-                Objects.equal(entityId, that.entityId) &&
+                Objects.equal(packedId, that.packedId) &&
                 Objects.equal(entityVersion, that.entityVersion);
     }
 
@@ -187,7 +192,7 @@ public final class EntityStateEnvelope<I, S extends Message>
     public String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("entityState", Stringifiers.toString(entityState))
-                          .add("entityId", Stringifiers.toString(entityId))
+                          .add("entityId", Stringifiers.toString(packedId))
                           .add("entityStateClass", entityStateClass)
                           .add("tenantId", Stringifiers.toString(tenantId))
                           .add("entityVersion", entityVersion)

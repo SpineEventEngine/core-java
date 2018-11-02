@@ -30,6 +30,7 @@ import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.CommandDispatchedToHandler;
+import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.HistoryRejections;
 
@@ -82,5 +83,9 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
     @Override // Exposes the method to this package.
     protected void registerIn(BoundedContext context) {
         super.registerIn(context);
+    }
+
+    private I idFrom(EntityHistoryId receiver) {
+        return idFrom(receiver, repository.getIdClass());
     }
 }

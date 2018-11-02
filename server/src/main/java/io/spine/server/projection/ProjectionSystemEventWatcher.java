@@ -69,4 +69,8 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     protected void registerIn(BoundedContext context) {
         super.registerIn(context);
     }
+
+    private I idFrom(EntityHistoryId receiver) {
+        return idFrom(receiver, repository.getIdClass());
+    }
 }
