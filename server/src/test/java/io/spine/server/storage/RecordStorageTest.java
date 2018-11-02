@@ -58,7 +58,6 @@ import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
@@ -66,9 +65,8 @@ import static io.spine.server.storage.given.RecordStorageTestEnv.assertSingleRec
 import static io.spine.server.storage.given.RecordStorageTestEnv.buildStorageRecord;
 import static io.spine.server.storage.given.RecordStorageTestEnv.delete;
 import static io.spine.server.storage.given.RecordStorageTestEnv.emptyFilters;
-import static io.spine.server.storage.given.RecordStorageTestEnv.emptyOrderBy;
-import static io.spine.server.storage.given.RecordStorageTestEnv.emptyPagination;
 import static io.spine.server.storage.given.RecordStorageTestEnv.newEntity;
+import static io.spine.server.storage.given.RecordStorageTestEnv.newEntityQuery;
 import static io.spine.server.storage.given.RecordStorageTestEnv.toEntityId;
 import static io.spine.test.storage.Project.Status.CANCELLED;
 import static io.spine.test.storage.Project.Status.DONE;
@@ -138,7 +136,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
+        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
         ProjectId idMatching = newId();
         ProjectId idWrong1 = newId();
         ProjectId idWrong2 = newId();
@@ -229,7 +227,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
-        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
+        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
 
         // Perform the query
         Iterator<EntityRecord> readRecords = storage.readAll(query);
@@ -260,7 +258,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .addFilter(all(eq(archived.toString(), true)))
                 .build();
-        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
+        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(archivedRecord, read);
     }
@@ -300,8 +298,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
-        EntityQuery<ProjectId> query =
-                from(emptyFilters(), emptyOrderBy(), emptyPagination(), storage);
+        EntityQuery<ProjectId> query = newEntityQuery(emptyFilters(), storage);
 
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(activeRecord, read);
@@ -342,9 +339,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
-        EntityQuery<ProjectId> query =
-                from(filters, emptyOrderBy(), emptyPagination(), storage)
-                        .withActiveLifecycle(storage);
+        EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
+                .withActiveLifecycle(storage);
 
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(activeRecord, read);
@@ -385,7 +381,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
-        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
+        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
 
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(activeRecord, read);
@@ -457,7 +453,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
+        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
 
         ProjectId id = newId();
         TestCounterEntity entity = newEntity(id);
@@ -518,9 +514,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addFilter(columnFilter)
                 .build();
         RecordStorage<ProjectId> storage = getStorage();
-        EntityQuery<ProjectId> query =
-                from(filters, emptyOrderBy(), emptyPagination(), storage)
-                        .withActiveLifecycle(storage);
+        EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
+                .withActiveLifecycle(storage);
         Iterator<EntityRecord> read = storage.readAll(query);
         List<EntityRecord> readRecords = newArrayList(read);
         assertEquals(1, readRecords.size());
@@ -565,7 +560,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = getStorage();
 
-        EntityQuery<ProjectId> query = from(filters, emptyOrderBy(), emptyPagination(), storage);
+        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
         ProjectId idMatching = newId();
         ProjectId idWrong = newId();
 
