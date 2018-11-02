@@ -30,9 +30,10 @@ import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.CommandDispatchedToHandler;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.HistoryRejections;
+
+import static io.spine.server.entity.EntityHistoryIds.unwrap;
 
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
@@ -51,7 +52,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe
     public void on(CommandDispatchedToHandler event) {
-        I id = idFrom(event.getReceiver());
+        I id = unwrap(event.getReceiver(), repository.getIdClass());
         CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
 
@@ -67,7 +68,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe
     public void on(EventDispatchedToReactor event) {
-        I id = idFrom(event.getReceiver());
+        I id = unwrap(event.getReceiver(), repository.getIdClass());
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }
@@ -83,9 +84,5 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
     @Override // Exposes the method to this package.
     protected void registerIn(BoundedContext context) {
         super.registerIn(context);
-    }
-
-    private I idFrom(EntityHistoryId receiver) {
-        return idFrom(receiver, repository.getIdClass());
     }
 }

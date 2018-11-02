@@ -30,6 +30,8 @@ import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
 import io.spine.system.server.HistoryRejections;
 
+import static io.spine.server.entity.EntityHistoryIds.unwrap;
+
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
  * related to dispatching events to {@link Projection}s of a given type.
@@ -49,7 +51,7 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     @Subscribe
     public void on(EventDispatchedToSubscriber event) {
         EntityHistoryId receiver = event.getReceiver();
-        I id = idFrom(receiver);
+        I id = unwrap(receiver, repository.getIdClass());
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }
@@ -68,9 +70,5 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     @Override // Exposes the method to this package.
     protected void registerIn(BoundedContext context) {
         super.registerIn(context);
-    }
-
-    private I idFrom(EntityHistoryId receiver) {
-        return idFrom(receiver, repository.getIdClass());
     }
 }
