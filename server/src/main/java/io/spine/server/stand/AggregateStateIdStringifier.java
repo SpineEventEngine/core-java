@@ -93,7 +93,7 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
         checkArgument(idTypeEndIndex > 0,
                       "Passed string does not contain the ID type.");
         String idTypeString = s.substring(idTypeStartIndex, idTypeEndIndex);
-        Class idType = idTypeFromString(idTypeString);
+        Class<?> idType = idTypeFromString(idTypeString);
 
         String idStringValue = s.substring(idTypeEndIndex + 1);
         Object genericId = Stringifiers.fromString(idStringValue, idType);
@@ -117,7 +117,7 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
         return result;
     }
 
-    private static Class idTypeFromString(String idTypeString) {
+    private static Class<?> idTypeFromString(String idTypeString) {
         Class result;
         if (idTypeString.contains(TYPE_NAME_DIVIDER)) {
             TypeName typeName = TypeName.of(idTypeString);

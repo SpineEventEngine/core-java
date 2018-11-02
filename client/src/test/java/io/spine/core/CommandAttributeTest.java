@@ -29,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -111,7 +110,7 @@ class CommandAttributeTest {
     void setAndGetMessage() {
         CommandAttribute<StringValue> attr = new CommandAttribute<StringValue>("str-val") {
         };
-        StringValue value = toMessage(getClass().getName());
+        StringValue value = StringValue.of(getClass().getName());
 
         assertSetGet(attr, value);
     }

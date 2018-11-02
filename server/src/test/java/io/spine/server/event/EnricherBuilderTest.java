@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,7 +62,8 @@ class EnricherBuilderTest {
                 if (input == null) {
                     return null;
                 }
-                return toMessage(Timestamps.toString(input));
+                String rawTimestamp = Timestamps.toString(input);
+                return StringValue.of(rawTimestamp);
             }
         };
         this.fieldEnrichment = FieldEnrichment.of(Timestamp.class, StringValue.class, function);
