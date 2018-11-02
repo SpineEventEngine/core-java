@@ -21,9 +21,11 @@
 package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
+import io.spine.client.EntityId;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.option.EntityOption;
@@ -319,10 +321,8 @@ class EntityHistoryTest {
             EventDispatchedToSubscriber event =
                     eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
             EntityHistoryId receiver = event.getReceiver();
-            PersonId actualIdValue = Identifier.unpack(receiver.getEntityId()
-                                                               .getId());
             PersonCreated payload = (PersonCreated) getMessage(event.getPayload());
-            assertEquals(id, actualIdValue);
+            assertId(receiver);
             assertEquals(PersonProjection.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
         }
@@ -339,10 +339,8 @@ class EntityHistoryTest {
             CommandDispatchedToHandler commandDispatchedEvent =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
-            PersonId actualIdValue = Identifier.unpack(receiver.getEntityId()
-                                                               .getId());
             CreatePerson payload = (CreatePerson) getMessage(commandDispatchedEvent.getPayload());
-            assertEquals(id, actualIdValue);
+            assertId(receiver);
             assertEquals(PersonAggregate.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
         }
@@ -369,13 +367,10 @@ class EntityHistoryTest {
             EntityExtractedFromArchive event =
                     eventAccumulator.assertNextEventIs(EntityExtractedFromArchive.class);
 
+            EntityHistoryId historyId = event.getId();
             assertEquals(PersonAggregate.TYPE.value(),
-                         event.getId()
-                              .getTypeUrl());
-            PersonId actualId = Identifier.unpack(event.getId()
-                                                       .getEntityId()
-                                                       .getId());
-            assertEquals(id, actualId);
+                         historyId.getTypeUrl());
+            assertId(historyId);
         }
 
         private void checkEntityRestored() {
@@ -388,9 +383,9 @@ class EntityHistoryTest {
         }
 
         private void assertId(EntityHistoryId actual) {
-            PersonId actualId = Identifier.unpack(actual.getEntityId()
-                                                        .getId());
-            assertEquals(id, actualId);
+            EntityId entityId = actual.getEntityId();
+            Any idValue = entityId.getId();
+            assertEquals(id, Identifier.unpack(idValue));
         }
 
         private void postCommand(CommandMessage commandMessage) {
