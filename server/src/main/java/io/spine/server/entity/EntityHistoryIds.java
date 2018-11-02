@@ -68,13 +68,13 @@ public final class EntityHistoryIds {
      *
      * @param historyId
      *         the ID of the entity history
-     * @param idClass
-     *         the class of the entity ID
      * @return the extracted entity ID
      */
-    public static <T> T unwrap(EntityHistoryId historyId, Class<T> idClass) {
+    public static <I> I unwrap(EntityHistoryId historyId) {
         Any idValue = historyId.getEntityId()
                                .getId();
-        return Identifier.unpack(idValue, idClass);
+        @SuppressWarnings("unchecked" /* // The caller is responsible for the correct type. */)
+        I unpackedId = (I) Identifier.unpack(idValue);
+        return unpackedId;
     }
 }

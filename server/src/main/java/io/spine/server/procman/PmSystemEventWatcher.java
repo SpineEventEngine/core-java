@@ -52,7 +52,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe
     public void on(CommandDispatchedToHandler event) {
-        I id = unwrap(event.getReceiver(), repository.getIdClass());
+        I id = unwrap(event.getReceiver());
         CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
 
@@ -68,7 +68,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe
     public void on(EventDispatchedToReactor event) {
-        I id = unwrap(event.getReceiver(), repository.getIdClass());
+        I id = unwrap(event.getReceiver());
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }

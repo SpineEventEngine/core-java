@@ -51,7 +51,7 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     @Subscribe
     public void on(EventDispatchedToSubscriber event) {
         EntityHistoryId receiver = event.getReceiver();
-        I id = unwrap(receiver, repository.getIdClass());
+        I id = unwrap(receiver);
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }

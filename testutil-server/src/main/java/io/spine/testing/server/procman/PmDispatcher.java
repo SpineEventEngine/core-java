@@ -144,6 +144,7 @@ public final class PmDispatcher {
     ProcessManagerRepository<I, P, S> mockRepository() {
         TestPmRepository mockedRepo = mock(TestPmRepository.class);
         when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
+        when(mockedRepo.getIdClass()).thenReturn(Object.class);
         return mockedRepo;
     }
 

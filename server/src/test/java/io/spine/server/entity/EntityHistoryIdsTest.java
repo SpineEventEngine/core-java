@@ -62,7 +62,7 @@ class EntityHistoryIdsTest extends UtilityClassTest<EntityHistoryIds> {
     void unwrapEntityId() {
         String entityId = "id";
         EntityHistoryId historyId = EntityHistoryIds.wrap(entityId, TYPE_URL);
-        String entityIdFromHistory = EntityHistoryIds.unwrap(historyId, entityId.getClass());
+        String entityIdFromHistory = EntityHistoryIds.unwrap(historyId);
         assertEquals(entityId, entityIdFromHistory);
     }
 }
