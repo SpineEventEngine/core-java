@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Any;
+import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdVBuilder;
@@ -31,8 +32,10 @@ import io.spine.type.TypeUrl;
 import static io.spine.base.Identifier.pack;
 
 /**
- * Utilities for working with entity history IDs.
+ * Utilities for working with {@linkplain io.spine.system.server.EntityHistoryId entity history
+ * identifiers}.
  */
+@Internal
 public final class EntityHistoryIds {
 
     /** Prevents instantiation of this utility class. */
