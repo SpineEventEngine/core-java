@@ -95,13 +95,13 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         return builder.build();
     }
 
+    @SuppressWarnings("unchecked" /* The cast is safe since the <I> and <S> types are bound with
+            the type <E>, and forward conversion is performed on the entity of type <E>. */)
     @Override
     protected E doBackward(EntityRecord entityRecord) {
-        @SuppressWarnings("unchecked") /* The cast is safe since the type <S> is bound with
-            the type <E>, and forward conversion is performed on the entity of type <E>. */
         S unpacked = (S) unpack(entityRecord.getState());
         S state = FieldMasks.applyMask(getFieldMask(), unpacked);
-        I id = Identifier.unpack(entityRecord.getEntityId());
+        I id = (I) Identifier.unpack(entityRecord.getEntityId());
         E entity = entityFactory.create(id);
         checkState(entity != null, "EntityFactory produced null entity.");
         injectState(entity, state, entityRecord);

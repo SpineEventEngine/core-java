@@ -25,6 +25,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.util.Durations;
 import io.spine.base.CommandMessage;
+import io.spine.base.Identifier;
 import io.spine.client.EntityFilters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
@@ -49,7 +50,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
@@ -208,10 +208,7 @@ class ScheduledCommandTest {
     }
 
     private static CommandMessage createCommandMessage() {
-        CompanyId id = CompanyId
-                .newBuilder()
-                .setUuid(newUuid())
-                .build();
+        CompanyId id = Identifier.generate(CompanyId.class);
         String name = ScheduledCommandTest.class.getSimpleName();
         EstablishCompany result = EstablishCompany.newBuilder()
                                                   .setId(id)

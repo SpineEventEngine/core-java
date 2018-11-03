@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Any;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -236,8 +237,9 @@ abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        CommandId commandId = Identifier.unpack(observer.firstResponse().getMessageId());
-        assertEquals(cmd.getId(), commandId);
+        Ack ack = observer.firstResponse();
+        Any messageId = ack.getMessageId();
+        assertEquals(cmd.getId(), Identifier.unpack(messageId));
     }
 
     /**

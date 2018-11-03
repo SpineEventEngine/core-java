@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.Tests.nullRef;
 
 /**
@@ -81,7 +80,7 @@ public class Given {
         PrjProjectCreated eventMessage = PrjProjectCreated.newBuilder()
                                                           .setProjectId(projectIdBuilder)
                                                           .build();
-        StringValue producerId = toMessage(Given.class.getSimpleName());
+        StringValue producerId = StringValue.of(Given.class.getSimpleName());
         EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
                                                     Identifier.pack(producerId));
         Event event = eventFactory.createEvent(eventMessage, nullRef());

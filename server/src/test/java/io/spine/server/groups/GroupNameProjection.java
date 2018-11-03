@@ -21,12 +21,12 @@
 package io.spine.server.groups;
 
 import com.google.protobuf.StringValue;
-import com.google.protobuf.StringValueVBuilder;
 import io.spine.core.Subscribe;
 import io.spine.server.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;
+import io.spine.validate.StringValueVBuilder;
 
 import static com.google.common.collect.ImmutableSet.of;
 
@@ -52,7 +52,8 @@ public final class GroupNameProjection
             StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
             routing.route(Organization.class, (org, ctx) -> of(
                     GroupId.newBuilder()
-                           .setUuid(org.getId().getUid())
+                           .setUuid(org.getId()
+                                       .getUuid())
                            .build()));
             getEventRouting().routeEntityStateUpdates(routing);
         }

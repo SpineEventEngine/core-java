@@ -88,6 +88,7 @@ public class AggregateMessageDispatcher {
     private static <I, A extends Aggregate<I, ?, ?>> AggregateRepository<I, A> mockRepository() {
         TestAggregateRepository mockedRepo = mock(TestAggregateRepository.class);
         when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
+        when(mockedRepo.getIdClass()).thenReturn(Object.class);
         return mockedRepo;
     }
 

@@ -63,6 +63,7 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
@@ -132,6 +133,7 @@ class ProjectionEndToEndTest {
         groups.register(repository);
         UserId organizationHead = UserId
                 .newBuilder()
+                .setValue(newUuid())
                 .build();
         EntityHistoryId historyId = EntityHistoryId
                 .newBuilder()

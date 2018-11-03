@@ -21,7 +21,6 @@
 package io.spine.server.command;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.StringValue;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
@@ -48,7 +47,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
 
     /** Supplier for a packed version of the dispatcher ID. */
     private final Supplier<Any> producerId =
-            memoize(() -> pack(TypeConverter.<String, StringValue>toMessage(getId())));
+            memoize(() -> pack(TypeConverter.toMessage(getId())));
 
     /** Lazily initialized logger. */
 

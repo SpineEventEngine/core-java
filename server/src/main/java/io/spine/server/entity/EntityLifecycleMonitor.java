@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -113,8 +114,9 @@ public final class EntityLifecycleMonitor<I,
     @Override
     public void onAfterCommit(EntityRecordChange change) {
         Set<Message> messageIds = copyOf(acknowledgedMessageIds);
-        I id = Identifier.unpack(change.getPreviousValue()
-                                       .getEntityId());
+        Any newEntityId = change.getPreviousValue()
+                                .getEntityId();
+        I id = Identifier.unpack(newEntityId, repository.getIdClass());
         repository.lifecycleOf(id)
                   .onStateChanged(change, messageIds);
     }

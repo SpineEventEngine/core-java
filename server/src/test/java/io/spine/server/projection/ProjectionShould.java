@@ -30,7 +30,6 @@ import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.core.given.GivenEvent;
-import io.spine.protobuf.TypeConverter;
 import io.spine.server.model.DuplicateHandlerMethodError;
 import io.spine.server.model.HandlerFieldFilterClashError;
 import io.spine.server.projection.given.EntitySubscriberProjection;
@@ -106,7 +105,7 @@ class ProjectionShould {
         projection = Given.projectionOfClass(TestProjection.class)
                           .withId(newUuid())
                           .withVersion(1)
-                          .withState(TypeConverter.toMessage("Initial state"))
+                          .withState(StringValue.of("Initial state"))
                           .build();
     }
 

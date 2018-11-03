@@ -29,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.DefaultEntityStorageConverter.forAllFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -82,7 +81,7 @@ class DefaultEntityStorageConverterTest {
     @Test
     @DisplayName("convert forward and backward")
     void convertForwardAndBackward() throws Exception {
-        StringValue entityState = toMessage("back and forth");
+        StringValue entityState = StringValue.of("back and forth");
         TestEntity entity = createEntity(100L, entityState);
 
         EntityRecord out = converter.convert(entity);

@@ -21,11 +21,11 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
+import com.google.protobuf.Any;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
@@ -44,7 +44,6 @@ import java.util.Set;
 
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -128,8 +127,8 @@ class CommandServiceTest {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
         Ack acked = observer.firstResponse();
-        CommandId id = Identifier.unpack(acked.getMessageId());
-        assertEquals(cmd.getId(), id);
+        Any messageId = acked.getMessageId();
+        assertEquals(cmd.getId(), Identifier.unpack(messageId));
     }
 
     @Test

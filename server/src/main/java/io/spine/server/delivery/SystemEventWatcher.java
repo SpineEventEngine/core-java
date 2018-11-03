@@ -122,16 +122,6 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     }
 
     /**
-     * Unpacks the generic entity ID from the given {@link EntityHistoryId
-     * EntityHistoryId}.
-     */
-    protected I idFrom(EntityHistoryId historyId) {
-        Any id = historyId.getEntityId()
-                          .getId();
-        return Identifier.unpack(id);
-    }
-
-    /**
      * Registers itself in the given domain {@link BoundedContext}.
      *
      * <p>Registers this {@link AbstractEventSubscriber} in

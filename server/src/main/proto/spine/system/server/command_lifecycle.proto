@@ -46,7 +46,8 @@ message CommandLifecycle {
     option (entity).kind = AGGREGATE;
 
     // The ID of the command.
-    spine.core.CommandId id = 1;
+    //TODO:2018-10-31:dmytro.grankin: make the ID required, see https://github.com/SpineEventEngine/core-java/issues/877
+    spine.core.CommandId id = 1 [(required) = false];
 
     // The command.
     spine.core.Command command = 2;

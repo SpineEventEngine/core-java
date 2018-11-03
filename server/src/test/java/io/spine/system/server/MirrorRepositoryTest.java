@@ -241,10 +241,7 @@ class MirrorRepositoryTest {
         @Test
         @DisplayName("to nowhere if the event is not on an aggregate update")
         void projection() {
-            VideoId videoId = VideoId
-                    .newBuilder()
-                    .setUuid(newUuid())
-                    .build();
+            VideoId videoId = Identifier.generate(VideoId.class);
             TypeUrl projectionType = TypeUrl.of(LocalizedVideo.class);
             dispatchStateChanged(projectionType, videoId, LocalizedVideo.getDefaultInstance());
 

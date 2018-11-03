@@ -30,7 +30,6 @@ import io.spine.test.projection.event.PairImported;
 import io.spine.test.projection.event.StringImported;
 import io.spine.validate.StringValueVBuilder;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ProjectionTestEnv {
@@ -70,7 +69,7 @@ public class ProjectionTestEnv {
                                               .getValue();
             String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
-            return toMessage(result);
+            return StringValue.of(result);
         }
     }
 

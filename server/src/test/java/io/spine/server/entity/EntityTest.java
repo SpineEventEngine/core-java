@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.given.EntityTestEnv.isBetween;
 import static io.spine.testing.Tests.nullRef;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -138,7 +137,7 @@ class EntityTest {
         @Test
         @DisplayName("Message")
         void ofMessageType() {
-            StringValue messageId = toMessage("messageId");
+            StringValue messageId = StringValue.of("messageId");
             TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
             assertEquals(messageId, entityWithMessageID.getId());

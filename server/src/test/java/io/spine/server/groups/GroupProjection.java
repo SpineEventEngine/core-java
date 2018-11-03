@@ -54,8 +54,9 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
             StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
             routing.route(Organization.class, (org, eventContext) ->
                     of(GroupId.newBuilder()
-                              .setUuid(org.getHead().getValue())
-                               .build()));
+                              .setUuid(org.getHead()
+                                          .getValue())
+                              .build()));
             getEventRouting().routeEntityStateUpdates(routing);
         }
     }

@@ -35,14 +35,13 @@ import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.server.storage.RecordStorage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static java.lang.String.format;
@@ -178,11 +177,12 @@ public final class EntityQueries {
 
     private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {
         EntityIdFilter idFilter = entityFilters.getIdFilter();
-        Collection<I> ids = new ArrayList<>();
+        Collection<I> ids = newArrayList();
         for (EntityId entityId : idFilter.getIdsList()) {
             Any wrappedMessageId = entityId.getId();
-            I genericId = Identifier.unpack(wrappedMessageId);
-            ids.add(genericId);
+            @SuppressWarnings("unchecked" /* The caller is responsible to pass the proper IDs. */)
+            I unpackedId = (I) Identifier.unpack(wrappedMessageId);
+            ids.add(unpackedId);
         }
         return ids;
     }

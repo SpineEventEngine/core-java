@@ -91,7 +91,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private static CommandId commandIdFrom(Ack ack) {
         Any messageId = ack.getMessageId();
-        return Identifier.unpack(messageId);
+        return Identifier.unpack(messageId, CommandId.class);
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Default values.

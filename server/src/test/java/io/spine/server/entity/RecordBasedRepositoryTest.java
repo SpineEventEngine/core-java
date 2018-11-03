@@ -34,6 +34,7 @@ import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.storage.RecordStorage;
+import io.spine.testing.server.entity.given.GivenLifecycleFlags;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
@@ -93,6 +94,11 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     protected abstract RecordBasedRepository<I, E, S> createRepository();
 
     protected abstract E createEntity(I id);
+
+    protected final E createEntity(int idValue) {
+        I id = createId(idValue);
+        return createEntity(id);
+    }
 
     protected abstract List<E> createEntities(int count);
 
@@ -194,7 +200,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("single entity by ID")
         void singleEntityById() {
-            E entity = createEntity(createId(985));
+            E entity = createEntity(985);
 
             storeEntity(entity);
 
@@ -421,7 +427,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             ids.add(entities.get(i)
                             .getId());
         }
-        Entity<I, S> sideEntity = createEntity(createId(375));
+        Entity<I, S> sideEntity = createEntity(375);
         ids.add(sideEntity.getId());
 
         Collection<E> found = newArrayList(loadMany(ids));
@@ -437,18 +443,14 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("archived")
         void archived() {
-            E entity = createEntity(createId(821));
+            E entity = createEntity(821);
             I id = entity.getId();
 
             storeEntity(entity);
 
             assertTrue(findById(id).isPresent());
 
-            entity.setLifecycleFlags(
-                    LifecycleFlags.newBuilder()
-                                  .setArchived(true)
-                                  .build()
-            );
+            entity.setLifecycleFlags(GivenLifecycleFlags.archived());
             storeEntity(entity);
 
             assertFalse(findById(id).isPresent());
@@ -457,19 +459,14 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("deleted")
         void deleted() {
-            E entity = createEntity(createId(822));
+            E entity = createEntity(822);
             I id = entity.getId();
 
             storeEntity(entity);
 
             assertTrue(findById(id).isPresent());
 
-            entity.setLifecycleFlags(
-                    LifecycleFlags
-                            .newBuilder()
-                            .setDeleted(true)
-                            .build()
-            );
+            entity.setLifecycleFlags(GivenLifecycleFlags.deleted());
             storeEntity(entity);
 
             assertFalse(findById(id).isPresent());
@@ -479,20 +476,16 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @Test
     @DisplayName("exclude non-active records from entity query")
     void excludeNonActiveRecords() {
-        I archivedId = createId(42);
-        I deletedId = createId(314);
-        I activeId = createId(271);
-
-        E activeEntity = repository.create(activeId);
-        E archivedEntity = repository.create(archivedId);
-        E deletedEntity = repository.create(deletedId);
+        E activeEntity = createEntity(271);
+        E archivedEntity = createEntity(42);
+        E deletedEntity = createEntity(314);
         delete((TransactionalEntity) deletedEntity);
         archive((TransactionalEntity) archivedEntity);
 
         // Fill the storage
-        repository.store(activeEntity);
-        repository.store(archivedEntity);
-        repository.store(deletedEntity);
+        storeEntity(activeEntity);
+        storeEntity(archivedEntity);
+        storeEntity(deletedEntity);
 
         Iterator<E> found = repository.find(emptyFilters(), emptyOrder(), emptyPagination(),
                                             emptyFieldMask());
@@ -506,20 +499,16 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @Test
     @DisplayName("allow any lifecycle if column is involved in query")
     void ignoreLifecycleForColumns() {
-        I archivedId = createId(42);
-        I deletedId = createId(314);
-        I activeId = createId(271);
-
-        E activeEntity = repository.create(activeId);
-        E archivedEntity = repository.create(archivedId);
-        E deletedEntity = repository.create(deletedId);
+        E activeEntity = createEntity(42);
+        E archivedEntity = createEntity(314);
+        E deletedEntity = createEntity(271);
         delete((TransactionalEntity) deletedEntity);
         archive((TransactionalEntity) archivedEntity);
 
         // Fill the storage
-        repository.store(activeEntity);
-        repository.store(archivedEntity);
-        repository.store(deletedEntity);
+        storeEntity(activeEntity);
+        storeEntity(archivedEntity);
+        storeEntity(deletedEntity);
 
         CompositeColumnFilter columnFilter = all(eq(archived.name(), false));
         EntityFilters filters = EntityFilters

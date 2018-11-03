@@ -141,9 +141,14 @@ class ProjectionRepositoryTest
 
     @Override
     protected TestProjection createEntity(ProjectId id) {
+        Project project = Project
+                .newBuilder()
+                .setId(id)
+                .build();
         TestProjection projection =
                 Given.projectionOfClass(TestProjection.class)
                      .withId(id)
+                     .withState(project)
                      .build();
         return projection;
     }
@@ -248,7 +253,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("event")
         void event() {
-            PrjProjectStarted msg = GivenEventMessage.projectStarted();
+            PrjProjectCreated msg = projectCreated();
 
             // Ensure no instances are present in the repository now.
             assertFalse(repository().loadAll()
@@ -285,6 +290,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("event to archived projection")
         void eventToArchived() {
+            checkDispatchesEvent(projectCreated());
             PrjProjectArchived projectArchived = GivenEventMessage.projectArchived();
             checkDispatchesEvent(projectArchived);
             ProjectId projectId = projectArchived.getProjectId();
@@ -305,6 +311,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("event to deleted projection")
         void eventToDeleted() {
+            checkDispatchesEvent(projectCreated());
             PrjProjectDeleted projectDeleted = GivenEventMessage.projectDeleted();
             checkDispatchesEvent(projectDeleted);
             ProjectId projectId = projectDeleted.getProjectId();

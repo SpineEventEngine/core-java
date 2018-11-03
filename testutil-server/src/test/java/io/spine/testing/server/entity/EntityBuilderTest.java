@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,7 +91,7 @@ class EntityBuilderTest {
     void createEntity() {
         long id = 1024L;
         int version = 100500;
-        StringValue state = toMessage(getClass().getName());
+        StringValue state = StringValue.of(getClass().getName());
         Timestamp timestamp = Time.getCurrentTime();
 
         VersionableEntity entity = givenEntity()
@@ -113,7 +112,7 @@ class EntityBuilderTest {
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());
-        assertEquals(toMessage(""), entity.getState());
+        assertEquals(StringValue.of(""), entity.getState());
         assertEquals(0, entity.getVersion().getNumber());
     }
 

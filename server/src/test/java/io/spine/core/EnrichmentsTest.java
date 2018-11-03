@@ -41,7 +41,6 @@ import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.core.Enrichments.getEnrichments;
 import static io.spine.core.given.GivenEvent.context;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -88,7 +87,7 @@ class EnrichmentsTest {
                 .newBuilder()
                 .setId(producerId)
                 .build();
-        boolValue = toMessage(false);
+        boolValue = BoolValue.of(false);
         eventFactory = TestEventFactory.newInstance(Identifier.pack(producerId), getClass());
         context = eventFactory.createEvent(projectCreated)
                               .getContext();
