@@ -25,7 +25,7 @@ There is a [template][server-quickstart] for a server application built in Spine
 
 The introductory application examples are available [here][examples-java].
 
-For more advanced example, including web application see [ToDo List app][todo-list].   
+For more advanced example including a Spine server, a console client and a web application see [ToDo List app][todo-list].   
 
 ## Links
 * [Getting Started Guide][getting-started]
