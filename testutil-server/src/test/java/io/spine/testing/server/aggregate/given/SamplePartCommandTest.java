@@ -51,7 +51,7 @@ public class SamplePartCommandTest
 
     @Override
     protected Repository<TuTaskId, TuAggregatePart>
-    createEntityRepository() {
+    createRepository() {
         return new TuAggregatePartRepository();
     }
 

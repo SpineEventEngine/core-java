@@ -52,7 +52,7 @@ public class SampleEventImportTest
     }
 
     @Override
-    protected Repository<TuProjectId, TuAggregate> createEntityRepository() {
+    protected Repository<TuProjectId, TuAggregate> createRepository() {
         return new TuAggregateRepository();
     }
 
