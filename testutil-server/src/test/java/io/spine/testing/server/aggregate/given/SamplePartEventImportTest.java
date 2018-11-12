@@ -53,7 +53,7 @@ public class SamplePartEventImportTest
     }
 
     @Override
-    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
+    protected Repository<TuTaskId, TuAggregatePart> createRepository() {
         return new TuAggregatePartRepository();
     }
 

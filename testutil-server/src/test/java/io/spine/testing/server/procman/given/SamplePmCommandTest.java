@@ -54,7 +54,7 @@ public class SamplePmCommandTest
 
     @Override
     protected Repository<TuTaskId, CommandHandlingPm>
-    createEntityRepository() {
+    createRepository() {
         return new CommandHandlingPmRepo();
     }
 

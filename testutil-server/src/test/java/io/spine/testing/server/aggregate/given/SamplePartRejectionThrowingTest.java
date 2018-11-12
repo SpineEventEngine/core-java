@@ -49,7 +49,7 @@ public class SamplePartRejectionThrowingTest
     }
 
     @Override
-    protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
+    protected Repository<TuTaskId, TuAggregatePart> createRepository() {
         return new TuAggregatePartRepository();
     }
 

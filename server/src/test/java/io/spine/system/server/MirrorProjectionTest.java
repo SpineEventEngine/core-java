@@ -39,7 +39,7 @@ abstract class MirrorProjectionTest<E extends EventMessage>
     }
 
     @Override
-    protected Repository<MirrorId, MirrorProjection> createEntityRepository() {
+    protected Repository<MirrorId, MirrorProjection> createRepository() {
         return new MirrorRepository();
     }
 }

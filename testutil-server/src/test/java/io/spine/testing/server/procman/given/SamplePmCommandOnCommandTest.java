@@ -45,7 +45,7 @@ public class SamplePmCommandOnCommandTest
     }
 
     @Override
-    protected Repository<TuProjectId, CommandingPm> createEntityRepository() {
+    protected Repository<TuProjectId, CommandingPm> createRepository() {
         return new CommandingPmRepo();
     }
 }
