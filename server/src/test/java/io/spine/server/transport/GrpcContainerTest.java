@@ -75,10 +75,13 @@ class GrpcContainerTest {
     @Test
     @DisplayName("add and remove parameters from builder")
     void setParamsInBuilder() {
-        GrpcContainer.Builder builder = GrpcContainer.newBuilder()
-                                                     .setPort(8080)
-                                                     .setPort(60);
-        assertEquals(60, builder.getPort());
+        int port = 60;
+        GrpcContainer.Builder builder = GrpcContainer
+                .newBuilder()
+                .setPort(8080)
+                .setPort(port);
+
+        assertEquals(port, builder.getPort());
 
         int count = 3;
         List<ServerServiceDefinition> definitions = new ArrayList<>(count);
@@ -120,6 +123,15 @@ class GrpcContainerTest {
         grpcContainer.shutdown();
 
         verify(server).shutdown();
+    }
+
+    @Test
+    @DisplayName("forcefully shutdown server")
+    void shutdownAndWait() throws IOException {
+        grpcContainer.start();
+        grpcContainer.shutdownNowAndWait();
+
+        assertTrue(grpcContainer.isShutdown());
     }
 
     @Test

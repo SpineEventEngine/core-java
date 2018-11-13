@@ -41,8 +41,6 @@ import static com.google.common.base.Preconditions.checkState;
  * <p>Maintains and deploys several of gRPC services within a single server.
  *
  * <p>Uses {@link ServerServiceDefinition}s of each service.
- *
- * @author Alex Tymchenko
  */
 public class GrpcContainer {
 
@@ -91,6 +89,21 @@ public class GrpcContainer {
     public void shutdown() {
         checkState(grpcServer != null, SERVER_NOT_STARTED_MSG);
         grpcServer.shutdown();
+        grpcServer = null;
+    }
+
+    /**
+     * Initiates a forceful shutdown in which preexisting and new calls are rejected.
+     *
+     * <p>The method returns when the service becomes terminated.
+     * The most common usage scenario for this method is clean-up in unit tests
+     * (e.g. {@literal @}{@code AfterEach} in JUnit5) that involve gRPC communications.
+     */
+    @VisibleForTesting
+    public void shutdownNowAndWait() {
+        checkState(grpcServer != null, SERVER_NOT_STARTED_MSG);
+        grpcServer.shutdownNow();
+        awaitTermination();
         grpcServer = null;
     }
 
