@@ -89,7 +89,7 @@ public class GrpcContainer {
     public void shutdown() {
         checkState(grpcServer != null, SERVER_NOT_STARTED_MSG);
         grpcServer.shutdown();
-        grpcServer = null;
+        this.grpcServer = null;
     }
 
     /**
@@ -104,7 +104,7 @@ public class GrpcContainer {
         checkState(grpcServer != null, SERVER_NOT_STARTED_MSG);
         grpcServer.shutdownNow();
         awaitTermination();
-        grpcServer = null;
+        this.grpcServer = null;
     }
 
     /** Waits for the service to become terminated. */
