@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Enrichments.createEnrichment;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
@@ -101,8 +102,11 @@ public final class EventEnvelope
 
     @Override
     public ActorContext getActorContext() {
-        return getEventContext().getCommandContext()
-                                .getActorContext();
+        ActorContext contextFromCommand = getEventContext().getCommandContext()
+                                                           .getActorContext();
+        return isNotDefault(contextFromCommand)
+               ? contextFromCommand
+               : getEventContext().getImportContext();
     }
 
     /**

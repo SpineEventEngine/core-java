@@ -33,6 +33,8 @@ message BbProjectId {
 }
 
 message BbProject {
+    option (entity).kind = AGGREGATE;
+
     BbProjectId id = 1;
 
     string name = 2;
