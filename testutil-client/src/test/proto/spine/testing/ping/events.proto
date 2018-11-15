@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package spine.testing.client.grpc;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.testing.client.grpc.event";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
+
+message Pong {
+    // This event does not have fields because we're not going to handle it
+    // in the tests. Should we have such a need, we can arrange custom routing
+    // based on `EventContext`.
+}

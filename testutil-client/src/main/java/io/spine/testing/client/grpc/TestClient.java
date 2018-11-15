@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.client;
+package io.spine.testing.client.grpc;
 
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
@@ -34,6 +34,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
