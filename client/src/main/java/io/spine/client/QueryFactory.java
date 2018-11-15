@@ -135,8 +135,7 @@ public final class QueryFactory {
      * @throws IllegalArgumentException
      *         if any of IDs have invalid type or are {@code null}
      */
-    public Query byIds(Class<? extends Message> entityClass,
-                       Set<?> ids) {
+    public Query byIds(Class<? extends Message> entityClass, Set<?> ids) {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
@@ -158,8 +157,7 @@ public final class QueryFactory {
      * @param entityClass
      *         the class of a target entity
      * @param maskPaths
-     *         the property paths for the {@code FieldMask} applied
-     *         to each of results
+     *         the property paths for the {@code FieldMask} applied to each of results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
