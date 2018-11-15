@@ -27,11 +27,12 @@ import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
-import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.QueryService;
 import org.junit.jupiter.api.Assertions;
+
+import java.util.function.Function;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -59,13 +60,10 @@ public abstract class VerifyState {
      *
      * @param queryService
      *         the query service to obtain entity states from
-     * @param tenantId
-     *         the tenant ID of queried storage
      */
-    public final void verify(QueryService queryService, TenantId tenantId) {
+    public final void verify(QueryService queryService) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
-        Query queryForTenant = queryFor(tenantId);
-        queryService.read(queryForTenant, observer);
+        queryService.read(query, observer);
         Assertions.assertTrue(observer.isCompleted());
         QueryResponse response = observer.firstResponse();
         ImmutableList<Message> actualEntities = response.getMessagesList()
@@ -75,37 +73,35 @@ public abstract class VerifyState {
         compare(expectedResult, actualEntities);
     }
 
-    /** Obtains the {@link #query} with the specified {@code TenantId}. */
-    private Query queryFor(TenantId tenantId) {
-        ActorContext contextWithTenant = query.getContext()
-                                              .toBuilder()
-                                              .setTenantId(tenantId)
-                                              .build();
-        return query.toBuilder()
-                    .setContext(contextWithTenant)
-                    .build();
-    }
-
     /**
      * Compares the expected and the actual entity states.
      */
     protected abstract void compare(ImmutableCollection<? extends Message> expected,
                                     ImmutableCollection<? extends Message> actual);
 
+    /** Returns producer of {@link #exactly(io.spine.core.TenantId, Class, Iterable)}. */
+    public static <T extends Message> VerifyStateProducer exactly(Class<T> entityType,
+                                                                  Iterable<T> expected) {
+        return tenantId -> exactly(tenantId, entityType, expected);
+    }
+
     /**
      * Obtains a verifier which checks that the system contains exactly the passed entity states.
      *
+     * @param <T>
+     *         the type of the entity state
+     * @param tenantId
+     *         the tenant ID of queried storage
      * @param entityType
      *         the type of the entity to query
      * @param expected
      *         the expected entity states
-     * @param <T>
-     *         the type of the entity state
      * @return new instance of {@code VerifyState}
      */
-    public static <T extends Message> VerifyState exactly(Class<T> entityType,
+    public static <T extends Message> VerifyState exactly(TenantId tenantId,
+                                                          Class<T> entityType,
                                                           Iterable<T> expected) {
-        QueryFactory queries = newInstance(VerifyState.class).query();
+        QueryFactory queries = newInstance(VerifyState.class, tenantId).query();
         return new VerifyState(queries.all(entityType), copyOf(expected)) {
             @Override
             protected void compare(ImmutableCollection<? extends Message> expected,
@@ -113,5 +109,11 @@ public abstract class VerifyState {
                 assertThat(actual).containsExactlyElementsIn(expected);
             }
         };
+    }
+
+    /**
+     * Produces {@link VerifyState} based on a {@link TenantId}.
+     */
+    public interface VerifyStateProducer extends Function<TenantId, VerifyState> {
     }
 }

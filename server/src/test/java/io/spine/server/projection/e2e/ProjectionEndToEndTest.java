@@ -116,10 +116,7 @@ class ProjectionEndToEndTest {
         OrganizationId id = established.getId();
         sender.receivesEvent(event(id, established));
         receiver.assertThat(exactly(StringValue.class, of(
-                StringValue
-                        .newBuilder()
-                        .setValue(established.getName())
-                        .build()
+                StringValue.of(established.getName())
         )));
     }
 

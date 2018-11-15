@@ -44,6 +44,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.blackbox.VerifyState.VerifyStateProducer;
 
 import java.util.Collection;
 import java.util.List;
@@ -397,7 +398,14 @@ public class BlackBoxBoundedContext {
                 .newBuilder()
                 .add(boundedContext)
                 .build();
-        verifier.verify(queryService, tenantId);
+        verifier.verify(queryService);
+        return this;
+    }
+
+    @CanIgnoreReturnValue
+    public BlackBoxBoundedContext assertThat(VerifyStateProducer verifierProducer) {
+        VerifyState verifier = verifierProducer.apply(tenantId);
+        assertThat(verifier);
         return this;
     }
 
