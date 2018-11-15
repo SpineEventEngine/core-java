@@ -21,11 +21,13 @@
 package io.spine.testing.server.blackbox;
 
 import io.spine.testing.server.ShardingReset;
+import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
+import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import org.junit.jupiter.api.AfterEach;
@@ -34,11 +36,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.server.blackbox.VerifyState.exactly;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
@@ -55,7 +59,8 @@ class BlackBoxBoundedContextTest {
     @BeforeEach
     void setUp() {
         projects = BlackBoxBoundedContext.newInstance()
-                                         .with(new BbProjectRepository());
+                                         .with(new BbProjectRepository(),
+                                               new BbProjectViewRepository());
     }
 
     @AfterEach
@@ -65,11 +70,35 @@ class BlackBoxBoundedContextTest {
 
     @SuppressWarnings("ReturnValueIgnored")
     @Test
-    @DisplayName("receive and handle a single commands")
+    @DisplayName("receive and handle a single command")
     void receivesACommand() {
         projects.receivesCommand(createProject())
                 .assertThat(acked(once()).withoutErrorsOrRejections())
                 .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
+    }
+
+    @SuppressWarnings("ReturnValueIgnored")
+    @Test
+    @DisplayName("verify aggregate state")
+    void verifyAggregateState() {
+        BbCreateProject createProject = createProject();
+        BbProject expectedProject = BbProjectVBuilder.newBuilder()
+                                                     .setId(createProject.getProjectId())
+                                                     .build();
+        projects.receivesCommand(createProject)
+                .assertThat(exactly(BbProject.class, of(expectedProject)));
+    }
+
+    @SuppressWarnings("ReturnValueIgnored")
+    @Test
+    @DisplayName("verify projection state")
+    void verifyProjectionState() {
+        BbCreateProject createProject = createProject();
+        BbProjectView expectedProject = BbProjectViewVBuilder.newBuilder()
+                                                             .setId(createProject.getProjectId())
+                                                             .build();
+        projects.receivesCommand(createProject)
+                .assertThat(exactly(BbProjectView.class, of(expectedProject)));
     }
 
     @SuppressWarnings("ReturnValueIgnored")

@@ -397,7 +397,7 @@ public class BlackBoxBoundedContext {
                 .newBuilder()
                 .add(boundedContext)
                 .build();
-        verifier.verify(queryService);
+        verifier.verify(queryService, tenantId);
         return this;
     }
 

@@ -27,6 +27,8 @@ import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
+import io.spine.core.ActorContext;
+import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.QueryService;
 import org.junit.jupiter.api.Assertions;
@@ -57,10 +59,13 @@ public abstract class VerifyState {
      *
      * @param queryService
      *         the query service to obtain entity states from
+     * @param tenantId
+     *         the tenant ID of queried storage
      */
-    public final void verify(QueryService queryService) {
+    public final void verify(QueryService queryService, TenantId tenantId) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
-        queryService.read(query, observer);
+        Query queryForTenant = queryFor(tenantId);
+        queryService.read(queryForTenant, observer);
         Assertions.assertTrue(observer.isCompleted());
         QueryResponse response = observer.firstResponse();
         ImmutableList<Message> actualEntities = response.getMessagesList()
@@ -68,6 +73,17 @@ public abstract class VerifyState {
                                                         .map(unpackFunc())
                                                         .collect(toImmutableList());
         compare(expectedResult, actualEntities);
+    }
+
+    /** Obtains the {@link #query} with the specified {@code TenantId}. */
+    private Query queryFor(TenantId tenantId) {
+        ActorContext contextWithTenant = query.getContext()
+                                              .toBuilder()
+                                              .setTenantId(tenantId)
+                                              .build();
+        return query.toBuilder()
+                    .setContext(contextWithTenant)
+                    .build();
     }
 
     /**
