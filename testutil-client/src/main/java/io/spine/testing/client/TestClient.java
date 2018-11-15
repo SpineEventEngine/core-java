@@ -45,11 +45,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class TestClient implements Logging {
 
+    private static final String RPC_FAILED = "The command could not be posted.";
     private final TestActorRequestFactory requestFactory;
     private final ManagedChannel channel;
     private final CommandServiceBlockingStub commandClient;
     private final QueryServiceBlockingStub queryClient;
-    private static final String RPC_FAILED = "The command could not be posted.";
 
     /**
      * Construct the client connecting to server at {@code host:port}.
