@@ -26,7 +26,6 @@ import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Enrichments.createEnrichment;
@@ -100,27 +99,9 @@ public final class EventEnvelope
         return getEventContext();
     }
 
-    /**
-     * Obtains the actor context of the event.
-     *
-     * <p>The {@code ActorContext} is retrieved by traversing {@code Event}s context
-     * and can be retrieved from the following places:
-     * <ul>
-     *     <li>the import context of the event;
-     *     <li>the actor context of the command context of this event;
-     *     <li>the actor context of the command context of the origin event of any depth.
-     * </ul>
-     *
-     * @return the actor context of the wrapped event
-     */
     @Override
     public ActorContext getActorContext() {
-        Optional<CommandContext> commandContext = findCommandContext(getEventContext());
-        if (commandContext.isPresent()) {
-            return commandContext.get()
-                                 .getActorContext();
-        }
-        return getEventContext().getImportContext();
+        return Events.getActorContext(getOuterObject());
     }
 
     /**
@@ -227,40 +208,5 @@ public final class EventEnvelope
         Event.Builder enrichedCopy = getOuterObject().toBuilder()
                                                      .setContext(context);
         return of(enrichedCopy.build());
-    }
-
-    /**
-     * Obtains a context of the command, which lead to this event.
-     *
-     * <p>The context is obtained by traversing the events origin for a valid context source.
-     * There can be two sources for the command context:
-     * <ol>
-     *     <li>The command context set as the event origin.
-     *     <li>The command set as a field of a rejection context if an event was generated in a
-     *     response to a rejection.
-     * </ol>
-     *
-     * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
-     */
-    private static Optional<CommandContext> findCommandContext(EventContext eventContext) {
-        CommandContext commandContext = null;
-        EventContext ctx = eventContext;
-
-        while (commandContext == null) {
-            switch (ctx.getOriginCase()) {
-                case EVENT_CONTEXT:
-                    ctx = ctx.getEventContext();
-                    break;
-                case COMMAND_CONTEXT:
-                    commandContext = ctx.getCommandContext();
-                    break;
-                case IMPORT_CONTEXT:
-                case ORIGIN_NOT_SET:
-                default:
-                    return Optional.empty();
-            }
-        }
-
-        return Optional.of(commandContext);
     }
 }

@@ -35,6 +35,7 @@ import io.spine.string.StringifierRegistry;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -243,16 +244,41 @@ public final class Events {
     }
 
     /**
-     * Obtains a {@link TenantId} from the {@linkplain EventEnvelope#getActorContext()
-     * actor context} of the given {@link Event}.
+     * Obtains a {@link TenantId} from the {@linkplain #getActorContext(Event) actor context}
+     * of the given {@link Event}.
      *
      * @return a tenant ID from the actor context of the event
      */
     @Internal
     public static TenantId getTenantId(Event event) {
         checkNotNull(event);
-        return EventEnvelope.of(event)
-                            .getTenantId();
+        ActorContext actorContext = getActorContext(event);
+        return actorContext.getTenantId();
+    }
+
+    /**
+     * Obtains the actor context of the event.
+     *
+     * <p>The {@code ActorContext} is retrieved by traversing {@code Event}s context
+     * and can be retrieved from the following places:
+     * <ul>
+     *     <li>the import context of the event;
+     *     <li>the actor context of the command context of this event;
+     *     <li>the actor context of the command context of the origin event of any depth.
+     * </ul>
+     *
+     * @return the actor context of the wrapped event
+     */
+    @Internal
+    public static ActorContext getActorContext(Event event) {
+        checkNotNull(event);
+        EventContext eventContext = event.getContext();
+        Optional<CommandContext> commandContext = findCommandContext(eventContext);
+        if (commandContext.isPresent()) {
+            return commandContext.get()
+                                 .getActorContext();
+        }
+        return eventContext.getImportContext();
     }
 
     /**
@@ -352,5 +378,40 @@ public final class Events {
                                     .build();
             return result;
         }
+    }
+
+    /**
+     * Obtains a context of the command, which lead to this event.
+     *
+     * <p>The context is obtained by traversing the events origin for a valid context source.
+     * There can be two sources for the command context:
+     * <ol>
+     *     <li>The command context set as the event origin.
+     *     <li>The command set as a field of a rejection context if an event was generated in a
+     *     response to a rejection.
+     * </ol>
+     *
+     * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
+     */
+    private static Optional<CommandContext> findCommandContext(EventContext eventContext) {
+        CommandContext commandContext = null;
+        EventContext ctx = eventContext;
+
+        while (commandContext == null) {
+            switch (ctx.getOriginCase()) {
+                case EVENT_CONTEXT:
+                    ctx = ctx.getEventContext();
+                    break;
+                case COMMAND_CONTEXT:
+                    commandContext = ctx.getCommandContext();
+                    break;
+                case IMPORT_CONTEXT:
+                case ORIGIN_NOT_SET:
+                default:
+                    return Optional.empty();
+            }
+        }
+
+        return Optional.of(commandContext);
     }
 }
