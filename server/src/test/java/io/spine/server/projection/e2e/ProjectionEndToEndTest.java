@@ -82,21 +82,24 @@ class ProjectionEndToEndTest {
         PrjProjectCreated created = GivenEventMessage.projectCreated();
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
-        ProjectId id = created.getProjectId();
+        ProjectId producerId = created.getProjectId();
         BlackBoxBoundedContext
                 .newInstance()
                 .with(new EntitySubscriberProjection.Repository(),
                       new TestProjection.Repository())
-                .receivesEvents(event(id, created),
-                                event(id, firstTaskAdded),
-                                event(id, secondTaskAdded))
+                .receivesEventsProducedBy(producerId,
+                                          created,
+                                          firstTaskAdded,
+                                          secondTaskAdded)
                 .assertThat(exactly(ProjectTaskNames.class, of(
                         ProjectTaskNames
                                 .newBuilder()
-                                .setProjectId(id)
+                                .setProjectId(producerId)
                                 .setProjectName(created.getName())
-                                .addTaskName(firstTaskAdded.getTask().getTitle())
-                                .addTaskName(secondTaskAdded.getTask().getTitle())
+                                .addTaskName(firstTaskAdded.getTask()
+                                                           .getTitle())
+                                .addTaskName(secondTaskAdded.getTask()
+                                                            .getTitle())
                                 .build()
                 )));
     }

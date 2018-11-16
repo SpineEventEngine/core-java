@@ -48,6 +48,7 @@ import io.spine.testing.server.blackbox.VerifyState.VerifyStateProducer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
@@ -277,6 +278,29 @@ public class BlackBoxBoundedContext {
     public BlackBoxBoundedContext
     receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    /**
+     * Sends off events using the specified producer to the Bounded Context.
+     *
+     * <p>The method is needed to route events based on a proper producer ID.
+     *
+     * @param firstEvent
+     *         a domain event to be dispatched to the Bounded Context first
+     * @param otherEvents
+     *         optional domain events to be dispatched to the Bounded Context
+     *         in supplied order
+     * @return current instance
+     */
+    public BlackBoxBoundedContext
+    receivesEventsProducedBy(Object producerId,
+                             EventMessage firstEvent, EventMessage... otherEvents) {
+        List<EventMessage> eventMessages = asList(firstEvent, otherEvents);
+        TestEventFactory customFactory = newEventFactory(producerId);
+        List<Message> events = eventMessages.stream()
+                                            .map(customFactory::createEvent)
+                                            .collect(Collectors.toList());
+        return this.receivesEvents(events);
     }
 
     /**
