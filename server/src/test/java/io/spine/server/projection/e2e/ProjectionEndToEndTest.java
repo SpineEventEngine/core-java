@@ -21,10 +21,8 @@
 package io.spine.server.projection.e2e;
 
 import com.google.common.truth.IterableSubject;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EventMessage;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
@@ -51,7 +49,6 @@ import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.server.ShardingReset;
-import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
@@ -66,7 +63,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.testing.server.blackbox.VerifyState.exactly;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -116,8 +112,9 @@ class ProjectionEndToEndTest {
         BlackBoxBoundedContext receiver = BlackBoxBoundedContext
                 .newInstance()
                 .with(new GroupNameProjection.Repository());
-        OrganizationId id = established.getId();
-        sender.receivesEvent(event(id, established));
+        OrganizationId producerId = established.getId();
+        sender.receivesEventsProducedBy(producerId,
+                                        established);
         receiver.assertThat(exactly(StringValue.class, of(
                 StringValue.of(established.getName())
         )));
@@ -180,11 +177,5 @@ class ProjectionEndToEndTest {
         assertParticipants.contains(organizationHead);
 
         groups.close();
-    }
-
-    private static Event event(Message producerId, EventMessage eventMessage) {
-        TestEventFactory eventFactory = newInstance(producerId, ProjectionEndToEndTest.class);
-        Event result = eventFactory.createEvent(eventMessage);
-        return result;
     }
 }
