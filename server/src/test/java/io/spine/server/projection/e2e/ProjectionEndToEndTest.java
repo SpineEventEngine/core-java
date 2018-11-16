@@ -29,6 +29,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.groups.Group;
@@ -48,6 +49,7 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
+import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.type.TypeUrl;
@@ -105,12 +107,13 @@ class ProjectionEndToEndTest {
     @SuppressWarnings("ResultOfMethodCallIgnored")
         // Black box context is used in a non-fluent fashion.
     void receiveExternal() {
+        TenantId tenantId = GivenTenantId.newUuid();
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
         BlackBoxBoundedContext sender = BlackBoxBoundedContext
-                .newInstance()
+                .newInstance(tenantId)
                 .with(new OrganizationProjection.Repository());
         BlackBoxBoundedContext receiver = BlackBoxBoundedContext
-                .newInstance()
+                .newInstance(tenantId)
                 .with(new GroupNameProjection.Repository());
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId,

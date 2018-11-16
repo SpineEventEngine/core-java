@@ -79,7 +79,18 @@ public abstract class VerifyState {
     protected abstract void compare(ImmutableCollection<? extends Message> expected,
                                     ImmutableCollection<? extends Message> actual);
 
-    /** Returns producer of {@link #exactly(io.spine.core.TenantId, Class, Iterable)}. */
+    /**
+     * Obtains the producer of {@link #exactly(TenantId, Class, Iterable)}.
+     *
+     * @param entityType
+     *         the type of the entity to query
+     * @param expected
+     *         the expected entity states
+     * @return new instance of {@code VerifyState}
+     * @implNote the method is purposed to hide setting of a tenant ID when it is unnecessary
+     *           and should be used by a {@link BlackBoxBoundedContext},
+     *           which will set the used tenant ID.
+     */
     public static <T extends Message> VerifyStateByTenant exactly(Class<T> entityType,
                                                                   Iterable<T> expected) {
         return tenantId -> exactly(tenantId, entityType, expected);

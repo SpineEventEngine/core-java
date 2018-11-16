@@ -85,7 +85,7 @@ public class BlackBoxBoundedContext {
     /**
      * Creates a new multi-tenant instance.
      */
-    private BlackBoxBoundedContext() {
+    private BlackBoxBoundedContext(TenantId tenantId) {
         this.commandTap = new CommandMemoizingTap();
         this.boundedContext = BoundedContext
                 .newBuilder()
@@ -93,7 +93,7 @@ public class BlackBoxBoundedContext {
                 .setCommandBus(CommandBus.newBuilder()
                                          .appendFilter(commandTap))
                 .build();
-        this.tenantId = newTenantId();
+        this.tenantId = tenantId;
         this.requestFactory = requestFactory(tenantId);
         this.eventFactory = eventFactory(requestFactory);
         this.commandBus = boundedContext.getCommandBus();
@@ -102,11 +102,30 @@ public class BlackBoxBoundedContext {
         this.observer = memoizingObserver();
     }
 
+    public TenantId getTenantId() {
+        return tenantId;
+    }
+
     /**
-     * Creates new instance.
+     * Creates a new bounded context, which operates in context of a random {@link TenantId}.
+     *
+     * @see #newInstance(TenantId)
      */
     public static BlackBoxBoundedContext newInstance() {
-        return new BlackBoxBoundedContext();
+        return newInstance(newTenantId());
+    }
+
+    /**
+     * Creates a new bounded context, which operates in context of the specified tenant.
+     *
+     * <p>It is possible to perform operations with a different tenant ID by supplying
+     * {@linkplain Command commands} and {@linkplain Event events} with the different tenant ID.
+     *
+     * @param tenant
+     *         the {@link TenantId} to use when producing commands and events
+     */
+    public static BlackBoxBoundedContext newInstance(TenantId tenant) {
+        return new BlackBoxBoundedContext(tenant);
     }
 
     /*
@@ -416,6 +435,9 @@ public class BlackBoxBoundedContext {
         return this;
     }
 
+    /**
+     * Does the same as {@link #assertThat(VerifyStateByTenant)}, but with a custom tenant ID.
+     */
     @CanIgnoreReturnValue
     public BlackBoxBoundedContext assertThat(VerifyState verifier) {
         QueryService queryService = QueryService
@@ -426,6 +448,13 @@ public class BlackBoxBoundedContext {
         return this;
     }
 
+    /**
+     * Asserts the state of an entity using the {@link #tenantId}.
+     *
+     * @param verifyByTenant
+     *         the function to produce {@link VerifyState} with specific tenant ID
+     * @return current instance
+     */
     @CanIgnoreReturnValue
     public BlackBoxBoundedContext assertThat(VerifyStateByTenant verifyByTenant) {
         VerifyState verifier = verifyByTenant.apply(tenantId);
