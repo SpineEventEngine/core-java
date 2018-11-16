@@ -17,11 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    compile project(path: ':server')
 
-    api project(path: ':testutil-client')
-    testImplementation project(path: ':testutil-client', configuration: 'testArtifacts')
+package io.spine.testing.client.grpc.given;
+
+import com.google.protobuf.Timestamp;
+import io.spine.base.CommandMessage;
+import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.route.CommandRoute;
+
+public class Table extends ProcessManagerRepository<Integer, Tennis, Timestamp> {
+
+    /**
+     * Customize the routing to always use a process manager with zero ID.
+     */
+    public Table() {
+        super();
+        getCommandRouting().replaceDefault(
+                (CommandRoute<Integer, CommandMessage>) (message, context) -> 0);
+    }
 }
-
-apply from: testArtifactsScript

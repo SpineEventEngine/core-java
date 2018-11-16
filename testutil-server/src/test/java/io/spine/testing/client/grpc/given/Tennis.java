@@ -17,11 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    compile project(path: ':server')
 
-    api project(path: ':testutil-client')
-    testImplementation project(path: ':testutil-client', configuration: 'testArtifacts')
+package io.spine.testing.client.grpc.given;
+
+import com.google.protobuf.Timestamp;
+import io.spine.server.command.Assign;
+import io.spine.server.procman.ProcessManager;
+import io.spine.testing.client.grpc.command.Ping;
+import io.spine.testing.client.grpc.event.Pong;
+import io.spine.validate.TimestampVBuilder;
+
+/**
+ * Process manager that handles the {@link io.spine.testing.client.grpc.command.Ping Ping}
+ * command generating the {@link io.spine.testing.client.grpc.event.Pong Pong} event.
+ */
+class Tennis extends ProcessManager<Integer, Timestamp, TimestampVBuilder> {
+
+    protected Tennis(Integer id) {
+        super(id);
+    }
+
+    @Assign
+    Pong handle(Ping command) {
+        return Pong.getDefaultInstance(); // since the message is empty.
+    }
 }
-
-apply from: testArtifactsScript

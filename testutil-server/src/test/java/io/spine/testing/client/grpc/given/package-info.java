@@ -17,11 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    compile project(path: ':server')
 
-    api project(path: ':testutil-client')
-    testImplementation project(path: ':testutil-client', configuration: 'testArtifacts')
-}
+/**
+ * This package is a testing environment for {@link io.spine.testing.client.grpc.TestClientTest}.
+ */
 
-apply from: testArtifactsScript
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.client.grpc.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

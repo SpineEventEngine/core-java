@@ -37,6 +37,8 @@ import io.spine.logging.Logging;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeName;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -70,17 +72,19 @@ public class TestClient implements Logging {
     /**
      * Creates a command for the passed message and sends it to the server.
      */
-    public void post(CommandMessage domainCommand) {
+    public Optional<Ack> post(CommandMessage domainCommand) {
         Command command = requestFactory.command()
                                         .create(domainCommand);
         TypeName commandType = TypeName.of(domainCommand);
+        Ack result = null;
         try {
             _debug("Sending command: {} ...", commandType);
-            Ack result = commandClient.post(command);
+            result = commandClient.post(command);
             _debug("Ack: {}", result.toString());
         } catch (RuntimeException e) {
             _warn(RPC_FAILED, e);
         }
+        return Optional.ofNullable(result);
     }
 
     /**
@@ -102,7 +106,16 @@ public class TestClient implements Logging {
      * @throws InterruptedException if waiting is interrupted.
      */
     public void shutdown() throws InterruptedException {
-        channel.shutdown()
-               .awaitTermination(5, SECONDS);
+        if (!channel.isShutdown()) {
+            channel.shutdown()
+                   .awaitTermination(5, SECONDS);
+        }
+    }
+
+    /**
+     * Verifies if the client is shutdown.
+     */
+    public boolean isShutdown() {
+        return channel.isShutdown();
     }
 }

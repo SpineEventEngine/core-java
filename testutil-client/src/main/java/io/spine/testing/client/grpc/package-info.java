@@ -17,11 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    compile project(path: ':server')
 
-    api project(path: ':testutil-client')
-    testImplementation project(path: ':testutil-client', configuration: 'testArtifacts')
-}
+/**
+ * This package provides a testing utility for testing Spine-based client applications that
+ * use gRPC for sending commands and querying the backend.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.client.grpc;
 
-apply from: testArtifactsScript
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

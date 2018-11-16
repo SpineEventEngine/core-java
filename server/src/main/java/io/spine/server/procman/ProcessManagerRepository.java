@@ -115,8 +115,9 @@ public abstract class ProcessManagerRepository<I,
         super(EventRoute.byFirstMessageField());
     }
 
-    /** Obtains class information of process managers managed by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    /**
+     * Obtains class information of process managers managed by this repository.
+     */
     ProcessManagerClass<P> processManagerClass() {
         return (ProcessManagerClass<P>) entityClass();
     }
@@ -151,8 +152,6 @@ public abstract class ProcessManagerRepository<I,
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
      */
-    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "LocalVariableNamingConvention"})
-    // It's fine, as reflects the logic.
     @Override
     public void onRegistered() {
         super.onRegistered();
