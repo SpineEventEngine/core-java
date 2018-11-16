@@ -42,8 +42,6 @@ import static io.spine.server.bus.Buses.reject;
 /**
  * The {@code CommandService} allows client applications to post commands and
  * receive updates from the application backend.
- *
- * @author Alexander Yevsyukov
  */
 public class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase

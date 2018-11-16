@@ -28,10 +28,8 @@ import io.spine.server.event.grpc.EventStoreGrpc;
 
 /**
  * gRPC service over the locally running implementation of {@link EventStore}.
- *
- * @author Alexander Yevsyukov
  */
-class GrpcService extends EventStoreGrpc.EventStoreImplBase {
+final class GrpcService extends EventStoreGrpc.EventStoreImplBase {
 
     private final EventStore eventStore;
 

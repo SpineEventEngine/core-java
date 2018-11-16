@@ -22,6 +22,7 @@ package io.spine.server;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Queries;
 import io.spine.client.Query;
@@ -72,12 +73,14 @@ public class QueryService
     public static class Builder {
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
 
+        @CanIgnoreReturnValue
         public Builder add(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder remove(BoundedContext boundedContext) {
             boundedContexts.remove(boundedContext);
             return this;

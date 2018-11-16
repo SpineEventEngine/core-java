@@ -29,13 +29,9 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
- * A name of {@code BoundedContext} used to distinguish an instance of bounded context among other
- * bounded contexts that exist in the same application.
+ * Utility class for working with Bounded Context names.
  *
- * <p>Must be unique in scope of the application.
- *
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
+ * @see io.spine.core.BoundedContextName
  */
 public final class BoundedContextNames {
 

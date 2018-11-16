@@ -35,9 +35,6 @@ import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("InMemoryRecordStorage should")
 public class InMemoryRecordStorageTest
         extends RecordStorageTest<InMemoryRecordStorage<ProjectId>> {
@@ -48,7 +45,7 @@ public class InMemoryRecordStorageTest
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(Project.class),
                                ProjectId.class);
-        return InMemoryRecordStorage.newInstance(spec, false, cls);
+        return new InMemoryRecordStorage<>(spec, false, cls);
     }
 
     @Override

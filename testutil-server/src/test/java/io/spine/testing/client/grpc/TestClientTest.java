@@ -28,6 +28,7 @@ import io.spine.testing.client.grpc.given.Server;
 import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -38,6 +39,7 @@ import static com.google.common.truth.Truth8.assertThat;
 
 @SuppressWarnings("StaticVariableMayNotBeInitialized")
 @ExtendWith(ShardingReset.class)
+@Disabled //TODO:2018-11-16:alexander.yevsyukov: Resume when migrating to new Server
 class TestClientTest {
 
     private static Server server;

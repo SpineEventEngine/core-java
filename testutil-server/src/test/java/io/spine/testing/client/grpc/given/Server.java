@@ -32,14 +32,11 @@ import io.spine.server.transport.GrpcContainer;
 import java.io.IOException;
 
 import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
+import static io.spine.core.BoundedContextNames.newName;
 
 public class Server implements Logging {
 
-    static final BoundedContextName contextName =
-            BoundedContextName
-                    .newBuilder()
-                    .setValue("Tennis")
-                    .build();
+    private static final BoundedContextName contextName = newName("Tennis");
 
     private final int port;
     private final GrpcContainer grpcContainer;
@@ -47,7 +44,8 @@ public class Server implements Logging {
 
     public Server() {
         this.port = DEFAULT_CLIENT_SERVICE_PORT;
-        this.boundedContext = createBoundedContext(InMemoryStorageFactory.newInstance(contextName, false));
+        StorageFactory factory = InMemoryStorageFactory.newInstance(contextName, false);
+        this.boundedContext = createBoundedContext(factory);
         this.grpcContainer = createGrpcContainer(this.boundedContext);
     }
 

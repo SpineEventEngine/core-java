@@ -58,7 +58,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"}) // OK for this central piece.
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
 @CanIgnoreReturnValue
 public final class BoundedContextBuilder implements Logging {
 

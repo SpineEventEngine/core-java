@@ -29,18 +29,16 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
 /**
  * A factory for in-memory storages.
- *
- * @author Alexander Yevsyukov
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
@@ -86,28 +84,30 @@ public class InMemoryStorageFactory implements StorageFactory {
     public <I> RecordStorage<I>
     createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         EntityClass<?> modelClass = asEntityClass(entityClass);
-        Class<? extends Message> stateClass = modelClass.getStateClass();
-        TypeUrl typeUrl = TypeUrl.of(stateClass);
-        @SuppressWarnings("unchecked") // The cast is protected by generic params of the method.
-                Class<I> idClass = (Class<I>) modelClass.getIdClass();
-        StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
-        return InMemoryRecordStorage.newInstance(spec, isMultitenant(), entityClass);
+        StorageSpec<I> spec = toStorageSpec(modelClass);
+        return new InMemoryRecordStorage<>(spec, isMultitenant(), entityClass);
     }
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
-        ProjectionClass<?> modelClass = asProjectionClass(projectionClass);
+        EntityClass<?> modelClass = asProjectionClass(projectionClass);
+        StorageSpec<I> spec = toStorageSpec(modelClass);
+        InMemoryRecordStorage<I> recordStorage =
+                new InMemoryRecordStorage<>(spec, isMultitenant(), projectionClass);
+        return new InMemoryProjectionStorage<>(recordStorage);
+    }
+
+    /**
+     * Obtains storage specification for the passed entity class.
+     */
+    private <I> StorageSpec<I> toStorageSpec(EntityClass<?> modelClass) {
         Class<? extends Message> stateClass = modelClass.getStateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.getIdClass();
         TypeUrl stateUrl = TypeUrl.of(stateClass);
-        StorageSpec<I> spec = StorageSpec.of(boundedContextName, stateUrl, idClass);
-
-        boolean multitenant = isMultitenant();
-        InMemoryRecordStorage<I> entityStorage =
-                InMemoryRecordStorage.newInstance(spec, multitenant, projectionClass);
-        return InMemoryProjectionStorage.newInstance(entityStorage);
+        StorageSpec<I> result = StorageSpec.of(boundedContextName, stateUrl, idClass);
+        return result;
     }
 
     @Override
@@ -120,6 +120,12 @@ public class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        return newInstance(this.boundedContextName, false);
+        return newInstance(boundedContextName, false);
+    }
+
+    @Override
+    public StorageFactory copyFor(BoundedContextName name, boolean multitenant) {
+        checkNotNull(name);
+        return newInstance(name, multitenant);
     }
 }
