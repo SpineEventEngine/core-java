@@ -102,10 +102,6 @@ public class BlackBoxBoundedContext {
         this.observer = memoizingObserver();
     }
 
-    public TenantId getTenantId() {
-        return tenantId;
-    }
-
     /**
      * Creates a new bounded context, which operates in context of a random {@link TenantId}.
      *
