@@ -60,12 +60,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Iterator;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.testing.server.blackbox.VerifyState.exactly;
+import static io.spine.testing.server.blackbox.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -89,7 +88,7 @@ class ProjectionEndToEndTest {
                                           created,
                                           firstTaskAdded,
                                           secondTaskAdded)
-                .assertThat(exactly(ProjectTaskNames.class, of(
+                .assertThat(exactlyOne(
                         ProjectTaskNames
                                 .newBuilder()
                                 .setProjectId(producerId)
@@ -99,7 +98,7 @@ class ProjectionEndToEndTest {
                                 .addTaskName(secondTaskAdded.getTask()
                                                             .getTitle())
                                 .build()
-                )));
+                ));
     }
 
     @Test
@@ -118,9 +117,9 @@ class ProjectionEndToEndTest {
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId,
                                         established);
-        receiver.assertThat(exactly(StringValue.class, of(
+        receiver.assertThat(exactlyOne(
                 StringValue.of(established.getName())
-        )));
+        ));
     }
 
     @Test

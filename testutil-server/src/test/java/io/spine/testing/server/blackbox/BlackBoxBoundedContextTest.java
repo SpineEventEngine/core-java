@@ -33,6 +33,7 @@ import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -43,6 +44,7 @@ import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.server.blackbox.VerifyState.exactly;
+import static io.spine.testing.server.blackbox.VerifyState.exactlyOne;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
@@ -68,6 +70,64 @@ class BlackBoxBoundedContextTest {
         projects.close();
     }
 
+    @Nested
+    @DisplayName("verify state of")
+    class VerifyStateOf {
+
+        @Test
+        @DisplayName("a single aggregate")
+        void aggregate() {
+            BbCreateProject createProject = createProject();
+            BbProject expectedProject = createdProjectAggregate(createProject);
+            projects.receivesCommand(createProject)
+                    .assertThat(exactlyOne(expectedProject));
+        }
+
+        @Test
+        @DisplayName("several aggregates")
+        void aggregates() {
+            BbCreateProject createProject1 = createProject();
+            BbCreateProject createProject2 = createProject();
+            BbProject expectedProject1 = createdProjectAggregate(createProject1);
+            BbProject expectedProject2 = createdProjectAggregate(createProject2);
+            projects.receivesCommands(createProject1, createProject2)
+                    .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
+        }
+
+        @Test
+        @DisplayName("a single projection")
+        void projection() {
+            BbCreateProject createProject = createProject();
+            BbProjectView expectedProject = createProjectView(createProject);
+            projects.receivesCommand(createProject)
+                    .assertThat(exactlyOne(expectedProject));
+        }
+
+        @Test
+        @DisplayName("several projections")
+        void projections() {
+            BbCreateProject createProject1 = createProject();
+            BbCreateProject createProject2 = createProject();
+            BbProjectView expectedProject1 = createProjectView(createProject1);
+            BbProjectView expectedProject2 = createProjectView(createProject2);
+            projects.receivesCommands(createProject1, createProject2)
+                    .assertThat(exactly(BbProjectView.class,
+                                        of(expectedProject1, expectedProject2)));
+        }
+
+        private BbProject createdProjectAggregate(BbCreateProject createProject) {
+            return BbProjectVBuilder.newBuilder()
+                                    .setId(createProject.getProjectId())
+                                    .build();
+        }
+
+        private BbProjectView createProjectView(BbCreateProject createProject) {
+            return BbProjectViewVBuilder.newBuilder()
+                                        .setId(createProject.getProjectId())
+                                        .build();
+        }
+    }
+
     @SuppressWarnings("ReturnValueIgnored")
     @Test
     @DisplayName("receive and handle a single command")
@@ -75,30 +135,6 @@ class BlackBoxBoundedContextTest {
         projects.receivesCommand(createProject())
                 .assertThat(acked(once()).withoutErrorsOrRejections())
                 .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
-    }
-
-    @SuppressWarnings("ReturnValueIgnored")
-    @Test
-    @DisplayName("verify aggregate state")
-    void verifyAggregateState() {
-        BbCreateProject createProject = createProject();
-        BbProject expectedProject = BbProjectVBuilder.newBuilder()
-                                                     .setId(createProject.getProjectId())
-                                                     .build();
-        projects.receivesCommand(createProject)
-                .assertThat(exactly(BbProject.class, of(expectedProject)));
-    }
-
-    @SuppressWarnings("ReturnValueIgnored")
-    @Test
-    @DisplayName("verify projection state")
-    void verifyProjectionState() {
-        BbCreateProject createProject = createProject();
-        BbProjectView expectedProject = BbProjectViewVBuilder.newBuilder()
-                                                             .setId(createProject.getProjectId())
-                                                             .build();
-        projects.receivesCommand(createProject)
-                .assertThat(exactly(BbProjectView.class, of(expectedProject)));
     }
 
     @SuppressWarnings("ReturnValueIgnored")

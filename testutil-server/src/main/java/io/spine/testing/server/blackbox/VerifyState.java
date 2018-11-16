@@ -40,6 +40,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.testing.client.TestActorRequestFactory.newInstance;
+import static java.util.Collections.singletonList;
 
 /**
  * Verifies the states of entities currently present in a bounded context.
@@ -94,6 +95,16 @@ public abstract class VerifyState {
     public static <T extends Message> VerifyStateByTenant exactly(Class<T> entityType,
                                                                   Iterable<T> expected) {
         return tenantId -> exactly(tenantId, entityType, expected);
+    }
+
+    /**
+     * The shortcut of {@link #exactly(Class, Iterable)} to verify that
+     * only a single entity is present in the storage and its state matched the expected.
+     */
+    public static <T extends Message> VerifyStateByTenant exactlyOne(T expected) {
+        @SuppressWarnings("unchecked" /* The cast is totally safe. */)
+        Class<T> messageClass = (Class<T>) expected.getClass();
+        return exactly(messageClass, singletonList(expected));
     }
 
     /**
