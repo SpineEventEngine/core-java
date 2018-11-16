@@ -111,8 +111,7 @@ public final class EventEnvelope
      *     <li>the actor context of the command context of the origin event of any depth.
      * </ul>
      *
-     * @return a tenant ID available by traversing event context back to original command
-     *         context or a default empty tenant ID if no tenant ID is found this way
+     * @return the actor context of the wrapped event
      */
     @Override
     public ActorContext getActorContext() {
@@ -233,12 +232,12 @@ public final class EventEnvelope
     /**
      * Obtains a context of the command, which lead to this event.
      *
-     * <p> The context is obtained by traversing the events origin for a valid context source.
+     * <p>The context is obtained by traversing the events origin for a valid context source.
      * There can be two sources for the command context:
      * <ol>
-     *     <li>The command context set as the event origin.</li>
+     *     <li>The command context set as the event origin.
      *     <li>The command set as a field of a rejection context if an event was generated in a
-     *     response to a rejection.</li>
+     *     response to a rejection.
      * </ol>
      *
      * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
