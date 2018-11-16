@@ -300,6 +300,8 @@ public class BlackBoxBoundedContext {
      *
      * <p>The method is needed to route events based on a proper producer ID.
      *
+     * @param producerId
+     *         the {@linkplain io.spine.core.EventContext#getProducerId() producer} for events
      * @param firstEvent
      *         a domain event to be dispatched to the Bounded Context first
      * @param otherEvents

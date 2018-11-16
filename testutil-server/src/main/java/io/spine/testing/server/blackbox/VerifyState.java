@@ -81,16 +81,18 @@ public abstract class VerifyState {
                                     ImmutableCollection<? extends Message> actual);
 
     /**
-     * Obtains the producer of {@link #exactly(TenantId, Class, Iterable)}.
+     * Obtains provider of an entity states verifier.
+     *
+     * <p>The verifier checks that the system contains exactly the passed entity states.
+     *
+     * <p>Use the method to verify entities within the
+     * {@linkplain BlackBoxBoundedContext#tenantId tenant} of a {@link BlackBoxBoundedContext}.
      *
      * @param entityType
      *         the type of the entity to query
      * @param expected
      *         the expected entity states
-     * @return new instance of {@code VerifyState}
-     * @implNote the method is purposed to hide setting of a tenant ID when it is unnecessary
-     *           and should be used by a {@link BlackBoxBoundedContext},
-     *           which will set the used tenant ID.
+     * @return provider of {@link #exactly(TenantId, Class, Iterable)}
      */
     public static <T extends Message> VerifyStateByTenant exactly(Class<T> entityType,
                                                                   Iterable<T> expected) {
@@ -99,7 +101,7 @@ public abstract class VerifyState {
 
     /**
      * The shortcut of {@link #exactly(Class, Iterable)} to verify that
-     * only a single entity is present in the storage and its state matched the expected.
+     * only a single entity is present in the storage and its state matches the expected.
      */
     public static <T extends Message> VerifyStateByTenant exactlyOne(T expected) {
         @SuppressWarnings("unchecked" /* The cast is totally safe. */)
@@ -134,7 +136,13 @@ public abstract class VerifyState {
     }
 
     /**
-     * Produces {@link VerifyState} based on a {@link TenantId}.
+     * Provides a {@link VerifyState} based on a {@link TenantId}.
+     *
+     * <p>Use the interface when a tenant ID for {@link VerifyState} should be specified
+     * by a {@link BlackBoxBoundedContext}.
+     *
+     * <p>If a user wants to specify a tenant ID on its own,
+     * {@link VerifyState} should be used directly.
      */
     public interface VerifyStateByTenant extends Function<TenantId, VerifyState> {
     }
