@@ -84,8 +84,6 @@ public class Server implements Logging {
         grpcContainer.addShutdownHook();
 
         log().info("Server started, listening to commands on the port {}", port);
-
-        grpcContainer.awaitTermination();
     }
 
     public void shutdown() throws Exception {
