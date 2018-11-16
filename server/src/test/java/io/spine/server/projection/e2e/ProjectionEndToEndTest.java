@@ -109,10 +109,14 @@ class ProjectionEndToEndTest {
         TenantId tenantId = GivenTenantId.newUuid();
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
         BlackBoxBoundedContext sender = BlackBoxBoundedContext
-                .newInstance(tenantId)
+                .newBuilder()
+                .withTenant(tenantId)
+                .build()
                 .with(new OrganizationProjection.Repository());
         BlackBoxBoundedContext receiver = BlackBoxBoundedContext
-                .newInstance(tenantId)
+                .newBuilder()
+                .withTenant(tenantId)
+                .build()
                 .with(new GroupNameProjection.Repository());
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId,

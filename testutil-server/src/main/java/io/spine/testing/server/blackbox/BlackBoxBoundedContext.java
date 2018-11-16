@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
@@ -85,15 +84,17 @@ public class BlackBoxBoundedContext {
     /**
      * Creates a new multi-tenant instance.
      */
-    private BlackBoxBoundedContext(TenantId tenantId) {
+    BlackBoxBoundedContext(BlackBoxBuilder builder) {
         this.commandTap = new CommandMemoizingTap();
         this.boundedContext = BoundedContext
                 .newBuilder()
                 .setMultitenant(true)
                 .setCommandBus(CommandBus.newBuilder()
                                          .appendFilter(commandTap))
+                .setEventBus(EventBus.newBuilder()
+                                     .setEnricher(builder.buildEnricher()))
                 .build();
-        this.tenantId = tenantId;
+        this.tenantId = builder.buildTenant();
         this.requestFactory = requestFactory(tenantId);
         this.eventFactory = eventFactory(requestFactory);
         this.commandBus = boundedContext.getCommandBus();
@@ -103,25 +104,17 @@ public class BlackBoxBoundedContext {
     }
 
     /**
-     * Creates a new bounded context, which operates in context of a random {@link TenantId}.
-     *
-     * @see #newInstance(TenantId)
+     * Creates a new bounded context with the default configuration.
      */
     public static BlackBoxBoundedContext newInstance() {
-        return newInstance(newTenantId());
+        return newBuilder().build();
     }
 
     /**
-     * Creates a new bounded context, which operates in context of the specified tenant.
-     *
-     * <p>It is possible to perform operations with a different tenant ID by supplying
-     * {@linkplain Command commands} and {@linkplain Event events} with the different tenant ID.
-     *
-     * @param tenant
-     *         the {@link TenantId} to use when producing commands and events
+     * Creates a builder for a black box bounded context.
      */
-    public static BlackBoxBoundedContext newInstance(TenantId tenant) {
-        return new BlackBoxBoundedContext(tenant);
+    public static BlackBoxBuilder newBuilder() {
+        return new BlackBoxBuilder();
     }
 
     /*
@@ -175,16 +168,6 @@ public class BlackBoxBoundedContext {
                  ? (Any) producerId
                  : Identifier.pack(producerId);
         return TestEventFactory.newInstance(id, requestFactory);
-    }
-
-    /**
-     * Creates a new {@link TenantId Tenant ID} with a random UUID value convenient
-     * for test purposes.
-     */
-    private static TenantId newTenantId() {
-        return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
     }
 
     /*
