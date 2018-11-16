@@ -80,7 +80,7 @@ public abstract class VerifyState {
                                     ImmutableCollection<? extends Message> actual);
 
     /** Returns producer of {@link #exactly(io.spine.core.TenantId, Class, Iterable)}. */
-    public static <T extends Message> VerifyStateProducer exactly(Class<T> entityType,
+    public static <T extends Message> VerifyStateByTenant exactly(Class<T> entityType,
                                                                   Iterable<T> expected) {
         return tenantId -> exactly(tenantId, entityType, expected);
     }
@@ -114,6 +114,6 @@ public abstract class VerifyState {
     /**
      * Produces {@link VerifyState} based on a {@link TenantId}.
      */
-    public interface VerifyStateProducer extends Function<TenantId, VerifyState> {
+    public interface VerifyStateByTenant extends Function<TenantId, VerifyState> {
     }
 }
