@@ -22,11 +22,13 @@ package io.spine.core;
 
 import com.google.protobuf.Message;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.core.given.EventEnvelopeTestEnv.actorContext;
 import static io.spine.core.given.EventEnvelopeTestEnv.commandContext;
 import static io.spine.core.given.EventEnvelopeTestEnv.event;
+import static io.spine.core.given.EventEnvelopeTestEnv.eventContext;
 import static io.spine.core.given.EventEnvelopeTestEnv.eventMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -50,27 +52,41 @@ class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventC
         return EventClass.of(obj);
     }
 
-    @Test
-    @DisplayName("obtain actor context from command context")
-    void actorContextFromCommandContext() {
-        CommandContext commandContext = commandContext();
-        EventContext context = EventContext.newBuilder()
-                                           .setCommandContext(commandContext)
-                                           .build();
-        Event event = event(eventMessage(), context);
-        EventEnvelope envelope = toEnvelope(event);
-        assertEquals(commandContext.getActorContext(), envelope.getActorContext());
-    }
+    @Nested
+    @DisplayName("obtain actor context from")
+    class ObtainActorContext {
 
-    @Test
-    @DisplayName("obtain actor context from import context")
-    void actorContextFromImportContext() {
-        EventContext context = EventContext.newBuilder()
-                                           .setImportContext(actorContext())
-                                           .build();
-        Event event = event(eventMessage(), context);
-        EventEnvelope envelope = toEnvelope(event);
-        ActorContext expectedImportContext = context.getImportContext();
-        assertEquals(expectedImportContext, envelope.getActorContext());
+        @Test
+        @DisplayName("command context")
+        void fromCommandContext() {
+            CommandContext commandContext = commandContext();
+            EventContext context = eventContext(commandContext);
+            EventEnvelope envelope = envelope(context);
+            assertEquals(commandContext.getActorContext(), envelope.getActorContext());
+        }
+
+        @Test
+        @DisplayName("command context of the origin event")
+        void fromCommandContextOfOrigin() {
+            CommandContext commandContext = commandContext();
+            EventContext originContext = eventContext(commandContext);
+            EventContext context = eventContext(originContext);
+            EventEnvelope envelope = envelope(context);
+            assertEquals(commandContext.getActorContext(), envelope.getActorContext());
+        }
+
+        @Test
+        @DisplayName("import context")
+        void fromImportContext() {
+            EventContext context = eventContext(actorContext());
+            EventEnvelope envelope = envelope(context);
+            ActorContext expectedImportContext = context.getImportContext();
+            assertEquals(expectedImportContext, envelope.getActorContext());
+        }
+
+        private EventEnvelope envelope(EventContext context) {
+            Event event = event(eventMessage(), context);
+            return toEnvelope(event);
+        }
     }
 }

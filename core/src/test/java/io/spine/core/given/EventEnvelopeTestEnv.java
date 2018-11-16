@@ -77,4 +77,22 @@ public class EventEnvelopeTestEnv {
                              .setProjectId(projectId)
                              .build();
     }
+
+    public static EventContext eventContext(CommandContext commandContext) {
+        return EventContext.newBuilder()
+                           .setCommandContext(commandContext)
+                           .build();
+    }
+
+    public static EventContext eventContext(EventContext eventContext) {
+        return EventContext.newBuilder()
+                           .setEventContext(eventContext)
+                           .build();
+    }
+
+    public static EventContext eventContext(ActorContext importContext) {
+        return EventContext.newBuilder()
+                           .setImportContext(importContext)
+                           .build();
+    }
 }
