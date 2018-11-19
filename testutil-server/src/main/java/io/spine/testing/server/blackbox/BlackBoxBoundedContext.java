@@ -22,11 +22,8 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -52,28 +49,19 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
- *
- * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link VerifyAcknowledgements acknowledgement
- * verfier}, {@link VerifyEvents emitted events verifier}).
- *
- * @author Mykhailo Drachuk
+ * A black box bounded context for writing integration tests in multitenant environment.
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
-public class BlackBoxBoundedContext {
+public class BlackBoxBoundedContext extends AbstractBlackBoxContext {
 
     private final BoundedContext boundedContext;
-    private final TestActorRequestFactory requestFactory;
-    private final TestEventFactory eventFactory;
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final ImportBus importBus;
@@ -85,6 +73,7 @@ public class BlackBoxBoundedContext {
      * Creates a new multi-tenant instance.
      */
     BlackBoxBoundedContext(BlackBoxBuilder builder) {
+        super(requestFactory(builder.buildTenant()));
         this.commandTap = new CommandMemoizingTap();
         this.boundedContext = BoundedContext
                 .newBuilder()
@@ -95,8 +84,6 @@ public class BlackBoxBoundedContext {
                                      .setEnricher(builder.buildEnricher()))
                 .build();
         this.tenantId = builder.buildTenant();
-        this.requestFactory = requestFactory(tenantId);
-        this.eventFactory = eventFactory(requestFactory);
         this.commandBus = boundedContext.getCommandBus();
         this.eventBus = boundedContext.getEventBus();
         this.importBus = boundedContext.getImportBus();
@@ -131,43 +118,6 @@ public class BlackBoxBoundedContext {
      */
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
         return TestActorRequestFactory.newInstance(BlackBoxBoundedContext.class, tenantId);
-    }
-
-    /**
-     * Creates a new {@link io.spine.server.event.EventFactory event factory} for tests which uses
-     * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory
-     * request factory}.
-     *
-     * @param requestFactory
-     *         a request factory bearing the actor and able to provide an origin for
-     *         factory generated events
-     * @return a new event factory instance
-     */
-    private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
-        return TestEventFactory.newInstance(requestFactory);
-    }
-
-    /**
-     * Creates a new instance of {@link TestEventFactory} which supplies mock
-     * for {@linkplain io.spine.core.EventContext#getProducerId() producer ID} values.
-     */
-    public TestEventFactory newEventFactory() {
-        return eventFactory(requestFactory);
-    }
-
-    /**
-     * Creates a new instance of {@link TestEventFactory} which supplies the passed value
-     * of the {@linkplain io.spine.core.EventContext#getProducerId() event producer ID}.
-     *
-     * @param producerId
-     *         can be {@code Integer}, {@code Long}, {@link String}, or {@code Message}
-     */
-    public TestEventFactory newEventFactory(Object producerId) {
-        checkNotNull(producerId);
-        Any id = producerId instanceof Any
-                 ? (Any) producerId
-                 : Identifier.pack(producerId);
-        return TestEventFactory.newInstance(id, requestFactory);
     }
 
     /*
@@ -316,14 +266,6 @@ public class BlackBoxBoundedContext {
         return this;
     }
 
-    private List<Event> toEvents(Collection<Message> domainEvents) {
-        List<Event> events = newArrayListWithCapacity(domainEvents.size());
-        for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent));
-        }
-        return events;
-    }
-
     public BlackBoxBoundedContext importsEvent(Message eventOrMessage) {
         return this.importAll(singletonList(eventOrMessage));
     }
@@ -337,31 +279,6 @@ public class BlackBoxBoundedContext {
         List<Event> events = toEvents(domainEvents);
         importBus.post(events, observer);
         return this;
-    }
-
-    /**
-     * Generates {@link Event} with the passed instance is an event message. If the passed
-     * instance is {@code Event} returns it.
-     *
-     * @param eventOrMessage
-     *         a domain event message or {@code Event}
-     * @return a newly created {@code Event} instance or passed {@code Event}
-     */
-    private Event event(Message eventOrMessage) {
-        if (eventOrMessage instanceof Event) {
-            return (Event) eventOrMessage;
-        }
-        EventMessage message = (EventMessage) eventOrMessage;
-        return eventFactory.createEvent(message);
-    }
-
-    private Command command(Message commandOrMessage) {
-        if (commandOrMessage instanceof Command) {
-            return (Command) commandOrMessage;
-        }
-        CommandMessage message = (CommandMessage) commandOrMessage;
-        return requestFactory.command()
-                             .create(message);
     }
 
     /*
