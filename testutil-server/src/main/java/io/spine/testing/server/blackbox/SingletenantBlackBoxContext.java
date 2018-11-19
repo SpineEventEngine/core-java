@@ -21,8 +21,12 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.event.Enricher;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.client.blackbox.Acknowledgements;
+import io.spine.testing.client.blackbox.VerifyAcknowledgements;
+import io.spine.testing.server.blackbox.verify.state.VerifyState;
 
 /**
  * A black box bounded context for writing integration tests in a single tenant environment.
@@ -37,6 +41,62 @@ public class SingletenantBlackBoxContext
                       .build(),
               TestActorRequestFactory.newInstance(SingletenantBlackBoxContext.class)
         );
+    }
+
+    /**
+     * Verifies emitted events by the passed verifier.
+     *
+     * @param verifier
+     *         a verifier that checks the events emitted in this Bounded Context
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public SingletenantBlackBoxContext assertThat(VerifyEvents verifier) {
+        EmittedEvents events = output().emittedEvents();
+        verifier.verify(events);
+        return this;
+    }
+
+    /**
+     * Executes the provided verifier, which throws an assertion error in case of
+     * unexpected results.
+     *
+     * @param verifier
+     *         a verifier that checks the acknowledgements in this Bounded Context
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public SingletenantBlackBoxContext assertThat(VerifyAcknowledgements verifier) {
+        Acknowledgements acks = output().commandAcks();
+        verifier.verify(acks);
+        return this;
+    }
+
+    /**
+     * Verifies emitted commands by the passed verifier.
+     *
+     * @param verifier
+     *         a verifier that checks the commands emitted in this Bounded Context
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public SingletenantBlackBoxContext assertThat(VerifyCommands verifier) {
+        EmittedCommands commands = output().emittedCommands();
+        verifier.verify(commands);
+        return this;
+    }
+
+    /**
+     * Verifies states of entities using the verifier.
+     *
+     * @param verifier
+     *         a verifier of entity states
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public SingletenantBlackBoxContext assertThat(VerifyState verifier) {
+        verifier.verify(output());
+        return this;
     }
 
     public static SingletenantBlackBoxContext newInstance() {
