@@ -226,7 +226,7 @@ public class MultitenantBlackBoxContext
      */
     @CanIgnoreReturnValue
     public MultitenantBlackBoxContext assertThat(VerifyEvents verifier) {
-        EmittedEvents events = emittedEvents();
+        EmittedEvents events = emittedEvents(tenantId);
         verifier.verify(events);
         return this;
     }
@@ -286,7 +286,7 @@ public class MultitenantBlackBoxContext
     /**
      * Reads all events from the bounded context for the provided tenant.
      */
-    private EmittedEvents emittedEvents() {
+    private EmittedEvents emittedEvents(TenantId tenantId) {
         TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
         EmittedEvents events = tenantAwareRunner.evaluate(() -> output().emittedEvents());
         return events;
