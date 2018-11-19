@@ -28,7 +28,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
-import io.spine.testing.server.blackbox.verify.state.VerifyState.VerifyStateByTenant;
 
 /**
  * A black box bounded context for writing integration tests in a multitenant environment.
@@ -120,25 +119,18 @@ public class MultitenantBlackBoxContext
     }
 
     /**
-     * Does the same as {@link #assertThat(VerifyStateByTenant)}, but with a custom tenant ID.
-     */
-    @CanIgnoreReturnValue
-    public MultitenantBlackBoxContext assertThat(VerifyState verifier) {
-        verifier.verify(output());
-        return this;
-    }
-
-    /**
-     * Asserts the state of an entity using the {@link #tenantId}.
+     * Asserts the state of an entity using the specified tenant ID.
      *
-     * @param verifyByTenant
-     *         the function to produce {@link VerifyState} with specific tenant ID
+     * @param tenantId
+     *         the tenant ID to use for entities query
+     * @param verifier
+     *         a verifier of entity states
      * @return current instance
      */
     @CanIgnoreReturnValue
-    public MultitenantBlackBoxContext assertThat(VerifyStateByTenant verifyByTenant) {
-        VerifyState verifier = verifyByTenant.apply(tenantId);
-        return assertThat(verifier);
+    public MultitenantBlackBoxContext assertThat(TenantId tenantId, VerifyState verifier) {
+        verifier.verify(output());
+        return this;
     }
 
     /**

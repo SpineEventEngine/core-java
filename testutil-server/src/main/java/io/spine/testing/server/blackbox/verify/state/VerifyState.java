@@ -25,8 +25,6 @@ import com.google.protobuf.Message;
 import io.spine.core.TenantId;
 import io.spine.testing.server.blackbox.BlackBoxOutput;
 
-import java.util.function.Function;
-
 import static java.util.Collections.singletonList;
 
 /**
@@ -86,17 +84,5 @@ public abstract class VerifyState {
     public static <T extends Message> VerifyState exactly(Class<T> entityType,
                                                           Iterable<T> expected) {
         return new VerifyByType<>(expected, entityType);
-    }
-
-    /**
-     * Provides a {@link VerifyState} based on a {@link TenantId}.
-     *
-     * <p>Use the interface when a tenant ID for {@link VerifyState} should be specified
-     * by a {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext}.
-     *
-     * <p>If a user wants to specify a tenant ID on its own,
-     * {@link VerifyState} should be used directly.
-     */
-    public interface VerifyStateByTenant extends Function<TenantId, VerifyState> {
     }
 }
