@@ -185,6 +185,11 @@ public final class EventStore implements AutoCloseable {
         storage.close();
     }
 
+    @VisibleForTesting
+    boolean isOpen() {
+        return storage.isOpen();
+    }
+
     /**
      * Builder for creating new {@code EventStore} instance.
      */

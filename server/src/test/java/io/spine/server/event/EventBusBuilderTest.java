@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
@@ -40,6 +39,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -201,7 +201,7 @@ class EventBusBuilderTest
         @Test
         @DisplayName("EventStore by EventStoreStreamExecutor")
         void eventStoreByEventExecutor() {
-            EventBus.Builder builder = builder().setEventStore(eventStore());
+            EventBus.Builder builder = builder().setEventStore(eventStore);
             assertThrows(IllegalStateException.class,
                          () -> builder.setEventStoreStreamExecutor(mock(Executor.class)));
         }
@@ -282,18 +282,5 @@ class EventBusBuilderTest
                                           .getId();
             assertEquals(mainThreadId, runnableThreadId);
         });
-    }
-
-    private static EventStore eventStore() {
-        BoundedContext bc = BoundedContext
-                .newBuilder()
-                .setMultitenant(false)
-                .build();
-        return EventStore
-                .newBuilder()
-                .setStorageFactory(bc.getStorageFactory())
-                .setStreamExecutor(MoreExecutors.directExecutor())
-                .withDefaultLogger()
-                .build();
     }
 }
