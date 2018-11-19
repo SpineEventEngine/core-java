@@ -28,9 +28,6 @@ import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class TestEventSubscriber extends AbstractEventSubscriber {
 
     private Message handledEvent;

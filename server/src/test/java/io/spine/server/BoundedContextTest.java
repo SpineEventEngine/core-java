@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc;
+package io.spine.server;
 
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption;
-import io.spine.server.BoundedContext;
 import io.spine.server.bc.given.AnotherProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectPmRepo;
@@ -170,7 +169,6 @@ class BoundedContextTest {
         }
     }
 
-    @SuppressWarnings("unchecked") // OK for the purpose of the created Matcher.
     @Test
     @DisplayName("propagate registered repositories to Stand")
     void propagateRepositoriesToStand() {

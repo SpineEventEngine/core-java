@@ -22,9 +22,6 @@ package io.spine.server.bc.given;
 
 import io.spine.server.aggregate.AggregateRepository;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class SecretProjectRepository
         extends AggregateRepository<String, SecretProjectAggregate> {
 }
