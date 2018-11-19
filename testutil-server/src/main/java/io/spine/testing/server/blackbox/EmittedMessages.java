@@ -31,7 +31,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
 
 /**
  * Abstract base for classes providing information on messages emitted
- * in the {@link MultitenantBlackBoxContext Bounded Context}.
+ * in the {@link BlackBoxBoundedContext Bounded Context}.
  *
  * @param <C>
  *         the type of the message class

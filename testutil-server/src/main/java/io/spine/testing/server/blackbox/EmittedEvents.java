@@ -33,9 +33,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Provides information on events emitted in the {@link MultitenantBlackBoxContext Bounded Context}.
- *
- * @author Mykhailo Drachuk
+ * Provides information on events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
  */
 @VisibleForTesting
 public final class EmittedEvents extends EmittedMessages<EventClass, Event, EventMessage> {

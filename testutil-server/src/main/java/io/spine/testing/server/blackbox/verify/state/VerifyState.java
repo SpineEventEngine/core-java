@@ -96,7 +96,7 @@ public abstract class VerifyState {
      * Provides a {@link VerifyState} based on a {@link TenantId}.
      *
      * <p>Use the interface when a tenant ID for {@link VerifyState} should be specified
-     * by a {@link io.spine.testing.server.blackbox.MultitenantBlackBoxContext}.
+     * by a {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext}.
      *
      * <p>If a user wants to specify a tenant ID on its own,
      * {@link VerifyState} should be used directly.

@@ -30,7 +30,7 @@ import static io.spine.testing.server.blackbox.AbstractVerify.count;
 import static io.spine.testing.server.blackbox.AbstractVerify.countAndClass;
 
 /**
- * Verifies that a {@link MultitenantBlackBoxContext Bounded Context} emitted commands that satisfy
+ * Verifies that a {@link BlackBoxBoundedContext Bounded Context} emitted commands that satisfy
  * criteria defined by a factory method that returns an instance of this class.
  *
  * @author Alexander Yevsyukov
