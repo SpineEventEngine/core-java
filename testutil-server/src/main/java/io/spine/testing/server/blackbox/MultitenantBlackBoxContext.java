@@ -30,8 +30,6 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.QueryService;
-import io.spine.server.aggregate.ImportBus;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
@@ -51,7 +49,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A black box bounded context for writing integration tests in a multitenant environment.
@@ -60,9 +57,7 @@ import static java.util.stream.Collectors.toList;
 @VisibleForTesting
 public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
 
-    private final CommandBus commandBus;
     private final EventBus eventBus;
-    private final ImportBus importBus;
     private final TenantId tenantId;
     private final MemoizingObserver<Ack> observer;
     private final CommandMemoizingTap commandTap;
@@ -76,9 +71,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
               requestFactory(builder.buildTenant()));
         this.tenantId = builder.buildTenant();
         this.commandTap = getCommandTap();
-        this.commandBus = boundedContext().getCommandBus();
         this.eventBus = boundedContext().getEventBus();
-        this.importBus = boundedContext().getImportBus();
         this.observer = observer();
     }
 
@@ -172,10 +165,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
      * @return current instance
      */
     private MultitenantBlackBoxContext receivesCommands(Collection<Message> domainCommands) {
-        List<Command> commands = domainCommands.stream()
-                                               .map(this::command)
-                                               .collect(toList());
-        commandBus.post(commands, observer);
+        input().receivesCommands(domainCommands);
         return this;
     }
 
@@ -253,8 +243,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
      * @return current instance
      */
     private MultitenantBlackBoxContext receivesEvents(Collection<Message> domainEvents) {
-        List<Event> events = toEvents(domainEvents);
-        eventBus.post(events, observer);
+        input().receivesEvents(domainEvents);
         return this;
     }
 
@@ -268,8 +257,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
     }
 
     private MultitenantBlackBoxContext importAll(Collection<Message> domainEvents) {
-        List<Event> events = toEvents(domainEvents);
-        importBus.post(events, observer);
+        input().importsEvents(domainEvents);
         return this;
     }
 

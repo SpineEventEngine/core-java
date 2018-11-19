@@ -21,13 +21,8 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.ImportBus;
@@ -37,11 +32,7 @@ import io.spine.server.event.EventBus;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
-import java.util.Collection;
-import java.util.List;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
@@ -61,7 +52,7 @@ public abstract class BlackBoxBoundedContext {
     private final ImportBus importBus;
     private final MemoizingObserver<Ack> observer;
     private final TestActorRequestFactory requestFactory;
-    private final TestEventFactory eventFactory;
+    private final BlackBoxInput input;
 
     protected BlackBoxBoundedContext(boolean multitenant,
                                      Enricher enricher,
@@ -80,7 +71,7 @@ public abstract class BlackBoxBoundedContext {
         this.importBus = boundedContext.getImportBus();
         this.observer = memoizingObserver();
         this.requestFactory = requestFactory;
-        this.eventFactory = eventFactory(requestFactory);
+        this.input = new BlackBoxInput(boundedContext, requestFactory, observer);
     }
 
     /**
@@ -120,39 +111,6 @@ public abstract class BlackBoxBoundedContext {
         }
     }
 
-    protected List<Event> toEvents(Collection<Message> domainEvents) {
-        List<Event> events = newArrayListWithCapacity(domainEvents.size());
-        for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent));
-        }
-        return events;
-    }
-
-    protected Command command(Message commandOrMessage) {
-        if (commandOrMessage instanceof Command) {
-            return (Command) commandOrMessage;
-        }
-        CommandMessage message = (CommandMessage) commandOrMessage;
-        return requestFactory.command()
-                             .create(message);
-    }
-
-    /**
-     * Generates {@link Event} with the passed instance is an event message. If the passed
-     * instance is {@code Event} returns it.
-     *
-     * @param eventOrMessage
-     *         a domain event message or {@code Event}
-     * @return a newly created {@code Event} instance or passed {@code Event}
-     */
-    private Event event(Message eventOrMessage) {
-        if (eventOrMessage instanceof Event) {
-            return (Event) eventOrMessage;
-        }
-        EventMessage message = (EventMessage) eventOrMessage;
-        return eventFactory.createEvent(message);
-    }
-
     /**
      * Creates a new {@link io.spine.server.event.EventFactory event factory} for tests which uses
      * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory
@@ -171,23 +129,15 @@ public abstract class BlackBoxBoundedContext {
         return boundedContext;
     }
 
-    public CommandBus getCommandBus() {
-        return commandBus;
-    }
-
-    public EventBus getEventBus() {
-        return eventBus;
-    }
-
-    public ImportBus getImportBus() {
-        return importBus;
-    }
-
     public MemoizingObserver<Ack> observer() {
         return observer;
     }
 
     public CommandMemoizingTap getCommandTap() {
         return commandTap;
+    }
+
+    public BlackBoxInput input() {
+        return input;
     }
 }
