@@ -29,7 +29,7 @@ import io.spine.server.aggregate.given.klasse.event.EngineStopped;
 import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.MultitenantBlackBoxContext;
+import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,13 +50,13 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 @DisplayName("For event import AggregateRepository should")
 class EventImportTest {
 
-    private MultitenantBlackBoxContext boundedContext;
+    private SingletenantBlackBoxContext boundedContext;
     private EngineRepository repository;
 
     @BeforeEach
     void setUp() {
         repository = new EngineRepository();
-        boundedContext = MultitenantBlackBoxContext
+        boundedContext = SingletenantBlackBoxContext
                 .newInstance()
                 .with(repository);
     }

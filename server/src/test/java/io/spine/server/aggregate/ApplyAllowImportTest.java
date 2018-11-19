@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import io.spine.server.aggregate.given.importado.DotSpace;
 import io.spine.server.aggregate.given.importado.ObjectId;
 import io.spine.server.aggregate.given.importado.event.Moved;
-import io.spine.testing.server.blackbox.MultitenantBlackBoxContext;
+import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,11 +48,11 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 @DisplayName("Aggregate which supports event import should")
 class ApplyAllowImportTest {
 
-    private MultitenantBlackBoxContext boundedContext;
+    private SingletenantBlackBoxContext boundedContext;
 
     @BeforeEach
     void setUp() {
-        boundedContext = MultitenantBlackBoxContext
+        boundedContext = SingletenantBlackBoxContext
                 .newInstance()
                 .with(new DotSpace());
     }

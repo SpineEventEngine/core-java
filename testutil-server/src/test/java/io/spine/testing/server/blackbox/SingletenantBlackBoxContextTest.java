@@ -53,16 +53,16 @@ import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyO
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(ShardingReset.class)
-@DisplayName("Black Box Bounded Context should")
-class MultitenantBlackBoxContextTest {
+@DisplayName("Single tenant Black Box Bounded Context should")
+class SingletenantBlackBoxContextTest {
 
-    private MultitenantBlackBoxContext projects;
+    private SingletenantBlackBoxContext projects;
 
     @BeforeEach
     void setUp() {
-        projects = MultitenantBlackBoxContext.newInstance()
-                                             .with(new BbProjectRepository(),
-                                               new BbProjectViewRepository());
+        projects = SingletenantBlackBoxContext.newInstance()
+                                              .with(new BbProjectRepository(),
+                                                    new BbProjectViewRepository());
     }
 
     @AfterEach
@@ -182,7 +182,7 @@ class MultitenantBlackBoxContextTest {
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
-                MultitenantBlackBoxContext
+                SingletenantBlackBoxContext
                         .newInstance()
                         .with(new RepositoryThrowingExceptionOnClose() {
                             @Override

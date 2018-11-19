@@ -29,7 +29,6 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
-import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.groups.Group;
@@ -49,9 +48,8 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
-import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.ShardingReset;
-import io.spine.testing.server.blackbox.MultitenantBlackBoxContext;
+import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -80,7 +78,7 @@ class ProjectionEndToEndTest {
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
-        MultitenantBlackBoxContext
+        SingletenantBlackBoxContext
                 .newInstance()
                 .with(new EntitySubscriberProjection.Repository(),
                       new TestProjection.Repository())
@@ -106,17 +104,12 @@ class ProjectionEndToEndTest {
     @SuppressWarnings("ResultOfMethodCallIgnored")
         // Black box context is used in a non-fluent fashion.
     void receiveExternal() {
-        TenantId tenantId = GivenTenantId.newUuid();
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
-        MultitenantBlackBoxContext sender = MultitenantBlackBoxContext
-                .newBuilder()
-                .withTenant(tenantId)
-                .build()
+        SingletenantBlackBoxContext sender = SingletenantBlackBoxContext
+                .newInstance()
                 .with(new OrganizationProjection.Repository());
-        MultitenantBlackBoxContext receiver = MultitenantBlackBoxContext
-                .newBuilder()
-                .withTenant(tenantId)
-                .build()
+        SingletenantBlackBoxContext receiver = SingletenantBlackBoxContext
+                .newInstance()
                 .with(new GroupNameProjection.Repository());
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId,

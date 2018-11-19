@@ -64,7 +64,7 @@ import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.MultitenantBlackBoxContext;
+import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.InjectCommandBus;
@@ -256,12 +256,12 @@ class ProcessManagerTest {
     @DisplayName("create command(s)")
     class CommandCreation {
 
-        private MultitenantBlackBoxContext boundedContext;
+        private SingletenantBlackBoxContext boundedContext;
 
         @BeforeEach
         void setUp() {
-            boundedContext = MultitenantBlackBoxContext.newInstance()
-                                                       .with(new TestProcessManagerRepo());
+            boundedContext = SingletenantBlackBoxContext.newInstance()
+                                                        .with(new TestProcessManagerRepo());
         }
 
         @AfterEach
@@ -389,7 +389,7 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            MultitenantBlackBoxContext
+            SingletenantBlackBoxContext
                     .newInstance()
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
@@ -428,7 +428,7 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            MultitenantBlackBoxContext
+            SingletenantBlackBoxContext
                     .newInstance()
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)

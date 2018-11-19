@@ -22,7 +22,7 @@ package io.spine.server.model.noops;
 
 import io.spine.server.model.noops.given.ArchiverPm;
 import io.spine.test.model.contexts.archiver.ArchiveFile;
-import io.spine.testing.server.blackbox.MultitenantBlackBoxContext;
+import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ class NothingTest {
     @Test
     @DisplayName("the bus should not know")
     void notPost() {
-        MultitenantBlackBoxContext boundedContext = MultitenantBlackBoxContext
+        SingletenantBlackBoxContext boundedContext = SingletenantBlackBoxContext
                 .newInstance()
                 .with(new ArchiverPm.Repository())
                 .receivesCommand(archiveSingleFile());

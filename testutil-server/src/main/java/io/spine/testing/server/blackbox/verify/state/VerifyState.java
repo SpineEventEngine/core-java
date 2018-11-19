@@ -44,30 +44,10 @@ public abstract class VerifyState {
     public abstract void verify(BlackBoxOutput output);
 
     /**
-     * Obtains provider of an entity states verifier.
-     *
-     * <p>The verifier checks that the system contains exactly the passed entity states.
-     *
-     * <p>Use the method to verify entities within the
-     * {@linkplain io.spine.testing.server.blackbox.MultitenantBlackBoxContext#tenantId tenant} of a
-     * {@link io.spine.testing.server.blackbox.MultitenantBlackBoxContext}.
-     *
-     * @param entityType
-     *         the type of the entity to query
-     * @param expected
-     *         the expected entity states
-     * @return provider of {@link #exactly(TenantId, Class, Iterable)}
-     */
-    public static <T extends Message> VerifyStateByTenant exactly(Class<T> entityType,
-                                                                  Iterable<T> expected) {
-        return tenantId -> exactly(tenantId, entityType, expected);
-    }
-
-    /**
      * The shortcut of {@link #exactly(Class, Iterable)} to verify that
      * only a single entity is present in the storage and its state matches the expected.
      */
-    public static <T extends Message> VerifyStateByTenant exactlyOne(T expected) {
+    public static <T extends Message> VerifyState exactlyOne(T expected) {
         @SuppressWarnings("unchecked" /* The cast is totally safe. */)
         Class<T> messageClass = (Class<T>) expected.getClass();
         return exactly(messageClass, singletonList(expected));
@@ -90,6 +70,22 @@ public abstract class VerifyState {
                                                           Class<T> entityType,
                                                           Iterable<T> expected) {
         return new VerifyByTypeForTenant<>(expected, entityType, tenantId);
+    }
+
+    /**
+     * Obtains a verifier which checks that the system contains exactly the passed entity states.
+     *
+     * @param <T>
+     *         the type of the entity state
+     * @param entityType
+     *         the type of the entity to query
+     * @param expected
+     *         the expected entity states
+     * @return new instance of {@code VerifyState}
+     */
+    public static <T extends Message> VerifyState exactly(Class<T> entityType,
+                                                          Iterable<T> expected) {
+        return new VerifyByType<>(expected, entityType);
     }
 
     /**
