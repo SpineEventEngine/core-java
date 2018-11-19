@@ -20,6 +20,7 @@
 
 package io.spine.testing.client.grpc;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -72,6 +73,7 @@ public class TestClient implements Logging {
     /**
      * Creates a command for the passed message and sends it to the server.
      */
+    @CanIgnoreReturnValue
     public Optional<Ack> post(CommandMessage domainCommand) {
         Command command = requestFactory.command()
                                         .create(domainCommand);

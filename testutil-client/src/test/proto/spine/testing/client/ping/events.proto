@@ -9,8 +9,9 @@ option java_package = "io.spine.testing.client.grpc.event";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
+import "spine/testing/client/ping/table.proto";
+
 message Pong {
-    // This event does not have fields because we're not going to handle it
-    // in the tests. Should we have such a need, we can arrange custom routing
-    // based on `EventContext`.
+    int32 table = 1;
+    TableSide side = 2 [(required) = true];
 }

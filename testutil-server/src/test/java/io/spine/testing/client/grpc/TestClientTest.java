@@ -21,14 +21,19 @@
 package io.spine.testing.client.grpc;
 
 import com.google.common.truth.OptionalSubject;
+import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.client.QueryResponse;
 import io.spine.core.Ack;
 import io.spine.core.UserId;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.Server;
 import io.spine.testing.client.grpc.command.Ping;
-import io.spine.testing.client.grpc.given.Server;
+import io.spine.testing.client.grpc.given.GameRepository;
 import io.spine.testing.server.ShardingReset;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -36,47 +41,87 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.core.Responses.statusOk;
+import static io.spine.testing.client.grpc.TableSide.LEFT;
+import static io.spine.testing.client.grpc.TableSide.RIGHT;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("StaticVariableMayNotBeInitialized")
 @ExtendWith(ShardingReset.class)
-@Disabled //TODO:2018-11-16:alexander.yevsyukov: Resume when migrating to new Server
 class TestClientTest {
 
-    private static Server server;
-    private static TestClient client;
+    private Server server;
+    private TestClient client;
 
-    @BeforeAll
-    static void setUpAll() throws IOException {
-        server = new Server();
+    @BeforeEach
+    void setUpAll() throws IOException {
+        BoundedContextBuilder context = BoundedContext
+                .newBuilder()
+                .setName("Tennis")
+                .add(new GameRepository());
+        server = Server
+                .newBuilder()
+                .add(context)
+                .build();
         server.start();
-        UserId userId = UserId.newBuilder()
-                              .setValue(TestClientTest.class.getSimpleName())
-                              .build();
+        UserId userId = UserId
+                .newBuilder()
+                .setValue(TestClientTest.class.getSimpleName())
+                .build();
         client = new TestClient(userId, "localhost", server.getPort());
+
+
     }
 
-    @AfterAll
-    @SuppressWarnings("StaticVariableUsedBeforeInitialization") // see setUpAll()
-    static void tearDownAll() throws Exception {
-        client.shutdown();
-        server.shutdown();
+    @AfterEach
+    void tearDownAll() throws Exception {
+        if (!client.isShutdown()) {
+            client.shutdown();
+        }
+        server.shutdownAndWait();
     }
 
     @Test
     void post() {
-        Optional<Ack> result = client.post(Ping.getDefaultInstance());
+        Optional<Ack> result = ping(LEFT);
+        OptionalSubject subject = assertThat(result);
+        subject.isPresent();
+        Truth.assertThat(result.get()
+                               .getStatus())
+             .isEqualTo(statusOk());
+    }
 
-        OptionalSubject assertThat = assertThat(result);
-        assertThat.isPresent();
+    @CanIgnoreReturnValue
+    private Optional<Ack> ping(TableSide side) {
+        return client.post(Ping.newBuilder()
+                               .setTable(1)
+                               .setSide(side)
+                               .build());
     }
 
     @Test
     void queryAll() {
-        //TODO:2018-11-15:alexander.yevsyukov: Implement
+        Optional<Ack> result = ping(LEFT);
+        OptionalSubject subject = assertThat(result);
+        subject.isPresent();
+        Truth.assertThat(result.get()
+                               .getStatus())
+             .isEqualTo(statusOk());
+
+        // Query the state of the Game Process Manager, which has Timestamp as its state.
+        QueryResponse response = client.queryAll(Table.class);
+        Truth.assertThat(response.getMessagesList())
+             .isNotEmpty();
     }
 
     @Test
-    void shutdown() {
-        //TODO:2018-11-15:alexander.yevsyukov: Implement as a separate nested test.
+    void shutdown() throws InterruptedException {
+        // Ensure that the client is operational.
+        assertThat(ping(RIGHT)).isPresent();
+
+        assertFalse(client.isShutdown());
+        client.shutdown();
+        
+        assertTrue(client.isShutdown());
     }
 }

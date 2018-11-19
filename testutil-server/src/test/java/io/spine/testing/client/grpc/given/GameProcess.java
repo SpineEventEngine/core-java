@@ -20,25 +20,39 @@
 
 package io.spine.testing.client.grpc.given;
 
-import com.google.protobuf.Timestamp;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
+import io.spine.testing.client.grpc.Table;
+import io.spine.testing.client.grpc.TableSide;
+import io.spine.testing.client.grpc.TableVBuilder;
 import io.spine.testing.client.grpc.command.Ping;
 import io.spine.testing.client.grpc.event.Pong;
-import io.spine.validate.TimestampVBuilder;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Process manager that handles the {@link io.spine.testing.client.grpc.command.Ping Ping}
  * command generating the {@link io.spine.testing.client.grpc.event.Pong Pong} event.
  */
-class Tennis extends ProcessManager<Integer, Timestamp, TimestampVBuilder> {
+class GameProcess extends ProcessManager<Integer, Table, TableVBuilder> {
 
-    protected Tennis(Integer id) {
+    protected GameProcess(Integer id) {
         super(id);
     }
 
     @Assign
     Pong handle(Ping command) {
-        return Pong.getDefaultInstance(); // since the message is empty.
+        return Pong.newBuilder()
+                   .setTable(command.getTable())
+                   .setSide(opposite(command.getSide()))
+                   .build();
+    }
+
+    private static TableSide opposite(TableSide side) {
+        checkArgument(side != TableSide.SIDE_UNDEFINED);
+        if (side == TableSide.LEFT) {
+            return TableSide.RIGHT;
+        }
+        return TableSide.LEFT;
     }
 }

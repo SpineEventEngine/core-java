@@ -26,8 +26,6 @@ import io.spine.client.Query;
 
 /**
  * Processes a query and returns the result.
- *
- * @author Alex Tymchenko
  */
 interface QueryProcessor {
 

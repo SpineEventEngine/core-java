@@ -26,6 +26,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
@@ -41,6 +42,8 @@ import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -73,6 +76,9 @@ public final class BoundedContextBuilder implements Logging {
     private EventBus.Builder eventBus;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
+
+    /** Repositories to be registered with the Bounded Context being built after its creation. */
+    private final List<Repository<?, ?>> repositories = new ArrayList<>();
 
     /**
      * Prevents direct instantiation.
@@ -220,12 +226,31 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Adds the passed repository to the registration list which will be processed after
+     * the Bounded Context is created.
+     */
+    public BoundedContextBuilder add(Repository<?, ?> repository) {
+        checkNotNull(repository);
+        repositories.add(repository);
+        return this;
+    }
+
+    /**
+     * Removes the passed repository from the registration list.
+     */
+    public BoundedContextBuilder remove(Repository<?, ?> repository) {
+        checkNotNull(repository);
+        repositories.remove(repository);
+        return this;
+    }
+
+    /**
      * Creates a new instance of {@code BoundedContext} with the set configurations.
      *
-     * <p>The resulting domain-specific bounded context has as internal System bounded context.
-     * The entities of the System domain describe the entities of the resulting bounded context.
+     * <p>The resulting domain-specific bounded context has as internal System Bounded Context.
+     * The entities of the System domain describe the entities of the resulting Bounded Context.
      *
-     * <p>The System bounded contexts shares some configuration with the domain bounded context,
+     * <p>The System Bounded Context shares some configuration with the Domain Bounded Context,
      * such as:
      * <ul>
      *     <li>{@linkplain #getTenantIndex()} tenancy;
@@ -246,8 +271,17 @@ public final class BoundedContextBuilder implements Logging {
                 .orElseGet(InMemoryTransportFactory::newInstance);
         SystemContext system = buildSystem(transport);
         BoundedContext result = buildDefault(system, transport);
-        log().debug(result.nameForLogging() + " created.");
+        log().debug("{} created.", result.nameForLogging());
+
+        registerRepositories(result);
         return result;
+    }
+
+    private void registerRepositories(BoundedContext result) {
+        for (Repository<?, ?> repository : repositories) {
+            result.register(repository);
+            log().debug("{} registered.", repository);
+        }
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {

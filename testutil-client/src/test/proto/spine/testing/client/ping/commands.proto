@@ -9,8 +9,9 @@ option java_package = "io.spine.testing.client.grpc.command";
 option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
-import "google/protobuf/timestamp.proto";
+import "spine/testing/client/ping/table.proto";
 
 message Ping {
-    // The message has no fields assuming custom routing based on `CommandContext`.
+    int32 table = 1;
+    TableSide side = 2 [(required) = true];
 }

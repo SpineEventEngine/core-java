@@ -20,19 +20,15 @@
 
 package io.spine.testing.client.grpc.given;
 
-import com.google.protobuf.Timestamp;
-import io.spine.base.CommandMessage;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.route.CommandRoute;
+import io.spine.testing.client.grpc.Table;
 
-public class Table extends ProcessManagerRepository<Integer, Tennis, Timestamp> {
+public class GameRepository extends ProcessManagerRepository<Integer, GameProcess, Table> {
 
     /**
      * Customize the routing to always use a process manager with zero ID.
      */
-    public Table() {
+    public GameRepository() {
         super();
-        getCommandRouting().replaceDefault(
-                (CommandRoute<Integer, CommandMessage>) (message, context) -> 0);
     }
 }
