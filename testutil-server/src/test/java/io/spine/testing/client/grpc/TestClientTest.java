@@ -68,8 +68,6 @@ class TestClientTest {
                 .setValue(TestClientTest.class.getSimpleName())
                 .build();
         client = new TestClient(userId, "localhost", server.getPort());
-
-
     }
 
     @AfterEach
