@@ -46,8 +46,6 @@ import static java.util.stream.Collectors.toSet;
 
 /**
  * A store of all events in a bounded context.
- *
- * @author Alexander Yevsyukov
  */
 public class EventStore implements AutoCloseable {
 
