@@ -37,9 +37,9 @@ import static io.spine.testing.client.grpc.TableSide.SIDE_UNDEFINED;
  * Process manager that handles the {@link io.spine.testing.client.grpc.command.Ping Ping}
  * command generating the {@link io.spine.testing.client.grpc.event.Pong Pong} event.
  */
-class GameProcess extends ProcessManager<Integer, Table, TableVBuilder> {
+final class GameProcess extends ProcessManager<Integer, Table, TableVBuilder> {
 
-    protected GameProcess(Integer id) {
+    private GameProcess(Integer id) {
         super(id);
     }
 

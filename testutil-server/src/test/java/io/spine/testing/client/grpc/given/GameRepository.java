@@ -23,12 +23,5 @@ package io.spine.testing.client.grpc.given;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.testing.client.grpc.Table;
 
-public class GameRepository extends ProcessManagerRepository<Integer, GameProcess, Table> {
-
-    /**
-     * Customize the routing to always use a process manager with zero ID.
-     */
-    public GameRepository() {
-        super();
-    }
+public final class GameRepository extends ProcessManagerRepository<Integer, GameProcess, Table> {
 }
