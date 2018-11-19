@@ -216,18 +216,20 @@ public class EventStore implements AutoCloseable {
     }
 
     /**
-     * Abstract builder base for building.
-     *
-     * @param <T> the type of the builder product
-     * @param <B> the type of the builder for covariance in derived classes
+     * Builder for creating new {@code EventStore} instance.
      */
-    private abstract static class AbstractBuilder<T, B extends AbstractBuilder<T, B>> {
+    public static class Builder {
 
         private Executor streamExecutor;
         private StorageFactory storageFactory;
         private @Nullable Logger logger;
 
-        public abstract T build();
+        public EventStore build() {
+            checkState();
+            EventStore result =
+                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
+            return result;
+        }
 
         /**
          * This method must be called in {@link #build()} implementations to
@@ -243,9 +245,9 @@ public class EventStore implements AutoCloseable {
         }
 
         @CanIgnoreReturnValue
-        public B setStreamExecutor(Executor executor) {
+        public Builder setStreamExecutor(Executor executor) {
             this.streamExecutor = checkNotNull(executor);
-            return castThis();
+            return this;
         }
 
         public StorageFactory getStorageFactory() {
@@ -253,9 +255,9 @@ public class EventStore implements AutoCloseable {
         }
 
         @CanIgnoreReturnValue
-        public B setStorageFactory(StorageFactory storageFactory) {
+        public Builder setStorageFactory(StorageFactory storageFactory) {
             this.storageFactory = checkNotNull(storageFactory);
-            return castThis();
+            return this;
         }
 
         public @Nullable Logger getLogger() {
@@ -263,40 +265,20 @@ public class EventStore implements AutoCloseable {
         }
 
         @CanIgnoreReturnValue
-        public B setLogger(@Nullable Logger logger) {
+        public Builder setLogger(@Nullable Logger logger) {
             this.logger = logger;
-            return castThis();
+            return this;
         }
 
         /**
          * Sets default logger.
          *
-         * @see EventStore#log()
+         * @see io.spine.server.event.EventStore#log()
          */
         @CanIgnoreReturnValue
-        public B withDefaultLogger() {
+        public Builder withDefaultLogger() {
             setLogger(log());
-            return castThis();
-        }
-
-        /** Casts this to generic type to provide type covariance in the derived classes. */
-        @SuppressWarnings("unchecked") // See Javadoc
-        private B castThis() {
-            return (B) this;
-        }
-    }
-
-    /**
-     * Builder for creating new local {@code EventStore} instance.
-     */
-    public static class Builder extends AbstractBuilder<EventStore, Builder> {
-
-        @Override
-        public EventStore build() {
-            checkState();
-            EventStore result =
-                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
-            return result;
+            return this;
         }
     }
 
@@ -327,8 +309,8 @@ public class EventStore implements AutoCloseable {
         if (logger.isDebugEnabled()) {
             String requestData = TextFormat.shortDebugString(request);
             logger.debug("Creating stream on request: {} for observer: {}",
-                        requestData,
-                        responseObserver);
+                         requestData,
+                         responseObserver);
         }
     }
 
