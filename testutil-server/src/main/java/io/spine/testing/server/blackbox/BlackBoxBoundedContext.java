@@ -25,8 +25,15 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.ImportBus;
+import io.spine.server.commandbus.CommandBus;
+import io.spine.server.event.Enricher;
+import io.spine.server.event.EventBus;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
@@ -35,6 +42,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
@@ -45,10 +54,31 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
  */
 public abstract class BlackBoxBoundedContext {
 
+    private final BoundedContext boundedContext;
+    private final CommandMemoizingTap commandTap;
+    private final CommandBus commandBus;
+    private final EventBus eventBus;
+    private final ImportBus importBus;
+    private final MemoizingObserver<Ack> observer;
     private final TestActorRequestFactory requestFactory;
     private final TestEventFactory eventFactory;
 
-    protected BlackBoxBoundedContext(TestActorRequestFactory requestFactory) {
+    protected BlackBoxBoundedContext(boolean multitenant,
+                                     Enricher enricher,
+                                     TestActorRequestFactory requestFactory) {
+        this.commandTap = new CommandMemoizingTap();
+        this.boundedContext = BoundedContext
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setCommandBus(CommandBus.newBuilder()
+                                         .appendFilter(commandTap))
+                .setEventBus(EventBus.newBuilder()
+                                     .setEnricher(enricher))
+                .build();
+        this.commandBus = boundedContext.getCommandBus();
+        this.eventBus = boundedContext.getEventBus();
+        this.importBus = boundedContext.getImportBus();
+        this.observer = memoizingObserver();
         this.requestFactory = requestFactory;
         this.eventFactory = eventFactory(requestFactory);
     }
@@ -74,6 +104,20 @@ public abstract class BlackBoxBoundedContext {
                  ? (Any) producerId
                  : Identifier.pack(producerId);
         return TestEventFactory.newInstance(id, requestFactory);
+    }
+
+    /**
+     * Closes the bounded context so that it shutting down all of its repositories.
+     *
+     * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
+     * that may occur while closing, into an {@link IllegalStateException}.
+     */
+    public void close() {
+        try {
+            boundedContext.close();
+        } catch (Exception e) {
+            throw illegalStateWithCauseOf(e);
+        }
     }
 
     protected List<Event> toEvents(Collection<Message> domainEvents) {
@@ -121,5 +165,29 @@ public abstract class BlackBoxBoundedContext {
      */
     private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
         return TestEventFactory.newInstance(requestFactory);
+    }
+
+    public BoundedContext boundedContext() {
+        return boundedContext;
+    }
+
+    public CommandBus getCommandBus() {
+        return commandBus;
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public ImportBus getImportBus() {
+        return importBus;
+    }
+
+    public MemoizingObserver<Ack> observer() {
+        return observer;
+    }
+
+    public CommandMemoizingTap getCommandTap() {
+        return commandTap;
     }
 }

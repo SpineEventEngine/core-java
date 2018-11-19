@@ -29,7 +29,6 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.BoundedContext;
 import io.spine.server.QueryService;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
@@ -51,7 +50,6 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
@@ -62,7 +60,6 @@ import static java.util.stream.Collectors.toList;
 @VisibleForTesting
 public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
 
-    private final BoundedContext boundedContext;
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final ImportBus importBus;
@@ -74,21 +71,15 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
      * Creates a new multi-tenant instance.
      */
     MultitenantBlackBoxContext(BlackBoxBuilder builder) {
-        super(requestFactory(builder.buildTenant()));
-        this.commandTap = new CommandMemoizingTap();
-        this.boundedContext = BoundedContext
-                .newBuilder()
-                .setMultitenant(true)
-                .setCommandBus(CommandBus.newBuilder()
-                                         .appendFilter(commandTap))
-                .setEventBus(EventBus.newBuilder()
-                                     .setEnricher(builder.buildEnricher()))
-                .build();
+        super(true,
+              builder.buildEnricher(),
+              requestFactory(builder.buildTenant()));
         this.tenantId = builder.buildTenant();
-        this.commandBus = boundedContext.getCommandBus();
-        this.eventBus = boundedContext.getEventBus();
-        this.importBus = boundedContext.getImportBus();
-        this.observer = memoizingObserver();
+        this.commandTap = getCommandTap();
+        this.commandBus = boundedContext().getCommandBus();
+        this.eventBus = boundedContext().getEventBus();
+        this.importBus = boundedContext().getImportBus();
+        this.observer = observer();
     }
 
     /**
@@ -136,7 +127,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
         checkNotNull(repositories);
         for (Repository<?, ?> repository : repositories) {
             checkNotNull(repository);
-            boundedContext.register(repository);
+            boundedContext().register(repository);
         }
         return this;
     }
@@ -341,7 +332,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
     public MultitenantBlackBoxContext assertThat(VerifyState verifier) {
         QueryService queryService = QueryService
                 .newBuilder()
-                .add(boundedContext)
+                .add(boundedContext())
                 .build();
         verifier.verify(queryService);
         return this;
@@ -401,23 +392,5 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
     private static EventStreamQuery allEventsQuery() {
         return EventStreamQuery.newBuilder()
                                .build();
-    }
-
-    /*
-     * Bounded context lifecycle.
-     ******************************************************************************/
-
-    /**
-     * Closes the bounded context so that it shutting down all of its repositories.
-     *
-     * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
-     * that may occur while closing, into an {@link IllegalStateException}.
-     */
-    public void close() {
-        try {
-            boundedContext.close();
-        } catch (Exception e) {
-            throw illegalStateWithCauseOf(e);
-        }
     }
 }
