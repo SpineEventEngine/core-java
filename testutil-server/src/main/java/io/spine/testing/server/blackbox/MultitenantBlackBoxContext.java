@@ -56,7 +56,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 /**
- * A black box bounded context for writing integration tests in multitenant environment.
+ * A black box bounded context for writing integration tests in a multitenant environment.
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting

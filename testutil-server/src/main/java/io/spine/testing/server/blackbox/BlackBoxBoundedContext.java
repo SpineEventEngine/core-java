@@ -43,7 +43,7 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
  * verified in using various verifiers (e.g. {@link io.spine.testing.server.blackbox.verify.state.VerifyState
  * state verfier}, {@link VerifyEvents emitted events verifier}).
  */
-public class BlackBoxBoundedContext {
+public abstract class BlackBoxBoundedContext {
 
     private final TestActorRequestFactory requestFactory;
     private final TestEventFactory eventFactory;
@@ -51,39 +51,6 @@ public class BlackBoxBoundedContext {
     protected BlackBoxBoundedContext(TestActorRequestFactory requestFactory) {
         this.requestFactory = requestFactory;
         this.eventFactory = eventFactory(requestFactory);
-    }
-
-    protected List<Event> toEvents(Collection<Message> domainEvents) {
-        List<Event> events = newArrayListWithCapacity(domainEvents.size());
-        for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent));
-        }
-        return events;
-    }
-
-    /**
-     * Generates {@link Event} with the passed instance is an event message. If the passed
-     * instance is {@code Event} returns it.
-     *
-     * @param eventOrMessage
-     *         a domain event message or {@code Event}
-     * @return a newly created {@code Event} instance or passed {@code Event}
-     */
-    private Event event(Message eventOrMessage) {
-        if (eventOrMessage instanceof Event) {
-            return (Event) eventOrMessage;
-        }
-        EventMessage message = (EventMessage) eventOrMessage;
-        return eventFactory.createEvent(message);
-    }
-
-    protected Command command(Message commandOrMessage) {
-        if (commandOrMessage instanceof Command) {
-            return (Command) commandOrMessage;
-        }
-        CommandMessage message = (CommandMessage) commandOrMessage;
-        return requestFactory.command()
-                             .create(message);
     }
 
     /**
@@ -107,6 +74,39 @@ public class BlackBoxBoundedContext {
                  ? (Any) producerId
                  : Identifier.pack(producerId);
         return TestEventFactory.newInstance(id, requestFactory);
+    }
+
+    protected List<Event> toEvents(Collection<Message> domainEvents) {
+        List<Event> events = newArrayListWithCapacity(domainEvents.size());
+        for (Message domainEvent : domainEvents) {
+            events.add(event(domainEvent));
+        }
+        return events;
+    }
+
+    protected Command command(Message commandOrMessage) {
+        if (commandOrMessage instanceof Command) {
+            return (Command) commandOrMessage;
+        }
+        CommandMessage message = (CommandMessage) commandOrMessage;
+        return requestFactory.command()
+                             .create(message);
+    }
+
+    /**
+     * Generates {@link Event} with the passed instance is an event message. If the passed
+     * instance is {@code Event} returns it.
+     *
+     * @param eventOrMessage
+     *         a domain event message or {@code Event}
+     * @return a newly created {@code Event} instance or passed {@code Event}
+     */
+    private Event event(Message eventOrMessage) {
+        if (eventOrMessage instanceof Event) {
+            return (Event) eventOrMessage;
+        }
+        EventMessage message = (EventMessage) eventOrMessage;
+        return eventFactory.createEvent(message);
     }
 
     /**
