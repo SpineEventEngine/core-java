@@ -29,6 +29,9 @@ import io.spine.testing.client.grpc.command.Ping;
 import io.spine.testing.client.grpc.event.Pong;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static io.spine.testing.client.grpc.TableSide.LEFT;
+import static io.spine.testing.client.grpc.TableSide.RIGHT;
+import static io.spine.testing.client.grpc.TableSide.SIDE_UNDEFINED;
 
 /**
  * Process manager that handles the {@link io.spine.testing.client.grpc.command.Ping Ping}
@@ -49,10 +52,7 @@ class GameProcess extends ProcessManager<Integer, Table, TableVBuilder> {
     }
 
     private static TableSide opposite(TableSide side) {
-        checkArgument(side != TableSide.SIDE_UNDEFINED);
-        if (side == TableSide.LEFT) {
-            return TableSide.RIGHT;
-        }
-        return TableSide.LEFT;
+        checkArgument(side != SIDE_UNDEFINED);
+        return (side == LEFT) ? RIGHT : LEFT;
     }
 }

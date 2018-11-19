@@ -20,7 +20,6 @@
 
 package io.spine.testing.client.grpc;
 
-import com.google.common.truth.OptionalSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.client.QueryResponse;
@@ -83,12 +82,8 @@ class TestClientTest {
 
     @Test
     void post() {
-        Optional<Ack> result = ping(LEFT);
-        OptionalSubject subject = assertThat(result);
-        subject.isPresent();
-        Truth.assertThat(result.get()
-                               .getStatus())
-             .isEqualTo(statusOk());
+        Optional<Ack> optional = ping(LEFT);
+        assertOk(optional);
     }
 
     @CanIgnoreReturnValue
@@ -101,12 +96,8 @@ class TestClientTest {
 
     @Test
     void queryAll() {
-        Optional<Ack> result = ping(LEFT);
-        OptionalSubject subject = assertThat(result);
-        subject.isPresent();
-        Truth.assertThat(result.get()
-                               .getStatus())
-             .isEqualTo(statusOk());
+        Optional<Ack> optional = ping(LEFT);
+        assertOk(optional);
 
         // Query the state of the Game Process Manager, which has Timestamp as its state.
         QueryResponse response = client.queryAll(Table.class);
@@ -121,7 +112,15 @@ class TestClientTest {
 
         assertFalse(client.isShutdown());
         client.shutdown();
-        
+
         assertTrue(client.isShutdown());
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static void assertOk(Optional<Ack> optional) {
+        assertTrue(optional.isPresent());
+        Ack ack = optional.get();
+        Truth.assertThat(ack.getStatus())
+             .isEqualTo(statusOk());
     }
 }
