@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.toSet;
 /**
  * A store of all events in a bounded context.
  */
-public class EventStore implements AutoCloseable {
+public final class EventStore implements AutoCloseable {
 
     private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
@@ -73,9 +73,7 @@ public class EventStore implements AutoCloseable {
         Set<TenantId> tenants = Streams.stream(events)
                                        .map(Events::getTenantId)
                                        .collect(toSet());
-        checkArgument(tenants.size() == 1,
-                      TENANT_MISMATCH_ERROR_MSG,
-                      tenants);
+        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }
 
     /**
@@ -110,7 +108,7 @@ public class EventStore implements AutoCloseable {
         TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
-                store(event);
+                storage.store(event);
             }
         };
         op.execute();
@@ -143,40 +141,12 @@ public class EventStore implements AutoCloseable {
                 if (isTenantSet()) { // If multitenant context
                     ensureSameTenant(events);
                 }
-                store(events);
+                storage.store(events);
             }
         };
         op.execute();
 
         logStored(events);
-    }
-
-    /**
-     * Stores the passed event.
-     *
-     * @param event the event to store.
-     */
-    protected void store(Event event) {
-        storage.store(event);
-    }
-
-    /**
-     * Stores the passed events.
-     *
-     * @param events the events to store.
-     */
-    protected void store(Iterable<Event> events) {
-        storage.store(events);
-    }
-
-    /**
-     * Creates iterator for traversing through the history of events matching the passed query.
-     *
-     * @param query the query filtering the history
-     * @return iterator instance
-     */
-    protected Iterator<Event> iterator(EventStreamQuery query) {
-        return storage.iterator(query);
     }
 
     /**
@@ -192,7 +162,7 @@ public class EventStore implements AutoCloseable {
         logReadingStart(request, responseObserver);
 
         streamExecutor.execute(() -> {
-            Iterator<Event> eventRecords = iterator(request);
+            Iterator<Event> eventRecords = storage.iterator(request);
             while (eventRecords.hasNext()) {
                 Event event = eventRecords.next();
                 responseObserver.onNext(event);
@@ -218,24 +188,21 @@ public class EventStore implements AutoCloseable {
     /**
      * Builder for creating new {@code EventStore} instance.
      */
-    public static class Builder {
+    public static final class Builder {
 
         private Executor streamExecutor;
         private StorageFactory storageFactory;
         private @Nullable Logger logger;
 
-        public EventStore build() {
-            checkState();
-            EventStore result =
-                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
-            return result;
+        /** Prevents instantiation from outside. */
+        private Builder() {
         }
 
         /**
          * This method must be called in {@link #build()} implementations to
          * verify that all required parameters are set.
          */
-        protected void checkState() {
+        private void checkState() {
             checkNotNull(getStreamExecutor(), "streamExecutor must be set");
             checkNotNull(getStorageFactory(), "eventStorage must be set");
         }
@@ -279,6 +246,16 @@ public class EventStore implements AutoCloseable {
         public Builder withDefaultLogger() {
             setLogger(log());
             return this;
+        }
+
+        /**
+         * Creates new {@code EventStore} instance.
+         */
+        public EventStore build() {
+            checkState();
+            EventStore result =
+                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
+            return result;
         }
     }
 
