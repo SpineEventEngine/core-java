@@ -28,7 +28,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.server.QueryService;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
@@ -284,12 +283,5 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     protected BlackBoxOutput output() {
         return output;
-    }
-
-    protected QueryService queryService() {
-        return QueryService
-                .newBuilder()
-                .add(boundedContext)
-                .build();
     }
 }

@@ -98,6 +98,17 @@ public final class BlackBoxOutput {
         return entities(entityType, query);
     }
 
+    /**
+     * Reads entities of the specified type using {@link #queryService()}.
+     *
+     * <p>Purposed to read entities in a single tenant bounded context.
+     */
+    public <T extends Message> List<T> entities(Class<T> entityType) {
+        QueryFactory queries = newInstance(VerifyState.class).query();
+        Query query = queries.all(entityType);
+        return entities(entityType, query);
+    }
+
     private <T extends Message> List<T> entities(Class<T> entityType, Query query) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
         queryService().read(query, observer);

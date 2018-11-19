@@ -23,7 +23,6 @@ package io.spine.testing.server.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.TenantId;
-import io.spine.server.QueryService;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
@@ -125,8 +124,7 @@ public class MultitenantBlackBoxContext
      */
     @CanIgnoreReturnValue
     public MultitenantBlackBoxContext assertThat(VerifyState verifier) {
-        QueryService queryService = queryService();
-        verifier.verify(queryService);
+        verifier.verify(output());
         return this;
     }
 
