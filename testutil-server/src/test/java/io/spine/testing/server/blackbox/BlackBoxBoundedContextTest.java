@@ -43,13 +43,13 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
-import static io.spine.testing.server.blackbox.VerifyState.exactly;
-import static io.spine.testing.server.blackbox.VerifyState.exactlyOne;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
+import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
+import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(ShardingReset.class)

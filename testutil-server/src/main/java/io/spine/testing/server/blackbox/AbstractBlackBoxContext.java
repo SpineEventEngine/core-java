@@ -40,8 +40,8 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
  *
  * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link VerifyState state
- * verfier}, {@link VerifyEvents emitted events verifier}).
+ * verified in using various verifiers (e.g. {@link io.spine.testing.server.blackbox.verify.state.VerifyState
+ * state verfier}, {@link VerifyEvents emitted events verifier}).
  */
 public class AbstractBlackBoxContext {
 

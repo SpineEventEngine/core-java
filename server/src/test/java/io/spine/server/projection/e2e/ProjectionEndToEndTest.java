@@ -64,7 +64,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.testing.server.blackbox.VerifyState.exactlyOne;
+import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

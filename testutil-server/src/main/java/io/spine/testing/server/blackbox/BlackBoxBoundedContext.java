@@ -41,7 +41,8 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.VerifyState.VerifyStateByTenant;
+import io.spine.testing.server.blackbox.verify.state.VerifyState;
+import io.spine.testing.server.blackbox.verify.state.VerifyState.VerifyStateByTenant;
 
 import java.util.Collection;
 import java.util.List;
