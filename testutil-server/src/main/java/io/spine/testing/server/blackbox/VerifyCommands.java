@@ -38,7 +38,7 @@ import static io.spine.testing.server.blackbox.AbstractVerify.countAndClass;
 @VisibleForTesting
 public class VerifyCommands extends DelegatingVerify<EmittedCommands> {
 
-    private VerifyCommands(Verify<EmittedCommands> delegate) {
+    private VerifyCommands(VerifyMessages<EmittedCommands> delegate) {
         super(delegate);
     }
 

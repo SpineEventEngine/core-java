@@ -42,13 +42,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 @SuppressWarnings("ClassReferencesSubclass")
 @VisibleForTesting
-abstract class AbstractVerify<E extends EmittedMessages> implements Verify<E> {
+abstract class AbstractVerify<E extends EmittedMessages> implements VerifyMessages<E> {
 
-    static <E extends EmittedMessages> Verify<E> count(Count expectedCount) {
+    static <E extends EmittedMessages> VerifyMessages<E> count(Count expectedCount) {
         return new MessageCount<>(expectedCount);
     }
 
-    static <E extends EmittedMessages> Verify<E>
+    static <E extends EmittedMessages> VerifyMessages<E>
     countAndClass(Count expected, Class<? extends Message> messageClass) {
         return new CountAndClass<>(expected, messageClass);
     }
