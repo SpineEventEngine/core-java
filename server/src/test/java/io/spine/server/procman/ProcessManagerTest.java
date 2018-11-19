@@ -64,7 +64,7 @@ import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.MultitenantBlackBoxContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.InjectCommandBus;
@@ -256,12 +256,12 @@ class ProcessManagerTest {
     @DisplayName("create command(s)")
     class CommandCreation {
 
-        private BlackBoxBoundedContext boundedContext;
+        private MultitenantBlackBoxContext boundedContext;
 
         @BeforeEach
         void setUp() {
-            boundedContext = BlackBoxBoundedContext.newInstance()
-                                                   .with(new TestProcessManagerRepo());
+            boundedContext = MultitenantBlackBoxContext.newInstance()
+                                                       .with(new TestProcessManagerRepo());
         }
 
         @AfterEach
@@ -389,7 +389,7 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            BlackBoxBoundedContext
+            MultitenantBlackBoxContext
                     .newInstance()
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
@@ -428,7 +428,7 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            BlackBoxBoundedContext
+            MultitenantBlackBoxContext
                     .newInstance()
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)

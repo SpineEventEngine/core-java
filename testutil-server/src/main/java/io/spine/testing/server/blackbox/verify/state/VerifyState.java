@@ -86,7 +86,7 @@ public abstract class VerifyState {
      * <p>The verifier checks that the system contains exactly the passed entity states.
      *
      * <p>Use the method to verify entities within the
-     * {@linkplain io.spine.testing.server.blackbox.BlackBoxBoundedContext#tenantId tenant} of a {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext}.
+     * {@linkplain io.spine.testing.server.blackbox.MultitenantBlackBoxContext#tenantId tenant} of a {@link io.spine.testing.server.blackbox.MultitenantBlackBoxContext}.
      *
      * @param entityType
      *         the type of the entity to query
@@ -139,7 +139,7 @@ public abstract class VerifyState {
      * Provides a {@link VerifyState} based on a {@link TenantId}.
      *
      * <p>Use the interface when a tenant ID for {@link VerifyState} should be specified
-     * by a {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext}.
+     * by a {@link io.spine.testing.server.blackbox.MultitenantBlackBoxContext}.
      *
      * <p>If a user wants to specify a tenant ID on its own,
      * {@link VerifyState} should be used directly.

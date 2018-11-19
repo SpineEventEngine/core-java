@@ -62,7 +62,7 @@ import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.MultitenantBlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -499,11 +499,11 @@ public class AggregateRepositoryTest {
                     .newBuilder()
                     .setProjectId(id)
                     .build();
-            BlackBoxBoundedContext.newInstance()
-                                  .with(repository())
-                                  .receivesCommands(create, addTask, start)
-                                  .assertThat(emittedEventsHadVersions(1, 2, 3))
-                                  .close();
+            MultitenantBlackBoxContext.newInstance()
+                                      .with(repository())
+                                      .receivesCommands(create, addTask, start)
+                                      .assertThat(emittedEventsHadVersions(1, 2, 3))
+                                      .close();
         }
 
         @Test
@@ -525,16 +525,16 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext.newInstance()
-                                  .with(repository())
-                                  .receivesCommands(create, start)
-                                  .receivesEvent(archived)
-                                  .assertThat(emittedEventsHadVersions(
+            MultitenantBlackBoxContext.newInstance()
+                                      .with(repository())
+                                      .receivesCommands(create, start)
+                                      .receivesEvent(archived)
+                                      .assertThat(emittedEventsHadVersions(
                                           1, 2, // Product creation
                                           0,    // Manually assembled event (`archived`)
                                           3     // Event produced in response to `archived` event
                                   ))
-                                  .close();
+                                      .close();
         }
 
         @Test
@@ -556,12 +556,12 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext.newInstance()
-                                  .with(new EventDiscardingAggregateRepository())
-                                  .receivesCommands(create, start)
-                                  .receivesEvent(archived)
-                                  .assertThat(emittedEvents(AggProjectArchived.class))
-                                  .close();
+            MultitenantBlackBoxContext.newInstance()
+                                      .with(new EventDiscardingAggregateRepository())
+                                      .receivesCommands(create, start)
+                                      .receivesEvent(archived)
+                                      .assertThat(emittedEvents(AggProjectArchived.class))
+                                      .close();
         }
     }
 

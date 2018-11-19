@@ -51,7 +51,7 @@ import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.ShardingReset;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.MultitenantBlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -80,7 +80,7 @@ class ProjectionEndToEndTest {
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
-        BlackBoxBoundedContext
+        MultitenantBlackBoxContext
                 .newInstance()
                 .with(new EntitySubscriberProjection.Repository(),
                       new TestProjection.Repository())
@@ -108,12 +108,12 @@ class ProjectionEndToEndTest {
     void receiveExternal() {
         TenantId tenantId = GivenTenantId.newUuid();
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
-        BlackBoxBoundedContext sender = BlackBoxBoundedContext
+        MultitenantBlackBoxContext sender = MultitenantBlackBoxContext
                 .newBuilder()
                 .withTenant(tenantId)
                 .build()
                 .with(new OrganizationProjection.Repository());
-        BlackBoxBoundedContext receiver = BlackBoxBoundedContext
+        MultitenantBlackBoxContext receiver = MultitenantBlackBoxContext
                 .newBuilder()
                 .withTenant(tenantId)
                 .build()

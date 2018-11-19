@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
 
 /**
- * The builder of a {@link BlackBoxBoundedContext}.
+ * The builder of a {@link MultitenantBlackBoxContext}.
  */
 public class BlackBoxBuilder {
 
@@ -78,8 +78,8 @@ public class BlackBoxBuilder {
         return enricher;
     }
 
-    public BlackBoxBoundedContext build() {
-        return new BlackBoxBoundedContext(this);
+    public MultitenantBlackBoxContext build() {
+        return new MultitenantBlackBoxContext(this);
     }
 
     /**

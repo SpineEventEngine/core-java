@@ -33,7 +33,7 @@ class BlackBoxBuilderTest {
     @Test
     @DisplayName("build the bounded context")
     void build() {
-        BlackBoxBoundedContext boundedContext =
+        MultitenantBlackBoxContext boundedContext =
                 new BlackBoxBuilder().withTenant(GivenTenantId.newUuid())
                                      .withEnricher(Enricher.newBuilder()
                                                            .build())

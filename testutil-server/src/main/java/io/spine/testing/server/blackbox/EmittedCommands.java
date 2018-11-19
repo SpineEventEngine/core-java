@@ -28,7 +28,7 @@ import io.spine.core.CommandClass;
 import java.util.List;
 
 /**
- * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ * Provides information on commands emitted in the {@link MultitenantBlackBoxContext Bounded Context}.
  *
  * @author Alexander Yevsyukov
  */

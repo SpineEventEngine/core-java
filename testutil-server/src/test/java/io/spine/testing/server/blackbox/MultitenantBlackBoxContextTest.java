@@ -54,14 +54,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(ShardingReset.class)
 @DisplayName("Black Box Bounded Context should")
-class BlackBoxBoundedContextTest {
+class MultitenantBlackBoxContextTest {
 
-    private BlackBoxBoundedContext projects;
+    private MultitenantBlackBoxContext projects;
 
     @BeforeEach
     void setUp() {
-        projects = BlackBoxBoundedContext.newInstance()
-                                         .with(new BbProjectRepository(),
+        projects = MultitenantBlackBoxContext.newInstance()
+                                             .with(new BbProjectRepository(),
                                                new BbProjectViewRepository());
     }
 
@@ -182,7 +182,7 @@ class BlackBoxBoundedContextTest {
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
-                BlackBoxBoundedContext
+                MultitenantBlackBoxContext
                         .newInstance()
                         .with(new RepositoryThrowingExceptionOnClose() {
                             @Override

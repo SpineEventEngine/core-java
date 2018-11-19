@@ -23,13 +23,13 @@
  * Such a tests would provide an ability to test complex systems without setting up 
  * the infrastructure.
  * 
- * <p>One such black box example is for {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext
+ * <p>One such black box example is for {@link io.spine.testing.server.blackbox.MultitenantBlackBoxContext
  * Bounded Context testing}. It allows sending Commands and Events to the 
  * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
  * inside of the Bounded Context.
  * 
  * @see io.spine.testing.client.blackbox
- * @see io.spine.testing.server.blackbox.BlackBoxBoundedContext
+ * @see io.spine.testing.server.blackbox.MultitenantBlackBoxContext
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
