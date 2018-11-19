@@ -22,6 +22,8 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.grpc.MemoizingObserver;
@@ -34,9 +36,15 @@ import io.spine.server.event.EventBus;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static java.util.Collections.singletonList;
 
 /**
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
@@ -87,6 +95,134 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
             checkNotNull(repository);
             boundedContext.register(repository);
         }
+        return thisRef();
+    }
+
+    /**
+     * Sends off a provided command to the Bounded Context.
+     *
+     * @param domainCommand
+     *         a domain command to be dispatched to the Bounded Context
+     * @return current instance
+     */
+    public T receivesCommand(Message domainCommand) {
+        return this.receivesCommands(singletonList(domainCommand));
+    }
+
+    /**
+     * Sends off provided commands to the Bounded Context.
+     *
+     * @param firstCommand
+     *         a domain command to be dispatched to the Bounded Context first
+     * @param secondCommand
+     *         a domain command to be dispatched to the Bounded Context second
+     * @param otherCommands
+     *         optional domain commands to be dispatched to the Bounded Context
+     *         in supplied order
+     * @return current instance
+     */
+    public T
+    receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
+        return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
+    }
+
+    /**
+     * Sends off a provided command to the Bounded Context.
+     *
+     * @param domainCommands
+     *         a list of domain commands to be dispatched to the Bounded Context
+     * @return current instance
+     */
+    private T receivesCommands(Collection<Message> domainCommands) {
+        input.receivesCommands(domainCommands);
+        return thisRef();
+    }
+
+    /**
+     * Sends off a provided event to the Bounded Context.
+     *
+     * @param messageOrEvent
+     *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is passed, it
+     *         will be posted to {@link EventBus} as is.
+     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
+     *         event message and posted to the bus.
+     * @return current instance
+     */
+    public T receivesEvent(Message messageOrEvent) {
+        return this.receivesEvents(singletonList(messageOrEvent));
+    }
+
+    /**
+     * Sends off provided events to the Bounded Context.
+     *
+     * <p>The method accepts event messages or instances of {@link io.spine.core.Event}.
+     * If an instance of {@code Event} is passed, it will be posted to {@link EventBus} as is.
+     * Otherwise, an instance of {@code Event} will be generated basing on the passed event
+     * message and posted to the bus.
+     *
+     * @param firstEvent
+     *         a domain event to be dispatched to the Bounded Context first
+     * @param secondEvent
+     *         a domain event to be dispatched to the Bounded Context second
+     * @param otherEvents
+     *         optional domain events to be dispatched to the Bounded Context
+     *         in supplied order
+     * @return current instance
+     */
+    @SuppressWarnings("unused")
+    public T
+    receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+        return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    /**
+     * Sends off events using the specified producer to the Bounded Context.
+     *
+     * <p>The method is needed to route events based on a proper producer ID.
+     *
+     * @param producerId
+     *         the {@linkplain io.spine.core.EventContext#getProducerId() producer} for events
+     * @param firstEvent
+     *         a domain event to be dispatched to the Bounded Context first
+     * @param otherEvents
+     *         optional domain events to be dispatched to the Bounded Context
+     *         in supplied order
+     * @return current instance
+     */
+    public T
+    receivesEventsProducedBy(Object producerId,
+                             EventMessage firstEvent, EventMessage... otherEvents) {
+        List<EventMessage> eventMessages = asList(firstEvent, otherEvents);
+        TestEventFactory customFactory = newEventFactory(producerId);
+        List<Message> events = eventMessages.stream()
+                                            .map(customFactory::createEvent)
+                                            .collect(Collectors.toList());
+        return this.receivesEvents(events);
+    }
+
+    /**
+     * Sends off provided events to the Bounded Context.
+     *
+     * @param domainEvents
+     *         a list of domain event to be dispatched to the Bounded Context
+     * @return current instance
+     */
+    private T receivesEvents(Collection<Message> domainEvents) {
+        input.receivesEvents(domainEvents);
+        return thisRef();
+    }
+
+    public T importsEvent(Message eventOrMessage) {
+        return this.importAll(singletonList(eventOrMessage));
+    }
+
+    public T
+    importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+        return this.importAll(asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    private T importAll(Collection<Message> domainEvents) {
+        input.importsEvents(domainEvents);
         return thisRef();
     }
 
@@ -145,10 +281,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     @SuppressWarnings("unchecked" /* See Javadoc. */)
     private T thisRef() {
         return (T) this;
-    }
-
-    protected BlackBoxInput input() {
-        return input;
     }
 
     protected BlackBoxOutput output() {
