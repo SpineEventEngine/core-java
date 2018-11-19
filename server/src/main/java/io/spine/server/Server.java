@@ -225,6 +225,11 @@ public final class Server implements Logging {
          *
          * <p>If {@code StorageFactory} was not directly set to the builder, an instance of
          * {@code InMemoryStorageFactory} will be used.
+         *
+         * @implNote  Even though the instance of {@code InMemoryStorageFactory} is created as
+         * single-tenant, a multi-tenant copy of the factory would be {@linkplain
+         * io.spine.server.storage.memory.InMemoryStorageFactory#copyFor(io.spine.core.BoundedContextName, boolean)
+         * created} for a multi-tenant Bounded Context.
          */
         private void ensureStorageFactory() {
             if (storageFactory == null) {
