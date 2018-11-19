@@ -57,12 +57,6 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
         };
     }
 
-    protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
-                                                              boolean multitenant,
-                                                              Class<? extends Entity> entityClass) {
-        return new InMemoryRecordStorage<>(spec, multitenant, entityClass);
-    }
-
     StorageSpec<I> getSpec() {
         return spec;
     }

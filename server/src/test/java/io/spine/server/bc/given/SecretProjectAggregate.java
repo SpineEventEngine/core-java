@@ -31,9 +31,6 @@ import io.spine.test.bc.event.BcProjectStarted;
 
 import java.util.List;
 
-/**
- * @author Alexander Yevsyukov
- */
 class SecretProjectAggregate
         extends Aggregate<String, SecretProject, SecretProjectVBuilder> {
     private SecretProjectAggregate(String id) {

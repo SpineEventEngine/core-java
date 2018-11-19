@@ -117,7 +117,6 @@ public final class CommandRouting<I>
     public <M extends CommandMessage> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
         Optional<? extends Route<CommandMessage, CommandContext, I>> optional = doGet(commandClass);
         if (optional.isPresent()) {
-            @SuppressWarnings("unchecked") // Cast to external API.
             CommandRoute<I, M> route = (CommandRoute<I, M>) optional.get();
             return Optional.of(route);
         }

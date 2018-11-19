@@ -33,14 +33,12 @@ import static io.grpc.Status.INVALID_ARGUMENT;
 
 /**
  * Utility class for working with {@link Status}es.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 public class Statuses {
 
+    /** Prevent instantiation of this utility class. */
     private Statuses() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

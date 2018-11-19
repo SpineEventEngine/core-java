@@ -24,9 +24,6 @@ import com.google.protobuf.Empty;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.bc.ProjectId;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class ProjectPmRepo
         extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
 }

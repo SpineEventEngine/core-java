@@ -28,9 +28,6 @@ import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.validate.EmptyVBuilder;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class ProjectReport
         extends Projection<ProjectId, Empty, EmptyVBuilder> {
 
@@ -39,6 +36,7 @@ public class ProjectReport
     }
 
     @Subscribe
+    @SuppressWarnings("unused")
     void on(BcProjectCreated event, EventContext context) {
         // Do nothing. We have the method so that there's one event class exposed
         // by the repository.

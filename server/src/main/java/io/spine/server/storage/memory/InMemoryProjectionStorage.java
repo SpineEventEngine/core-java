@@ -39,7 +39,6 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  * The in-memory implementation of {@link ProjectionStorage}.
  *
  * @param <I> the type of stream projection IDs
- * @author Alexander Litus
  */
 public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
@@ -49,12 +48,7 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     /** The time of the last handled event per tenant. */
     private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
 
-    public static <I>
-    InMemoryProjectionStorage<I> newInstance(InMemoryRecordStorage<I> entityStorage) {
-        return new InMemoryProjectionStorage<>(entityStorage);
-    }
-
-    private InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
+    InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
         super(recordStorage.isMultitenant());
         this.recordStorage = recordStorage;
     }

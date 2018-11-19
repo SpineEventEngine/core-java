@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import io.spine.core.BoundedContextName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
@@ -31,8 +32,6 @@ import io.spine.server.projection.ProjectionStorage;
  * A factory for creating storages used by repositories,
  * {@link io.spine.server.event.EventStore EventStore},
  * and {@link io.spine.server.stand.Stand Stand}.
- *
- * @author Alexander Yevsyukov
  */
 public interface StorageFactory extends AutoCloseable {
 
@@ -88,4 +87,10 @@ public interface StorageFactory extends AutoCloseable {
      *         if the factory is single-tenant
      */
     StorageFactory toSingleTenant();
+
+    /**
+     * Creates a new instance for serving a {@code BoundedContext} with the passed name
+     * and multi-tenancy status.
+     */
+    StorageFactory copyFor(BoundedContextName name, boolean multitenant);
 }

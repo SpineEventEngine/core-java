@@ -18,39 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
-
-import io.grpc.stub.StreamObserver;
-import io.spine.core.Event;
-import io.spine.core.Response;
-import io.spine.core.Responses;
-import io.spine.server.event.grpc.EventStoreGrpc;
-
 /**
- * gRPC service over the locally running implementation of {@link EventStore}.
+ * This package provides a testing utility for testing Spine-based client applications that
+ * use gRPC for sending commands and querying the backend.
  */
-final class GrpcService extends EventStoreGrpc.EventStoreImplBase {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.client.grpc;
 
-    private final EventStore eventStore;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    GrpcService(EventStore eventStore) {
-        super();
-        this.eventStore = eventStore;
-    }
-
-    @Override
-    public void append(Event request, StreamObserver<Response> responseObserver) {
-        try {
-            eventStore.append(request);
-            responseObserver.onNext(Responses.ok());
-            responseObserver.onCompleted();
-        } catch (RuntimeException e) {
-            responseObserver.onError(e);
-        }
-    }
-
-    @Override
-    public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-        eventStore.read(request, responseObserver);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

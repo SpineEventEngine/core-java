@@ -208,12 +208,10 @@ public class Acknowledgements {
     private static class RejectionFilter<T extends RejectionMessage> implements Predicate<Event> {
 
         private final TypeUrl typeUrl;
-        private final Class<T> rejectionType;
         private final RejectionCriterion<T> predicate;
 
         private RejectionFilter(Class<T> rejectionType, RejectionCriterion<T> predicate) {
             this.typeUrl = TypeUrl.of(rejectionType);
-            this.rejectionType = rejectionType;
             this.predicate = predicate;
         }
 

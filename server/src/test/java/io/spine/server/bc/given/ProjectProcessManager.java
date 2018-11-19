@@ -31,9 +31,6 @@ import io.spine.test.bc.command.BcCreateProject;
 import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.validate.EmptyVBuilder;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class ProjectProcessManager
         extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
 
@@ -49,6 +46,7 @@ public class ProjectProcessManager
     }
 
     @Subscribe
+    @SuppressWarnings("unused")
     public void on(BcProjectCreated event, EventContext ctx) {
         // Do nothing, just watch.
     }

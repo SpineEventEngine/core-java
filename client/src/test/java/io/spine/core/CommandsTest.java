@@ -33,7 +33,7 @@ import io.spine.test.commands.CmdCreateProject;
 import io.spine.test.commands.CmdStartProject;
 import io.spine.test.commands.CmdStopProject;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.client.c.CreateTask;
+import io.spine.testing.client.command.TestCommandMessage;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
@@ -159,7 +159,7 @@ class CommandsTest {
     @Test
     @DisplayName("extract message from given command")
     void extractMessage() {
-        CommandMessage message = CreateTask
+        CommandMessage message = TestCommandMessage
                 .newBuilder()
                 .setId(Identifier.newUuid())
                 .build();
@@ -258,7 +258,7 @@ class CommandsTest {
         TypeName typeName = CommandEnvelope.of(command)
                                            .getTypeName();
         assertNotNull(typeName);
-        assertEquals(TypeName.of(CreateTask.class), typeName);
+        assertEquals(TypeName.of(TestCommandMessage.class), typeName);
     }
 
     @Test
@@ -266,7 +266,7 @@ class CommandsTest {
     void getCommandTypeUrl() {
         ActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(CommandsTest.class);
-        CommandMessage message = CreateTask
+        CommandMessage message = TestCommandMessage
                 .newBuilder()
                 .setId(Identifier.newUuid())
                 .build();
@@ -277,6 +277,6 @@ class CommandsTest {
                                          .getTypeName()
                                          .toUrl();
 
-        assertEquals(TypeUrl.of(CreateTask.class), typeUrl);
+        assertEquals(TypeUrl.of(TestCommandMessage.class), typeUrl);
     }
 }

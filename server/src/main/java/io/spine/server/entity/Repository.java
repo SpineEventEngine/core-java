@@ -47,7 +47,6 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -96,7 +95,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected final EntityClass<E> entityClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            Class<E> cast = (Class<E>) ENTITY.getArgumentIn(getClass());
+            Class<E> cast = (Class<E>) GenericParameter.ENTITY.getArgumentIn(getClass());
             entityClass = getModelClass(cast);
         }
         return entityClass;

@@ -18,39 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.testing.client.grpc.given;
 
-import io.grpc.stub.StreamObserver;
-import io.spine.core.Event;
-import io.spine.core.Response;
-import io.spine.core.Responses;
-import io.spine.server.event.grpc.EventStoreGrpc;
+import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.testing.client.grpc.Table;
 
-/**
- * gRPC service over the locally running implementation of {@link EventStore}.
- */
-final class GrpcService extends EventStoreGrpc.EventStoreImplBase {
-
-    private final EventStore eventStore;
-
-    GrpcService(EventStore eventStore) {
-        super();
-        this.eventStore = eventStore;
-    }
-
-    @Override
-    public void append(Event request, StreamObserver<Response> responseObserver) {
-        try {
-            eventStore.append(request);
-            responseObserver.onNext(Responses.ok());
-            responseObserver.onCompleted();
-        } catch (RuntimeException e) {
-            responseObserver.onError(e);
-        }
-    }
-
-    @Override
-    public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-        eventStore.read(request, responseObserver);
-    }
+public final class GameRepository extends ProcessManagerRepository<Integer, GameProcess, Table> {
 }

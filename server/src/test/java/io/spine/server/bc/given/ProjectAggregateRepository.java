@@ -23,9 +23,6 @@ package io.spine.server.bc.given;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.bc.ProjectId;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class ProjectAggregateRepository
         extends AggregateRepository<ProjectId, ProjectAggregate> {
 }
