@@ -26,7 +26,9 @@ import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.QueryService;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -42,9 +44,11 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
  * verified in using various verifiers (e.g. {@link io.spine.testing.server.blackbox.verify.state.VerifyState
  * state verfier}, {@link VerifyEvents emitted events verifier}).
+ *
+ * @param <T> the type of the bounded context descendant
  */
 @VisibleForTesting
-public abstract class BlackBoxBoundedContext {
+public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     private final BoundedContext boundedContext;
     private final TestActorRequestFactory requestFactory;
@@ -68,6 +72,22 @@ public abstract class BlackBoxBoundedContext {
         this.input = new BlackBoxInput(boundedContext, requestFactory, observer);
         EventBus eventBus = boundedContext.getEventBus();
         this.output = new BlackBoxOutput(eventBus, commandTap, observer);
+    }
+
+    /**
+     * Registers passed repositories with the Bounded Context.
+     *
+     * @param repositories
+     *         repositories to register in the Bounded Context
+     * @return current instance
+     */
+    public final T with(Repository<?, ?>... repositories) {
+        checkNotNull(repositories);
+        for (Repository<?, ?> repository : repositories) {
+            checkNotNull(repository);
+            boundedContext.register(repository);
+        }
+        return thisRef();
     }
 
     /**
@@ -121,8 +141,10 @@ public abstract class BlackBoxBoundedContext {
         return TestEventFactory.newInstance(requestFactory);
     }
 
-    public BoundedContext boundedContext() {
-        return boundedContext;
+    /** Casts this to generic type to provide type covariance in the derived classes. */
+    @SuppressWarnings("unchecked" /* See Javadoc. */)
+    private T thisRef() {
+        return (T) this;
     }
 
     protected BlackBoxInput input() {
@@ -131,5 +153,12 @@ public abstract class BlackBoxBoundedContext {
 
     protected BlackBoxOutput output() {
         return output;
+    }
+
+    protected QueryService queryService() {
+        return QueryService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
     }
 }

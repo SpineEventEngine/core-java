@@ -27,7 +27,6 @@ import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.QueryService;
-import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -41,7 +40,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static java.util.Collections.singletonList;
 
@@ -50,7 +48,8 @@ import static java.util.Collections.singletonList;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
-public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
+public class MultitenantBlackBoxContext
+        extends BlackBoxBoundedContext<MultitenantBlackBoxContext> {
 
     private final TenantId tenantId;
 
@@ -88,22 +87,6 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
      */
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
         return TestActorRequestFactory.newInstance(MultitenantBlackBoxContext.class, tenantId);
-    }
-
-    /**
-     * Registers passed repositories with the Bounded Context.
-     *
-     * @param repositories
-     *         repositories to register in the Bounded Context
-     * @return current instance
-     */
-    public final MultitenantBlackBoxContext with(Repository<?, ?>... repositories) {
-        checkNotNull(repositories);
-        for (Repository<?, ?> repository : repositories) {
-            checkNotNull(repository);
-            boundedContext().register(repository);
-        }
-        return this;
     }
 
     /**
@@ -282,10 +265,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
      */
     @CanIgnoreReturnValue
     public MultitenantBlackBoxContext assertThat(VerifyState verifier) {
-        QueryService queryService = QueryService
-                .newBuilder()
-                .add(boundedContext())
-                .build();
+        QueryService queryService = queryService();
         verifier.verify(queryService);
         return this;
     }

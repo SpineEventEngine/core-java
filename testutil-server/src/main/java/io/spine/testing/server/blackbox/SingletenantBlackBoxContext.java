@@ -28,7 +28,8 @@ import io.spine.testing.client.TestActorRequestFactory;
  * A black box bounded context for writing integration tests in a single tenant environment.
  */
 @VisibleForTesting
-public class SingletenantBlackBoxContext extends BlackBoxBoundedContext {
+public class SingletenantBlackBoxContext
+        extends BlackBoxBoundedContext<SingletenantBlackBoxContext> {
 
     private SingletenantBlackBoxContext() {
         super(false,
