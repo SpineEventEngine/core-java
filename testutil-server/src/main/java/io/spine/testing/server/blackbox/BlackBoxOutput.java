@@ -21,52 +21,67 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
+import io.spine.client.Query;
+import io.spine.client.QueryFactory;
+import io.spine.client.QueryResponse;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContext;
+import io.spine.server.QueryService;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.testing.client.blackbox.Acknowledgements;
+import io.spine.testing.server.blackbox.verify.state.VerifyState;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.testing.client.TestActorRequestFactory.newInstance;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * An output of a {@link BlackBoxBoundedContext}, which provides emitted domain messages.
  */
 @VisibleForTesting
-final class BlackBoxOutput {
+public final class BlackBoxOutput {
 
+    private final BoundedContext boundedContext;
     private final EventBus eventBus;
     private final CommandMemoizingTap commandTap;
     private final MemoizingObserver<Ack> observer;
 
-    BlackBoxOutput(EventBus eventBus,
+    BlackBoxOutput(BoundedContext boundedContext,
                    CommandMemoizingTap commandTap,
                    MemoizingObserver<Ack> observer) {
-        this.eventBus = checkNotNull(eventBus);
+        this.boundedContext = checkNotNull(boundedContext);
+        this.eventBus = checkNotNull(boundedContext.getEventBus());
         this.commandTap = checkNotNull(commandTap);
         this.observer = checkNotNull(observer);
     }
 
     /** Obtains all commands posted to a command bus. */
-    EmittedCommands emittedCommands() {
+    public EmittedCommands emittedCommands() {
         List<Command> commands = allCommands();
         return new EmittedCommands(commands);
     }
 
     /** Obtains acknowledgements of {@linkplain #emittedCommands() emitted commands}. */
-    Acknowledgements commandAcks() {
+    public Acknowledgements commandAcks() {
         return new Acknowledgements(observer.responses());
     }
 
     /**
      * Reads all events emitted in a bounded context.
      */
-    EmittedEvents emittedEvents() {
+    public EmittedEvents emittedEvents() {
         MemoizingObserver<Event> queryObserver = memoizingObserver();
         eventBus.getEventStore()
                 .read(allEventsQuery(), queryObserver);
@@ -74,12 +89,40 @@ final class BlackBoxOutput {
         return new EmittedEvents(responses);
     }
 
+    /**
+     * Reads entities of the specified type for the tenant using {@link #queryService()}.
+     */
+    public <T extends Message> List<T> entities(Class<T> entityType, TenantId tenantId) {
+        QueryFactory queries = newInstance(VerifyState.class, tenantId).query();
+        Query query = queries.all(entityType);
+        return entities(entityType, query);
+    }
+
+    private <T extends Message> List<T> entities(Class<T> entityType, Query query) {
+        MemoizingObserver<QueryResponse> observer = memoizingObserver();
+        queryService().read(query, observer);
+        assertTrue(observer.isCompleted());
+        QueryResponse response = observer.firstResponse();
+        ImmutableList<T> entities = response.getMessagesList()
+                                            .stream()
+                                            .map(state -> AnyPacker.unpack(state, entityType))
+                                            .collect(toImmutableList());
+        return entities;
+    }
+
+    private QueryService queryService() {
+        return QueryService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
+    }
+
     private List<Command> allCommands() {
         return commandTap.commands();
     }
 
     /**
-     * Creates a new {@link io.spine.server.event.EventStreamQuery} without any filters.
+     * Creates a new {@link EventStreamQuery} without any filters.
      */
     private static EventStreamQuery allEventsQuery() {
         return EventStreamQuery.newBuilder()

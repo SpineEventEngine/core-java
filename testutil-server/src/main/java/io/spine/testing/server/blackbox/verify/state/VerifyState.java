@@ -21,25 +21,12 @@
 package io.spine.testing.server.blackbox.verify.state;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.client.Query;
-import io.spine.client.QueryFactory;
-import io.spine.client.QueryResponse;
 import io.spine.core.TenantId;
-import io.spine.grpc.MemoizingObserver;
-import io.spine.server.QueryService;
-import org.junit.jupiter.api.Assertions;
+import io.spine.testing.server.blackbox.BlackBoxOutput;
 
 import java.util.function.Function;
 
-import static com.google.common.collect.ImmutableList.copyOf;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.truth.Truth.assertThat;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.protobuf.AnyPacker.unpackFunc;
-import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static java.util.Collections.singletonList;
 
 /**
@@ -48,37 +35,13 @@ import static java.util.Collections.singletonList;
 @VisibleForTesting
 public abstract class VerifyState {
 
-    private final Query query;
-    private final ImmutableCollection<? extends Message> expectedResult;
-
-    VerifyState(Query query, ImmutableCollection<? extends Message> result) {
-        this.query = query;
-        expectedResult = result;
-    }
-
     /**
      * Verifies the entity states.
      *
-     * @param queryService
-     *         the query service to obtain entity states from
+     * @param output
+     *         the output of a black box bounded context
      */
-    public final void verify(QueryService queryService) {
-        MemoizingObserver<QueryResponse> observer = memoizingObserver();
-        queryService.read(query, observer);
-        Assertions.assertTrue(observer.isCompleted());
-        QueryResponse response = observer.firstResponse();
-        ImmutableList<Message> actualEntities = response.getMessagesList()
-                                                        .stream()
-                                                        .map(unpackFunc())
-                                                        .collect(toImmutableList());
-        compare(expectedResult, actualEntities);
-    }
-
-    /**
-     * Compares the expected and the actual entity states.
-     */
-    protected abstract void compare(ImmutableCollection<? extends Message> expected,
-                                    ImmutableCollection<? extends Message> actual);
+    public abstract void verify(BlackBoxOutput output);
 
     /**
      * Obtains provider of an entity states verifier.
@@ -86,7 +49,8 @@ public abstract class VerifyState {
      * <p>The verifier checks that the system contains exactly the passed entity states.
      *
      * <p>Use the method to verify entities within the
-     * {@linkplain io.spine.testing.server.blackbox.MultitenantBlackBoxContext#tenantId tenant} of a {@link io.spine.testing.server.blackbox.MultitenantBlackBoxContext}.
+     * {@linkplain io.spine.testing.server.blackbox.MultitenantBlackBoxContext#tenantId tenant} of a
+     * {@link io.spine.testing.server.blackbox.MultitenantBlackBoxContext}.
      *
      * @param entityType
      *         the type of the entity to query
@@ -125,14 +89,7 @@ public abstract class VerifyState {
     public static <T extends Message> VerifyState exactly(TenantId tenantId,
                                                           Class<T> entityType,
                                                           Iterable<T> expected) {
-        QueryFactory queries = newInstance(VerifyState.class, tenantId).query();
-        return new VerifyState(queries.all(entityType), copyOf(expected)) {
-            @Override
-            protected void compare(ImmutableCollection<? extends Message> expected,
-                                   ImmutableCollection<? extends Message> actual) {
-                assertThat(actual).containsExactlyElementsIn(expected);
-            }
-        };
+        return new VerifyByTypeForTenant<>(expected, entityType, tenantId);
     }
 
     /**

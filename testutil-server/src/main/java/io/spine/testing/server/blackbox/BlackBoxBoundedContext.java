@@ -78,8 +78,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         MemoizingObserver<Ack> observer = memoizingObserver();
         this.requestFactory = requestFactory;
         this.input = new BlackBoxInput(boundedContext, requestFactory, observer);
-        EventBus eventBus = boundedContext.getEventBus();
-        this.output = new BlackBoxOutput(eventBus, commandTap, observer);
+        this.output = new BlackBoxOutput(boundedContext, commandTap, observer);
     }
 
     /**
