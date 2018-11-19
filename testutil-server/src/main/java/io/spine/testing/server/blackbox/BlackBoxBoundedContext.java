@@ -356,8 +356,7 @@ public class BlackBoxBoundedContext extends AbstractBlackBoxContext {
     @CanIgnoreReturnValue
     public BlackBoxBoundedContext assertThat(VerifyStateByTenant verifyByTenant) {
         VerifyState verifier = verifyByTenant.apply(tenantId);
-        assertThat(verifier);
-        return this;
+        return assertThat(verifier);
     }
 
     private EmittedCommands emittedCommands() {
