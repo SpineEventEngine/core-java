@@ -35,12 +35,27 @@ import io.spine.testing.server.blackbox.verify.state.VerifyState;
 public class SingletenantBlackBoxContext
         extends BlackBoxBoundedContext<SingletenantBlackBoxContext> {
 
-    private SingletenantBlackBoxContext() {
+    private SingletenantBlackBoxContext(Enricher enricher) {
         super(false,
-              Enricher.newBuilder()
-                      .build(),
+              enricher,
               TestActorRequestFactory.newInstance(SingletenantBlackBoxContext.class)
         );
+    }
+
+    /**
+     * Creates a new bounded context with the default configuration.
+     */
+    public static SingletenantBlackBoxContext newInstance() {
+        Enricher enricher = Enricher.newBuilder()
+                                    .build();
+        return new SingletenantBlackBoxContext(enricher);
+    }
+
+    /**
+     * Creates a new bounded context with the specified event enricher.
+     */
+    public static SingletenantBlackBoxContext newInstance(Enricher enricher) {
+        return new SingletenantBlackBoxContext(enricher);
     }
 
     /**
@@ -97,9 +112,5 @@ public class SingletenantBlackBoxContext
     public SingletenantBlackBoxContext assertThat(VerifyState verifier) {
         verifier.verify(output());
         return this;
-    }
-
-    public static SingletenantBlackBoxContext newInstance() {
-        return new SingletenantBlackBoxContext();
     }
 }
