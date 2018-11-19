@@ -66,12 +66,12 @@ final class BlackBoxOutput {
     /**
      * Reads all events emitted in a bounded context.
      */
-    List<Event> readAllEvents() {
+    EmittedEvents emittedEvents() {
         MemoizingObserver<Event> queryObserver = memoizingObserver();
         eventBus.getEventStore()
                 .read(allEventsQuery(), queryObserver);
         List<Event> responses = queryObserver.responses();
-        return responses;
+        return new EmittedEvents(responses);
     }
 
     private List<Command> allCommands() {

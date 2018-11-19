@@ -248,11 +248,6 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
         return this;
     }
 
-    private EmittedEvents emittedEvents() {
-        List<Event> events = readAllEvents();
-        return new EmittedEvents(events);
-    }
-
     /**
      * Executes the provided verifier, which throws an assertion error in case of
      * unexpected results.
@@ -311,9 +306,9 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
     /**
      * Reads all events from the bounded context for the provided tenant.
      */
-    private List<Event> readAllEvents() {
+    private EmittedEvents emittedEvents() {
         TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
-        List<Event> events = tenantAwareRunner.evaluate(() -> output().readAllEvents());
+        EmittedEvents events = tenantAwareRunner.evaluate(() -> output().emittedEvents());
         return events;
     }
 }
