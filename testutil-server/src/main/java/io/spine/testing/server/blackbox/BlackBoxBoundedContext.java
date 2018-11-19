@@ -20,12 +20,12 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
@@ -43,21 +43,18 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  * verified in using various verifiers (e.g. {@link io.spine.testing.server.blackbox.verify.state.VerifyState
  * state verfier}, {@link VerifyEvents emitted events verifier}).
  */
+@VisibleForTesting
 public abstract class BlackBoxBoundedContext {
 
     private final BoundedContext boundedContext;
-    private final CommandMemoizingTap commandTap;
-    private final CommandBus commandBus;
-    private final EventBus eventBus;
-    private final ImportBus importBus;
-    private final MemoizingObserver<Ack> observer;
     private final TestActorRequestFactory requestFactory;
     private final BlackBoxInput input;
+    private final BlackBoxOutput output;
 
     protected BlackBoxBoundedContext(boolean multitenant,
                                      Enricher enricher,
                                      TestActorRequestFactory requestFactory) {
-        this.commandTap = new CommandMemoizingTap();
+        CommandMemoizingTap commandTap = new CommandMemoizingTap();
         this.boundedContext = BoundedContext
                 .newBuilder()
                 .setMultitenant(multitenant)
@@ -66,12 +63,11 @@ public abstract class BlackBoxBoundedContext {
                 .setEventBus(EventBus.newBuilder()
                                      .setEnricher(enricher))
                 .build();
-        this.commandBus = boundedContext.getCommandBus();
-        this.eventBus = boundedContext.getEventBus();
-        this.importBus = boundedContext.getImportBus();
-        this.observer = memoizingObserver();
+        MemoizingObserver<Ack> observer = memoizingObserver();
         this.requestFactory = requestFactory;
         this.input = new BlackBoxInput(boundedContext, requestFactory, observer);
+        EventBus eventBus = boundedContext.getEventBus();
+        this.output = new BlackBoxOutput(eventBus, commandTap, observer);
     }
 
     /**
@@ -129,15 +125,11 @@ public abstract class BlackBoxBoundedContext {
         return boundedContext;
     }
 
-    public MemoizingObserver<Ack> observer() {
-        return observer;
-    }
-
-    public CommandMemoizingTap getCommandTap() {
-        return commandTap;
-    }
-
-    public BlackBoxInput input() {
+    protected BlackBoxInput input() {
         return input;
+    }
+
+    protected BlackBoxOutput output() {
+        return output;
     }
 }

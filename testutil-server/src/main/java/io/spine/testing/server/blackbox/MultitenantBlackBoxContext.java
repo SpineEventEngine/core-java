@@ -24,16 +24,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.core.Ack;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.server.QueryService;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventStreamQuery;
-import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
@@ -47,7 +43,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static java.util.Collections.singletonList;
 
 /**
@@ -57,10 +52,7 @@ import static java.util.Collections.singletonList;
 @VisibleForTesting
 public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
 
-    private final EventBus eventBus;
     private final TenantId tenantId;
-    private final MemoizingObserver<Ack> observer;
-    private final CommandMemoizingTap commandTap;
 
     /**
      * Creates a new multi-tenant instance.
@@ -70,9 +62,6 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
               builder.buildEnricher(),
               requestFactory(builder.buildTenant()));
         this.tenantId = builder.buildTenant();
-        this.commandTap = getCommandTap();
-        this.eventBus = boundedContext().getEventBus();
-        this.observer = observer();
     }
 
     /**
@@ -89,10 +78,6 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
         return new BlackBoxBuilder();
     }
 
-    /*
-     * Utilities for instance initialization.
-     ******************************************************************************/
-
     /**
      * Creates a new {@link io.spine.client.ActorRequestFactory actor request factory} for tests
      * with a provided tenant ID.
@@ -104,10 +89,6 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
         return TestActorRequestFactory.newInstance(MultitenantBlackBoxContext.class, tenantId);
     }
-
-    /*
-     * Methods populating the bounded context with repositories.
-     ******************************************************************************/
 
     /**
      * Registers passed repositories with the Bounded Context.
@@ -124,10 +105,6 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
         }
         return this;
     }
-
-    /*
-     * Methods sending commands to the bounded context.
-     ******************************************************************************/
 
     /**
      * Sends off a provided command to the Bounded Context.
@@ -168,10 +145,6 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
         input().receivesCommands(domainCommands);
         return this;
     }
-
-    /*
-     * Methods sending events to the bounded context.
-     ******************************************************************************/
 
     /**
      * Sends off a provided event to the Bounded Context.
@@ -261,10 +234,6 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
         return this;
     }
 
-    /*
-     * Methods verifying the bounded context behaviour.
-     ******************************************************************************/
-
     /**
      * Verifies emitted events by the passed verifier.
      *
@@ -294,7 +263,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
      */
     @CanIgnoreReturnValue
     public MultitenantBlackBoxContext assertThat(VerifyAcknowledgements verifier) {
-        Acknowledgements acks = commandAcks();
+        Acknowledgements acks = output().commandAcks();
         verifier.verify(acks);
         return this;
     }
@@ -308,7 +277,7 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
      */
     @CanIgnoreReturnValue
     public MultitenantBlackBoxContext assertThat(VerifyCommands verifier) {
-        EmittedCommands commands = emittedCommands();
+        EmittedCommands commands = output().emittedCommands();
         verifier.verify(commands);
         return this;
     }
@@ -339,46 +308,12 @@ public class MultitenantBlackBoxContext extends BlackBoxBoundedContext {
         return assertThat(verifier);
     }
 
-    private EmittedCommands emittedCommands() {
-        List<Command> commands = readAllCommands();
-        return new EmittedCommands(commands);
-    }
-
-    private List<Command> readAllCommands() {
-        return commandTap.commands();
-    }
-
-    private Acknowledgements commandAcks() {
-        return new Acknowledgements(observer.responses());
-    }
-
-    /*
-     * Methods reading the events which were emitted in the bounded context.
-     ******************************************************************************/
-
     /**
      * Reads all events from the bounded context for the provided tenant.
      */
     private List<Event> readAllEvents() {
-        MemoizingObserver<Event> queryObserver = memoizingObserver();
-        TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
-            @Override
-            public void run() {
-                eventBus.getEventStore()
-                        .read(allEventsQuery(), queryObserver);
-            }
-        };
-        operation.execute();
-
-        List<Event> responses = queryObserver.responses();
-        return responses;
-    }
-
-    /**
-     * Creates a new {@link EventStreamQuery} without any filters.
-     */
-    private static EventStreamQuery allEventsQuery() {
-        return EventStreamQuery.newBuilder()
-                               .build();
+        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
+        List<Event> events = tenantAwareRunner.evaluate(() -> output().readAllEvents());
+        return events;
     }
 }
