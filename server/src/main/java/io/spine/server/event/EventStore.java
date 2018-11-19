@@ -23,13 +23,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.TextFormat;
-import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
-import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -70,14 +68,6 @@ public class EventStore implements AutoCloseable {
      */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    /**
-     * Creates new {@link ServiceBuilder} for building {@code EventStore} instance
-     * that will be exposed as a gRPC service.
-     */
-    public static ServiceBuilder newServiceBuilder() {
-        return new ServiceBuilder();
     }
 
     private static void ensureSameTenant(Iterable<Event> events) {
@@ -308,26 +298,6 @@ public class EventStore implements AutoCloseable {
             checkState();
             EventStore result =
                     new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
-            return result;
-        }
-    }
-
-    /**
-     * The builder of {@code EventStore} instance exposed as gRPC service.
-     *
-     * @see io.spine.server.event.grpc.EventStoreGrpc.EventStoreImplBase
-     * EventStoreGrpc.EventStoreImplBase
-     */
-    public static class ServiceBuilder
-            extends AbstractBuilder<ServerServiceDefinition, ServiceBuilder> {
-
-        @Override
-        public ServerServiceDefinition build() {
-            checkState();
-            EventStore eventStore =
-                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
-            EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
-            ServerServiceDefinition result = grpcService.bindService();
             return result;
         }
     }
