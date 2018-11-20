@@ -76,6 +76,7 @@ import static io.spine.server.event.given.EventBusTestEnv.eventBusBuilder;
 import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.server.event.given.EventBusTestEnv.newTask;
 import static io.spine.server.event.given.EventBusTestEnv.readEvents;
+import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -86,7 +87,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(ShardingReset.class)
@@ -134,7 +134,7 @@ public class EventBusTest {
     @Test
     @DisplayName("return associated EventStore")
     void returnEventStore() {
-        EventStore eventStore = mock(EventStore.class);
+        EventStore eventStore = eventStore();
         EventBus result = EventBus.newBuilder()
                                   .setEventStore(eventStore)
                                   .build();
@@ -270,7 +270,7 @@ public class EventBusTest {
     @Test
     @DisplayName("unregister registries on close")
     void unregisterRegistriesOnClose() throws Exception {
-        EventStore eventStore = spy(mock(EventStore.class));
+        EventStore eventStore = eventStore();
         EventBus eventBus = EventBus
                 .newBuilder()
                 .setEventStore(eventStore)
@@ -283,7 +283,8 @@ public class EventBusTest {
 
         assertTrue(eventBus.getDispatchers(eventClass)
                            .isEmpty());
-        verify(eventStore).close();
+
+        assertFalse(eventStore.isOpen());
     }
 
     @Nested

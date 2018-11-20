@@ -445,11 +445,12 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             checkNotNull(eventStoreStreamExecutor);
 
             if (eventStore == null) {
-                eventStore = EventStore.newBuilder()
-                                       .setStreamExecutor(eventStoreStreamExecutor)
-                                       .setStorageFactory(storageFactory)
-                                       .setLogger(EventStore.log())
-                                       .build();
+                eventStore = EventStore
+                        .newBuilder()
+                        .setStreamExecutor(eventStoreStreamExecutor)
+                        .setStorageFactory(storageFactory)
+                        .setLogger(EventStore.log())
+                        .build();
             }
 
             if (eventValidator == null) {
