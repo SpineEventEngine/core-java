@@ -64,7 +64,14 @@ public final class GivenUserId {
     /**
      * Generates a new UUID-based {@code UserId}.
      *
-     * @apiNote This method is an alias for {@link #newUuid()}
+     * @apiNote This method is an alias for {@link #newUuid()}. The reason for having it this.
+     * The code {@code GivenUserId.newUuid()} is somewhat awkward to read and pronounce.
+     * Some tests or test environments require setup where the code {@code GivenUserId.generated()}
+     * reads natural as it tells a story. In other places having {@code newUuid()}
+     * (which is statically imported) looks better, and it also clearly tells what it does.
+     *
+     * <p>So, this method is meant to be used with the class name, while its
+     * {@linkplain #newUuid() sibling} is meant to be used when statically imported.
      */
     public static UserId generated() {
         return newUuid();
