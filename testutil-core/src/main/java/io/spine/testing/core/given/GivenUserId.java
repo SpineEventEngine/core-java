@@ -23,6 +23,7 @@ package io.spine.testing.core.given;
 import io.spine.base.Identifier;
 import io.spine.core.UserId;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -47,7 +48,7 @@ public final class GivenUserId {
      */
     public static UserId of(String value) {
         checkNotNull(value);
-
+        checkArgument(!value.isEmpty(), "UserId cannot be empty");
         return UserId.newBuilder()
                      .setValue(value)
                      .build();
@@ -58,5 +59,22 @@ public final class GivenUserId {
      */
     public static UserId newUuid() {
         return of(USER_PREFIX + Identifier.newUuid());
+    }
+
+    /**
+     * Generates a new UUID-based {@code UserId}.
+     *
+     * @apiNote This method is an alias for {@link #newUuid()}
+     */
+    public static UserId generated() {
+        return newUuid();
+    }
+
+    /**
+     * Creates a test value of {@code UserId} based on the simple class name of a test suite.
+     */
+    public static UserId byTestClass(Class<?> cls) {
+        checkNotNull(cls);
+        return of(cls.getSimpleName());
     }
 }

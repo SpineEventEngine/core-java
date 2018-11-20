@@ -45,7 +45,6 @@ import java.util.Optional;
  * An aggregate that fires a {@linkplain Pair pair} with an optional upon handling a command,
  * an event or a rejection.
  *
- * @author Alexander Yevsyukkov
  * @see io.spine.server.aggregate.AggregateTest.CreateSingleEventForPair
  */
 public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder> {

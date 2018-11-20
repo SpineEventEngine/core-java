@@ -40,9 +40,9 @@ import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
+import io.spine.testing.core.given.GivenUserId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.TestValues.randomString;
 
 public class ProjectionRepositoryTestEnv {
@@ -164,10 +164,7 @@ public class ProjectionRepositoryTestEnv {
 
         public static OrganizationEstablished organizationEstablished() {
             OrganizationId id = Identifier.generate(OrganizationId.class);
-            UserId head = UserId
-                    .newBuilder()
-                    .setValue(newUuid())
-                    .build();
+            UserId head = GivenUserId.generated();
             return OrganizationEstablished
                     .newBuilder()
                     .setId(id)

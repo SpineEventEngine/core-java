@@ -44,8 +44,6 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 /**
  * An aggregate class for {@linkplain
  * io.spine.server.aggregate.IdempotencyGuardTest IdempotencyGuard tests}.
- *
- * @author Mykhailo Drachuk
  */
 public class IgTestAggregate
         extends Aggregate<ProjectId, Project, ProjectVBuilder> {
