@@ -28,11 +28,11 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
  * @param <E> the type of emitted messages
  * @author Alexander Yevsyukov
  */
-public abstract class DelegatingVerify<E extends EmittedMessages> implements VerifyMessages<E> {
+public abstract class DelegatingVerify<E extends EmittedMessages> implements Verify<E> {
 
-    private final VerifyMessages<E> delegate;
+    private final Verify<E> delegate;
 
-    protected DelegatingVerify(VerifyMessages<E> delegate) {
+    protected DelegatingVerify(Verify<E> delegate) {
         this.delegate = delegate;
     }
 

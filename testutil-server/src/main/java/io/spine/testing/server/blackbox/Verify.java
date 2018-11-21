@@ -26,7 +26,7 @@ package io.spine.testing.server.blackbox;
  * @param <E> the type of emitted messages
  * @author Alexander Yevsyukov
  */
-public interface VerifyMessages<E extends EmittedMessages> {
+public interface Verify<E extends EmittedMessages> {
 
     /**
      * Verifies passed messages by invoking appropriate assertions.

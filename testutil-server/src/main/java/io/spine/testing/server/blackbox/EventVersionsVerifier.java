@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * An event verifier which checks that the emitted events have the given version numbers.
  */
-public final class EventVersionsVerifier implements VerifyMessages<EmittedEvents> {
+public final class EventVersionsVerifier implements Verify<EmittedEvents> {
 
     private final int[] versions;
 
