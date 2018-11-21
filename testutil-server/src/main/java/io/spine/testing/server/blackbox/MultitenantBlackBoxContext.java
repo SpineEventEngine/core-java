@@ -22,7 +22,7 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
+import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.server.event.Enricher;
 import io.spine.server.tenant.TenantAwareRunner;
@@ -53,7 +53,8 @@ public class MultitenantBlackBoxContext
     /**
      * Switches the bounded context to operate on behalf of the specified tenant.
      *
-     * @param tenant new tenant ID
+     * @param tenant
+     *         new tenant ID
      * @return current instance
      */
     public MultitenantBlackBoxContext withTenant(TenantId tenant) {
@@ -110,8 +111,7 @@ public class MultitenantBlackBoxContext
 
         @Override
         public boolean test(Command command) {
-            TenantId commandTenant = CommandEnvelope.of(command)
-                                                    .getTenantId();
+            TenantId commandTenant = Commands.getTenantId(command);
             return commandTenant.equals(tenantToMatch);
         }
     }
