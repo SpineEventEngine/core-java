@@ -31,16 +31,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 
 /**
- * Queries entities by the state type and verifies that
- * entity states match the {@linkplain #expected specified} ones.
+ * Verifies that all entities of a type match expected ones in the exact order.
  */
 @VisibleForTesting
-class VerifyByType<T extends Message> extends VerifyState {
+class AllOfTypeMatch<T extends Message> extends VerifyState {
 
     private final Iterable<T> expected;
     private final Class<T> entityType;
 
-    VerifyByType(Iterable<T> expected, Class<T> entityType) {
+    AllOfTypeMatch(Iterable<T> expected, Class<T> entityType) {
         super();
         this.expected = checkNotNull(expected);
         this.entityType = checkNotNull(entityType);

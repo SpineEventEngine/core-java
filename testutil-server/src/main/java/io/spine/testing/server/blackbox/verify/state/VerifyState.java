@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class VerifyState {
 
     /**
-     * Verifies the entity states.
+     * Queries and verifies entity states.
      *
      * @param boundedContext
      *         the bounded context to query
@@ -101,6 +101,6 @@ public abstract class VerifyState {
      */
     public static <T extends Message> VerifyState exactly(Class<T> entityType,
                                                           Iterable<T> expected) {
-        return new VerifyByType<>(expected, entityType);
+        return new AllOfTypeMatch<>(expected, entityType);
     }
 }
