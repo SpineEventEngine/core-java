@@ -284,4 +284,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     protected BlackBoxOutput output() {
         return output;
     }
+
+    protected BoundedContext boundedContext() {
+        return boundedContext;
+    }
 }

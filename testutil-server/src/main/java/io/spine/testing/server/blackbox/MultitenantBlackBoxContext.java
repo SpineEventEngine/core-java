@@ -121,15 +121,13 @@ public class MultitenantBlackBoxContext
     /**
      * Asserts the state of an entity using the specified tenant ID.
      *
-     * @param tenantId
-     *         the tenant ID to use for entities query
      * @param verifier
      *         a verifier of entity states
      * @return current instance
      */
     @CanIgnoreReturnValue
-    public MultitenantBlackBoxContext assertThat(TenantId tenantId, VerifyState verifier) {
-        verifier.verify(output());
+    public MultitenantBlackBoxContext assertThat(VerifyState verifier) {
+        verifier.verify(boundedContext(), requestFactory(tenantId).query());
         return this;
     }
 

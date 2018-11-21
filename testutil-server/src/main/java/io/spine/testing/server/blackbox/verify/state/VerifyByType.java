@@ -22,9 +22,10 @@ package io.spine.testing.server.blackbox.verify.state;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import io.spine.testing.server.blackbox.BlackBoxOutput;
+import io.spine.client.Query;
+import io.spine.client.QueryFactory;
 
-import java.util.List;
+import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
@@ -32,8 +33,6 @@ import static com.google.common.truth.Truth.assertThat;
 /**
  * Queries entities by the state type and verifies that
  * entity states match the {@linkplain #expected specified} ones.
- *
- * <p>Purposed for verification of entity state in a single tenant application.
  */
 @VisibleForTesting
 class VerifyByType<T extends Message> extends VerifyState {
@@ -42,13 +41,18 @@ class VerifyByType<T extends Message> extends VerifyState {
     private final Class<T> entityType;
 
     VerifyByType(Iterable<T> expected, Class<T> entityType) {
+        super();
         this.expected = checkNotNull(expected);
         this.entityType = checkNotNull(entityType);
     }
 
     @Override
-    public void verify(BlackBoxOutput output) {
-        List<T> actual = output.entities(entityType);
-        assertThat(actual).containsExactlyElementsIn(expected);
+    protected Query query(QueryFactory factory) {
+        return factory.all(entityType);
+    }
+
+    @Override
+    protected void verify(Collection<? extends Message> actualEntities) {
+        assertThat(actualEntities).containsExactlyElementsIn(expected);
     }
 }

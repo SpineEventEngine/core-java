@@ -21,11 +21,22 @@
 package io.spine.testing.server.blackbox.verify.state;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.core.TenantId;
-import io.spine.testing.server.blackbox.BlackBoxOutput;
+import io.spine.client.Query;
+import io.spine.client.QueryFactory;
+import io.spine.client.QueryResponse;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContext;
+import io.spine.server.QueryService;
 
+import java.util.Collection;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verifies the states of entities currently present in a bounded context.
@@ -36,10 +47,36 @@ public abstract class VerifyState {
     /**
      * Verifies the entity states.
      *
-     * @param output
-     *         the output of a black box bounded context
+     * @param boundedContext
+     *         the bounded context to query
+     * @param queryFactory
+     *         the factory to create queries
      */
-    public abstract void verify(BlackBoxOutput output);
+    public void verify(BoundedContext boundedContext, QueryFactory queryFactory) {
+        Query query = query(queryFactory);
+        MemoizingObserver<QueryResponse> observer = memoizingObserver();
+        QueryService queryService = QueryService.newBuilder()
+                                                .add(boundedContext)
+                                                .build();
+        queryService.read(query, observer);
+        assertTrue(observer.isCompleted());
+        QueryResponse response = observer.firstResponse();
+        ImmutableList<? extends Message> entities = response.getMessagesList()
+                                                            .stream()
+                                                            .map(AnyPacker::unpack)
+                                                            .collect(toImmutableList());
+        verify(entities);
+    }
+
+    /**
+     * Obtains the query for entities to be verified.
+     */
+    protected abstract Query query(QueryFactory factory);
+
+    /**
+     * Verifies actual entity states and throws an assertion error if the verification is failed.
+     */
+    protected abstract void verify(Collection<? extends Message> actualEntities);
 
     /**
      * The shortcut of {@link #exactly(Class, Iterable)} to verify that
@@ -49,25 +86,6 @@ public abstract class VerifyState {
         @SuppressWarnings("unchecked" /* The cast is totally safe. */)
         Class<T> messageClass = (Class<T>) expected.getClass();
         return exactly(messageClass, singletonList(expected));
-    }
-
-    /**
-     * Obtains a verifier which checks that the system contains exactly the passed entity states.
-     *
-     * @param <T>
-     *         the type of the entity state
-     * @param tenantId
-     *         the tenant ID of queried storage
-     * @param entityType
-     *         the type of the entity to query
-     * @param expected
-     *         the expected entity states
-     * @return new instance of {@code VerifyState}
-     */
-    public static <T extends Message> VerifyState exactly(TenantId tenantId,
-                                                          Class<T> entityType,
-                                                          Iterable<T> expected) {
-        return new VerifyByTypeForTenant<>(expected, entityType, tenantId);
     }
 
     /**

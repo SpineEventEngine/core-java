@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -44,6 +45,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * An input of a {@link BlackBoxBoundedContext}, which receives domain messages.
  */
+@VisibleForTesting
 final class BlackBoxInput {
 
     private final CommandBus commandBus;
@@ -72,7 +74,8 @@ final class BlackBoxInput {
      */
     void receivesCommands(Collection<Message> domainCommands) {
         List<Command> commands = domainCommands.stream()
-                                               .map(this::command)
+                                               .map(commandOrMessage -> command(commandOrMessage,
+                                                                                requestFactory))
                                                .collect(toList());
         commandBus.post(commands, observer);
     }
@@ -96,7 +99,7 @@ final class BlackBoxInput {
     private List<Event> toEvents(Collection<Message> domainEvents) {
         List<Event> events = newArrayListWithCapacity(domainEvents.size());
         for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent));
+            events.add(event(domainEvent, eventFactory));
         }
         return events;
     }
@@ -107,9 +110,11 @@ final class BlackBoxInput {
      *
      * @param eventOrMessage
      *         a domain event message or {@code Event}
+     * @param eventFactory
+     *         the event factory to produce events with
      * @return a newly created {@code Event} instance or passed {@code Event}
      */
-    private Event event(Message eventOrMessage) {
+    private static Event event(Message eventOrMessage, TestEventFactory eventFactory) {
         if (eventOrMessage instanceof Event) {
             return (Event) eventOrMessage;
         }
@@ -117,7 +122,8 @@ final class BlackBoxInput {
         return eventFactory.createEvent(message);
     }
 
-    private Command command(Message commandOrMessage) {
+    private static Command command(Message commandOrMessage,
+                                   TestActorRequestFactory requestFactory) {
         if (commandOrMessage instanceof Command) {
             return (Command) commandOrMessage;
         }
