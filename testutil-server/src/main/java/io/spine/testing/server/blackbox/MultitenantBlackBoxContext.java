@@ -21,14 +21,16 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.event.Enricher;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.client.blackbox.Acknowledgements;
-import io.spine.testing.client.blackbox.VerifyAcknowledgements;
-import io.spine.testing.server.blackbox.verify.state.VerifyState;
+
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -60,80 +62,31 @@ public class MultitenantBlackBoxContext
         return this;
     }
 
-    /**
-     * Verifies emitted events by the passed verifier.
-     *
-     * @param verifier
-     *         a verifier that checks the events emitted in this Bounded Context
-     * @return current instance
-     */
-    @CanIgnoreReturnValue
-    public MultitenantBlackBoxContext assertThat(VerifyEvents verifier) {
-        EmittedEvents events = emittedEvents(tenantId());
-        verifier.verify(events);
-        return this;
-    }
-
-    /**
-     * Executes the provided verifier, which throws an assertion error in case of
-     * unexpected results.
-     *
-     * @param verifier
-     *         a verifier that checks the acknowledgements in this Bounded Context
-     * @return current instance
-     */
-    @CanIgnoreReturnValue
-    public MultitenantBlackBoxContext assertThat(VerifyAcknowledgements verifier) {
-        Acknowledgements acks = output().commandAcks();
-        verifier.verify(acks);
-        return this;
-    }
-
-    /**
-     * Verifies emitted commands by the passed verifier.
-     *
-     * @param verifier
-     *         a verifier that checks the commands emitted in this Bounded Context
-     * @return current instance
-     */
-    @CanIgnoreReturnValue
-    public MultitenantBlackBoxContext assertThat(VerifyCommands verifier) {
-        EmittedCommands commands = output().emittedCommands();
-        verifier.verify(commands);
-        return this;
-    }
-
-    /**
-     * Asserts the state of an entity using the specified tenant ID.
-     *
-     * @param verifier
-     *         a verifier of entity states
-     * @return current instance
-     */
-    @CanIgnoreReturnValue
-    public MultitenantBlackBoxContext assertThat(VerifyState verifier) {
-        verifier.verify(boundedContext(), requestFactory().query());
-        return this;
-    }
-
     @Override
     protected TestActorRequestFactory requestFactory() {
         return requestFactory(tenantId());
+    }
+
+    @Override
+    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
+        List<Command> allCommands = commandTap.commands();
+        List<Command> tenantCommands = allCommands.stream()
+                                                  .filter(new IsTenantCommand(tenantId))
+                                                  .collect(Collectors.toList());
+        return new EmittedCommands(tenantCommands);
+    }
+
+    @Override
+    protected EmittedEvents emittedEvents() {
+        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
+        EmittedEvents events = tenantAwareRunner.evaluate(super::emittedEvents);
+        return events;
     }
 
     private TenantId tenantId() {
         checkState(tenantId != null,
                    "Set a tenant ID before calling receive and assert methods");
         return tenantId;
-    }
-
-    /**
-     * Reads all events from the bounded context for the provided tenant.
-     */
-    private EmittedEvents emittedEvents(TenantId tenantId) {
-        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
-        EmittedEvents events = tenantAwareRunner.evaluate(() -> output().emittedEvents());
-        return events;
     }
 
     /**
@@ -146,5 +99,21 @@ public class MultitenantBlackBoxContext
      */
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
         return TestActorRequestFactory.newInstance(MultitenantBlackBoxContext.class, tenantId);
+    }
+
+    private static class IsTenantCommand implements Predicate<Command> {
+
+        private final TenantId tenantToMatch;
+
+        private IsTenantCommand(TenantId tenantToMatch) {
+            this.tenantToMatch = tenantToMatch;
+        }
+
+        @Override
+        public boolean test(Command command) {
+            TenantId commandTenant = CommandEnvelope.of(command)
+                                                    .getTenantId();
+            return commandTenant.equals(tenantToMatch);
+        }
     }
 }

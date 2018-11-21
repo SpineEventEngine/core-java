@@ -21,18 +21,26 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
+import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventStreamQuery;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.client.blackbox.Acknowledgements;
+import io.spine.testing.client.blackbox.VerifyAcknowledgements;
+import io.spine.testing.server.blackbox.verify.state.VerifyState;
 
 import java.util.Collection;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
@@ -53,16 +61,17 @@ import static java.util.Collections.singletonList;
  */
 @SuppressWarnings({
         "ClassReferencesSubclass", /* See the API note. */
-        "ClassWithTooManyMethods"})
+        "ClassWithTooManyMethods",
+        "OverlyCoupledClass"})
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     private final BoundedContext boundedContext;
-    private final BlackBoxOutput output;
+    private final CommandMemoizingTap commandTap;
     private final MemoizingObserver<Ack> observer;
 
     protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
-        CommandMemoizingTap commandTap = new CommandMemoizingTap();
+        this.commandTap = new CommandMemoizingTap();
         this.boundedContext = BoundedContext
                 .newBuilder()
                 .setMultitenant(multitenant)
@@ -72,7 +81,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                      .setEnricher(enricher))
                 .build();
         this.observer = memoizingObserver();
-        this.output = new BlackBoxOutput(boundedContext, commandTap, observer);
     }
 
     /**
@@ -244,6 +252,63 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return thisRef();
     }
 
+    /**
+     * Verifies emitted events by the passed verifier.
+     *
+     * @param verifier
+     *         a verifier that checks the events emitted in this Bounded Context
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertThat(VerifyEvents verifier) {
+        EmittedEvents events = emittedEvents();
+        verifier.verify(events);
+        return thisRef();
+    }
+
+    /**
+     * Executes the provided verifier, which throws an assertion error in case of
+     * unexpected results.
+     *
+     * @param verifier
+     *         a verifier that checks the acknowledgements in this Bounded Context
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertThat(VerifyAcknowledgements verifier) {
+        Acknowledgements acks = commandAcknowledgements(observer);
+        verifier.verify(acks);
+        return thisRef();
+    }
+
+    /**
+     * Verifies emitted commands by the passed verifier.
+     *
+     * @param verifier
+     *         a verifier that checks the commands emitted in this Bounded Context
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertThat(VerifyCommands verifier) {
+        EmittedCommands commands = emittedCommands(commandTap);
+        verifier.verify(commands);
+        return thisRef();
+    }
+
+    /**
+     * Asserts the state of an entity using the specified tenant ID.
+     *
+     * @param verifier
+     *         a verifier of entity states
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertThat(VerifyState verifier) {
+        QueryFactory queryFactory = requestFactory().query();
+        verifier.verify(boundedContext, queryFactory);
+        return thisRef();
+    }
+
     private BlackBoxInput input() {
         return new BlackBoxInput(boundedContext, requestFactory(), observer);
     }
@@ -268,18 +333,44 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return (T) this;
     }
 
-    protected BlackBoxOutput output() {
-        return output;
-    }
-
-    protected BoundedContext boundedContext() {
-        return boundedContext;
-    }
-
     /**
      * Obtains the request factory to operate with.
      */
     protected abstract TestActorRequestFactory requestFactory();
+
+    /**
+     * Obtains commands emitted in the bounded context.
+     */
+    protected abstract EmittedCommands emittedCommands(CommandMemoizingTap commandTap);
+
+    /**
+     * Obtains acknowledgements of {@linkplain #emittedCommands(CommandMemoizingTap)
+     * emitted commands}.
+     */
+    protected Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
+        List<Ack> acknowledgements = observer.responses();
+        return new Acknowledgements(acknowledgements);
+    }
+
+    /**
+     * Obtains events emitted in the bounded context.
+     */
+    protected EmittedEvents emittedEvents() {
+        MemoizingObserver<Event> queryObserver = memoizingObserver();
+        boundedContext.getEventBus()
+                      .getEventStore()
+                      .read(allEventsQuery(), queryObserver);
+        List<Event> responses = queryObserver.responses();
+        return new EmittedEvents(responses);
+    }
+
+    /**
+     * Creates a new {@link io.spine.server.event.EventStreamQuery} without any filters.
+     */
+    private static EventStreamQuery allEventsQuery() {
+        return EventStreamQuery.newBuilder()
+                               .build();
+    }
 
     private static Enricher emptyEnricher() {
         return Enricher.newBuilder()
