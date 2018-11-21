@@ -60,9 +60,9 @@ class SingletenantBlackBoxContextTest {
 
     @BeforeEach
     void setUp() {
-        projects = SingletenantBlackBoxContext.newInstance()
-                                              .with(new BbProjectRepository(),
-                                                    new BbProjectViewRepository());
+        projects = BlackBoxBoundedContext.singletenant()
+                                         .with(new BbProjectRepository(),
+                                               new BbProjectViewRepository());
     }
 
     @AfterEach
@@ -182,8 +182,8 @@ class SingletenantBlackBoxContextTest {
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
-                SingletenantBlackBoxContext
-                        .newInstance()
+                BlackBoxBoundedContext
+                        .singletenant()
                         .with(new RepositoryThrowingExceptionOnClose() {
                             @Override
                             protected void throwException() {

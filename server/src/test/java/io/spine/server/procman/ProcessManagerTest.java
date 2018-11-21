@@ -64,6 +64,7 @@ import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
@@ -260,8 +261,8 @@ class ProcessManagerTest {
 
         @BeforeEach
         void setUp() {
-            boundedContext = SingletenantBlackBoxContext.newInstance()
-                                                        .with(new TestProcessManagerRepo());
+            boundedContext = BlackBoxBoundedContext.singletenant()
+                                                   .with(new TestProcessManagerRepo());
         }
 
         @AfterEach
@@ -389,8 +390,8 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            SingletenantBlackBoxContext
-                    .newInstance()
+            BlackBoxBoundedContext
+                    .singletenant()
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())
@@ -428,8 +429,8 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            SingletenantBlackBoxContext
-                    .newInstance()
+            BlackBoxBoundedContext
+                    .singletenant()
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())

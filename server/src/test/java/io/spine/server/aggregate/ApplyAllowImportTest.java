@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import io.spine.server.aggregate.given.importado.DotSpace;
 import io.spine.server.aggregate.given.importado.ObjectId;
 import io.spine.server.aggregate.given.importado.event.Moved;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,9 +53,8 @@ class ApplyAllowImportTest {
 
     @BeforeEach
     void setUp() {
-        boundedContext = SingletenantBlackBoxContext
-                .newInstance()
-                .with(new DotSpace());
+        boundedContext = BlackBoxBoundedContext.singletenant()
+                                               .with(new DotSpace());
     }
 
     @AfterEach

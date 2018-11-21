@@ -38,24 +38,8 @@ public class SingletenantBlackBoxContext
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(SingletenantBlackBoxContext.class);
 
-    private SingletenantBlackBoxContext(Enricher enricher) {
+    SingletenantBlackBoxContext(Enricher enricher) {
         super(false, enricher, requestFactory);
-    }
-
-    /**
-     * Creates a new bounded context with the default configuration.
-     */
-    public static SingletenantBlackBoxContext newInstance() {
-        Enricher enricher = Enricher.newBuilder()
-                                    .build();
-        return new SingletenantBlackBoxContext(enricher);
-    }
-
-    /**
-     * Creates a new bounded context with the specified event enricher.
-     */
-    public static SingletenantBlackBoxContext newInstance(Enricher enricher) {
-        return new SingletenantBlackBoxContext(enricher);
     }
 
     /**

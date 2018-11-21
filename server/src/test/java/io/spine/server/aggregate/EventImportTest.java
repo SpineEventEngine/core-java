@@ -29,6 +29,7 @@ import io.spine.server.aggregate.given.klasse.event.EngineStopped;
 import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -56,9 +57,8 @@ class EventImportTest {
     @BeforeEach
     void setUp() {
         repository = new EngineRepository();
-        boundedContext = SingletenantBlackBoxContext
-                .newInstance()
-                .with(repository);
+        boundedContext = BlackBoxBoundedContext.singletenant()
+                                               .with(repository);
     }
 
     @AfterEach

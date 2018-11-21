@@ -178,7 +178,7 @@ class MultitenantBlackBoxContextTest {
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
-                SingletenantBlackBoxContext
+                MultitenantBlackBoxContext
                         .newInstance()
                         .with(new RepositoryThrowingExceptionOnClose() {
                             @Override

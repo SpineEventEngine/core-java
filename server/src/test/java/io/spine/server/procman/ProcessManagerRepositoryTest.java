@@ -67,7 +67,7 @@ import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.ShardingReset;
-import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -544,8 +544,8 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        SingletenantBlackBoxContext
-                .newInstance()
+        BlackBoxBoundedContext
+                .singletenant()
                 .with(new EventDiscardingProcManRepository())
                 .receivesCommand(command)
                 .assertThat(emittedEvent(count(0)));

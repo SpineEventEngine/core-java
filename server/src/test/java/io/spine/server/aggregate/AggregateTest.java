@@ -61,7 +61,7 @@ import io.spine.test.aggregate.event.AggTaskAssigned;
 import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.AfterEach;
@@ -726,8 +726,8 @@ public class AggregateTest {
         @Test
         @DisplayName("when dispatching a command")
         void fromCommandDispatch() {
-            SingletenantBlackBoxContext
-                    .newInstance()
+            BlackBoxBoundedContext
+                    .singletenant()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(createTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
@@ -747,8 +747,8 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on an event")
         void fromEventReact() {
-            SingletenantBlackBoxContext
-                    .newInstance()
+            BlackBoxBoundedContext
+                    .singletenant()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(assignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
@@ -770,8 +770,8 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
-            SingletenantBlackBoxContext
-                    .newInstance()
+            BlackBoxBoundedContext
+                    .singletenant()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())

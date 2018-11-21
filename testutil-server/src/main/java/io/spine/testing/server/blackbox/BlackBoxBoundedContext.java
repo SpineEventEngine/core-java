@@ -52,8 +52,14 @@ import static java.util.Collections.singletonList;
  * verified in using various verifiers (e.g. {@link io.spine.testing.server.blackbox.verify.state.VerifyState
  * state verfier}, {@link VerifyEvents emitted events verifier}).
  *
- * @param <T> the type of the bounded context descendant
+ * @param <T>
+ *         the type of the bounded context descendant
+ * @apiNote The class provides factory methods for creation of different bounded contexts.
  */
+@SuppressWarnings({
+        "ClassReferencesSubclass", /* See the API note. */
+        "AbstractClassWithoutAbstractMethods",
+        "ClassWithTooManyMethods"})
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
@@ -78,6 +84,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         this.requestFactory = requestFactory;
         this.input = new BlackBoxInput(boundedContext, requestFactory, observer);
         this.output = new BlackBoxOutput(boundedContext, commandTap, observer);
+    }
+
+    /**
+     * Creates a single tenant bounded context with the default configuration.
+     */
+    public static SingletenantBlackBoxContext singletenant() {
+        return new SingletenantBlackBoxContext(emptyEnricher());
+    }
+
+    /**
+     * Creates a single tenant bounded context with the specified enricher.
+     */
+    public static SingletenantBlackBoxContext singletenant(Enricher enricher) {
+        return new SingletenantBlackBoxContext(enricher);
     }
 
     /**
@@ -140,7 +160,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * Sends off a provided event to the Bounded Context.
      *
      * @param messageOrEvent
-     *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is passed, it
+     *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is
+     *         passed, it
      *         will be posted to {@link EventBus} as is.
      *         Otherwise, an instance of {@code Event} will be generated basing on the passed
      *         event message and posted to the bus.
@@ -273,6 +294,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
         return TestEventFactory.newInstance(requestFactory);
+    }
+
+    private static Enricher emptyEnricher() {
+        return Enricher.newBuilder()
+                       .build();
     }
 
     /** Casts this to generic type to provide type covariance in the derived classes. */

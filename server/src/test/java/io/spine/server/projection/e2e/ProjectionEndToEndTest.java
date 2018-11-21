@@ -49,6 +49,7 @@ import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.server.ShardingReset;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingletenantBlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
@@ -78,8 +79,7 @@ class ProjectionEndToEndTest {
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
-        SingletenantBlackBoxContext
-                .newInstance()
+        BlackBoxBoundedContext.singletenant()
                 .with(new EntitySubscriberProjection.Repository(),
                       new TestProjection.Repository())
                 .receivesEventsProducedBy(producerId,
@@ -105,11 +105,11 @@ class ProjectionEndToEndTest {
         // Black box context is used in a non-fluent fashion.
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
-        SingletenantBlackBoxContext sender = SingletenantBlackBoxContext
-                .newInstance()
+        SingletenantBlackBoxContext sender = BlackBoxBoundedContext
+                .singletenant()
                 .with(new OrganizationProjection.Repository());
-        SingletenantBlackBoxContext receiver = SingletenantBlackBoxContext
-                .newInstance()
+        SingletenantBlackBoxContext receiver = BlackBoxBoundedContext
+                .singletenant()
                 .with(new GroupNameProjection.Repository());
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId,
