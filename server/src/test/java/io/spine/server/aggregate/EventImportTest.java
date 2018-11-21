@@ -57,8 +57,9 @@ class EventImportTest {
     @BeforeEach
     void setUp() {
         repository = new EngineRepository();
-        boundedContext = BlackBoxBoundedContext.newInstance()
-                                               .with(repository);
+        boundedContext = BlackBoxBoundedContext
+                .newInstance()
+                .with(repository);
     }
 
     @AfterEach
