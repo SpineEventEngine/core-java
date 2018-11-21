@@ -39,6 +39,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -47,12 +48,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions",
+@SuppressWarnings({"OptionalGetWithoutIsPresent",
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EventBus Builder should")
-class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
-                                                 EventEnvelope,
-                                                 Event> {
+class EventBusBuilderTest
+        extends BusBuilderTest<EventBus.Builder, EventEnvelope, Event> {
 
     private StorageFactory storageFactory;
 
@@ -111,8 +111,8 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
 
         @Test
         @DisplayName("EventStore")
-        void eventStore() {
-            EventStore mock = mock(EventStore.class);
+        void obtainEventStore() {
+            EventStore mock = eventStore();
             assertEquals(mock, builder().setEventStore(mock)
                                         .getEventStore()
                                         .get());
@@ -167,10 +167,17 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
     @DisplayName("not allow to override")
     class NotOverride {
 
+        private EventStore eventStore;
+
+        @BeforeEach
+        void setUp() {
+            eventStore = eventStore();
+        }
+
         @Test
         @DisplayName("EventStore by StorageFactory")
         void eventStoreByStorageFactory() {
-            EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+            EventBus.Builder builder = builder().setEventStore(eventStore);
             assertThrows(IllegalStateException.class,
                          () -> builder.setStorageFactory(storageFactory));
         }
@@ -180,7 +187,7 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         void storageFactoryByEventStore() {
             EventBus.Builder builder = builder().setStorageFactory(mock(StorageFactory.class));
             assertThrows(IllegalStateException.class,
-                         () -> builder.setEventStore(mock(EventStore.class)));
+                         () -> builder.setEventStore(eventStore));
         }
 
         @Test
@@ -188,13 +195,13 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         void eventExecutorByEventStore() {
             EventBus.Builder builder = builder().setEventStoreStreamExecutor(mock(Executor.class));
             assertThrows(IllegalStateException.class,
-                         () -> builder.setEventStore(mock(EventStore.class)));
+                         () -> builder.setEventStore(eventStore));
         }
 
         @Test
         @DisplayName("EventStore by EventStoreStreamExecutor")
         void eventStoreByEventExecutor() {
-            EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+            EventBus.Builder builder = builder().setEventStore(eventStore);
             assertThrows(IllegalStateException.class,
                          () -> builder.setEventStoreStreamExecutor(mock(Executor.class)));
         }

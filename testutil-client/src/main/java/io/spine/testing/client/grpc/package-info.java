@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc.given;
+/**
+ * This package provides a testing utility for testing Spine-based client applications that
+ * use gRPC for sending commands and querying the backend.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.client.grpc;
 
-import com.google.protobuf.Empty;
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.bc.ProjectId;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-public class ProjectPmRepo
-        extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
-}
+import javax.annotation.ParametersAreNonnullByDefault;

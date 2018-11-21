@@ -18,11 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc;
+package io.spine.server;
 
-import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
+import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.storage.StorageFactory;
@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions",
+@SuppressWarnings({"OptionalGetWithoutIsPresent",
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("BoundedContext Builder should")
 class BoundedContextBuilderTest {
@@ -216,5 +216,38 @@ class BoundedContextBuilderTest {
                                                                       .setMultitenant(false)
                                                                       .setCommandBus(commandBus)
                                                                       .build());
+    }
+
+    @Nested
+    class Repositories {
+
+        private Repository<?, ?> repository;
+        private BoundedContextBuilder builder;
+
+        @BeforeEach
+        void setUp() {
+            this.builder = BoundedContext.newBuilder();
+            repository = new ProjectAggregateRepository();
+        }
+
+        @Test
+        @DisplayName("add repository")
+        void addRepo() {
+            assertFalse(builder.hasRepository(repository));
+
+            builder.add(repository);
+
+            assertTrue(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("remove repository")
+        void removeRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasRepository(repository));
+
+            builder.remove(repository);
+            assertFalse(builder.hasRepository(repository));
+        }
     }
 }

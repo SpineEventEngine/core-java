@@ -25,9 +25,6 @@ import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.ProjectVBuilder;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class AnotherProjectAggregate
         extends Aggregate<ProjectId, Project, ProjectVBuilder> {
     protected AnotherProjectAggregate(ProjectId id) {

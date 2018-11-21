@@ -20,12 +20,13 @@
 
 package io.spine.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
@@ -41,6 +42,8 @@ import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -58,8 +61,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"}) // OK for this central piece.
-@CanIgnoreReturnValue
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
 public final class BoundedContextBuilder implements Logging {
 
     @SuppressWarnings("TestOnlyProblems")
@@ -73,6 +75,9 @@ public final class BoundedContextBuilder implements Logging {
     private EventBus.Builder eventBus;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
+
+    /** Repositories to be registered with the Bounded Context being built after its creation. */
+    private final List<Repository<?, ?>> repositories = new ArrayList<>();
 
     /**
      * Prevents direct instantiation.
@@ -94,6 +99,7 @@ public final class BoundedContextBuilder implements Logging {
      * @param name an identifier string for a new bounded context.
      *             Cannot be null, empty, or blank
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setName(String name) {
         return setName(newName(name));
     }
@@ -110,6 +116,7 @@ public final class BoundedContextBuilder implements Logging {
      * @param name an identifier string for a new bounded context.
      *             Cannot be null, empty, or blank
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setName(BoundedContextName name) {
         BoundedContextNames.checkValid(name);
         this.name = name;
@@ -124,6 +131,7 @@ public final class BoundedContextBuilder implements Logging {
         return name;
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setMultitenant(boolean value) {
         this.multitenant = value;
         return this;
@@ -140,6 +148,7 @@ public final class BoundedContextBuilder implements Logging {
      * {@link StorageFactorySwitch} will be used during the construction of
      * a {@code BoundedContext} instance.
      */
+    @CanIgnoreReturnValue
     public
     BoundedContextBuilder setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
         this.storageFactorySupplier = supplier;
@@ -155,6 +164,7 @@ public final class BoundedContextBuilder implements Logging {
         return storageFactorySupplier;
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setCommandBus(CommandBus.Builder commandBus) {
         this.commandBus = checkNotNull(commandBus);
         return this;
@@ -175,6 +185,7 @@ public final class BoundedContextBuilder implements Logging {
         return result;
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setEventBus(EventBus.Builder eventBus) {
         this.eventBus = checkNotNull(eventBus);
         return this;
@@ -188,6 +199,7 @@ public final class BoundedContextBuilder implements Logging {
         return eventBus.build();
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setStand(Stand.Builder stand) {
         this.stand = checkNotNull(stand);
         return this;
@@ -201,6 +213,7 @@ public final class BoundedContextBuilder implements Logging {
         return stand.build();
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setIntegrationBus(IntegrationBus.Builder integrationBus) {
         this.integrationBus = checkNotNull(integrationBus);
         return this;
@@ -210,6 +223,7 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(integrationBus);
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setTenantIndex(TenantIndex tenantIndex) {
         if (this.multitenant) {
             checkNotNull(tenantIndex,
@@ -220,12 +234,44 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Adds the passed repository to the registration list which will be processed after
+     * the Bounded Context is created.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder add(Repository<?, ?> repository) {
+        checkNotNull(repository);
+        repositories.add(repository);
+        return this;
+    }
+
+    /**
+     * Removes the passed repository from the registration list.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder remove(Repository<?, ?> repository) {
+        checkNotNull(repository);
+        repositories.remove(repository);
+        return this;
+    }
+
+    /**
+     * Verifies if the passed repository was previously added into the registration list
+     * of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    boolean hasRepository(Repository<?, ?> repository) {
+        checkNotNull(repository);
+        boolean result = repositories.contains(repository);
+        return result;
+    }
+
+    /**
      * Creates a new instance of {@code BoundedContext} with the set configurations.
      *
-     * <p>The resulting domain-specific bounded context has as internal System bounded context.
-     * The entities of the System domain describe the entities of the resulting bounded context.
+     * <p>The resulting domain-specific bounded context has as internal System Bounded Context.
+     * The entities of the System domain describe the entities of the resulting Bounded Context.
      *
-     * <p>The System bounded contexts shares some configuration with the domain bounded context,
+     * <p>The System Bounded Context shares some configuration with the Domain Bounded Context,
      * such as:
      * <ul>
      *     <li>{@linkplain #getTenantIndex()} tenancy;
@@ -240,14 +286,22 @@ public final class BoundedContextBuilder implements Logging {
      *
      * @return new {@code BoundedContext}
      */
-    @CheckReturnValue
     public BoundedContext build() {
         TransportFactory transport = getTransportFactory()
                 .orElseGet(InMemoryTransportFactory::newInstance);
         SystemContext system = buildSystem(transport);
         BoundedContext result = buildDefault(system, transport);
-        log().debug(result.nameForLogging() + " created.");
+        log().debug("{} created.", result.nameForLogging());
+
+        registerRepositories(result);
         return result;
+    }
+
+    private void registerRepositories(BoundedContext result) {
+        for (Repository<?, ?> repository : repositories) {
+            result.register(repository);
+            log().debug("{} registered.", repository);
+        }
     }
 
     private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
@@ -276,10 +330,10 @@ public final class BoundedContextBuilder implements Logging {
         return result;
     }
 
-    private <B extends BoundedContext> B
-    buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
-                 SystemClient client,
-                 TransportFactory transport) {
+    private <B extends BoundedContext>
+    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
+                   SystemClient client,
+                   TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
 
         initTenantIndex(storageFactory);

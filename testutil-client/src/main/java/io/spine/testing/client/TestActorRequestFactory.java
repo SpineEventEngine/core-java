@@ -22,7 +22,6 @@ package io.spine.testing.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.ActorContext;
@@ -32,7 +31,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.testing.TestValues;
-import io.spine.testing.client.c.CreateTask;
+import io.spine.testing.client.command.TestCommandMessage;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
@@ -42,40 +41,39 @@ import static io.spine.testing.core.given.GivenUserId.of;
 
 /**
  * An {@code ActorRequestFactory} for running tests.
- *
- * @author Alexaner Yevsyukov
  */
-@Internal
 @VisibleForTesting
 public class TestActorRequestFactory extends ActorRequestFactory {
 
     protected TestActorRequestFactory(UserId actor, ZoneOffset zoneOffset, ZoneId zoneId) {
-        super(ActorRequestFactory.newBuilder()
-                                 .setActor(actor)
-                                 .setZoneOffset(zoneOffset)
-                                 .setZoneId(zoneId));
+        super(ActorRequestFactory
+                      .newBuilder()
+                      .setActor(actor)
+                      .setZoneOffset(zoneOffset)
+                      .setZoneId(zoneId)
+        );
     }
 
     protected TestActorRequestFactory(TenantId tenantId,
                                       UserId actor,
                                       ZoneOffset zoneOffset,
                                       ZoneId zoneId) {
-        super(ActorRequestFactory.newBuilder()
-                                 .setTenantId(tenantId)
-                                 .setActor(actor)
-                                 .setZoneOffset(zoneOffset)
-                                 .setZoneId(zoneId));
+        super(ActorRequestFactory
+                      .newBuilder()
+                      .setTenantId(tenantId)
+                      .setActor(actor)
+                      .setZoneOffset(zoneOffset)
+                      .setZoneId(zoneId)
+        );
     }
 
-    public static TestActorRequestFactory newInstance(String actor,
-                                                      ZoneOffset zoneOffset,
-                                                      ZoneId zoneId) {
+    public static
+    TestActorRequestFactory newInstance(String actor, ZoneOffset zoneOffset, ZoneId zoneId) {
         return newInstance(of(actor), zoneOffset, zoneId);
     }
 
-    public static TestActorRequestFactory newInstance(UserId actor,
-                                                      ZoneOffset zoneOffset,
-                                                      ZoneId zoneId) {
+    public static
+    TestActorRequestFactory newInstance(UserId actor, ZoneOffset zoneOffset, ZoneId zoneId) {
         return new TestActorRequestFactory(actor, zoneOffset, zoneId);
     }
 
@@ -128,14 +126,15 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     /**
-     * Generates a test instance of a command.
+     * Generates a test instance of a command with the message
+     * {@link io.spine.testing.client.command.TestCommandMessage TestCommandMessage}.
      */
     public Command generateCommand() {
         @SuppressWarnings("MagicNumber")
-        String randomSuffix = String.valueOf(TestValues.random(10_000));
-        CreateTask msg = CreateTask
+        String randomSuffix = String.format("%04d", TestValues.random(10_000));
+        TestCommandMessage msg = TestCommandMessage
                 .newBuilder()
-                .setId("GeneratedTestCommand" + randomSuffix)
+                .setId("random-number-" + randomSuffix)
                 .build();
         return createCommand(msg);
     }

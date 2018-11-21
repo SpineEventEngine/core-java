@@ -44,7 +44,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
@@ -104,10 +103,11 @@ public class EventStoreTest {
                     .setBefore(future)
                     .build();
             AtomicBoolean done = new AtomicBoolean(false);
-            Collection<Event> resultEvents = newConcurrentHashSet();
-            eventStore.read(query, new ResponseObserver(resultEvents, done));
-            assertDone(done);
+            ResponseObserver observer = new ResponseObserver(done);
+            eventStore.read(query, observer);
+            Collection<Event> resultEvents = observer.getEvents();
 
+            assertDone(done);
             assertThat(resultEvents).hasSize(1);
             Event event = resultEvents.iterator()
                                       .next();
@@ -137,11 +137,11 @@ public class EventStoreTest {
                     .addFilter(taskAddedType)
                     .build();
             AtomicBoolean done = new AtomicBoolean(false);
-            Collection<Event> resultEvents = newConcurrentHashSet();
-            eventStore.read(query, new ResponseObserver(resultEvents, done));
+            ResponseObserver observer = new ResponseObserver(done);
+            eventStore.read(query, observer);
             assertDone(done);
 
-            IterableSubject assertResultEvents = assertThat(resultEvents);
+            IterableSubject assertResultEvents = assertThat(observer.getEvents());
             assertResultEvents.hasSize(2);
             assertResultEvents.containsExactly(taskAdded1, teasAdded2);
         }
@@ -173,11 +173,11 @@ public class EventStoreTest {
                     .addFilter(taskAddedType)
                     .build();
             AtomicBoolean done = new AtomicBoolean(false);
-            Collection<Event> resultEvents = newConcurrentHashSet();
-            eventStore.read(query, new ResponseObserver(resultEvents, done));
+            ResponseObserver observer = new ResponseObserver(done);
+            eventStore.read(query, observer);
             assertDone(done);
 
-            IterableSubject assertResultEvents = assertThat(resultEvents);
+            IterableSubject assertResultEvents = assertThat(observer.getEvents());
             assertResultEvents.hasSize(1);
             assertResultEvents.containsExactly(eventInFuture);
         }

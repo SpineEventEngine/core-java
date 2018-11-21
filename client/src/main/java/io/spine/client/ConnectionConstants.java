@@ -21,9 +21,7 @@
 package io.spine.client;
 
 /**
- * Constant values shared between client and server.
- *
- * @author Alexander Yevsyukov
+ * Constant values shared between client and server code.
  */
 public final class ConnectionConstants {
 
@@ -32,7 +30,7 @@ public final class ConnectionConstants {
      */
     public static final int DEFAULT_CLIENT_SERVICE_PORT = 50051;
 
+    /** Prevents instantiation of this utility class. */
     private ConnectionConstants() {
-        // Prevent instantiation.
     }
 }

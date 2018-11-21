@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc.given;
+/**
+ * This package is a testing environment for {@link io.spine.testing.client.grpc.TestClientTest}.
+ */
 
-import com.google.protobuf.Empty;
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.bc.ProjectId;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.client.grpc.given;
 
-public class ProjectPmRepo
-        extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

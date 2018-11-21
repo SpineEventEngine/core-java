@@ -18,12 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc.given;
+package io.spine.testing.client.grpc.given;
 
-import com.google.protobuf.Empty;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.bc.ProjectId;
+import io.spine.testing.client.grpc.Table;
 
-public class ProjectPmRepo
-        extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+public final class GameRepository extends ProcessManagerRepository<Integer, GameProcess, Table> {
 }

@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc;
+package io.spine.server;
 
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption;
-import io.spine.server.BoundedContext;
 import io.spine.server.bc.given.AnotherProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectPmRepo;
@@ -45,6 +44,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +53,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -170,7 +169,6 @@ class BoundedContextTest {
         }
     }
 
-    @SuppressWarnings("unchecked") // OK for the purpose of the created Matcher.
     @Test
     @DisplayName("propagate registered repositories to Stand")
     void propagateRepositoriesToStand() {
@@ -223,7 +221,7 @@ class BoundedContextTest {
     @Test
     @DisplayName("not set storage factory for EventBus if EventStore is set")
     void useEventStoreIfSet() {
-        EventStore eventStore = mock(EventStore.class);
+        EventStore eventStore = eventStore();
         BoundedContext bc = BoundedContext.newBuilder()
                                           .setEventBus(EventBus.newBuilder()
                                                                .setEventStore(eventStore))

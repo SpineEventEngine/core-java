@@ -86,8 +86,7 @@ import static java.util.stream.Collectors.toList;
  * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
 @Internal
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
-    // Posts system messages in multiple cases.
+@SuppressWarnings("OverlyCoupledClass") // Posts system messages in multiple cases.
 public class EntityLifecycle {
 
     /**
@@ -135,7 +134,7 @@ public class EntityLifecycle {
      * Posts the {@link EntityCreated} system event.
      *
      * @param entityKind
-     *         the {@linkplain EntityOption.Kind kind} of the created entity
+     *         the kind of the created entity
      */
     public final void onEntityCreated(EntityOption.Kind entityKind) {
         EntityCreated event = EntityCreatedVBuilder
