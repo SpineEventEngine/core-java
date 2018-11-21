@@ -163,7 +163,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @return current instance
      */
     private T receivesCommands(Collection<Message> domainCommands) {
-        input().receivesCommands(domainCommands);
+        setup().postCommands(domainCommands);
         return thisRef();
     }
 
@@ -222,7 +222,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     public T
     receivesEventsProducedBy(Object producerId,
                              EventMessage firstEvent, EventMessage... otherEvents) {
-        input().receivesEvents(producerId, firstEvent, otherEvents);
+        setup().postEvents(producerId, firstEvent, otherEvents);
         return thisRef();
     }
 
@@ -234,7 +234,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @return current instance
      */
     private T receivesEvents(Collection<Message> domainEvents) {
-        input().receivesEvents(domainEvents);
+        setup().postEvents(domainEvents);
         return thisRef();
     }
 
@@ -248,7 +248,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     }
 
     private T importAll(Collection<Message> domainEvents) {
-        input().importsEvents(domainEvents);
+        setup().importEvents(domainEvents);
         return thisRef();
     }
 
@@ -309,8 +309,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return thisRef();
     }
 
-    private BlackBoxInput input() {
-        return new BlackBoxInput(boundedContext, requestFactory(), observer);
+    private BlackBoxSetup setup() {
+        return new BlackBoxSetup(boundedContext, requestFactory(), observer);
     }
 
     /**

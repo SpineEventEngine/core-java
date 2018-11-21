@@ -46,10 +46,17 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.util.stream.Collectors.toList;
 
 /**
- * An input of a {@link BlackBoxBoundedContext}, which receives domain messages.
+ * A class which sets up a {@link BlackBoxBoundedContext}.
+ *
+ * <p>The setup may involve:
+ * <ul>
+ *     <li>posting of commands;
+ *     <li>posting of events;
+ *     <li>importing of events.
+ * </ul>
  */
 @VisibleForTesting
-final class BlackBoxInput {
+final class BlackBoxSetup {
 
     private final CommandBus commandBus;
     private final EventBus eventBus;
@@ -58,7 +65,7 @@ final class BlackBoxInput {
     private final TestEventFactory eventFactory;
     private final MemoizingObserver<Ack> observer;
 
-    BlackBoxInput(BoundedContext boundedContext,
+    BlackBoxSetup(BoundedContext boundedContext,
                   TestActorRequestFactory requestFactory,
                   MemoizingObserver<Ack> observer) {
         this.commandBus = boundedContext.getCommandBus();
@@ -70,12 +77,13 @@ final class BlackBoxInput {
     }
 
     /**
-     * Sends off a provided command to the Bounded Context.
+     * Posts commands to the bounded context.
      *
      * @param domainCommands
-     *         a list of domain commands to be dispatched to the Bounded Context
+     *         a list of {@linkplain CommandMessage command messages}
+     *         or {@linkplain Command commands}
      */
-    void receivesCommands(Collection<Message> domainCommands) {
+    void postCommands(Collection<Message> domainCommands) {
         List<Command> commands = domainCommands.stream()
                                                .map(commandOrMessage -> command(commandOrMessage,
                                                                                 requestFactory))
@@ -84,24 +92,40 @@ final class BlackBoxInput {
     }
 
     /**
-     * Sends off provided events to the Bounded Context.
+     * Posts events to the bounded context.
      *
      * @param domainEvents
-     *         a list of domain event to be dispatched to the Bounded Context
+     *         a list of {@linkplain EventMessage event messages} or {@linkplain Event events}
      */
-    void receivesEvents(Collection<Message> domainEvents) {
+    void postEvents(Collection<Message> domainEvents) {
         List<Event> events = toEvents(domainEvents, eventFactory);
         eventBus.post(events, observer);
     }
 
-    void receivesEvents(Object producerId, EventMessage firstEvent, EventMessage... otherEvents) {
+    /**
+     * Posts events with the specified producer to the bounded context.
+     *
+     * @param producerId
+     *          the {@linkplain io.spine.core.EventContext#getProducerId() producer} for events
+     * @param firstEvent
+     *         the first event to be posted
+     * @param otherEvents
+     *         other events to be posted, if any
+     */
+    void postEvents(Object producerId, EventMessage firstEvent, EventMessage... otherEvents) {
         List<Message> eventMessages = asList(firstEvent, otherEvents);
         TestEventFactory customFactory = newEventFactory(producerId);
         List<Event> events = toEvents(eventMessages, customFactory);
         eventBus.post(events, observer);
     }
 
-    void importsEvents(Collection<Message> domainEvents) {
+    /**
+     * {@linkplain ImportBus Imports} events to the bounded context.
+     *
+     * @param domainEvents
+     *         a list of events to import
+     */
+    void importEvents(Collection<Message> domainEvents) {
         List<Event> events = toEvents(domainEvents, eventFactory);
         importBus.post(events, observer);
     }
@@ -133,6 +157,17 @@ final class BlackBoxInput {
         return eventFactory.createEvent(message);
     }
 
+    /**
+     * Generates a {@link Command} from a {@link CommandMessage}.
+     *
+     * <p>If the passed message is a {@link Command} does nothing.
+     *
+     * @param commandOrMessage
+     *         a command or command message
+     * @param requestFactory
+     *         the factory to produce commands with
+     * @return a {@code Command}
+     */
     private static Command command(Message commandOrMessage,
                                    TestActorRequestFactory requestFactory) {
         if (commandOrMessage instanceof Command) {
