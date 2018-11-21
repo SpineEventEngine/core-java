@@ -52,6 +52,7 @@ class MultitenantBlackBoxContextTest
     void verifyForDifferentTenants() {
         TenantId john = newUuid();
         TenantId carl = newUuid();
+        TenantId newUser = newUuid();
         BbCreateProject createJohnProject = createProject();
         BbCreateProject createCarlProject = createProject();
         boundedContext()
@@ -74,6 +75,11 @@ class MultitenantBlackBoxContextTest
                 .assertThat(emittedCommand(BbCreateProject.class, count(1)))
                 .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
                 .assertThat(exactlyOne(createdProjectState(createCarlProject)))
+
+                // Verify nothing happened for a new user.
+                .withTenant(newUser)
+                .assertThat(emittedCommand(count(0)))
+                .assertThat(emittedEvent(count(0)))
 
                 // Verify command acknowledgements.
                 // One command was posted for John and one for Carl,
