@@ -23,11 +23,14 @@ package io.spine.testing.server.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.TenantId;
+import io.spine.server.event.Enricher;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A black box bounded context for writing integration tests in a multitenant environment.
@@ -37,42 +40,24 @@ import io.spine.testing.server.blackbox.verify.state.VerifyState;
 public class MultitenantBlackBoxContext
         extends BlackBoxBoundedContext<MultitenantBlackBoxContext> {
 
-    private final TenantId tenantId;
+    private TenantId tenantId;
 
     /**
      * Creates a new multi-tenant instance.
      */
-    MultitenantBlackBoxContext(BlackBoxBuilder builder) {
-        super(true,
-              builder.buildEnricher(),
-              requestFactory(builder.buildTenant()));
-        this.tenantId = builder.buildTenant();
+    MultitenantBlackBoxContext(Enricher enricher) {
+        super(true, enricher);
     }
 
     /**
-     * Creates a new bounded context with the default configuration.
-     */
-    public static MultitenantBlackBoxContext newInstance() {
-        return newBuilder().build();
-    }
-
-    /**
-     * Creates a builder for a black box bounded context.
-     */
-    public static BlackBoxBuilder newBuilder() {
-        return new BlackBoxBuilder();
-    }
-
-    /**
-     * Creates a new {@link io.spine.client.ActorRequestFactory actor request factory} for tests
-     * with a provided tenant ID.
+     * Switches the bounded context to operate on behalf of the specified tenant.
      *
-     * @param tenantId
-     *         an identifier of a tenant that is executing requests in this Bounded Context
-     * @return a new request factory instance
+     * @param tenant new tenant ID
+     * @return current instance
      */
-    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(MultitenantBlackBoxContext.class, tenantId);
+    public MultitenantBlackBoxContext withTenant(TenantId tenant) {
+        this.tenantId = tenant;
+        return this;
     }
 
     /**
@@ -84,7 +69,7 @@ public class MultitenantBlackBoxContext
      */
     @CanIgnoreReturnValue
     public MultitenantBlackBoxContext assertThat(VerifyEvents verifier) {
-        EmittedEvents events = emittedEvents(tenantId);
+        EmittedEvents events = emittedEvents(tenantId());
         verifier.verify(events);
         return this;
     }
@@ -127,8 +112,19 @@ public class MultitenantBlackBoxContext
      */
     @CanIgnoreReturnValue
     public MultitenantBlackBoxContext assertThat(VerifyState verifier) {
-        verifier.verify(boundedContext(), requestFactory(tenantId).query());
+        verifier.verify(boundedContext(), requestFactory().query());
         return this;
+    }
+
+    @Override
+    protected TestActorRequestFactory requestFactory() {
+        return requestFactory(tenantId());
+    }
+
+    private TenantId tenantId() {
+        checkState(tenantId != null,
+                   "Set a tenant ID before calling receive and assert methods");
+        return tenantId;
     }
 
     /**
@@ -138,5 +134,17 @@ public class MultitenantBlackBoxContext
         TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
         EmittedEvents events = tenantAwareRunner.evaluate(() -> output().emittedEvents());
         return events;
+    }
+
+    /**
+     * Creates a new {@link io.spine.client.ActorRequestFactory actor request factory} for tests
+     * with a provided tenant ID.
+     *
+     * @param tenantId
+     *         an identifier of a tenant that is executing requests in this Bounded Context
+     * @return a new request factory instance
+     */
+    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
+        return TestActorRequestFactory.newInstance(MultitenantBlackBoxContext.class, tenantId);
     }
 }

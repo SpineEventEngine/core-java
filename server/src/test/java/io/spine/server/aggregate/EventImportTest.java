@@ -182,8 +182,8 @@ class EventImportTest {
      */
     private EventEnvelope createEvent(EventMessage eventMessage, @Nullable EngineId producerId) {
         TestEventFactory eventFactory = producerId == null
-                                        ? boundedContext.newEventFactory()
-                                        : boundedContext.newEventFactory(producerId);
+                                        ? TestEventFactory.newInstance(getClass())
+                                        : TestEventFactory.newInstance(producerId, getClass());
         EventEnvelope result = EventEnvelope.of(eventFactory.createEvent(eventMessage));
         return result;
     }

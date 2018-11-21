@@ -21,10 +21,8 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
@@ -33,11 +31,8 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.TestEventFactory;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
@@ -58,19 +53,15 @@ import static java.util.Collections.singletonList;
  */
 @SuppressWarnings({
         "ClassReferencesSubclass", /* See the API note. */
-        "AbstractClassWithoutAbstractMethods",
         "ClassWithTooManyMethods"})
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     private final BoundedContext boundedContext;
-    private final TestActorRequestFactory requestFactory;
-    private final BlackBoxInput input;
     private final BlackBoxOutput output;
+    private final MemoizingObserver<Ack> observer;
 
-    protected BlackBoxBoundedContext(boolean multitenant,
-                                     Enricher enricher,
-                                     TestActorRequestFactory requestFactory) {
+    protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
         CommandMemoizingTap commandTap = new CommandMemoizingTap();
         this.boundedContext = BoundedContext
                 .newBuilder()
@@ -80,9 +71,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                 .setEventBus(EventBus.newBuilder()
                                      .setEnricher(enricher))
                 .build();
-        MemoizingObserver<Ack> observer = memoizingObserver();
-        this.requestFactory = requestFactory;
-        this.input = new BlackBoxInput(boundedContext, requestFactory, observer);
+        this.observer = memoizingObserver();
         this.output = new BlackBoxOutput(boundedContext, commandTap, observer);
     }
 
@@ -98,6 +87,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     public static SingletenantBlackBoxContext singletenant(Enricher enricher) {
         return new SingletenantBlackBoxContext(enricher);
+    }
+
+    /**
+     * Creates a multitenant tenant bounded context with the default configuration.
+     */
+    public static MultitenantBlackBoxContext multitenant() {
+        return new MultitenantBlackBoxContext(emptyEnricher());
+    }
+
+    /**
+     * Creates a multitenant tenant bounded context with the specified enricher.
+     */
+    public static MultitenantBlackBoxContext multitenant(Enricher enricher) {
+        return new MultitenantBlackBoxContext(enricher);
     }
 
     /**
@@ -152,7 +155,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @return current instance
      */
     private T receivesCommands(Collection<Message> domainCommands) {
-        input.receivesCommands(domainCommands);
+        input().receivesCommands(domainCommands);
         return thisRef();
     }
 
@@ -211,12 +214,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     public T
     receivesEventsProducedBy(Object producerId,
                              EventMessage firstEvent, EventMessage... otherEvents) {
-        List<EventMessage> eventMessages = asList(firstEvent, otherEvents);
-        TestEventFactory customFactory = newEventFactory(producerId);
-        List<Message> events = eventMessages.stream()
-                                            .map(customFactory::createEvent)
-                                            .collect(Collectors.toList());
-        return this.receivesEvents(events);
+        input().receivesEvents(producerId, firstEvent, otherEvents);
+        return thisRef();
     }
 
     /**
@@ -227,7 +226,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @return current instance
      */
     private T receivesEvents(Collection<Message> domainEvents) {
-        input.receivesEvents(domainEvents);
+        input().receivesEvents(domainEvents);
         return thisRef();
     }
 
@@ -241,31 +240,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     }
 
     private T importAll(Collection<Message> domainEvents) {
-        input.importsEvents(domainEvents);
+        input().importsEvents(domainEvents);
         return thisRef();
     }
 
-    /**
-     * Creates a new instance of {@link TestEventFactory} which supplies mock
-     * for {@linkplain io.spine.core.EventContext#getProducerId() producer ID} values.
-     */
-    public TestEventFactory newEventFactory() {
-        return eventFactory(requestFactory);
-    }
-
-    /**
-     * Creates a new instance of {@link TestEventFactory} which supplies the passed value
-     * of the {@linkplain io.spine.core.EventContext#getProducerId() event producer ID}.
-     *
-     * @param producerId
-     *         can be {@code Integer}, {@code Long}, {@link String}, or {@code Message}
-     */
-    public TestEventFactory newEventFactory(Object producerId) {
-        checkNotNull(producerId);
-        Any id = producerId instanceof Any
-                 ? (Any) producerId
-                 : Identifier.pack(producerId);
-        return TestEventFactory.newInstance(id, requestFactory);
+    private BlackBoxInput input() {
+        return new BlackBoxInput(boundedContext, requestFactory(), observer);
     }
 
     /**
@@ -282,25 +262,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         }
     }
 
-    /**
-     * Creates a new {@link io.spine.server.event.EventFactory event factory} for tests which uses
-     * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory
-     * request factory}.
-     *
-     * @param requestFactory
-     *         a request factory bearing the actor and able to provide an origin for
-     *         factory generated events
-     * @return a new event factory instance
-     */
-    private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
-        return TestEventFactory.newInstance(requestFactory);
-    }
-
-    private static Enricher emptyEnricher() {
-        return Enricher.newBuilder()
-                       .build();
-    }
-
     /** Casts this to generic type to provide type covariance in the derived classes. */
     @SuppressWarnings("unchecked" /* See Javadoc. */)
     private T thisRef() {
@@ -313,5 +274,15 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     protected BoundedContext boundedContext() {
         return boundedContext;
+    }
+
+    /**
+     * Obtains the request factory to operate with.
+     */
+    protected abstract TestActorRequestFactory requestFactory();
+
+    private static Enricher emptyEnricher() {
+        return Enricher.newBuilder()
+                       .build();
     }
 }

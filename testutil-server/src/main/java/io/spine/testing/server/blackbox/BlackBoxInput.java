@@ -21,9 +21,11 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -39,6 +41,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.util.stream.Collectors.toList;
 
@@ -87,16 +90,24 @@ final class BlackBoxInput {
      *         a list of domain event to be dispatched to the Bounded Context
      */
     void receivesEvents(Collection<Message> domainEvents) {
-        List<Event> events = toEvents(domainEvents);
+        List<Event> events = toEvents(domainEvents, eventFactory);
+        eventBus.post(events, observer);
+    }
+
+    void receivesEvents(Object producerId, EventMessage firstEvent, EventMessage... otherEvents) {
+        List<Message> eventMessages = asList(firstEvent, otherEvents);
+        TestEventFactory customFactory = newEventFactory(producerId);
+        List<Event> events = toEvents(eventMessages, customFactory);
         eventBus.post(events, observer);
     }
 
     void importsEvents(Collection<Message> domainEvents) {
-        List<Event> events = toEvents(domainEvents);
+        List<Event> events = toEvents(domainEvents, eventFactory);
         importBus.post(events, observer);
     }
 
-    private List<Event> toEvents(Collection<Message> domainEvents) {
+    private static List<Event> toEvents(Collection<Message> domainEvents,
+                                        TestEventFactory eventFactory) {
         List<Event> events = newArrayListWithCapacity(domainEvents.size());
         for (Message domainEvent : domainEvents) {
             events.add(event(domainEvent, eventFactory));
@@ -130,6 +141,21 @@ final class BlackBoxInput {
         CommandMessage message = (CommandMessage) commandOrMessage;
         return requestFactory.command()
                              .create(message);
+    }
+
+    /**
+     * Creates a new instance of {@link TestEventFactory} which supplies the passed value
+     * of the {@linkplain io.spine.core.EventContext#getProducerId() event producer ID}.
+     *
+     * @param producerId
+     *         can be {@code Integer}, {@code Long}, {@link String}, or {@code Message}
+     */
+    private TestEventFactory newEventFactory(Object producerId) {
+        checkNotNull(producerId);
+        Any id = producerId instanceof Any
+                 ? (Any) producerId
+                 : Identifier.pack(producerId);
+        return TestEventFactory.newInstance(id, requestFactory);
     }
 
     /**

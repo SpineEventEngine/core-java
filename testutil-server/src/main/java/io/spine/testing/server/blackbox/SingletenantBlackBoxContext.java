@@ -35,11 +35,11 @@ import io.spine.testing.server.blackbox.verify.state.VerifyState;
 public class SingletenantBlackBoxContext
         extends BlackBoxBoundedContext<SingletenantBlackBoxContext> {
 
-    private static final TestActorRequestFactory requestFactory =
+    private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(SingletenantBlackBoxContext.class);
 
     SingletenantBlackBoxContext(Enricher enricher) {
-        super(false, enricher, requestFactory);
+        super(false, enricher);
     }
 
     /**
@@ -96,5 +96,10 @@ public class SingletenantBlackBoxContext
     public SingletenantBlackBoxContext assertThat(VerifyState verifier) {
         verifier.verify(boundedContext(), requestFactory.query());
         return this;
+    }
+
+    @Override
+    protected TestActorRequestFactory requestFactory() {
+        return requestFactory;
     }
 }

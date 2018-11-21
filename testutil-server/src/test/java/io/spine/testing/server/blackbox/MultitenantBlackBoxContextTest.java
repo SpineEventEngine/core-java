@@ -43,6 +43,7 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
@@ -60,9 +61,9 @@ class MultitenantBlackBoxContextTest {
 
     @BeforeEach
     void setUp() {
-        projects = MultitenantBlackBoxContext.newInstance()
-                                             .with(new BbProjectRepository(),
-                                                   new BbProjectViewRepository());
+        projects = BlackBoxBoundedContext.multitenant()
+                                         .with(new BbProjectRepository(),
+                                               new BbProjectViewRepository());
     }
 
     @AfterEach
@@ -79,7 +80,8 @@ class MultitenantBlackBoxContextTest {
         void aggregate() {
             BbCreateProject createProject = createProject();
             BbProject expectedProject = createdProjectAggregate(createProject);
-            projects.receivesCommand(createProject)
+            projects.withTenant(newUuid())
+                    .receivesCommand(createProject)
                     .assertThat(exactlyOne(expectedProject));
         }
 
@@ -90,7 +92,8 @@ class MultitenantBlackBoxContextTest {
             BbCreateProject createProject2 = createProject();
             BbProject expectedProject1 = createdProjectAggregate(createProject1);
             BbProject expectedProject2 = createdProjectAggregate(createProject2);
-            projects.receivesCommands(createProject1, createProject2)
+            projects.withTenant(newUuid())
+                    .receivesCommands(createProject1, createProject2)
                     .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
         }
 
@@ -99,7 +102,8 @@ class MultitenantBlackBoxContextTest {
         void projection() {
             BbCreateProject createProject = createProject();
             BbProjectView expectedProject = createProjectView(createProject);
-            projects.receivesCommand(createProject)
+            projects.withTenant(newUuid())
+                    .receivesCommand(createProject)
                     .assertThat(exactlyOne(expectedProject));
         }
 
@@ -110,7 +114,8 @@ class MultitenantBlackBoxContextTest {
             BbCreateProject createProject2 = createProject();
             BbProjectView expectedProject1 = createProjectView(createProject1);
             BbProjectView expectedProject2 = createProjectView(createProject2);
-            projects.receivesCommands(createProject1, createProject2)
+            projects.withTenant(newUuid())
+                    .receivesCommands(createProject1, createProject2)
                     .assertThat(exactly(BbProjectView.class,
                                         of(expectedProject1, expectedProject2)));
         }
@@ -131,7 +136,8 @@ class MultitenantBlackBoxContextTest {
     @Test
     @DisplayName("receive and handle a single command")
     void receivesACommand() {
-        projects.receivesCommand(createProject())
+        projects.withTenant(newUuid())
+                .receivesCommand(createProject())
                 .assertThat(acked(once()).withoutErrorsOrRejections())
                 .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
     }
@@ -140,7 +146,8 @@ class MultitenantBlackBoxContextTest {
     @DisplayName("receive and handle multiple commands")
     void receivesCommands() {
         BbProjectId projectId = newProjectId();
-        projects.receivesCommand(createProject(projectId))
+        projects.withTenant(newUuid())
+                .receivesCommand(createProject(projectId))
                 .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
                 .assertThat(acked(count(4)).withoutErrorsOrRejections())
                 .assertThat(VerifyEvents.emittedEvent(count(4)))
@@ -153,6 +160,7 @@ class MultitenantBlackBoxContextTest {
     void receivesEvent() {
         BbProjectId projectId = newProjectId();
         projects.with(new BbReportRepository())
+                .withTenant(newUuid())
                 .receivesCommand(createReport(projectId))
                 .receivesEvent(taskAdded(projectId))
                 .assertThat(acked(twice()).withoutErrorsOrRejections())
@@ -166,6 +174,7 @@ class MultitenantBlackBoxContextTest {
     void receivesEvents() {
         BbProjectId projectId = newProjectId();
         projects.with(new BbReportRepository())
+                .withTenant(newUuid())
                 .receivesCommand(createReport(projectId))
                 .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                 .assertThat(acked(count(4)).withoutErrorsOrRejections())
@@ -178,8 +187,8 @@ class MultitenantBlackBoxContextTest {
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
-                MultitenantBlackBoxContext
-                        .newInstance()
+                BlackBoxBoundedContext
+                        .multitenant()
                         .with(new RepositoryThrowingExceptionOnClose() {
                             @Override
                             protected void throwException() {
