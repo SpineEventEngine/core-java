@@ -20,35 +20,14 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.Command;
-import io.spine.server.event.Enricher;
-import io.spine.testing.client.TestActorRequestFactory;
+import org.junit.jupiter.api.DisplayName;
 
-import java.util.List;
-
-/**
- * A black box bounded context for writing integration tests in a single tenant environment.
- */
-@VisibleForTesting
-public class SingletenantBlackBoxContext
-        extends BlackBoxBoundedContext<SingletenantBlackBoxContext> {
-
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(SingletenantBlackBoxContext.class);
-
-    SingletenantBlackBoxContext(Enricher enricher) {
-        super(false, enricher);
-    }
+@DisplayName("Single tenant Black Box Bounded Context should")
+class SingleTenantBlackBoxContextTest
+        extends BlackBoxBoundedContextTest<SingleTenantBlackBoxContext> {
 
     @Override
-    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
-        List<Command> commands = commandTap.commands();
-        return new EmittedCommands(commands);
-    }
-
-    @Override
-    protected TestActorRequestFactory requestFactory() {
-        return requestFactory;
+    SingleTenantBlackBoxContext newInstance() {
+        return BlackBoxBoundedContext.newInstance();
     }
 }

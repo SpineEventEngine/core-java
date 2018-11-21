@@ -86,15 +86,15 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Creates a single tenant bounded context with the default configuration.
      */
-    public static SingletenantBlackBoxContext singletenant() {
-        return new SingletenantBlackBoxContext(emptyEnricher());
+    public static SingleTenantBlackBoxContext newInstance() {
+        return new SingleTenantBlackBoxContext(emptyEnricher());
     }
 
     /**
      * Creates a single tenant bounded context with the specified enricher.
      */
-    public static SingletenantBlackBoxContext singletenant(Enricher enricher) {
-        return new SingletenantBlackBoxContext(enricher);
+    public static SingleTenantBlackBoxContext newInstance(Enricher enricher) {
+        return new SingleTenantBlackBoxContext(enricher);
     }
 
     /**
