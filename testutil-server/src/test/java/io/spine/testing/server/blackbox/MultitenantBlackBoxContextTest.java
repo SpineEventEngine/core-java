@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
@@ -64,13 +65,15 @@ class MultitenantBlackBoxContextTest
 
                 // Verify project was created for John.
                 .withTenant(john)
-                .assertThat(exactlyOne(createdProjectState(createJohnProject)))
+                .assertThat(emittedCommand(BbCreateProject.class, count(1)))
                 .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
+                .assertThat(exactlyOne(createdProjectState(createJohnProject)))
 
                 // Verify project was created for Carl.
                 .withTenant(carl)
-                .assertThat(exactlyOne(createdProjectState(createCarlProject)))
+                .assertThat(emittedCommand(BbCreateProject.class, count(1)))
                 .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
+                .assertThat(exactlyOne(createdProjectState(createCarlProject)))
 
                 // Verify command acknowledgements.
                 // One command was posted for John and one for Carl,
