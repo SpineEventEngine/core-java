@@ -26,8 +26,6 @@ import io.spine.test.aggregate.ProjectId;
 /**
  * Test environment repository for {@linkplain AggregateTest
  * Aggregate tests}.
- *
- * @author Alexander Yevsyukov
  */
 public class TestAggregateRepository
         extends AbstractAggregateTestRepository<ProjectId, TestAggregate> {

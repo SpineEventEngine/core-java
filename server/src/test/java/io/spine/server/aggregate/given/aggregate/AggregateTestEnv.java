@@ -26,24 +26,20 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.core.UserId;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.core.given.GivenVersion.withNumber;
 
-/**
- * @author Alexander Yevsyukov
- * @author Mykhailo Drachuk
- */
 public class AggregateTestEnv {
 
-    /** Prevent instantiation of this test environment */
+    /** Prevent instantiation of this test environment. */
     private AggregateTestEnv() {
         // Do nothing.
     }
@@ -52,12 +48,6 @@ public class AggregateTestEnv {
         return AggTaskId.newBuilder()
                         .setId(newUuid())
                         .build();
-    }
-
-    private static UserId newUserId() {
-        return UserId.newBuilder()
-                     .setValue(newUuid())
-                     .build();
     }
 
     public static TenantId newTenantId() {
@@ -75,14 +65,14 @@ public class AggregateTestEnv {
     public static AggAssignTask assignTask() {
         return AggAssignTask.newBuilder()
                             .setTaskId(newTaskId())
-                            .setAssignee(newUserId())
+                            .setAssignee(GivenUserId.generated())
                             .build();
     }
 
     public static AggReassignTask reassignTask() {
         return AggReassignTask.newBuilder()
                               .setTaskId(newTaskId())
-                              .setAssignee(newUserId())
+                              .setAssignee(GivenUserId.generated())
                               .build();
     }
 

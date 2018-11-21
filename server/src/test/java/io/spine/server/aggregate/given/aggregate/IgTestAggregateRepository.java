@@ -29,9 +29,6 @@ import static com.google.common.collect.ImmutableSet.of;
 /**
  * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
  * IdempotencyGuard tests}.
- *
- * @author Mykhailo Drachuk
- * @author Alexander Yevsyukov
  */
 public class IgTestAggregateRepository
         extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {

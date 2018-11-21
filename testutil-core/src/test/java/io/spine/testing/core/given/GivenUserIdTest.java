@@ -42,9 +42,10 @@ class GivenUserIdTest extends UtilityClassTest<GivenUserId> {
         String testIdString = "12345";
         UserId userId = of(testIdString);
 
-        UserId expected = UserId.newBuilder()
-                                .setValue(testIdString)
-                                .build();
+        UserId expected = UserId
+                .newBuilder()
+                .setValue(testIdString)
+                .build();
 
         assertEquals(expected, userId);
     }
@@ -55,5 +56,11 @@ class GivenUserIdTest extends UtilityClassTest<GivenUserId> {
         assertFalse(GivenUserId.newUuid()
                                .getValue()
                                .isEmpty());
+    }
+
+    @Test
+    @DisplayName("create test value by test suite class")
+    void byClass() {
+        assertEquals(getClass().getSimpleName(), GivenUserId.byTestClass(getClass()).getValue());
     }
 }

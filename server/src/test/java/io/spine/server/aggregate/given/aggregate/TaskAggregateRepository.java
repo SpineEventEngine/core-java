@@ -25,8 +25,6 @@ import io.spine.test.aggregate.task.AggTaskId;
 
 /**
  * A repository that manages {@link TaskAggregate} instances.
- *
- * @author Alexander Yevsyukkov
  */
 public class TaskAggregateRepository extends AggregateRepository<AggTaskId, TaskAggregate> {
 }
