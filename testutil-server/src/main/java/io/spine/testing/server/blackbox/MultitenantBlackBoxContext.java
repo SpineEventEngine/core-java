@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * A black box bounded context for writing integration tests in a multitenant environment.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
 public class MultitenantBlackBoxContext
         extends BlackBoxBoundedContext<MultitenantBlackBoxContext> {

@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.testing.client.blackbox.Count.count;
@@ -44,6 +46,7 @@ import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
+import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
@@ -53,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * An abstract base for testing of black box bounded contexts.
  */
+@ExtendWith(ShardingReset.class)
 abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
 
     private T projects;
@@ -73,6 +77,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
      */
     abstract BlackBoxBoundedContext<T> newInstance();
 
+    T boundedContext() {
+        return projects;
+    }
+
     @Nested
     @DisplayName("verify state of")
     class VerifyStateOf {
@@ -81,7 +89,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
         @DisplayName("a single aggregate")
         void aggregate() {
             BbCreateProject createProject = createProject();
-            BbProject expectedProject = createdProjectAggregate(createProject);
+            BbProject expectedProject = createdProjectState(createProject);
             projects.receivesCommand(createProject)
                     .assertThat(exactlyOne(expectedProject));
         }
@@ -91,8 +99,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
         void aggregates() {
             BbCreateProject createProject1 = createProject();
             BbCreateProject createProject2 = createProject();
-            BbProject expectedProject1 = createdProjectAggregate(createProject1);
-            BbProject expectedProject2 = createdProjectAggregate(createProject2);
+            BbProject expectedProject1 = createdProjectState(createProject1);
+            BbProject expectedProject2 = createdProjectState(createProject2);
             projects.receivesCommands(createProject1, createProject2)
                     .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
         }
@@ -116,12 +124,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
             projects.receivesCommands(createProject1, createProject2)
                     .assertThat(exactly(BbProjectView.class,
                                         of(expectedProject1, expectedProject2)));
-        }
-
-        private BbProject createdProjectAggregate(BbCreateProject createProject) {
-            return BbProjectVBuilder.newBuilder()
-                                    .setId(createProject.getProjectId())
-                                    .build();
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {

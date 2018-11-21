@@ -20,17 +20,14 @@
 
 package io.spine.testing.server.blackbox;
 
-import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("Single tenant Black Box Bounded Context should")
 class SingletenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<SingletenantBlackBoxContext> {
 
     @Override
-    BlackBoxBoundedContext<SingletenantBlackBoxContext> newInstance() {
+    SingletenantBlackBoxContext newInstance() {
         return BlackBoxBoundedContext.singletenant();
     }
 }

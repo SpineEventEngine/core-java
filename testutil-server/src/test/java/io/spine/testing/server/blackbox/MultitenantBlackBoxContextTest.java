@@ -20,19 +20,71 @@
 
 package io.spine.testing.server.blackbox;
 
-import io.spine.testing.core.given.GivenTenantId;
-import io.spine.testing.server.ShardingReset;
+import com.google.protobuf.StringValue;
+import io.spine.core.TenantId;
+import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
 
-@ExtendWith(ShardingReset.class)
+import static io.spine.testing.client.blackbox.Count.count;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.given.Given.createProject;
+import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
+import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @DisplayName("Multi tenant Black Box Bounded Context should")
 class MultitenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<MultitenantBlackBoxContext> {
 
     @Override
-    BlackBoxBoundedContext<MultitenantBlackBoxContext> newInstance() {
+    MultitenantBlackBoxContext newInstance() {
         return BlackBoxBoundedContext.multitenant()
-                                     .withTenant(GivenTenantId.newUuid());
+                                     .withTenant(newUuid());
+    }
+
+    @Test
+    @DisplayName("verify using a particular tenant ID")
+    void verifyForDifferentTenants() {
+        TenantId john = newUuid();
+        TenantId carl = newUuid();
+        BbCreateProject createJohnProject = createProject();
+        BbCreateProject createCarlProject = createProject();
+        boundedContext()
+                // Create a project for John.
+                .withTenant(john)
+                .receivesCommand(createJohnProject)
+
+                // Create a project for Carl.
+                .withTenant(carl)
+                .receivesCommand(createCarlProject)
+
+                // Verify project was created for John.
+                .withTenant(john)
+                .assertThat(exactlyOne(createdProjectState(createJohnProject)))
+                .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
+
+                // Verify project was created for Carl.
+                .withTenant(carl)
+                .assertThat(exactlyOne(createdProjectState(createCarlProject)))
+                .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
+
+                // Verify command acknowledgements.
+                // One command was posted for John and one for Carl,
+                // so totally 2 commands were acknowledged (aren't grouped by a tenant ID).
+                .assertThat(acked(count(2)));
+    }
+
+    @Test
+    @DisplayName("require tenant ID")
+    void requireTenantId() {
+        assertThrows(
+                IllegalStateException.class,
+                () -> BlackBoxBoundedContext.multitenant()
+                                            .assertThat(exactlyOne(StringValue.of("verify state")))
+        );
     }
 }
