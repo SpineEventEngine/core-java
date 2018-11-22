@@ -101,8 +101,7 @@ public final class EventEnvelope
 
     @Override
     public ActorContext getActorContext() {
-        return getEventContext().getCommandContext()
-                                .getActorContext();
+        return Events.getActorContext(getOuterObject());
     }
 
     /**

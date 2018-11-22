@@ -21,19 +21,23 @@
 package io.spine.testing.server.blackbox;
 
 import io.spine.testing.server.ShardingReset;
+import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
+import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
@@ -42,20 +46,25 @@ import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
+import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
+import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
+import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * An abstract base for testing of black box bounded contexts.
+ */
 @ExtendWith(ShardingReset.class)
-@DisplayName("Black Box Bounded Context should")
-class BlackBoxBoundedContextTest {
+abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
 
-    private BlackBoxBoundedContext projects;
+    private T projects;
 
     @BeforeEach
     void setUp() {
-        projects = BlackBoxBoundedContext.newInstance()
-                                         .with(new BbProjectRepository());
+        projects = newInstance().with(new BbProjectRepository(),
+                                      new BbProjectViewRepository());
     }
 
     @AfterEach
@@ -63,9 +72,70 @@ class BlackBoxBoundedContextTest {
         projects.close();
     }
 
+    /**
+     * Creates a new instance of a bounded context to be used in this test suite.
+     */
+    abstract BlackBoxBoundedContext<T> newInstance();
+
+    T boundedContext() {
+        return projects;
+    }
+
+    @Nested
+    @DisplayName("verify state of")
+    class VerifyStateOf {
+
+        @Test
+        @DisplayName("a single aggregate")
+        void aggregate() {
+            BbCreateProject createProject = createProject();
+            BbProject expectedProject = createdProjectState(createProject);
+            projects.receivesCommand(createProject)
+                    .assertThat(exactlyOne(expectedProject));
+        }
+
+        @Test
+        @DisplayName("several aggregates")
+        void aggregates() {
+            BbCreateProject createProject1 = createProject();
+            BbCreateProject createProject2 = createProject();
+            BbProject expectedProject1 = createdProjectState(createProject1);
+            BbProject expectedProject2 = createdProjectState(createProject2);
+            projects.receivesCommands(createProject1, createProject2)
+                    .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
+        }
+
+        @Test
+        @DisplayName("a single projection")
+        void projection() {
+            BbCreateProject createProject = createProject();
+            BbProjectView expectedProject = createProjectView(createProject);
+            projects.receivesCommand(createProject)
+                    .assertThat(exactlyOne(expectedProject));
+        }
+
+        @Test
+        @DisplayName("several projections")
+        void projections() {
+            BbCreateProject createProject1 = createProject();
+            BbCreateProject createProject2 = createProject();
+            BbProjectView expectedProject1 = createProjectView(createProject1);
+            BbProjectView expectedProject2 = createProjectView(createProject2);
+            projects.receivesCommands(createProject1, createProject2)
+                    .assertThat(exactly(BbProjectView.class,
+                                        of(expectedProject1, expectedProject2)));
+        }
+
+        private BbProjectView createProjectView(BbCreateProject createProject) {
+            return BbProjectViewVBuilder.newBuilder()
+                                        .setId(createProject.getProjectId())
+                                        .build();
+        }
+    }
+
     @SuppressWarnings("ReturnValueIgnored")
     @Test
-    @DisplayName("receive and handle a single commands")
+    @DisplayName("receive and handle a single command")
     void receivesACommand() {
         projects.receivesCommand(createProject())
                 .assertThat(acked(once()).withoutErrorsOrRejections())
@@ -117,8 +187,7 @@ class BlackBoxBoundedContextTest {
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
-                BlackBoxBoundedContext
-                        .newInstance()
+                newInstance()
                         .with(new RepositoryThrowingExceptionOnClose() {
                             @Override
                             protected void throwException() {

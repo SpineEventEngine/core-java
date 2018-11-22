@@ -20,27 +20,14 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.CommandMessage;
-import io.spine.core.Command;
-import io.spine.core.CommandClass;
+import org.junit.jupiter.api.DisplayName;
 
-import java.util.List;
+@DisplayName("Single tenant Black Box Bounded Context should")
+class SingleTenantBlackBoxContextTest
+        extends BlackBoxBoundedContextTest<SingleTenantBlackBoxContext> {
 
-/**
- * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
- */
-@VisibleForTesting
-public final class EmittedCommands extends EmittedMessages<CommandClass, Command, CommandMessage> {
-
-    EmittedCommands(List<Command> commands) {
-        super(commands, counterFor(commands), Command.class);
-    }
-
-    private static MessageTypeCounter<CommandClass, Command, CommandMessage>
-    counterFor(List<Command> commands) {
-        return new MessageTypeCounter<CommandClass, Command, CommandMessage>(commands,
-                                                                             CommandClass::of,
-                                                                             CommandClass::from);
+    @Override
+    SingleTenantBlackBoxContext newInstance() {
+        return BlackBoxBoundedContext.newInstance();
     }
 }

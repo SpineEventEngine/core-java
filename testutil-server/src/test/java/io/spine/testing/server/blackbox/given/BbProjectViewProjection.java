@@ -18,29 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.given;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.CommandMessage;
-import io.spine.core.Command;
-import io.spine.core.CommandClass;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.BbProjectView;
+import io.spine.testing.server.blackbox.BbProjectViewVBuilder;
+import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.testing.server.blackbox.event.BbProjectStarted;
 
-import java.util.List;
+import static io.spine.testing.server.blackbox.BbProject.Status.STARTED;
 
-/**
- * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
- */
-@VisibleForTesting
-public final class EmittedCommands extends EmittedMessages<CommandClass, Command, CommandMessage> {
+public class BbProjectViewProjection
+        extends Projection<BbProjectId, BbProjectView, BbProjectViewVBuilder> {
 
-    EmittedCommands(List<Command> commands) {
-        super(commands, counterFor(commands), Command.class);
+    protected BbProjectViewProjection(BbProjectId id) {
+        super(id);
     }
 
-    private static MessageTypeCounter<CommandClass, Command, CommandMessage>
-    counterFor(List<Command> commands) {
-        return new MessageTypeCounter<CommandClass, Command, CommandMessage>(commands,
-                                                                             CommandClass::of,
-                                                                             CommandClass::from);
+    @Subscribe
+    public void on(BbProjectCreated event) {
+        getBuilder().setId(event.getProjectId());
+    }
+
+    @Subscribe
+    public void on(BbProjectStarted event) {
+        getBuilder().setStatus(STARTED);
     }
 }

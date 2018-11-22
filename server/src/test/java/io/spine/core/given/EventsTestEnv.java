@@ -26,11 +26,12 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 
-/**
- * @author Mykhailo Drachuk
- */
+import static io.spine.core.given.GivenEvent.message;
+import static io.spine.protobuf.AnyPacker.pack;
+
 public class EventsTestEnv {
 
+    /** Prevents instantiation of this utility class. */
     private EventsTestEnv() {
     }
 
@@ -53,6 +54,7 @@ public class EventsTestEnv {
 
     public static Event event(EventContext context) {
         return Event.newBuilder()
+                    .setMessage(pack(message()))
                     .setContext(context)
                     .build();
     }

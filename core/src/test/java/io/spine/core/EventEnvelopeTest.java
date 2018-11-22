@@ -21,36 +21,24 @@
 package io.spine.core;
 
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
-import io.spine.test.core.ProjectCreated;
-import io.spine.test.core.ProjectId;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.given.EventEnvelopeTestEnv.actorContext;
+import static io.spine.core.given.EventEnvelopeTestEnv.commandContext;
+import static io.spine.core.given.EventEnvelopeTestEnv.event;
+import static io.spine.core.given.EventEnvelopeTestEnv.eventContext;
+import static io.spine.core.given.EventEnvelopeTestEnv.eventMessage;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("EventEnvelope should")
 class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventClass> {
 
     @Override
     protected Event outerObject() {
-        ProjectId projectId = ProjectId.newBuilder()
-                                       .setId(newUuid())
-                                       .build();
-
-        Message eventMessage = ProjectCreated.newBuilder()
-                                             .setProjectId(projectId)
-                                             .build();
-
-        EventId.Builder eventIdBuilder = EventId.newBuilder()
-                                                .setValue(newUuid());
-        Event event = Event.newBuilder()
-                           .setId(eventIdBuilder)
-                           .setMessage(AnyPacker.pack(eventMessage))
-                           .setContext(EventContext.getDefaultInstance())
-                           .build();
+        Message eventMessage = eventMessage();
+        Event event = event(eventMessage);
         return event;
     }
 
@@ -62,5 +50,43 @@ class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventC
     @Override
     protected EventClass getMessageClass(Event obj) {
         return EventClass.of(obj);
+    }
+
+    @Nested
+    @DisplayName("obtain actor context from")
+    class ObtainActorContext {
+
+        @Test
+        @DisplayName("command context")
+        void fromCommandContext() {
+            CommandContext commandContext = commandContext();
+            EventContext context = eventContext(commandContext);
+            EventEnvelope envelope = envelope(context);
+            assertEquals(commandContext.getActorContext(), envelope.getActorContext());
+        }
+
+        @Test
+        @DisplayName("command context of the origin event")
+        void fromCommandContextOfOrigin() {
+            CommandContext commandContext = commandContext();
+            EventContext originContext = eventContext(commandContext);
+            EventContext context = eventContext(originContext);
+            EventEnvelope envelope = envelope(context);
+            assertEquals(commandContext.getActorContext(), envelope.getActorContext());
+        }
+
+        @Test
+        @DisplayName("import context")
+        void fromImportContext() {
+            EventContext context = eventContext(actorContext());
+            EventEnvelope envelope = envelope(context);
+            ActorContext expectedImportContext = context.getImportContext();
+            assertEquals(expectedImportContext, envelope.getActorContext());
+        }
+
+        private EventEnvelope envelope(EventContext context) {
+            Event event = event(eventMessage(), context);
+            return toEnvelope(event);
+        }
     }
 }

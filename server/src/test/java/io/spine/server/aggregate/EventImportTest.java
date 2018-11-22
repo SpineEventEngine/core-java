@@ -30,6 +30,7 @@ import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +51,7 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 @DisplayName("For event import AggregateRepository should")
 class EventImportTest {
 
-    private BlackBoxBoundedContext boundedContext;
+    private SingleTenantBlackBoxContext boundedContext;
     private EngineRepository repository;
 
     @BeforeEach
@@ -182,8 +183,8 @@ class EventImportTest {
      */
     private EventEnvelope createEvent(EventMessage eventMessage, @Nullable EngineId producerId) {
         TestEventFactory eventFactory = producerId == null
-                                        ? boundedContext.newEventFactory()
-                                        : boundedContext.newEventFactory(producerId);
+                                        ? TestEventFactory.newInstance(getClass())
+                                        : TestEventFactory.newInstance(producerId, getClass());
         EventEnvelope result = EventEnvelope.of(eventFactory.createEvent(eventMessage));
         return result;
     }

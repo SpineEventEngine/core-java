@@ -18,29 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.verify.state;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.CommandMessage;
-import io.spine.core.Command;
-import io.spine.core.CommandClass;
+import com.google.protobuf.Message;
+import io.spine.client.Query;
+import io.spine.client.QueryFactory;
 
-import java.util.List;
+import java.util.Collection;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.truth.Truth.assertThat;
 
 /**
- * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ * Verifies that all entities of a type match expected ones in the exact order.
  */
 @VisibleForTesting
-public final class EmittedCommands extends EmittedMessages<CommandClass, Command, CommandMessage> {
+class AllOfTypeMatch<T extends Message> extends VerifyState {
 
-    EmittedCommands(List<Command> commands) {
-        super(commands, counterFor(commands), Command.class);
+    private final Iterable<T> expected;
+    private final Class<T> entityType;
+
+    AllOfTypeMatch(Iterable<T> expected, Class<T> entityType) {
+        super();
+        this.expected = checkNotNull(expected);
+        this.entityType = checkNotNull(entityType);
     }
 
-    private static MessageTypeCounter<CommandClass, Command, CommandMessage>
-    counterFor(List<Command> commands) {
-        return new MessageTypeCounter<CommandClass, Command, CommandMessage>(commands,
-                                                                             CommandClass::of,
-                                                                             CommandClass::from);
+    @Override
+    protected Query query(QueryFactory factory) {
+        return factory.all(entityType);
+    }
+
+    @Override
+    protected void verify(Collection<? extends Message> actualEntities) {
+        assertThat(actualEntities).containsExactlyElementsIn(expected);
     }
 }

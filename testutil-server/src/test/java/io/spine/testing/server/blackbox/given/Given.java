@@ -20,7 +20,9 @@
 
 package io.spine.testing.server.blackbox.given;
 
+import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.BbProjectVBuilder;
 import io.spine.testing.server.blackbox.BbReportId;
 import io.spine.testing.server.blackbox.BbTask;
 import io.spine.testing.server.blackbox.command.BbAddTask;
@@ -86,5 +88,11 @@ public class Given {
         return BbProjectId.newBuilder()
                         .setId(newUuid())
                         .build();
+    }
+
+    public static BbProject createdProjectState(BbCreateProject createProject) {
+        return BbProjectVBuilder.newBuilder()
+                                .setId(createProject.getProjectId())
+                                .build();
     }
 }

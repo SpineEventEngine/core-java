@@ -102,9 +102,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
                   .writeLastHandledEventTime(eventTime);
 
         repository.getStand()
-                  .post(eventContext.getCommandContext()
-                                    .getActorContext()
-                                    .getTenantId(), projection);
+                  .post(envelope().getTenantId(), projection);
     }
 
     /**

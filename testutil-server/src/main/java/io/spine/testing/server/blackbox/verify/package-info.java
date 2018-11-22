@@ -18,29 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
-
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.CommandMessage;
-import io.spine.core.Command;
-import io.spine.core.CommandClass;
-
-import java.util.List;
-
 /**
- * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ * This package provides classes for verification of a black box bounded context.
+ *
+ * @see io.spine.testing.server.blackbox.verify.state.VerifyState
  */
-@VisibleForTesting
-public final class EmittedCommands extends EmittedMessages<CommandClass, Command, CommandMessage> {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server.blackbox.verify;
 
-    EmittedCommands(List<Command> commands) {
-        super(commands, counterFor(commands), Command.class);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    private static MessageTypeCounter<CommandClass, Command, CommandMessage>
-    counterFor(List<Command> commands) {
-        return new MessageTypeCounter<CommandClass, Command, CommandMessage>(commands,
-                                                                             CommandClass::of,
-                                                                             CommandClass::from);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

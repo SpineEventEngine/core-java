@@ -18,29 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.given;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.CommandMessage;
-import io.spine.core.Command;
-import io.spine.core.CommandClass;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.BbProjectView;
 
-import java.util.List;
-
-/**
- * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
- */
-@VisibleForTesting
-public final class EmittedCommands extends EmittedMessages<CommandClass, Command, CommandMessage> {
-
-    EmittedCommands(List<Command> commands) {
-        super(commands, counterFor(commands), Command.class);
-    }
-
-    private static MessageTypeCounter<CommandClass, Command, CommandMessage>
-    counterFor(List<Command> commands) {
-        return new MessageTypeCounter<CommandClass, Command, CommandMessage>(commands,
-                                                                             CommandClass::of,
-                                                                             CommandClass::from);
-    }
+public class BbProjectViewRepository
+        extends ProjectionRepository<BbProjectId, BbProjectViewProjection, BbProjectView> {
 }

@@ -21,26 +21,34 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.CommandMessage;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
+import io.spine.server.event.Enricher;
+import io.spine.testing.client.TestActorRequestFactory;
 
 import java.util.List;
 
 /**
- * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ * A black box bounded context for writing integration tests in a single tenant environment.
  */
 @VisibleForTesting
-public final class EmittedCommands extends EmittedMessages<CommandClass, Command, CommandMessage> {
+public class SingleTenantBlackBoxContext
+        extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
 
-    EmittedCommands(List<Command> commands) {
-        super(commands, counterFor(commands), Command.class);
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(SingleTenantBlackBoxContext.class);
+
+    SingleTenantBlackBoxContext(Enricher enricher) {
+        super(false, enricher);
     }
 
-    private static MessageTypeCounter<CommandClass, Command, CommandMessage>
-    counterFor(List<Command> commands) {
-        return new MessageTypeCounter<CommandClass, Command, CommandMessage>(commands,
-                                                                             CommandClass::of,
-                                                                             CommandClass::from);
+    @Override
+    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
+        List<Command> commands = commandTap.commands();
+        return new EmittedCommands(commands);
+    }
+
+    @Override
+    protected TestActorRequestFactory requestFactory() {
+        return requestFactory;
     }
 }
