@@ -48,6 +48,7 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
@@ -60,7 +61,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
@@ -128,10 +128,7 @@ class ProjectionEndToEndTest {
                 .newBuilder()
                 .build();
         groups.register(repository);
-        UserId organizationHead = UserId
-                .newBuilder()
-                .setValue(newUuid())
-                .build();
+        UserId organizationHead = GivenUserId.newUuid();
         EntityHistoryId historyId = EntityHistoryId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.of(Organization.class).value())

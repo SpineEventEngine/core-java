@@ -44,8 +44,6 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectPaused;
  * in any of event appliers.
  *
  * <p>One might say, this aggregate sticks to its roots and denies changes. Hence the name.
- *
- * @author Alex Tymchenko
  */
 public class AmishAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 

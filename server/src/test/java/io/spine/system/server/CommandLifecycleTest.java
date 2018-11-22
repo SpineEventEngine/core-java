@@ -44,6 +44,7 @@ import io.spine.system.server.given.command.CompanyNameProcman;
 import io.spine.system.server.given.command.CompanyNameProcmanRepo;
 import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -192,10 +192,7 @@ class CommandLifecycleTest {
         private Command buildInvalidCommand() {
             EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
             CommandId commandId = Commands.generateId();
-            UserId actor = UserId
-                    .newBuilder()
-                    .setValue(newUuid())
-                    .build();
+            UserId actor = GivenUserId.newUuid();
             Timestamp now = Time.getCurrentTime();
             ActorContext actorContext = ActorContext
                     .newBuilder()

@@ -35,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @param <I> the type of aggregate identifiers
  * @param <A> the type of aggregates
- * @author Alexander Yevsyukov
  */
 public class AbstractAggregateTestRepository<I, A extends Aggregate<I, ?, ?>>
         extends AggregateRepository<I, A> {
