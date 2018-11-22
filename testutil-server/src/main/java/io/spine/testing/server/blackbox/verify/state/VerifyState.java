@@ -45,7 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class VerifyState {
 
     /**
-     * Queries and verifies entity states.
+     * Queries the read-side of the provided {@code BoundedContext} and
+     * {@linkplain #verify(Collection)} verifies} the results according to the pre-set expectations.
      *
      * @param boundedContext
      *         the bounded context to query

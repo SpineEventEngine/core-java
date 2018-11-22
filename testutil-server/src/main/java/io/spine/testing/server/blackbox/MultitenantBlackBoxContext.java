@@ -71,7 +71,7 @@ public class MultitenantBlackBoxContext
     protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
         List<Command> allCommands = commandTap.commands();
         List<Command> tenantCommands = allCommands.stream()
-                                                  .filter(new HasTenantId(tenantId))
+                                                  .filter(new MatchesTenant(tenantId))
                                                   .collect(Collectors.toList());
         return new EmittedCommands(tenantCommands);
     }
@@ -104,11 +104,11 @@ public class MultitenantBlackBoxContext
     /**
      * A predicate to match commands with a {@linkplain #tenantToMatch tenant ID}.
      */
-    private static class HasTenantId implements Predicate<Command> {
+    private static class MatchesTenant implements Predicate<Command> {
 
         private final TenantId tenantToMatch;
 
-        private HasTenantId(TenantId tenantToMatch) {
+        private MatchesTenant(TenantId tenantToMatch) {
             this.tenantToMatch = tenantToMatch;
         }
 

@@ -73,7 +73,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
     }
 
     /**
-     * Creates a new instance of a bounded context for the basic set of tests.
+     * Creates a new instance of a bounded context to be used in this test suite.
      */
     abstract BlackBoxBoundedContext<T> newInstance();
 
