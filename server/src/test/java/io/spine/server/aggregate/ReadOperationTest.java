@@ -20,16 +20,11 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Timestamp;
-import io.spine.base.Time;
-import io.spine.base.Time.Provider;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.server.aggregate.given.ReadOperationTestEnv.TestAggregate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,17 +46,6 @@ class ReadOperationTest {
             InMemoryStorageFactory.newInstance(BoundedContextNames.assumingTests(), false);
 
     private AggregateStorage<String> storage;
-
-    @BeforeAll
-    static void prepare() {
-        Time.Provider provider = new TickingTime();
-        Time.setProvider(provider);
-    }
-
-    @AfterAll
-    static void unPrepare() {
-        Time.resetProvider();
-    }
 
     @BeforeEach
     void setUp() {
@@ -131,22 +115,5 @@ class ReadOperationTest {
                 .addAllEvent(events)
                 .setSnapshot(snapshot)
                 .build());
-    }
-
-    public static final class TickingTime implements Provider {
-
-        private Timestamp current;
-
-        public TickingTime() {
-            this.current = Time.getCurrentTime();
-        }
-
-        @Override
-        public Timestamp getCurrentTime() {
-            current = current.toBuilder()
-                             .setSeconds(current.getSeconds() + 1)
-                             .build();
-            return current;
-        }
     }
 }
