@@ -42,7 +42,6 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  * An event-sourced storage of aggregate part events and snapshots.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
- * @author Alexander Yevsyukov
  */
 @SPI
 public abstract class AggregateStorage<I>
@@ -164,27 +163,6 @@ public abstract class AggregateStorage<I>
                                    .setSnapshot(snapshot)
                                    .build();
     }
-
-    /**
-     * Reads a count of events which were saved to the storage after
-     * the last snapshot was created,
-     * <strong>or</strong> a count of all events if there were no snapshots yet.
-     *
-     * @param id an ID of an aggregate
-     * @return an even count after the last snapshot
-     */
-    protected abstract int readEventCountAfterLastSnapshot(I id);
-
-    /**
-     * Writes a count of events which were saved to the storage after
-     * the last snapshot was created, or a count of all events if there
-     * were no snapshots yet.
-     *
-     * @param id         an ID of an aggregate
-     * @param eventCount an even count after the last snapshot
-     * @throws IllegalStateException if the storage is closed
-     */
-    protected abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
 
     // Storage implementation API.
 

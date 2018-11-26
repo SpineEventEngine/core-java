@@ -206,8 +206,7 @@ public class AggregateRepositoryTest {
             repository().store(aggregate);
             AggregateStateRecord record = readRecord(aggregate);
             assertTrue(record.hasSnapshot());
-            assertEquals(0, repository().aggregateStorage()
-                                        .readEventCountAfterLastSnapshot(aggregate.getId()));
+            assertEquals(0, record.getEventCount());
         }
 
         @Test

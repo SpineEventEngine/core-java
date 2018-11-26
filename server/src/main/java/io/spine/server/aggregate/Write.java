@@ -32,8 +32,6 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
  * An {@link Aggregate} write operation.
  *
  * <p>Stores the given aggregate into the associated storage.
- *
- * @author Dmytro Dashenkov
  */
 final class Write<I> {
 
@@ -84,7 +82,7 @@ final class Write<I> {
     }
 
     private void writeEvents(List<Event> events) {
-        int eventCount = storage.readEventCountAfterLastSnapshot(aggregate.getId());
+        int eventCount = aggregate.getPersistedEventCount();
         Collection<Event> eventBatch = newArrayListWithCapacity(snapshotTrigger);
         for (Event event : events) {
             eventBatch.add(event);
@@ -99,7 +97,7 @@ final class Write<I> {
         if (!eventBatch.isEmpty()) {
             persist(eventBatch);
         }
-        commit(eventCount);
+        commit();
     }
 
     private void persist(Collection<Event> events, Snapshot snapshot) {
@@ -123,10 +121,8 @@ final class Write<I> {
         storage.write(id, record);
     }
 
-    private void commit(int eventCount) {
+    private void commit() {
         aggregate.commitEvents();
-        storage.writeEventCountAfterLastSnapshot(aggregate.getId(), eventCount);
-
         if (aggregate.lifecycleFlagsChanged()) {
             storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
         }
