@@ -23,12 +23,12 @@ package io.spine.server.aggregate;
 import io.spine.core.Event;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -42,7 +42,7 @@ final class ReadOperation<I> {
 
     private final AggregateStorage<I> storage;
     private final AggregateReadRequest<I> request;
-    private final Deque<Event> history = newLinkedList();
+    private final Deque<Event> history;
 
     private @MonotonicNonNull Snapshot snapshot = null;
 
@@ -50,6 +50,7 @@ final class ReadOperation<I> {
         storage.checkNotClosed();
         this.storage = storage;
         this.request = checkNotNull(request);
+        this.history = new ArrayDeque<>(request.getBatchSize());
     }
 
     Optional<AggregateStateRecord> perform() {
@@ -74,6 +75,7 @@ final class ReadOperation<I> {
                 break;
             case SNAPSHOT:
                 snapshot = record.getSnapshot();
+                history.clear();
                 break;
             case KIND_NOT_SET:
             default:

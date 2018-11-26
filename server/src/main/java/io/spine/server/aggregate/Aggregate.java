@@ -121,6 +121,14 @@ public abstract class Aggregate<I,
         implements EventPlayer, EventReactor {
 
     /**
+     * The count of events stored to the {@linkplain AggregateStorage storage} since the last
+     * snapshot.
+     *
+     * <p>This field is set in {@link #play(AggregateStateRecord)} and is effectively final.
+     */
+    private int persistedEventCount = 0;
+
+    /**
      * Events generated in the process of handling commands that were not yet committed.
      *
      * @see #commitEvents()
@@ -256,7 +264,7 @@ public abstract class Aggregate<I,
             restore(snapshot);
         }
         List<Event> events = aggregateStateRecord.getEventList();
-
+        persistedEventCount = events.size();
         play(events);
         remember(events);
     }
@@ -400,5 +408,12 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
+    }
+
+    /**
+     * Obtains the number of events stored in the associated storage since last snapshot.
+     */
+    int getPersistedEventCount() {
+        return persistedEventCount;
     }
 }
