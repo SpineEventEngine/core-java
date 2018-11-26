@@ -75,7 +75,6 @@ final class ReadOperation<I> {
                 break;
             case SNAPSHOT:
                 snapshot = record.getSnapshot();
-                history.clear();
                 break;
             case KIND_NOT_SET:
             default:
