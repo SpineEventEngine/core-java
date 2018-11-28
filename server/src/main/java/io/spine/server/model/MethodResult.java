@@ -142,26 +142,22 @@ public abstract class MethodResult<V extends Message> {
             }
         }
 
-        // An `Iterable` is the one of the return types we expect from methods we call.
+        if (output instanceof List) {
+            // Cast to the list of messages as it is the one of the return types
+            // we expect by methods we call.
+            List<V> result = (List<V>) output;
+            return result;
+        }
+
+        // If it's not a list it could be another `Iterable`.
         if (output instanceof Iterable) {
-            Iterable<V> result = (Iterable<V>) output;
-            return filterOutEmpties(result);
+            Iterable<V> iterable = (Iterable<V>) output;
+            return copyOf(iterable);
         }
 
         // Another type of result is single event message (as Message).
         V singleMessage = (V) output;
         List<V> result = singletonList(singleMessage);
-        return result;
-    }
-
-    /**
-     * Removes all {@link Empty} messages from the given {@code Iterable} and collects everything
-     * else to {@code List}.
-     */
-    private static <V extends Message> List<V> filterOutEmpties(Iterable<V> output) {
-        List<V> result = stream(output)
-                .filter(v -> !(v instanceof Empty))
-                .collect(toList());
         return result;
     }
 
