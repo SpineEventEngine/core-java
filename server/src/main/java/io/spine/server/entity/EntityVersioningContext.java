@@ -60,7 +60,7 @@ final class EntityVersioningContext {
     /**
      * An event which is handled by the entity during transaction.
      *
-     * <p>The event is optional in the versioning context as the version increment can occur upon
+     * <p>The event is optional in the versioning context as the version change can occur upon
      * command handling (see {@link io.spine.server.procman.ProcessManager}).
      */
     @Nullable EventEnvelope event() {
