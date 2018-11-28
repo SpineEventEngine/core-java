@@ -495,6 +495,16 @@ public abstract class Transaction<I,
                                        .build();
     }
 
+    /**
+     * Advances the transaction version.
+     *
+     * <p>This method can only be used on transactions whose versioning strategy doesn't require
+     * any additional information. An example of such strategy is
+     * {@link EntityVersioning#AUTO_INCREMENT}.
+     *
+     * @throws IllegalStateException
+     *         if the version cannot be incremented without the additional context
+     */
     protected void advanceVersion() {
         checkState(versioningStrategy() != FROM_EVENT, "Specify an event via the custom " +
                 "versioning context to use FROM_EVENT strategy");
@@ -502,6 +512,9 @@ public abstract class Transaction<I,
         advanceVersion(context);
     }
 
+    /**
+     * Increments the transaction version based on the given versioning context.
+     */
     void advanceVersion(EntityVersioningContext context) {
         Version version = versioningStrategy().nextVersion(context);
         checkIsIncrement(getVersion(), version);

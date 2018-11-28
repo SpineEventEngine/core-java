@@ -28,11 +28,8 @@ import io.spine.core.Versions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-// todo update doc
-
 /**
- * The strategy of versioning of {@linkplain Entity entities} during a {@link Transaction.Phase} of
- * a certain {@code Transaction}.
+ * The strategy of versioning of {@linkplain Entity entities} during a certain {@link Transaction}.
  */
 @Internal
 public enum EntityVersioning {
@@ -78,13 +75,12 @@ public enum EntityVersioning {
     };
 
     /**
-     * Creates the {@link Entity} version which is set after the given {@link Transaction.Phase} is
-     * completed successfully.
+     * Creates a new {@link Entity} version from the given context.
      *
      * <p>This method has no side effects, i.e. doesn't set the version to the transaction etc.
      *
      * @param context
-     *         the context
+     *         the versioning context with the information about current transaction, etc.
      * @return the advanced version
      */
     abstract Version nextVersion(EntityVersioningContext context);

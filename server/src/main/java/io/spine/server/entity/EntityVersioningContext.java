@@ -23,25 +23,47 @@ package io.spine.server.entity;
 import io.spine.core.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * The context which {@link EntityVersioning} uses for version increment.
+ */
 final class EntityVersioningContext {
 
     private final Transaction transaction;
+
     private final @Nullable EventEnvelope event;
 
+    /**
+     * Creates an {@code EntityVersioningContext} based on the given transaction.
+     *
+     * <p>The event field remains {@code null}, so such context isn't suitable for the versioning
+     * strategies which are based on the handled event version.
+     */
     EntityVersioningContext(Transaction transaction) {
         this.transaction = transaction;
         this.event = null;
     }
 
+    /**
+     * Creates an {@code EntityVersioningContext} from the given transaction and event.
+     */
     EntityVersioningContext(Transaction transaction, EventEnvelope event) {
         this.transaction = transaction;
         this.event = event;
     }
 
+    /**
+     * A transaction during which the version increment occurs.
+     */
     Transaction transaction() {
         return transaction;
     }
 
+    /**
+     * An event which is handled by the entity during transaction.
+     *
+     * <p>The event is optional in the versioning context as the version increment can occur upon
+     * command handling (see {@link io.spine.server.procman.ProcessManager}).
+     */
     @Nullable EventEnvelope event() {
         return event;
     }
