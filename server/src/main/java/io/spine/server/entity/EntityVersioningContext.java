@@ -29,7 +29,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 final class EntityVersioningContext {
 
     private final Transaction transaction;
-
     private final @Nullable EventEnvelope event;
 
     /**
