@@ -53,6 +53,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 
     @Assign
     PmQuizStarted handle(PmStartQuiz command) {
+        getBuilder().setId(command.getQuizId());
         return PmQuizStarted.newBuilder()
                             .setQuizId(command.getQuizId())
                             .addAllQuestion(command.getQuestionList())

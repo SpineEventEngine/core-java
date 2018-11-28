@@ -38,6 +38,7 @@ import io.spine.validate.ValidationException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -217,7 +218,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * @return the version of the entity, modified within this transaction
+     * Returns the version of the entity, modified within this transaction.
      */
     Version getVersion() {
         return version;
@@ -494,6 +495,19 @@ public abstract class Transaction<I,
                                        .build();
     }
 
+    protected void advanceVersion() {
+        checkState(versioningStrategy() != FROM_EVENT, "Specify an event via the custom " +
+                "versioning context to use FROM_EVENT strategy");
+        EntityVersioningContext context = new EntityVersioningContext(this);
+        advanceVersion(context);
+    }
+
+    void advanceVersion(EntityVersioningContext context) {
+        Version version = versioningStrategy().nextVersion(context);
+        checkIsIncrement(getVersion(), version);
+        setVersion(version);
+    }
+
     /**
      * Retrieves the {@link EntityVersioning} of current {@code Transaction}.
      *
@@ -548,10 +562,9 @@ public abstract class Transaction<I,
         }
 
         private void advanceVersion() {
-            Version version = underlyingTransaction.versioningStrategy()
-                                                   .nextVersion(this);
-            checkIsIncrement(underlyingTransaction.getVersion(), version);
-            underlyingTransaction.setVersion(version);
+            EntityVersioningContext context =
+                    new EntityVersioningContext(underlyingTransaction, event);
+            underlyingTransaction.advanceVersion(context);
         }
 
         Transaction<I, E, S, B> getUnderlyingTransaction() {

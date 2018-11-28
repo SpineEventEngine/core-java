@@ -72,6 +72,16 @@ public class PmTransaction<I,
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>The method is overridden to expose itself to the package.
+     */
+    @Override
+    protected void advanceVersion() {
+        super.advanceVersion();
+    }
+
+    /**
      * Creates a new transaction for a given {@code ProcessManager}.
      *
      * @param  processManager the {@code ProcessManager} instance to start the transaction for

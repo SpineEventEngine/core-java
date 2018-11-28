@@ -22,8 +22,13 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+// todo update doc
 
 /**
  * The strategy of versioning of {@linkplain Entity entities} during a {@link Transaction.Phase} of
@@ -44,8 +49,10 @@ public enum EntityVersioning {
      */
     FROM_EVENT {
         @Override
-        Version nextVersion(Transaction.Phase<?, ?, ?, ?> phase) {
-            Version fromEvent = phase.getContext()
+        Version nextVersion(EntityVersioningContext context) {
+            EventEnvelope event = context.event();
+            checkNotNull(event, "Event must be set when using FROM_EVENT versioning strategy");
+            Version fromEvent = event.getEventContext()
                                      .getVersion();
             return fromEvent;
         }
@@ -62,9 +69,9 @@ public enum EntityVersioning {
      */
     AUTO_INCREMENT {
         @Override
-        Version nextVersion(Transaction.Phase<?, ?, ?, ?> phase) {
-            Version current = phase.getUnderlyingTransaction()
-                                   .getVersion();
+        Version nextVersion(EntityVersioningContext context) {
+            Version current = context.transaction()
+                                     .getVersion();
             Version newVersion = Versions.increment(current);
             return newVersion;
         }
@@ -76,8 +83,9 @@ public enum EntityVersioning {
      *
      * <p>This method has no side effects, i.e. doesn't set the version to the transaction etc.
      *
-     * @param phase the transaction phase that causes the version change
+     * @param context
+     *         the context
      * @return the advanced version
      */
-    abstract Version nextVersion(Transaction.Phase<?, ?, ?, ?> phase);
+    abstract Version nextVersion(EntityVersioningContext context);
 }

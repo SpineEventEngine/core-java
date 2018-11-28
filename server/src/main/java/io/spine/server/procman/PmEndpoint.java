@@ -71,6 +71,7 @@ abstract class PmEndpoint<I,
     protected List<Event> dispatchInTx(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
         List<Event> events = doDispatch(processManager, envelope());
+        tx.advanceVersion();
         tx.commit();
         return events;
     }
