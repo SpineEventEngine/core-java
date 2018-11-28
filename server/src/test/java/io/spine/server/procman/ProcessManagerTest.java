@@ -116,6 +116,8 @@ import static org.mockito.Mockito.spy;
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
 
+    private static final int VERSION = 2;
+
     private final TestEventFactory eventFactory =
             TestEventFactory.newInstance(Identifier.pack(TestProcessManager.ID), getClass());
     private final TestActorRequestFactory requestFactory =
@@ -145,7 +147,7 @@ class ProcessManagerTest {
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
-                              .withVersion(2)
+                              .withVersion(VERSION)
                               .withState(Any.getDefaultInstance())
                               .build();
     }
@@ -190,6 +192,31 @@ class ProcessManagerTest {
 
             assertEquals(1, eventMessages.size());
             assertTrue(eventMessages.get(0) instanceof Event);
+        }
+    }
+
+    @Nested
+    @DisplayName("increment version by one")
+    class IncrementVersion {
+
+        @Test
+        @DisplayName("on command dispatch")
+        void onCommandDispatch() {
+            assertEquals(VERSION, processManager.getVersion()
+                                                .getNumber());
+            testDispatchCommand(createProject());
+            assertEquals(VERSION + 1, processManager.getVersion()
+                                                    .getNumber());
+        }
+
+        @Test
+        @DisplayName("on event dispatch")
+        void onEventDispatch() {
+            assertEquals(VERSION, processManager.getVersion()
+                                                .getNumber());
+            testDispatchEvent(messageOfType(PmProjectStarted.class));
+            assertEquals(VERSION + 1, processManager.getVersion()
+                                                    .getNumber());
         }
     }
 
