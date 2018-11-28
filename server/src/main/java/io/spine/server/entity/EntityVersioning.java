@@ -75,12 +75,12 @@ public enum EntityVersioning {
     };
 
     /**
-     * Creates a new {@link Entity} version from the given context.
+     * Creates a new {@link Entity} version based on the given versioning context.
      *
      * <p>This method has no side effects, i.e. doesn't set the version to the transaction etc.
      *
      * @param context
-     *         the versioning context with the information about current transaction, etc.
+     *         the versioning context with the information about current transaction
      * @return the advanced version
      */
     abstract Version nextVersion(EntityVersioningContext context);
