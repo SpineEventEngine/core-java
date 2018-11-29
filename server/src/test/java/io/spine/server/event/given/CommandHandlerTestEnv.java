@@ -207,8 +207,7 @@ public class CommandHandlerTestEnv {
                                                     .setTaskId(taskId)
                                                     .build()
                                             : null;
-            return Pair.withNullable(
-                    cmdTaskAssigned, cmdTaskStarted);
+            return Pair.withNullable(cmdTaskAssigned, cmdTaskStarted);
         }
     }
 }
