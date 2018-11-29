@@ -23,13 +23,16 @@ package io.spine.server.event.model;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.UserId;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.given.reactor.RcIterableReturn;
 import io.spine.server.event.model.given.reactor.RcOneParam;
 import io.spine.server.event.model.given.reactor.RcReturnOptional;
+import io.spine.server.event.model.given.reactor.RcReturnPair;
 import io.spine.server.event.model.given.reactor.RcTwoParams;
 import io.spine.server.event.model.given.reactor.RcWrongAnnotation;
 import io.spine.server.event.model.given.reactor.RcWrongFirstParam;
@@ -40,6 +43,7 @@ import io.spine.server.event.model.given.reactor.TestEventReactor;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.test.reflect.ProjectId;
+import io.spine.test.reflect.event.RefProjectAssigned;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.test.reflect.event.RefProjectStarted;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +52,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -56,9 +61,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("EventReactorMethod should")
 class EventReactorMethodTest {
@@ -148,14 +150,7 @@ class EventReactorMethodTest {
         @Test
         @DisplayName("when returning value")
         void returnValue() {
-            ProjectId id = ProjectId
-                    .newBuilder()
-                    .setId(randomString())
-                    .build();
-            RefProjectCreated event = RefProjectCreated
-                    .newBuilder()
-                    .setProjectId(id)
-                    .build();
+            RefProjectCreated event = projectCreatedEvent();
 
             ReactorMethodResult result =
                     method.invoke(target, envelope(event));
@@ -163,9 +158,10 @@ class EventReactorMethodTest {
             IterableSubject assertThat = assertThat(result.asMessages());
             assertThat.hasSize(1);
             assertThat.containsExactly(
-                    RefProjectStarted.newBuilder()
-                                     .setProjectId(id)
-                                     .build()
+                    RefProjectStarted
+                            .newBuilder()
+                            .setProjectId(event.getProjectId())
+                            .build()
             );
         }
 
@@ -181,6 +177,70 @@ class EventReactorMethodTest {
                     method.invoke(target, envelope(event));
 
             assertThat(result.asMessages()).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("support Pair return type")
+    class PairReturn {
+
+        private EventReactor target;
+        private Method rawMethod;
+        private EventReactorMethod method;
+
+        @BeforeEach
+        void setUp() {
+            target = new RcReturnPair();
+            rawMethod = ((TestEventReactor) target).getMethod();
+            method = createMethod(rawMethod);
+        }
+
+        @Test
+        @DisplayName("in predicate")
+        void inPredicate() {
+            assertValid(rawMethod);
+        }
+
+        @Test
+        @DisplayName("in factory")
+        void inFactory() {
+            assertThat(method).isNotNull();
+        }
+
+        @Test
+        @DisplayName("when returning Pair with two non-null values")
+        void returningNonNull() {
+            RefProjectCreated event = projectCreatedWithAssignee();
+            ReactorMethodResult result = method.invoke(target, envelope(event));
+
+            IterableSubject assertThat = assertThat(result.asMessages());
+            assertThat.hasSize(2);
+            assertThat.containsExactly(RefProjectStarted
+                                               .newBuilder()
+                                               .setProjectId(event.getProjectId())
+                                               .build(),
+                                       RefProjectAssigned
+                                               .newBuilder()
+                                               .setProjectId(event.getProjectId())
+                                               .setAssignee(event.getAssignee())
+                                               .build()
+            );
+        }
+
+        @Test
+        @DisplayName("when returning Pair with null second value")
+        void returningSecondNull() {
+            RefProjectCreated event = projectCreatedEvent();
+            ReactorMethodResult result = method.invoke(target, envelope(event));
+
+            List<EventMessage> messages = result.asMessages();
+            IterableSubject assertThat = assertThat(messages);
+            assertThat.hasSize(1);
+            assertThat.containsExactly(RefProjectStarted
+                                               .newBuilder()
+                                               .setProjectId(event.getProjectId())
+                                               .build()
+            );
         }
     }
 
@@ -222,6 +282,35 @@ class EventReactorMethodTest {
             Method method = new RcWrongSecondParam().getMethod();
             assertInvalid(method);
         }
+    }
+
+    private static RefProjectCreated projectCreatedEvent() {
+        ProjectId projectId = ProjectId
+                .newBuilder()
+                .setId(randomString())
+                .build();
+        RefProjectCreated result = RefProjectCreated
+                .newBuilder()
+                .setProjectId(projectId)
+                .build();
+        return result;
+    }
+
+    private static RefProjectCreated projectCreatedWithAssignee() {
+        ProjectId projectId = ProjectId
+                .newBuilder()
+                .setId(randomString())
+                .build();
+        UserId userId = UserId
+                .newBuilder()
+                .setValue(randomString())
+                .build();
+        RefProjectCreated result = RefProjectCreated
+                .newBuilder()
+                .setProjectId(projectId)
+                .setAssignee(userId)
+                .build();
+        return result;
     }
 
     @SuppressWarnings("ConstantConditions") // It's OK for tests

@@ -53,9 +53,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Alexander Litus
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandHandler should")
 class CommandHandlerTest {
@@ -131,6 +128,39 @@ class CommandHandlerTest {
             Message expected = expectedMessages.get(i);
             Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
             assertEquals(expected, actual);
+        }
+    }
+
+    @Nested
+    @DisplayName("post Pair of events")
+    class PostPair {
+
+        @Test
+        @DisplayName("with two non-null values")
+        void withBothValues() {
+            Command cmd = Given.ACommand.createTask(true);
+
+            EventCatcher eventCatcher = new EventCatcher();
+            eventBus.register(eventCatcher);
+
+            handler.handle(cmd);
+
+            List<EventEnvelope> dispatchedEvents = eventCatcher.getDispatched();
+            assertEquals(2, dispatchedEvents.size());
+        }
+
+        @Test
+        @DisplayName("with null second value")
+        void withNullSecondValue() {
+            Command cmd = Given.ACommand.createTask(false);
+
+            EventCatcher eventCatcher = new EventCatcher();
+            eventBus.register(eventCatcher);
+
+            handler.handle(cmd);
+
+            List<EventEnvelope> dispatchedEvents = eventCatcher.getDispatched();
+            assertEquals(1, dispatchedEvents.size());
         }
     }
 
