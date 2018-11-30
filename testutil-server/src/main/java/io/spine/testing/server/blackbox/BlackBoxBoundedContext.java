@@ -154,8 +154,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         in supplied order
      * @return current instance
      */
-    public T
-    receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
+    public
+    T receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
         return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
@@ -203,9 +203,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         in supplied order
      * @return current instance
      */
-    @SuppressWarnings("unused")
-    public T
-    receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+    public T receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
@@ -223,9 +221,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         in supplied order
      * @return current instance
      */
-    public T
-    receivesEventsProducedBy(Object producerId,
-                             EventMessage firstEvent, EventMessage... otherEvents) {
+    public T receivesEventsProducedBy(Object producerId,
+                                      EventMessage firstEvent,
+                                      EventMessage... otherEvents) {
         setup().postEvents(producerId, firstEvent, otherEvents);
         return thisRef();
     }
@@ -246,8 +244,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return this.importAll(singletonList(eventOrMessage));
     }
 
-    public T
-    importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+    public T importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.importAll(asList(firstEvent, secondEvent, otherEvents));
     }
 
