@@ -20,17 +20,23 @@
 
 package io.spine.server.command;
 
+import com.google.protobuf.Empty;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.client.CommandFactory;
+import io.spine.core.UserId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventFactory;
+import io.spine.server.tuple.Pair;
+import io.spine.test.command.CmdAssignTask;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdCreateTask;
 import io.spine.test.command.CmdSetTaskDescription;
+import io.spine.test.command.CmdStartTask;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.Task;
@@ -42,13 +48,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.TestValues.random;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
+@SuppressWarnings("OverlyCoupledClass")
 @DisplayName("AbstractCommander should")
 class AbstractCommanderTest {
 
@@ -69,7 +76,9 @@ class AbstractCommanderTest {
         AbstractCommander commander = new Commendatore(commandBus, boundedContext.getEventBus());
         interceptor = new CommandInterceptor(boundedContext,
                                              FirstCmdCreateProject.class,
-                                             CmdSetTaskDescription.class);
+                                             CmdSetTaskDescription.class,
+                                             CmdAssignTask.class,
+                                             CmdStartTask.class);
         commandBus.register(commander);
         eventBus.register(DelegatingEventDispatcher.of(commander));
     }
@@ -100,6 +109,25 @@ class AbstractCommanderTest {
         assertTrue(interceptor.contains(CmdSetTaskDescription.class));
     }
 
+    @Test
+    @DisplayName("create a pair of commands in response to a command")
+    void createCommandPair() {
+        postCreateTaskCommand(true);
+
+        assertTrue(interceptor.contains(CmdAssignTask.class));
+        assertTrue(interceptor.contains(CmdStartTask.class));
+    }
+
+    @Test
+    @DisplayName("create a pair of commands with null second command in response to a command")
+    void createCommandPairWithNull() {
+        postCreateTaskCommand(false);
+
+        assertTrue(interceptor.contains(CmdAssignTask.class));
+        assertFalse(interceptor.contains(CmdStartTask.class));
+        assertFalse(interceptor.contains(Empty.class));
+    }
+
     /*
      * Test Environment
      *******************************/
@@ -116,6 +144,13 @@ class AbstractCommanderTest {
                 .newBuilder()
                 .setId(random(1, 100))
                 .build();
+    }
+
+    private static UserId newUserId() {
+        return UserId
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
 
     }
 
@@ -129,6 +164,23 @@ class AbstractCommanderTest {
         io.spine.core.Event event = eventFactory.createEvent(eventMessage, null);
         boundedContext.getEventBus()
                       .post(event);
+    }
+
+    private void postCreateTaskCommand(boolean startTask) {
+        TaskId taskId = newTaskId();
+        UserId userId = newUserId();
+        Task task = Task
+                .newBuilder()
+                .setTaskId(taskId)
+                .setAssignee(userId)
+                .build();
+        CmdCreateTask commandMessage = CmdCreateTask
+                .newBuilder()
+                .setTaskId(taskId)
+                .setTask(task)
+                .setStart(startTask)
+                .build();
+        createCommandAndPost(commandMessage);
     }
 
     /**
@@ -156,6 +208,25 @@ class AbstractCommanderTest {
                                     .getTaskId())
                     .setDescription("Testing command creation on event")
                     .build();
+        }
+
+        @Command
+        Pair<CmdAssignTask, Optional<CmdStartTask>> on(CmdCreateTask command) {
+            TaskId taskId = command.getTaskId();
+            UserId assignee = command.getTask()
+                                     .getAssignee();
+            CmdAssignTask cmdAssignTask = CmdAssignTask
+                    .newBuilder()
+                    .setTaskId(taskId)
+                    .setAssignee(assignee)
+                    .build();
+            CmdStartTask cmdStartTask = command.getStart()
+                                        ? CmdStartTask
+                                                .newBuilder()
+                                                .setTaskId(taskId)
+                                                .build()
+                                        : null;
+            return Pair.withNullable(cmdAssignTask, cmdStartTask);
         }
     }
 }
