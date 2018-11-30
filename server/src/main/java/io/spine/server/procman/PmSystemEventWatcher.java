@@ -30,6 +30,7 @@ import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.CommandDispatchedToHandler;
+import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.HistoryRejections;
 
@@ -52,7 +53,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe
     public void on(CommandDispatchedToHandler event) {
-        I id = unwrap(event.getReceiver());
+        I id = extract(event.getReceiver());
         CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
 
@@ -68,9 +69,17 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe
     public void on(EventDispatchedToReactor event) {
-        I id = unwrap(event.getReceiver());
+        I id = extract(event.getReceiver());
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
+    }
+
+    /**
+     * Extracts receiver ID and casts it to the type of the generic parameter {@code <I>}.
+     */
+    @SuppressWarnings("unchecked")
+    private I extract(EntityHistoryId receiver) {
+        return (I) unwrap(receiver);
     }
 
     @Subscribe
