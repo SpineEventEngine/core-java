@@ -77,8 +77,8 @@ public class PmTransaction<I,
      * <p>The method is overridden to expose itself to the package.
      */
     @Override
-    protected void advanceVersion() {
-        super.advanceVersion();
+    protected void incrementVersion() {
+        super.incrementVersion();
     }
 
     /**

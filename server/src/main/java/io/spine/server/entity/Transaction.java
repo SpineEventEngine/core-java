@@ -40,8 +40,8 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.entity.EntityVersioning.AUTO_INCREMENT;
 import static io.spine.server.entity.EntityVersioning.FROM_EVENT;
 import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -432,7 +432,7 @@ public abstract class Transaction<I,
         entity.injectTransaction(tx);
     }
 
-    private void setVersion(Version version) {
+    void setVersion(Version version) {
         checkNotNull(version);
         this.version = version;
     }
@@ -496,29 +496,30 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Advances the transaction version.
+     * Advances the version of the entity in transaction based on the last applied event.
      *
-     * <p>This method can only be used on transactions whose versioning strategy doesn't require
-     * any additional information. An example of such strategy is
-     * {@link EntityVersioning#AUTO_INCREMENT}.
-     *
-     * @throws IllegalStateException
-     *         if the version cannot be incremented without the additional context
+     * @param event
+     *         the last event applied to the entity
      */
-    protected void advanceVersion() {
-        checkState(versioningStrategy() != FROM_EVENT, "Specify an event via the custom " +
-                "versioning context to use FROM_EVENT strategy");
-        EntityVersioningContext context = new EntityVersioningContext(this);
-        advanceVersion(context);
+    void advanceVersion(EventEnvelope event) {
+        versioningStrategy().createVersionIncrement(this, event)
+                            .doIncrement();
     }
 
     /**
-     * Increments the transaction version based on the given versioning context.
+     * Manually increments the entity version by 1.
+     *
+     * <p>This method can only be used on transactions with {@link EntityVersioning#AUTO_INCREMENT}
+     * versioning strategy.
+     *
+     * @throws IllegalStateException
+     *         if the transaction has unsuitable versioning strategy
      */
-    void advanceVersion(EntityVersioningContext context) {
-        Version version = versioningStrategy().nextVersion(context);
-        checkIsIncrement(getVersion(), version);
-        setVersion(version);
+    protected void incrementVersion() {
+        checkState(versioningStrategy() == AUTO_INCREMENT, "Manual version increment is " +
+                "available only for transactions with AUTO_INCREMENT versioning strategy");
+        AutoIncrement versionIncrement = new AutoIncrement(this);
+        versionIncrement.doIncrement();
     }
 
     /**
@@ -569,15 +570,9 @@ public abstract class Transaction<I,
          */
         private Phase<I, E, S, B> propagate() {
             underlyingTransaction.dispatch(underlyingTransaction.getEntity(), event);
-            advanceVersion();
+            underlyingTransaction.advanceVersion(event);
             markSuccessful();
             return this;
-        }
-
-        private void advanceVersion() {
-            EntityVersioningContext context =
-                    new EntityVersioningContext(underlyingTransaction, event);
-            underlyingTransaction.advanceVersion(context);
         }
 
         Transaction<I, E, S, B> getUnderlyingTransaction() {

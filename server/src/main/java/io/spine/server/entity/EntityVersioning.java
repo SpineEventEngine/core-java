@@ -23,10 +23,6 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Version;
-import io.spine.core.Versions;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The strategy of versioning of {@linkplain Entity entities} during a certain {@link Transaction}.
@@ -46,12 +42,8 @@ public enum EntityVersioning {
      */
     FROM_EVENT {
         @Override
-        Version nextVersion(EntityVersioningContext context) {
-            EventEnvelope event = context.event();
-            checkNotNull(event, "Event must be set when using FROM_EVENT versioning strategy");
-            Version fromEvent = event.getEventContext()
-                                     .getVersion();
-            return fromEvent;
+        VersionIncrement createVersionIncrement(Transaction transaction, EventEnvelope event) {
+            return new IncrementFromEvent(transaction, event);
         }
     },
 
@@ -66,22 +58,20 @@ public enum EntityVersioning {
      */
     AUTO_INCREMENT {
         @Override
-        Version nextVersion(EntityVersioningContext context) {
-            Version current = context.transaction()
-                                     .getVersion();
-            Version newVersion = Versions.increment(current);
-            return newVersion;
+        VersionIncrement createVersionIncrement(Transaction transaction, EventEnvelope ignored) {
+            return new AutoIncrement(transaction);
         }
     };
 
     /**
-     * Creates a new {@link Entity} version based on the given versioning context.
+     * Creates a {@code VersionIncrement} which implements the versioning strategy for the given
+     * transaction based on the last applied event.
      *
-     * <p>This method has no side effects, i.e. doesn't set the version to the transaction etc.
-     *
-     * @param context
-     *         the versioning context with the information about current transaction
-     * @return the advanced version
+     * @param transaction
+     *         the transaction for which the entity version should be modified
+     * @param event
+     *         the last event applied to the entity in transaction
+     * @return a setter of the new version for the entity in transaction
      */
-    abstract Version nextVersion(EntityVersioningContext context);
+    abstract VersionIncrement createVersionIncrement(Transaction transaction, EventEnvelope event);
 }

@@ -20,50 +20,41 @@
 
 package io.spine.server.entity;
 
-import io.spine.core.EventEnvelope;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import io.spine.core.Version;
+
+import static io.spine.core.Versions.checkIsIncrement;
 
 /**
- * The context which {@link EntityVersioning} uses for version increment.
+ * A setter of a new version for the entity in transaction.
  */
-final class EntityVersioningContext {
+abstract class VersionIncrement {
 
     private final Transaction transaction;
-    private final @Nullable EventEnvelope event;
 
-    /**
-     * Creates an {@code EntityVersioningContext} based on the given transaction.
-     *
-     * <p>The event field remains {@code null}, so such context isn't suitable for the versioning
-     * strategies which are based on the handled event version.
-     */
-    EntityVersioningContext(Transaction transaction) {
+    VersionIncrement(Transaction transaction) {
         this.transaction = transaction;
-        this.event = null;
     }
 
     /**
-     * Creates an {@code EntityVersioningContext} from the given transaction and event.
+     * Advances the version of the entity in transaction.
      */
-    EntityVersioningContext(Transaction transaction, EventEnvelope event) {
-        this.transaction = transaction;
-        this.event = event;
+    void doIncrement() {
+        Version nextVersion = nextVersion();
+        checkIsIncrement(transaction.getVersion(), nextVersion);
+        transaction.setVersion(nextVersion);
     }
 
     /**
-     * A transaction during which the version increment occurs.
+     * Returns the transaction on which the {@code VersionIncrement} operates.
      */
     Transaction transaction() {
         return transaction;
     }
 
     /**
-     * An event which is handled by the entity during transaction.
+     * Creates a new version for the entity in transaction.
      *
-     * <p>The event is optional in the versioning context as the version change can occur upon
-     * command handling (see {@link io.spine.server.procman.ProcessManager}).
+     * @return the incremented {@code Version} of the entity
      */
-    @Nullable EventEnvelope event() {
-        return event;
-    }
+    abstract Version nextVersion();
 }
