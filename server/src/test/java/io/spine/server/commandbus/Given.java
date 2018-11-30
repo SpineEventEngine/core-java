@@ -29,17 +29,21 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdCreateTask;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.SecondCmdStartProject;
+import io.spine.test.command.Task;
+import io.spine.test.command.TaskId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.testing.TestValues.random;
 
 public class Given {
 
@@ -49,15 +53,25 @@ public class Given {
 
     private static ProjectId newProjectId() {
         String uuid = newUuid();
-        return ProjectId.newBuilder()
-                        .setId(uuid)
-                        .build();
+        return ProjectId
+                .newBuilder()
+                .setId(uuid)
+                .build();
+    }
+
+    private static TaskId newTaskId() {
+        int id = random(1, 100);
+        return TaskId
+                .newBuilder()
+                .setId(id)
+                .build();
     }
 
     public static class ACommand {
 
         private static final UserId USER_ID = GivenUserId.newUuid();
         private static final ProjectId PROJECT_ID = newProjectId();
+        private static final TaskId TASK_ID = newTaskId();
 
         private ACommand() {
             // Prevent construction from outside.
@@ -82,6 +96,10 @@ public class Given {
             return create(message, USER_ID, getCurrentTime());
         }
 
+        public static Command createTask(boolean startTask) {
+            return createTask(TASK_ID, USER_ID, startTask);
+        }
+
         public static Command addTask() {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
@@ -94,6 +112,11 @@ public class Given {
         static Command firstCreateProject() {
             FirstCmdCreateProject command = CommandMessage.firstCreateProject(newProjectId());
             return create(command, USER_ID, getCurrentTime());
+        }
+
+        static Command createTask(TaskId taskId, UserId userId, boolean startTask) {
+            CmdCreateTask command = CommandMessage.createTask(taskId, userId, startTask);
+            return create(command, userId, getCurrentTime());
         }
 
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
@@ -148,6 +171,20 @@ public class Given {
 
         private CommandMessage() {
             // Prevent construction from outside.
+        }
+
+        static CmdCreateTask createTask(TaskId taskId, UserId userId, boolean startTask) {
+            Task task = Task
+                    .newBuilder()
+                    .setTaskId(taskId)
+                    .setAssignee(userId)
+                    .build();
+            return CmdCreateTask
+                    .newBuilder()
+                    .setTaskId(taskId)
+                    .setTask(task)
+                    .setStart(startTask)
+                    .build();
         }
 
         static CmdAddTask addTask(String projectId) {

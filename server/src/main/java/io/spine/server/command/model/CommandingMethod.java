@@ -80,8 +80,9 @@ public interface CommandingMethod<T,
             super(rawMethodOutput);
             this.optional = optional;
             List<CommandMessage> messages = toMessages(rawMethodOutput);
-            checkMessages(messages);
-            setMessages(messages);
+            List<CommandMessage> filtered = filterIgnored(messages);
+            checkMessages(filtered);
+            setMessages(filtered);
         }
 
         private void checkMessages(List<CommandMessage> messages) {
