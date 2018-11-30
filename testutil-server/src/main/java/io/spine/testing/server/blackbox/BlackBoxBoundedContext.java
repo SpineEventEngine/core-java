@@ -51,14 +51,16 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 
 /**
- * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
+ * This class provides means for integration testing of Bounded Contexts.
  *
- * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link io.spine.testing.server.blackbox.verify.state.VerifyState
- * state verfier}, {@link VerifyEvents emitted events verifier}).
+ * <p>Such a test suite would send commands or events to the Bounded Context under the test,
+ * and then verify consequences of handling a command or an event.
  *
- * @param <T>
- *         the type of the bounded context descendant
+ * <p>Handling a command or an event usually results in {@link VerifyEvents emitted events}) and
+ * {@linkplain VerifyState updated state} of an entity. This class provides API for testing such
+ * effects.
+ *
+ * @param <T> the type of a sub-class for return type covariance
  * @apiNote The class provides factory methods for creation of different bounded contexts.
  */
 @SuppressWarnings({
@@ -86,35 +88,35 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     }
 
     /**
-     * Creates a single tenant bounded context with the default configuration.
+     * Creates a single-tenant instance with the default configuration.
      */
     public static SingleTenantBlackBoxContext newInstance() {
         return new SingleTenantBlackBoxContext(emptyEnricher());
     }
 
     /**
-     * Creates a single tenant bounded context with the specified enricher.
+     * Creates a single-tenant instance with the specified enricher.
      */
     public static SingleTenantBlackBoxContext newInstance(Enricher enricher) {
         return new SingleTenantBlackBoxContext(enricher);
     }
 
     /**
-     * Creates a multitenant tenant bounded context with the default configuration.
+     * Creates a multitenant instance the default configuration.
      */
     public static MultitenantBlackBoxContext multitenant() {
         return new MultitenantBlackBoxContext(emptyEnricher());
     }
 
     /**
-     * Creates a multitenant tenant bounded context with the specified enricher.
+     * Creates a multitenant instance with the specified enricher.
      */
     public static MultitenantBlackBoxContext multitenant(Enricher enricher) {
         return new MultitenantBlackBoxContext(enricher);
     }
 
     /**
-     * Registers passed repositories with the Bounded Context.
+     * Registers passed repositories with the Bounded Context under the test.
      *
      * @param repositories
      *         repositories to register in the Bounded Context
