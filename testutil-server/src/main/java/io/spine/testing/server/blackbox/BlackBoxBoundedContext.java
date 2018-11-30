@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
 import io.spine.core.Event;
@@ -45,6 +46,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 
@@ -261,6 +263,35 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T assertThat(VerifyEvents verifier) {
+        EmittedEvents events = emittedEvents();
+        verifier.verify(events);
+        return thisRef();
+    }
+
+    /**
+     * Asserts that an event of the passed class was emitted once.
+     *
+     * @param eventClass
+     *         the class of events to verify
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertEmitted(Class<? extends EventMessage> eventClass) {
+        VerifyEvents verifier = VerifyEvents.emittedEvent(eventClass, once());
+        EmittedEvents events = emittedEvents();
+        verifier.verify(events);
+        return thisRef();
+    }
+
+    /**
+     * Asserts that a rejection of the passed class was emitted once.
+     *
+     * @param rejectionClass
+     *         the class of the rejection to verify
+     * @return current instance
+     */
+    public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
+        VerifyEvents verifier = VerifyEvents.emittedEvent(rejectionClass, once());
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return thisRef();
