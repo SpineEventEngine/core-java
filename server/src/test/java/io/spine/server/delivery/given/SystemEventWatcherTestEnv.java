@@ -29,9 +29,6 @@ import io.spine.type.TypeUrl;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
 public class SystemEventWatcherTestEnv {
 
     /**
@@ -40,7 +37,7 @@ public class SystemEventWatcherTestEnv {
     private SystemEventWatcherTestEnv() {
     }
 
-    public static class ExternalWatcher extends SystemEventWatcher<String> {
+    public static class ExternalWatcher extends SystemEventWatcher {
 
         public ExternalWatcher() {
             super(TypeUrl.of(Empty.class));
@@ -52,7 +49,7 @@ public class SystemEventWatcherTestEnv {
         }
     }
 
-    public static class NonSystemWatcher extends SystemEventWatcher<String> {
+    public static class NonSystemWatcher extends SystemEventWatcher {
 
         public NonSystemWatcher() {
             super(TypeUrl.of(Empty.class));
@@ -64,7 +61,7 @@ public class SystemEventWatcherTestEnv {
         }
     }
 
-    public static class ValidSystemWatcher extends SystemEventWatcher<String> {
+    public static class ValidSystemWatcher extends SystemEventWatcher {
 
         public ValidSystemWatcher() {
             super(TypeUrl.of(Empty.class));
