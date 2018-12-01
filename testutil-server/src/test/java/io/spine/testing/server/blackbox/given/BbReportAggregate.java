@@ -32,9 +32,6 @@ import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportVBuilder> {
 
     protected BbReportAggregate(BbReportId id) {
@@ -61,14 +58,12 @@ public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportV
 
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Apply
     void on(BbReportCreated event) {
         getBuilder().setId(event.getReportId())
                     .addAllProjectIds(event.getProjectIdList());
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Apply
     void on(BbTaskAddedToReport event) {
         getBuilder().addTasks(event.getTask());

@@ -21,6 +21,7 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
@@ -108,6 +109,13 @@ public class Acknowledgements {
      */
     public boolean containErrors() {
         return !errors.isEmpty();
+    }
+
+    /**
+     * Obtains errors occurred during command handling.
+     */
+    public ImmutableList<Error> errors() {
+        return ImmutableList.copyOf(errors);
     }
 
     /**

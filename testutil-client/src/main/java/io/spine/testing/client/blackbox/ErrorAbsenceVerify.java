@@ -34,7 +34,7 @@ final class ErrorAbsenceVerify extends VerifyAcknowledgements {
     @Override
     public void verify(Acknowledgements acks) {
         if (acks.containErrors()) {
-            fail("Bounded Context unexpectedly thrown an error");
+            fail("Bounded Context unexpectedly thrown errors: " + acks.errors());
         }
     }
 }
