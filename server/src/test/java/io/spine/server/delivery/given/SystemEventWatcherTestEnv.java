@@ -44,7 +44,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(SewProjectCreated domesticEvent) {
+        public void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
             fail("External events are not allowed in SystemEventWatchers.");
         }
     }
@@ -56,7 +56,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe
-        public void on(SewProjectCreated externalEvent) {
+        public void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
             fail("Only spine.system.server events are allowed.");
         }
     }
@@ -68,7 +68,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe
-        public void on(EntityCreated externalEvent) {
+        public void on(@SuppressWarnings("unused") EntityCreated unused) {
             // NoOp.
         }
     }
