@@ -43,6 +43,7 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
@@ -140,7 +141,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     void receivesACommand() {
         context.receivesCommand(createProject())
                .assertThat(acked(once()).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
+               .assertThat(emittedEvent(BbProjectCreated.class, once()));
     }
 
     @Test
@@ -157,9 +158,9 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         context.receivesCommand(createProject(projectId))
                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
                .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(count(4)))
-               .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
-               .assertThat(VerifyEvents.emittedEvent(BbTaskAdded.class, thrice()));
+               .assertThat(emittedEvent(count(4)))
+               .assertThat(emittedEvent(BbProjectCreated.class, once()))
+               .assertThat(emittedEvent(BbTaskAdded.class, thrice()));
     }
 
     @Test
@@ -170,9 +171,9 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
                .assertThat(acked(twice()).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(thrice()))
-               .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
-               .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, once()));
+               .assertThat(emittedEvent(thrice()))
+               .assertThat(emittedEvent(BbReportCreated.class, once()))
+               .assertThat(emittedEvent(BbTaskAddedToReport.class, once()));
     }
 
     @Test
@@ -183,9 +184,9 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(count(7)))
-               .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
-               .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, thrice()));
+               .assertThat(emittedEvent(count(7)))
+               .assertThat(emittedEvent(BbReportCreated.class, once()))
+               .assertThat(emittedEvent(BbTaskAddedToReport.class, thrice()));
     }
 
     @Test
