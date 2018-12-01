@@ -175,7 +175,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         // Attempt to start the project again.
         context.receivesCommand(startProject(projectId))
                .assertRejectedWith(Rejections.BbProjectAlreadyStarted.class);
-
     }
 
     @Test

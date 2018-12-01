@@ -299,6 +299,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         the class of the rejection to verify
      * @return current instance
      */
+    @CanIgnoreReturnValue
     public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
         //TODO:2018-12-01:alexander.yevsyukov: The following call should be:
         //        VerifyEvents.emittedEvents(rejectionClass, once());
