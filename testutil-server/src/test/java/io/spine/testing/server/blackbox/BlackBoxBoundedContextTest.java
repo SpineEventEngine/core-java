@@ -54,7 +54,7 @@ import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyO
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * An abstract base for testing of black box bounded contexts.
+ * An abstract base for integration testing of Bounded Contexts.
  *
  * @param <T> the type of the {@code BlackBoxBoundedContext}
  */
@@ -135,7 +135,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Test
     @DisplayName("receive and handle a single command")
     void receivesACommand() {
@@ -144,7 +143,13 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
+    @Test
+    @DisplayName("verifiers emitting one event")
+    void eventOnCommand() {
+        context.receivesCommand(createProject())
+               .assertEmitted(BbProjectCreated.class);
+    }
+
     @Test
     @DisplayName("receive and handle multiple commands")
     void receivesCommands() {
@@ -157,7 +162,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .assertThat(VerifyEvents.emittedEvent(BbTaskAdded.class, thrice()));
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Test
     @DisplayName("receive and react on single event")
     void receivesEvent() {
@@ -171,7 +175,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, once()));
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Test
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
