@@ -28,7 +28,6 @@ import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
-import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -167,8 +166,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("receive and react on single event")
     void receivesEvent() {
         BbProjectId projectId = newProjectId();
-        context.with(new BbReportRepository())
-               .receivesCommand(createReport(projectId))
+        context.receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
                .assertThat(acked(twice()).withoutErrorsOrRejections())
                .assertThat(emittedEvent(thrice()))
@@ -180,8 +178,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
         BbProjectId projectId = newProjectId();
-        context.with(new BbReportRepository())
-               .receivesCommand(createReport(projectId))
+        context.receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                .assertThat(acked(count(4)).withoutErrorsOrRejections())
                .assertThat(emittedEvent(count(7)))

@@ -727,7 +727,7 @@ public class AggregateTest {
         @DisplayName("when dispatching a command")
         void fromCommandDispatch() {
             BlackBoxBoundedContext
-                    .newInstance()
+                    .singleTenant()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(createTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
@@ -748,7 +748,7 @@ public class AggregateTest {
         @DisplayName("when reacting on an event")
         void fromEventReact() {
             BlackBoxBoundedContext
-                    .newInstance()
+                    .singleTenant()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(assignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
@@ -771,7 +771,7 @@ public class AggregateTest {
         @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
             BlackBoxBoundedContext
-                    .newInstance()
+                    .singleTenant()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())

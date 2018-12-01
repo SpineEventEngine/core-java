@@ -54,7 +54,7 @@ class ApplyAllowImportTest {
     @BeforeEach
     void setUp() {
         boundedContext = BlackBoxBoundedContext
-                .newInstance()
+                .singleTenant()
                 .with(new DotSpace());
     }
 

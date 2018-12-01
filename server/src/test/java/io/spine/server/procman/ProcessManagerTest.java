@@ -261,7 +261,7 @@ class ProcessManagerTest {
 
         @BeforeEach
         void setUp() {
-            boundedContext = BlackBoxBoundedContext.newInstance()
+            boundedContext = BlackBoxBoundedContext.singleTenant()
                                                    .with(new TestProcessManagerRepo());
         }
 
@@ -391,7 +391,7 @@ class ProcessManagerTest {
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
             BlackBoxBoundedContext
-                    .newInstance()
+                    .singleTenant()
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())
@@ -430,7 +430,7 @@ class ProcessManagerTest {
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
             BlackBoxBoundedContext
-                    .newInstance()
+                    .singleTenant()
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())

@@ -58,7 +58,7 @@ class EventImportTest {
     void setUp() {
         repository = new EngineRepository();
         boundedContext = BlackBoxBoundedContext
-                .newInstance()
+                .singleTenant()
                 .with(repository);
     }
 
