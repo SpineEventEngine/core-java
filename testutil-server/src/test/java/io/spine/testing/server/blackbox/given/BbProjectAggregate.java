@@ -89,7 +89,8 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
 
     @Apply
     void on(BbProjectCreated event) {
-        getBuilder().setId(event.getProjectId());
+        getBuilder().setId(event.getProjectId())
+                    .setStatus(CREATED);
     }
 
     @Apply
