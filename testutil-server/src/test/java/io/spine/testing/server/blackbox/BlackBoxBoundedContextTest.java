@@ -29,6 +29,7 @@ import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
+import io.spine.testing.server.blackbox.rejection.Rejections;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,6 +49,7 @@ import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
+import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
@@ -160,6 +162,19 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .assertThat(emittedEvent(count(4)))
                .assertThat(emittedEvent(BbProjectCreated.class, once()))
                .assertThat(emittedEvent(BbTaskAdded.class, thrice()));
+    }
+
+    @Test
+    @DisplayName("reject a command")
+    void rejectsCommand() {
+        BbProjectId projectId = newProjectId();
+        // Create and start the project.
+        context.receivesCommands(createProject(projectId), startProject(projectId));
+
+        // Attempt to start the project again.
+        context.receivesCommand(startProject(projectId))
+               .assertRejectedWith(Rejections.BbProjectAlreadyStarted.class);
+
     }
 
     @Test

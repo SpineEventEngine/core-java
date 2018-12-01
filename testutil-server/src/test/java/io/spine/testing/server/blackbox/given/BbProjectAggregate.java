@@ -55,17 +55,17 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     }
 
     @Assign
-    BbProjectStarted handle(BbStartProject command)
-            throws BbProjectAlreadyStarted {
+    BbProjectStarted handle(BbStartProject command) throws BbProjectAlreadyStarted {
+        BbProjectId projectId = command.getProjectId();
         if (getState().getStatus() != CREATED) {
             throw BbProjectAlreadyStarted
                     .newBuilder()
-                    .setProjectId(command.getProjectId())
+                    .setProjectId(projectId)
                     .build();
         }
         return BbProjectStarted
                 .newBuilder()
-                .setProjectId(command.getProjectId())
+                .setProjectId(projectId)
                 .build();
     }
 
@@ -87,19 +87,16 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
                 .build();
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Apply
     void on(BbProjectCreated event) {
         getBuilder().setId(event.getProjectId());
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Apply
     void on(BbProjectStarted event) {
         getBuilder().setStatus(STARTED);
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Apply
     void on(BbTaskAdded event) {
         getBuilder().addTask(event.getTask());

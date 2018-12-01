@@ -28,17 +28,21 @@ import io.spine.testing.server.blackbox.BbTask;
 import io.spine.testing.server.blackbox.command.BbAddTask;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
+import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 
 import static io.spine.base.Identifier.newUuid;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class Given {
 
     /** Prevents instantiation of this utility class. */
     private Given() {
+    }
+
+    public static BbProjectId newProjectId() {
+        return BbProjectId.newBuilder()
+                          .setId(newUuid())
+                          .build();
     }
 
     public static BbAddTask addTask(BbProjectId projectId) {
@@ -84,10 +88,10 @@ public class Given {
                                .build();
     }
 
-    public static BbProjectId newProjectId() {
-        return BbProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+    public static BbStartProject startProject(BbProjectId projectId) {
+        return BbStartProject.newBuilder()
+                             .setProjectId(projectId)
+                             .build();
     }
 
     public static BbProject createdProjectState(BbCreateProject createProject) {
