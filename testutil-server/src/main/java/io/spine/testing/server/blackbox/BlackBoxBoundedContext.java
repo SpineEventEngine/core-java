@@ -311,11 +311,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
-        //TODO:2018-12-01:alexander.yevsyukov: The following call should be:
-        //        VerifyEvents.emittedEvents(rejectionClass, once());
-        // We're having a relaxed call here because of some reason we are getting two rejections
-        // in tests instead of one. This needs to be investigated and stricter verification applied.
-        VerifyEvents verifier = VerifyEvents.emittedEvents(rejectionClass);
+        VerifyEvents verifier = VerifyEvents.emittedEvent(rejectionClass, once());
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return thisRef();

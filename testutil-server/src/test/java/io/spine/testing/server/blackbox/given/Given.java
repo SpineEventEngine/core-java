@@ -97,6 +97,7 @@ public class Given {
     public static BbProject createdProjectState(BbCreateProject createProject) {
         return BbProjectVBuilder.newBuilder()
                                 .setId(createProject.getProjectId())
+                                .setStatus(BbProject.Status.CREATED)
                                 .build();
     }
 }
