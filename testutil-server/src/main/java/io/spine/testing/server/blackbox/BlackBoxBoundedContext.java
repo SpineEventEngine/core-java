@@ -95,6 +95,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     }
 
     /**
+     * Creates new single-tenant instance with the default configuration.
+     *
+     * @deprecated use {@link #singleTenant()} or {@link #multiTenant()} instead
+     */
+    @Deprecated
+    public static SingleTenantBlackBoxContext newInstance() {
+        return singleTenant();
+    }
+
+    /**
      * Creates a single-tenant instance with the specified enricher.
      */
     public static SingleTenantBlackBoxContext singleTenant(Enricher enricher) {
