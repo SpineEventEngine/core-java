@@ -35,10 +35,10 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A black box bounded context for writing integration tests in a multitenant environment.
+ * Test fixture for multi-tenant Bounded Contexts.
  */
 @VisibleForTesting
-public class MultitenantBlackBoxContext
+public final class MultitenantBlackBoxContext
         extends BlackBoxBoundedContext<MultitenantBlackBoxContext> {
 
     private TenantId tenantId;
@@ -57,7 +57,7 @@ public class MultitenantBlackBoxContext
      *         new tenant ID
      * @return current instance
      */
-    public MultitenantBlackBoxContext withTenant(TenantId tenant) {
+    MultitenantBlackBoxContext withTenant(TenantId tenant) {
         this.tenantId = tenant;
         return this;
     }

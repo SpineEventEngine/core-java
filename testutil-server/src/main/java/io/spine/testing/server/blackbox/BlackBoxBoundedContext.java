@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
 import io.spine.core.Event;
@@ -45,18 +46,21 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 
 /**
- * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
+ * This class provides means for integration testing of Bounded Contexts.
  *
- * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link io.spine.testing.server.blackbox.verify.state.VerifyState
- * state verfier}, {@link VerifyEvents emitted events verifier}).
+ * <p>Such a test suite would send commands or events to the Bounded Context under the test,
+ * and then verify consequences of handling a command or an event.
  *
- * @param <T>
- *         the type of the bounded context descendant
+ * <p>Handling a command or an event usually results in {@link VerifyEvents emitted events}) and
+ * {@linkplain VerifyState updated state} of an entity. This class provides API for testing such
+ * effects.
+ *
+ * @param <T> the type of a sub-class for return type covariance
  * @apiNote The class provides factory methods for creation of different bounded contexts.
  */
 @SuppressWarnings({
@@ -84,35 +88,45 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     }
 
     /**
-     * Creates a single tenant bounded context with the default configuration.
+     * Creates a single-tenant instance with the default configuration.
      */
-    public static SingleTenantBlackBoxContext newInstance() {
+    public static SingleTenantBlackBoxContext singleTenant() {
         return new SingleTenantBlackBoxContext(emptyEnricher());
     }
 
     /**
-     * Creates a single tenant bounded context with the specified enricher.
+     * Creates new single-tenant instance with the default configuration.
+     *
+     * @deprecated use {@link #singleTenant()} or {@link #multiTenant()} instead
      */
-    public static SingleTenantBlackBoxContext newInstance(Enricher enricher) {
+    @Deprecated
+    public static SingleTenantBlackBoxContext newInstance() {
+        return singleTenant();
+    }
+
+    /**
+     * Creates a single-tenant instance with the specified enricher.
+     */
+    public static SingleTenantBlackBoxContext singleTenant(Enricher enricher) {
         return new SingleTenantBlackBoxContext(enricher);
     }
 
     /**
-     * Creates a multitenant tenant bounded context with the default configuration.
+     * Creates a multitenant instance the default configuration.
      */
-    public static MultitenantBlackBoxContext multitenant() {
+    public static MultitenantBlackBoxContext multiTenant() {
         return new MultitenantBlackBoxContext(emptyEnricher());
     }
 
     /**
-     * Creates a multitenant tenant bounded context with the specified enricher.
+     * Creates a multitenant instance with the specified enricher.
      */
-    public static MultitenantBlackBoxContext multitenant(Enricher enricher) {
+    public static MultitenantBlackBoxContext multiTenant(Enricher enricher) {
         return new MultitenantBlackBoxContext(enricher);
     }
 
     /**
-     * Registers passed repositories with the Bounded Context.
+     * Registers passed repositories with the Bounded Context under the test.
      *
      * @param repositories
      *         repositories to register in the Bounded Context
@@ -133,7 +147,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param domainCommand
      *         a domain command to be dispatched to the Bounded Context
      * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup
      */
+    @CanIgnoreReturnValue
     public T receivesCommand(Message domainCommand) {
         return this.receivesCommands(singletonList(domainCommand));
     }
@@ -149,9 +165,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         optional domain commands to be dispatched to the Bounded Context
      *         in supplied order
      * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup
      */
-    public T
-    receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
+    @CanIgnoreReturnValue
+    public
+    T receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
         return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
@@ -177,7 +195,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         Otherwise, an instance of {@code Event} will be generated basing on the passed
      *         event message and posted to the bus.
      * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup
      */
+    @CanIgnoreReturnValue
     public T receivesEvent(Message messageOrEvent) {
         return this.receivesEvents(singletonList(messageOrEvent));
     }
@@ -198,10 +218,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         optional domain events to be dispatched to the Bounded Context
      *         in supplied order
      * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup
      */
-    @SuppressWarnings("unused")
-    public T
-    receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+    @CanIgnoreReturnValue
+    public T receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
@@ -219,9 +239,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         in supplied order
      * @return current instance
      */
-    public T
-    receivesEventsProducedBy(Object producerId,
-                             EventMessage firstEvent, EventMessage... otherEvents) {
+    public T receivesEventsProducedBy(Object producerId,
+                                      EventMessage firstEvent,
+                                      EventMessage... otherEvents) {
         setup().postEvents(producerId, firstEvent, otherEvents);
         return thisRef();
     }
@@ -238,12 +258,13 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return thisRef();
     }
 
+    @CanIgnoreReturnValue
     public T importsEvent(Message eventOrMessage) {
         return this.importAll(singletonList(eventOrMessage));
     }
 
-    public T
-    importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+    @CanIgnoreReturnValue
+    public T importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.importAll(asList(firstEvent, secondEvent, otherEvents));
     }
 
@@ -261,6 +282,36 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T assertThat(VerifyEvents verifier) {
+        EmittedEvents events = emittedEvents();
+        verifier.verify(events);
+        return thisRef();
+    }
+
+    /**
+     * Asserts that an event of the passed class was emitted once.
+     *
+     * @param eventClass
+     *         the class of events to verify
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertEmitted(Class<? extends EventMessage> eventClass) {
+        VerifyEvents verifier = VerifyEvents.emittedEvent(eventClass, once());
+        EmittedEvents events = emittedEvents();
+        verifier.verify(events);
+        return thisRef();
+    }
+
+    /**
+     * Asserts that a rejection of the passed class was emitted once.
+     *
+     * @param rejectionClass
+     *         the class of the rejection to verify
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
+        VerifyEvents verifier = VerifyEvents.emittedEvent(rejectionClass, once());
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return thisRef();
