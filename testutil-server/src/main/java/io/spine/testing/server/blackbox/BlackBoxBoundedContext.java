@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
@@ -29,6 +30,7 @@ import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
@@ -40,10 +42,12 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
+import io.spine.type.TypeName;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
@@ -159,6 +163,21 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                .forEach(result::with);
 
         return result;
+    }
+
+    /**
+     * Obtains set of type names of entities known to this Bounded Context.
+     */
+    @VisibleForTesting
+    Set<TypeName> getAllEntityStateTypes() {
+        ImmutableSet.Builder<TypeName> result = ImmutableSet.builder();
+        for (Visibility visibility : Visibility.values()) {
+            if (visibility == Visibility.VISIBILITY_UNKNOWN) {
+                continue;
+            }
+            result.addAll(boundedContext.getEntityStateTypes(visibility));
+        }
+        return result.build();
     }
 
     /**

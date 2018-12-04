@@ -271,14 +271,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
         DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
-        if (dispatcher.dispatchesEvents()) {
-            getEventBus().register(delegate);
-            SystemReadSide systemReadSide = getSystemClient().readSide();
-            systemReadSide.register(delegate);
-        }
-        if (dispatcher.dispatchesExternalEvents()) {
-            registerWithIntegrationBus(delegate);
-        }
+        registerEventDispatcher(delegate);
     }
 
     /**
@@ -302,8 +295,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> getEntityTypes(Visibility visibility) {
-        Set<TypeName> result = guard.getEntityTypes(visibility);
+    public Set<TypeName> getEntityStateTypes(Visibility visibility) {
+        Set<TypeName> result = guard.getEntityStateTypes(visibility);
         return result;
     }
 

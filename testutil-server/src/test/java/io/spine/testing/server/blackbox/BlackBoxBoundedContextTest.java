@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.Repository;
@@ -35,12 +36,15 @@ import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
+import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
@@ -222,6 +226,15 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                         .close());
     }
 
+    /**
+     * Obtains the set of entity state types from the passed repositories.
+     */
+    private static Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
+        ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
+        repos.forEach(repository -> builder.add(repository.getEntityStateType()
+                                                          .toName()));
+        return builder.build();
+    }
 
     @Nested
     @DisplayName("create an instance by BoundedContextBuilder")
@@ -232,8 +245,11 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 new BbProjectViewRepository()
         );
 
+        private final Set<TypeName> types = toTypes(repositories);
+
         private BlackBoxBoundedContext<?> blackBox;
         private BoundedContextBuilder builder;
+
 
         @BeforeEach
         void setUp() {
@@ -247,6 +263,11 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
+            assertEntityTypes();
+        }
+
+        private void assertEntityTypes() {
+            assertThat(blackBox.getAllEntityStateTypes()).containsAllIn(types);
         }
 
         @Test
@@ -255,6 +276,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
+            assertEntityTypes();
         }
     }
 }
