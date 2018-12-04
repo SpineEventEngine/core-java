@@ -37,8 +37,10 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Contains the data on provided acknowledgements, allowing it to be queried about acks, errors, 
@@ -49,6 +51,8 @@ public class Acknowledgements {
 
     private static final Event EMPTY_EVENT = Event.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
+    private static final Predicate<Error> EMPTY_ERRORS_FILTER = 
+            not(Error.getDefaultInstance()::equals);
 
     private final List<Ack> acks = newArrayList();
     private final List<Error> errors = newArrayList();
@@ -108,6 +112,14 @@ public class Acknowledgements {
      */
     public boolean containErrors() {
         return !errors.isEmpty();
+    }
+
+    public List<Error> getErrors() {
+        return acks.stream()
+                   .map(Ack::getStatus)
+                   .map(Status::getError)
+                   .filter(EMPTY_ERRORS_FILTER)
+                   .collect(toList());
     }
 
     /**

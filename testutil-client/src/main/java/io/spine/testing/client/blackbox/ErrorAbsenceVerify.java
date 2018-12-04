@@ -22,19 +22,18 @@ package io.spine.testing.client.blackbox;
 
 import io.spine.base.Error;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Verifies that the command handling did not respond with {@link Error error}.
- *
- * @author Mykhailo Drachuk
  */
 final class ErrorAbsenceVerify extends VerifyAcknowledgements {
 
     @Override
     public void verify(Acknowledgements acks) {
         if (acks.containErrors()) {
-            fail("Bounded Context unexpectedly thrown an error");
+            fail(format("Bounded Context unexpectedly thrown errors: %s", acks.getErrors()));
         }
     }
 }
