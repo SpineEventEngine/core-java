@@ -79,9 +79,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * the model elements which belong to it.
  *
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
- *     Martin Fowler on bounded contexts</a>
+ *     Martin Fowler on Bounded Contexts</a>
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("OverlyCoupledClass")
 public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /**
@@ -112,8 +112,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @throws IllegalStateException
      *         if called from a derived class, which is not a part of the framework
-     * @apiNote This constructor is for internal use of the framework.
-     *          Application developers should not create classes derived from {@code BoundedContext}
+     * @apiNote This constructor is for internal use of the framework. Application developers
+     *          should not create classes derived from {@code BoundedContext}.
      */
     @Internal
     protected BoundedContext(BoundedContextBuilder builder) {

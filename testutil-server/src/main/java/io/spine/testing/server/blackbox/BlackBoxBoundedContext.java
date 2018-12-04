@@ -30,6 +30,7 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
@@ -42,6 +43,7 @@ import io.spine.testing.server.blackbox.verify.state.VerifyState;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
@@ -61,7 +63,8 @@ import static java.util.Collections.singletonList;
  * effects.
  *
  * @param <T> the type of a sub-class for return type covariance
- * @apiNote The class provides factory methods for creation of different bounded contexts.
+ * @apiNote It is expected that instances of classes derived from {@code BlackBoxBoundedContext}
+ *          are obtained by factory methods provided by this class.
  */
 @SuppressWarnings({
         "ClassReferencesSubclass", /* See the API note. */
@@ -130,12 +133,42 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     }
 
     /**
+     * Creates new instance obtaining configuration parameters from the passed builder.
+     *
+     * <p>In particular:
+     * <ul>
+     *     <li>multi-tenancy status;
+     *     <li>{@code Enricher};
+     *     <li>added repositories.
+     * </ul>
+     */
+    public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
+        Optional<EventBus.Builder> eventBus = builder.getEventBus();
+        Enricher enricher =
+                eventBus.isPresent()
+                ? eventBus.get()
+                          .getEnricher()
+                          .orElse(emptyEnricher())
+                : emptyEnricher();
+
+        BlackBoxBoundedContext<?> result = builder.isMultitenant()
+                ? multiTenant(enricher)
+                : singleTenant(enricher);
+
+        builder.repositories()
+               .forEach(result::with);
+
+        return result;
+    }
+
+    /**
      * Registers passed repositories with the Bounded Context under the test.
      *
      * @param repositories
      *         repositories to register in the Bounded Context
      * @return current instance
      */
+    @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
         checkNotNull(repositories);
         for (Repository<?, ?> repository : repositories) {
@@ -166,8 +199,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param secondCommand
      *         a domain command to be dispatched to the Bounded Context second
      * @param otherCommands
-     *         optional domain commands to be dispatched to the Bounded Context
-     *         in supplied order
+     *         optional domain commands to be dispatched to the Bounded Context in supplied order
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup
      */
@@ -194,8 +226,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *
      * @param messageOrEvent
      *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is
-     *         passed, it
-     *         will be posted to {@link EventBus} as is.
+     *         passed, it will be posted to {@link EventBus} as is.
      *         Otherwise, an instance of {@code Event} will be generated basing on the passed
      *         event message and posted to the bus.
      * @return current instance
@@ -219,8 +250,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param secondEvent
      *         a domain event to be dispatched to the Bounded Context second
      * @param otherEvents
-     *         optional domain events to be dispatched to the Bounded Context
-     *         in supplied order
+     *         optional domain events to be dispatched to the Bounded Context in supplied order
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup
      */
@@ -239,8 +269,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param firstEvent
      *         a domain event to be dispatched to the Bounded Context first
      * @param otherEvents
-     *         optional domain events to be dispatched to the Bounded Context
-     *         in supplied order
+     *         optional domain events to be dispatched to the Bounded Context in supplied order
      * @return current instance
      */
     public T receivesEventsProducedBy(Object producerId,

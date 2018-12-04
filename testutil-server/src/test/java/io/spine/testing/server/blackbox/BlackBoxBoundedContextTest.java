@@ -20,6 +20,10 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.collect.ImmutableList;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.entity.Repository;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
@@ -39,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
@@ -215,5 +220,41 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                             }
                         })
                         .close());
+    }
+
+
+    @Nested
+    @DisplayName("create an instance by BoundedContextBuilder")
+    class CreateByBuilder {
+
+        private final ImmutableList<Repository<?, ?>> repositories = ImmutableList.of(
+                new BbProjectRepository(),
+                new BbProjectViewRepository()
+        );
+
+        private BlackBoxBoundedContext<?> blackBox;
+        private BoundedContextBuilder builder;
+
+        @BeforeEach
+        void setUp() {
+            builder = BoundedContext.newBuilder();
+            repositories.forEach(builder::add);
+        }
+
+        @Test
+        void singleTenant() {
+            builder.setMultitenant(false);
+            blackBox = BlackBoxBoundedContext.from(builder);
+
+            assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
+        }
+
+        @Test
+        void multiTenant() {
+            builder.setMultitenant(true);
+            blackBox = BlackBoxBoundedContext.from(builder);
+
+            assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
+        }
     }
 }
