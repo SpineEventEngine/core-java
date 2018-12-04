@@ -22,9 +22,12 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.Truth8;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.Enricher;
+import io.spine.server.event.EventBus;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
@@ -249,11 +252,15 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private BlackBoxBoundedContext<?> blackBox;
         private BoundedContextBuilder builder;
-
+        private Enricher enricher;
 
         @BeforeEach
         void setUp() {
-            builder = BoundedContext.newBuilder();
+            enricher = Enricher.newBuilder()
+                               .build();
+            builder = BoundedContext.newBuilder()
+                                    .setEventBus(EventBus.newBuilder()
+                                                         .setEnricher(enricher));
             repositories.forEach(builder::add);
         }
 
@@ -264,10 +271,17 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
             assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
             assertEntityTypes();
+            assertEnricher();
         }
 
         private void assertEntityTypes() {
             assertThat(blackBox.getAllEntityStateTypes()).containsAllIn(types);
+        }
+
+        private void assertEnricher() {
+            Truth8.assertThat(blackBox.getEventBus()
+                                      .enricher())
+                  .hasValue(enricher);
         }
 
         @Test
@@ -277,6 +291,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
             assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
             assertEntityTypes();
+            assertEnricher();
         }
     }
 }

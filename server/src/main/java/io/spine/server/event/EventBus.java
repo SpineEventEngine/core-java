@@ -117,7 +117,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     private @MonotonicNonNull EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
-    private final @Nullable Enricher enricher;
+    private final @MonotonicNonNull Enricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -183,8 +183,8 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      * Posts the event for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain io.spine.server.bus.Bus#post(Message, StreamObserver)} parent method}, but does not
-     * require any response observer.
+     * {@linkplain io.spine.server.bus.Bus#post(Message, StreamObserver)} parent method},
+     * but does not require any response observer.
      *
      * @param event the event to be handled
      * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
@@ -197,8 +197,8 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      * Posts the events for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method}, but
-     * does not require any response observer.
+     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method},
+     * but does not require any response observer.
      *
      * <p>This method should be used if the callee does not care about the events acknowledgement.
      *
@@ -207,6 +207,14 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      */
     public final void post(Iterable<Event> events) {
         post(events, streamObserver);
+    }
+
+    /**
+     * Obtains {@code Enricher} used by this Event Bus.
+     */
+    @VisibleForTesting
+    public final Optional<Enricher> enricher() {
+        return Optional.ofNullable(enricher);
     }
 
     protected EventEnvelope enrich(EventEnvelope event) {
@@ -395,8 +403,8 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
          * <p>If the {@code Enricher} is not set, the enrichments
          * will <strong>NOT</strong> be supported for the {@code EventBus} instance built.
          *
-         * @param enricher the {@code Enricher} for events or {@code null} if enrichment is
-         *                 not supported
+         * @param enricher
+         *         the {@code Enricher} for events or {@code null} if enrichment is not supported
          */
         public Builder setEnricher(Enricher enricher) {
             this.enricher = enricher;

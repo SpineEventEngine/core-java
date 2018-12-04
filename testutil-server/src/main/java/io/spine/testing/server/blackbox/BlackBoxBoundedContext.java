@@ -180,6 +180,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return result.build();
     }
 
+    @VisibleForTesting
+    EventBus getEventBus() {
+        return boundedContext.getEventBus();
+    }
+
     /**
      * Registers passed repositories with the Bounded Context under the test.
      *
