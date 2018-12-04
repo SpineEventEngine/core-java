@@ -78,8 +78,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <P> the type of process managers
  * @param <S> the type of process manager state messages
  * @see ProcessManager
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("OverlyCoupledClass")
 public abstract class ProcessManagerRepository<I,
@@ -145,9 +143,9 @@ public abstract class ProcessManagerRepository<I,
      * process manager:
      *
      * <ul>
-     *     <li>command handler methods;</li>
-     *     <li>domestic or external event reactor methods;</li>
-     *     <li>domestic or external rejection reactor methods.</li>
+     *     <li>command handler methods;
+     *     <li>domestic or external event reactor methods;
+     *     <li>domestic or external rejection reactor methods.
      * </ul>
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
