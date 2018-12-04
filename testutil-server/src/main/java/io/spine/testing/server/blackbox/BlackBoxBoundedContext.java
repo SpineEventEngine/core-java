@@ -76,13 +76,17 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
         this.commandTap = new CommandMemoizingTap();
+        EventBus.Builder eventBus = EventBus
+                .newBuilder()
+                .setEnricher(enricher);
+        CommandBus.Builder commandBus = CommandBus
+                .newBuilder()
+                .appendFilter(commandTap);
         this.boundedContext = BoundedContext
                 .newBuilder()
                 .setMultitenant(multitenant)
-                .setCommandBus(CommandBus.newBuilder()
-                                         .appendFilter(commandTap))
-                .setEventBus(EventBus.newBuilder()
-                                     .setEnricher(enricher))
+                .setCommandBus(commandBus)
+                .setEventBus(eventBus)
                 .build();
         this.observer = memoizingObserver();
     }
