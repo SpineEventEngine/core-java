@@ -327,10 +327,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return thisRef();
     }
 
-    /*
-     * Methods verifying the bounded context behaviour.
-     ******************************************************************************/
-
     /**
      * Verifies emitted events by the passed verifier.
      *
