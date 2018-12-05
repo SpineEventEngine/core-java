@@ -39,6 +39,9 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessages;
+import io.spine.server.integration.IntegrationBus;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
@@ -50,7 +53,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -79,6 +81,7 @@ public class BlackBoxBoundedContext {
     private final TenantId tenantId;
     private final MemoizingObserver<Ack> observer;
     private final CommandMemoizingTap commandTap;
+    private final IntegrationBus integrationBus;
 
     /**
      * Creates a new multi-tenant instance.
@@ -97,6 +100,7 @@ public class BlackBoxBoundedContext {
         this.commandBus = boundedContext.getCommandBus();
         this.eventBus = boundedContext.getEventBus();
         this.importBus = boundedContext.getImportBus();
+        this.integrationBus = boundedContext.getIntegrationBus();
         this.observer = memoizingObserver();
     }
 
@@ -292,11 +296,9 @@ public class BlackBoxBoundedContext {
     }
 
     private List<Event> toEvents(Collection<Message> domainEvents) {
-        List<Event> events = newArrayListWithCapacity(domainEvents.size());
-        for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent));
-        }
-        return events;
+        return domainEvents.stream()
+                           .map(this::event)
+                           .collect(toList());
     }
 
     public BlackBoxBoundedContext importsEvent(Message eventOrMessage) {
@@ -312,6 +314,41 @@ public class BlackBoxBoundedContext {
         List<Event> events = toEvents(domainEvents);
         importBus.post(events, observer);
         return this;
+    }
+
+
+    /**
+     * Sends off a provided event to the Bounded Context.
+     *
+     * @param messageOrEvent
+     *         an event message or {@link Event}. If an instance of {@code Event} is passed, it
+     *         will be posted to {@link EventBus} as is.
+     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
+     *         event message and posted to the bus.
+     * @return current instance
+     */
+    public BlackBoxBoundedContext receivesExternalEvent(Message messageOrEvent) {
+        return this.receivesExternalEvents(singletonList(messageOrEvent));
+    }
+
+    /**
+     * Sends off provided events as external to the Bounded Context.
+     *
+     * @param domainEvents
+     *         a list of domain event to be dispatched to the Bounded Context
+     * @return current instance
+     */
+    private BlackBoxBoundedContext receivesExternalEvents(Collection<Message> domainEvents) {
+        List<ExternalMessage> events = toExternalEvents(domainEvents);
+        integrationBus.post(events, observer);
+        return this;
+    }
+
+    private List<ExternalMessage> toExternalEvents(Collection<Message> domainEvents) {
+        return domainEvents.stream()
+                           .map(this::event)
+                           .map(event -> ExternalMessages.of(event, boundedContext.getName()))
+                           .collect(toList());
     }
 
     /**
