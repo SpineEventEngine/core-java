@@ -72,11 +72,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates managed by this repository
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
- * @apiNote
- * This class is made {@code abstract} for preserving type information of aggregate ID and
- * aggregate classes used by implementations.
+ * @apiNote This class is made {@code abstract} for preserving type information of aggregate ID and
+ *          aggregate classes used by implementations.
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>

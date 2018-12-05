@@ -65,6 +65,7 @@ public class CommanderExpected<S extends Message>
 
     /**
      * {@inheritDoc}
+     *
      * @apiNote Overrides to expose the method.
      */
     @CanIgnoreReturnValue

@@ -48,7 +48,7 @@ public interface Entity<I, S extends Message> {
      * Obtains string representation of the entity identifier.
      *
      * @apiNote The primary purpose of this method is to display the identifier in human-readable
-     * form in debug and error messages.
+     *          form in debug and error messages.
      */
     default String idAsString() {
         return Stringifiers.toString(getId());
