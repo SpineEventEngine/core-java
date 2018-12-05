@@ -39,7 +39,7 @@ import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmailVBuild
  */
 public class SamplePartEventImportTest
         extends AggregateEventImportTest<TuTaskId,
-        TuCommentReceivedByEmail,
+                                         TuCommentReceivedByEmail,
                                          TuComments,
                                          TuAggregatePart> {
 
