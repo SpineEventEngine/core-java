@@ -299,7 +299,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         Otherwise, an instance of {@code Event} will be generated basing on the passed
      *         event message and posted to the bus.
      * @return current instance
-     * @apiNote Returned value can be ignored when this method invoked for test setup
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
     public T receivesExternalEvent(BoundedContextName sourceContext, Message messageOrEvent) {
@@ -325,7 +325,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         optional external events to be dispatched to the Bounded Context
      *         in supplied order
      * @return current instance
-     * @apiNote Returned value can be ignored when this method invoked for test setup
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
     public T receivesExternalEvents(BoundedContextName sourceContext,
