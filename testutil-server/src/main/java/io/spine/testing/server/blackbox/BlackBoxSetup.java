@@ -53,9 +53,9 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>The setup may involve:
  * <ul>
- * <li>posting of commands;
- * <li>posting of events;
- * <li>importing of events.
+ *     <li>posting of commands;
+ *     <li>posting of events;
+ *     <li>importing of events.
  * </ul>
  */
 @VisibleForTesting
