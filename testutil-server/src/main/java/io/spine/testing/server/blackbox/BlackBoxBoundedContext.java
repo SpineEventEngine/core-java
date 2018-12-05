@@ -158,9 +158,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *
      * <p>In particular:
      * <ul>
-     * <li>multi-tenancy status;
-     * <li>{@code Enricher};
-     * <li>added repositories.
+     *     <li>multi-tenancy status;
+     *     <li>{@code Enricher};
+     *     <li>added repositories.
      * </ul>
      */
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
