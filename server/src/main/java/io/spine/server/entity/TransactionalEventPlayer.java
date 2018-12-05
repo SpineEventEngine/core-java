@@ -32,14 +32,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class TransactionalEventPlayer implements EventPlayer {
 
-    private final Transaction<?, ?, ?, ?> transaction;
+    private final EventPlayingTransaction<?, ?, ?, ?> transaction;
 
     /**
      * Creates a new instance of {@code TransactionalEventPlayer}.
      *
      * @param transaction the transaction
      */
-    TransactionalEventPlayer(Transaction<?, ?, ?, ?> transaction) {
+    TransactionalEventPlayer(EventPlayingTransaction<?, ?, ?, ?> transaction) {
         this.transaction = checkNotNull(transaction);
     }
 
@@ -51,7 +51,7 @@ final class TransactionalEventPlayer implements EventPlayer {
         checkNotNull(events);
         for (Event event : events) {
             EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            transaction.apply(eventEnvelope);
+            transaction.play(eventEnvelope);
         }
     }
 }

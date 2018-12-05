@@ -26,7 +26,9 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.aggregate.model.EventApplier;
-import io.spine.server.entity.Transaction;
+import io.spine.server.entity.EventPlayingTransaction;
+import io.spine.server.entity.IncrementFromEvent;
+import io.spine.server.entity.VersionIncrement;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -41,7 +43,7 @@ import io.spine.validate.ValidatingBuilder;
 public class AggregateTransaction<I,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        extends Transaction<I, Aggregate<I, S, B>, S, B> {
+        extends EventPlayingTransaction<I, Aggregate<I, S, B>, S, B> {
 
     @VisibleForTesting
     AggregateTransaction(Aggregate<I, S, B> aggregate) {
@@ -60,7 +62,7 @@ public class AggregateTransaction<I,
      * does not operate with {@linkplain EventContext event context}, this parameter is ignored.
      */
     @Override
-    protected final void dispatch(Aggregate aggregate, EventEnvelope event) {
+    protected final void doDispatch(Aggregate<I, S, B> aggregate, EventEnvelope event) {
         aggregate.invokeApplier(event);
     }
 
@@ -85,5 +87,10 @@ public class AggregateTransaction<I,
     static AggregateTransaction start(Aggregate aggregate) {
         AggregateTransaction tx = new AggregateTransaction(aggregate);
         return tx;
+    }
+
+    @Override
+    protected VersionIncrement createVersionIncrement(EventEnvelope event) {
+        return new IncrementFromEvent(this, event);
     }
 }
