@@ -29,7 +29,7 @@ import io.spine.testing.server.aggregate.given.agg.TuAggregatePartRepository;
 import io.spine.testing.server.expected.EventApplierExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuTaskId;
-import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmail;
+import io.spine.testing.server.given.entity.event.TuCommentReceivedByEmail;
 import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmailVBuilder;
 
 /**
@@ -39,11 +39,11 @@ import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmailVBuild
  */
 public class SamplePartEventImportTest
         extends AggregateEventImportTest<TuTaskId,
-                                         TuCommentRecievedByEmail,
+        TuCommentReceivedByEmail,
                                          TuComments,
                                          TuAggregatePart> {
 
-    public static final TuCommentRecievedByEmail TEST_EVENT =
+    public static final TuCommentReceivedByEmail TEST_EVENT =
             TuCommentRecievedByEmailVBuilder.newBuilder()
                                             .setId(TuAggregatePart.ID)
                                             .build();

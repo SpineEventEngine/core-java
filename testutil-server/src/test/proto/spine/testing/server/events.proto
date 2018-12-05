@@ -58,7 +58,7 @@ message TuCommentAdded {
 
 // An event to be imported into an aggretate.
 //
-message TuCommentRecievedByEmail {
+message TuCommentReceivedByEmail {
     TuTaskId id = 2;
 }
 
