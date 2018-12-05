@@ -86,7 +86,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     private final BoundedContext boundedContext;
     private final CommandMemoizingTap commandTap;
     private final MemoizingObserver<Ack> observer;
-    private final Set<Message> sentEvents;
+
+    /**
+     * Events received by {@code BlackBoxBoundedContext} and posted to the event bus.
+     *
+     * <p>These events are filtered out from those which are stored in the Bounded Context to
+     * collect only the emitted events, which are used for assertions.
+     *
+     * @see #emittedEvents()
+     */
+    private final Set<Message> postedEvents;
 
     protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
         this.commandTap = new CommandMemoizingTap();
@@ -103,7 +112,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                 .setEventBus(eventBus)
                 .build();
         this.observer = memoizingObserver();
-        this.sentEvents = new HashSet<>();
+        this.postedEvents = new HashSet<>();
     }
 
     /**
@@ -149,9 +158,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *
      * <p>In particular:
      * <ul>
-     *     <li>multi-tenancy status;
-     *     <li>{@code Enricher};
-     *     <li>added repositories.
+     * <li>multi-tenancy status;
+     * <li>{@code Enricher};
+     * <li>added repositories.
      * </ul>
      */
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
@@ -372,7 +381,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                       EventMessage firstEvent,
                                       EventMessage... otherEvents) {
         List<Event> sentEvents = setup().postEvents(producerId, firstEvent, otherEvents);
-        this.sentEvents.addAll(sentEvents);
+        this.postedEvents.addAll(sentEvents);
         return thisRef();
     }
 
@@ -385,7 +394,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     private T receivesEvents(Collection<Message> domainEvents) {
         List<Event> sentEvents = setup().postEvents(domainEvents);
-        this.sentEvents.addAll(sentEvents);
+        this.postedEvents.addAll(sentEvents);
         return thisRef();
     }
 
@@ -544,8 +553,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                       .read(allEventsQuery(), queryObserver);
         List<Event> responses = queryObserver.responses()
                                              .stream()
-                                             .filter(not(sentEvents::contains))
-                                             .collect(toList());;
+                                             .filter(not(postedEvents::contains))
+                                             .collect(toList());
         return new EmittedEvents(responses);
     }
 
