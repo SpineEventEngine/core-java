@@ -214,16 +214,38 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("receives external event")
     void receivesExternalEvents() {
         BbProjectId projectId = newProjectId();
-        UserId id = newUuid();
+        UserId user = newUuid();
 
         context.receivesCommand(createProject(projectId))
-               .receivesCommand(addProjectAssignee(projectId, id))
-               .receivesExternalEvent(userDeleted(id, projectId))
+               .receivesCommand(addProjectAssignee(projectId, user))
+               .receivesExternalEvent(userDeleted(user, projectId))
                .assertThat(acked(count(3)).withoutErrorsOrRejections())
-               .assertThat(VerifyEvents.emittedEvent(count(3)))
-               .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
-               .assertThat(VerifyEvents.emittedEvent(BbUserAssigned.class, once()))
-               .assertThat(VerifyEvents.emittedEvent(BbUserUnassigned.class, once()));
+               .assertThat(emittedEvent(count(3)))
+               .assertThat(emittedEvent(BbProjectCreated.class, once()))
+               .assertThat(emittedEvent(BbUserAssigned.class, once()))
+               .assertThat(emittedEvent(BbUserUnassigned.class, once()));
+    }
+
+    @Test
+    @DisplayName("receives multiple external events")
+    void receivesMultipleExternalEvents() {
+        BbProjectId projectId = newProjectId();
+        UserId user1 = newUuid();
+        UserId user2 = newUuid();
+        UserId user3 = newUuid();
+
+        context.receivesCommand(createProject(projectId))
+               .receivesCommands(addProjectAssignee(projectId, user1),
+                                 addProjectAssignee(projectId, user2),
+                                 addProjectAssignee(projectId, user3))
+               .receivesExternalEvents(userDeleted(user1, projectId),
+                                       userDeleted(user2, projectId),
+                                       userDeleted(user3, projectId))
+               .assertThat(acked(count(7)).withoutErrorsOrRejections())
+               .assertThat(emittedEvent(count(7)))
+               .assertThat(emittedEvent(BbProjectCreated.class, once()))
+               .assertThat(emittedEvent(BbUserAssigned.class, thrice()))
+               .assertThat(emittedEvent(BbUserUnassigned.class, thrice()));
     }
 
     @Test

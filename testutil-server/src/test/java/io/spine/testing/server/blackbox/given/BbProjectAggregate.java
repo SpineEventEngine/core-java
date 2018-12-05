@@ -149,7 +149,7 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
 
     @Apply
     void on(BbUserUnassigned event) {
-        List<UserId> assignees = getState().getAssigneeList();
+        List<UserId> assignees = getBuilder().getAssignee();
         int index = assignees.indexOf(event.getUserId());
         getBuilder().removeAssignee(index);
     }
