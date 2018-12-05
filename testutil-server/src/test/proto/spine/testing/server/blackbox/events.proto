@@ -56,18 +56,18 @@ message BbTaskAddedToReport {
     BbTask task = 3;
 }
 
-message BbUserAssigned {
+message BbAssigneeAdded {
     BbProjectId id = 1 [(required) = true];
     spine.core.UserId user_id = 2 [(required) = true];
 }
 
-message BbUserUnassigned {
+message BbAssigneeRemoved {
     BbProjectId id = 1 [(required) = true];
     spine.core.UserId user_id = 2 [(required) = true];
 }
 
 //
-// External User bounded context events
+// External `Users` bounded context events
 //
 
 message BbUserDeleted {

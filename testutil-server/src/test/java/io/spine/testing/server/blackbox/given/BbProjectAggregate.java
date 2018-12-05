@@ -33,14 +33,14 @@ import io.spine.testing.server.blackbox.command.BbAddProjectAssignee;
 import io.spine.testing.server.blackbox.command.BbAddTask;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbStartProject;
+import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
+import io.spine.testing.server.blackbox.event.BbAssigneeAddedVBuilder;
+import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbProjectStarted;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
-import io.spine.testing.server.blackbox.event.BbUserAssigned;
-import io.spine.testing.server.blackbox.event.BbUserAssignedVBuilder;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
-import io.spine.testing.server.blackbox.event.BbUserUnassigned;
-import io.spine.testing.server.blackbox.event.BbUserUnassignedVBuilder;
+import io.spine.testing.server.blackbox.event.BbAssigneeRemovedVBuilder;
 import io.spine.testing.server.blackbox.rejection.BbProjectAlreadyStarted;
 import io.spine.testing.server.blackbox.rejection.BbTaskCreatedInCompletedProject;
 
@@ -100,8 +100,8 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     }
 
     @Assign
-    BbUserAssigned handle(BbAddProjectAssignee command) {
-        return BbUserAssignedVBuilder
+    BbAssigneeAdded handle(BbAddProjectAssignee command) {
+        return BbAssigneeAddedVBuilder
                 .newBuilder()
                 .setId(getId())
                 .setUserId(command.getUserId())
@@ -109,7 +109,7 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     }
 
     @React(external = true)
-    Optional<BbUserUnassigned> on(BbUserDeleted event) {
+    Optional<BbAssigneeRemoved> on(BbUserDeleted event) {
         List<UserId> assignees = getState().getAssigneeList();
         UserId user = event.getId();
         if (!assignees.contains(user)) {
@@ -118,8 +118,8 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
         return Optional.of(userUnassigned(user));
     }
 
-    private BbUserUnassigned userUnassigned(UserId user) {
-        return BbUserUnassignedVBuilder
+    private BbAssigneeRemoved userUnassigned(UserId user) {
+        return BbAssigneeRemovedVBuilder
                 .newBuilder()
                 .setId(getId())
                 .setUserId(user)
@@ -143,12 +143,12 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     }
 
     @Apply
-    void on(BbUserAssigned event) {
+    void on(BbAssigneeAdded event) {
         getBuilder().addAssignee(event.getUserId());
     }
 
     @Apply
-    void on(BbUserUnassigned event) {
+    void on(BbAssigneeRemoved event) {
         List<UserId> assignees = getBuilder().getAssignee();
         int index = assignees.indexOf(event.getUserId());
         getBuilder().removeAssignee(index);

@@ -23,8 +23,6 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth8;
-import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.Repository;
@@ -33,12 +31,12 @@ import io.spine.server.event.EventBus;
 import io.spine.core.UserId;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
-import io.spine.testing.server.blackbox.event.BbUserAssigned;
-import io.spine.testing.server.blackbox.event.BbUserUnassigned;
+import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
@@ -240,8 +238,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                    .assertThat(acked(count(3)).withoutErrorsOrRejections())
                    .assertThat(emittedEvent(count(3)))
                    .assertThat(emittedEvent(BbProjectCreated.class, once()))
-                   .assertThat(emittedEvent(BbUserAssigned.class, once()))
-                   .assertThat(emittedEvent(BbUserUnassigned.class, once()));
+                   .assertThat(emittedEvent(BbAssigneeAdded.class, once()))
+                   .assertThat(emittedEvent(BbAssigneeRemoved.class, once()));
         }
 
         @Test
@@ -263,8 +261,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                    .assertThat(acked(count(7)).withoutErrorsOrRejections())
                    .assertThat(emittedEvent(count(7)))
                    .assertThat(emittedEvent(BbProjectCreated.class, once()))
-                   .assertThat(emittedEvent(BbUserAssigned.class, thrice()))
-                   .assertThat(emittedEvent(BbUserUnassigned.class, thrice()));
+                   .assertThat(emittedEvent(BbAssigneeAdded.class, thrice()))
+                   .assertThat(emittedEvent(BbAssigneeRemoved.class, thrice()));
         }
     }
 
