@@ -101,10 +101,12 @@ final class BlackBoxSetup {
      *
      * @param domainEvents
      *         a list of {@linkplain EventMessage event messages} or {@linkplain Event events}
+     * @return list of events posted to {@link EventBus}
      */
-    void postEvents(Collection<Message> domainEvents) {
+    List<Event> postEvents(Collection<Message> domainEvents) {
         List<Event> events = toEvents(domainEvents, eventFactory);
         eventBus.post(events, observer);
+        return events;
     }
 
     /**
@@ -116,12 +118,15 @@ final class BlackBoxSetup {
      *         the first event to be posted
      * @param otherEvents
      *         other events to be posted, if any
+     * @return list of events posted to {@link EventBus}
      */
-    void postEvents(Object producerId, EventMessage firstEvent, EventMessage... otherEvents) {
+    List<Event> postEvents(Object producerId, EventMessage firstEvent,
+                           EventMessage... otherEvents) {
         List<Message> eventMessages = asList(firstEvent, otherEvents);
         TestEventFactory customFactory = newEventFactory(producerId);
         List<Event> events = toEvents(eventMessages, customFactory);
         eventBus.post(events, observer);
+        return events;
     }
 
     /**

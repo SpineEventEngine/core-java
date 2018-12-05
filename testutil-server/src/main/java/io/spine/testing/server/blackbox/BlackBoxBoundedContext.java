@@ -46,16 +46,19 @@ import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.type.TypeName;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * This class provides means for integration testing of Bounded Contexts.
@@ -84,6 +87,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     private final CommandMemoizingTap commandTap;
     private final MemoizingObserver<Ack> observer;
 
+    /**
+     * Events received by {@code BlackBoxBoundedContext} and posted to the event bus.
+     *
+     * <p>These events are filtered out from those which are stored in the Bounded Context to
+     * collect only the emitted events, which are used for assertions.
+     *
+     * @see #emittedEvents()
+     */
+    private final Set<Message> postedEvents;
+
     protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
         this.commandTap = new CommandMemoizingTap();
         EventBus.Builder eventBus = EventBus
@@ -99,6 +112,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                 .setEventBus(eventBus)
                 .build();
         this.observer = memoizingObserver();
+        this.postedEvents = new HashSet<>();
     }
 
     /**
@@ -289,7 +303,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Sends off a provided event to the Bounded Context as event from an external source.
      *
-     *
      * @param sourceContext
      *         a name of the Bounded Context external events come from
      * @param messageOrEvent
@@ -367,7 +380,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     public T receivesEventsProducedBy(Object producerId,
                                       EventMessage firstEvent,
                                       EventMessage... otherEvents) {
-        setup().postEvents(producerId, firstEvent, otherEvents);
+        List<Event> sentEvents = setup().postEvents(producerId, firstEvent, otherEvents);
+        this.postedEvents.addAll(sentEvents);
         return thisRef();
     }
 
@@ -379,7 +393,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @return current instance
      */
     private T receivesEvents(Collection<Message> domainEvents) {
-        setup().postEvents(domainEvents);
+        List<Event> sentEvents = setup().postEvents(domainEvents);
+        this.postedEvents.addAll(sentEvents);
         return thisRef();
     }
 
@@ -530,13 +545,19 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     /**
      * Obtains events emitted in the bounded context.
+     *
+     * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
+     * calls.
      */
     protected EmittedEvents emittedEvents() {
         MemoizingObserver<Event> queryObserver = memoizingObserver();
         boundedContext.getEventBus()
                       .getEventStore()
                       .read(allEventsQuery(), queryObserver);
-        List<Event> responses = queryObserver.responses();
+        List<Event> responses = queryObserver.responses()
+                                             .stream()
+                                             .filter(not(postedEvents::contains))
+                                             .collect(toList());
         return new EmittedEvents(responses);
     }
 

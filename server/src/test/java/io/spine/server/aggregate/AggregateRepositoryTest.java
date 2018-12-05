@@ -86,8 +86,11 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.request
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBoundedContext;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.testing.client.blackbox.Count.none;
+import static io.spine.testing.client.blackbox.Count.thrice;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -531,7 +534,6 @@ public class AggregateRepositoryTest {
                                   .receivesEvent(archived)
                                   .assertThat(emittedEventsHadVersions(
                                           1, 2, // Product creation
-                                          0,    // Manually assembled event (`archived`)
                                           3     // Event produced in response to `archived` event
                                   ))
                                   .close();
@@ -560,7 +562,8 @@ public class AggregateRepositoryTest {
                                   .with(new EventDiscardingAggregateRepository())
                                   .receivesCommands(create, start)
                                   .receivesEvent(archived)
-                                  .assertThat(emittedEvents(AggProjectArchived.class))
+                                  .assertThat(emittedEvent(none()))
+                                  .assertThat(acked(thrice()).withoutErrorsOrRejections())
                                   .close();
         }
     }
