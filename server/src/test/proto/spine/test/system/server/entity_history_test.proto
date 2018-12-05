@@ -41,7 +41,7 @@ message PersonId {
 message Person {
     option (entity).kind = AGGREGATE;
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = false];
 
     spine.people.PersonName name = 2;
 }
@@ -51,7 +51,7 @@ message Person {
 message PersonCreation {
     option (entity).kind = PROCESS_MANAGER;
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = false];
 
     bool created = 2;
 }
@@ -61,7 +61,17 @@ message PersonCreation {
 message PersonFirstName {
     option (entity).kind = AGGREGATE;
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = false];
 
     string first_name = 2;
+}
+
+// A state type of a projection.
+//
+message PersonDetails {
+    option (entity).kind = PROJECTION;
+
+    PersonId id = 1 [(required) = false];
+
+    spine.people.PersonName name = 2;
 }

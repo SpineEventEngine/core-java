@@ -57,7 +57,6 @@ import static io.spine.core.Events.sort;
 import static io.spine.core.given.EventsTestEnv.tenantId;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -90,7 +89,7 @@ public class EventsTest extends UtilityClassTest<Events> {
     void setUp() {
         TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(getClass());
         CommandEnvelope cmd = requestFactory.generateEnvelope();
-        StringValue producerId = toMessage(getClass().getSimpleName());
+        StringValue producerId = StringValue.of(getClass().getSimpleName());
         eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(GivenEvent.message(), null);
         context = event.getContext();
@@ -156,9 +155,7 @@ public class EventsTest extends UtilityClassTest<Events> {
         @DisplayName("root command ID")
         void rootCommandId() {
             CommandEnvelope command = requestFactory.generateEnvelope();
-            StringValue producerId = toMessage(getClass().getSimpleName());
-            EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-            Event event = ef.createEvent(GivenEvent.message(), null);
+            Event event = newEvent(command);
 
             assertEquals(command.getId(), Events.getRootCommandId(event));
         }
@@ -167,14 +164,18 @@ public class EventsTest extends UtilityClassTest<Events> {
         @DisplayName("type name")
         void typeName() {
             CommandEnvelope command = requestFactory.generateEnvelope();
-            StringValue producerId = toMessage(getClass().getSimpleName());
-            EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-            Event event = ef.createEvent(GivenEvent.message(), null);
+            Event event = newEvent(command);
 
             TypeName typeName = EventEnvelope.of(event)
                                              .getTypeName();
             assertNotNull(typeName);
             assertEquals(GivenProjectCreated.class.getSimpleName(), typeName.getSimpleName());
+        }
+
+        private Event newEvent(CommandEnvelope command) {
+            StringValue producerId = StringValue.of(getClass().getSimpleName());
+            EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
+            return ef.createEvent(GivenEvent.message(), null);
         }
     }
 

@@ -24,8 +24,6 @@ import com.google.protobuf.Empty;
 
 /**
  * Utilities for working with {@link Response Response} objects.
- *
- * @author Alexander Yevsyukov
  */
 public final class Responses {
 
@@ -37,8 +35,8 @@ public final class Responses {
     private static final Response RESPONSE_OK = Response.newBuilder()
                                                         .setStatus(STATUS_OK)
                                                         .build();
+    /** Prevent instantiation of this utility class. */
     private Responses() {
-        // Prevent instantiation of this utility class.
     }
 
     /** Returns the instance of OK {@link Response}. */

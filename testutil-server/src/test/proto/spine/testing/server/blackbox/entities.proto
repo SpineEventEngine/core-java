@@ -35,6 +35,8 @@ message BbProjectId {
 }
 
 message BbProject {
+    option (entity).kind = AGGREGATE;
+
     BbProjectId id = 1;
 
     string name = 2;
@@ -52,6 +54,15 @@ message BbProject {
     Status status = 4;
 
     repeated spine.core.UserId assignee = 5;
+}
+
+message BbProjectView {
+
+    BbProjectId id = 1;
+
+    string name = 2;
+
+    BbProject.Status status = 3;
 }
 
 message BbTaskId {

@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -41,7 +42,6 @@ import io.spine.type.TypeUrl;
 
 import java.util.Map;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
@@ -70,10 +70,7 @@ public class RepositoryTestEnv {
     }
 
     private static Photo newPhoto(String url, String altText) {
-        PhotoId id = PhotoId
-                .newBuilder()
-                .setUuid(newUuid())
-                .build();
+        PhotoId id = Identifier.generate(PhotoId.class);
         Url fullSizeUrl = Url
                 .newBuilder()
                 .setSpec(url)

@@ -29,9 +29,6 @@ import io.spine.type.TypeUrl;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
 public class SystemEventWatcherTestEnv {
 
     /**
@@ -40,38 +37,38 @@ public class SystemEventWatcherTestEnv {
     private SystemEventWatcherTestEnv() {
     }
 
-    public static class ExternalWatcher extends SystemEventWatcher<String> {
+    public static class ExternalWatcher extends SystemEventWatcher {
 
         public ExternalWatcher() {
             super(TypeUrl.of(Empty.class));
         }
 
         @Subscribe(external = true)
-        public void on(SewProjectCreated domesticEvent) {
+        public void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
             fail("External events are not allowed in SystemEventWatchers.");
         }
     }
 
-    public static class NonSystemWatcher extends SystemEventWatcher<String> {
+    public static class NonSystemWatcher extends SystemEventWatcher {
 
         public NonSystemWatcher() {
             super(TypeUrl.of(Empty.class));
         }
 
         @Subscribe
-        public void on(SewProjectCreated externalEvent) {
+        public void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
             fail("Only spine.system.server events are allowed.");
         }
     }
 
-    public static class ValidSystemWatcher extends SystemEventWatcher<String> {
+    public static class ValidSystemWatcher extends SystemEventWatcher {
 
         public ValidSystemWatcher() {
             super(TypeUrl.of(Empty.class));
         }
 
         @Subscribe
-        public void on(EntityCreated externalEvent) {
+        public void on(@SuppressWarnings("unused") EntityCreated unused) {
             // NoOp.
         }
     }

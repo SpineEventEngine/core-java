@@ -56,8 +56,6 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
  *
  * <p>This class is declared here instead of being inner class of {@link AggregateTestEnv}
  * because it is heavily connected with internals of this test suite.
- *
- * @author Alexander Yevsyukkov
  */
 @SuppressWarnings("PublicField") /* For inspection in tests. */
 public class TestAggregate

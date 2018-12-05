@@ -37,9 +37,6 @@ import io.spine.test.bc.event.BcTaskAdded;
 
 import java.util.List;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class ProjectAggregate
         extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
@@ -70,7 +67,7 @@ public class ProjectAggregate
     }
 
     @Apply
-    void event(BcTaskAdded event) {
+    void event(@SuppressWarnings("unused") BcTaskAdded event) {
         // NOP
     }
 

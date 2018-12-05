@@ -18,41 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.testing.server.blackbox.verify.state;
 
-import io.grpc.stub.StreamObserver;
-import io.spine.core.Event;
-import io.spine.core.Response;
-import io.spine.core.Responses;
-import io.spine.server.event.grpc.EventStoreGrpc;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
+import io.spine.client.Query;
+import io.spine.client.QueryFactory;
+
+import java.util.Collection;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.truth.Truth.assertThat;
 
 /**
- * gRPC service over the locally running implementation of {@link EventStore}.
- *
- * @author Alexander Yevsyukov
+ * Verifies that all entities of a type match expected ones in the exact order.
  */
-class GrpcService extends EventStoreGrpc.EventStoreImplBase {
+@VisibleForTesting
+class AllOfTypeMatch<T extends Message> extends VerifyState {
 
-    private final EventStore eventStore;
+    private final Iterable<T> expected;
+    private final Class<T> entityType;
 
-    GrpcService(EventStore eventStore) {
+    AllOfTypeMatch(Iterable<T> expected, Class<T> entityType) {
         super();
-        this.eventStore = eventStore;
+        this.expected = checkNotNull(expected);
+        this.entityType = checkNotNull(entityType);
     }
 
     @Override
-    public void append(Event request, StreamObserver<Response> responseObserver) {
-        try {
-            eventStore.append(request);
-            responseObserver.onNext(Responses.ok());
-            responseObserver.onCompleted();
-        } catch (RuntimeException e) {
-            responseObserver.onError(e);
-        }
+    protected Query query(QueryFactory factory) {
+        return factory.all(entityType);
     }
 
     @Override
-    public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-        eventStore.read(request, responseObserver);
+    protected void verify(Collection<? extends Message> actualEntities) {
+        assertThat(actualEntities).containsExactlyElementsIn(expected);
     }
 }

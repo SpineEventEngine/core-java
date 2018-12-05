@@ -35,13 +35,18 @@ import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.tuple.Pair;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdCreateTask;
 import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.ProjectId;
+import io.spine.test.command.TaskId;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
+import io.spine.test.command.event.CmdTaskAssigned;
+import io.spine.test.command.event.CmdTaskStarted;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
@@ -50,11 +55,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.core.EventClass.from;
 import static io.spine.util.Exceptions.unsupported;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class CommandHandlerTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -67,7 +70,11 @@ public class CommandHandlerTestEnv {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.from(CmdProjectStarted.class));
+            return ImmutableSet.of(
+                    from(CmdProjectStarted.class),
+                    from(CmdTaskAssigned.class),
+                    from(CmdTaskStarted.class)
+            );
         }
 
         @Override
@@ -152,6 +159,13 @@ public class CommandHandlerTestEnv {
             return eventsOnStartProjectCmd;
         }
 
+        @Assign
+        Pair<CmdTaskAssigned, Optional<CmdTaskStarted>>
+        handle(CmdCreateTask msg, CommandContext context) {
+            commandsHandled.add(msg, context);
+            return createEventsOnCreateTaskCmd(msg);
+        }
+
         @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
             super.onError(envelope, exception);
@@ -178,6 +192,22 @@ public class CommandHandlerTestEnv {
                     .build();
             CmdProjectStarted defaultEvent = CmdProjectStarted.getDefaultInstance();
             return ImmutableList.of(startedEvent, defaultEvent);
+        }
+
+        private static Pair<CmdTaskAssigned, Optional<CmdTaskStarted>>
+        createEventsOnCreateTaskCmd(CmdCreateTask msg) {
+            TaskId taskId = msg.getTaskId();
+            CmdTaskAssigned cmdTaskAssigned = CmdTaskAssigned
+                    .newBuilder()
+                    .setTaskId(taskId)
+                    .build();
+            CmdTaskStarted cmdTaskStarted = msg.getStart()
+                                            ? CmdTaskStarted
+                                                    .newBuilder()
+                                                    .setTaskId(taskId)
+                                                    .build()
+                                            : null;
+            return Pair.withNullable(cmdTaskAssigned, cmdTaskStarted);
         }
     }
 }

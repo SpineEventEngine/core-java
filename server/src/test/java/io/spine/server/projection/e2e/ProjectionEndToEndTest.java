@@ -21,10 +21,8 @@
 package io.spine.server.projection.e2e;
 
 import com.google.common.truth.IterableSubject;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EventMessage;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
@@ -50,9 +48,10 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.ShardingReset;
-import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,12 +60,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Iterator;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.testing.server.TestEventFactory.newInstance;
-import static io.spine.testing.server.blackbox.VerifyState.exactly;
+import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -81,23 +78,26 @@ class ProjectionEndToEndTest {
         PrjProjectCreated created = GivenEventMessage.projectCreated();
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
-        ProjectId id = created.getProjectId();
+        ProjectId producerId = created.getProjectId();
         BlackBoxBoundedContext
-                .newInstance()
+                .singleTenant()
                 .with(new EntitySubscriberProjection.Repository(),
                       new TestProjection.Repository())
-                .receivesEvents(event(id, created),
-                                event(id, firstTaskAdded),
-                                event(id, secondTaskAdded))
-                .assertThat(exactly(ProjectTaskNames.class, of(
+                .receivesEventsProducedBy(producerId,
+                                          created,
+                                          firstTaskAdded,
+                                          secondTaskAdded)
+                .assertThat(exactlyOne(
                         ProjectTaskNames
                                 .newBuilder()
-                                .setProjectId(id)
+                                .setProjectId(producerId)
                                 .setProjectName(created.getName())
-                                .addTaskName(firstTaskAdded.getTask().getTitle())
-                                .addTaskName(secondTaskAdded.getTask().getTitle())
+                                .addTaskName(firstTaskAdded.getTask()
+                                                           .getTitle())
+                                .addTaskName(secondTaskAdded.getTask()
+                                                            .getTitle())
                                 .build()
-                )));
+                ));
     }
 
     @Test
@@ -106,20 +106,18 @@ class ProjectionEndToEndTest {
         // Black box context is used in a non-fluent fashion.
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
-        BlackBoxBoundedContext sender = BlackBoxBoundedContext
-                .newInstance()
+        SingleTenantBlackBoxContext sender = BlackBoxBoundedContext
+                .singleTenant()
                 .with(new OrganizationProjection.Repository());
-        BlackBoxBoundedContext receiver = BlackBoxBoundedContext
-                .newInstance()
+        SingleTenantBlackBoxContext receiver = BlackBoxBoundedContext
+                .singleTenant()
                 .with(new GroupNameProjection.Repository());
-        OrganizationId id = established.getId();
-        sender.receivesEvent(event(id, established));
-        receiver.assertThat(exactly(StringValue.class, of(
-                StringValue
-                        .newBuilder()
-                        .setValue(established.getName())
-                        .build()
-        )));
+        OrganizationId producerId = established.getId();
+        sender.receivesEventsProducedBy(producerId,
+                                        established);
+        receiver.assertThat(exactlyOne(
+                StringValue.of(established.getName())
+        ));
     }
 
     @Test
@@ -130,9 +128,7 @@ class ProjectionEndToEndTest {
                 .newBuilder()
                 .build();
         groups.register(repository);
-        UserId organizationHead = UserId
-                .newBuilder()
-                .build();
+        UserId organizationHead = GivenUserId.newUuid();
         EntityHistoryId historyId = EntityHistoryId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.of(Organization.class).value())
@@ -178,11 +174,5 @@ class ProjectionEndToEndTest {
         assertParticipants.contains(organizationHead);
 
         groups.close();
-    }
-
-    private static Event event(Message producerId, EventMessage eventMessage) {
-        TestEventFactory eventFactory = newInstance(producerId, ProjectionEndToEndTest.class);
-        Event result = eventFactory.createEvent(eventMessage);
-        return result;
     }
 }

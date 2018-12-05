@@ -13,7 +13,7 @@ import "spine/core/user_id.proto";
 
 message OrganizationId {
 
-    string uid = 1;
+    string uuid = 1;
 }
 
 message Organization {

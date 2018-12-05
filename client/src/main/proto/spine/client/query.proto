@@ -158,8 +158,8 @@ message QueryResponse {
     // Reserved for more query response attributes, e.g. to describe paginated response etc.
     reserved 2 to 4;
 
-    //TODO:2017-02-20:alexander.yevsyukov: Use EntityRecord instead of Any.
-    // Entity states (each packed as `Any`) returned to the API user as a result of Query execution.
+    // Entity states or their masked views (each packed as `Any`)
+    // returned as a result of Query execution.
     repeated google.protobuf.Any messages = 5;
 }
 

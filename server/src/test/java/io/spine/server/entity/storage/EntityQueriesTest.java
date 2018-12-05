@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
@@ -41,8 +42,8 @@ import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -58,17 +59,29 @@ import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.order;
 import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.pagination;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 @DisplayName("EntityQueries utility should")
-class EntityQueriesTest {
+class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
+
+    private EntityQueriesTest() {
+        super(EntityQueries.class);
+    }
+
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
+              .setDefault(Pagination.class, Pagination.getDefaultInstance())
+              .setDefault(EntityFilters.class, EntityFilters.getDefaultInstance())
+              .setDefault(RecordStorage.class, mock(RecordStorage.class))
+              .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
+    }
 
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
                                                     Class<? extends Entity> entityClass) {
@@ -78,7 +91,7 @@ class EntityQueriesTest {
 
     /**
      * This method is not placed in test environment because it uses package-private 
-     * {@link EntityQueries#from(EntityFilters, OrderBy, Pagination, Collection<EntityColumn>)}.
+     * {@link EntityQueries#from(EntityFilters, OrderBy, Pagination, Collection)}.
      */
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
                                                     OrderBy orderBy,
@@ -86,68 +99,6 @@ class EntityQueriesTest {
                                                     Class<? extends Entity> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         return from(filters, orderBy, pagination, entityColumns);
-    }
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(EntityQueries.class);
-    }
-
-    @Nested
-    @DisplayName("not accept null")
-    class NotAcceptNull {
-
-        @SuppressWarnings("ConstantConditions")
-        // The purpose of the check is passing null for @NotNull field.
-        @Test
-        @DisplayName("filters")
-        void filters() {
-            assertThrows(NullPointerException.class,
-                         () -> from(null, OrderBy.getDefaultInstance(),
-                                    Pagination.getDefaultInstance(), emptyList()));
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        // The purpose of the check is passing null for @NotNull field.
-        @Test
-        @DisplayName("storage")
-        void storage() {
-            RecordStorage<?> storage = null;
-            assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), OrderBy.getDefaultInstance(),
-                                    Pagination.getDefaultInstance(), storage));
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        // The purpose of the check is passing null for @NotNull field.
-        @Test
-        @DisplayName("order")
-        void order() {
-            assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), null,
-                                    Pagination.getDefaultInstance(), emptyList()));
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        // The purpose of the check is passing null for @NotNull field.
-        @Test
-        @DisplayName("pagination")
-        void pagination() {
-            assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), OrderBy.getDefaultInstance(),
-                                    null, emptyList()));
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        // The purpose of the check is passing null for @NotNull field.
-        @Test
-        @DisplayName("entity class")
-        void entityClass() {
-            assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), OrderBy.getDefaultInstance(),
-                                    null, emptyList()));
-        }
     }
 
     @Test

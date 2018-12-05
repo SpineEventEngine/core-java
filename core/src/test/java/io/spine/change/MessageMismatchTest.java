@@ -32,15 +32,14 @@ import static io.spine.change.MessageMismatch.unexpectedValue;
 import static io.spine.change.MessageMismatch.unpackActual;
 import static io.spine.change.MessageMismatch.unpackExpected;
 import static io.spine.change.MessageMismatch.unpackNewValue;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("MessageMismatch should")
 class MessageMismatchTest extends UtilityClassTest<MessageMismatch> {
 
-    private static final StringValue EXPECTED = toMessage("expected_value");
-    private static final StringValue ACTUAL = toMessage("actual-value");
-    private static final StringValue NEW_VALUE = toMessage("new-value");
+    private static final StringValue EXPECTED = StringValue.of("expected_value");
+    private static final StringValue ACTUAL = StringValue.of("actual-value");
+    private static final StringValue NEW_VALUE = StringValue.of("new-value");
     private static final StringValue DEFAULT_VALUE = StringValue.getDefaultInstance();
     private static final int VERSION = 1;
 

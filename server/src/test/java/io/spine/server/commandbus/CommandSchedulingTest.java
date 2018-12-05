@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -142,8 +143,9 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             CmdBusStartProject command = CmdBusStartProject.newBuilder()
                                                            .setId(newUuid())
                                                            .build();
+            CommandMessage commandMessage = toMessage(command, CommandMessage.class);
             Command cmd = requestFactory.command()
-                                        .create(toMessage(command));
+                                        .create(commandMessage);
             return cmd;
         }
     }

@@ -65,6 +65,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.InjectCommandBus;
@@ -256,11 +257,11 @@ class ProcessManagerTest {
     @DisplayName("create command(s)")
     class CommandCreation {
 
-        private BlackBoxBoundedContext boundedContext;
+        private SingleTenantBlackBoxContext boundedContext;
 
         @BeforeEach
         void setUp() {
-            boundedContext = BlackBoxBoundedContext.newInstance()
+            boundedContext = BlackBoxBoundedContext.singleTenant()
                                                    .with(new TestProcessManagerRepo());
         }
 
@@ -390,7 +391,7 @@ class ProcessManagerTest {
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
             BlackBoxBoundedContext
-                    .newInstance()
+                    .singleTenant()
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())
@@ -429,7 +430,7 @@ class ProcessManagerTest {
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
             BlackBoxBoundedContext
-                    .newInstance()
+                    .singleTenant()
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())

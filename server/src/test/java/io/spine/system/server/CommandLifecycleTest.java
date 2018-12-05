@@ -33,6 +33,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
+import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
@@ -43,6 +44,7 @@ import io.spine.system.server.given.command.CompanyNameProcman;
 import io.spine.system.server.given.command.CompanyNameProcmanRepo;
 import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +52,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -101,9 +102,7 @@ class CommandLifecycleTest {
         void setUp() {
             this.eventAccumulator = new CommandLifecycleWatcher();
             system.getEventBus().register(eventAccumulator);
-            id = CompanyId.newBuilder()
-                          .setUuid(newUuid())
-                          .build();
+            id = Identifier.generate(CompanyId.class);
         }
 
         @Test
@@ -192,14 +191,8 @@ class CommandLifecycleTest {
 
         private Command buildInvalidCommand() {
             EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
-            CommandId commandId = CommandId
-                    .newBuilder()
-                    .setUuid(newUuid())
-                    .build();
-            UserId actor = UserId
-                    .newBuilder()
-                    .setValue(newUuid())
-                    .build();
+            CommandId commandId = Commands.generateId();
+            UserId actor = GivenUserId.newUuid();
             Timestamp now = Time.getCurrentTime();
             ActorContext actorContext = ActorContext
                     .newBuilder()

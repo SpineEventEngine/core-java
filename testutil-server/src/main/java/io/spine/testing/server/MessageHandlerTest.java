@@ -87,7 +87,7 @@ public abstract class MessageHandlerTest<I,
     private final I entityId;
     private final M message;
 
-    private @Nullable Repository<I, E> entityRepository;
+    private @Nullable Repository<I, E> repository;
 
     /**
      * List of the commands sent to the bus during the test.
@@ -137,7 +137,7 @@ public abstract class MessageHandlerTest<I,
      *
      * @return instance of {@link Repository}
      */
-    protected abstract Repository<I, E> createEntityRepository();
+    protected abstract Repository<I, E> createRepository();
 
     /**
      * Returns instance of {@link BoundedContext} which is being used in this test suite.
@@ -157,8 +157,8 @@ public abstract class MessageHandlerTest<I,
     @OverridingMethodsMustInvokeSuper
     public void setUp() {
         boundedContext = TestBoundedContext.create(new MemoizingBusFilter());
-        entityRepository = createEntityRepository();
-        assertNotNull(entityRepository);
+        repository = createRepository();
+        assertNotNull(repository);
 
         Set<CommandClass> commandClasses = getAllCommandClasses();
         boundedContext.registerCommandDispatcher(new VoidCommandDispatcher(commandClasses));
@@ -170,7 +170,7 @@ public abstract class MessageHandlerTest<I,
     @AfterEach
     @OverridingMethodsMustInvokeSuper
     public void tearDown() {
-        entityRepository = null;
+        repository = null;
         interceptedCommands.clear();
         if (boundedContext != null) {
             try {

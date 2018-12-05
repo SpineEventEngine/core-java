@@ -21,6 +21,7 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
@@ -123,6 +124,13 @@ public class Acknowledgements {
     }
 
     /**
+     * Obtains errors occurred during command handling.
+     */
+    public ImmutableList<Error> errors() {
+        return ImmutableList.copyOf(errors);
+    }
+
+    /**
      * Obtains a total number of errors in the acknowledgements.
      */
     public int countErrors() {
@@ -220,12 +228,10 @@ public class Acknowledgements {
     private static class RejectionFilter<T extends RejectionMessage> implements Predicate<Event> {
 
         private final TypeUrl typeUrl;
-        private final Class<T> rejectionType;
         private final RejectionCriterion<T> predicate;
 
         private RejectionFilter(Class<T> rejectionType, RejectionCriterion<T> predicate) {
             this.typeUrl = TypeUrl.of(rejectionType);
-            this.rejectionType = rejectionType;
             this.predicate = predicate;
         }
 

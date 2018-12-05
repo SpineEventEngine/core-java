@@ -120,7 +120,7 @@ final class MirrorRepository
      *
      * @param query an aggregate query
      * @return an {@code Iterator} over the result aggregate states
-     * @see SystemWriteSide#readDomainAggregate(Query)
+     * @see SystemReadSide#readDomainAggregate(Query)
      */
     Iterator<Any> execute(Query query) {
         FieldMask aggregateFields = query.getFieldMask();

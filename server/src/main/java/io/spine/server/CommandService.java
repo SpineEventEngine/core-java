@@ -23,7 +23,6 @@ package io.spine.server;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.client.grpc.CommandServiceGrpc;
@@ -42,8 +41,6 @@ import static io.spine.server.bus.Buses.reject;
 /**
  * The {@code CommandService} allows client applications to post commands and
  * receive updates from the application backend.
- *
- * @author Alexander Yevsyukov
  */
 public class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
@@ -88,7 +85,6 @@ public class CommandService
         responseObserver.onCompleted();
     }
 
-    @CanIgnoreReturnValue
     public static class Builder {
 
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
@@ -96,6 +92,7 @@ public class CommandService
         /**
          * Adds the {@code BoundedContext} to the builder.
          */
+        @CanIgnoreReturnValue
         public Builder add(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
@@ -105,6 +102,7 @@ public class CommandService
         /**
          * Removes the {@code BoundedContext} from the builder.
          */
+        @CanIgnoreReturnValue
         public Builder remove(BoundedContext boundedContext) {
             boundedContexts.remove(boundedContext);
             return this;
@@ -116,7 +114,6 @@ public class CommandService
          * @param boundedContext the instance to check
          * @return {@code true} if the instance was added to the builder, {@code false} otherwise
          */
-        @CheckReturnValue
         public boolean contains(BoundedContext boundedContext) {
             boolean contains = boundedContexts.contains(boundedContext);
             return contains;
@@ -125,7 +122,6 @@ public class CommandService
         /**
          * Builds a new {@link CommandService}.
          */
-        @CheckReturnValue
         public CommandService build() {
             ImmutableMap<CommandClass, BoundedContext> map = createMap();
             CommandService result = new CommandService(map);
@@ -136,7 +132,6 @@ public class CommandService
          * Creates a map from {@code CommandClass}es to {@code BoundedContext}s that
          * handle such commands.
          */
-        @CheckReturnValue
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
             ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {

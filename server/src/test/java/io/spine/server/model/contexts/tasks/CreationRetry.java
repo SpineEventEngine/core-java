@@ -20,6 +20,7 @@
 
 package io.spine.server.model.contexts.tasks;
 
+import io.spine.base.Identifier;
 import io.spine.core.CommandContext;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
@@ -32,7 +33,6 @@ import io.spine.test.model.contexts.tasks.rejections.TaskRejections;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.base.Identifier.newUuid;
 
 /**
  * A {@link io.spine.server.command.Commander Commander} which retries the task creation if it
@@ -50,10 +50,7 @@ public final class CreationRetry extends AbstractCommander {
 
     @Command
     CreateTask on(TaskRejections.TaskAlreadyExists rejection, CommandContext commandContext) {
-        TaskId id = TaskId
-                .newBuilder()
-                .setUuid(newUuid())
-                .build();
+        TaskId id = Identifier.generate(TaskId.class);
         rejectedTasks.add(rejection.getId());
         return CreateTask
                 .newBuilder()

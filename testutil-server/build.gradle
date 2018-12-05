@@ -21,6 +21,7 @@ dependencies {
     compile project(path: ':server')
 
     api project(path: ':testutil-client')
+    testImplementation project(path: ':testutil-client', configuration: 'testArtifacts')
 }
 
 apply from: testArtifactsScript

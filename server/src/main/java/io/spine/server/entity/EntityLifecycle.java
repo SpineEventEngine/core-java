@@ -26,8 +26,6 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdVBuilder;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -56,7 +54,6 @@ import io.spine.system.server.EntityDeletedVBuilder;
 import io.spine.system.server.EntityExtractedFromArchive;
 import io.spine.system.server.EntityExtractedFromArchiveVBuilder;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityHistoryIdVBuilder;
 import io.spine.system.server.EntityRestored;
 import io.spine.system.server.EntityRestoredVBuilder;
 import io.spine.system.server.EntityStateChanged;
@@ -73,7 +70,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.copyOf;
-import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.server.entity.EventFilter.allowAll;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -90,8 +86,7 @@ import static java.util.stream.Collectors.toList;
  * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
 @Internal
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
-    // Posts system messages in multiple cases.
+@SuppressWarnings("OverlyCoupledClass") // Posts system messages in multiple cases.
 public class EntityLifecycle {
 
     /**
@@ -128,7 +123,7 @@ public class EntityLifecycle {
                               EventFilter eventFilter) {
         this.systemWriteSide = checkNotNull(writeSide);
         this.eventFilter = checkNotNull(eventFilter);
-        this.historyId = historyId(entityId, entityType);
+        this.historyId = EntityHistoryIds.wrap(entityId, entityType);
     }
 
     private EntityLifecycle(Builder builder) {
@@ -139,7 +134,7 @@ public class EntityLifecycle {
      * Posts the {@link EntityCreated} system event.
      *
      * @param entityKind
-     *         the {@linkplain EntityOption.Kind kind} of the created entity
+     *         the kind of the created entity
      */
     public final void onEntityCreated(EntityOption.Kind entityKind) {
         EntityCreated event = EntityCreatedVBuilder
@@ -390,19 +385,6 @@ public class EntityLifecycle {
                           .map(EntityLifecycle::dispatchedMessageId)
                           .collect(toList());
         return dispatchedMessageIds;
-    }
-
-    private static EntityHistoryId historyId(Object id, TypeUrl entityType) {
-        EntityId entityId = EntityIdVBuilder
-                .newBuilder()
-                .setId(pack(id))
-                .build();
-        EntityHistoryId historyId = EntityHistoryIdVBuilder
-                .newBuilder()
-                .setEntityId(entityId)
-                .setTypeUrl(entityType.value())
-                .build();
-        return historyId;
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks")

@@ -24,9 +24,6 @@ import com.google.protobuf.Empty;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.bc.ProjectId;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class ProjectReportRepository
         extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
 }

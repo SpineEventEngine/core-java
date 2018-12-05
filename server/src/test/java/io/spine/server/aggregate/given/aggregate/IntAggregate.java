@@ -26,8 +26,6 @@ import io.spine.test.aggregate.ProjectVBuilder;
 
 /**
  * An aggregate with {@code Integer} ID.
- *
- * @author Alexander Yevsyukkov
  */
 public class IntAggregate extends Aggregate<Integer, Project, ProjectVBuilder> {
     public IntAggregate(Integer id) {

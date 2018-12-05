@@ -39,18 +39,20 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.entity.EntityHistoryIds.unwrap;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.emptySet;
 
 /**
- * An {@link AbstractEventSubscriber EventSubscriber} for system events related to message
- * dispatching.
+ * Subscribes to system events related to entity message dispatching.
  *
  * <p>It is expected that a {@code SystemEventWatcher} performs actions only for events related
  * to a certain type of entity.
  *
  * <p>It is also expected that this subscriber is used <b>only</b> to subscribe to
  * {@linkplain Subscribe#external() external} events.
+ *
+ * @param <I> the type of the entity identifier
  */
 @Internal
 public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
@@ -122,13 +124,11 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     }
 
     /**
-     * Unpacks the generic entity ID from the given {@link EntityHistoryId
-     * EntityHistoryId}.
+     * Extracts receiver ID and casts it to the type of the generic parameter {@code <I>}.
      */
-    protected I idFrom(EntityHistoryId historyId) {
-        Any id = historyId.getEntityId()
-                          .getId();
-        return Identifier.unpack(id);
+    @SuppressWarnings("unchecked")
+    protected final I extract(EntityHistoryId receiver) {
+        return (I) unwrap(receiver);
     }
 
     /**

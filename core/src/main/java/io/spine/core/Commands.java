@@ -33,7 +33,6 @@ import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -43,7 +42,6 @@ import static io.spine.core.CommandContext.Schedule;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Timestamps2.isBetween;
 import static io.spine.protobuf.Timestamps2.isLaterThan;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -68,11 +66,7 @@ public final class Commands {
      * @return new command ID
      */
     public static CommandId generateId() {
-        String value = UUID.randomUUID()
-                           .toString();
-        return CommandId.newBuilder()
-                        .setUuid(value)
-                        .build();
+        return Identifier.generate(CommandId.class);
     }
 
     /**

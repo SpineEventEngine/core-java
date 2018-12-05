@@ -58,7 +58,7 @@ public class SamplePartEventReactionTest
     }
 
     @Override
-    protected Repository<TuTaskId, TuReactingAggregatePart> createEntityRepository() {
+    protected Repository<TuTaskId, TuReactingAggregatePart> createRepository() {
         return new TuReactingAggregatePartRepository();
     }
 

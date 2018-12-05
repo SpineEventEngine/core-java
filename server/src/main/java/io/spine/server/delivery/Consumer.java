@@ -79,8 +79,7 @@ public abstract class Consumer<I,
      * @param envelopeMessage an envelope to deliver
      */
     protected void deliverNow(I id, M envelopeMessage) {
-        TenantId tenantId = envelopeMessage.getActorContext()
-                                           .getTenantId();
+        TenantId tenantId = envelopeMessage.getTenantId();
         TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {

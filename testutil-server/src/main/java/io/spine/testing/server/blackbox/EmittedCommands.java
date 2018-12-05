@@ -29,8 +29,6 @@ import java.util.List;
 
 /**
  * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
- *
- * @author Alexander Yevsyukov
  */
 @VisibleForTesting
 public final class EmittedCommands extends EmittedMessages<CommandClass, Command, CommandMessage> {

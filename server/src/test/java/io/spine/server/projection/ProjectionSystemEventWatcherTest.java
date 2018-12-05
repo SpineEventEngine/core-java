@@ -21,14 +21,13 @@
 package io.spine.server.projection;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
-import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.given.GivenEvent;
+import io.spine.server.entity.EntityHistoryIds;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
@@ -44,7 +43,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.system.server.HistoryRejections.CannotDispatchEventTwice;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -182,15 +180,6 @@ class ProjectionSystemEventWatcherTest {
     }
 
     private static EntityHistoryId historyId() {
-        Any id = pack(newUuid());
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(id)
-                .build();
-        return EntityHistoryId
-                .newBuilder()
-                .setTypeUrl(REPOSITORY_TYPE.value())
-                .setEntityId(entityId)
-                .build();
+        return EntityHistoryIds.wrap(newUuid(), REPOSITORY_TYPE);
     }
 }

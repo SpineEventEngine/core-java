@@ -54,7 +54,7 @@ public class SampleProjectionTest
     }
 
     @Override
-    protected Repository<Long, TuProjection> createEntityRepository() {
+    protected Repository<Long, TuProjection> createRepository() {
         return new TuProjectionRepository();
     }
 

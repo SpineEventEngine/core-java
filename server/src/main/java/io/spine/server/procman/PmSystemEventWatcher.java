@@ -36,8 +36,6 @@ import io.spine.system.server.HistoryRejections;
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
  * related to dispatching commands and events to {@link ProcessManager}s of a given type.
- *
- * @see SystemEventWatcher
  */
 final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
@@ -50,10 +48,9 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe
     public void on(CommandDispatchedToHandler event) {
-        I id = idFrom(event.getReceiver());
+        I id = extract(event.getReceiver());
         CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
-
     }
 
     @Subscribe
@@ -66,7 +63,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 
     @Subscribe
     public void on(EventDispatchedToReactor event) {
-        I id = idFrom(event.getReceiver());
+        I id = extract(event.getReceiver());
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }

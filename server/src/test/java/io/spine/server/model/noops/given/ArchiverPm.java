@@ -37,10 +37,7 @@ import io.spine.test.model.contexts.archiver.ArchiverVBuilder;
  */
 public final class ArchiverPm extends ProcessManager<ArchiverId, Archiver, ArchiverVBuilder> {
 
-    static final ArchiverId SINGLE_ID = ArchiverId
-            .newBuilder()
-            .setUuid(Identifier.newUuid())
-            .build();
+    static final ArchiverId SINGLE_ID = Identifier.generate(ArchiverId.class);
 
     private ArchiverPm(ArchiverId id) {
         super(id);
@@ -49,7 +46,8 @@ public final class ArchiverPm extends ProcessManager<ArchiverId, Archiver, Archi
     @Assign
     Nothing handle(ArchiveFile command) {
         ArchiverVBuilder builder = getBuilder();
-        builder.setArchivedFiles(builder.getArchivedFiles() + 1);
+        builder.setId(SINGLE_ID)
+               .setArchivedFiles(builder.getArchivedFiles() + 1);
         return Nothing.getDefaultInstance();
     }
 

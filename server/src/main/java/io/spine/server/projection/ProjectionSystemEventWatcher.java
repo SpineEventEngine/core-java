@@ -34,7 +34,6 @@ import io.spine.system.server.HistoryRejections;
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
  * related to dispatching events to {@link Projection}s of a given type.
  *
- * @author Dmytro Dashenkov
  * @see SystemEventWatcher
  */
 final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
@@ -49,7 +48,7 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     @Subscribe
     public void on(EventDispatchedToSubscriber event) {
         EntityHistoryId receiver = event.getReceiver();
-        I id = idFrom(receiver);
+        I id = extract(receiver);
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }
