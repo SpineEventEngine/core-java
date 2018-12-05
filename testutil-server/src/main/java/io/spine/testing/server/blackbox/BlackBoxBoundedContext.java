@@ -208,7 +208,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param domainCommand
      *         a domain command to be dispatched to the Bounded Context
      * @return current instance
-     * @apiNote Returned value can be ignored when this method invoked for test setup
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
     public T receivesCommand(Message domainCommand) {
@@ -225,7 +225,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param otherCommands
      *         optional domain commands to be dispatched to the Bounded Context in supplied order
      * @return current instance
-     * @apiNote Returned value can be ignored when this method invoked for test setup
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
     public
@@ -254,7 +254,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *         Otherwise, an instance of {@code Event} will be generated basing on the passed
      *         event message and posted to the bus.
      * @return current instance
-     * @apiNote Returned value can be ignored when this method invoked for test setup
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
     public T receivesEvent(Message messageOrEvent) {
@@ -276,7 +276,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param otherEvents
      *         optional domain events to be dispatched to the Bounded Context in supplied order
      * @return current instance
-     * @apiNote Returned value can be ignored when this method invoked for test setup
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
     public T receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {

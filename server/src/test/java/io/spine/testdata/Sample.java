@@ -63,14 +63,16 @@ public class Sample {
      * Number and {@code boolean} fields may or may not have their default values ({@code 0} and
      * {@code false}).
      *
-     * @apiNote This method casts the builder to the generic parameter {@code <B>} for brevity of
-     *          test code. It is the caller responsibility to ensure that the message
-     *          type {@code <M>} corresponds to the builder type {@code <B>}.
-     *
-     * @param clazz Java class of the stub message
-     * @param <M>   type of the required message
-     * @param <B>   type of the {@link Message.Builder} for the message
+     * @param clazz
+     *         Java class of the stub message
+     * @param <M>
+     *         type of the required message
+     * @param <B>
+     *         type of the {@link Message.Builder} for the message
      * @return new instance of the {@link Message.Builder} for given type
+     * @apiNote This method casts the builder to the generic parameter {@code <B>} for
+     *         brevity of test code. It is the caller responsibility to ensure that the message
+     *         type {@code <M>} corresponds to the builder type {@code <B>}.
      * @see #valueFor(FieldDescriptor)
      */
     @SuppressWarnings("TypeParameterUnusedInFormals") // See apiNote.
