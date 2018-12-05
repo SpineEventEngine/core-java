@@ -48,8 +48,8 @@ import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
-import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
@@ -63,9 +63,10 @@ import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyO
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * An abstract base for integration testing of Bounded Contexts.
+ * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxBoundedContext}.
  *
- * @param <T> the type of the {@code BlackBoxBoundedContext}
+ * @param <T>
+ *         the type of the {@code BlackBoxBoundedContext}
  */
 @ExtendWith(ShardingReset.class)
 abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
@@ -134,7 +135,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbProjectView expectedProject2 = createProjectView(createProject2);
             context.receivesCommands(createProject1, createProject2)
                    .assertThat(exactly(BbProjectView.class,
-                                        of(expectedProject1, expectedProject2)));
+                                       of(expectedProject1, expectedProject2)));
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {
@@ -215,14 +216,14 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         BbProjectId projectId = newProjectId();
         UserId id = newUuid();
 
-        projects.receivesCommand(createProject(projectId))
-                .receivesCommand(addProjectAssignee(projectId, id))
-                .receivesExternalEvent(userDeleted(id, projectId))
-                .assertThat(acked(count(3)).withoutErrorsOrRejections())
-                .assertThat(VerifyEvents.emittedEvent(count(3)))
-                .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
-                .assertThat(VerifyEvents.emittedEvent(BbUserAssigned.class, once()))
-                .assertThat(VerifyEvents.emittedEvent(BbUserUnassigned.class, once()));
+        context.receivesCommand(createProject(projectId))
+               .receivesCommand(addProjectAssignee(projectId, id))
+               .receivesExternalEvent(userDeleted(id, projectId))
+               .assertThat(acked(count(3)).withoutErrorsOrRejections())
+               .assertThat(VerifyEvents.emittedEvent(count(3)))
+               .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
+               .assertThat(VerifyEvents.emittedEvent(BbUserAssigned.class, once()))
+               .assertThat(VerifyEvents.emittedEvent(BbUserUnassigned.class, once()));
     }
 
     @Test

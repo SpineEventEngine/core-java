@@ -35,7 +35,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
@@ -46,8 +45,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -63,7 +60,8 @@ import static java.util.Collections.singletonList;
  * {@linkplain VerifyState updated state} of an entity. This class provides API for testing such
  * effects.
  *
- * @param <T> the type of a sub-class for return type covariance
+ * @param <T>
+ *         the type of a sub-class for return type covariance
  * @apiNote The class provides factory methods for creation of different bounded contexts.
  */
 @SuppressWarnings({
@@ -75,6 +73,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     private final BoundedContext boundedContext;
     private final CommandMemoizingTap commandTap;
+    private final MemoizingObserver<Ack> observer;
 
     protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
         this.commandTap = new CommandMemoizingTap();
@@ -86,12 +85,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                 .setEventBus(EventBus.newBuilder()
                                      .setEnricher(enricher))
                 .build();
-        this.tenantId = newTenantId();
-        this.requestFactory = requestFactory(tenantId);
-        this.eventFactory = eventFactory(requestFactory);
-        this.commandBus = boundedContext.getCommandBus();
-        this.eventBus = boundedContext.getEventBus();
-        this.importBus = boundedContext.getImportBus();
         this.observer = memoizingObserver();
     }
 
@@ -233,6 +226,59 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
+
+    /**
+     * Sends off a provided event to the Bounded Context as event from an external source.
+     *
+     * @param messageOrEvent
+     *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is
+     *         passed, it will be posted to {@link io.spine.server.integration.IntegrationBus} 
+     *         as is.
+     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
+     *         event message and posted to the bus.
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup
+     */
+    @CanIgnoreReturnValue
+    public T receivesExternalEvent(Message messageOrEvent) {
+        return this.receivesExternalEvents(singletonList(messageOrEvent));
+    }
+
+    /**
+     * Sends off provided events to the Bounded Context as events from an external source.
+     *
+     * <p>The method accepts event messages or instances of {@link io.spine.core.Event}.
+     * If an instance of {@code Event} is passed, it will be posted to 
+     * {@link io.spine.server.integration.IntegrationBus} as is.
+     * Otherwise, an instance of {@code Event} will be generated basing on the passed event
+     * message and posted to the bus.
+     *
+     * @param firstEvent
+     *         an external event to be dispatched to the Bounded Context first
+     * @param secondEvent
+     *         an external event to be dispatched to the Bounded Context second
+     * @param otherEvents
+     *         optional external events to be dispatched to the Bounded Context
+     *         in supplied order
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup
+     */
+    @CanIgnoreReturnValue
+    public T receivesExternalEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+        return this.receivesExternalEvents(asList(firstEvent, secondEvent, otherEvents));
+    }
+    /**
+     * Sends off provided events to the Bounded Context as events from an external source.
+     *
+     * @param domainEvents
+     *         a list of external events to be dispatched to the Bounded Context
+     * @return current instance
+     */
+    private T receivesExternalEvents(Collection<Message> domainEvents) {
+        setup().postExternalEvents(domainEvents);
+        return thisRef();
+    }
+
     /**
      * Sends off events using the specified producer to the Bounded Context.
      *
@@ -266,15 +312,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return thisRef();
     }
 
-    private List<Event> toEvents(Collection<Message> domainEvents) {
-        List<Event> events = newArrayListWithCapacity(domainEvents.size());
-        for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent));
-        }
-        return events;
-    }
-
-    public BlackBoxBoundedContext importsEvent(Message eventOrMessage) {
+    @CanIgnoreReturnValue
+    public T importsEvent(Message eventOrMessage) {
         return this.importAll(singletonList(eventOrMessage));
     }
 
@@ -286,31 +325,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     private T importAll(Collection<Message> domainEvents) {
         setup().importEvents(domainEvents);
         return thisRef();
-    }
-
-    /**
-     * Generates {@link Event} with the passed instance is an event message. If the passed
-     * instance is {@code Event} returns it.
-     *
-     * @param eventOrMessage
-     *         a domain event message or {@code Event}
-     * @return a newly created {@code Event} instance or passed {@code Event}
-     */
-    private Event event(Message eventOrMessage) {
-        if (eventOrMessage instanceof Event) {
-            return (Event) eventOrMessage;
-        }
-        EventMessage message = (EventMessage) eventOrMessage;
-        return eventFactory.createEvent(message);
-    }
-
-    private Command command(Message commandOrMessage) {
-        if (commandOrMessage instanceof Command) {
-            return (Command) commandOrMessage;
-        }
-        CommandMessage message = (CommandMessage) commandOrMessage;
-        return requestFactory.command()
-                             .create(message);
     }
 
     /*
