@@ -105,6 +105,16 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     T boundedContext() {
         return context;
     }
+    
+    @Test
+    @DisplayName("ignore events sent events in emitted")
+    void ignoreSentEvents() {
+        BbProjectId id = newProjectId();
+        context.receivesCommand(createProject(id))
+               .receivesEvent(taskAdded(id))
+               .assertThat(emittedEvent(once()))
+               .assertThat(emittedEvent(BbProjectCreated.class, once()));
+    }
 
     @Nested
     @DisplayName("verify state of")
@@ -205,7 +215,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
                .assertThat(acked(twice()).withoutErrorsOrRejections())
-               .assertThat(emittedEvent(thrice()))
+               .assertThat(emittedEvent(twice()))
                .assertThat(emittedEvent(BbReportCreated.class, once()))
                .assertThat(emittedEvent(BbTaskAddedToReport.class, once()));
     }
@@ -218,7 +228,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(emittedEvent(count(7)))
+               .assertThat(emittedEvent(count(4)))
                .assertThat(emittedEvent(BbReportCreated.class, once()))
                .assertThat(emittedEvent(BbTaskAddedToReport.class, thrice()));
     }
