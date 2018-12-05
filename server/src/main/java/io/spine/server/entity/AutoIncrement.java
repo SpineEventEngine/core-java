@@ -20,20 +20,22 @@
 
 package io.spine.server.entity;
 
+import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 
 /**
  * A version increment which advances the given entity version by 1.
  */
-class AutoIncrement extends VersionIncrement {
+@Internal
+public class AutoIncrement extends VersionIncrement {
 
-    AutoIncrement(Transaction transaction) {
+    public AutoIncrement(Transaction transaction) {
         super(transaction);
     }
 
     @Override
-    Version nextVersion() {
+    protected Version nextVersion() {
         Version current = transaction().getVersion();
         Version result = Versions.increment(current);
         return result;

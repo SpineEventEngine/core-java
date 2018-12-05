@@ -25,6 +25,7 @@ import io.spine.core.Event;
 
 import java.util.Collection;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.singleton;
 
@@ -70,6 +71,10 @@ public interface EventPlayer {
      */
     static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
         checkNotNull(entity);
-        return new TransactionalEventPlayer(entity.tx());
+        Transaction<?, ?, ?, ?> tx = entity.tx();
+        checkArgument(tx instanceof EventPlayingTransaction,
+                      "Please specify entity type with EventPlayingTransaction");
+        EventPlayingTransaction<?, ?, ?, ?> cast = (EventPlayingTransaction<?, ?, ?, ?>) tx;
+        return new TransactionalEventPlayer(cast);
     }
 }

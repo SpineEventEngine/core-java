@@ -26,9 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
-import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.AbstractValidatingBuilder;
@@ -38,11 +35,8 @@ import io.spine.validate.ValidationException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.entity.EntityVersioning.AUTO_INCREMENT;
-import static io.spine.server.entity.EntityVersioning.FROM_EVENT;
 import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
@@ -143,7 +137,7 @@ public abstract class Transaction<I,
      *
      * <p>Contains all the phases, including failed.
      */
-    private final List<Phase<I, E, S, B>> phases = newLinkedList();
+    private final List<Phase<I, ?>> phases = newLinkedList();
 
     private TransactionListener<I, E, S, B> transactionListener;
 
@@ -190,16 +184,6 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Dispatches the event message and its context to the current entity-in-transaction.
-     *
-     * <p>This operation is always performed in scope of an active transaction.
-     *
-     * @param entity  the target entity
-     * @param event   the event to dispatch
-     */
-    protected abstract void dispatch(E entity, EventEnvelope event);
-
-    /**
      * Allows to understand whether this transaction is active.
      *
      * @return {@code true} if the transaction is active, {@code false} otherwise
@@ -213,7 +197,7 @@ public abstract class Transaction<I,
         return lifecycleFlags;
     }
 
-    E getEntity() {
+    protected E getEntity() {
         return entity;
     }
 
@@ -224,8 +208,21 @@ public abstract class Transaction<I,
         return version;
     }
 
-    List<Phase<I, E, S, B>> getPhases() {
+    List<Phase<I, ?>> getPhases() {
         return ImmutableList.copyOf(phases);
+    }
+
+    @CanIgnoreReturnValue
+    protected <R> R propagate(Phase<I, R> phase) {
+        try {
+            return phase.propagate();
+        } catch (Throwable t) {
+            rollback(t);
+            throw illegalStateWithCauseOf(t);
+        } finally {
+            phases.add(phase);
+            getListener().onAfterPhase(phase);
+        }
     }
 
     /**
@@ -345,37 +342,6 @@ public abstract class Transaction<I,
                            .build();
     }
 
-    /**
-     * Creates a new {@linkplain Phase transaction phase} for the given event
-     * and propagates the phase.
-     *
-     * <p>In case of an exception, the {@linkplain #rollback(Throwable) transaction rollback}
-     * is performed.
-     *
-     * @param event the envelope with the event
-     * @return this instance of the transaction
-     */
-    @CanIgnoreReturnValue
-    @SuppressWarnings("OverlyBroadCatchBlock")  /* to `rollback(..)` in case of any exception. */
-    Transaction<I, E, S, B> apply(EventEnvelope event) {
-        Phase<I, E, S, B> phase = new Phase<>(this, event);
-
-        Phase<I, E, S, B> appliedPhase = null;
-        try {
-            appliedPhase = phase.propagate();
-        } catch (Throwable t) {
-            rollback(t);
-            throw illegalStateWithCauseOf(t);
-        } finally {
-            Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
-            phases.add(phaseToAdd);
-
-            getListener().onAfterPhase(phaseToAdd);
-        }
-
-        return this;
-    }
-
     private InvalidEntityStateException of(ValidationException exception) {
         Message invalidState = currentBuilderState();
         return onConstraintViolations(invalidState, exception.getConstraintViolations());
@@ -493,113 +459,5 @@ public abstract class Transaction<I,
         lifecycleFlags = lifecycleFlags.toBuilder()
                                        .setDeleted(deleted)
                                        .build();
-    }
-
-    /**
-     * Advances the version of the entity in transaction based on the last applied event.
-     *
-     * @param event
-     *         the last event applied to the entity
-     */
-    void advanceVersion(EventEnvelope event) {
-        versioningStrategy().createVersionIncrement(this, event)
-                            .doIncrement();
-    }
-
-    /**
-     * Manually increments the entity version by 1.
-     *
-     * <p>This method can only be used on transactions with {@link EntityVersioning#AUTO_INCREMENT}
-     * versioning strategy.
-     *
-     * @throws IllegalStateException
-     *         if the transaction has unsuitable versioning strategy
-     */
-    protected void incrementVersion() {
-        checkState(versioningStrategy() == AUTO_INCREMENT, "Manual version increment is " +
-                "available only for transactions with AUTO_INCREMENT versioning strategy");
-        AutoIncrement versionIncrement = new AutoIncrement(this);
-        versionIncrement.doIncrement();
-    }
-
-    /**
-     * Retrieves the {@link EntityVersioning} of current {@code Transaction}.
-     *
-     * <p>The value should be constant among all the instances of a certain (runtime) type.
-     *
-     * <p>By default the version is taken from
-     * the {@linkplain EntityVersioning#FROM_EVENT latest event applied}.
-     */
-    protected EntityVersioning versioningStrategy() {
-        return FROM_EVENT;
-    }
-
-    /**
-     * A stage of transaction, which is created by applying a single event (i.e. its message along
-     * with the context) to the entity.
-     *
-     * <p>Invokes an event applier method for the entity modified in scope of the underlying
-     * transaction, passing the event data to it. If such an invocation is successful,
-     * an entity version is incremented in scope of the transaction.
-     *
-     * @param <I> the type of entity IDs
-     * @param <E> the type of entity
-     * @param <S> the type of entity state
-     * @param <B> the type of a {@code ValidatingBuilder} for the entity state
-     */
-    protected static class Phase<I,
-                                 E extends TransactionalEntity<I, S, B>,
-                                 S extends Message,
-                                 B extends ValidatingBuilder<S, ? extends Message.Builder>> {
-
-        private final Transaction<I, E, S, B> underlyingTransaction;
-        private final EventEnvelope event;
-
-        private boolean successful = false;
-
-        private Phase(Transaction<I, E, S, B> transaction, EventEnvelope event) {
-            this.underlyingTransaction = transaction;
-            this.event = event;
-        }
-
-        /**
-         * Invokes the event applier method and, if the invocation is successful, increments the
-         * current entity version for this transaction. Also marks the current phase as successful.
-         *
-         * @return this instance of {@code Phase}
-         */
-        private Phase<I, E, S, B> propagate() {
-            underlyingTransaction.dispatch(underlyingTransaction.getEntity(), event);
-            underlyingTransaction.advanceVersion(event);
-            markSuccessful();
-            return this;
-        }
-
-        Transaction<I, E, S, B> getUnderlyingTransaction() {
-            return underlyingTransaction;
-        }
-
-        /**
-         * Obtains the ID of the event applied during this {@code Phase}.
-         */
-        EventId eventId() {
-            return event.getId();
-        }
-
-        private void markSuccessful() {
-            this.successful = true;
-        }
-
-        boolean isSuccessful() {
-            return successful;
-        }
-
-        protected Message getEventMessage() {
-            return event.getMessage();
-        }
-
-        protected EventContext getContext() {
-            return event.getEventContext();
-        }
     }
 }

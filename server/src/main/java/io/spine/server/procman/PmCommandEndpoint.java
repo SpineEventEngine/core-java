@@ -37,6 +37,7 @@ import static io.spine.server.command.DispatchCommand.operationFor;
  * @param <P> the type of process managers
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
 public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, CommandEnvelope> {
@@ -59,8 +60,9 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     @Override
     protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
         EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
-        DispatchCommand dispatch = operationFor(lifecycle, processManager, envelope);
-        return dispatch.perform();
+        DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope);
+        PmTransaction<I, ?, ?> tx = processManager.tx();
+        return tx.perform(dispatch);
     }
 
     @Override

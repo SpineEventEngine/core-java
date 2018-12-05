@@ -20,6 +20,7 @@
 
 package io.spine.server.command;
 
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -41,28 +42,28 @@ import static io.spine.core.Events.isRejection;
  * @author Dmytro Dashenkov
  */
 @Internal
-public final class DispatchCommand {
+public final class DispatchCommand<I> {
 
     private final EntityLifecycle lifecycle;
-    private final CommandHandlingEntity<?, ?, ?> entity;
+    private final CommandHandlingEntity<I, ?, ?> entity;
     private final CommandEnvelope command;
 
     private DispatchCommand(EntityLifecycle lifecycle,
-                            CommandHandlingEntity<?, ?, ?> entity,
+                            CommandHandlingEntity<I, ?, ?> entity,
                             CommandEnvelope command) {
         this.lifecycle = lifecycle;
         this.entity = entity;
         this.command = command;
     }
 
-    public static DispatchCommand operationFor(EntityLifecycle lifecycle,
-                                               CommandHandlingEntity<?, ?, ?> entity,
-                                               CommandEnvelope command) {
+    public static <I> DispatchCommand<I> operationFor(EntityLifecycle lifecycle,
+                                                      CommandHandlingEntity<I, ?, ?> entity,
+                                                      CommandEnvelope command) {
         checkNotNull(lifecycle);
         checkNotNull(entity);
         checkNotNull(command);
 
-        return new DispatchCommand(lifecycle, entity, command);
+        return new DispatchCommand<>(lifecycle, entity, command);
     }
 
     /**
@@ -84,6 +85,14 @@ public final class DispatchCommand {
         List<Event> result = entity.dispatchCommand(command);
         onCommandResult(command.getCommand(), result);
         return result;
+    }
+
+    public I entityId() {
+        return entity.getId();
+    }
+
+    public Message commandId() {
+        return command.getId();
     }
 
     private void onCommandResult(Command command, List<Event> produced) {

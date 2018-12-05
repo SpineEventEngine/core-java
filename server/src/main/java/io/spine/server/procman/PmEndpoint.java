@@ -34,6 +34,7 @@ import java.util.List;
  * @param <M> the type of message envelopes processed by the endpoint
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("unchecked") // Operations on repository are logically checked.
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
                           M extends ActorMessageEnvelope<?, ?, ?>>
@@ -71,7 +72,6 @@ abstract class PmEndpoint<I,
     protected List<Event> dispatchInTx(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
         List<Event> events = doDispatch(processManager, envelope());
-        tx.incrementVersion();
         tx.commit();
         return events;
     }

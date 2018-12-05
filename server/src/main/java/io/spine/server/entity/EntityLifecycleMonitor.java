@@ -40,7 +40,7 @@ import static com.google.common.collect.Lists.newLinkedList;
  * An implementation of {@link TransactionListener} which monitors the transaction flow and
  * triggers the {@link EntityLifecycle}.
  *
- * <p>On a successful {@link Transaction.Phase}, memoizes the ID of the applied message. After
+ * <p>On a successful {@link Phase}, memoizes the ID of the applied message. After
  * a successful transaction commit, passes the memoized IDs to the {@link EntityLifecycle}
  * of the entity under transaction, along with the information about the mutations performed under
  * the transaction - an {@link EntityRecordChange}.
@@ -94,10 +94,9 @@ public final class EntityLifecycleMonitor<I,
      * reported to the {@link EntityLifecycle} after a successful commit.
      */
     @Override
-    public void onAfterPhase(Transaction.Phase<I, E, S, B> phase) {
-        checkSameEntity(phase.getUnderlyingTransaction()
-                             .getEntity());
-        Message messageId = phase.eventId();
+    public void onAfterPhase(Phase<I, ?> phase) {
+        checkSameEntity(phase.getEntityId());
+        Message messageId = phase.getMessageId();
         acknowledgedMessageIds.add(messageId);
     }
 
@@ -134,15 +133,14 @@ public final class EntityLifecycleMonitor<I,
      * transactions. Thus, if the given entity is not the same as seen before,
      * an {@link IllegalStateException} is thrown
      *
-     * @param entity the entity to check
+     * @param entityId the entity to check
      * @throws IllegalStateException if the check fails
      */
-    private void checkSameEntity(E entity) throws IllegalStateException {
-        I idToCheck = entity.getId();
-        if (entityId == null) {
-            entityId = idToCheck;
+    private void checkSameEntity(I entityId) throws IllegalStateException {
+        if (this.entityId == null) {
+            this.entityId = entityId;
         } else {
-            checkState(entityId.equals(idToCheck),
+            checkState(this.entityId.equals(entityId),
                        "Tried to reuse an instance of %s for multiple transactions.",
                        EntityLifecycleMonitor.class.getSimpleName());
         }

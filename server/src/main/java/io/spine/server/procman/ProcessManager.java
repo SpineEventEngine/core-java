@@ -126,6 +126,12 @@ public abstract class ProcessManager<I,
         return super.getBuilder();
     }
 
+    @SuppressWarnings("unchecked") // Checked logically.
+    @Override
+    protected PmTransaction<I, S, B> tx() {
+        return (PmTransaction<I, S, B>) super.tx();
+    }
+
     /**
      * Dispatches the command to the handling method.
      *
@@ -201,7 +207,7 @@ public abstract class ProcessManager<I,
         );
     }
 
-    private static ImmutableList<Event> noEvents() {
+    private static List<Event> noEvents() {
         return ImmutableList.of();
     }
 

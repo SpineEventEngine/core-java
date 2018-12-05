@@ -20,23 +20,25 @@
 
 package io.spine.server.entity;
 
+import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 
 /**
  * A version increment which sets the new version from the given event.
  */
-class IncrementFromEvent extends VersionIncrement {
+@Internal
+public class IncrementFromEvent extends VersionIncrement {
 
     private final EventEnvelope event;
 
-    IncrementFromEvent(Transaction transaction, EventEnvelope event) {
+    public IncrementFromEvent(Transaction transaction, EventEnvelope event) {
         super(transaction);
         this.event = event;
     }
 
     @Override
-    Version nextVersion() {
+    protected Version nextVersion() {
         Version result = event.getEventContext()
                               .getVersion();
         return result;

@@ -22,11 +22,20 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
-import io.spine.server.entity.EntityVersioning;
+import io.spine.server.command.DispatchCommand;
+import io.spine.server.entity.AutoIncrement;
+import io.spine.server.entity.CommandDispatchingPhase;
+import io.spine.server.entity.EventDispatchingPhase;
+import io.spine.server.entity.Phase;
 import io.spine.server.entity.Transaction;
+import io.spine.server.entity.VersionIncrement;
+import io.spine.server.event.EventDispatch;
 import io.spine.validate.ValidatingBuilder;
+
+import java.util.List;
 
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.
@@ -52,12 +61,21 @@ public class PmTransaction<I,
         super(processManager, state, version);
     }
 
-    //TODO:2018-05-23:alexander.yevsyukov: Check that we really can ignore events returned by
-    // event reactor method of a ProcessManager. This looks like a bug.
-    @SuppressWarnings("CheckReturnValue")
-    @Override
-    protected void dispatch(ProcessManager processManager, EventEnvelope event) {
-        processManager.dispatchEvent(event);
+    List<Event> perform(DispatchCommand<I> dispatch) {
+        VersionIncrement versionIncrement = createVersionIncrement();
+        Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(dispatch, versionIncrement);
+        List<Event> events = propagate(phase);
+        return events;
+    }
+
+    List<Event> dispatchEvent(EventEnvelope event) {
+        VersionIncrement versionIncrement = createVersionIncrement();
+        Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
+                new EventDispatch<>(this::dispatch, getEntity(), event),
+                versionIncrement
+        );
+        List<Event> events = propagate(phase);
+        return events;
     }
 
     /**
@@ -69,16 +87,6 @@ public class PmTransaction<I,
     @Override
     protected void commit() {
         super.commit();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The method is overridden to expose itself to the package.
-     */
-    @Override
-    protected void incrementVersion() {
-        super.incrementVersion();
     }
 
     /**
@@ -95,8 +103,11 @@ public class PmTransaction<I,
         return tx;
     }
 
-    @Override
-    protected EntityVersioning versioningStrategy() {
-        return EntityVersioning.AUTO_INCREMENT;
+    private List<Event> dispatch(ProcessManager<I, S, B> processManager, EventEnvelope event) {
+        return processManager.dispatchEvent(event);
+    }
+
+    private VersionIncrement createVersionIncrement() {
+        return new AutoIncrement(this);
     }
 }

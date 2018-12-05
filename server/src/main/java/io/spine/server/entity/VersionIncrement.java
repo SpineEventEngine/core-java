@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import io.spine.annotation.Internal;
 import io.spine.core.Version;
 
 import static io.spine.core.Versions.checkIsIncrement;
@@ -27,7 +28,8 @@ import static io.spine.core.Versions.checkIsIncrement;
 /**
  * A setter of a new version for the entity in transaction.
  */
-abstract class VersionIncrement {
+@Internal
+public abstract class VersionIncrement {
 
     private final Transaction transaction;
 
@@ -38,7 +40,7 @@ abstract class VersionIncrement {
     /**
      * Advances the version of the entity in transaction.
      */
-    void doIncrement() {
+    void apply() {
         Version nextVersion = nextVersion();
         checkIsIncrement(transaction.getVersion(), nextVersion);
         transaction.setVersion(nextVersion);
@@ -56,5 +58,5 @@ abstract class VersionIncrement {
      *
      * @return the incremented {@code Version} of the entity
      */
-    abstract Version nextVersion();
+    protected abstract Version nextVersion();
 }
