@@ -52,8 +52,6 @@ public class Acknowledgements {
 
     private static final Event EMPTY_EVENT = Event.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
-    private static final Predicate<Error> EMPTY_ERRORS_FILTER = 
-            not(Error.getDefaultInstance()::equals);
 
     private final List<Ack> acks = newArrayList();
     private final List<Error> errors = newArrayList();
