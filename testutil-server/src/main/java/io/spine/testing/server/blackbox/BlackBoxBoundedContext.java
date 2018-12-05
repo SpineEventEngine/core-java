@@ -544,7 +544,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     }
 
     /**
-     * Obtains events emitted in the bounded context. 
+     * Obtains events emitted in the bounded context.
      *
      * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
      * calls.
