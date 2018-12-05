@@ -28,6 +28,8 @@ option java_package = "io.spine.testing.server.blackbox";
 option java_outer_classname = "BbProjectProto";
 option java_multiple_files = true;
 
+import "spine/core/user_id.proto";
+
 message BbProjectId {
     string id = 1;
 }
@@ -48,6 +50,8 @@ message BbProject {
     }
 
     Status status = 4;
+
+    repeated spine.core.UserId assignee = 5;
 }
 
 message BbTaskId {

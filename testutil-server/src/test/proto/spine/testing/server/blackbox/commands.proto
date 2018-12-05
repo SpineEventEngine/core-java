@@ -30,6 +30,7 @@ option java_multiple_files = true;
 
 import "spine/testing/server/blackbox/entities.proto";
 import "spine/testing/server/blackbox/report.proto";
+import "spine/core/user_id.proto";
 
 message BbCreateProject {
     BbProjectId project_id = 1;
@@ -47,4 +48,9 @@ message BbStartProject {
 message BbCreateReport {
     BbReportId report_id = 1;
     repeated BbProjectId project_id = 2;
+}
+
+message BbAddProjectAssignee {
+    BbProjectId id = 1;
+    spine.core.UserId user_id = 2;
 }

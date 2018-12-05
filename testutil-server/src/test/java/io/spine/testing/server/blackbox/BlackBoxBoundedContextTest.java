@@ -20,11 +20,14 @@
 
 package io.spine.testing.server.blackbox;
 
+import io.spine.core.UserId;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
+import io.spine.testing.server.blackbox.event.BbUserAssigned;
+import io.spine.testing.server.blackbox.event.BbUserUnassigned;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
@@ -39,11 +42,14 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.core.given.GivenUserId.newUuid;
+import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
+import static io.spine.testing.server.blackbox.given.Given.userDeleted;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(ShardingReset.class)
@@ -111,6 +117,23 @@ class BlackBoxBoundedContextTest {
                 .assertThat(VerifyEvents.emittedEvent(count(7)))
                 .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
                 .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, thrice()));
+    }
+
+    @SuppressWarnings("ReturnValueIgnored")
+    @Test
+    @DisplayName("receives external event")
+    void receivesExternalEvents() {
+        BbProjectId projectId = newProjectId();
+        UserId id = newUuid();
+
+        projects.receivesCommand(createProject(projectId))
+                .receivesCommand(addProjectAssignee(projectId, id))
+                .receivesExternalEvent(userDeleted(id, projectId))
+                .assertThat(acked(count(3)).withoutErrorsOrRejections())
+                .assertThat(VerifyEvents.emittedEvent(count(3)))
+                .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
+                .assertThat(VerifyEvents.emittedEvent(BbUserAssigned.class, once()))
+                .assertThat(VerifyEvents.emittedEvent(BbUserUnassigned.class, once()));
     }
 
     @Test
