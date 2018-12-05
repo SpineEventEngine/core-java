@@ -40,13 +40,14 @@ public interface Route<M extends Message, C extends Message, R>
     /**
      * Obtains entity ID(s) from the passed message and its context.
      *
-     * @param message an event or a command message
-     * @param context a context of the message
+     * @param message
+     *         an event or a command message
+     * @param context
+     *         a context of the message
      * @return a set of entity identifiers
-     * @apiNote
-     * This method overrides the one from {@code BiFunction} for more clarity in Javadoc
-     * references. Without overriding, it would be {@code #apply(Object, Object)},
-     * which may be confusing in the context of event routing.
+     * @apiNote This method overrides the one from {@code BiFunction} for more clarity in
+     *         Javadoc references. Without overriding, it would be {@code #apply(Object, Object)},
+     *         which may be confusing in the context of event routing.
      */
     @SuppressWarnings("AbstractMethodOverridesAbstractMethod") // see @apiNote
     @Override

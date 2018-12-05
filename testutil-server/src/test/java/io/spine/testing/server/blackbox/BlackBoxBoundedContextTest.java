@@ -20,6 +20,14 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.Truth8;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.entity.Repository;
+import io.spine.server.event.Enricher;
+import io.spine.server.event.EventBus;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
@@ -31,6 +39,7 @@ import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
+import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +47,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Set;
+
 import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
@@ -215,5 +227,71 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                             }
                         })
                         .close());
+    }
+
+    /**
+     * Obtains the set of entity state types from the passed repositories.
+     */
+    private static Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
+        ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
+        repos.forEach(repository -> builder.add(repository.getEntityStateType()
+                                                          .toName()));
+        return builder.build();
+    }
+
+    @Nested
+    @DisplayName("create an instance by BoundedContextBuilder")
+    class CreateByBuilder {
+
+        private final ImmutableList<Repository<?, ?>> repositories = ImmutableList.of(
+                new BbProjectRepository(),
+                new BbProjectViewRepository()
+        );
+
+        private final Set<TypeName> types = toTypes(repositories);
+
+        private BlackBoxBoundedContext<?> blackBox;
+        private BoundedContextBuilder builder;
+        private Enricher enricher;
+
+        @BeforeEach
+        void setUp() {
+            enricher = Enricher.newBuilder()
+                               .build();
+            builder = BoundedContext.newBuilder()
+                                    .setEventBus(EventBus.newBuilder()
+                                                         .setEnricher(enricher));
+            repositories.forEach(builder::add);
+        }
+
+        @Test
+        void singleTenant() {
+            builder.setMultitenant(false);
+            blackBox = BlackBoxBoundedContext.from(builder);
+
+            assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
+            assertEntityTypes();
+            assertEnricher();
+        }
+
+        private void assertEntityTypes() {
+            assertThat(blackBox.getAllEntityStateTypes()).containsAllIn(types);
+        }
+
+        private void assertEnricher() {
+            Truth8.assertThat(blackBox.getEventBus()
+                                      .enricher())
+                  .hasValue(enricher);
+        }
+
+        @Test
+        void multiTenant() {
+            builder.setMultitenant(true);
+            blackBox = BlackBoxBoundedContext.from(builder);
+
+            assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
+            assertEntityTypes();
+            assertEnricher();
+        }
     }
 }

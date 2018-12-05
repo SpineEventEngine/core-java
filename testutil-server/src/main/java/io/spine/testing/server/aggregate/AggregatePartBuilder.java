@@ -34,10 +34,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
 
 /**
  * Utility class for building {@code AggregatePart}s for tests.
- *
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
 public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
                                   I,
                                   S extends Message,
@@ -46,9 +43,6 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
 
     private R aggregateRoot;
 
-    /**
-     * {@inheritDoc}
-     */
     public AggregatePartBuilder() {
         super();
         // Have the constructor for easier location of usages.

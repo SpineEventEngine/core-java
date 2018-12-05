@@ -24,7 +24,6 @@
 
  * @see io.spine.testing.server.aggregate.AggregateCommandTest
  * @see io.spine.testing.server.aggregate.AggregateEventReactionTest
- * @see io.spine.testing.server.aggregate.AggregatePartCommandTest
  * @see io.spine.testing.server.procman.PmCommandTest
  * @see io.spine.testing.server.procman.PmEventReactionTest
  * @see io.spine.testing.server.projection.ProjectionTest
