@@ -28,12 +28,15 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
+import io.spine.core.UserId;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
+import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
@@ -51,12 +54,15 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.core.given.GivenUserId.newUuid;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
@@ -64,14 +70,16 @@ import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
+import static io.spine.testing.server.blackbox.given.Given.userDeleted;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * An abstract base for integration testing of Bounded Contexts.
+ * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxBoundedContext}.
  *
- * @param <T> the type of the {@code BlackBoxBoundedContext}
+ * @param <T>
+ *         the type of the {@code BlackBoxBoundedContext}
  */
 @ExtendWith(ShardingReset.class)
 abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
@@ -140,7 +148,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbProjectView expectedProject2 = createProjectView(createProject2);
             context.receivesCommands(createProject1, createProject2)
                    .assertThat(exactly(BbProjectView.class,
-                                        of(expectedProject1, expectedProject2)));
+                                       of(expectedProject1, expectedProject2)));
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {
@@ -213,6 +221,49 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .assertThat(emittedEvent(count(7)))
                .assertThat(emittedEvent(BbReportCreated.class, once()))
                .assertThat(emittedEvent(BbTaskAddedToReport.class, thrice()));
+    }
+
+    @Nested
+    class SendExternalEvents {
+
+        @Test
+        @DisplayName("sends an external event")
+        void single() {
+            BbProjectId projectId = newProjectId();
+            UserId user = newUuid();
+
+            context.receivesCommand(createProject(projectId))
+                   .receivesCommand(addProjectAssignee(projectId, user))
+                   .receivesExternalEvent(newName("Users"), userDeleted(user, projectId))
+                   .assertThat(acked(count(3)).withoutErrorsOrRejections())
+                   .assertThat(emittedEvent(count(3)))
+                   .assertThat(emittedEvent(BbProjectCreated.class, once()))
+                   .assertThat(emittedEvent(BbAssigneeAdded.class, once()))
+                   .assertThat(emittedEvent(BbAssigneeRemoved.class, once()));
+        }
+
+        @Test
+        @DisplayName("sends multiple external events")
+        void multiple() {
+            BbProjectId projectId = newProjectId();
+            UserId user1 = newUuid();
+            UserId user2 = newUuid();
+            UserId user3 = newUuid();
+
+            context.receivesCommand(createProject(projectId))
+                   .receivesCommands(addProjectAssignee(projectId, user1),
+                                     addProjectAssignee(projectId, user2),
+                                     addProjectAssignee(projectId, user3))
+                   .receivesExternalEvents(newName("Users"),
+                                           userDeleted(user1, projectId),
+                                           userDeleted(user2, projectId),
+                                           userDeleted(user3, projectId))
+                   .assertThat(acked(count(7)).withoutErrorsOrRejections())
+                   .assertThat(emittedEvent(count(7)))
+                   .assertThat(emittedEvent(BbProjectCreated.class, once()))
+                   .assertThat(emittedEvent(BbAssigneeAdded.class, thrice()))
+                   .assertThat(emittedEvent(BbAssigneeRemoved.class, thrice()));
+        }
     }
 
     @Test

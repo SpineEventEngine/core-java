@@ -27,6 +27,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
@@ -34,6 +35,9 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessages;
+import io.spine.server.integration.IntegrationBus;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
@@ -42,7 +46,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -63,6 +66,7 @@ final class BlackBoxSetup {
     private final ImportBus importBus;
     private final TestActorRequestFactory requestFactory;
     private final TestEventFactory eventFactory;
+    private final IntegrationBus integrationBus;
     private final MemoizingObserver<Ack> observer;
 
     BlackBoxSetup(BoundedContext boundedContext,
@@ -71,6 +75,7 @@ final class BlackBoxSetup {
         this.commandBus = boundedContext.getCommandBus();
         this.eventBus = boundedContext.getEventBus();
         this.importBus = boundedContext.getImportBus();
+        this.integrationBus = boundedContext.getIntegrationBus();
         this.requestFactory = checkNotNull(requestFactory);
         this.eventFactory = eventFactory(requestFactory);
         this.observer = checkNotNull(observer);
@@ -106,7 +111,7 @@ final class BlackBoxSetup {
      * Posts events with the specified producer to the bounded context.
      *
      * @param producerId
-     *          the {@linkplain io.spine.core.EventContext#getProducerId() producer} for events
+     *         the {@linkplain io.spine.core.EventContext#getProducerId() producer} for events
      * @param firstEvent
      *         the first event to be posted
      * @param otherEvents
@@ -117,6 +122,23 @@ final class BlackBoxSetup {
         TestEventFactory customFactory = newEventFactory(producerId);
         List<Event> events = toEvents(eventMessages, customFactory);
         eventBus.post(events, observer);
+    }
+
+    /**
+     * Posts events to the bounded context.
+     *
+     * @param sourceContext
+     *         a name of a Bounded Context external events come from
+     * @param domainEvents
+     *         a list of {@linkplain EventMessage event messages} or {@linkplain Event events}
+     */
+    void postExternalEvents(BoundedContextName sourceContext, Collection<Message> domainEvents) {
+        List<Event> events = toEvents(domainEvents, eventFactory);
+        List<ExternalMessage> externalEvents = events
+                .stream()
+                .map(event -> ExternalMessages.of(event, sourceContext))
+                .collect(toList());
+        integrationBus.post(externalEvents, observer);
     }
 
     /**
@@ -132,11 +154,10 @@ final class BlackBoxSetup {
 
     private static List<Event> toEvents(Collection<Message> domainEvents,
                                         TestEventFactory eventFactory) {
-        List<Event> events = newArrayListWithCapacity(domainEvents.size());
-        for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent, eventFactory));
-        }
-        return events;
+        return domainEvents
+                .stream()
+                .map(domainEvent -> event(domainEvent, eventFactory))
+                .collect(toList());
     }
 
     /**

@@ -28,6 +28,7 @@ import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.option.EntityOption.Visibility;
@@ -66,9 +67,11 @@ import static java.util.Collections.singletonList;
  * {@linkplain VerifyState updated state} of an entity. This class provides API for testing such
  * effects.
  *
- * @param <T> the type of a sub-class for return type covariance
- * @apiNote It is expected that instances of classes derived from {@code BlackBoxBoundedContext}
- *          are obtained by factory methods provided by this class.
+ * @param <T>
+ *         the type of a sub-class for return type covariance
+ * @apiNote It is expected that instances of classes derived from
+ *         {@code BlackBoxBoundedContext} are obtained by factory
+ *         methods provided by this class.
  */
 @SuppressWarnings({
         "ClassReferencesSubclass", /* See the API note. */
@@ -156,8 +159,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                 : emptyEnricher();
 
         BlackBoxBoundedContext<?> result = builder.isMultitenant()
-                ? multiTenant(enricher)
-                : singleTenant(enricher);
+                                           ? multiTenant(enricher)
+                                           : singleTenant(enricher);
 
         builder.repositories()
                .forEach(result::with);
@@ -228,8 +231,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public
-    T receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
+    public T receivesCommands(Message firstCommand, Message secondCommand,
+                              Message... otherCommands) {
         return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
@@ -281,6 +284,71 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     @CanIgnoreReturnValue
     public T receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    /**
+     * Sends off a provided event to the Bounded Context as event from an external source.
+     *
+     *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
+     * @param messageOrEvent
+     *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is
+     *         passed, it will be posted to {@link io.spine.server.integration.IntegrationBus}
+     *         as is.
+     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
+     *         event message and posted to the bus.
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
+     */
+    @CanIgnoreReturnValue
+    public T receivesExternalEvent(BoundedContextName sourceContext, Message messageOrEvent) {
+        return this.receivesExternalEvents(sourceContext, singletonList(messageOrEvent));
+    }
+
+    /**
+     * Sends off provided events to the Bounded Context as events from an external source.
+     *
+     * <p>The method accepts event messages or instances of {@link io.spine.core.Event}.
+     * If an instance of {@code Event} is passed, it will be posted to
+     * {@link io.spine.server.integration.IntegrationBus} as is.
+     * Otherwise, an instance of {@code Event} will be generated basing on the passed event
+     * message and posted to the bus.
+     *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
+     * @param firstEvent
+     *         an external event to be dispatched to the Bounded Context first
+     * @param secondEvent
+     *         an external event to be dispatched to the Bounded Context second
+     * @param otherEvents
+     *         optional external events to be dispatched to the Bounded Context
+     *         in supplied order
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
+     */
+    @CanIgnoreReturnValue
+    public T receivesExternalEvents(BoundedContextName sourceContext,
+                                    Message firstEvent,
+                                    Message secondEvent,
+                                    Message... otherEvents) {
+        return this.receivesExternalEvents(sourceContext,
+                                           asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    /**
+     * Sends off provided events to the Bounded Context as events from an external source.
+     *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
+     * @param domainEvents
+     *         a list of external events to be dispatched to the Bounded Context
+     * @return current instance
+     */
+    private T receivesExternalEvents(BoundedContextName sourceContext,
+                                     Collection<Message> domainEvents) {
+        setup().postExternalEvents(sourceContext, domainEvents);
+        return thisRef();
     }
 
     /**
