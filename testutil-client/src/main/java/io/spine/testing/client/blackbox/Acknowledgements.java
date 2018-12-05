@@ -115,14 +115,6 @@ public class Acknowledgements {
         return !errors.isEmpty();
     }
 
-    public List<Error> getErrors() {
-        return acks.stream()
-                   .map(Ack::getStatus)
-                   .map(Status::getError)
-                   .filter(EMPTY_ERRORS_FILTER)
-                   .collect(toList());
-    }
-
     /**
      * Obtains errors occurred during command handling.
      */
