@@ -22,7 +22,6 @@ package io.spine.testing.client.blackbox;
 
 import io.spine.base.Error;
 
-import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
