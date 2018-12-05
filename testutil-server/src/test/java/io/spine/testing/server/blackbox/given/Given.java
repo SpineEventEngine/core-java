@@ -27,7 +27,7 @@ import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectVBuilder;
 import io.spine.testing.server.blackbox.BbReportId;
 import io.spine.testing.server.blackbox.BbTask;
-import io.spine.testing.server.blackbox.command.BbAddProjectAssignee;
+import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbAddTask;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
@@ -106,8 +106,8 @@ public class Given {
                                 .build();
     }
 
-    public static BbAddProjectAssignee addProjectAssignee(BbProjectId projectId, UserId id) {
-        return BbAddProjectAssignee
+    public static BbAssignProject addProjectAssignee(BbProjectId projectId, UserId id) {
+        return BbAssignProject
                 .newBuilder()
                 .setId(projectId)
                 .setUserId(id)

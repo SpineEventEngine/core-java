@@ -29,7 +29,7 @@ import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectVBuilder;
 import io.spine.testing.server.blackbox.BbTask;
-import io.spine.testing.server.blackbox.command.BbAddProjectAssignee;
+import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbAddTask;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbStartProject;
@@ -100,7 +100,7 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     }
 
     @Assign
-    BbAssigneeAdded handle(BbAddProjectAssignee command) {
+    BbAssigneeAdded handle(BbAssignProject command) {
         return BbAssigneeAddedVBuilder
                 .newBuilder()
                 .setId(getId())

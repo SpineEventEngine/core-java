@@ -50,7 +50,7 @@ message BbCreateReport {
     repeated BbProjectId project_id = 2;
 }
 
-message BbAddProjectAssignee {
+message BbAssignProject {
     BbProjectId id = 1;
     spine.core.UserId user_id = 2;
 }
