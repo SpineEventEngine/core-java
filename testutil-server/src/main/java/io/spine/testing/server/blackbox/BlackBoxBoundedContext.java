@@ -28,6 +28,7 @@ import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.option.EntityOption.Visibility;
@@ -66,9 +67,11 @@ import static java.util.Collections.singletonList;
  * {@linkplain VerifyState updated state} of an entity. This class provides API for testing such
  * effects.
  *
- * @param <T> the type of a sub-class for return type covariance
- * @apiNote It is expected that instances of classes derived from {@code BlackBoxBoundedContext}
- *         are obtained by factory methods provided by this class.
+ * @param <T>
+ *         the type of a sub-class for return type covariance
+ * @apiNote It is expected that instances of classes derived from
+ *         {@code BlackBoxBoundedContext} are obtained by factory
+ *         methods provided by this class.
  */
 @SuppressWarnings({
         "ClassReferencesSubclass", /* See the API note. */
@@ -228,8 +231,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public 
-    T receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
+    public T receivesCommands(Message firstCommand, Message secondCommand,
+                              Message... otherCommands) {
         return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
