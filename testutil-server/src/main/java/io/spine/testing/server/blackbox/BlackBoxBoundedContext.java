@@ -289,6 +289,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Sends off a provided event to the Bounded Context as event from an external source.
      *
+     *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
      * @param messageOrEvent
      *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is
      *         passed, it will be posted to {@link io.spine.server.integration.IntegrationBus}
@@ -299,8 +302,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @apiNote Returned value can be ignored when this method invoked for test setup
      */
     @CanIgnoreReturnValue
-    public T receivesExternalEvent(Message messageOrEvent) {
-        return this.receivesExternalEvents(singletonList(messageOrEvent));
+    public T receivesExternalEvent(BoundedContextName sourceContext, Message messageOrEvent) {
+        return this.receivesExternalEvents(sourceContext, singletonList(messageOrEvent));
     }
 
     /**
@@ -312,6 +315,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * Otherwise, an instance of {@code Event} will be generated basing on the passed event
      * message and posted to the bus.
      *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
      * @param firstEvent
      *         an external event to be dispatched to the Bounded Context first
      * @param secondEvent
@@ -323,20 +328,26 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @apiNote Returned value can be ignored when this method invoked for test setup
      */
     @CanIgnoreReturnValue
-    public T receivesExternalEvents(Message firstEvent, Message secondEvent,
+    public T receivesExternalEvents(BoundedContextName sourceContext,
+                                    Message firstEvent,
+                                    Message secondEvent,
                                     Message... otherEvents) {
-        return this.receivesExternalEvents(asList(firstEvent, secondEvent, otherEvents));
+        return this.receivesExternalEvents(sourceContext,
+                                           asList(firstEvent, secondEvent, otherEvents));
     }
 
     /**
      * Sends off provided events to the Bounded Context as events from an external source.
      *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
      * @param domainEvents
      *         a list of external events to be dispatched to the Bounded Context
      * @return current instance
      */
-    private T receivesExternalEvents(Collection<Message> domainEvents) {
-        setup().postExternalEvents(domainEvents);
+    private T receivesExternalEvents(BoundedContextName sourceContext,
+                                     Collection<Message> domainEvents) {
+        setup().postExternalEvents(sourceContext, domainEvents);
         return thisRef();
     }
 

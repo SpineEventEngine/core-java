@@ -61,7 +61,6 @@ import static java.util.stream.Collectors.toList;
 @VisibleForTesting
 final class BlackBoxSetup {
 
-    private final BoundedContextName contextName;
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final ImportBus importBus;
@@ -73,7 +72,6 @@ final class BlackBoxSetup {
     BlackBoxSetup(BoundedContext boundedContext,
                   TestActorRequestFactory requestFactory,
                   MemoizingObserver<Ack> observer) {
-        this.contextName = boundedContext.getName();
         this.commandBus = boundedContext.getCommandBus();
         this.eventBus = boundedContext.getEventBus();
         this.importBus = boundedContext.getImportBus();
@@ -129,14 +127,16 @@ final class BlackBoxSetup {
     /**
      * Posts events to the bounded context.
      *
+     * @param sourceContext
+     *         a name of a Bounded Context external events come from
      * @param domainEvents
      *         a list of {@linkplain EventMessage event messages} or {@linkplain Event events}
      */
-    void postExternalEvents(Collection<Message> domainEvents) {
+    void postExternalEvents(BoundedContextName sourceContext, Collection<Message> domainEvents) {
         List<Event> events = toEvents(domainEvents, eventFactory);
         List<ExternalMessage> externalEvents = events
                 .stream()
-                .map(event -> ExternalMessages.of(event, contextName))
+                .map(event -> ExternalMessages.of(event, sourceContext))
                 .collect(toList());
         integrationBus.post(externalEvents, observer);
     }

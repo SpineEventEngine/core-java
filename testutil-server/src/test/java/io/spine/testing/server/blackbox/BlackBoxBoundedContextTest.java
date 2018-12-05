@@ -23,6 +23,8 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth8;
+import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.Repository;
@@ -54,6 +56,7 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
@@ -233,7 +236,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
             context.receivesCommand(createProject(projectId))
                    .receivesCommand(addProjectAssignee(projectId, user))
-                   .receivesExternalEvent(userDeleted(user, projectId))
+                   .receivesExternalEvent(newName("Users"), userDeleted(user, projectId))
                    .assertThat(acked(count(3)).withoutErrorsOrRejections())
                    .assertThat(emittedEvent(count(3)))
                    .assertThat(emittedEvent(BbProjectCreated.class, once()))
@@ -253,7 +256,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                    .receivesCommands(addProjectAssignee(projectId, user1),
                                      addProjectAssignee(projectId, user2),
                                      addProjectAssignee(projectId, user3))
-                   .receivesExternalEvents(userDeleted(user1, projectId),
+                   .receivesExternalEvents(newName("Users"),
+                                           userDeleted(user1, projectId),
                                            userDeleted(user2, projectId),
                                            userDeleted(user3, projectId))
                    .assertThat(acked(count(7)).withoutErrorsOrRejections())
