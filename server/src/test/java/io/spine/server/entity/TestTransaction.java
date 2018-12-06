@@ -87,11 +87,11 @@ public class TestTransaction {
     @SuppressWarnings("unchecked")
     private static class TestTx extends EventPlayingTransaction {
 
-        protected TestTx(TransactionalEntity entity) {
+        private TestTx(TransactionalEntity entity) {
             super(entity);
         }
 
-        public TestTx(TransactionalEntity entity, Message state, Version version) {
+        private TestTx(TransactionalEntity entity, Message state, Version version) {
             super(entity, state, version);
         }
 
@@ -112,7 +112,7 @@ public class TestTransaction {
 
     private static class NoIncrement extends VersionIncrement {
 
-        NoIncrement(Transaction transaction) {
+        private NoIncrement(Transaction transaction) {
             super(transaction);
         }
 
