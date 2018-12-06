@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import io.spine.annotation.Internal;
@@ -45,7 +46,8 @@ public abstract class EventPlayingTransaction<I,
     }
 
     @SuppressWarnings("OverlyBroadCatchBlock")  /* to `rollback(..)` in case of any exception. */
-    void play(EventEnvelope event) {
+    @VisibleForTesting
+    public void play(EventEnvelope event) {
         VersionIncrement increment = createVersionIncrement(event);
         Phase<I, Nothing> phase = new EventDispatchingPhase<>(
                 new EventDispatch<>(this::dispatch, getEntity(), event),

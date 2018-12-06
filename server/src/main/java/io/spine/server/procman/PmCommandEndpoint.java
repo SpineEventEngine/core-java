@@ -61,7 +61,7 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
         EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
         DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope);
-        PmTransaction<I, ?, ?> tx = processManager.tx();
+        PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
         return tx.perform(dispatch);
     }
 

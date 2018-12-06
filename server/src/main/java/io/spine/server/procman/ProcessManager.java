@@ -35,6 +35,8 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Transaction;
+import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
@@ -126,10 +128,14 @@ public abstract class ProcessManager<I,
         return super.getBuilder();
     }
 
-    @SuppressWarnings("unchecked") // Checked logically.
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Method overridden to be accessible from {@code procman} package.
+     */
     @Override
-    protected PmTransaction<I, S, B> tx() {
-        return (PmTransaction<I, S, B>) super.tx();
+    protected Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx() {
+        return super.tx();
     }
 
     /**

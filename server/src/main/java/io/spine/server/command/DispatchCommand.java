@@ -91,8 +91,8 @@ public final class DispatchCommand<I> {
         return entity.getId();
     }
 
-    public Message commandId() {
-        return command.getId();
+    public CommandEnvelope command() {
+        return command;
     }
 
     private void onCommandResult(Command command, List<Event> produced) {

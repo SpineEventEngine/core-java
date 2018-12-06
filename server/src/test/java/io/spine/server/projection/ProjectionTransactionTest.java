@@ -22,6 +22,7 @@ package io.spine.server.projection;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.core.given.GivenEvent;
@@ -139,6 +140,13 @@ class ProjectionTransactionTest
         return PrjTaskAdded.newBuilder()
                            .setProjectId(ID)
                            .build();
+    }
+
+    @Override
+    protected void applyEvent(Transaction tx, Event event) {
+        ProjectionTransaction cast = (ProjectionTransaction) tx;
+        EventEnvelope envelope = EventEnvelope.of(event);
+        cast.play(envelope);
     }
 
     @Override

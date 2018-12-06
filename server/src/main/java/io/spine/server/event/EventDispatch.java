@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
 import io.spine.server.entity.TransactionalEntity;
@@ -50,7 +49,7 @@ public final class EventDispatch<I, E extends TransactionalEntity<I, ?, ?>, R> {
         return entity.getId();
     }
 
-    public Message eventId() {
-        return event.getId();
+    public EventEnvelope event() {
+        return event;
     }
 }

@@ -36,6 +36,8 @@ public abstract class Phase<I, R> {
 
     private final VersionIncrement versionIncrement;
 
+    private boolean successful = false;
+
     Phase(VersionIncrement versionIncrement) {
         this.versionIncrement = versionIncrement;
     }
@@ -43,7 +45,16 @@ public abstract class Phase<I, R> {
     R propagate() {
         R result = performDispatch();
         versionIncrement.apply();
+        markSuccessful();
         return result;
+    }
+
+    boolean isSuccessful() {
+        return successful;
+    }
+
+    private void markSuccessful() {
+        this.successful = true;
     }
 
     protected abstract R performDispatch();
