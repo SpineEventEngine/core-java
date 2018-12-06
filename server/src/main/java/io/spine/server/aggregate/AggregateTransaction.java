@@ -78,12 +78,6 @@ public class AggregateTransaction<I,
         return tx;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>As long as {@linkplain EventApplier event applier method}
-     * does not operate with {@linkplain EventContext event context}, this parameter is ignored.
-     */
     @Override
     protected final void doDispatch(Aggregate<I, S, B> aggregate, EventEnvelope event) {
         aggregate.invokeApplier(event);
