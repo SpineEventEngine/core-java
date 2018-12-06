@@ -22,11 +22,23 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
 
 import java.util.List;
 
+/**
+ * A phase that dispatched a command to the entity in transaction.
+ *
+ * <p>The result of such dispatch is always a {@link List} of {@linkplain Event events} as
+ * described in the {@code CommandHandlingEntity}
+ * {@linkplain io.spine.server.command.CommandHandlingEntity#dispatchCommand(CommandEnvelope)
+ * contract}.
+ *
+ * @param <I>
+ *         the type of entity ID
+ */
 @Internal
 public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
 
@@ -46,7 +58,8 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
 
     @Override
     public I getEntityId() {
-        return dispatch.entityId();
+        return dispatch.entity()
+                       .getId();
     }
 
     @Override

@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
@@ -61,6 +62,14 @@ public class PmTransaction<I,
         super(processManager, state, version);
     }
 
+    /**
+     * Executes the given command dispatch for the current entity in transaction.
+     *
+     * @param dispatch
+     *         the {@code DispatchCommand} task
+     * @return the events generated from the command dispatch
+     * @see ProcessManager#dispatchCommand(CommandEnvelope)
+     */
     List<Event> perform(DispatchCommand<I> dispatch) {
         VersionIncrement versionIncrement = createVersionIncrement();
         Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(dispatch, versionIncrement);
@@ -68,6 +77,14 @@ public class PmTransaction<I,
         return events;
     }
 
+    /**
+     * Dispatches the given event to the current entity in transaction.
+     *
+     * @param event
+     *         the event to dispatch
+     * @return the events generated from the event dispatch
+     * @see ProcessManager#dispatchEvent(EventEnvelope)
+     */
     List<Event> dispatchEvent(EventEnvelope event) {
         VersionIncrement versionIncrement = createVersionIncrement();
         Phase<I, List<Event>> phase = new EventDispatchingPhase<>(

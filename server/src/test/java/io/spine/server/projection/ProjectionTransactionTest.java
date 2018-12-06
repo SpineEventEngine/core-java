@@ -159,8 +159,14 @@ class ProjectionTransactionTest
 
     /**
      * Tests the version advancement strategy for the {@link Projection}s.
+     *
+     * <p>The versioning strategy for {@link Projection} is
+     * {@link io.spine.server.entity.AutoIncrement}. This test case substitutes
+     * {@link #advanceVersionFromEvent()}, which tested the behavior of
+     * {@link io.spine.server.entity.IncrementFromEvent} strategy.
      */
-    @SuppressWarnings("CheckReturnValue") // Can ignore value of play() in this test.
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Can ignore value of play() in this test.
     @Test
     @DisplayName("increment version on event")
     void incrementVersionOnEvent() {

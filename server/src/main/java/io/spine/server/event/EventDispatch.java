@@ -26,6 +26,19 @@ import io.spine.server.entity.TransactionalEntity;
 
 import java.util.function.BiFunction;
 
+/**
+ * A dispatch of the event to the appropriate handler of an entity.
+ *
+ * <p>Unlike the {@link io.spine.server.command.DispatchCommand}, this class is a simple wrapper
+ * around the {@link BiFunction} which performs an actual event dispatch.
+ *
+ * @param <I>
+ *         the type of entity ID
+ * @param <E>
+ *         the type of entity
+ * @param <R>
+ *         the type of the dispatch result
+ */
 @Internal
 public final class EventDispatch<I, E extends TransactionalEntity<I, ?, ?>, R> {
 
@@ -33,6 +46,16 @@ public final class EventDispatch<I, E extends TransactionalEntity<I, ?, ?>, R> {
     private final E entity;
     private final EventEnvelope event;
 
+    /**
+     * Creates a new {@code EventDispatch} from the given dispatch function.
+     *
+     * @param dispatchFunction
+     *         the {@code BiFunction} that performs a dispatch operation
+     * @param entity
+     *         the entity to which the event is dispatched
+     * @param event
+     *         the dispatched event
+     */
     public EventDispatch(BiFunction<E, EventEnvelope, R> dispatchFunction,
                          E entity,
                          EventEnvelope event) {
@@ -41,14 +64,23 @@ public final class EventDispatch<I, E extends TransactionalEntity<I, ?, ?>, R> {
         this.event = event;
     }
 
+    /**
+     * Executes the dispatch operation, returning its result.
+     */
     public R perform() {
         return dispatchFunction.apply(entity, event);
     }
 
-    public I entityId() {
-        return entity.getId();
+    /**
+     * Returns the entity to which the event is dispatched.
+     */
+    public E entity() {
+        return entity;
     }
 
+    /**
+     * Returns the dispatched event.
+     */
     public EventEnvelope event() {
         return event;
     }

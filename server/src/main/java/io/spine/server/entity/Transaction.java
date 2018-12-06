@@ -57,15 +57,16 @@ import static java.lang.String.format;
  *
  * <p>Same applies to the entity lifecycle flags.
  *
- * <p>Version management is performed automatically by the transaction itself. Each event message
- * applied leads to the version increment.
+ * <p>Version management is performed automatically by the transaction itself.
  *
- * @param <I> the type of entity IDs
- * @param <E> the type of entity
- * @param <S> the type of entity state
- * @param <B> the type of a {@code ValidatingBuilder} for the entity state
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
+ * @param <I>
+ *         the type of entity IDs
+ * @param <E>
+ *         the type of entity
+ * @param <S>
+ *         the type of entity state
+ * @param <B>
+ *         the type of a {@code ValidatingBuilder} for the entity state
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 @Internal
@@ -148,7 +149,8 @@ public abstract class Transaction<I,
      *
      * <p>The entity state and attributes are set as starting values for this transaction.
      *
-     * @param entity   the entity to create the transaction for
+     * @param entity
+     *         the entity to create the transaction for
      * @see TransactionListener
      */
     protected Transaction(E entity) {
@@ -174,9 +176,12 @@ public abstract class Transaction<I,
      * <p>Note, that the given {@code state} and {@code version} are applied to the actual entity
      * upon commit.
      *
-     * @param entity   the target entity to modify within this transaction
-     * @param state    the entity state to set
-     * @param version  the entity version to set
+     * @param entity
+     *         the target entity to modify within this transaction
+     * @param state
+     *         the entity state to set
+     * @param version
+     *         the entity version to set
      */
     protected Transaction(E entity, S state, Version version) {
         this(entity);
@@ -212,6 +217,18 @@ public abstract class Transaction<I,
         return ImmutableList.copyOf(phases);
     }
 
+    /**
+     * Propagates a phase and performs a rollback in case of an exception.
+     *
+     * <p>The transaction {@linkplain #getListener() listener} is called for both failed and
+     * successful phases.
+     *
+     * @param phase
+     *         the phase to propagate
+     * @param <R>
+     *         the type of the phase propagation result
+     * @return the phase propagation result
+     */
     @CanIgnoreReturnValue
     protected <R> R propagate(Phase<I, R> phase) {
         try {
@@ -228,8 +245,10 @@ public abstract class Transaction<I,
     /**
      * Applies all the outstanding modifications to the enclosed entity.
      *
-     * @throws InvalidEntityStateException in case the new entity state is not valid
-     * @throws IllegalStateException       in case of a generic error
+     * @throws InvalidEntityStateException
+     *         in case the new entity state is not valid
+     * @throws IllegalStateException
+     *         in case of a generic error
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
         B builder = getBuilder();
@@ -247,7 +266,8 @@ public abstract class Transaction<I,
      * <p>In case if the commit is failed, the transaction is rolled back and the entity keeps
      * the current state.
      *
-     * @param builder the {@link ValidatingBuilder} with the new state of the entity
+     * @param builder
+     *         the {@link ValidatingBuilder} with the new state of the entity
      */
     private void commitChangedState(B builder) {
         try {
@@ -312,7 +332,8 @@ public abstract class Transaction<I,
      * Cancels the changes made within this transaction and removes the injected transaction object
      * from the enclosed entity.
      *
-     * @param cause the reason of the rollback
+     * @param cause
+     *         the reason of the rollback
      */
     void rollback(Throwable cause) {
         S currentState = currentBuilderState();
@@ -412,7 +433,8 @@ public abstract class Transaction<I,
      * <p>One of the usages for this method is for creating an entity instance
      * from a storage.
      *
-     * @param version the version to set.
+     * @param version
+     *         the version to set.
      */
     private void initVersion(Version version) {
         checkNotNull(version);
@@ -442,7 +464,8 @@ public abstract class Transaction<I,
      *
      * <p>Each next invocation overrides the previous one.
      *
-     * @param listener the listener to use in this transaction
+     * @param listener
+     *         the listener to use in this transaction
      */
     public void setListener(TransactionListener<I, E, S, B> listener) {
         checkNotNull(listener);

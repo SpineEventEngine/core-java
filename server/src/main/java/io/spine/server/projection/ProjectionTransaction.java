@@ -55,11 +55,6 @@ public class ProjectionTransaction<I,
         super(projection, state, version);
     }
 
-    @Override
-    protected void doDispatch(Projection<I, M, B> projection, EventEnvelope event) {
-        projection.apply(event);
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -85,6 +80,11 @@ public class ProjectionTransaction<I,
 
         ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection);
         return tx;
+    }
+
+    @Override
+    protected void doDispatch(Projection<I, M, B> projection, EventEnvelope event) {
+        projection.apply(event);
     }
 
     @Override

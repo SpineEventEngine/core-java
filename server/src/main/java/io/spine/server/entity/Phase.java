@@ -24,12 +24,24 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 
 /**
- * A stage of transaction, which is created by applying a single event (i.e. its message along
- * with the context) to the entity.
+ * An atomic entity state change which advances the entity version.
  *
- * <p>Invokes an event applier method for the entity modified in scope of the underlying
- * transaction, passing the event data to it. If such an invocation is successful,
- * an entity version is incremented in scope of the transaction.
+ * <p>The {@code Phase} is a part of {@linkplain Transaction transaction} mechanism and should only
+ * be propagated during the active transaction.
+ *
+ * <p>Typically, to perform the entity state change, a {@code Phase} executes some event/command
+ * dispatch task provided by the caller from the outside.
+ *
+ * <p>The result of the dispatch task execution could be the list of
+ * {@linkplain io.spine.core.Event events} if the applier method generated events or the
+ * list of {@linkplain io.spine.core.Command commands} if the dispatch was performed to the
+ * commanding method.
+ *
+ * @param <I>
+ *         the type of entity ID
+ * @param <R>
+ *         the type of the {@code Phase} propagation result
+ * @see Transaction
  */
 @Internal
 public abstract class Phase<I, R> {
@@ -42,6 +54,11 @@ public abstract class Phase<I, R> {
         this.versionIncrement = versionIncrement;
     }
 
+    /**
+     * Executes the task of the phase and updates the version of the entity in transaction.
+     *
+     * @return the result of the task execution
+     */
     R propagate() {
         R result = performDispatch();
         versionIncrement.apply();
@@ -57,9 +74,18 @@ public abstract class Phase<I, R> {
         this.successful = true;
     }
 
+    /**
+     * Executes the dispatch task and returns the result.
+     */
     protected abstract R performDispatch();
 
+    /**
+     * Returns the ID of the entity to which the {@code Message} is dispatched.
+     */
     protected abstract I getEntityId();
 
+    /**
+     * Returns the dispatched {@code Message} ID.
+     */
     protected abstract Message getMessageId();
 }

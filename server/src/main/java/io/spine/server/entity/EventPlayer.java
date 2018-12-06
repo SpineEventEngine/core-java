@@ -68,12 +68,17 @@ public interface EventPlayer {
      *
      * @param entity the entity for which to create the player
      * @return new instance on {@code EventPlayer}
+     * @throws IllegalStateException
+     *         if the given entity is not currently in transaction
+     * @throws IllegalArgumentException
+     *         if the entity transaction does not support event playing
      */
     static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
         checkNotNull(entity);
         Transaction<?, ?, ?, ?> tx = entity.tx();
         checkArgument(tx instanceof EventPlayingTransaction,
-                      "Please specify entity type with EventPlayingTransaction");
+                      "EventPlayer can only be created for the entity whose transaction type is " +
+                              "EventPlayingTransaction");
         EventPlayingTransaction<?, ?, ?, ?> cast = (EventPlayingTransaction<?, ?, ?, ?>) tx;
         return new TransactionalEventPlayer(cast);
     }

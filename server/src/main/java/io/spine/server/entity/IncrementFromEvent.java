@@ -26,6 +26,14 @@ import io.spine.core.Version;
 
 /**
  * A version increment which sets the new version from the given event.
+ *
+ * <p>Such increment strategy is applied to the {@link Entity} types which represent a sequence of
+ * events.
+ *
+ * <p>One example of such entity is {@link io.spine.server.aggregate.Aggregate Aggregate}.
+ * As a sequence of events, an {@code Aggregate} has no own versioning system, thus inherits the
+ * versions of the {@linkplain io.spine.server.aggregate.Apply applied} events. In other words, the
+ * current version of an {@code Aggregate} is the version of the last applied event.
  */
 @Internal
 public class IncrementFromEvent extends VersionIncrement {

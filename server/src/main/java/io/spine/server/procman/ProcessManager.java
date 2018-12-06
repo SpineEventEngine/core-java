@@ -131,7 +131,7 @@ public abstract class ProcessManager<I,
     /**
      * {@inheritDoc}
      *
-     * <p>Method overridden to be accessible from {@code procman} package.
+     * <p>The method is overridden to be accessible from the {@code procman} package.
      */
     @Override
     protected Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx() {

@@ -20,7 +20,6 @@
 
 package io.spine.server.command;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -39,7 +38,7 @@ import static io.spine.core.Events.isRejection;
  * <p>Dispatches the given {@linkplain CommandEnvelope command} to the given
  * {@linkplain CommandHandlingEntity entity} and triggers the {@link EntityLifecycle}.
  *
- * @author Dmytro Dashenkov
+ * @param <I> the type of entity ID
  */
 @Internal
 public final class DispatchCommand<I> {
@@ -87,8 +86,8 @@ public final class DispatchCommand<I> {
         return result;
     }
 
-    public I entityId() {
-        return entity.getId();
+    public CommandHandlingEntity<I, ?, ?> entity() {
+        return entity;
     }
 
     public CommandEnvelope command() {

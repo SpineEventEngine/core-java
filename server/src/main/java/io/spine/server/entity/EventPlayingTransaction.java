@@ -30,6 +30,21 @@ import io.spine.server.event.EventDispatch;
 import io.spine.server.model.Nothing;
 import io.spine.validate.ValidatingBuilder;
 
+/**
+ * A transaction that supports event {@linkplain EventPlayer playing}.
+ *
+ * <p>Event playing is a process of applying the events to the certain entity with no expected
+ * result.
+ *
+ * @param <I>
+ *         the type of entity IDs
+ * @param <E>
+ *         the type of entity
+ * @param <S>
+ *         the type of entity state
+ * @param <B>
+ *         the type of a {@code ValidatingBuilder} for the entity state
+ */
 @Internal
 public abstract class EventPlayingTransaction<I,
                                               E extends TransactionalEntity<I, S, B>,
@@ -45,7 +60,9 @@ public abstract class EventPlayingTransaction<I,
         super(entity, state, version);
     }
 
-    @SuppressWarnings("OverlyBroadCatchBlock")  /* to `rollback(..)` in case of any exception. */
+    /**
+     * Applies the given event to the entity in transaction.
+     */
     @VisibleForTesting
     public void play(EventEnvelope event) {
         VersionIncrement increment = createVersionIncrement(event);
@@ -62,7 +79,7 @@ public abstract class EventPlayingTransaction<I,
     }
 
     /**
-     * Dispatches the event message and its context to the current entity-in-transaction.
+     * Dispatches the event message and its context to the given entity.
      *
      * <p>This operation is always performed in scope of an active transaction.
      *
@@ -73,5 +90,12 @@ public abstract class EventPlayingTransaction<I,
      */
     protected abstract void doDispatch(E entity, EventEnvelope event);
 
+    /**
+     * Creates a version increment for the entity based on the currently processed event.
+     *
+     * @param event
+     *         the currently processed event
+     * @return the {@code VersionIncrement} to apply to the entity in transaction
+     */
     protected abstract VersionIncrement createVersionIncrement(EventEnvelope event);
 }

@@ -40,20 +40,23 @@ import static com.google.common.collect.Lists.newLinkedList;
  * An implementation of {@link TransactionListener} which monitors the transaction flow and
  * triggers the {@link EntityLifecycle}.
  *
- * <p>On a successful {@link Phase}, memoizes the ID of the applied message. After
- * a successful transaction commit, passes the memoized IDs to the {@link EntityLifecycle}
- * of the entity under transaction, along with the information about the mutations performed under
- * the transaction - an {@link EntityRecordChange}.
+ * <p>On a successful {@link Phase}, memoizes the ID of the applied message. After a successful
+ * transaction commit, passes the memoized IDs to the {@link EntityLifecycle} of the entity under
+ * transaction, along with the information about the mutations performed under the transaction - an
+ * {@link EntityRecordChange}.
  *
  * <p>An instance of this {@link TransactionListener} is meant to serve for a single
  * {@link Transaction}. When trying to reuse a listener for multiple transactions,
  * an {@link IllegalStateException} is thrown.
  *
- * @param <I> ID type of the entity under transaction
- * @param <E> type of entity under transaction
- * @param <S> state type of the entity under transaction
- * @param <B> type of {@link ValidatingBuilder} of {@code S}
- * @author Dmytro Dashenkov
+ * @param <I>
+ *         ID type of the entity under transaction
+ * @param <E>
+ *         type of entity under transaction
+ * @param <S>
+ *         state type of the entity under transaction
+ * @param <B>
+ *         type of {@link ValidatingBuilder} of {@code S}
  */
 @Internal
 public final class EntityLifecycleMonitor<I,
@@ -133,7 +136,8 @@ public final class EntityLifecycleMonitor<I,
      * transactions. Thus, if the given entity is not the same as seen before,
      * an {@link IllegalStateException} is thrown
      *
-     * @param entityId the entity to check
+     * @param entityId
+     *         the ID of the entity to check
      * @throws IllegalStateException if the check fails
      */
     private void checkSameEntity(I entityId) throws IllegalStateException {

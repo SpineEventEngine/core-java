@@ -24,6 +24,16 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.server.event.EventDispatch;
 
+/**
+ * A phase that dispatches an event to the entity in transaction.
+ *
+ * @param <I>
+ *         the type of entity ID
+ * @param <E>
+ *         the type of the entity
+ * @param <R>
+ *         the type of the event dispatch result
+ */
 @Internal
 public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
         extends Phase<I, R> {
@@ -44,7 +54,8 @@ public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
 
     @Override
     public I getEntityId() {
-        return dispatch.entityId();
+        return dispatch.entity()
+                       .getId();
     }
 
     @Override

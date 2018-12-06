@@ -25,7 +25,15 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 
 /**
- * A version increment which advances the given entity version by 1.
+ * A version increment which always advances the given entity version by 1.
+ *
+ * <p>Such increment strategy is applied to the {@link Entity} types which cannot use the event
+ * versions, such as {@link io.spine.server.projection.Projection Projection}s.
+ *
+ * <p>A {@code Projection} represents an arbitrary cast of data in a specific moment in
+ * time. The events applied to a {@code Projection} are produced by different {@code Entities}
+ * and have no common versioning. Thus, a {@code Projection} has its own versioning system.
+ * Each event <i>increments</i> the {@code Projection} version by one.
  */
 @Internal
 public class AutoIncrement extends VersionIncrement {
