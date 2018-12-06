@@ -31,8 +31,6 @@ import static java.util.Collections.singleton;
 
 /**
  * Plays events upon a certain entity.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface EventPlayer {
@@ -42,7 +40,8 @@ public interface EventPlayer {
      *
      * <p>Typically, the entity state is changed during this operation.
      *
-     * @param events the event stream to play
+     * @param events
+     *         the event stream to play
      */
     void play(Iterable<Event> events);
 
@@ -51,7 +50,8 @@ public interface EventPlayer {
      *
      * <p>This is a convenience method. See {@link #play(Iterable)} for more info.
      *
-     * @param event the event to play
+     * @param event
+     *         the event to play
      */
     default void play(Event event) {
         Collection<Event> events = singleton(event);
@@ -66,7 +66,8 @@ public interface EventPlayer {
      * If this condition is not met, an {@code IllegalStateException} is
      * {@linkplain TransactionalEntity#tx() thrown}.
      *
-     * @param entity the entity for which to create the player
+     * @param entity
+     *         the entity for which to create the player
      * @return new instance on {@code EventPlayer}
      * @throws IllegalStateException
      *         if the given entity is not currently in transaction
