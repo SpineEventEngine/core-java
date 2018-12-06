@@ -33,9 +33,6 @@ import io.spine.validate.ValidatingBuilder;
 /**
  * A transaction that supports event {@linkplain EventPlayer playing}.
  *
- * <p>Event playing is a process of applying the events to the certain entity with no expected
- * result.
- *
  * @param <I>
  *         the type of entity IDs
  * @param <E>
