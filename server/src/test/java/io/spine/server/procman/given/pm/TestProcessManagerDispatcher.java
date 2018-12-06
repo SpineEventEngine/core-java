@@ -20,43 +20,43 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.common.collect.Lists;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmPlanIteration;
+import io.spine.test.procman.command.PmReviewBacklog;
+import io.spine.test.procman.command.PmScheduleRetrospective;
+import io.spine.test.procman.command.PmStartIteration;
 
-import java.util.List;
 import java.util.Set;
 
 /**
- * Helper dispatcher class to verify that the Process Manager routes
- * the {@link PmAddTask} command.
+ * A simple NO-OP dispatcher for {@link TestProcessManager}.
+ *
+ * <p>Enables dispatch for all commands posted by the {@code TestProcessManager} commanding
+ * methods.
  */
-public class AddTaskDispatcher implements CommandDispatcher<Message> {
-
-    private final List<CommandEnvelope> commands = Lists.newLinkedList();
+public class TestProcessManagerDispatcher implements CommandDispatcher<Message> {
 
     @Override
     public Set<CommandClass> getMessageClasses() {
-        return CommandClass.setOf(PmAddTask.class);
+        return CommandClass.setOf(PmAddTask.class,
+                                  PmReviewBacklog.class,
+                                  PmScheduleRetrospective.class,
+                                  PmPlanIteration.class,
+                                  PmStartIteration.class);
     }
 
     @Override
     public Message dispatch(CommandEnvelope envelope) {
-        commands.add(envelope);
         return Empty.getDefaultInstance();
     }
 
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        // Do nothing.
-    }
-
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
-    public List<CommandEnvelope> getCommands() {
-        return commands;
+        // NoOp.
     }
 }

@@ -35,10 +35,10 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.Nothing;
-import io.spine.server.procman.given.pm.AddTaskDispatcher;
 import io.spine.server.procman.given.pm.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
+import io.spine.server.procman.given.pm.TestProcessManagerDispatcher;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -51,6 +51,7 @@ import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartIteration;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmIterationCompleted;
 import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
@@ -124,7 +125,6 @@ class ProcessManagerTest {
             TestActorRequestFactory.newInstance(getClass());
 
     private BoundedContext context;
-    private CommandBus commandBus;
     private TestProcessManager processManager;
 
     @BeforeEach
@@ -140,16 +140,19 @@ class ProcessManagerTest {
         EventBus eventBus = EventBus.newBuilder()
                                     .setStorageFactory(storageFactory)
                                     .build();
-        commandBus = spy(CommandBus.newBuilder()
-                                   .injectTenantIndex(tenantIndex)
-                                   .injectSystem(NoOpSystemWriteSide.INSTANCE)
-                                   .injectEventBus(eventBus)
-                                   .build());
+        CommandBus commandBus = spy(CommandBus.newBuilder()
+                                              .injectTenantIndex(tenantIndex)
+                                              .injectSystem(NoOpSystemWriteSide.INSTANCE)
+                                              .injectEventBus(eventBus)
+                                              .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
                               .withState(Any.getDefaultInstance())
                               .build();
+        commandBus.register(new TestProcessManagerDispatcher());
+        InjectCommandBus.of(commandBus)
+                        .to(processManager);
     }
 
     @AfterEach
@@ -161,7 +164,9 @@ class ProcessManagerTest {
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
-        assertEquals(pack(eventMessage), processManager.getState());
+        Any pmState = processManager.getState();
+        Any expected = pack(eventMessage);
+        assertEquals(expected, pmState);
         return result;
     }
 
@@ -200,21 +205,53 @@ class ProcessManagerTest {
     class IncrementVersion {
 
         @Test
-        @DisplayName("on command dispatch")
-        void onCommandDispatch() {
+        @DisplayName("on handling command")
+        void onCommandHandle() {
+            checkIncrementsOnCommand(createProject());
+        }
+
+        @Test
+        @DisplayName("on command substitution")
+        void onCommandTransform() {
+            checkIncrementsOnCommand(startProject());
+        }
+
+        @Test
+        @DisplayName("when substituting command with multiple commands")
+        void onCommandTransformIntoMultiple() {
+            checkIncrementsOnCommand(cancelIteration());
+        }
+
+        @Test
+        @DisplayName("on event react")
+        void onEventReact() {
+            checkIncrementsOnEvent(messageOfType(PmProjectStarted.class));
+        }
+
+        @Test
+        @DisplayName("when producing command in response to incoming event")
+        void onProducingCommand() {
+            checkIncrementsOnEvent(messageOfType(PmOwnerChanged.class));
+        }
+
+        @Test
+        @DisplayName("when producing several commands in response to incoming event")
+        void onProducingSeveralCommands() {
+            checkIncrementsOnEvent(messageOfType(PmIterationCompleted.class));
+        }
+
+        private void checkIncrementsOnCommand(CommandMessage commandMessage) {
             assertEquals(VERSION, processManager.getVersion()
                                                 .getNumber());
-            testDispatchCommand(createProject());
+            testDispatchCommand(commandMessage);
             assertEquals(VERSION + 1, processManager.getVersion()
                                                     .getNumber());
         }
 
-        @Test
-        @DisplayName("on event dispatch")
-        void onEventDispatch() {
+        private void checkIncrementsOnEvent(EventMessage eventMessage) {
             assertEquals(VERSION, processManager.getVersion()
                                                 .getNumber());
-            testDispatchEvent(messageOfType(PmProjectStarted.class));
+            testDispatchEvent(eventMessage);
             assertEquals(VERSION + 1, processManager.getVersion()
                                                     .getNumber());
         }
@@ -262,10 +299,6 @@ class ProcessManagerTest {
         @Test
         @DisplayName("commands")
         void commands() {
-            commandBus.register(new AddTaskDispatcher());
-            InjectCommandBus.of(commandBus)
-                            .to(processManager);
-
             testDispatchCommand(createProject());
             testDispatchCommand(addTask());
             testDispatchCommand(startProject());
