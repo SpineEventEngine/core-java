@@ -38,7 +38,8 @@ import static io.spine.core.Events.isRejection;
  * <p>Dispatches the given {@linkplain CommandEnvelope command} to the given
  * {@linkplain CommandHandlingEntity entity} and triggers the {@link EntityLifecycle}.
  *
- * @param <I> the type of entity ID
+ * @param <I>
+ *         the type of entity ID
  */
 @Internal
 public final class DispatchCommand<I> {
