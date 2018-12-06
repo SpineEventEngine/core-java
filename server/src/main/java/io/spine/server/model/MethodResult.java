@@ -66,10 +66,10 @@ public abstract class MethodResult<V extends Message> {
     /**
      * Assigns messages to a method result object.
      *
-     * @apiNote This method is meant to be called from withing a constructor of derived classes,
-     *          and called only once.
-     *
-     * @throws IllegalStateException if messages are already assigned
+     * @throws IllegalStateException
+     *         if messages are already assigned
+     * @apiNote This method is meant to be called from withing a constructor of derived
+     *          classes, and called only once.
      */
     protected final void setMessages(List<V> messages) {
         checkState(this.messages == null, "Method result messages are already assigned");

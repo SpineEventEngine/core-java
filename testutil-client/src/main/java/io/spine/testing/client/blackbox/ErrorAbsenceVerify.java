@@ -26,15 +26,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Verifies that the command handling did not respond with {@link Error error}.
- *
- * @author Mykhailo Drachuk
  */
 final class ErrorAbsenceVerify extends VerifyAcknowledgements {
 
     @Override
     public void verify(Acknowledgements acks) {
         if (acks.containErrors()) {
-            fail("Bounded Context unexpectedly thrown an error");
+            fail("Bounded Context unexpectedly thrown errors: " + acks.errors());
         }
     }
 }

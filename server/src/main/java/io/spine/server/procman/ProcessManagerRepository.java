@@ -78,8 +78,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <P> the type of process managers
  * @param <S> the type of process manager state messages
  * @see ProcessManager
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("OverlyCoupledClass")
 public abstract class ProcessManagerRepository<I,
@@ -141,13 +139,14 @@ public abstract class ProcessManagerRepository<I,
      *
      * <p>Registers with the {@code IntegrationBus} for dispatching external events and rejections.
      *
-     * <p>Ensures there is at least one message handler declared by the class of the managed
+     * <p>Ensures there is at least one handler method declared by the class of the managed
      * process manager:
      *
      * <ul>
-     *     <li>command handler methods;</li>
-     *     <li>domestic or external event reactor methods;</li>
-     *     <li>domestic or external rejection reactor methods.</li>
+     *     <li>command handler methods;
+     *     <li>domestic or external event reactor methods;
+     *     <li>domestic or external rejection reactor methods;
+     *     <li>commanding method.
      * </ul>
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
@@ -159,6 +158,19 @@ public abstract class ProcessManagerRepository<I,
         BoundedContext boundedContext = getBoundedContext();
         boundedContext.registerCommandDispatcher(this);
 
+        checkNotDeaf();
+
+        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
+        systemSubscriber.registerIn(boundedContext);
+
+        registerWithSharding();
+    }
+
+    /**
+     * Ensures the process manager class handles at least one type of messages.
+     */
+    private void checkNotDeaf() {
         boolean dispatchesEvents = dispatchesEvents() || dispatchesExternalEvents();
 
         if (!dispatchesCommands() && !dispatchesEvents) {
@@ -166,12 +178,6 @@ public abstract class ProcessManagerRepository<I,
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react on any events.", this);
         }
-
-        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
-        PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
-        systemSubscriber.registerIn(boundedContext);
-
-        registerWithSharding();
     }
 
     /**

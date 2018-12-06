@@ -71,7 +71,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of IDs of projections
  * @param <P> the type of projections
  * @param <S> the type of projection state messages
- * @author Alexander Yevsyukov
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S>

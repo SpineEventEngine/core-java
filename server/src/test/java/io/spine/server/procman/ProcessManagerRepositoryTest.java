@@ -545,7 +545,7 @@ class ProcessManagerRepositoryTest
                 .setProjectId(projectId)
                 .build();
         BlackBoxBoundedContext
-                .newInstance()
+                .singleTenant()
                 .with(new EventDiscardingProcManRepository())
                 .receivesCommand(command)
                 .assertThat(emittedEvent(count(0)));

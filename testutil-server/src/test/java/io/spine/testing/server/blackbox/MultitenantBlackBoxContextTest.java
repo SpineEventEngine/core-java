@@ -43,7 +43,7 @@ class MultitenantBlackBoxContextTest
 
     @Override
     MultitenantBlackBoxContext newInstance() {
-        return BlackBoxBoundedContext.multitenant()
+        return BlackBoxBoundedContext.multiTenant()
                                      .withTenant(newUuid());
     }
 
@@ -92,7 +92,7 @@ class MultitenantBlackBoxContextTest
     void requireTenantId() {
         assertThrows(
                 IllegalStateException.class,
-                () -> BlackBoxBoundedContext.multitenant()
+                () -> BlackBoxBoundedContext.multiTenant()
                                             .assertThat(exactlyOne(StringValue.of("verify state")))
         );
     }

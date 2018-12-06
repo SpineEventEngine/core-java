@@ -771,6 +771,7 @@
     <inspection_tool class="TransientFieldNotInitialized" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TrivialIf" enabled="true" level="TYPO" enabled_by_default="true" />
     <inspection_tool class="TrivialStringConcatenation" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="TsLint" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TypeMayBeWeakened" enabled="true" level="INFO" enabled_by_default="true">
       <scope name="Tests" level="INFO" enabled="true">
         <option name="useRighthandTypeAsWeakestTypeInAssignments" value="true" />

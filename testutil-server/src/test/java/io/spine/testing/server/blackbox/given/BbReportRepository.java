@@ -36,8 +36,6 @@ import static java.util.stream.Collectors.toSet;
 /**
  * A Report repository routing the {@link BbTaskAdded Task Added} events to all reports containing
  * corresponding project.
- *
- * @author Mykhailo Drachuk
  */
 public class BbReportRepository extends AggregateRepository<BbReportId, BbReportAggregate> {
 

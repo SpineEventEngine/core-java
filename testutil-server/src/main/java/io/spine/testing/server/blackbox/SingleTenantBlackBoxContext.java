@@ -28,10 +28,10 @@ import io.spine.testing.client.TestActorRequestFactory;
 import java.util.List;
 
 /**
- * A black box bounded context for writing integration tests in a single tenant environment.
+ * Test fixture for single-tenant Bounded Contexts.
  */
 @VisibleForTesting
-public class SingleTenantBlackBoxContext
+public final class SingleTenantBlackBoxContext
         extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
 
     private final TestActorRequestFactory requestFactory =

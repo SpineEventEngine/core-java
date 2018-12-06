@@ -20,16 +20,29 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.Truth8;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.entity.Repository;
+import io.spine.server.event.Enricher;
+import io.spine.server.event.EventBus;
+import io.spine.core.UserId;
 import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
+import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
+import io.spine.testing.server.blackbox.rejection.Rejections;
+import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,39 +50,51 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Set;
+
 import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.core.given.GivenUserId.newUuid;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
+import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
+import static io.spine.testing.server.blackbox.given.Given.userDeleted;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * An abstract base for testing of black box bounded contexts.
+ * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxBoundedContext}.
+ *
+ * @param <T>
+ *         the type of the {@code BlackBoxBoundedContext}
  */
 @ExtendWith(ShardingReset.class)
-abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
+abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
-    private T projects;
+    private T context;
 
     @BeforeEach
     void setUp() {
-        projects = newInstance().with(new BbProjectRepository(),
-                                      new BbProjectViewRepository());
+        context = newInstance().with(new BbProjectRepository(),
+                                     new BbProjectViewRepository());
     }
 
     @AfterEach
     void tearDown() {
-        projects.close();
+        context.close();
     }
 
     /**
@@ -78,7 +103,17 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
     abstract BlackBoxBoundedContext<T> newInstance();
 
     T boundedContext() {
-        return projects;
+        return context;
+    }
+    
+    @Test
+    @DisplayName("ignore events sent events in emitted")
+    void ignoreSentEvents() {
+        BbProjectId id = newProjectId();
+        context.receivesCommand(createProject(id))
+               .receivesEvent(taskAdded(id))
+               .assertThat(emittedEvent(once()))
+               .assertThat(emittedEvent(BbProjectCreated.class, once()));
     }
 
     @Nested
@@ -90,8 +125,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
         void aggregate() {
             BbCreateProject createProject = createProject();
             BbProject expectedProject = createdProjectState(createProject);
-            projects.receivesCommand(createProject)
-                    .assertThat(exactlyOne(expectedProject));
+            context.receivesCommand(createProject)
+                   .assertThat(exactlyOne(expectedProject));
         }
 
         @Test
@@ -101,8 +136,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
             BbCreateProject createProject2 = createProject();
             BbProject expectedProject1 = createdProjectState(createProject1);
             BbProject expectedProject2 = createdProjectState(createProject2);
-            projects.receivesCommands(createProject1, createProject2)
-                    .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
+            context.receivesCommands(createProject1, createProject2)
+                   .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
         }
 
         @Test
@@ -110,8 +145,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
         void projection() {
             BbCreateProject createProject = createProject();
             BbProjectView expectedProject = createProjectView(createProject);
-            projects.receivesCommand(createProject)
-                    .assertThat(exactlyOne(expectedProject));
+            context.receivesCommand(createProject)
+                   .assertThat(exactlyOne(expectedProject));
         }
 
         @Test
@@ -121,9 +156,9 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
             BbCreateProject createProject2 = createProject();
             BbProjectView expectedProject1 = createProjectView(createProject1);
             BbProjectView expectedProject2 = createProjectView(createProject2);
-            projects.receivesCommands(createProject1, createProject2)
-                    .assertThat(exactly(BbProjectView.class,
-                                        of(expectedProject1, expectedProject2)));
+            context.receivesCommands(createProject1, createProject2)
+                   .assertThat(exactly(BbProjectView.class,
+                                       of(expectedProject1, expectedProject2)));
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {
@@ -133,54 +168,112 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
         }
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Test
     @DisplayName("receive and handle a single command")
     void receivesACommand() {
-        projects.receivesCommand(createProject())
-                .assertThat(acked(once()).withoutErrorsOrRejections())
-                .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
+        context.receivesCommand(createProject())
+               .assertThat(acked(once()).withoutErrorsOrRejections())
+               .assertThat(emittedEvent(BbProjectCreated.class, once()));
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
+    @Test
+    @DisplayName("verifiers emitting one event")
+    void eventOnCommand() {
+        context.receivesCommand(createProject())
+               .assertEmitted(BbProjectCreated.class);
+    }
+
     @Test
     @DisplayName("receive and handle multiple commands")
     void receivesCommands() {
         BbProjectId projectId = newProjectId();
-        projects.receivesCommand(createProject(projectId))
-                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
-                .assertThat(acked(count(4)).withoutErrorsOrRejections())
-                .assertThat(VerifyEvents.emittedEvent(count(4)))
-                .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
-                .assertThat(VerifyEvents.emittedEvent(BbTaskAdded.class, thrice()));
+        context.receivesCommand(createProject(projectId))
+               .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
+               .assertThat(acked(count(4)).withoutErrorsOrRejections())
+               .assertThat(emittedEvent(count(4)))
+               .assertThat(emittedEvent(BbProjectCreated.class, once()))
+               .assertThat(emittedEvent(BbTaskAdded.class, thrice()));
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
+    @Test
+    @DisplayName("reject a command")
+    void rejectsCommand() {
+        BbProjectId projectId = newProjectId();
+        // Create and start the project.
+        context.receivesCommands(createProject(projectId), startProject(projectId));
+
+        // Attempt to start the project again.
+        context.receivesCommand(startProject(projectId))
+               .assertRejectedWith(Rejections.BbProjectAlreadyStarted.class);
+    }
+
     @Test
     @DisplayName("receive and react on single event")
     void receivesEvent() {
         BbProjectId projectId = newProjectId();
-        projects.with(new BbReportRepository())
-                .receivesCommand(createReport(projectId))
-                .receivesEvent(taskAdded(projectId))
-                .assertThat(acked(twice()).withoutErrorsOrRejections())
-                .assertThat(VerifyEvents.emittedEvent(thrice()))
-                .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
-                .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, once()));
+        context.with(new BbReportRepository())
+               .receivesCommand(createReport(projectId))
+               .receivesEvent(taskAdded(projectId))
+               .assertThat(acked(twice()).withoutErrorsOrRejections())
+               .assertThat(emittedEvent(twice()))
+               .assertThat(emittedEvent(BbReportCreated.class, once()))
+               .assertThat(emittedEvent(BbTaskAddedToReport.class, once()));
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Test
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
         BbProjectId projectId = newProjectId();
-        projects.with(new BbReportRepository())
-                .receivesCommand(createReport(projectId))
-                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
-                .assertThat(acked(count(4)).withoutErrorsOrRejections())
-                .assertThat(VerifyEvents.emittedEvent(count(7)))
-                .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
-                .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, thrice()));
+        context.with(new BbReportRepository())
+               .receivesCommand(createReport(projectId))
+               .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
+               .assertThat(acked(count(4)).withoutErrorsOrRejections())
+               .assertThat(emittedEvent(count(4)))
+               .assertThat(emittedEvent(BbReportCreated.class, once()))
+               .assertThat(emittedEvent(BbTaskAddedToReport.class, thrice()));
+    }
+
+    @Nested
+    class SendExternalEvents {
+
+        @Test
+        @DisplayName("sends an external event")
+        void single() {
+            BbProjectId projectId = newProjectId();
+            UserId user = newUuid();
+
+            context.receivesCommand(createProject(projectId))
+                   .receivesCommand(addProjectAssignee(projectId, user))
+                   .receivesExternalEvent(newName("Users"), userDeleted(user, projectId))
+                   .assertThat(acked(count(3)).withoutErrorsOrRejections())
+                   .assertThat(emittedEvent(count(3)))
+                   .assertThat(emittedEvent(BbProjectCreated.class, once()))
+                   .assertThat(emittedEvent(BbAssigneeAdded.class, once()))
+                   .assertThat(emittedEvent(BbAssigneeRemoved.class, once()));
+        }
+
+        @Test
+        @DisplayName("sends multiple external events")
+        void multiple() {
+            BbProjectId projectId = newProjectId();
+            UserId user1 = newUuid();
+            UserId user2 = newUuid();
+            UserId user3 = newUuid();
+
+            context.receivesCommand(createProject(projectId))
+                   .receivesCommands(addProjectAssignee(projectId, user1),
+                                     addProjectAssignee(projectId, user2),
+                                     addProjectAssignee(projectId, user3))
+                   .receivesExternalEvents(newName("Users"),
+                                           userDeleted(user1, projectId),
+                                           userDeleted(user2, projectId),
+                                           userDeleted(user3, projectId))
+                   .assertThat(acked(count(7)).withoutErrorsOrRejections())
+                   .assertThat(emittedEvent(count(7)))
+                   .assertThat(emittedEvent(BbProjectCreated.class, once()))
+                   .assertThat(emittedEvent(BbAssigneeAdded.class, thrice()))
+                   .assertThat(emittedEvent(BbAssigneeRemoved.class, thrice()));
+        }
     }
 
     @Test
@@ -195,5 +288,71 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext> {
                             }
                         })
                         .close());
+    }
+
+    /**
+     * Obtains the set of entity state types from the passed repositories.
+     */
+    private static Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
+        ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
+        repos.forEach(repository -> builder.add(repository.getEntityStateType()
+                                                          .toName()));
+        return builder.build();
+    }
+
+    @Nested
+    @DisplayName("create an instance by BoundedContextBuilder")
+    class CreateByBuilder {
+
+        private final ImmutableList<Repository<?, ?>> repositories = ImmutableList.of(
+                new BbProjectRepository(),
+                new BbProjectViewRepository()
+        );
+
+        private final Set<TypeName> types = toTypes(repositories);
+
+        private BlackBoxBoundedContext<?> blackBox;
+        private BoundedContextBuilder builder;
+        private Enricher enricher;
+
+        @BeforeEach
+        void setUp() {
+            enricher = Enricher.newBuilder()
+                               .build();
+            builder = BoundedContext.newBuilder()
+                                    .setEventBus(EventBus.newBuilder()
+                                                         .setEnricher(enricher));
+            repositories.forEach(builder::add);
+        }
+
+        @Test
+        void singleTenant() {
+            builder.setMultitenant(false);
+            blackBox = BlackBoxBoundedContext.from(builder);
+
+            assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
+            assertEntityTypes();
+            assertEnricher();
+        }
+
+        private void assertEntityTypes() {
+            assertThat(blackBox.getAllEntityStateTypes()).containsAllIn(types);
+        }
+
+        private void assertEnricher() {
+            Truth8.assertThat(blackBox.getEventBus()
+                                      .enricher())
+                  .hasValue(enricher);
+        }
+
+        @Test
+        void multiTenant() {
+            builder.setMultitenant(true);
+            blackBox = BlackBoxBoundedContext.from(builder);
+
+            assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
+            assertEntityTypes();
+            assertEnricher();
+        }
     }
 }

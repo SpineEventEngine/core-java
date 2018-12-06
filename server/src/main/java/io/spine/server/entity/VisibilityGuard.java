@@ -118,7 +118,7 @@ public final class VisibilityGuard {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> getEntityTypes(Visibility visibility) {
+    public Set<TypeName> getEntityStateTypes(Visibility visibility) {
         checkNotNull(visibility);
 
         // Filter repositories of entities with this visibility.

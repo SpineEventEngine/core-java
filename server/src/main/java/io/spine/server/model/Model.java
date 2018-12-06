@@ -135,9 +135,10 @@ public class Model {
      *
      * <p>This method must <em>not</em> be called from the production code.
      *
+     * @throws SecurityException
+     *         if called directly by non-authorized class
      * @apiNote This method <em>may</em> be called indirectly from authorized tool classes
-     *          or test utility classes.
-     * @throws SecurityException if called directly by non-authorized class
+     *         or test utility classes.
      */
     @VisibleForTesting
     public static synchronized void dropAllModels() {
