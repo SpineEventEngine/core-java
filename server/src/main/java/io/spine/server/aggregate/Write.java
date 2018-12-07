@@ -82,7 +82,7 @@ final class Write<I> {
     }
 
     private void writeEvents(List<Event> events) {
-        int eventCount = aggregate.getPersistedEventCount();
+        int eventCount = aggregate.getEventCountAfterLastSnapshot();
         Collection<Event> eventBatch = newArrayListWithCapacity(snapshotTrigger);
         for (Event event : events) {
             eventBatch.add(event);
@@ -123,8 +123,9 @@ final class Write<I> {
 
     private void commit(int eventCount) {
         aggregate.commitEvents();
+        storage.writeEventCountAfterLastSnapshot(id, eventCount);
+        aggregate.setEventCountAfterLastSnapshot(eventCount);
         if (aggregate.lifecycleFlagsChanged()) {
-            storage.writeEventCountAfterLastSnapshot(id, eventCount);
             storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
         }
     }
