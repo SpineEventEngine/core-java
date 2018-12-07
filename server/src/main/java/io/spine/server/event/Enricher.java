@@ -57,9 +57,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *         .build();
  *     }
  * </pre>
- *
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 @SPI
 public class Enricher {
@@ -160,10 +157,6 @@ public class Enricher {
                       "Enrichment is disabled for the message %s", envelope.getOuterObject());
     }
 
-    private ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions() {
-        return functions;
-    }
-
     /**
      * Finds a function that converts an source message field into an enrichment field.
      *
@@ -235,7 +228,7 @@ public class Enricher {
         /** Creates a new {@code Enricher}. */
         public Enricher build() {
             Enricher result = new Enricher(this);
-            validate(result.functions());
+            validate(result.functions);
             return result;
         }
 

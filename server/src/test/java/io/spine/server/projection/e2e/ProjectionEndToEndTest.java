@@ -80,7 +80,7 @@ class ProjectionEndToEndTest {
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
         BlackBoxBoundedContext
-                .newInstance()
+                .singleTenant()
                 .with(new EntitySubscriberProjection.Repository(),
                       new TestProjection.Repository())
                 .receivesEventsProducedBy(producerId,
@@ -107,10 +107,10 @@ class ProjectionEndToEndTest {
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
         SingleTenantBlackBoxContext sender = BlackBoxBoundedContext
-                .newInstance()
+                .singleTenant()
                 .with(new OrganizationProjection.Repository());
         SingleTenantBlackBoxContext receiver = BlackBoxBoundedContext
-                .newInstance()
+                .singleTenant()
                 .with(new GroupNameProjection.Repository());
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId,

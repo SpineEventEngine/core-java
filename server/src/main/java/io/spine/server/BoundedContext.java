@@ -79,9 +79,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * the model elements which belong to it.
  *
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
- *     Martin Fowler on bounded contexts</a>
+ *     Martin Fowler on Bounded Contexts</a>
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("OverlyCoupledClass")
 public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /**
@@ -112,8 +112,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @throws IllegalStateException
      *         if called from a derived class, which is not a part of the framework
-     * @apiNote This constructor is for internal use of the framework.
-     *          Application developers should not create classes derived from {@code BoundedContext}
+     * @apiNote This constructor is for internal use of the framework. Application developers
+     *          should not create classes derived from {@code BoundedContext}.
      */
     @Internal
     protected BoundedContext(BoundedContextBuilder builder) {
@@ -271,14 +271,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
         DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
-        if (dispatcher.dispatchesEvents()) {
-            getEventBus().register(delegate);
-            SystemReadSide systemReadSide = getSystemClient().readSide();
-            systemReadSide.register(delegate);
-        }
-        if (dispatcher.dispatchesExternalEvents()) {
-            registerWithIntegrationBus(delegate);
-        }
+        registerEventDispatcher(delegate);
     }
 
     /**
@@ -302,8 +295,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> getEntityTypes(Visibility visibility) {
-        Set<TypeName> result = guard.getEntityTypes(visibility);
+    public Set<TypeName> getEntityStateTypes(Visibility visibility) {
+        Set<TypeName> result = guard.getEntityStateTypes(visibility);
         return result;
     }
 

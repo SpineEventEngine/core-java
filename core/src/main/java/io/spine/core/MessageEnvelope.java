@@ -42,7 +42,7 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
      * Obtains string representation of the message identifier.
      *
      * @apiNote The primary purpose of this method is to display the identifier in human-readable
-     * form in debug and error messages.
+     *          form in debug and error messages.
      */
     default String idAsString() {
         return Stringifiers.toString(getId());

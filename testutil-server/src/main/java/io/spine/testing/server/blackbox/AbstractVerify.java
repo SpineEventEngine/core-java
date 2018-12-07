@@ -36,11 +36,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Abstract base for classes verifying emitted messages.
- *
- * @author Mykhailo Drachuk
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ClassReferencesSubclass")
 @VisibleForTesting
 abstract class AbstractVerify<E extends EmittedMessages> implements Verify<E> {
 
@@ -137,7 +133,9 @@ abstract class AbstractVerify<E extends EmittedMessages> implements Verify<E> {
         public void verify(E emittedMessages) {
             for (Class<? extends Message> messageClass : messageClasses) {
                 String className = messageClass.getName();
-                if (!emittedMessages.contain(messageClass)) {
+                @SuppressWarnings("unchecked") // this operation is type-safe.
+                boolean contains = emittedMessages.contain(messageClass);
+                if (!contains) {
                     fail(format("Bounded Context did not emit %s %s",
                                 className,
                                 emittedMessages.singular())
@@ -159,6 +157,7 @@ abstract class AbstractVerify<E extends EmittedMessages> implements Verify<E> {
         @Override
         public void verify(E emittedMessages) {
             String className = messageClass.getName();
+            @SuppressWarnings("unchecked") // this operation is type-safe.
             int actualCount = emittedMessages.count(messageClass);
             int expectedCount = expected();
             String moreOrLess = AbstractVerify.compare(actualCount, expectedCount);

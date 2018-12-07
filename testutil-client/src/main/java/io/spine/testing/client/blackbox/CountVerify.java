@@ -25,14 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Verifies that a command or an event was handled responding with specified number of
  * {@link io.spine.core.Ack acks}.
- *
- * @author Mykhailo Drachuk
  */
 final class CountVerify extends VerifyAcknowledgements {
 
     private final Count expectedCount;
 
-    /** @param expectedCount an amount acks that are expected be observed */
+    /**
+     * Creates verifier for the passed amount acks that are expected be observed.
+     */
     CountVerify(Count expectedCount) {
         super();
         this.expectedCount = expectedCount;

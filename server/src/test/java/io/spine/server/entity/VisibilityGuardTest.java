@@ -111,15 +111,15 @@ class VisibilityGuardTest {
     @Test
     @DisplayName("obtain repos by visibility")
     void obtainByVisibility() {
-        Set<TypeName> full = guard.getEntityTypes(Visibility.FULL);
+        Set<TypeName> full = guard.getEntityStateTypes(Visibility.FULL);
         assertEquals(1, full.size());
         assertTrue(full.contains(TypeName.of(FullAccessAggregate.class)));
 
-        Set<TypeName> subscribable = guard.getEntityTypes(Visibility.SUBSCRIBE);
+        Set<TypeName> subscribable = guard.getEntityStateTypes(Visibility.SUBSCRIBE);
         assertEquals(1, subscribable.size());
         assertTrue(subscribable.contains(TypeName.of(SubscribableAggregate.class)));
 
-        Set<TypeName> hidden = guard.getEntityTypes(Visibility.NONE);
+        Set<TypeName> hidden = guard.getEntityStateTypes(Visibility.NONE);
         assertEquals(1, hidden.size());
         assertTrue(hidden.contains(TypeName.of(HiddenAggregate.class)));
     }

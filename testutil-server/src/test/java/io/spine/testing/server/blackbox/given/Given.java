@@ -20,25 +20,34 @@
 
 package io.spine.testing.server.blackbox.given;
 
+import com.google.common.collect.Lists;
+import io.spine.core.UserId;
 import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectVBuilder;
 import io.spine.testing.server.blackbox.BbReportId;
 import io.spine.testing.server.blackbox.BbTask;
+import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbAddTask;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
+import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
+import io.spine.testing.server.blackbox.event.BbUserDeleted;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class Given {
 
     /** Prevents instantiation of this utility class. */
     private Given() {
+    }
+
+    public static BbProjectId newProjectId() {
+        return BbProjectId.newBuilder()
+                          .setId(newUuid())
+                          .build();
     }
 
     public static BbAddTask addTask(BbProjectId projectId) {
@@ -84,15 +93,32 @@ public class Given {
                                .build();
     }
 
-    public static BbProjectId newProjectId() {
-        return BbProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+    public static BbStartProject startProject(BbProjectId projectId) {
+        return BbStartProject.newBuilder()
+                             .setProjectId(projectId)
+                             .build();
     }
 
     public static BbProject createdProjectState(BbCreateProject createProject) {
         return BbProjectVBuilder.newBuilder()
                                 .setId(createProject.getProjectId())
+                                .setStatus(BbProject.Status.CREATED)
                                 .build();
+    }
+
+    public static BbAssignProject addProjectAssignee(BbProjectId projectId, UserId id) {
+        return BbAssignProject
+                .newBuilder()
+                .setId(projectId)
+                .setUserId(id)
+                .build();
+    }
+
+    public static BbUserDeleted userDeleted(UserId id, BbProjectId... projectIds) {
+        return BbUserDeleted
+                .newBuilder()
+                .setId(id)
+                .addAllProject(newArrayList(projectIds))
+                .build();
     }
 }

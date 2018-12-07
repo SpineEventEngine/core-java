@@ -141,20 +141,20 @@ public abstract class Aggregate<I,
     /**
      * Creates a new instance.
      *
-     * @apiNote Constructors of derived classes are likely to have package-private access level
-     * because of the following reasons:
-     * <ol>
-     *     <li>These constructors are not public API of an application.
-     *     Commands and aggregate IDs are.
-     *     <li>These constructors need to be accessible from tests in the same package.
-     * </ol>
+     * @param id
+     *         the ID for the new aggregate
+     * @apiNote Constructors of derived classes are likely to have package-private access
+     *         level because of the following reasons:
+     *         <ol>
+     *         <li>These constructors are not public API of an application.
+     *         Commands and aggregate IDs are.
+     *         <li>These constructors need to be accessible from tests in the same package.
+     *         </ol>
      *
-     * <p>If you do have tests that create aggregates via constructors, consider annotating them
-     * with {@code @VisibleForTesting}. Otherwise, aggregate constructors (that are invoked by
-     * {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
-     * via Reflection) may be left {@code private}.
-     *
-     * @param id the ID for the new aggregate
+     *         <p>If you do have tests that create aggregates via constructors, consider annotating
+     *         them with {@code @VisibleForTesting}. Otherwise, aggregate constructors (that are
+     *         invoked by {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
+     *         via Reflection) may be left {@code private}.
      */
     protected Aggregate(I id) {
         super(id);
@@ -219,7 +219,7 @@ public abstract class Aggregate<I,
      *
      * @param  event the envelope with the event to dispatch
      * @return a list of event messages that the aggregate produces in reaction to the event or
-     *         an empty list if the aggregate state does not change in reaction to the event
+     *         an empty list if the aggregate state does not change because of the event
      */
     List<Event> reactOn(EventEnvelope event) {
         idempotencyGuard.check(event);

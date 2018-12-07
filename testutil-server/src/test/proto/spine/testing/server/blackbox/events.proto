@@ -30,6 +30,7 @@ option java_multiple_files = true;
 
 import "spine/testing/server/blackbox/entities.proto";
 import "spine/testing/server/blackbox/report.proto";
+import "spine/core/user_id.proto";
 
 message BbProjectCreated {
     BbProjectId project_id = 1 [(required) = true];
@@ -53,4 +54,24 @@ message BbTaskAddedToReport {
     BbReportId report_id = 1 [(required) = true];
     BbProjectId project_id = 2;
     BbTask task = 3;
+}
+
+message BbAssigneeAdded {
+    BbProjectId id = 1 [(required) = true];
+    spine.core.UserId user_id = 2 [(required) = true];
+}
+
+message BbAssigneeRemoved {
+    BbProjectId id = 1 [(required) = true];
+    spine.core.UserId user_id = 2 [(required) = true];
+}
+
+//
+// External `Users` bounded context events
+//
+
+message BbUserDeleted {
+    spine.core.UserId id = 1 [(required) = true];
+    
+    repeated BbProjectId project = 2;
 }

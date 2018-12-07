@@ -39,7 +39,7 @@ class NothingTest {
     @DisplayName("the bus should not know")
     void notPost() {
         SingleTenantBlackBoxContext boundedContext = BlackBoxBoundedContext
-                .newInstance()
+                .singleTenant()
                 .with(new ArchiverPm.Repository())
                 .receivesCommand(archiveSingleFile());
         boundedContext.assertThat(emittedCommand(count(1)))

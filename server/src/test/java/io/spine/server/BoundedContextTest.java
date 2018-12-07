@@ -308,12 +308,12 @@ class BoundedContextTest {
     @Test
     @DisplayName("obtain entity types by visibility")
     void getEntityTypesByVisibility() {
-        assertTrue(boundedContext.getEntityTypes(EntityOption.Visibility.FULL)
+        assertTrue(boundedContext.getEntityStateTypes(EntityOption.Visibility.FULL)
                                  .isEmpty());
 
         registerAll();
 
-        assertFalse(boundedContext.getEntityTypes(EntityOption.Visibility.FULL)
+        assertFalse(boundedContext.getEntityStateTypes(EntityOption.Visibility.FULL)
                                   .isEmpty());
     }
 

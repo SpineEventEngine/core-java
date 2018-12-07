@@ -30,7 +30,7 @@ import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAddComment;
 import io.spine.testing.server.given.entity.command.TuRemoveComment;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
-import io.spine.testing.server.given.entity.event.TuCommentRecievedByEmail;
+import io.spine.testing.server.given.entity.event.TuCommentReceivedByEmail;
 import io.spine.testing.server.given.entity.event.TuCommentRemoved;
 import io.spine.testing.server.given.entity.rejection.TuFailedToRemoveComment;
 
@@ -82,7 +82,7 @@ public final class TuAggregatePart
     }
 
     @Apply(allowImport = true)
-    void on(TuCommentRecievedByEmail event) {
+    void on(TuCommentReceivedByEmail event) {
         getBuilder().setId(event.getId())
                     .setCommentsRecievedByEmail(getState().getCommentsRecievedByEmail() + 1)
                     .setTimestamp(fromMillis(1234567));

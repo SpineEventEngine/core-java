@@ -21,6 +21,7 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
@@ -58,8 +59,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>An application can have more than one bounded context. To distinguish
  * them use {@link #setName(String)}. If no ID is given the default ID will be assigned.
- *
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
 public final class BoundedContextBuilder implements Logging {
@@ -263,6 +262,16 @@ public final class BoundedContextBuilder implements Logging {
         checkNotNull(repository);
         boolean result = repositories.contains(repository);
         return result;
+    }
+
+    /**
+     * Obtains the list of repositories added to the builder by the time of the call.
+     *
+     * <p>Adding repositories to the builder after this method returns will not update the
+     * returned list.
+     */
+    public ImmutableList<Repository<?, ?>> repositories() {
+        return ImmutableList.copyOf(repositories);
     }
 
     /**

@@ -60,6 +60,7 @@ public class SamplePmCommandOnEventTest
 
     /**
      * Exposes {@link #message() to the test.
+     *
      * @apiNote we cannot override, since {@codd message()} is {@code final}.
      */
     public Message storedMessage() {

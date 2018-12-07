@@ -38,7 +38,6 @@ import static io.spine.protobuf.AnyPacker.pack;
  * <p>A filter may {@linkplain #allowAll() allow any event}, reject certain types of events, or
  * change the event content.
  *
- * @author Dmytro Dashenkov
  * @apiNote This type is a {@link FunctionalInterface}, so that an event filter may be defined
  *          with a lambda expression.
  */
@@ -81,8 +80,8 @@ public interface EventFilter {
      * @param events
      *         the events to apply the filter to
      * @return non-empty filtering results for the given events
-     * @apiNote This method should have the same behaviour in any descendant. Override this method
-     *          <b>only</b> for performance improvement.
+     * @apiNote This method should have the same behaviour in any descendant.
+     *          Override this method <b>only</b> for performance improvement.
      */
     default ImmutableCollection<Event> filter(Collection<Event> events) {
         ImmutableCollection<Event> filteredEvents = events

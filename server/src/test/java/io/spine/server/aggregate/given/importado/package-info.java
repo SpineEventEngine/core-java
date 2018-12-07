@@ -23,7 +23,7 @@
  * into aggregates.
  *
  * @apiNote This package is named this way since “{@code import}” is a reserved word in Java.
- * So, we resorted to Spanish for the package name.
+ *          So, we resorted to Spanish for the package name.
  */
 
 @CheckReturnValue
