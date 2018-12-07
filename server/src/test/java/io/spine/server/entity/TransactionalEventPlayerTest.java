@@ -37,9 +37,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("TransactionalEventPlayer should")
 class TransactionalEventPlayerTest {
 
@@ -54,7 +51,7 @@ class TransactionalEventPlayerTest {
     @DisplayName("delegate applying events to transaction when playing")
     void delegateEventsToTx() {
         TxPlayingEntity entity = entityWithActiveTx(false);
-        Transaction txMock = entity.getTransaction();
+        EventPlayingTransaction txMock = (EventPlayingTransaction) entity.getTransaction();
         assertNotNull(txMock);
         Event firstEvent = arbitrary();
         Event secondEvent = arbitrary();
@@ -68,7 +65,7 @@ class TransactionalEventPlayerTest {
     @SuppressWarnings("unchecked")  // OK for the test.
     private static TxPlayingEntity entityWithActiveTx(boolean txChanged) {
         TxPlayingEntity entity = new TxPlayingEntity();
-        Transaction tx = spy(mock(Transaction.class));
+        EventPlayingTransaction tx = spy(mock(EventPlayingTransaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
         when(tx.getEntity()).thenReturn(entity);
@@ -77,8 +74,8 @@ class TransactionalEventPlayerTest {
         return entity;
     }
 
-    private static void verifyEventApplied(Transaction txMock, Event event) {
-        verify(txMock).apply(eq(EventEnvelope.of(event)));
+    private static void verifyEventApplied(EventPlayingTransaction txMock, Event event) {
+        verify(txMock).play(eq(EventEnvelope.of(event)));
     }
 
     private static class TxPlayingEntity

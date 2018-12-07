@@ -18,45 +18,53 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.pm;
+package io.spine.server.entity;
 
-import com.google.common.collect.Lists;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.CommandClass;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.test.procman.command.PmAddTask;
+import io.spine.core.Event;
+import io.spine.server.command.DispatchCommand;
 
 import java.util.List;
-import java.util.Set;
 
 /**
- * Helper dispatcher class to verify that the Process Manager routes
- * the {@link PmAddTask} command.
+ * A phase that dispatched a command to the entity in transaction.
+ *
+ * <p>The result of such dispatch is always a {@link List} of {@linkplain Event events} as
+ * described in the {@code CommandHandlingEntity}
+ * {@linkplain io.spine.server.command.CommandHandlingEntity#dispatchCommand(CommandEnvelope)
+ * contract}.
+ *
+ * @param <I>
+ *         the type of entity ID
  */
-public class AddTaskDispatcher implements CommandDispatcher<Message> {
+@Internal
+public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
 
-    private final List<CommandEnvelope> commands = Lists.newLinkedList();
+    private final DispatchCommand<I> dispatch;
 
-    @Override
-    public Set<CommandClass> getMessageClasses() {
-        return CommandClass.setOf(PmAddTask.class);
+    public CommandDispatchingPhase(DispatchCommand<I> dispatch,
+                                   VersionIncrement versionIncrement) {
+        super(versionIncrement);
+        this.dispatch = dispatch;
     }
 
     @Override
-    public Message dispatch(CommandEnvelope envelope) {
-        commands.add(envelope);
-        return Empty.getDefaultInstance();
+    protected List<Event> performDispatch() {
+        List<Event> events = dispatch.perform();
+        return events;
     }
 
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        // Do nothing.
+    public I getEntityId() {
+        return dispatch.entity()
+                       .getId();
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
-    public List<CommandEnvelope> getCommands() {
-        return commands;
+    @Override
+    public Message getMessageId() {
+        return dispatch.command()
+                       .getId();
     }
 }

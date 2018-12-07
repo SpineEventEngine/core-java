@@ -23,9 +23,8 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.Version;
-import io.spine.server.entity.Transaction.Phase;
 import io.spine.server.event.EventFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.model.ModelTests;
@@ -42,7 +41,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.Events.getMessage;
 import static io.spine.core.Versions.newVersion;
 import static io.spine.core.given.GivenEvent.withMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +61,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  *
  * @author Alex Tymchenko
  */
-@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
+@SuppressWarnings({"unused" /* JUnit nested classes. */, "ClassWithTooManyMethods"})
 public abstract class TransactionTest<I,
         E extends TransactionalEntity<I, S, B>,
         S extends Message,
@@ -86,14 +84,11 @@ public abstract class TransactionTest<I,
     }
 
     private static boolean checkPhase(Event event, Phase phase) {
-        Message eventMessage = getMessage(event);
-        boolean equalMessages = eventMessage.equals(phase.getEventMessage());
-        boolean equalContexts = event.getContext()
-                                     .equals(phase.getContext());
+        EventId id = event.getId();
+        Message phaseId = phase.getMessageId();
+        boolean equalIds = id.equals(phaseId);
         boolean isSuccessful = phase.isSuccessful();
-        return equalMessages
-                && equalContexts
-                && isSuccessful;
+        return equalIds && isSuccessful;
     }
 
     private static Version someVersion() {
@@ -120,6 +115,8 @@ public abstract class TransactionTest<I,
     protected abstract EventMessage createEventMessage();
 
     protected abstract EventMessage createEventMessageThatFailsInHandler();
+
+    protected abstract void applyEvent(Transaction tx, Event event);
 
     protected abstract void breakEntityValidation(E entity, RuntimeException toThrow);
 
@@ -204,8 +201,8 @@ public abstract class TransactionTest<I,
 
         assertEquals(1, tx.getPhases()
                           .size());
-        Phase<I, E, S, B> phase = tx.getPhases()
-                                    .get(0);
+        Phase<I, ?> phase = tx.getPhases()
+                              .get(0);
         assertTrue(checkPhase(event, phase));
     }
 
@@ -401,9 +398,7 @@ public abstract class TransactionTest<I,
         assertEquals(entity.getVersion(), tx.getVersion());
 
         Event event = withMessage(createEventMessage());
-        EventEnvelope envelope = EventEnvelope.of(event);
-        tx.apply(envelope);
-
+        applyEvent(tx, event);
         Version versionFromEvent = event.getContext()
                                         .getVersion();
         assertEquals(versionFromEvent, tx.getVersion());
@@ -411,11 +406,7 @@ public abstract class TransactionTest<I,
         assertEquals(versionFromEvent, entity.getVersion());
     }
 
-    private ArgumentMatcher<Phase<I, E, S, B>> matchesSuccessfulPhaseFor(Event event) {
+    private ArgumentMatcher<Phase<I, ?>> matchesSuccessfulPhaseFor(Event event) {
         return phase -> checkPhase(event, phase);
-    }
-
-    private void applyEvent(Transaction<I, E, S, B> tx, Event event) {
-        tx.apply(EventEnvelope.of(event));
     }
 }

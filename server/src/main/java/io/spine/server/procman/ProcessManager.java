@@ -35,6 +35,8 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Transaction;
+import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
@@ -127,6 +129,16 @@ public abstract class ProcessManager<I,
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>The method is overridden to be accessible from the {@code procman} package.
+     */
+    @Override
+    protected Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx() {
+        return super.tx();
+    }
+
+    /**
      * Dispatches the command to the handling method.
      *
      * @param  command the envelope with the command to dispatch
@@ -201,7 +213,7 @@ public abstract class ProcessManager<I,
         );
     }
 
-    private static ImmutableList<Event> noEvents() {
+    private static List<Event> noEvents() {
         return ImmutableList.of();
     }
 

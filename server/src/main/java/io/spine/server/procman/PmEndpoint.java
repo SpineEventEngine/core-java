@@ -34,6 +34,7 @@ import java.util.List;
  * @param <M> the type of message envelopes processed by the endpoint
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("unchecked") // Operations on repository are logically checked.
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
                           M extends ActorMessageEnvelope<?, ?, ?>>

@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
@@ -48,9 +49,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("AggregateTransaction should")
 class AggregateTransactionTest
         extends TransactionTest<ProjectId,
@@ -137,6 +135,13 @@ class AggregateTransactionTest
     @Override
     protected EventMessage createEventMessageThatFailsInHandler() {
         return Given.EventMessage.taskAdded(ID);
+    }
+
+    @Override
+    protected void applyEvent(Transaction tx, Event event) {
+        AggregateTransaction cast = (AggregateTransaction) tx;
+        EventEnvelope envelope = EventEnvelope.of(event);
+        cast.play(envelope);
     }
 
     @Override

@@ -20,38 +20,47 @@
 
 package io.spine.server.entity;
 
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
+import io.spine.server.event.EventDispatch;
 
 /**
- * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
+ * A phase that dispatches an event to the entity in transaction.
  *
- * @author Dmytro Dashenkov
+ * @param <I>
+ *         the type of entity ID
+ * @param <E>
+ *         the type of the entity
+ * @param <R>
+ *         the type of the event dispatch result
  */
-final class TransactionalEventPlayer implements EventPlayer {
+@Internal
+public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
+        extends Phase<I, R> {
 
-    private final EventPlayingTransaction<?, ?, ?, ?> transaction;
+    private final EventDispatch<I, E, R> dispatch;
 
-    /**
-     * Creates a new instance of {@code TransactionalEventPlayer}.
-     *
-     * @param transaction the transaction
-     */
-    TransactionalEventPlayer(EventPlayingTransaction<?, ?, ?, ?> transaction) {
-        this.transaction = checkNotNull(transaction);
+    public EventDispatchingPhase(EventDispatch<I, E, R> dispatch,
+                                 VersionIncrement versionIncrement) {
+        super(versionIncrement);
+        this.dispatch = dispatch;
     }
 
-    /**
-     * Plays the given events upon the underlying entity transaction.
-     */
     @Override
-    public void play(Iterable<Event> events) {
-        checkNotNull(events);
-        for (Event event : events) {
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            transaction.play(eventEnvelope);
-        }
+    protected R performDispatch() {
+        R result = dispatch.perform();
+        return result;
+    }
+
+    @Override
+    public I getEntityId() {
+        return dispatch.entity()
+                       .getId();
+    }
+
+    @Override
+    public Message getMessageId() {
+        return dispatch.event()
+                       .getId();
     }
 }

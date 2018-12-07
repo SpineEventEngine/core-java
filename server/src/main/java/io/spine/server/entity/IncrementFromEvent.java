@@ -20,38 +20,35 @@
 
 package io.spine.server.entity;
 
-import io.spine.core.Event;
+import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.core.Version;
 
 /**
- * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
+ * A version increment which sets the new version from the given event.
  *
- * @author Dmytro Dashenkov
+ * <p>Such increment strategy is applied to the {@link Entity} types which represent a sequence of
+ * events.
+ *
+ * <p>One example of such entity is {@link io.spine.server.aggregate.Aggregate Aggregate}.
+ * As a sequence of events, an {@code Aggregate} has no own versioning system, thus inherits the
+ * versions of the {@linkplain io.spine.server.aggregate.Apply applied} events. In other words, the
+ * current version of an {@code Aggregate} is the version of the last applied event.
  */
-final class TransactionalEventPlayer implements EventPlayer {
+@Internal
+public class IncrementFromEvent extends VersionIncrement {
 
-    private final EventPlayingTransaction<?, ?, ?, ?> transaction;
+    private final EventEnvelope event;
 
-    /**
-     * Creates a new instance of {@code TransactionalEventPlayer}.
-     *
-     * @param transaction the transaction
-     */
-    TransactionalEventPlayer(EventPlayingTransaction<?, ?, ?, ?> transaction) {
-        this.transaction = checkNotNull(transaction);
+    public IncrementFromEvent(Transaction transaction, EventEnvelope event) {
+        super(transaction);
+        this.event = event;
     }
 
-    /**
-     * Plays the given events upon the underlying entity transaction.
-     */
     @Override
-    public void play(Iterable<Event> events) {
-        checkNotNull(events);
-        for (Event event : events) {
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            transaction.play(eventEnvelope);
-        }
+    protected Version nextVersion() {
+        Version result = event.getEventContext()
+                              .getVersion();
+        return result;
     }
 }

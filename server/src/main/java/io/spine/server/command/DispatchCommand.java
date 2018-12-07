@@ -38,31 +38,32 @@ import static io.spine.core.Events.isRejection;
  * <p>Dispatches the given {@linkplain CommandEnvelope command} to the given
  * {@linkplain CommandHandlingEntity entity} and triggers the {@link EntityLifecycle}.
  *
- * @author Dmytro Dashenkov
+ * @param <I>
+ *         the type of entity ID
  */
 @Internal
-public final class DispatchCommand {
+public final class DispatchCommand<I> {
 
     private final EntityLifecycle lifecycle;
-    private final CommandHandlingEntity<?, ?, ?> entity;
+    private final CommandHandlingEntity<I, ?, ?> entity;
     private final CommandEnvelope command;
 
     private DispatchCommand(EntityLifecycle lifecycle,
-                            CommandHandlingEntity<?, ?, ?> entity,
+                            CommandHandlingEntity<I, ?, ?> entity,
                             CommandEnvelope command) {
         this.lifecycle = lifecycle;
         this.entity = entity;
         this.command = command;
     }
 
-    public static DispatchCommand operationFor(EntityLifecycle lifecycle,
-                                               CommandHandlingEntity<?, ?, ?> entity,
-                                               CommandEnvelope command) {
+    public static <I> DispatchCommand<I> operationFor(EntityLifecycle lifecycle,
+                                                      CommandHandlingEntity<I, ?, ?> entity,
+                                                      CommandEnvelope command) {
         checkNotNull(lifecycle);
         checkNotNull(entity);
         checkNotNull(command);
 
-        return new DispatchCommand(lifecycle, entity, command);
+        return new DispatchCommand<>(lifecycle, entity, command);
     }
 
     /**
@@ -84,6 +85,14 @@ public final class DispatchCommand {
         List<Event> result = entity.dispatchCommand(command);
         onCommandResult(command.getCommand(), result);
         return result;
+    }
+
+    public CommandHandlingEntity<I, ?, ?> entity() {
+        return entity;
+    }
+
+    public CommandEnvelope command() {
+        return command;
     }
 
     private void onCommandResult(Command command, List<Event> produced) {
