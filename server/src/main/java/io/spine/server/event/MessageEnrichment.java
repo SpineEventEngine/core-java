@@ -146,7 +146,8 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
                                                              Field.getFieldClass(targetField)));
                 EnrichmentFunction fieldEnrichment = function.get();
                 @SuppressWarnings("unchecked"
-                        /* the model is checked during the initialization and activation */) Object targetValue = fieldEnrichment.apply(srcFieldValue, context);
+                        /* the model is checked during the initialization and activation */)
+                Object targetValue = fieldEnrichment.apply(srcFieldValue, context);
                 if (targetValue != null) {
                     builder.setField(targetField, targetValue);
                 }
