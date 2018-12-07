@@ -53,7 +53,6 @@ import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.LifecyclePredicates.isEntityActive;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -154,7 +153,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Finds an entity with the passed ID if this entity is
-     * {@linkplain LifecyclePredicates#isEntityActive() active}.
+     * {@linkplain WithLifecycle#isActive() active}.
      *
      * @param id
      *         the ID of the entity to find
@@ -168,8 +167,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.empty();
         }
         EntityRecord record = optional.get();
-        boolean recordActive = isEntityActive().test(record.getLifecycleFlags());
-        if (!recordActive) {
+        if (!record.isActive()) {
             return Optional.empty();
         }
         E entity = toEntity(record);
@@ -178,7 +176,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Finds a record and returns it if its {@link LifecycleFlags} don't make it
-     * {@linkplain LifecyclePredicates#isEntityActive()}.
+     * {@linkplain WithLifecycle#isActive() active}.
      */
     private Optional<EntityRecord> findRecord(I id) {
         RecordStorage<I> storage = recordStorage();

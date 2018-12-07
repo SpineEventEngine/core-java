@@ -22,7 +22,6 @@ syntax = "proto3";
 package spine.test.projection.event;
 
 import "spine/options.proto";
-import "spine/server/entity/entity.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.projection.event";

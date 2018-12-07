@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
@@ -39,7 +41,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A value of {@link EntityRecord} associated with its {@linkplain EntityColumn columns}.
  */
-public final class EntityRecordWithColumns implements Serializable {
+public final class EntityRecordWithColumns implements WithLifecycle, Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -166,6 +168,26 @@ public final class EntityRecordWithColumns implements Serializable {
      */
     public boolean hasColumns() {
         return hasStorageFields;
+    }
+
+    @Override
+    public LifecycleFlags getLifecycleFlags() {
+        return record.getLifecycleFlags();
+    }
+
+    @Override
+    public boolean isArchived() {
+        return record.isArchived();
+    }
+
+    @Override
+    public boolean isDeleted() {
+        return record.isDeleted();
+    }
+
+    @Override
+    public boolean isActive() {
+        return record.isActive();
     }
 
     @Override
