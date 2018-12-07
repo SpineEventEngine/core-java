@@ -155,6 +155,7 @@ public class TestProcessManager
 
     @Command
     Pair<PmScheduleRetrospective, PmPlanIteration> split(PmCancelIteration command) {
+        remember(command);
         ProjectId pid = command.getProjectId();
         return Pair.of(PmScheduleRetrospective
                                .newBuilder()
@@ -168,6 +169,7 @@ public class TestProcessManager
 
     @Command
     Pair<PmScheduleRetrospective, PmPlanIteration> on(PmIterationCompleted event) {
+        remember(event);
         ProjectId pid = event.getProjectId();
         return Pair.of(PmScheduleRetrospective
                                .newBuilder()
@@ -185,6 +187,7 @@ public class TestProcessManager
 
     @Command
     Optional<PmStartIteration> on(PmIterationPlanned event) {
+        remember(event);
         if (event.getBudgetAllocated()) {
             return Optional.of(PmStartIteration.newBuilder()
                                                .setProjectId(event.getProjectId())

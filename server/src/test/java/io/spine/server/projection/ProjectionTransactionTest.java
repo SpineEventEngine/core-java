@@ -22,6 +22,7 @@ package io.spine.server.projection;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.core.given.GivenEvent;
@@ -142,6 +143,13 @@ class ProjectionTransactionTest
     }
 
     @Override
+    protected void applyEvent(Transaction tx, Event event) {
+        ProjectionTransaction cast = (ProjectionTransaction) tx;
+        EventEnvelope envelope = EventEnvelope.of(event);
+        cast.play(envelope);
+    }
+
+    @Override
     protected void breakEntityValidation(
             Projection<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
@@ -153,11 +161,12 @@ class ProjectionTransactionTest
      * Tests the version advancement strategy for the {@link Projection}s.
      *
      * <p>The versioning strategy for {@link Projection} is
-     * {@link io.spine.server.entity.EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT}. This test
-     * case substitutes {@link #advanceVersionFromEvent()}, which tested the behavior of
-     * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
+     * {@link io.spine.server.entity.AutoIncrement}. This test case substitutes
+     * {@link #advanceVersionFromEvent()}, which tested the behavior of
+     * {@link io.spine.server.entity.IncrementFromEvent} strategy.
      */
-    @SuppressWarnings("CheckReturnValue") // Can ignore value of play() in this test.
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Can ignore value of play() in this test.
     @Test
     @DisplayName("increment version on event")
     void incrementVersionOnEvent() {

@@ -20,38 +20,32 @@
 
 package io.spine.server.entity;
 
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.annotation.Internal;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 
 /**
- * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
+ * A version increment which always advances the given entity version by 1.
  *
- * @author Dmytro Dashenkov
+ * <p>Such increment strategy is applied to the {@link Entity} types which cannot use the event
+ * versions, such as {@link io.spine.server.projection.Projection Projection}s.
+ *
+ * <p>A {@code Projection} represents an arbitrary cast of data in a specific moment in
+ * time. The events applied to a {@code Projection} are produced by different {@code Entities}
+ * and have no common versioning. Thus, a {@code Projection} has its own versioning system.
+ * Each event <i>increments</i> the {@code Projection} version by one.
  */
-final class TransactionalEventPlayer implements EventPlayer {
+@Internal
+public class AutoIncrement extends VersionIncrement {
 
-    private final EventPlayingTransaction<?, ?, ?, ?> transaction;
-
-    /**
-     * Creates a new instance of {@code TransactionalEventPlayer}.
-     *
-     * @param transaction the transaction
-     */
-    TransactionalEventPlayer(EventPlayingTransaction<?, ?, ?, ?> transaction) {
-        this.transaction = checkNotNull(transaction);
+    public AutoIncrement(Transaction transaction) {
+        super(transaction);
     }
 
-    /**
-     * Plays the given events upon the underlying entity transaction.
-     */
     @Override
-    public void play(Iterable<Event> events) {
-        checkNotNull(events);
-        for (Event event : events) {
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            transaction.play(eventEnvelope);
-        }
+    protected Version nextVersion() {
+        Version current = transaction().getVersion();
+        Version result = Versions.increment(current);
+        return result;
     }
 }
