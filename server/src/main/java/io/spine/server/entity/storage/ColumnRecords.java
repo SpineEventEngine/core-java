@@ -36,7 +36,7 @@ import static java.lang.String.format;
  */
 public final class ColumnRecords {
 
-    /** Prevent initialization of the utility class */
+    /** Prevents initialization of the utility class. */
     private ColumnRecords() {
     }
 
