@@ -40,7 +40,6 @@ import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsActive;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
 
@@ -52,7 +51,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
     private final Map<I, EntityRecordWithColumns> activeRecords =
-            filterValues(records, isRecordWithColumnsActive()::test);
+            filterValues(records, r -> r != null && r.isActive());
     private static final EntityRecordUnpacker UNPACKER = EntityRecordUnpacker.INSTANCE;
 
     @Override

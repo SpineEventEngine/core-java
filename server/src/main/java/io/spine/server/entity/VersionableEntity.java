@@ -26,8 +26,6 @@ import io.spine.server.entity.storage.Column;
 
 /**
  * An entity with version and timestamp of the last modification.
- *
- * @author Alexander Yevsyukov
  */
 public interface VersionableEntity<I, S extends Message> extends Entity<I, S> {
 

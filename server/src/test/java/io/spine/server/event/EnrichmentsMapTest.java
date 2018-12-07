@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import io.spine.test.event.EnrichmentByContextFields;
@@ -63,11 +62,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-                   /* JUnit nested classes cannot be static. */})
 @DisplayName("EnrichmentsMap should")
 class EnrichmentsMapTest {
 
@@ -271,7 +265,7 @@ class EnrichmentsMapTest {
             Class<? extends Message>... eventClassesExpected) {
         Collection<String> eventTypesActual = getEventTypes(enrichmentClass);
 
-        for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
+        for (Class<? extends Message> expectedClass : eventClassesExpected) {
             String expectedTypeName = TypeName.of(expectedClass)
                                               .value();
             assertTrue(eventTypesActual.contains(expectedTypeName));

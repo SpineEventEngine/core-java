@@ -29,8 +29,6 @@ option java_package = "io.spine.system.server";
 option java_outer_classname = "SBEventsProto";
 option java_multiple_files = true;
 
-import "spine/test/system/server/command_lifecycle_test.proto";
-
 message SMProjectCreated {
 
     string uuid = 1;

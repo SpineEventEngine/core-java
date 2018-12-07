@@ -26,8 +26,6 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.server.route.given.switchman.rejection";
 
-import "spine/test/aggregate/project.proto";
-
 message SwitchmanUnavailable {
     string switchman_name = 1;
 }

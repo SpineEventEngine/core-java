@@ -22,10 +22,8 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
-import io.spine.server.aggregate.model.EventApplier;
 import io.spine.server.entity.EventPlayingTransaction;
 import io.spine.server.entity.IncrementFromEvent;
 import io.spine.server.entity.VersionIncrement;
@@ -37,7 +35,6 @@ import io.spine.validate.ValidatingBuilder;
  * @param <I> the type of aggregate IDs
  * @param <S> the type of aggregate state
  * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
- * @author Alex Tymchenko
  */
 @Internal
 public class AggregateTransaction<I,
