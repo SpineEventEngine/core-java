@@ -142,7 +142,7 @@ public abstract class TransactionalEntity<I,
         return "Cannot modify entity state: transaction is not available.";
     }
 
-    Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx() {
+    protected Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx() {
         return ensureTransaction();
     }
 

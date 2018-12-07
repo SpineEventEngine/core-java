@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
@@ -39,9 +40,6 @@ import java.util.List;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alex Tymchenko
- */
 class PmTransactionTest
         extends TransactionTest<ProjectId,
                                 ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
@@ -139,6 +137,15 @@ class PmTransactionTest
         return PmTaskAdded.newBuilder()
                           .setProjectId(ID)
                           .build();
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Method called to dispatch event.
+    @Override
+    protected void applyEvent(Transaction tx, Event event) {
+        PmTransaction cast = (PmTransaction) tx;
+        EventEnvelope envelope = EventEnvelope.of(event);
+        cast.dispatchEvent(envelope);
     }
 
     @Override

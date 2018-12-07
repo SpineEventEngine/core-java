@@ -56,7 +56,7 @@ public class TestTransaction {
         TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void dispatch(TransactionalEntity entity, EventEnvelope event) {
+            protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setArchived(true);
             }
         };
@@ -75,7 +75,7 @@ public class TestTransaction {
         TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void dispatch(TransactionalEntity entity, EventEnvelope event) {
+            protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setDeleted(true);
             }
         };
@@ -85,23 +85,40 @@ public class TestTransaction {
     }
 
     @SuppressWarnings("unchecked")
-    private static class TestTx extends Transaction {
+    private static class TestTx extends EventPlayingTransaction {
 
-        protected TestTx(TransactionalEntity entity) {
+        private TestTx(TransactionalEntity entity) {
             super(entity);
         }
 
-        public TestTx(TransactionalEntity entity, Message state, Version version) {
+        private TestTx(TransactionalEntity entity, Message state, Version version) {
             super(entity, state, version);
         }
 
         @Override
-        protected void dispatch(TransactionalEntity entity, EventEnvelope event) {
+        protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
             // NoOp by default
         }
 
+        @Override
+        protected VersionIncrement createVersionIncrement(EventEnvelope event) {
+            return new NoIncrement(this);
+        }
+
         private void dispatchForTest() {
-            dispatch(getEntity(), null);
+            doDispatch(getEntity(), null);
+        }
+    }
+
+    private static class NoIncrement extends VersionIncrement {
+
+        private NoIncrement(Transaction transaction) {
+            super(transaction);
+        }
+
+        @Override
+        protected Version nextVersion() {
+            return transaction().getVersion();
         }
     }
 }

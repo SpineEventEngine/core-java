@@ -33,6 +33,7 @@ import java.util.List;
  * @param <P> the type of process managers
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
 public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, EventEnvelope> {
@@ -54,7 +55,8 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected List<Event> doDispatch(P processManager, EventEnvelope envelope) {
-        List<Event> events = processManager.dispatchEvent(envelope);
+        PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
+        List<Event> events = tx.dispatchEvent(envelope);
         return events;
     }
 

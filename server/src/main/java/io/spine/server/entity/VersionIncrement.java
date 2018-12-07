@@ -20,38 +20,43 @@
 
 package io.spine.server.entity;
 
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.annotation.Internal;
+import io.spine.core.Version;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Versions.checkIsIncrement;
 
 /**
- * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
- *
- * @author Dmytro Dashenkov
+ * A setter of a new version for the entity in transaction.
  */
-final class TransactionalEventPlayer implements EventPlayer {
+@Internal
+public abstract class VersionIncrement {
 
-    private final EventPlayingTransaction<?, ?, ?, ?> transaction;
+    private final Transaction transaction;
+
+    VersionIncrement(Transaction transaction) {
+        this.transaction = transaction;
+    }
 
     /**
-     * Creates a new instance of {@code TransactionalEventPlayer}.
+     * Advances the version of the entity in transaction.
+     */
+    void apply() {
+        Version nextVersion = nextVersion();
+        checkIsIncrement(transaction.getVersion(), nextVersion);
+        transaction.setVersion(nextVersion);
+    }
+
+    /**
+     * Returns the transaction on which the {@code VersionIncrement} operates.
+     */
+    Transaction transaction() {
+        return transaction;
+    }
+
+    /**
+     * Creates a new version for the entity in transaction.
      *
-     * @param transaction the transaction
+     * @return the incremented {@code Version} of the entity
      */
-    TransactionalEventPlayer(EventPlayingTransaction<?, ?, ?, ?> transaction) {
-        this.transaction = checkNotNull(transaction);
-    }
-
-    /**
-     * Plays the given events upon the underlying entity transaction.
-     */
-    @Override
-    public void play(Iterable<Event> events) {
-        checkNotNull(events);
-        for (Event event : events) {
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            transaction.play(eventEnvelope);
-        }
-    }
+    protected abstract Version nextVersion();
 }
