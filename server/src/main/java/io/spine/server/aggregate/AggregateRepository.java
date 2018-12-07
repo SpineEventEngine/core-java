@@ -496,9 +496,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Fetches the history of the {@code Aggregate} with the given ID.
      *
-     * <p>To read an {@link AggregateStateRecord} from an {@link AggregateStorage},
-     * a {@linkplain #getSnapshotTrigger() snapshot trigger} is used as a
-     * {@linkplain AggregateReadRequest#getBatchSize() batch size}.
+     * <p>The method fetches only the recent history of the aggregate. The maximum depth of the read
+     * operation is defined as the greater number between
+     * the {@linkplain AggregateStorage#readEventCountAfterLastSnapshot(Object) event count after
+     * last snapshot} and the {@linkplain #getSnapshotTrigger() snapshot trigger}, plus one.
+     * This way, we secure the read operation from:
+     * <ol>
+     *     <li>snapshot trigger decrease;
+     *     <li>eventual consistency in the event count field.
+     * </ol>
+     *
+     * <p>The extra one unit of depth is added in order to be sure to include the last snapshot
+     * itself.
      *
      * @param id the ID of the {@code Aggregate} to fetch
      * @return the {@link AggregateStateRecord} for the {@code Aggregate} or
@@ -508,7 +517,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         AggregateStorage<I> storage = aggregateStorage();
 
         int eventsAfterLastSnapshot = storage.readEventCountAfterLastSnapshot(id);
-        int batchSize = max(snapshotTrigger, eventsAfterLastSnapshot);
+        int batchSize = max(snapshotTrigger, eventsAfterLastSnapshot) + 1;
 
         AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
         Optional<AggregateStateRecord> eventsFromStorage = storage.read(request);
