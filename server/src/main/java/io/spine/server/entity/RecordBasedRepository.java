@@ -53,7 +53,7 @@ import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityActive;
+import static io.spine.server.entity.LifecyclePredicates.isEntityActive;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -154,7 +154,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Finds an entity with the passed ID if this entity is
-     * {@linkplain EntityWithLifecycle.Predicates#isEntityActive() active}.
+     * {@linkplain LifecyclePredicates#isEntityActive() active}.
      *
      * @param id
      *         the ID of the entity to find
@@ -178,7 +178,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Finds a record and returns it if its {@link LifecycleFlags} don't make it
-     * {@linkplain EntityWithLifecycle.Predicates#isEntityActive()}.
+     * {@linkplain LifecyclePredicates#isEntityActive()}.
      */
     private Optional<EntityRecord> findRecord(I id) {
         RecordStorage<I> storage = recordStorage();

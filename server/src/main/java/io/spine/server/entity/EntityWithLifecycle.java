@@ -22,9 +22,6 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
-
-import java.util.function.Predicate;
 
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
@@ -57,74 +54,4 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
      * Tells whether lifecycle flags of the entity changed since its initialization.
      */
     boolean lifecycleFlagsChanged();
-
-    /**
-     * Collection of predicates for filtering entities with lifecycle flags.
-     */
-    class Predicates {
-
-        private static final Predicate<LifecycleFlags> isEntityActive =
-                input -> input == null ||
-                        !(input.getArchived() || input.getDeleted());
-
-        private static final Predicate<EntityRecord> isRecordActive =
-                input -> {
-                    if (input == null) {
-                        return true;
-                    }
-                    LifecycleFlags flags = input.getLifecycleFlags();
-                    boolean result = isEntityActive.test(flags);
-                    return result;
-                };
-
-        private static final Predicate<EntityRecordWithColumns> isRecordWithColumnsActive =
-                input -> {
-                    if (input == null) {
-                        return false;
-                    }
-                    EntityRecord record = input.getRecord();
-                    return isRecordActive().test(record);
-                };
-
-        /** Prevent instantiation of this utility class. */
-        private Predicates() {
-        }
-
-        /**
-         * Obtains the predicate for checking if an entity has
-         * any of the {@link LifecycleFlags} set.
-         *
-         * <p>If so, an entity becomes inactive to load methods of a repository.
-         * Entities with flags set must be treated by special {@linkplain RepositoryView views}
-         * of a repository.
-         *
-         * @return the filter predicate
-         * @see LifecycleFlags
-         */
-        public static Predicate<LifecycleFlags> isEntityActive() {
-            return isEntityActive;
-        }
-
-        /**
-         * Obtains the predicate for checking if an entity record has any
-         * of the {@link LifecycleFlags} set.
-         *
-         * @return the predicate that filters inactive {@link EntityRecord}s
-         * @see EntityRecord#getLifecycleFlags()
-         */
-        public static Predicate<EntityRecord> isRecordActive() {
-            return isRecordActive;
-        }
-
-        /**
-         * Obtains the predicate for checking if an {@link EntityRecordWithColumns entity record
-         * with columns} has any of the {@link LifecycleFlags} set.
-         *
-         * @return the predicate that filters inactive {@link EntityRecordWithColumns}s
-         * @see EntityRecord#getLifecycleFlags()
-         */
-        public static Predicate<EntityRecordWithColumns> isRecordWithColumnsActive() {
-            return isRecordWithColumnsActive;
-        }
-    }
 }

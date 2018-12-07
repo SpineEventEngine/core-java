@@ -32,7 +32,6 @@ import java.util.Optional;
  * @param <I> the type of identifiers
  * @param <M> the type of records
  * @param <R> the type of {@linkplain ReadRequest read requests}
- * @author Alexander Yevsyukov
  */
 @SPI
 public interface Storage<I, M extends Message, R extends ReadRequest<I>> extends AutoCloseable {

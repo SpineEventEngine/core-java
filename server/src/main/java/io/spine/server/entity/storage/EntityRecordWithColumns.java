@@ -38,8 +38,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A value of {@link EntityRecord} associated with its {@linkplain EntityColumn columns}.
- *
- * @author Dmytro Dashenkov
  */
 public final class EntityRecordWithColumns implements Serializable {
 
@@ -50,7 +48,7 @@ public final class EntityRecordWithColumns implements Serializable {
     private final boolean hasStorageFields;
 
     /**
-     * Creates a new instance of the {@code EntityRecordWithColumns}.
+     * Creates a new instance with columns.
      *
      * @param record the record to pack
      * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} to pack
@@ -63,8 +61,7 @@ public final class EntityRecordWithColumns implements Serializable {
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithColumns} with no
-     * {@linkplain EntityColumn columns}.
+     * Creates an instance with no {@linkplain EntityColumn columns}.
      *
      * <p>An object created with this constructor will always return {@code false} on
      * {@link #hasColumns()}.
@@ -92,7 +89,7 @@ public final class EntityRecordWithColumns implements Serializable {
      * @param record  the {@link EntityRecord} to create value from
      * @param entity  the {@link Entity} to extract {@linkplain EntityColumn column} values from
      * @param storage the {@linkplain RecordStorage storage} for which the record is created
-     * @return new instance of {@link EntityRecordWithColumns}
+     * @return new instance
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
@@ -104,8 +101,7 @@ public final class EntityRecordWithColumns implements Serializable {
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithColumns}
-     * with no {@linkplain EntityColumn columns}.
+     * Creates an instance with no {@linkplain EntityColumn columns}.
      *
      * <p>An object created with this factory method will always return {@code false} on
      * {@link #hasColumns()}.
@@ -117,7 +113,7 @@ public final class EntityRecordWithColumns implements Serializable {
     }
 
     /**
-     * Creates a new instance of the {@code EntityRecordWithColumns}.
+     * Creates a new instance.
      */
     @VisibleForTesting
     static EntityRecordWithColumns of(EntityRecord record,

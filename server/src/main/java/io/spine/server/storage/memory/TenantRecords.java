@@ -40,8 +40,8 @@ import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsActive;
 import static io.spine.server.entity.FieldMasks.applyMask;
+import static io.spine.server.entity.LifecyclePredicates.isRecordWithColumnsActive;
 import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
 
 /**

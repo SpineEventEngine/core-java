@@ -23,8 +23,8 @@ package io.spine.server.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityActive;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordActive;
+import static io.spine.server.entity.LifecyclePredicates.isEntityActive;
+import static io.spine.server.entity.LifecyclePredicates.isRecordActive;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
