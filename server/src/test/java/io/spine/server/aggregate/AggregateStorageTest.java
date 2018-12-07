@@ -469,6 +469,41 @@ public abstract class AggregateStorageTest
         }
     }
 
+    @Nested
+    @DisplayName("properly read event count")
+    class ReadEventCount {
+
+        @Test
+        @DisplayName("set to default zero value")
+        void zeroByDefault() {
+            assertEquals(0, storage.readEventCountAfterLastSnapshot(id));
+        }
+
+        @Test
+        @DisplayName("set to specified value")
+        void setToSpecifiedValue() {
+            int expectedCount = 32;
+            storage.writeEventCountAfterLastSnapshot(id, expectedCount);
+
+            int actualCount = storage.readEventCountAfterLastSnapshot(id);
+
+            assertEquals(expectedCount, actualCount);
+        }
+
+        @Test
+        @DisplayName("updated to specified value")
+        void updated() {
+            int primaryValue = 16;
+            storage.writeEventCountAfterLastSnapshot(id, primaryValue);
+            int expectedValue = 32;
+            storage.writeEventCountAfterLastSnapshot(id, expectedValue);
+
+            int actualCount = storage.readEventCountAfterLastSnapshot(id);
+
+            assertEquals(expectedValue, actualCount);
+        }
+    }
+
     @Test
     @DisplayName("continue reading history if snapshot was not found in first batch")
     void continueReadHistoryIfSnapshotNotFound() {
@@ -558,21 +593,21 @@ public abstract class AggregateStorageTest
     class BeingClosedThrow {
 
         @Test
-        @DisplayName("write operations")
+        @DisplayName("writing event count")
         void onWritingEventCount() {
             close(storage);
 
             assertThrows(IllegalStateException.class,
-                         () -> storage.write(id, AggregateStateRecord.getDefaultInstance()));
+                         () -> storage.writeEventCountAfterLastSnapshot(id, 5));
         }
 
         @Test
-        @DisplayName("read operations")
+        @DisplayName("reading event count")
         void onReadingEventCount() {
             close(storage);
 
             assertThrows(IllegalStateException.class,
-                         () -> storage.read(new AggregateReadRequest<>(id, 42)));
+                         () -> storage.readEventCountAfterLastSnapshot(id));
         }
     }
 
