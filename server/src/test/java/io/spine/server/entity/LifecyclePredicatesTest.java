@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,47 +29,52 @@ import static io.spine.server.entity.LifecyclePredicates.isRecordActive;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
-@DisplayName("EntityWithLifecycle Predicates should")
-class PredicatesTest {
+@DisplayName("LifecyclePredicates utility class should")
+class LifecyclePredicatesTest extends UtilityClassTest<LifecyclePredicates> {
+
+    LifecyclePredicatesTest() {
+        super(LifecyclePredicates.class);
+    }
 
     @Test
     @DisplayName("consider archived entity inactive")
     void stateArchivedEntityInactive() {
-        LifecycleFlags status = LifecycleFlags.newBuilder()
-                                              .setArchived(true)
-                                              .build();
+        LifecycleFlags status = LifecycleFlags
+                .newBuilder()
+                .setArchived(true)
+                .build();
         assertFalse(isEntityActive().test(status));
     }
 
     @Test
     @DisplayName("consider deleted entity inactive")
     void stateDeletedEntityInactive() {
-        LifecycleFlags status = LifecycleFlags.newBuilder()
-                                              .setDeleted(true)
-                                              .build();
+        LifecycleFlags status = LifecycleFlags
+                .newBuilder()
+                .setDeleted(true)
+                .build();
         assertFalse(isEntityActive().test(status));
     }
 
     @Test
     @DisplayName("consider archived record inactive")
     void stateArchivedRecordInactive() {
-        EntityRecord record = EntityRecord.newBuilder()
-                                          .setLifecycleFlags(LifecycleFlags.newBuilder()
-                                                                           .setArchived(true))
-                                          .build();
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setLifecycleFlags(LifecycleFlags.newBuilder()
+                                                 .setArchived(true))
+                .build();
         assertFalse(isRecordActive().test(record));
     }
 
     @Test
     @DisplayName("consider deleted record inactive")
     void stateDeletedRecordInactive() {
-        EntityRecord record = EntityRecord.newBuilder()
-                                          .setLifecycleFlags(LifecycleFlags.newBuilder()
-                                                                           .setDeleted(true))
-                                          .build();
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setLifecycleFlags(LifecycleFlags.newBuilder()
+                                                 .setDeleted(true))
+                .build();
         assertFalse(isRecordActive().test(record));
     }
 

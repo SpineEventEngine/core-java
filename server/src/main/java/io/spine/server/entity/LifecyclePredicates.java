@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 /**
  * Collection of predicates for filtering entities with lifecycle flags.
  */
-public class LifecyclePredicates {
+public final class LifecyclePredicates {
 
     private static final Predicate<LifecycleFlags> isEntityActive =
             input -> input == null ||
