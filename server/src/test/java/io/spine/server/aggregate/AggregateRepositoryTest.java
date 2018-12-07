@@ -98,9 +98,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
@@ -266,7 +268,7 @@ public class AggregateRepositoryTest {
     }
 
     @Nested
-    @DisplayName("pass snapshot trigger to AggregateReadRequest")
+    @DisplayName("pass snapshot trigger + 1 to AggregateReadRequest")
     class PassSnapshotTrigger {
 
         @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
@@ -287,7 +289,7 @@ public class AggregateRepositoryTest {
 
             AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
             assertEquals(id, passedRequest.getRecordId());
-            assertEquals(repositorySpy.getSnapshotTrigger(), passedRequest.getBatchSize());
+            assertEquals(repositorySpy.getSnapshotTrigger() + 1, passedRequest.getBatchSize());
         }
 
         @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
@@ -310,7 +312,39 @@ public class AggregateRepositoryTest {
 
             AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
             assertEquals(id, passedRequest.getRecordId());
-            assertEquals(nonDefaultSnapshotTrigger, passedRequest.getBatchSize());
+            assertEquals(nonDefaultSnapshotTrigger + 1, passedRequest.getBatchSize());
+        }
+    }
+
+    @Nested
+    @DisplayName("pass event count after last snapshot + 1 to AggregateReadRequest")
+    class PassEventCount {
+
+        @SuppressWarnings("CheckReturnValue")
+            // Calling `AggregateRepository.loadOrCreate` for the side effect.
+        @Test
+        @DisplayName("when the count is greater than the snapshot trigger")
+        void whenGreaterThanTrigger() {
+            AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository());
+            AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+            when(repositorySpy.aggregateStorage())
+                    .thenReturn(storageSpy);
+            int snapshotTrigger = repositorySpy.getSnapshotTrigger();
+            int eventCount = snapshotTrigger * 2;
+            when(storageSpy.readEventCountAfterLastSnapshot(any(ProjectId.class)))
+                    .thenReturn(eventCount);
+
+            ProjectId id = Sample.messageOfType(ProjectId.class);
+            repositorySpy.loadOrCreate(id);
+
+            @SuppressWarnings("unchecked") // Reflective mock creation.
+            ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+                    ArgumentCaptor.forClass(AggregateReadRequest.class);
+            verify(storageSpy).read(requestCaptor.capture());
+
+            AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+            assertEquals(id, passedRequest.getRecordId());
+            assertEquals(eventCount + 1, passedRequest.getBatchSize());
         }
     }
 
