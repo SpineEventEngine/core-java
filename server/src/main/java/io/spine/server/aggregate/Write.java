@@ -97,7 +97,7 @@ final class Write<I> {
         if (!eventBatch.isEmpty()) {
             persist(eventBatch);
         }
-        commit();
+        commit(eventCount);
     }
 
     private void persist(Collection<Event> events, Snapshot snapshot) {
@@ -121,9 +121,10 @@ final class Write<I> {
         storage.write(id, record);
     }
 
-    private void commit() {
+    private void commit(int eventCount) {
         aggregate.commitEvents();
         if (aggregate.lifecycleFlagsChanged()) {
+            storage.writeEventCountAfterLastSnapshot(id, eventCount);
             storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
         }
     }
