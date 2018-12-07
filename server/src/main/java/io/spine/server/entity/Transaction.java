@@ -69,8 +69,6 @@ import static java.lang.String.format;
  * @param <E> the type of entity
  * @param <S> the type of entity state
  * @param <B> the type of a {@code ValidatingBuilder} for the entity state
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 @Internal
@@ -134,7 +132,7 @@ public abstract class Transaction<I,
      * <p>Has {@code true} value since the transaction instance creation
      * until {@linkplain #commit() commit()} is performed.
      */
-    @SuppressWarnings("UnusedAssignment") // is used for documentation purposes.
+    @SuppressWarnings("UnusedAssignment") // is used to make the initial tx. state explicit.
     private boolean active = false;
 
     /**
@@ -217,7 +215,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * @return the version of the entity, modified within this transaction
+     * Obtains the version of the entity, modified within this transaction.
      */
     Version getVersion() {
         return version;
@@ -336,12 +334,13 @@ public abstract class Transaction<I,
         Version version = entity.getVersion();
         Any state = pack(entity.getState());
         LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
-        return EntityRecord.newBuilder()
-                           .setEntityId(entityId)
-                           .setVersion(version)
-                           .setState(state)
-                           .setLifecycleFlags(lifecycleFlags)
-                           .build();
+        return EntityRecord
+                .newBuilder()
+                .setEntityId(entityId)
+                .setVersion(version)
+                .setState(state)
+                .setLifecycleFlags(lifecycleFlags)
+                .build();
     }
 
     /**
@@ -355,7 +354,6 @@ public abstract class Transaction<I,
      * @return this instance of the transaction
      */
     @CanIgnoreReturnValue
-    @SuppressWarnings("OverlyBroadCatchBlock")  /* to `rollback(..)` in case of any exception. */
     Transaction<I, E, S, B> apply(EventEnvelope event) {
         Phase<I, E, S, B> phase = new Phase<>(this, event);
 

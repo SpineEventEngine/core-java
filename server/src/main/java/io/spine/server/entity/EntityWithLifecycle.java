@@ -86,8 +86,8 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
                     return isRecordActive().test(record);
                 };
 
+        /** Prevent instantiation of this utility class. */
         private Predicates() {
-            // Prevent instantiation of this utility class.
         }
 
         /**
