@@ -73,7 +73,7 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithManyGetters.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
-            assertThat(entityColumns).hasSize(3);
+            assertThat(entityColumns).hasSize(4);
             assertTrue(containsColumn(entityColumns, "someMessage"));
             assertTrue(containsColumn(entityColumns, "integerFieldValue"));
             assertTrue(containsColumn(entityColumns, "floatNull"));
@@ -123,7 +123,7 @@ class ColumnReaderTest {
         void inheritedNonPublicColumns() {
             ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-            assertThat(entityColumns).hasSize(3);
+            assertThat(entityColumns).hasSize(4);
         }
 
         @Test

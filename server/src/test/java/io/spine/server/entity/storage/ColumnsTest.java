@@ -63,7 +63,7 @@ class ColumnsTest {
     private
     static void checkFields(EntityWithManyGetters entity, Map<String, MemoizedValue> fields) {
         assertNotNull(fields);
-        assertThat(fields).hasSize(3);
+        assertThat(fields).hasSize(4);
 
         String floatNullKey = "floatNull";
         MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
@@ -95,10 +95,11 @@ class ColumnsTest {
     @Test
     @DisplayName("get all valid columns for entity class")
     void getAllColumns() {
-        Collection<EntityColumn> entityColumns = Columns.getAllColumns(EntityWithManyGetters.class);
+        Collection<EntityColumn> entityColumns =
+                Columns.getAllColumns(EntityWithManyGetters.class);
 
         assertNotNull(entityColumns);
-        assertThat(entityColumns).hasSize(3);
+        assertThat(entityColumns).hasSize(4);
     }
 
     @Test
@@ -126,6 +127,13 @@ class ColumnsTest {
 
         assertThrows(IllegalArgumentException.class,
                      () -> findColumn(entityClass, nonExistingColumnName));
+    }
+
+    @Test
+    @DisplayName("not count method with `is` prefix and non-boolean return type as column")
+    void requireBooleanTypeForIs() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> findColumn(EntityWithManyGetters.class, "isNonBoolean"));
     }
 
     @Test

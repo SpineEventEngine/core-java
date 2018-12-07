@@ -64,7 +64,7 @@ class ColumnValueExtractorTest {
             EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
-            assertThat(columnValues).hasSize(3);
+            assertThat(columnValues).hasSize(4);
             assertEquals(entity.getSomeMessage(), columnValues.get("someMessage")
                                                               .getValue());
         }

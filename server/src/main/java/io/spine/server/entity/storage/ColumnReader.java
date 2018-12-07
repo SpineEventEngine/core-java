@@ -44,8 +44,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * checks verifying that {@link EntityColumn} definitions in the processed {@link Entity} class are
  * correct. If column definitions are incorrect, the exception is thrown upon
  * {@linkplain EntityColumn entity columns} reading.
- *
- * @author Dmytro Kuzmin
+ * 
  * @see Columns
  * @see EntityColumn
  */

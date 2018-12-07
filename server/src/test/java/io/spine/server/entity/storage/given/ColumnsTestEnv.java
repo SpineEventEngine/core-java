@@ -31,9 +31,6 @@ import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author Dmytro Grankin
- */
 public class ColumnsTestEnv {
 
     public static final String CUSTOM_COLUMN_NAME = "columnName";
@@ -60,6 +57,16 @@ public class ColumnsTestEnv {
 
         public EntityWithManyGetters(String id) {
             super(id);
+        }
+
+        @Column
+        public boolean isBoolean() {
+            return true;
+        }
+
+        @Column
+        public int isNonBoolean() {
+            return 1;
         }
 
         @Column(name = CUSTOM_COLUMN_NAME)

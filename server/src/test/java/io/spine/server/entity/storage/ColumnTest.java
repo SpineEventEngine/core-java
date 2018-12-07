@@ -186,6 +186,13 @@ class ColumnTest {
             Method method = TestEntity.class.getDeclaredMethod("getParameter", String.class);
             assertThrows(IllegalArgumentException.class, () -> EntityColumn.from(method));
         }
+
+        @Test
+        @DisplayName("getter with `is` prefix and non-boolean return type")
+        void nonBooleanIsGetter() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> forMethod("isNonBoolean", TestEntity.class));
+        }
     }
 
     @Test

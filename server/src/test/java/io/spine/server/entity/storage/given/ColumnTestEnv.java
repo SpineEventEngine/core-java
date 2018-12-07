@@ -40,9 +40,6 @@ import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCC
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Grankin
- */
 public class ColumnTestEnv {
 
     public static final String CUSTOM_COLUMN_NAME = " customColumnName ";
@@ -81,6 +78,11 @@ public class ColumnTestEnv {
 
         public void setMutableState(@Nullable Integer mutableState) {
             this.mutableState = mutableState;
+        }
+
+        @Column
+        public int isNonBoolean() {
+            return 1;
         }
 
         @Column
