@@ -130,7 +130,7 @@ public abstract class Transaction<I,
      * <p>Has {@code true} value since the transaction instance creation
      * until {@linkplain #commit() commit()} is performed.
      */
-    @SuppressWarnings("UnusedAssignment") // is used for documentation purposes.
+    @SuppressWarnings("UnusedAssignment") // is used to make the initial tx. state explicit.
     private boolean active = false;
 
     /**
@@ -355,12 +355,13 @@ public abstract class Transaction<I,
         Version version = entity.getVersion();
         Any state = pack(entity.getState());
         LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
-        return EntityRecord.newBuilder()
-                           .setEntityId(entityId)
-                           .setVersion(version)
-                           .setState(state)
-                           .setLifecycleFlags(lifecycleFlags)
-                           .build();
+        return EntityRecord
+                .newBuilder()
+                .setEntityId(entityId)
+                .setVersion(version)
+                .setState(state)
+                .setLifecycleFlags(lifecycleFlags)
+                .build();
     }
 
     private InvalidEntityStateException of(ValidationException exception) {

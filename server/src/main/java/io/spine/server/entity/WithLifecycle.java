@@ -20,39 +20,37 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
-import io.spine.server.entity.storage.Column;
-
 /**
- * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
- *
- * <p>Lifecycle flags determine if an entity is active.
- * An entity is considered to be active if the lifecycle flags are missing.
- * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted}, 
- * then it’s regarded to be inactive.
+ * Something with {@link LifecycleFlags}.
  */
-public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S>, WithLifecycle {
+public interface WithLifecycle {
 
     /**
-     * {@inheritDoc}
+     * Obtains current lifecycle flags.
+     */
+    @SuppressWarnings("override") // not marked in the generated code
+    LifecycleFlags getLifecycleFlags();
+
+    /**
+     * Shows if current instance is marked as archived or not.
+     */
+    default boolean isArchived() {
+        return getLifecycleFlags().getArchived();
+    }
+
+    /**
+     * Shows if current instance is marked as deleted or not.
+     */
+    default boolean isDeleted() {
+        return getLifecycleFlags().getDeleted();
+    }
+
+    /**
+     * Verifies if any of the lifecycle attributes is set.
      *
-     * <p>Overrides to add the {@code Column} annotation.
+     * @return {@code false} if any of the attributes is set, {@code true} otherwise
      */
-    @Column
-    @Override
-    boolean isArchived();
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to add {@code Column} annotation.
-     */
-    @Column
-    @Override
-    boolean isDeleted();
-
-    /**
-     * Tells whether lifecycle flags of the entity changed since its initialization.
-     */
-    boolean lifecycleFlagsChanged();
+    default boolean isActive() {
+        return !(isArchived() || isDeleted());
+    }
 }
