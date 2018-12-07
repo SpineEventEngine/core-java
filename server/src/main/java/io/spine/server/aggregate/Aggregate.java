@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -128,7 +129,7 @@ public abstract class Aggregate<I,
      *
      * @see AggregateStorage#readEventCountAfterLastSnapshot(Object)
      */
-    private int persistedEventCount = 0;
+    private int eventCountAfterLastSnapshot = 0;
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -266,7 +267,7 @@ public abstract class Aggregate<I,
             restore(snapshot);
         }
         List<Event> events = aggregateStateRecord.getEventList();
-        persistedEventCount = events.size();
+        eventCountAfterLastSnapshot = events.size();
         play(events);
         remember(events);
     }
@@ -415,7 +416,15 @@ public abstract class Aggregate<I,
     /**
      * Obtains the number of events stored in the associated storage since last snapshot.
      */
-    int getPersistedEventCount() {
-        return persistedEventCount;
+    int getEventCountAfterLastSnapshot() {
+        return eventCountAfterLastSnapshot;
+    }
+
+    /**
+     * Updates the number of events stores in the associated storage since last snapshot.
+     */
+    void setEventCountAfterLastSnapshot(int count) {
+        checkArgument(count >= 0, "Event count cannot be negative.");
+        this.eventCountAfterLastSnapshot = count;
     }
 }
