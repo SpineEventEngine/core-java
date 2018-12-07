@@ -44,13 +44,12 @@ import static java.lang.reflect.Modifier.isStatic;
 
 /**
  * Utilities for working with methods.
- *
- * @author Dmytro Dashenkov
- * @author Alexander Yevsyukov
  */
 class Methods {
 
-    private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
+    private static final String GET = "get";
+    private static final String IS = "is";
+    private static final String GETTER_PREFIX_REGEX = '(' + GET + ")|(" + IS + ')';
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
     private static final ImmutableSet<String> NULLABLE_ANNOTATION_SIMPLE_NAMES =
             ImmutableSet.of("CheckForNull", "Nullable", "NullableDecl", "NullableType");
@@ -107,6 +106,9 @@ class Methods {
                                            .find()
                               && getter.getParameterTypes().length == 0,
                       "Method `%s` is not a getter.", getter);
+        checkArgument(!getter.getName().startsWith(IS) ||
+                              boolean.class.isAssignableFrom(getter.getReturnType()),
+                      "Getter with an `is` prefix should have `boolean` return type.");
         checkArgument(getAnnotatedVersion(getter).isPresent(),
                       "Entity column getter should be annotated with `%s`.",
                       Column.class.getName());
