@@ -44,7 +44,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * checks verifying that {@link EntityColumn} definitions in the processed {@link Entity} class are
  * correct. If column definitions are incorrect, the exception is thrown upon
  * {@linkplain EntityColumn entity columns} reading.
- * 
+ *
  * @see Columns
  * @see EntityColumn
  */
@@ -57,7 +57,7 @@ class ColumnReader {
     }
 
     /**
-     * Creates an instance of {@link ColumnReader} for the given {@link Entity} class.
+     * Creates an instance of {@code ColumnReader} for the given {@link Entity} class.
      *
      * <p>The reader can be further used to {@linkplain ColumnReader#readColumns() obtain}
      * {@linkplain EntityColumn entity columns} for the given class.
