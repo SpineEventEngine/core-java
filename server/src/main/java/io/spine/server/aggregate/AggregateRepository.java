@@ -66,6 +66,7 @@ import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.Math.max;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -504,8 +505,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         {@code Optional.empty()} if there is no record with the ID
      */
     protected Optional<AggregateStateRecord> fetchHistory(I id) {
-        AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
-        Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);
+        AggregateStorage<I> storage = aggregateStorage();
+
+        int eventsAfterLastSnapshot = storage.readEventCountAfterLastSnapshot(id);
+        int batchSize = max(snapshotTrigger, eventsAfterLastSnapshot);
+
+        AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
+        Optional<AggregateStateRecord> eventsFromStorage = storage.read(request);
         return eventsFromStorage;
     }
 

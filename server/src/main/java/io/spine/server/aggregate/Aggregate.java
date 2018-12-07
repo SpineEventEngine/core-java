@@ -125,6 +125,8 @@ public abstract class Aggregate<I,
      * snapshot.
      *
      * <p>This field is set in {@link #play(AggregateStateRecord)} and is effectively final.
+     *
+     * @see AggregateStorage#readEventCountAfterLastSnapshot(Object)
      */
     private int persistedEventCount = 0;
 
