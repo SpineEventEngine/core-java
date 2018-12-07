@@ -31,8 +31,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <p>The properties of the annotation affect how the column will be persisted.
  *
- * <p>The annotation will have affect only if it applied to a {@code public} instance getter,
- * i.e. a method without parameters with {@code get-} or {@code is-} prefix.
+ * <p>The annotation will have effect only if it's applied to a {@code public} instance getter,
+ * i.e. a method without parameters and with {@code get-} prefix. An {@code is-} prefix is
+ * supported only for properties of {@code boolean} type.
  *
  * <p>The class declaring an entity column <b>must</b> as well be {@code public}.
  *
@@ -42,8 +43,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * the exception will be raised on a repository
  * {@linkplain io.spine.server.BoundedContext#register(io.spine.server.entity.Repository)
  * registration} for the entity.
- *
- * @author Dmytro Grankin
  */
 @Target(METHOD)
 @Retention(RUNTIME)
