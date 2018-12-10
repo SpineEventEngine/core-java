@@ -123,7 +123,7 @@ class Methods {
         checkArgument(!getter.getName().startsWith(IS_PREFIX)
                               || boolean.class.isAssignableFrom(returnType)
                               || Boolean.class.isAssignableFrom(returnType),
-                      "Getter with an `is` prefix should have `boolean` return type.");
+                      "Getter with an `is` prefix should have `boolean` or `Boolean` return type.");
         checkArgument(getAnnotatedVersion(getter).isPresent(),
                       "Entity column getter should be annotated with `%s`.",
                       Column.class.getName());
