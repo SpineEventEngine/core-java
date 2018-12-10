@@ -77,7 +77,7 @@ import static java.lang.String.format;
  *         --OrderAggregate.java--
  *
  *         \@Column
- *         public int isDuplicate() {
+ *         public boolean isDuplicate() {
  *             return getState().isDuplicate();
  *         }
  *
