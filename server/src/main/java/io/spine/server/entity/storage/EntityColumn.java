@@ -118,7 +118,7 @@ import static java.lang.String.format;
  *         \@Column
  *         public boolean hasChildren() { ... }
  *
- *         // "is" prefix is allowed only for methods which return "boolean"
+ *         // "is" prefix is allowed only for methods which return "boolean" or "Boolean"
  *         \@Column
  *         public int isNew() { ... }
  *

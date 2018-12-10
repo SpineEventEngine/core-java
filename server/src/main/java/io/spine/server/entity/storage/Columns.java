@@ -41,6 +41,18 @@ import static java.lang.String.format;
  * the Java Bean</a> getter spec and annotated with {@link Column} are considered
  * {@linkplain EntityColumn columns}.
  *
+ * <p>Additionally, the {@link Boolean} getters starting with {@code is-} are allowed (contrary to
+ * the Java Bean spec), to enable situations like
+ * <pre>
+ *     {@code
+ *             \@Nullable
+ *             \@Column
+ *             public Boolean isMale() {
+ *                 return null;
+ *             }
+ *     }
+ * </pre>
+ *
  * <p>Inherited columns are taken into account too, but building entity hierarchies is strongly
  * discouraged.
  *

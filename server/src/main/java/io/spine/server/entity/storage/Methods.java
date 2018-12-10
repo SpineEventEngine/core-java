@@ -45,11 +45,24 @@ import static java.lang.reflect.Modifier.isStatic;
 /**
  * Utilities for working with methods.
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Random duplication of simple strings.
 class Methods {
 
-    private static final String GET = "get";
-    private static final String IS = "is";
-    private static final String GETTER_PREFIX_REGEX = '(' + GET + ")|(" + IS + ')';
+    /**
+     * One of the possible getter prefixes - {@code get-}.
+     */
+    private static final String GET_PREFIX = "get";
+
+    /**
+     * The other possible getter prefix - {@code is-}.
+     *
+     * <p>Allowed for {@code boolean} and {@link Boolean} entity columns.
+     *
+     * <p>Package-private access because we manually search for some of such methods.
+     */
+    static final String IS_PREFIX = "is";
+
+    private static final String GETTER_PREFIX_REGEX = '(' + GET_PREFIX + ")|(" + IS_PREFIX + ')';
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
     private static final ImmutableSet<String> NULLABLE_ANNOTATION_SIMPLE_NAMES =
             ImmutableSet.of("CheckForNull", "Nullable", "NullableDecl", "NullableType");
@@ -106,8 +119,10 @@ class Methods {
                                            .find()
                               && getter.getParameterTypes().length == 0,
                       "Method `%s` is not a getter.", getter);
-        checkArgument(!getter.getName().startsWith(IS) ||
-                              boolean.class.isAssignableFrom(getter.getReturnType()),
+        Class<?> returnType = getter.getReturnType();
+        checkArgument(!getter.getName().startsWith(IS_PREFIX)
+                              || boolean.class.isAssignableFrom(returnType)
+                              || Boolean.class.isAssignableFrom(returnType),
                       "Getter with an `is` prefix should have `boolean` return type.");
         checkArgument(getAnnotatedVersion(getter).isPresent(),
                       "Entity column getter should be annotated with `%s`.",
@@ -115,7 +130,6 @@ class Methods {
         int modifiers = getter.getModifiers();
         checkArgument(isPublic(modifiers) && !isStatic(modifiers),
                       "Entity column getter should be public instance method.");
-        Class<?> returnType = getter.getReturnType();
         Class<?> wrapped = wrap(returnType);
         checkArgument(Serializable.class.isAssignableFrom(wrapped),
                       "Cannot create column of non-serializable type %s by method %s.",

@@ -52,9 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Many string literals for method names. */})
@@ -139,6 +136,25 @@ class ColumnTest {
         assertNotNull(value);
         assertEquals(initialState, value.intValue());
         assertEquals(changedState, extractedState);
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Just check that column is constructed without an exception.
+    @Nested
+    @DisplayName("allow `is` prefix")
+    class AllowIsPrefix {
+
+        @Test
+        @DisplayName("for `boolean` properties")
+        void forBooleanProperties() {
+            forMethod("isBoolean", TestEntity.class);
+        }
+
+        @Test
+        @DisplayName("for `Boolean` properties")
+        void forBooleanWrapperProperties() {
+            forMethod("isBooleanWrapper", TestEntity.class);
+        }
     }
 
     @Nested

@@ -65,6 +65,11 @@ public class ColumnsTestEnv {
         }
 
         @Column
+        public @Nullable Boolean isBooleanWrapper() {
+            return true;
+        }
+
+        @Column
         public int isNonBoolean() {
             return 1;
         }
@@ -160,6 +165,7 @@ public class ColumnsTestEnv {
         }
     }
 
+    @SuppressWarnings("unused") // Reflective access
     public static class EntityWithRepeatedColumnNames
             extends AbstractVersionableEntity<String, Any> {
         protected EntityWithRepeatedColumnNames(String id) {

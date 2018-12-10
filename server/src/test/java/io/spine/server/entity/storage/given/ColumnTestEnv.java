@@ -81,6 +81,16 @@ public class ColumnTestEnv {
         }
 
         @Column
+        public boolean isBoolean() {
+            return true;
+        }
+
+        @Column
+        public Boolean isBooleanWrapper() {
+            return true;
+        }
+
+        @Column
         public int isNonBoolean() {
             return 1;
         }

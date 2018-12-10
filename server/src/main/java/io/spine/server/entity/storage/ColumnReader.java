@@ -25,14 +25,20 @@ import io.spine.server.entity.Entity;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.entity.storage.Methods.IS_PREFIX;
 import static io.spine.server.entity.storage.Methods.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A class whose purpose is to obtain {@linkplain EntityColumn entity columns} from the given
@@ -50,25 +56,49 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 class ColumnReader {
 
-    private final Class<? extends Entity> entityClass;
+    /**
+     * A predicate to check if the given method or one of its predecessors are annotated with
+     * {@link Column}.
+     */
+    private static final Predicate<Method> hasAnnotatedVersion = hasAnnotatedVersion();
 
-    private ColumnReader(Class<? extends Entity> entityClass) {
-        this.entityClass = entityClass;
+    /**
+     * A predicate to check if the given method represents an entity property with the
+     * {@link Boolean} return type and the name starting with {@code is-}.
+     */
+    private static final Predicate<Method> isBooleanWrapperProperty = isBooleanWrapperProperty();
+
+    private final BeanInfo entityDescriptor;
+    private final String className;
+
+    /**
+     * Creates a new {@code ColumnReader} instance.
+     *
+     * @param entityDescriptor
+     *         a descriptor of the entity as a Java Bean
+     * @param className
+     *         an entity class name for logging purposes
+     */
+    private ColumnReader(BeanInfo entityDescriptor, String className) {
+        this.entityDescriptor = entityDescriptor;
+        this.className = className;
     }
 
     /**
      * Creates an instance of {@code ColumnReader} for the given {@link Entity} class.
      *
-     * <p>The reader can be further used to {@linkplain ColumnReader#readColumns() obtain}
-     * {@linkplain EntityColumn entity columns} for the given class.
-     *
-     * @param entityClass {@link Entity} class for which to create the instance
-     * @return new instance of {@code ColumnReader} for the specified class
+     * @param entityClass
+     *         the {@link Entity} class for which to create the instance
+     * @return a new instance of {@code ColumnReader} for the specified class
      */
     static ColumnReader forClass(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
-
-        return new ColumnReader(entityClass);
+        try {
+            BeanInfo entityDescriptor = Introspector.getBeanInfo(entityClass);
+            return new ColumnReader(entityDescriptor, entityClass.getName());
+        } catch (IntrospectionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -79,30 +109,51 @@ class ColumnReader {
      * <p>If the check for correctness fails, throws {@link IllegalStateException}.
      *
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
-     * @throws IllegalStateException if entity column definitions are incorrect
+     * @throws IllegalStateException
+     *         if entity column definitions are incorrect
      */
     Collection<EntityColumn> readColumns() {
-        BeanInfo entityDescriptor;
-        try {
-            entityDescriptor = Introspector.getBeanInfo(entityClass);
-        } catch (IntrospectionException e) {
-            throw new IllegalStateException(e);
-        }
-
-        Collection<EntityColumn> entityColumns = newLinkedList();
-        for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
-            Method getter = property.getReadMethod();
-            boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
-            if (isEntityColumn) {
-                EntityColumn column = EntityColumn.from(getter);
-                entityColumns.add(column);
-            }
-        }
-
-        checkRepeatedColumnNames(entityColumns);
-        return entityColumns;
+        List<EntityColumn> columns = gatherColumnsFromProperties();
+        List<EntityColumn> booleanWrapperColumns = gatherBooleanWrapperColumns();
+        columns.addAll(booleanWrapperColumns);
+        checkRepeatedColumnNames(columns);
+        return columns;
     }
 
+    /**
+     * Gathers entity properties and creates the entity columns where appropriate.
+     *
+     * <p>The entity properties search is based on the Java Bean
+     * <a href="https://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
+     * specification</a>.
+     */
+    private List<EntityColumn> gatherColumnsFromProperties() {
+        PropertyDescriptor[] properties = entityDescriptor.getPropertyDescriptors();
+        List<EntityColumn> result = Arrays.stream(properties)
+                                          .map(PropertyDescriptor::getReadMethod)
+                                          .filter(hasAnnotatedVersion)
+                                          .map(EntityColumn::from)
+                                          .collect(toList());
+        return result;
+    }
+
+    /**
+     * Gathers entity columns that have {@link Boolean} return type and start with {@code is-}
+     * prefix.
+     *
+     * <p>The {@code Boolean} properties starting with {@code is-} are not allowed by the Java Bean
+     * specification, so {@link #gatherColumnsFromProperties()} would not detect them for us.
+     */
+    private List<EntityColumn> gatherBooleanWrapperColumns() {
+        MethodDescriptor[] methodDescriptors = entityDescriptor.getMethodDescriptors();
+        List<EntityColumn> result = Arrays.stream(methodDescriptors)
+                                          .map(MethodDescriptor::getMethod)
+                                          .filter(isBooleanWrapperProperty)
+                                          .filter(hasAnnotatedVersion)
+                                          .map(EntityColumn::from)
+                                          .collect(toList());
+        return result;
+    }
 
     /**
      * Ensures that the specified columns have no repeated names.
@@ -119,10 +170,27 @@ class ColumnReader {
             if (checkedNames.contains(columnName)) {
                 throw newIllegalStateException(
                         "The entity `%s` has columns with the same name for storing `%s`.",
-                        entityClass.getName(),
+                        className,
                         columnName);
             }
             checkedNames.add(columnName);
         }
+    }
+
+    private static Predicate<Method> hasAnnotatedVersion() {
+        return method -> getAnnotatedVersion(method).isPresent();
+    }
+
+    private static Predicate<Method> isBooleanWrapperProperty() {
+        return method -> {
+            Class<?> returnType = method.getReturnType();
+            boolean returnsBoolean = Boolean.class.isAssignableFrom(returnType);
+            boolean noParameters = method.getParameterCount() == 0;
+            boolean startsWithIs = method.getName()
+                                         .startsWith(IS_PREFIX);
+            return returnsBoolean
+                    && noParameters
+                    && startsWithIs;
+        };
     }
 }

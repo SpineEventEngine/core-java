@@ -63,7 +63,7 @@ class ColumnsTest {
     private
     static void checkFields(EntityWithManyGetters entity, Map<String, MemoizedValue> fields) {
         assertNotNull(fields);
-        assertThat(fields).hasSize(4);
+        assertThat(fields).hasSize(5);
 
         String floatNullKey = "floatNull";
         MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
@@ -99,7 +99,7 @@ class ColumnsTest {
                 Columns.getAllColumns(EntityWithManyGetters.class);
 
         assertNotNull(entityColumns);
-        assertThat(entityColumns).hasSize(4);
+        assertThat(entityColumns).hasSize(5);
     }
 
     @Test

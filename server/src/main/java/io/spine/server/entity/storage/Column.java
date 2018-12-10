@@ -33,7 +33,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <p>The annotation will have effect only if it's applied to a {@code public} instance getter,
  * i.e. a method without parameters and with {@code get-} prefix. An {@code is-} prefix is also
- * supported but only for properties of {@code boolean} type.
+ * supported but only for properties of {@code boolean} and {@link Boolean} types.
  *
  * <p>The class declaring an entity column <b>must</b> as well be {@code public}.
  *
