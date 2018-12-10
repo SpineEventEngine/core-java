@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithBooleanColumns;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
@@ -32,7 +33,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
@@ -135,13 +138,73 @@ class ColumnReaderTest {
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
             assertFalse(containsColumn(entityColumns, "staticMember"));
         }
+    }
+
+    @Nested
+    @DisplayName("look for `Boolean` columns via predicate which returns")
+    class InBooleanLookupPredicate {
+
+        private final Predicate<Method> predicate = ColumnReader.isBooleanWrapperProperty;
 
         @Test
-        @DisplayName("`Boolean` methods with parameters")
-        void booleanGettersWithParam() {
-            ColumnReader columnReader = forClass(EntityWithManyGetters.class);
-            Collection<EntityColumn> entityColumns = columnReader.readColumns();
-            assertFalse(containsColumn(entityColumns, "booleanWithParam"));
+        @DisplayName("`true` for correct `Boolean` column")
+        void findCorrect() throws NoSuchMethodException {
+            boolean result = predicate.test(method("isBooleanWrapperColumn"));
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("`false` for column starting with `get`")
+        void notFindStartingWithGet() throws NoSuchMethodException {
+            boolean result = predicate.test(method("getBooleanWrapperColumn"));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for non-`Boolean` column")
+        void notFindNonBoolean() throws NoSuchMethodException {
+            boolean result = predicate.test(method("isNonBoolean"));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for non-`Boolean` column starting with `get`")
+        void notFindNonBooleanStartingWithGet() throws NoSuchMethodException {
+            boolean result = predicate.test(method("getNonBoolean"));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for `Boolean` column with params")
+        void notFindBooleanWithParams() throws NoSuchMethodException {
+            boolean result = predicate.test(method("isBooleanWithParam", int.class));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for `Boolean` column with params starting with `get`")
+        void notFindBooleanWithParamsStartingWithGet() throws NoSuchMethodException {
+            boolean result = predicate.test(method("getBooleanWithParam", int.class));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for non-`Boolean` column with params")
+        void notFindNonBooleanWithParams() throws NoSuchMethodException {
+            boolean result = predicate.test(method("isNonBooleanWithParam", int.class));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for non-`Boolean` column with params starting with `get`")
+        void notFindNonBooleanWithParamsStartingWithGet() throws NoSuchMethodException {
+            boolean result = predicate.test(method("getNonBooleanWithParam", int.class));
+            assertFalse(result);
+        }
+
+        private Method method(String name, Class<?>... parameterTypes)
+                throws NoSuchMethodException {
+            return EntityWithBooleanColumns.class.getDeclaredMethod(name, parameterTypes);
         }
     }
 

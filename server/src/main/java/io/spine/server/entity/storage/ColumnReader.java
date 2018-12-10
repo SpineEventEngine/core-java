@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.entity.Entity;
 
 import java.beans.BeanInfo;
@@ -66,7 +67,8 @@ class ColumnReader {
      * A predicate to check if the given method represents an entity property with the
      * {@code Boolean} return type and the name starting with {@code is-}.
      */
-    private static final Predicate<Method> isBooleanWrapperProperty = isBooleanWrapperProperty();
+    @VisibleForTesting
+    static final Predicate<Method> isBooleanWrapperProperty = isBooleanWrapperProperty();
 
     private final BeanInfo entityDescriptor;
     private final String className;

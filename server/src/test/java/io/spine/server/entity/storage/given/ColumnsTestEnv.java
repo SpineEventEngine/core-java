@@ -74,11 +74,6 @@ public class ColumnsTestEnv {
             return 1;
         }
 
-        @Column
-        public Boolean isBooleanWithParam(int param) {
-            return true;
-        }
-
         @Column(name = CUSTOM_COLUMN_NAME)
         public int getIntegerFieldValue() {
             return 0;
@@ -107,6 +102,49 @@ public class ColumnsTestEnv {
         @Column
         public static int getStaticMember() {
             return 1024;
+        }
+    }
+
+    public static class EntityWithBooleanColumns {
+
+        @Column
+        public Boolean isBooleanWrapperColumn() {
+            return true;
+        }
+
+        @Column
+        public Boolean getBooleanWrapperColumn() {
+            return true;
+        }
+
+        @Column
+        public int isNonBoolean() {
+            return 1;
+        }
+
+        @Column
+        public int getNonBoolean() {
+            return 1;
+        }
+
+        @Column
+        public Boolean isBooleanWithParam(int param) {
+            return true;
+        }
+
+        @Column
+        public Boolean getBooleanWithParam(int param) {
+            return true;
+        }
+
+        @Column
+        public int isNonBooleanWithParam(int param) {
+            return 1;
+        }
+
+        @Column
+        public int getNonBooleanWithParam(int param) {
+            return 1;
         }
     }
 
