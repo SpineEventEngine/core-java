@@ -41,7 +41,7 @@ import static java.lang.String.format;
  * the Java Bean</a> getter spec and annotated with {@link Column} are considered
  * {@linkplain EntityColumn columns}.
  *
- * <p>Additionally, the {@link Boolean} getters starting with {@code is-} are allowed (contrary to
+ * <p>Additionally, the {@code Boolean} getters starting with {@code is-} are allowed (contrary to
  * the Java Bean spec), to enable situations like
  * <pre>
  *     {@code

@@ -64,7 +64,7 @@ class ColumnReader {
 
     /**
      * A predicate to check if the given method represents an entity property with the
-     * {@link Boolean} return type and the name starting with {@code is-}.
+     * {@code Boolean} return type and the name starting with {@code is-}.
      */
     private static final Predicate<Method> isBooleanWrapperProperty = isBooleanWrapperProperty();
 
@@ -138,7 +138,7 @@ class ColumnReader {
     }
 
     /**
-     * Gathers entity columns that have {@link Boolean} return type and start with {@code is-}
+     * Gathers entity columns that have {@code Boolean} return type and start with {@code is-}
      * prefix.
      *
      * <p>The {@code Boolean} properties starting with {@code is-} are not allowed by the Java Bean
