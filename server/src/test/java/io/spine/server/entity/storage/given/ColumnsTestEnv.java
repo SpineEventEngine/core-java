@@ -31,6 +31,7 @@ import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+@SuppressWarnings("unused") // Lots of entities with reflective access only.
 public class ColumnsTestEnv {
 
     public static final String CUSTOM_COLUMN_NAME = "columnName";
@@ -50,7 +51,6 @@ public class ColumnsTestEnv {
         }
     }
 
-    @SuppressWarnings("unused")  // Reflective access
     public static class EntityWithManyGetters extends AbstractEntity<String, Any> {
 
         private final Project someMessage = Sample.messageOfType(Project.class);
@@ -111,7 +111,6 @@ public class ColumnsTestEnv {
         }
     }
 
-    @SuppressWarnings("unused") // Reflective access
     public static class EntityWithInvalidGetters extends AbstractEntity<String, Any> {
 
         protected EntityWithInvalidGetters(String id) {
@@ -124,9 +123,8 @@ public class ColumnsTestEnv {
         }
     }
 
-    // Most read-life (non-test) Entities are children of AbstractVersionableEntity,
+    // Most real-life (non-test) Entities are children of AbstractVersionableEntity,
     // which brings 3 storage fields from the box.
-    @SuppressWarnings("unused") // Reflective access
     public static class RealLifeEntity extends AbstractVersionableEntity<ProjectId, Project> {
 
         public RealLifeEntity(ProjectId id) {
@@ -144,7 +142,6 @@ public class ColumnsTestEnv {
         }
     }
 
-    @SuppressWarnings("unused") // Reflective access
     public interface InterfaceWithEntityColumn {
 
         // The column annotation from the interface should be taken into account.
@@ -165,7 +162,6 @@ public class ColumnsTestEnv {
         }
     }
 
-    @SuppressWarnings("unused") // Reflective access
     public static class EntityWithRepeatedColumnNames
             extends AbstractVersionableEntity<String, Any> {
         protected EntityWithRepeatedColumnNames(String id) {
