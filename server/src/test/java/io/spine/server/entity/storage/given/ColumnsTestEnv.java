@@ -74,6 +74,11 @@ public class ColumnsTestEnv {
             return 1;
         }
 
+        @Column
+        public Boolean isBooleanWithParam(int param) {
+            return true;
+        }
+
         @Column(name = CUSTOM_COLUMN_NAME)
         public int getIntegerFieldValue() {
             return 0;

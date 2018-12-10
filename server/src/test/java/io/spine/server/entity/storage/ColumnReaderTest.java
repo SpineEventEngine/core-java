@@ -136,6 +136,13 @@ class ColumnReaderTest {
             assertFalse(containsColumn(entityColumns, "staticMember"));
         }
 
+        @Test
+        @DisplayName("`Boolean` methods with parameters")
+        void booleanGettersWithParam() {
+            ColumnReader columnReader = forClass(EntityWithManyGetters.class);
+            Collection<EntityColumn> entityColumns = columnReader.readColumns();
+            assertFalse(containsColumn(entityColumns, "booleanWithParam"));
+        }
     }
 
     private static boolean containsColumn(Iterable<EntityColumn> entityColumns, String columnName) {
