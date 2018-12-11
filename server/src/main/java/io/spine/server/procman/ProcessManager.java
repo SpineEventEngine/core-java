@@ -123,7 +123,6 @@ public abstract class ProcessManager<I,
      *         or a command handler
      */
     @Override
-    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }
