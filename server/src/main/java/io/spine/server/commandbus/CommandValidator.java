@@ -152,8 +152,8 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             if (isDefault(message)) {
                 addViolation("Non-default command message must be set.");
             }
-            List<ConstraintViolation> messageViolations = MessageValidator.newInstance()
-                                                                          .validate(message);
+            List<ConstraintViolation> messageViolations = MessageValidator.newInstance(message)
+                                                                          .validate();
             result.addAll(messageViolations);
         }
 

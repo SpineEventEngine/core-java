@@ -28,7 +28,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
@@ -73,10 +73,10 @@ public class InvalidEventException extends EventException implements MessageInva
      * event which field values violate validation constraint(s).
      */
     private static class ConstraintViolationExceptionFactory
-                                extends ExceptionFactory<InvalidEventException,
-                                                         EventMessage,
-                                                         EventClass,
-                                                         EventValidationError> {
+            extends ExceptionFactory<InvalidEventException,
+                                     EventMessage,
+                                     EventClass,
+                                     EventValidationError> {
 
         private final EventClass eventClass;
 

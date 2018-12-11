@@ -30,17 +30,14 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.model.EntityStateClass;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
 import static io.spine.server.entity.EntityStateValidationError.INVALID_ENTITY_STATE;
 
 /**
- * Signals that an entity state does not pass {@linkplain AbstractEntity#validate(Message)
- * validation}.
- *
- * @author Dmytro Grankin
+ * Signals that an entity state does not pass validation.
  */
 public final class InvalidEntityStateException extends RuntimeException {
 
@@ -147,7 +144,8 @@ public final class InvalidEntityStateException extends RuntimeException {
         /**
          * Returns a map with an entity state type attribute.
          *
-         * @param entityState the entity state to get the type from
+         * @param entityState
+         *         the entity state to get the type from
          */
         @Override
         protected Map<String, Value> getMessageTypeAttribute(Message entityState) {
