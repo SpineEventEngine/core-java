@@ -121,8 +121,13 @@ public abstract class ProcessManager<I,
      *
      * @throws IllegalStateException if the method is called from outside an event/rejection reactor
      *         or a command handler
+     * @apiNote Marked {@link VisibleForTesting} to allow package-local use of this method in tests.
+     *          It does not affect the visibility for inheritors, which stays {@code protected}
+     *          {@linkplain io.spine.server.entity.TransactionalEntity#getBuilder() as originally 
+     *          defined in parents}.
      */
     @Override
+    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }
