@@ -34,7 +34,6 @@ import io.spine.string.Stringifiers;
  *
  * @param <I> the type of entity identifier
  * @param <S> the type of entity state
- * @author Alexander Yevsyukov
  * @see VersionableEntity
  */
 public interface Entity<I, S extends Message> {
@@ -65,14 +64,14 @@ public interface Entity<I, S extends Message> {
     enum GenericParameter implements GenericTypeIndex<Entity> {
 
         /**
-         * The index of the declaration of the generic parameter type {@code <I>}
-         * in {@link Entity}.
+         * The index of the declaration of the generic parameter type {@code <I>} in
+         * the {@link Entity} interface.
          */
         ID(0),
 
         /**
          * The index of the declaration of the generic parameter type {@code <S>}
-         * in {@link Entity}
+         * in the {@link Entity} interface.
          */
         STATE(1);
 

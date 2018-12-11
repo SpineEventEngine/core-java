@@ -69,7 +69,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    protected final List<Event> dispatchInTx(A aggregate) {
+    final List<Event> dispatchInTx(A aggregate) {
         List<Event> events = doDispatch(aggregate, envelope());
         AggregateTransaction tx = startTransaction(aggregate);
         List<Event> producedEvents = aggregate.apply(events);

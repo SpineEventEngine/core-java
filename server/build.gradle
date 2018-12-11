@@ -44,3 +44,17 @@ javadoc {
         }
     }
 }
+
+//TODO:2018-12-07:alexander.yevsyukov: Remove this task and dependency on it after Spine Proto Compiler
+// no longer generates interfaces mentioned in the (is) option of a proto message. Now this happens
+// always, so it's no possible to create an interface in the same package with the generated 
+// message, and then mentioned in the `is` option value.
+// That's why this task removes the automatically generated interface in favor of the manually
+// written class.
+task deleteGeneratedWithLifecycleJava(type: Delete) {
+    delete "${project.ext.generatedJavaDir}/io/spine/server/entity/WithLifecycle.java"
+}
+
+compileJava {
+    dependsOn deleteGeneratedWithLifecycleJava
+}
