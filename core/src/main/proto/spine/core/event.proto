@@ -81,6 +81,7 @@ message Event {
 
 // Meta-information for an event.
 message EventContext {
+    option (is) = {java_type: "io.spine.core.MessageContext" generate: true};
 
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];

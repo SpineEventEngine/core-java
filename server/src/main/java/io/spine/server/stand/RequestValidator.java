@@ -140,15 +140,15 @@ abstract class RequestValidator<M extends Message> {
     }
 
     /**
-     * Checks whether the {@code Message} of the given request conforms the constraints
+     * Checks whether the {@code Message} of the given request conforms the constraints.
      *
      * @param request the request message to validate.
      * @return an instance of exception,
      * or {@code Optional.empty()} if the request message is valid.
      */
     private Optional<InvalidRequestException> validateMessage(M request) {
-        List<ConstraintViolation> violations = MessageValidator.newInstance()
-                                                               .validate(request);
+        List<ConstraintViolation> violations = MessageValidator.newInstance(request)
+                                                               .validate();
         if (violations.isEmpty()) {
             return Optional.empty();
         }
