@@ -26,9 +26,7 @@ import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.testing.Tests;
-import io.spine.validate.MessageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,10 +36,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -79,13 +75,6 @@ class EventBusBuilderTest
         void eventStore() {
             assertThrows(NullPointerException.class,
                          () -> builder().setEventStore(Tests.nullRef()));
-        }
-
-        @Test
-        @DisplayName("EventValidator")
-        void eventValidator() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setEventValidator(Tests.nullRef()));
         }
     }
 
@@ -128,15 +117,6 @@ class EventBusBuilderTest
         }
 
         @Test
-        @DisplayName("EventValidator")
-        void eventValidator() {
-            MessageValidator validator = MessageValidator.newInstance();
-            assertEquals(validator, builder().setEventValidator(validator)
-                                             .getEventValidator()
-                                             .get());
-        }
-
-        @Test
         @DisplayName("Enricher")
         void enricher() {
             Enricher enricher = Enricher.newBuilder()
@@ -146,14 +126,6 @@ class EventBusBuilderTest
                                           .getEnricher()
                                           .get());
         }
-    }
-
-    @Test
-    @DisplayName("set event validator if it is not specified explicitly")
-    void setDefaultValidator() {
-        assertNotNull(builder().setStorageFactory(storageFactory)
-                               .build()
-                               .getMessageValidator());
     }
 
     @Test
@@ -244,20 +216,6 @@ class EventBusBuilderTest
                 fail("The specified executor was not used.");
             }
         }
-    }
-
-    @Test
-    @DisplayName("allow custom message validators")
-    void allowCustomValidators() {
-        StorageFactory storageFactory =
-                StorageFactorySwitch.newInstance(newName("test"), false)
-                                    .get();
-        MessageValidator validator = mock(MessageValidator.class);
-        EventBus eventBus = builder()
-                .setEventValidator(validator)
-                .setStorageFactory(storageFactory)
-                .build();
-        assertEquals(validator, eventBus.getMessageValidator());
     }
 
     @Test

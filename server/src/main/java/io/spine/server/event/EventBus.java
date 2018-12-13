@@ -40,7 +40,6 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.storage.StorageFactory;
-import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -56,29 +55,29 @@ import static java.lang.String.format;
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
  *
- * <h2>Receiving Events</h2>
+ * <h1>Receiving Events</h1>
+ *
  * <p>To receive event messages a subscriber object should:
  * <ol>
- * <li>Expose a {@code public} method that accepts an event message as the first parameter
- * and an {@link EventContext EventContext} as the second
- * (optional) parameter.
- * <li>Mark the method with the {@link io.spine.core.Subscribe @Subscribe} annotation.
- * <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
- * instance of {@code EventBus} directly, or rely on message delivery
- * from an {@link EventDispatcher}. An example of such a dispatcher is
- * {@link io.spine.server.projection.ProjectionRepository ProjectionRepository}
+ *     <li>Expose a {@code public} method that accepts an event message as the first parameter
+ *         and an {@link EventContext EventContext} as the second (optional) parameter.
+ *     <li>Mark the method with the {@link io.spine.core.Subscribe @Subscribe} annotation.
+ *     <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
+ *         instance of {@code EventBus} directly, or rely on message delivery
+ *         from an {@link EventDispatcher}. An example of such a dispatcher is
+ *         {@link io.spine.server.projection.ProjectionRepository ProjectionRepository}.
  * </ol>
  *
  * <p><strong>Note:</strong> A subscriber method cannot accept just {@link Message} as
  * the first parameter. It must be an <strong>exact type</strong> of the event message
  * that needs to be handled.
  *
- * <h2>Posting Events</h2>
+ * <h1>Posting Events</h1>
+ *
  * <p>Events are posted to an EventBus using {@link #post(Message, StreamObserver)} method.
  * Normally this is done by an
- * {@linkplain io.spine.server.aggregate.AggregateRepository AggregateRepository} in the process
- * of handling a command,
- * or by a {@linkplain io.spine.server.procman.ProcessManager ProcessManager}.
+ * {@link io.spine.server.aggregate.AggregateRepository AggregateRepository} in the process
+ * of handling a command, or by a {@link io.spine.server.procman.ProcessManager ProcessManager}.
  *
  * <p>The passed {@link Event} is stored in the {@link EventStore} associated with
  * the {@code EventBus} <strong>before</strong> it is passed to subscribers.
@@ -101,9 +100,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
-    /** The validator for messages of posted events. */
-    private final MessageValidator eventMessageValidator;
-
     /** The handler for dead events. */
     private final DeadMessageHandler<EventEnvelope> deadMessageHandler;
 
@@ -124,7 +120,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         super(builder);
         this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
-        this.eventMessageValidator = builder.eventValidator;
         this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
 
         this.deadMessageHandler = new DeadEventTap();
@@ -154,7 +149,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     @Override
     protected EnvelopeValidator<EventEnvelope> getValidator() {
         if (eventValidator == null) {
-            eventValidator = new EventValidator(eventMessageValidator);
+            eventValidator = new EventValidator();
         }
         return eventValidator;
     }
@@ -167,11 +162,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     @Override
     protected EventEnvelope toEnvelope(Event message) {
         return EventEnvelope.of(message);
-    }
-
-    @VisibleForTesting
-    MessageValidator getMessageValidator() {
-        return eventMessageValidator;
     }
 
     /** Returns {@link EventStore} associated with the bus. */
@@ -294,13 +284,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         private @Nullable Executor eventStoreStreamExecutor;
 
         /**
-         * Optional validator for events.
-         *
-         * <p>If not set, a default value will be set by the builder.
-         */
-        private @Nullable MessageValidator eventValidator;
-
-        /**
          * Optional enricher for events.
          *
          * <p>If not set, the enrichments will NOT be supported
@@ -386,16 +369,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             return Optional.ofNullable(eventStoreStreamExecutor);
         }
 
-        @CanIgnoreReturnValue
-        public Builder setEventValidator(MessageValidator eventValidator) {
-            this.eventValidator = checkNotNull(eventValidator);
-            return this;
-        }
-
-        public Optional<MessageValidator> getEventValidator() {
-            return Optional.ofNullable(eventValidator);
-        }
-
         /**
          * Sets a custom {@link Enricher} for events posted to
          * the {@code EventBus} which is being built.
@@ -446,12 +419,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             String message = "Either storageFactory or eventStore must be " +
                              "set to build the EventBus instance";
             checkState(storageFactory != null || eventStore != null, message);
-
             if (eventStoreStreamExecutor == null) {
                 eventStoreStreamExecutor = MoreExecutors.directExecutor();
             }
             checkNotNull(eventStoreStreamExecutor);
-
             if (eventStore == null) {
                 eventStore = EventStore
                         .newBuilder()
@@ -460,11 +431,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
                         .setLogger(EventStore.log())
                         .build();
             }
-
-            if (eventValidator == null) {
-                eventValidator = MessageValidator.newInstance();
-            }
-
             EventBus result = new EventBus(this);
             return result;
         }
