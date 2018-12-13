@@ -181,23 +181,26 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Verifies the new entity state and returns {@link ConstraintViolation}s, if any.
      *
-     * <p>Default implementation uses the {@linkplain MessageValidator#validate(Message)
-     * message validation}.
+     * <p>Default implementation uses the {@linkplain MessageValidator#validate() message
+     * validation}.
      *
-     * @param  newState a state object to replace the current state
+     * @param newState
+     *         a state object to replace the current state
      * @return the violation constraints
      */
     protected List<ConstraintViolation> checkEntityState(S newState) {
         checkNotNull(newState);
-        return MessageValidator.newInstance()
-                               .validate(newState);
+        return MessageValidator.newInstance(newState)
+                               .validate();
     }
 
     /**
      * Ensures that the passed new state is valid.
      *
-     * @param   newState a state object to replace the current state
-     * @throws InvalidEntityStateException if the state is not valid
+     * @param newState
+     *         a state object to replace the current state
+     * @throws InvalidEntityStateException
+     *         if the state is not valid
      * @see #checkEntityState(Message)
      */
     private void validate(S newState) throws InvalidEntityStateException {
