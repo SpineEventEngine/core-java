@@ -37,6 +37,8 @@ import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
+import java.time.ZonedDateTime;
+
 import static io.spine.testing.core.given.GivenUserId.of;
 
 /**
@@ -45,11 +47,11 @@ import static io.spine.testing.core.given.GivenUserId.of;
 @VisibleForTesting
 public class TestActorRequestFactory extends ActorRequestFactory {
 
-    protected TestActorRequestFactory(UserId actor, ZoneOffset zoneOffset, ZoneId zoneId) {
+    protected TestActorRequestFactory(UserId actor, ZoneId zoneId) {
         super(ActorRequestFactory
                       .newBuilder()
                       .setActor(actor)
-                      .setZoneOffset(zoneOffset)
+                      .setZoneOffset(idToZoneOffset(zoneId))
                       .setZoneId(zoneId)
         );
     }
@@ -68,21 +70,21 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public static
-    TestActorRequestFactory newInstance(String actor, ZoneOffset zoneOffset, ZoneId zoneId) {
-        return newInstance(of(actor), zoneOffset, zoneId);
+    TestActorRequestFactory newInstance(String actor, ZoneId zoneId) {
+        return newInstance(of(actor), zoneId);
     }
 
     public static
-    TestActorRequestFactory newInstance(UserId actor, ZoneOffset zoneOffset, ZoneId zoneId) {
-        return new TestActorRequestFactory(actor, zoneOffset, zoneId);
+    TestActorRequestFactory newInstance(UserId actor, ZoneId zoneId) {
+        return new TestActorRequestFactory(actor, zoneId);
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass) {
-        return newInstance(testClass.getName(), ZoneOffsets.getDefault(), ZoneIds.systemDefault());
+        return newInstance(testClass.getName(), ZoneIds.systemDefault());
     }
 
     public static TestActorRequestFactory newInstance(UserId actor) {
-        return newInstance(actor, ZoneOffsets.getDefault(), ZoneIds.systemDefault());
+        return newInstance(actor, ZoneIds.systemDefault());
     }
 
     public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
@@ -96,6 +98,19 @@ public class TestActorRequestFactory extends ActorRequestFactory {
                                            of(testClass.getName()),
                                            ZoneOffsets.getDefault(),
                                            ZoneIds.systemDefault());
+    }
+
+    private static ZoneOffset idToZoneOffset(ZoneId zoneId) {
+        String id = zoneId.getValue();
+        java.time.ZoneId javaZoneId = java.time.ZoneId.of(id);
+        int offsetInSeconds = ZonedDateTime.now(javaZoneId)
+                                           .getOffset()
+                                           .getTotalSeconds();
+        ZoneOffset offset = ZoneOffset
+                .newBuilder()
+                .setAmountSeconds(offsetInSeconds)
+                .build();
+        return offset;
     }
 
     /** Creates new command with the passed timestamp. */
