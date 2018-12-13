@@ -31,7 +31,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
@@ -134,10 +134,11 @@ public class InvalidCommandException extends CommandException implements Message
      * command which field values violate validation constraint(s).
      */
     private static class ConstraintViolationExceptionFactory
-                                 extends ExceptionFactory<InvalidCommandException,
-                                                          Command,
-                                                          CommandClass,
-                                                          CommandValidationError> {
+            extends ExceptionFactory<InvalidCommandException,
+                                     Command,
+                                     CommandClass,
+                                     CommandValidationError> {
+
         private final CommandClass commandClass;
 
         protected ConstraintViolationExceptionFactory(Command command,
