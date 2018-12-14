@@ -22,8 +22,8 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithASetterButNoGetter;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
@@ -117,7 +117,7 @@ class ColumnReaderTest {
 
     @Test
     @DisplayName("not confuse a setter method with a property mutator")
-    void testSetterDeclaringEntity(){
+    void testSetterDeclaringEntity() {
         ColumnReader columnReader = forClass(EntityWithASetterButNoGetter.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
         assertThat(entityColumns).isEmpty();
