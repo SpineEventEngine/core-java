@@ -98,15 +98,15 @@ class ColumnReader {
         }
 
         PropertyDescriptor[] propertyDescriptors = entityDescriptor.getPropertyDescriptors();
-        ImmutableSet<EntityColumn> annotatedColumns = Arrays
+        ImmutableSet<EntityColumn> columns = Arrays
                 .stream(propertyDescriptors)
                 .map(PropertyDescriptor::getReadMethod)
                 .filter(Objects::nonNull)
                 .filter(ColumnReader::isAnnotated)
                 .map(EntityColumn::from)
                 .collect(toImmutableSet());
-        checkRepeatedColumnNames(annotatedColumns);
-        return annotatedColumns;
+        checkRepeatedColumnNames(columns);
+        return columns;
     }
 
     private static boolean isAnnotated(Method method) {
