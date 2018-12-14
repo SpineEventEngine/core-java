@@ -27,7 +27,10 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -91,10 +94,14 @@ class ColumnReader {
         }
 
         Collection<EntityColumn> entityColumns = newLinkedList();
-        for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
+        PropertyDescriptor[] propertyDescriptors = entityDescriptor.getPropertyDescriptors();
+        Set<PropertyDescriptor> propertiesWithAccessors = Arrays.stream(propertyDescriptors)
+                                                                .filter(ColumnReader::hasAccessor)
+                                                                .collect(Collectors.toSet());
+        for (PropertyDescriptor property : propertiesWithAccessors) {
             Method getter = property.getReadMethod();
-            boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
-            if (isEntityColumn) {
+            boolean getterIsAnnotated = getAnnotatedVersion(getter).isPresent();
+            if (getterIsAnnotated) {
                 EntityColumn column = EntityColumn.from(getter);
                 entityColumns.add(column);
             }
@@ -104,6 +111,9 @@ class ColumnReader {
         return entityColumns;
     }
 
+    private static boolean hasAccessor(PropertyDescriptor descriptor) {
+        return descriptor.getReadMethod() != null;
+    }
 
     /**
      * Ensures that the specified columns have no repeated names.
