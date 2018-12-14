@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.Entity;
 
 import java.beans.BeanInfo;
@@ -27,9 +28,12 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.entity.storage.Methods.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -63,7 +67,8 @@ class ColumnReader {
      * <p>The reader can be further used to {@linkplain ColumnReader#readColumns() obtain}
      * {@linkplain EntityColumn entity columns} for the given class.
      *
-     * @param entityClass {@link Entity} class for which to create the instance
+     * @param entityClass
+     *         {@link Entity} class for which to create the instance
      * @return new instance of {@code ColumnReader} for the specified class
      */
     static ColumnReader forClass(Class<? extends Entity> entityClass) {
@@ -80,8 +85,10 @@ class ColumnReader {
      * <p>If the check for correctness fails, throws {@link IllegalStateException}.
      *
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
-     * @throws IllegalStateException if entity column definitions are incorrect
+     * @throws IllegalStateException
+     *         if entity column definitions are incorrect
      */
+    @SuppressWarnings("ConstantConditions")
     Collection<EntityColumn> readColumns() {
         BeanInfo entityDescriptor;
         try {
@@ -90,28 +97,31 @@ class ColumnReader {
             throw new IllegalStateException(e);
         }
 
-        Collection<EntityColumn> entityColumns = newLinkedList();
-        for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
-            Method getter = property.getReadMethod();
-            boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
-            if (isEntityColumn) {
-                EntityColumn column = EntityColumn.from(getter);
-                entityColumns.add(column);
-            }
-        }
-
-        checkRepeatedColumnNames(entityColumns);
-        return entityColumns;
+        PropertyDescriptor[] propertyDescriptors = entityDescriptor.getPropertyDescriptors();
+        ImmutableSet<EntityColumn> columns = Arrays
+                .stream(propertyDescriptors)
+                .map(PropertyDescriptor::getReadMethod)
+                .filter(Objects::nonNull)
+                .filter(ColumnReader::isAnnotated)
+                .map(EntityColumn::from)
+                .collect(toImmutableSet());
+        checkRepeatedColumnNames(columns);
+        return columns;
     }
 
+    private static boolean isAnnotated(Method method) {
+        return getAnnotatedVersion(method).isPresent();
+    }
 
     /**
      * Ensures that the specified columns have no repeated names.
      *
      * <p>If the check fails, throws {@link IllegalStateException}.
      *
-     * @param columns     the columns to check
-     * @throws IllegalStateException if columns contain repeated names
+     * @param columns
+     *         the columns to check
+     * @throws IllegalStateException
+     *         if columns contain repeated names
      */
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
         Collection<String> checkedNames = newLinkedList();

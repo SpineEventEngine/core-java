@@ -53,6 +53,28 @@ public class ColumnsTestEnv {
         }
     }
 
+    /**
+     * An entity type which declares a {@linkplain #setSecretNumber(Integer) mutator method},
+     * however doesn't declare a respective accessor method.
+     *
+     * <p>{@code ColumnReader} should not get confused and assume that the mutator method is
+     * a property, and, therefore, a potential column.
+     */
+    @SuppressWarnings("unused") // Reflective access
+    public static class EntityWithASetterButNoGetter extends AbstractEntity<String, Any> {
+
+        private Integer secretNumber;
+
+        protected EntityWithASetterButNoGetter(String id) {
+            super(id);
+        }
+
+        @SuppressWarnings("WeakerAccess") // Required for a test
+        public void setSecretNumber(Integer secretNumber) {
+            this.secretNumber = secretNumber;
+        }
+    }
+
     @SuppressWarnings("unused")  // Reflective access
     public static class EntityWithManyGetters extends AbstractEntity<String, Any> {
 
