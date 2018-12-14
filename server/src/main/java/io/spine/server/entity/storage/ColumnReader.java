@@ -130,7 +130,6 @@ class ColumnReader {
      *         if columns contain repeated names
      */
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
-
         Collection<String> checkedNames = newLinkedList();
         for (EntityColumn column : columns) {
             String columnName = column.getStoredName();
