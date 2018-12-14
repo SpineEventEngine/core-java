@@ -20,14 +20,18 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.Entity;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -84,6 +88,7 @@ class ColumnReader {
      * @throws IllegalStateException
      *         if entity column definitions are incorrect
      */
+    @SuppressWarnings("ConstantConditions")
     Collection<EntityColumn> readColumns() {
         BeanInfo entityDescriptor;
         try {
@@ -92,24 +97,26 @@ class ColumnReader {
             throw new IllegalStateException(e);
         }
 
-        Collection<EntityColumn> entityColumns = newLinkedList();
         PropertyDescriptor[] propertyDescriptors = entityDescriptor.getPropertyDescriptors();
-        Arrays.stream(propertyDescriptors)
-              .filter(ColumnReader::hasAccessor)
-              .filter(ColumnReader::accessorIsAnnotated)
-              .map(PropertyDescriptor::getReadMethod)
-              .forEach(readMethod -> entityColumns.add(EntityColumn.from(readMethod)));
 
-        checkRepeatedColumnNames(entityColumns);
-        return entityColumns;
+        Set<EntityColumn> annotatedColumns = Arrays.stream(propertyDescriptors)
+                                               .map(PropertyDescriptor::getReadMethod)
+                                               .filter(ColumnReader::hasAccessor)
+                                               .filter(ColumnReader::accessorIsAnnotated)
+                                               .map(EntityColumn::from)
+                                               .collect(Collectors.toSet());
+
+        checkRepeatedColumnNames(annotatedColumns);
+        return ImmutableSet.copyOf(annotatedColumns);
     }
 
-    private static boolean accessorIsAnnotated(PropertyDescriptor descriptor) {
-        return getAnnotatedVersion(descriptor.getReadMethod()).isPresent();
+    private static boolean accessorIsAnnotated(Method method) {
+        return getAnnotatedVersion(method).isPresent();
     }
 
-    private static boolean hasAccessor(PropertyDescriptor descriptor) {
-        return descriptor.getReadMethod() != null;
+    @SuppressWarnings("ConstantConditions")
+    private static boolean hasAccessor(Method method) {
+        return method != null;
     }
 
     /**
@@ -123,6 +130,7 @@ class ColumnReader {
      *         if columns contain repeated names
      */
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
+
         Collection<String> checkedNames = newLinkedList();
         for (EntityColumn column : columns) {
             String columnName = column.getStoredName();
