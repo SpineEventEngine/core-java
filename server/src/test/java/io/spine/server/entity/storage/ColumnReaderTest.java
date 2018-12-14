@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithASetterButNoGetter;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
@@ -112,6 +113,14 @@ class ColumnReaderTest {
             assertThat(entityColumns).hasSize(1);
             assertTrue(containsColumn(entityColumns, "integerFieldValue"));
         }
+    }
+
+    @Test
+    @DisplayName("not confuse a `setSomething()` method with a property mutator")
+    void testSetterDeclaringEntity(){
+        ColumnReader columnReader = forClass(EntityWithASetterButNoGetter.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        assertThat(entityColumns).hasSize(1);
     }
 
     @Nested
