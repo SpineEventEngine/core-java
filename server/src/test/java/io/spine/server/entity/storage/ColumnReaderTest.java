@@ -116,11 +116,11 @@ class ColumnReaderTest {
     }
 
     @Test
-    @DisplayName("not confuse a `setSomething()` method with a property mutator")
+    @DisplayName("not confuse a setter method with a property mutator")
     void testSetterDeclaringEntity(){
         ColumnReader columnReader = forClass(EntityWithASetterButNoGetter.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
-        assertThat(entityColumns).hasSize(1);
+        assertThat(entityColumns).isEmpty();
     }
 
     @Nested

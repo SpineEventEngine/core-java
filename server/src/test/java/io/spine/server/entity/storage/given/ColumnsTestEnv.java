@@ -69,11 +69,6 @@ public class ColumnsTestEnv {
             super(id);
         }
 
-        @Column
-        public Integer getFortyThree(){
-            return 43;
-        }
-
         @SuppressWarnings("WeakerAccess") // Required for a test
         public void setSecretNumber(Integer secretNumber) {
             this.secretNumber = secretNumber;
