@@ -26,11 +26,8 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -66,7 +63,8 @@ class ColumnReader {
      * <p>The reader can be further used to {@linkplain ColumnReader#readColumns() obtain}
      * {@linkplain EntityColumn entity columns} for the given class.
      *
-     * @param entityClass {@link Entity} class for which to create the instance
+     * @param entityClass
+     *         {@link Entity} class for which to create the instance
      * @return new instance of {@code ColumnReader} for the specified class
      */
     static ColumnReader forClass(Class<? extends Entity> entityClass) {
@@ -83,7 +81,8 @@ class ColumnReader {
      * <p>If the check for correctness fails, throws {@link IllegalStateException}.
      *
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
-     * @throws IllegalStateException if entity column definitions are incorrect
+     * @throws IllegalStateException
+     *         if entity column definitions are incorrect
      */
     Collection<EntityColumn> readColumns() {
         BeanInfo entityDescriptor;
@@ -95,20 +94,18 @@ class ColumnReader {
 
         Collection<EntityColumn> entityColumns = newLinkedList();
         PropertyDescriptor[] propertyDescriptors = entityDescriptor.getPropertyDescriptors();
-        Set<PropertyDescriptor> propertiesWithAccessors = Arrays.stream(propertyDescriptors)
-                                                                .filter(ColumnReader::hasAccessor)
-                                                                .collect(Collectors.toSet());
-        for (PropertyDescriptor property : propertiesWithAccessors) {
-            Method getter = property.getReadMethod();
-            boolean getterIsAnnotated = getAnnotatedVersion(getter).isPresent();
-            if (getterIsAnnotated) {
-                EntityColumn column = EntityColumn.from(getter);
-                entityColumns.add(column);
-            }
-        }
+        Arrays.stream(propertyDescriptors)
+              .filter(ColumnReader::hasAccessor)
+              .filter(ColumnReader::accessorIsAnnotated)
+              .map(PropertyDescriptor::getReadMethod)
+              .forEach(readMethod -> entityColumns.add(EntityColumn.from(readMethod)));
 
         checkRepeatedColumnNames(entityColumns);
         return entityColumns;
+    }
+
+    private static boolean accessorIsAnnotated(PropertyDescriptor descriptor) {
+        return getAnnotatedVersion(descriptor.getReadMethod()).isPresent();
     }
 
     private static boolean hasAccessor(PropertyDescriptor descriptor) {
@@ -120,8 +117,10 @@ class ColumnReader {
      *
      * <p>If the check fails, throws {@link IllegalStateException}.
      *
-     * @param columns     the columns to check
-     * @throws IllegalStateException if columns contain repeated names
+     * @param columns
+     *         the columns to check
+     * @throws IllegalStateException
+     *         if columns contain repeated names
      */
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
         Collection<String> checkedNames = newLinkedList();
