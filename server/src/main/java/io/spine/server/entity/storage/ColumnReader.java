@@ -30,10 +30,10 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.entity.storage.Methods.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -99,24 +99,20 @@ class ColumnReader {
 
         PropertyDescriptor[] propertyDescriptors = entityDescriptor.getPropertyDescriptors();
 
-        Set<EntityColumn> annotatedColumns = Arrays.stream(propertyDescriptors)
-                                               .map(PropertyDescriptor::getReadMethod)
-                                               .filter(ColumnReader::hasAccessor)
-                                               .filter(ColumnReader::accessorIsAnnotated)
-                                               .map(EntityColumn::from)
-                                               .collect(Collectors.toSet());
+        ImmutableSet<EntityColumn> annotatedColumns = Arrays
+                .stream(propertyDescriptors)
+                .map(PropertyDescriptor::getReadMethod)
+                .filter(Objects::isNull)
+                .filter(ColumnReader::isAnnotated)
+                .map(EntityColumn::from)
+                .collect(toImmutableSet());
 
         checkRepeatedColumnNames(annotatedColumns);
-        return ImmutableSet.copyOf(annotatedColumns);
+        return annotatedColumns;
     }
 
-    private static boolean accessorIsAnnotated(Method method) {
+    private static boolean isAnnotated(Method method) {
         return getAnnotatedVersion(method).isPresent();
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private static boolean hasAccessor(Method method) {
-        return method != null;
     }
 
     /**
