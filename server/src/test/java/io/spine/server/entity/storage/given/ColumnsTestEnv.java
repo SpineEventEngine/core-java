@@ -54,8 +54,8 @@ public class ColumnsTestEnv {
     }
 
     /**
-     * This entity declares a {@linkplain #setSecretNumber(Integer) mutator method}, however
-     * doesn't declare a respective accessor method.
+     * An entity type which declares a {@linkplain #setSecretNumber(Integer) mutator method},
+     * however doesn't declare a respective accessor method.
      *
      * <p>{@code ColumnReader} should not get confused and assume that the mutator method is
      * a property, and, therefore, a potential column.

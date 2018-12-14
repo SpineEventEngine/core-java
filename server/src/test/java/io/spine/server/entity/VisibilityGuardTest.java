@@ -57,12 +57,9 @@ class VisibilityGuardTest {
 
     private VisibilityGuard guard;
     private List<Repository> repositories;
-    private BoundedContext boundedContext;
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContext.newBuilder()
-                                       .build();
         repositories = Lists.newArrayList();
 
         guard = VisibilityGuard.newInstance();
@@ -77,8 +74,7 @@ class VisibilityGuardTest {
     }
 
     @AfterEach
-    void shutDown() throws Exception {
-        boundedContext.close();
+    void shutDown() {
         repositories.clear();
     }
 
