@@ -101,8 +101,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     private static ZoneOffset idToZoneOffset(ZoneId zoneId) {
-        String id = zoneId.getValue();
-        java.time.ZoneId javaZoneId = java.time.ZoneId.of(id);
+        java.time.ZoneId javaZoneId = java.time.ZoneId.of(zoneId.getValue());
         int offsetInSeconds = ZonedDateTime.now(javaZoneId)
                                            .getOffset()
                                            .getTotalSeconds();
