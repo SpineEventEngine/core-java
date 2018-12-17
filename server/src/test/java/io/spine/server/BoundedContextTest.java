@@ -32,6 +32,7 @@ import io.spine.server.bc.given.ProjectPmRepo;
 import io.spine.server.bc.given.ProjectProjectionRepo;
 import io.spine.server.bc.given.ProjectRemovalRepository;
 import io.spine.server.bc.given.ProjectReportRepository;
+import io.spine.server.bc.given.RepositoryPair;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
@@ -44,7 +45,6 @@ import io.spine.system.server.SystemClient;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.server.model.ModelTests;
-import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -199,46 +199,48 @@ class BoundedContextTest {
     @ParameterizedTest
     @MethodSource("sameStateRepositories")
     @DisplayName("not allow two entity repositories with entities of same state")
-    void throwOnSameEntityState(Pair<Repository, Repository> sameStateRepositories) {
-        Repository repository = sameStateRepositories.getKey();
+    void throwOnSameEntityState(RepositoryPair sameStateRepositories) {
+        Repository<?, ?> repository = sameStateRepositories.first();
         boundedContext.register(repository);
-        Repository anotherRepository = sameStateRepositories.getValue();
+        Repository<?, ?> anotherRepository = sameStateRepositories.second();
         assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepository));
     }
 
     /**
-     * To check whether {@link io.spine.server.BoundedContext} really throws an
-     * {@code IllegalStateException} upon an attempt to register a repository that manages an entity
-     * of a state that a registered entity repository is already managing, all combinations of
-     * entities that take state as a type parameter need to be checked.
+     * Returns all combination of repositories that manage entities of the same state.
      *
-     * <p>This method returns a stream of pairs of all such combinations, which is a cartesian
+     * <p>To check whether a {@link io.spine.server.BoundedContext} really throws
+     * an {@code IllegalStateException} upon an attempt to register a repository that manages an
+     * entity of a state that a registered entity repository is already managing, all combinations
+     * of entities that take state as a type parameter need to be checked.
+     *
+     * <p>This method returns a stream of pairs of all such combinations, which is a Cartesian
      * product of:
      * <ul>
-     *     <li>{@linkplain io.spine.server.procman.ProcessManagerRepository process manager}
-     *     <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate}
-     *     <li>{@linkplain io.spine.server.projection.ProjectionRepository projection}
+     *     <li>{@linkplain io.spine.server.procman.ProcessManagerRepository process manager},
+     *     <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate},
+     *     <li>{@linkplain io.spine.server.projection.ProjectionRepository projection}.
      * </ul>
      */
     private static Stream<Arguments> sameStateRepositories() {
-        Set<Repository> repositories =
+        Set<Repository<?, ?>> repositories =
                 ImmutableSet.of(new ProjectAggregateRepository(),
                                 new ProjectProjectionRepo(),
                                 new ProjectCreationRepository());
 
-        Set<Repository> sameStateRepositories =
+        Set<Repository<?, ?>> sameStateRepositories =
                 ImmutableSet.of(new AnotherProjectAggregateRepository(),
                                 new FinishedProjectProjectionRepo(),
                                 new ProjectRemovalRepository());
 
-        Set<List<Repository>> cartesianProduct = Sets.cartesianProduct(repositories,
-                                                                       sameStateRepositories);
+        Set<List<Repository<?, ?>>> cartesianProduct = Sets.cartesianProduct(repositories,
+                                                                             sameStateRepositories);
 
         Stream.Builder<Arguments> builder = Stream.builder();
-        for (List<Repository> list : cartesianProduct) {
-            Repository firstRepo = list.get(0);
-            Repository secondRepo = list.get(1);
-            Pair<Repository, Repository> pair = new Pair<>(firstRepo, secondRepo);
+        for (List<Repository<?, ?>> list : cartesianProduct) {
+            Repository<?, ?> firstRepo = list.get(0);
+            Repository<?, ?> secondRepo = list.get(1);
+            RepositoryPair pair = new RepositoryPair(firstRepo, secondRepo);
             builder.add(Arguments.of(pair));
         }
 
