@@ -28,6 +28,7 @@ import io.spine.test.bc.ProjectVBuilder;
 import io.spine.test.bc.event.BcProjectCreated;
 
 public class ProjectProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
+
     protected ProjectProjection(ProjectId id) {
         super(id);
     }

@@ -203,7 +203,7 @@ class BoundedContextTest {
     }
 
     /**
-     * Returns all combination of repositories that manage entities of the same state.
+     * Returns all combinations of repositories that manage entities of the same state.
      *
      * <p>To check whether a {@link io.spine.server.BoundedContext} really throws
      * an {@code IllegalStateException} upon an attempt to register a repository that manages an
@@ -213,8 +213,8 @@ class BoundedContextTest {
      * <p>This method returns a stream of pairs of all such combinations, which is a Cartesian
      * product of:
      * <ul>
-     *     <li>{@linkplain io.spine.server.procman.ProcessManagerRepository process manager},
-     *     <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate},
+     *     <li>{@linkplain io.spine.server.procman.ProcessManagerRepository process manager};
+     *     <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate};
      *     <li>{@linkplain io.spine.server.projection.ProjectionRepository projection}.
      * </ul>
      * All of the returned repositories manage entities of the same state type.
@@ -234,15 +234,11 @@ class BoundedContextTest {
 
         Set<List<Repository<?, ?>>> cartesianProduct = Sets.cartesianProduct(repositories,
                                                                              sameStateRepositories);
+        Stream<Arguments> result = cartesianProduct.stream()
+                                                   .map(repos -> Arguments.of(repos.get(0),
+                                                                              repos.get(1)));
 
-        Stream.Builder<Arguments> builder = Stream.builder();
-        for (List<Repository<?, ?>> list : cartesianProduct) {
-            Repository<?, ?> firstRepo = list.get(0);
-            Repository<?, ?> secondRepo = list.get(1);
-            builder.add(Arguments.of(firstRepo, secondRepo));
-        }
-
-        return builder.build();
+        return result;
     }
 
     @Test
