@@ -25,7 +25,6 @@ import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
 
 public class AnotherProjectProjectionRepo extends ProjectionRepository<ProjectId,
-        AnotherProjectProjection,
-        Project> {
-
+                                                                       AnotherProjectProjection,
+                                                                       Project> {
 }

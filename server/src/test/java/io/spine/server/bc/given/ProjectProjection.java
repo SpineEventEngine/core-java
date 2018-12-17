@@ -28,20 +28,12 @@ import io.spine.test.bc.ProjectVBuilder;
 import io.spine.test.bc.event.BcProjectCreated;
 
 public class ProjectProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
-
-    /**
-     * Creates a new instance.
-     *
-     * @param id
-     *         the ID for the new instance
-     * @throws IllegalArgumentException
-     *         if the ID is not of one of the supported types
-     */
     protected ProjectProjection(ProjectId id) {
         super(id);
     }
 
     @Subscribe
     public void on(BcProjectCreated created) {
+        // just watch
     }
 }

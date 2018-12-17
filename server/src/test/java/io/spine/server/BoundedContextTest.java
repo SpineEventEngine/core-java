@@ -215,9 +215,9 @@ class BoundedContextTest {
      * <p>This method returns a stream of pairs of all such combinations, which is a cartesian
      * product of:
      * <ul>
-     * <li>{@linkplain io.spine.server.procman.ProcessManagerRepository process manager}
-     * <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate}
-     * <li>{@linkplain io.spine.server.projection.ProjectionRepository projection}
+     *     <li>{@linkplain io.spine.server.procman.ProcessManagerRepository process manager}
+     *     <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate}
+     *     <li>{@linkplain io.spine.server.projection.ProjectionRepository projection}
      * </ul>
      */
     private static Stream<Arguments> sameStateRepositories() {
@@ -235,11 +235,9 @@ class BoundedContextTest {
                                                                        sameStateRepositories);
 
         Stream.Builder<Arguments> builder = Stream.builder();
-
         for (List<Repository> list : cartesianProduct) {
             Repository firstRepo = list.get(0);
             Repository secondRepo = list.get(1);
-
             Pair<Repository, Repository> pair = new Pair<>(firstRepo, secondRepo);
             builder.add(Arguments.of(pair));
         }

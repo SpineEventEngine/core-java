@@ -41,5 +41,4 @@ public class ProjectRemovalProcman extends ProcessManager<ProjectId, Project, Pr
                 .setProjectId(remove.getProjectId())
                 .build();
     }
-
 }
