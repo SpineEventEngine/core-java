@@ -40,6 +40,16 @@ message CreateProject {
     EvTeamId team_id = 2;
 }
 
+message RemoveProject {
+
+    ProjectId project_id = 1;
+}
+
+message ProceedToProjectRemoval {
+
+    ProjectId project_id = 1;
+}
+
 message AddTask {
 
     ProjectId project_id = 1;
