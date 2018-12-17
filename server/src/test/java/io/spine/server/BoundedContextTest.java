@@ -32,7 +32,6 @@ import io.spine.server.bc.given.ProjectPmRepo;
 import io.spine.server.bc.given.ProjectProjectionRepo;
 import io.spine.server.bc.given.ProjectRemovalRepository;
 import io.spine.server.bc.given.ProjectReportRepository;
-import io.spine.server.bc.given.RepositoryPair;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
@@ -198,11 +197,9 @@ class BoundedContextTest {
     @ParameterizedTest
     @MethodSource("sameStateRepositories")
     @DisplayName("not allow two entity repositories with entities of same state")
-    void throwOnSameEntityState(RepositoryPair sameStateRepositories) {
-        Repository<?, ?> repository = sameStateRepositories.first();
-        boundedContext.register(repository);
-        Repository<?, ?> anotherRepository = sameStateRepositories.second();
-        assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepository));
+    void throwOnSameEntityState(Repository<?, ?> firstRepo, Repository<?, ?> secondRepo) {
+        boundedContext.register(firstRepo);
+        assertThrows(IllegalStateException.class, () -> boundedContext.register(secondRepo));
     }
 
     /**
@@ -242,8 +239,7 @@ class BoundedContextTest {
         for (List<Repository<?, ?>> list : cartesianProduct) {
             Repository<?, ?> firstRepo = list.get(0);
             Repository<?, ?> secondRepo = list.get(1);
-            RepositoryPair pair = new RepositoryPair(firstRepo, secondRepo);
-            builder.add(Arguments.of(pair));
+            builder.add(Arguments.of(firstRepo, secondRepo));
         }
 
         return builder.build();
