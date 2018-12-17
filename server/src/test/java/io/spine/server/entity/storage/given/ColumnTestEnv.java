@@ -86,7 +86,7 @@ public class ColumnTestEnv {
         }
 
         @Column
-        public Boolean isBooleanWrapper() {
+        public @Nullable Boolean isBooleanWrapper() {
             return true;
         }
 
