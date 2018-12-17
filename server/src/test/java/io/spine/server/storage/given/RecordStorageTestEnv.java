@@ -246,8 +246,8 @@ public class RecordStorageTestEnv {
             injectState(this, newState, getCounterVersion());
         }
 
-        public void assignCounterVersion(int counterVersion) {
-            counter = counterVersion;
+        public void assignCounter(int counter) {
+            this.counter = counter;
         }
     }
 

@@ -152,7 +152,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         wrongEntity2.assignStatus(CANCELLED);
 
         // Change internal Entity state
-        wrongEntity1.assignCounterVersion(1);
+        wrongEntity1.assignCounter(1);
 
         // After the mutation above the single matching record is the one under the `idMatching` ID
 
