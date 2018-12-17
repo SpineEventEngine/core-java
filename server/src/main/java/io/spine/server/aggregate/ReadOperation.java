@@ -42,7 +42,7 @@ final class ReadOperation<I> {
 
     private final AggregateStorage<I> storage;
     private final AggregateReadRequest<I> request;
-    private final Deque<Event> history = newLinkedList();
+    private final Deque<Event> history;
 
     private @MonotonicNonNull Snapshot snapshot = null;
 
@@ -50,6 +50,7 @@ final class ReadOperation<I> {
         storage.checkNotClosed();
         this.storage = storage;
         this.request = checkNotNull(request);
+        this.history = newLinkedList();
     }
 
     Optional<AggregateStateRecord> perform() {

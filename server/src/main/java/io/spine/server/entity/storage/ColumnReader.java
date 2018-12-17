@@ -31,7 +31,8 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -39,7 +40,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.entity.storage.Methods.IS_PREFIX;
 import static io.spine.server.entity.storage.Methods.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * A class whose purpose is to obtain {@linkplain EntityColumn entity columns} from the given
@@ -64,7 +65,7 @@ class ColumnReader {
     private static final Predicate<Method> hasAnnotatedVersion = hasAnnotatedVersion();
 
     /**
-     * A predicate to check if the given method represents an entity property with the
+     * A predicate to check whether the given method represents an entity property with the
      * {@code Boolean} return type and the name starting with {@code is-}.
      */
     @VisibleForTesting
@@ -111,12 +112,11 @@ class ColumnReader {
      * <p>If the check for correctness fails, throws {@link IllegalStateException}.
      *
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
-     * @throws IllegalStateException
-     *         if entity column definitions are incorrect
+     * @throws IllegalStateException if entity column definitions are incorrect
      */
     Collection<EntityColumn> readColumns() {
-        List<EntityColumn> columns = gatherColumnsFromProperties();
-        List<EntityColumn> booleanWrapperColumns = gatherBooleanWrapperColumns();
+        Set<EntityColumn> columns = gatherColumnsFromProperties();
+        Set<EntityColumn> booleanWrapperColumns = gatherBooleanWrapperColumns();
         columns.addAll(booleanWrapperColumns);
         checkRepeatedColumnNames(columns);
         return columns;
@@ -129,13 +129,15 @@ class ColumnReader {
      * <a href="https://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
      * specification</a>.
      */
-    private List<EntityColumn> gatherColumnsFromProperties() {
+    private Set<EntityColumn> gatherColumnsFromProperties() {
         PropertyDescriptor[] properties = entityDescriptor.getPropertyDescriptors();
-        List<EntityColumn> result = Arrays.stream(properties)
-                                          .map(PropertyDescriptor::getReadMethod)
-                                          .filter(hasAnnotatedVersion)
-                                          .map(EntityColumn::from)
-                                          .collect(toList());
+        Set<EntityColumn> result = Arrays
+                .stream(properties)
+                .map(PropertyDescriptor::getReadMethod)
+                .filter(Objects::nonNull)
+                .filter(hasAnnotatedVersion)
+                .map(EntityColumn::from)
+                .collect(toSet());
         return result;
     }
 
@@ -146,14 +148,15 @@ class ColumnReader {
      * <p>The {@code Boolean} properties starting with {@code is-} are not allowed by the Java Bean
      * specification, so {@link #gatherColumnsFromProperties()} would not detect them for us.
      */
-    private List<EntityColumn> gatherBooleanWrapperColumns() {
+    private Set<EntityColumn> gatherBooleanWrapperColumns() {
         MethodDescriptor[] methodDescriptors = entityDescriptor.getMethodDescriptors();
-        List<EntityColumn> result = Arrays.stream(methodDescriptors)
-                                          .map(MethodDescriptor::getMethod)
-                                          .filter(isBooleanWrapperProperty)
-                                          .filter(hasAnnotatedVersion)
-                                          .map(EntityColumn::from)
-                                          .collect(toList());
+        Set<EntityColumn> result = Arrays
+                .stream(methodDescriptors)
+                .map(MethodDescriptor::getMethod)
+                .filter(isBooleanWrapperProperty)
+                .filter(hasAnnotatedVersion)
+                .map(EntityColumn::from)
+                .collect(toSet());
         return result;
     }
 
@@ -162,8 +165,10 @@ class ColumnReader {
      *
      * <p>If the check fails, throws {@link IllegalStateException}.
      *
-     * @param columns     the columns to check
-     * @throws IllegalStateException if columns contain repeated names
+     * @param columns
+     *         the columns to check
+     * @throws IllegalStateException
+     *         if columns contain repeated names
      */
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
         Collection<String> checkedNames = newLinkedList();

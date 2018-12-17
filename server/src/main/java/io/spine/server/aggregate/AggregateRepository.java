@@ -66,14 +66,16 @@ import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.Math.max;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates managed by this repository
- * @apiNote This class is made {@code abstract} for preserving type information of aggregate ID and
- *          aggregate classes used by implementations.
+ * @apiNote
+ * This class is made {@code abstract} for preserving type information of aggregate ID and
+ * aggregate classes used by implementations.
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
@@ -494,17 +496,31 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Fetches the history of the {@code Aggregate} with the given ID.
      *
-     * <p>To read an {@link AggregateStateRecord} from an {@link AggregateStorage},
-     * a {@linkplain #getSnapshotTrigger() snapshot trigger} is used as a
-     * {@linkplain AggregateReadRequest#getBatchSize() batch size}.
+     * <p>The method fetches only the recent history of the aggregate. The maximum depth of the read
+     * operation is defined as the greater number between
+     * the {@linkplain AggregateStorage#readEventCountAfterLastSnapshot(Object) event count after
+     * last snapshot} and the {@linkplain #getSnapshotTrigger() snapshot trigger}, plus one.
+     * This way, we secure the read operation from:
+     * <ol>
+     *     <li>snapshot trigger decrease;
+     *     <li>eventual consistency in the event count field.
+     * </ol>
+     *
+     * <p>The extra one unit of depth is added in order to be sure to include the last snapshot
+     * itself.
      *
      * @param id the ID of the {@code Aggregate} to fetch
      * @return the {@link AggregateStateRecord} for the {@code Aggregate} or
      *         {@code Optional.empty()} if there is no record with the ID
      */
     protected Optional<AggregateStateRecord> fetchHistory(I id) {
-        AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
-        Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);
+        AggregateStorage<I> storage = aggregateStorage();
+
+        int eventsAfterLastSnapshot = storage.readEventCountAfterLastSnapshot(id);
+        int batchSize = max(snapshotTrigger, eventsAfterLastSnapshot) + 1;
+
+        AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
+        Optional<AggregateStateRecord> eventsFromStorage = storage.read(request);
         return eventsFromStorage;
     }
 

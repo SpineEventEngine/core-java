@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithASetterButNoGetter;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithBooleanColumns;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
@@ -59,6 +60,8 @@ class ColumnReaderTest {
         new NullPointerTester().testStaticMethods(ColumnReader.class, Visibility.PACKAGE);
     }
 
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Call the method to throw exception.
     @Test
     @DisplayName("throw ISE on invalid column definitions")
     void throwOnInvalidColumns() {
@@ -117,6 +120,14 @@ class ColumnReaderTest {
             assertThat(entityColumns).hasSize(1);
             assertTrue(containsColumn(entityColumns, "integerFieldValue"));
         }
+    }
+
+    @Test
+    @DisplayName("not confuse a setter method with a property mutator")
+    void testSetterDeclaringEntity() {
+        ColumnReader columnReader = forClass(EntityWithASetterButNoGetter.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        assertThat(entityColumns).isEmpty();
     }
 
     @Nested
