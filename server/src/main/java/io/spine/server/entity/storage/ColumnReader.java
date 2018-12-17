@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.Entity;
 
 import java.beans.BeanInfo;
@@ -32,15 +33,16 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.entity.storage.Methods.IS_PREFIX;
 import static io.spine.server.entity.storage.Methods.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Stream.concat;
 
 /**
  * A class whose purpose is to obtain {@linkplain EntityColumn entity columns} from the given
@@ -115,49 +117,40 @@ class ColumnReader {
      * @throws IllegalStateException if entity column definitions are incorrect
      */
     Collection<EntityColumn> readColumns() {
-        Set<EntityColumn> columns = gatherColumnsFromProperties();
-        Set<EntityColumn> booleanWrapperColumns = gatherBooleanWrapperColumns();
-        columns.addAll(booleanWrapperColumns);
+        ImmutableSet<EntityColumn> columns = scanColumns();
         checkRepeatedColumnNames(columns);
         return columns;
     }
 
     /**
-     * Gathers entity properties and creates the entity columns where appropriate.
+     * Scans the entity methods for entity columns.
      *
      * <p>The entity properties search is based on the Java Bean
      * <a href="https://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
      * specification</a>.
+     *
+     * <p>The only exception to this are the {@code Boolean} properties starting with {@code is-}
+     * which are not allowed by the Java Bean specification and have to be gathered separately.
      */
-    private Set<EntityColumn> gatherColumnsFromProperties() {
+    private ImmutableSet<EntityColumn> scanColumns() {
         PropertyDescriptor[] properties = entityDescriptor.getPropertyDescriptors();
-        Set<EntityColumn> result = Arrays
+        Stream<Method> propertyAccessors = Arrays
                 .stream(properties)
                 .map(PropertyDescriptor::getReadMethod)
-                .filter(Objects::nonNull)
-                .filter(hasAnnotatedVersion)
-                .map(EntityColumn::from)
-                .collect(toSet());
-        return result;
-    }
+                .filter(Objects::nonNull);
 
-    /**
-     * Gathers entity columns that have {@code Boolean} return type and start with {@code is-}
-     * prefix.
-     *
-     * <p>The {@code Boolean} properties starting with {@code is-} are not allowed by the Java Bean
-     * specification, so they have to be gathered separately.
-     */
-    private Set<EntityColumn> gatherBooleanWrapperColumns() {
         MethodDescriptor[] methodDescriptors = entityDescriptor.getMethodDescriptors();
-        Set<EntityColumn> result = Arrays
+        Stream<Method> booleanWrapperGetters = Arrays
                 .stream(methodDescriptors)
                 .map(MethodDescriptor::getMethod)
-                .filter(isBooleanWrapperProperty)
+                .filter(isBooleanWrapperProperty);
+
+        Stream<Method> candidates = concat(propertyAccessors, booleanWrapperGetters);
+        ImmutableSet<EntityColumn> columns = candidates
                 .filter(hasAnnotatedVersion)
                 .map(EntityColumn::from)
-                .collect(toSet());
-        return result;
+                .collect(toImmutableSet());
+        return columns;
     }
 
     /**
