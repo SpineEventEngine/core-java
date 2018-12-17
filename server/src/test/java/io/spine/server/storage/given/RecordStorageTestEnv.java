@@ -184,7 +184,6 @@ public class RecordStorageTestEnv {
         @CanIgnoreReturnValue
         @Column
         public int getCounter() {
-            counter++;
             return counter;
         }
 
@@ -245,6 +244,10 @@ public class RecordStorageTestEnv {
                     .setStatus(status)
                     .build();
             injectState(this, newState, getCounterVersion());
+        }
+
+        public void assignCounterVersion(int counterVersion) {
+            counter = counterVersion;
         }
     }
 

@@ -118,8 +118,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .build();
         Version versionValue = Version
                 .newBuilder()
-                .setNumber(2) // Value of the counter after one columns
-                .build();     // scan (incremented 2 times internally)
+                .setNumber(0)
+                .build();
 
         ColumnFilter status = eq("projectStatusValue", wrappedValue);
         ColumnFilter version = eq("counterVersion", versionValue);
@@ -152,7 +152,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         wrongEntity2.assignStatus(CANCELLED);
 
         // Change internal Entity state
-        wrongEntity1.getCounter();
+        wrongEntity1.assignCounterVersion(1);
 
         // After the mutation above the single matching record is the one under the `idMatching` ID
 
