@@ -221,6 +221,7 @@ class BoundedContextTest {
      *     <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate},
      *     <li>{@linkplain io.spine.server.projection.ProjectionRepository projection}.
      * </ul>
+     * All of the returned repositories manage entities of the same state type.
      */
     private static Stream<Arguments> sameStateRepositories() {
         Set<Repository<?, ?>> repositories =
