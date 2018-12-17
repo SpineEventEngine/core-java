@@ -206,6 +206,20 @@ class BoundedContextTest {
         assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepository));
     }
 
+    /**
+     * To check whether {@link io.spine.server.BoundedContext} really throws an
+     * {@code IllegalStateException} upon an attempt to register a repository that manages an entity
+     * of a state that a registered entity repository is already managing, all combinations of
+     * entities that take state as a type parameter need to be checked.
+     *
+     * <p>This method returns a stream of pairs of all such combinations, which is a cartesian
+     * product of:
+     * <ul>
+     * <li>{@linkplain io.spine.server.procman.ProcessManagerRepository process manager}
+     * <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate}
+     * <li>{@linkplain io.spine.server.projection.ProjectionRepository projection}
+     * </ul>
+     */
     private static Stream<Arguments> sameStateRepositories() {
         Set<Repository> repositories =
                 ImmutableSet.of(new ProjectAggregateRepository(),
