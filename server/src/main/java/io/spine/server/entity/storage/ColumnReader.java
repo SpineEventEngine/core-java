@@ -146,7 +146,7 @@ class ColumnReader {
      * prefix.
      *
      * <p>The {@code Boolean} properties starting with {@code is-} are not allowed by the Java Bean
-     * specification, so {@link #gatherColumnsFromProperties()} would not detect them for us.
+     * specification, so they have to be gathered separately.
      */
     private Set<EntityColumn> gatherBooleanWrapperColumns() {
         MethodDescriptor[] methodDescriptors = entityDescriptor.getMethodDescriptors();
