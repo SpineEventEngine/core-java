@@ -125,12 +125,12 @@ class ColumnReader {
     /**
      * Scans the entity methods for entity columns.
      *
-     * <p>The entity properties search is based on the Java Bean
+     * <p>The column search is based on the Java Bean
      * <a href="https://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
      * specification</a>.
      *
-     * <p>The only exception to this are the {@code Boolean} properties starting with {@code is-}
-     * which are not allowed by the Java Bean specification and have to be gathered separately.
+     * <p>The only exception are the {@code Boolean} properties starting with {@code is-}
+     * which are not covered by the specification and have to be looked up manually.
      */
     private ImmutableSet<EntityColumn> scanColumns() {
         PropertyDescriptor[] properties = entityDescriptor.getPropertyDescriptors();
