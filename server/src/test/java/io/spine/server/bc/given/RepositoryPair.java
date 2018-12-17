@@ -20,27 +20,34 @@
 
 package io.spine.server.bc.given;
 
+import com.google.protobuf.Message;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 
-/** A pair of {@linkplain io.spine.server.entity.Repository repositories}. */
-public class RepositoryPair {
+/**
+ * A pair of {@linkplain io.spine.server.entity.Repository repositories}.
+ *
+ * @param <S> type of state that entities managed by each of the repositories have.
+ */
+public class RepositoryPair<S extends Message> {
 
-    private final Repository<?, ?> firstRepository;
-    private final Repository<?, ?> secondRepository;
+    private final Repository<?, Entity<?, S>> firstRepository;
+    private final Repository<?, Entity<?, S>> secondRepository;
 
     /** Constructs a pair from provided repositories. */
-    public RepositoryPair(Repository<?, ?> firstRepository, Repository<?, ?> secondRepository) {
+    public RepositoryPair(Repository<?, Entity<?, S>> firstRepository,
+                          Repository<?, Entity<?, S>> secondRepository) {
         this.firstRepository = firstRepository;
         this.secondRepository = secondRepository;
     }
 
     /** Returns the first value of this repository pair. */
-    public Repository<?, ?> first() {
+    public Repository<?, Entity<?, S>> first() {
         return firstRepository;
     }
 
     /** Returns the second value of this repository pair. */
-    public Repository<?, ?> second() {
+    public Repository<?, Entity<?, S>> second() {
         return secondRepository;
     }
 }

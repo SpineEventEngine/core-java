@@ -195,7 +195,6 @@ class BoundedContextTest {
         assertThat(stand.getExposedTypes(), contains(repository.getEntityStateType()));
     }
 
-    @SuppressWarnings("unchecked")
     @ParameterizedTest
     @MethodSource("sameStateRepositories")
     @DisplayName("not allow two entity repositories with entities of same state")
@@ -223,6 +222,8 @@ class BoundedContextTest {
      * </ul>
      * All of the returned repositories manage entities of the same state type.
      */
+    @SuppressWarnings("unchecked")
+        // Entities managed by created repositories are all of state type `Project`.
     private static Stream<Arguments> sameStateRepositories() {
         Set<Repository<?, ?>> repositories =
                 ImmutableSet.of(new ProjectAggregateRepository(),
