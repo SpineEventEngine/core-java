@@ -58,7 +58,8 @@ class Methods {
      *
      * <p>Allowed for {@code boolean} and {@link Boolean} entity columns.
      *
-     * <p>Package-private access because we manually search for some of such methods.
+     * <p>Package-private access to enable the common usage of this prefix in the column lookup
+     * {@linkplain ColumnReader#isBooleanWrapperProperty()} code}.
      */
     static final String IS_PREFIX = "is";
 
