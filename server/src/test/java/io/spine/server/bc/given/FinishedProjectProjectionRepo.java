@@ -20,26 +20,11 @@
 
 package io.spine.server.bc.given;
 
-import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.ProjectVBuilder;
-import io.spine.test.bc.event.BcProjectStarted;
 
-public class AnotherProjectProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
-
-    /**
-     * Creates a new instance.
-     *
-     * @param id
-     *         the ID for the new instance
-     * @throws IllegalArgumentException
-     *         if the ID is not of one of the supported types
-     */
-    protected AnotherProjectProjection(ProjectId id) {
-        super(id);
-    }
-
-    public void on(BcProjectStarted started) {
-    }
+public class FinishedProjectProjectionRepo extends ProjectionRepository<ProjectId,
+                                                                        FinishedProjectProjection,
+                                                                        Project> {
 }

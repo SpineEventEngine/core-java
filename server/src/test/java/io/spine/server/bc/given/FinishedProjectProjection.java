@@ -20,11 +20,21 @@
 
 package io.spine.server.bc.given;
 
-import io.spine.server.projection.ProjectionRepository;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
+import io.spine.test.bc.ProjectVBuilder;
+import io.spine.test.event.ProjectFinished;
 
-public class AnotherProjectProjectionRepo extends ProjectionRepository<ProjectId,
-                                                                       AnotherProjectProjection,
-                                                                       Project> {
+public class FinishedProjectProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
+
+    protected FinishedProjectProjection(ProjectId id) {
+        super(id);
+    }
+
+    @Subscribe
+    public void on(ProjectFinished finished) {
+        // For testing purposes ignoring the event is fine.
+    }
 }

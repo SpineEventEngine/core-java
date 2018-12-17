@@ -25,7 +25,7 @@ import com.google.common.collect.Sets;
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption;
 import io.spine.server.bc.given.AnotherProjectAggregateRepository;
-import io.spine.server.bc.given.AnotherProjectProjectionRepo;
+import io.spine.server.bc.given.FinishedProjectProjectionRepo;
 import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectCreationRepository;
 import io.spine.server.bc.given.ProjectPmRepo;
@@ -228,7 +228,7 @@ class BoundedContextTest {
 
         Set<Repository> sameStateRepositories =
                 ImmutableSet.of(new AnotherProjectAggregateRepository(),
-                                new AnotherProjectProjectionRepo(),
+                                new FinishedProjectProjectionRepo(),
                                 new ProjectRemovalRepository());
 
         Set<List<Repository>> cartesianProduct = Sets.cartesianProduct(repositories,

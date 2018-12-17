@@ -34,6 +34,6 @@ public class ProjectProjection extends Projection<ProjectId, Project, ProjectVBu
 
     @Subscribe
     public void on(BcProjectCreated created) {
-        // just watch
+        // For testing purposes event can be ignored.
     }
 }
