@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage.given;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
@@ -35,8 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
-import static java.util.stream.Collectors.toList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,33 +50,35 @@ public class ColumnsTestEnv {
     }
 
     /**
-     * Verifies that a column collection contains the specified column.
-     */
-    public static void assertContainsColumn(Collection<EntityColumn> columns, String columnName) {
-        assertTrue(containsColumn(columns, columnName));
-    }
-
-    /**
-     * Verifies that a column collection does not contain the specified column.
+     * Verifies that a column collection contains the specified columns.
      */
     public static void
-    assertNotContainsColumn(Collection<EntityColumn> columns, String columnName) {
-        assertFalse(containsColumn(columns, columnName));
+    assertContainsColumns(Collection<EntityColumn> actual, String... columnNames) {
+        assertTrue(containsColumn(actual, columnNames));
     }
 
     /**
-     * Checks whether the given column collection contains a specified column.
+     * Verifies that a column collection does not contain the specified columns.
      */
-    private static boolean containsColumn(Collection<EntityColumn> columns, String columnName) {
-        checkNotNull(columns);
-        checkNotEmptyOrBlank(columnName, "column name");
+    public static void
+    assertNotContainsColumns(Collection<EntityColumn> actual, String... columnNames) {
+        assertFalse(containsColumn(actual, columnNames));
+    }
 
-        boolean containsColumn = columns
+    /**
+     * Checks whether a given column collection contains the specified columns.
+     *
+     * <p>The collection can be safely stored in {@link ImmutableSet} as it will never contain
+     * repeated column names.
+     */
+    private static boolean containsColumn(Collection<EntityColumn> actual, String... columnNames) {
+        checkNotNull(actual);
+        ImmutableSet<String> expectedColumns = ImmutableSet.copyOf(columnNames);
+        ImmutableSet<String> actualColumns = actual
                 .stream()
                 .map(EntityColumn::getName)
-                .collect(toList())
-                .contains(columnName);
-        return containsColumn;
+                .collect(toImmutableSet());
+        return expectedColumns.equals(actualColumns);
     }
 
     public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {

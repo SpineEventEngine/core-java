@@ -37,7 +37,7 @@ import java.util.Map;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
-import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertContainsColumn;
+import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertContainsColumns;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -98,11 +98,10 @@ class ColumnsTest {
         Collection<EntityColumn> entityColumns =
                 Columns.getAllColumns(EntityWithManyGetters.class);
 
-        assertContainsColumn(entityColumns, "boolean");
-        assertContainsColumn(entityColumns, "booleanWrapper");
-        assertContainsColumn(entityColumns, "someMessage");
-        assertContainsColumn(entityColumns, "integerFieldValue");
-        assertContainsColumn(entityColumns, "floatNull");
+        assertContainsColumns(
+                entityColumns,
+                "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
+        );
     }
 
     @Test
