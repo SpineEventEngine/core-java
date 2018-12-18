@@ -106,7 +106,8 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
-                    archived.name(), deleted.name(), "visible", version.name(), "someTime");
+                    archived.name(), deleted.name(), "visible", version.name(), "someTime"
+            );
         }
 
         @Test
