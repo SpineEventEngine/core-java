@@ -245,7 +245,7 @@ public class EventsTest extends UtilityClassTest<Events> {
     class ThrowIaeOnRead {
 
         @Test
-        @DisplayName("for event without origin")
+        @DisplayName("of the event without origin")
         void forEventWithoutOrigin() {
             EventContext context = contextWithoutOrigin().build();
             Event event = EventsTestEnv.event(context);
@@ -253,7 +253,7 @@ public class EventsTest extends UtilityClassTest<Events> {
         }
 
         @Test
-        @DisplayName("for event with event context without origin")
+        @DisplayName("of the event whose event context has no origin")
         void forEventContextWithoutOrigin() {
             EventContext context = contextWithoutOrigin()
                     .setEventContext(contextWithoutOrigin())
