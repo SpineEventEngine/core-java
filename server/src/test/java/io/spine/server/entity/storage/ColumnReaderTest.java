@@ -38,19 +38,19 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.ColumnReader.forClass;
+import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertContainsColumn;
+import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertNotContainsColumn;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("DuplicateStringLiteralInspection") // Lots of literals for column names.
 @DisplayName("ColumnReader should")
 class ColumnReaderTest {
 
@@ -79,12 +79,11 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithManyGetters.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
-            assertThat(entityColumns).hasSize(5);
-            assertTrue(containsColumn(entityColumns, "boolean"));
-            assertTrue(containsColumn(entityColumns, "booleanWrapper"));
-            assertTrue(containsColumn(entityColumns, "someMessage"));
-            assertTrue(containsColumn(entityColumns, "integerFieldValue"));
-            assertTrue(containsColumn(entityColumns, "floatNull"));
+            assertContainsColumn(entityColumns, "boolean");
+            assertContainsColumn(entityColumns, "booleanWrapper");
+            assertContainsColumn(entityColumns, "someMessage");
+            assertContainsColumn(entityColumns, "integerFieldValue");
+            assertContainsColumn(entityColumns, "floatNull");
         }
 
         @Test
@@ -103,12 +102,11 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(RealLifeEntity.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
-            assertThat(entityColumns).hasSize(5);
-            assertTrue(containsColumn(entityColumns, archived.name()));
-            assertTrue(containsColumn(entityColumns, deleted.name()));
-            assertTrue(containsColumn(entityColumns, "visible"));
-            assertTrue(containsColumn(entityColumns, version.name()));
-            assertTrue(containsColumn(entityColumns, "someTime"));
+            assertContainsColumn(entityColumns, archived.name());
+            assertContainsColumn(entityColumns, deleted.name());
+            assertContainsColumn(entityColumns, "visible");
+            assertContainsColumn(entityColumns, version.name());
+            assertContainsColumn(entityColumns, "someTime");
         }
 
         @Test
@@ -116,9 +114,7 @@ class ColumnReaderTest {
         void fromImplementedInterface() {
             ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-
-            assertThat(entityColumns).hasSize(1);
-            assertTrue(containsColumn(entityColumns, "integerFieldValue"));
+            assertContainsColumn(entityColumns, "integerFieldValue");
         }
     }
 
@@ -127,7 +123,7 @@ class ColumnReaderTest {
     void testSetterDeclaringEntity() {
         ColumnReader columnReader = forClass(EntityWithASetterButNoGetter.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
-        assertThat(entityColumns).isEmpty();
+        assertNotContainsColumn(entityColumns, "secretNumber");
     }
 
     @Nested
@@ -139,7 +135,7 @@ class ColumnReaderTest {
         void inheritedNonPublicColumns() {
             ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-            assertThat(entityColumns).hasSize(5);
+            assertNotContainsColumn(entityColumns, "someNonPublicMethod");
         }
 
         @Test
@@ -147,7 +143,7 @@ class ColumnReaderTest {
         void staticMembers() {
             ColumnReader columnReader = forClass(EntityWithManyGetters.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-            assertFalse(containsColumn(entityColumns, "staticMember"));
+            assertNotContainsColumn(entityColumns, "staticMember");
         }
     }
 
@@ -217,17 +213,5 @@ class ColumnReaderTest {
                 throws NoSuchMethodException {
             return EntityWithBooleanColumns.class.getDeclaredMethod(name, parameterTypes);
         }
-    }
-
-    private static boolean containsColumn(Iterable<EntityColumn> entityColumns, String columnName) {
-        checkNotNull(entityColumns);
-        checkNotEmptyOrBlank(columnName, "column name");
-
-        for (EntityColumn column : entityColumns) {
-            if (columnName.equals(column.getName())) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -35,7 +35,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.collect.testing.Helpers.assertEmpty;
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -64,7 +63,6 @@ class ColumnValueExtractorTest {
             EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
-            assertThat(columnValues).hasSize(5);
             assertEquals(entity.getSomeMessage(), columnValues.get("someMessage")
                                                               .getValue());
         }
@@ -75,7 +73,6 @@ class ColumnValueExtractorTest {
             PrivateEntity entity = new PrivateEntity(TEST_ENTITY_ID);
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
-            assertThat(columnValues).hasSize(1);
             assertEquals(entity.getIntValue(), columnValues.get("intValue")
                                                            .getValue());
         }

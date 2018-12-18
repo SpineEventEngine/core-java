@@ -26,10 +26,19 @@ import io.spine.base.Time;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Collection;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("unused") // Lots of entities with reflective access only.
 public class ColumnsTestEnv {
@@ -38,6 +47,36 @@ public class ColumnsTestEnv {
 
     private ColumnsTestEnv() {
         // Prevent instantiation of this utility class.
+    }
+
+    /**
+     * Verifies that a column collection contains the specified column.
+     */
+    public static void assertContainsColumn(Collection<EntityColumn> columns, String columnName) {
+        assertTrue(containsColumn(columns, columnName));
+    }
+
+    /**
+     * Verifies that a column collection does not contain the specified column.
+     */
+    public static void
+    assertNotContainsColumn(Collection<EntityColumn> columns, String columnName) {
+        assertFalse(containsColumn(columns, columnName));
+    }
+
+    /**
+     * Checks whether the given column collection contains a specified column.
+     */
+    private static boolean containsColumn(Collection<EntityColumn> columns, String columnName) {
+        checkNotNull(columns);
+        checkNotEmptyOrBlank(columnName, "column name");
+
+        boolean containsColumn = columns
+                .stream()
+                .map(EntityColumn::getName)
+                .collect(toList())
+                .contains(columnName);
+        return containsColumn;
     }
 
     public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
@@ -172,6 +211,11 @@ public class ColumnsTestEnv {
     public static class EntityWithManyGettersDescendant extends EntityWithManyGetters {
         public EntityWithManyGettersDescendant(String id) {
             super(id);
+        }
+
+        @Override
+        int getSomeNonPublicMethod() {
+            return super.getSomeNonPublicMethod();
         }
     }
 
