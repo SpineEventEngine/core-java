@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
+import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -152,6 +153,7 @@ class ProjectionEndToEndTest {
                 .newBuilder()
                 .setTimestamp(producedAt)
                 .setExternal(true)
+                .setImportContext(ActorContext.getDefaultInstance())
                 .build();
         Event event = Event
                 .newBuilder()

@@ -238,34 +238,28 @@ public class EventsTest extends UtilityClassTest<Events> {
         assertEquals(eventId, checkValid(eventId));
     }
 
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Method called to throw exception.
     @Nested
-    @DisplayName("return default tenant ID")
-    class ReturnDefaultTenantId {
+    @DisplayName("throw IAE when reading tenant ID")
+    class ThrowIaeOnRead {
 
         @Test
         @DisplayName("for event without origin")
-        void forNoOrigin() {
+        void forEventWithoutOrigin() {
             EventContext context = contextWithoutOrigin().build();
             Event event = EventsTestEnv.event(context);
-
-            TenantId tenantId = Events.getTenantId(event);
-
-            TenantId defaultTenantId = TenantId.getDefaultInstance();
-            assertEquals(defaultTenantId, tenantId);
+            assertThrows(IllegalArgumentException.class, () -> Events.getTenantId(event));
         }
 
         @Test
         @DisplayName("for event with event context without origin")
         void forEventContextWithoutOrigin() {
-            EventContext context = contextWithoutOrigin().setEventContext(
-                    contextWithoutOrigin())
-                                                         .build();
+            EventContext context = contextWithoutOrigin()
+                    .setEventContext(contextWithoutOrigin())
+                    .build();
             Event event = EventsTestEnv.event(context);
-
-            TenantId tenantId = Events.getTenantId(event);
-
-            TenantId defaultTenantId = TenantId.getDefaultInstance();
-            assertEquals(defaultTenantId, tenantId);
+            assertThrows(IllegalArgumentException.class, () -> Events.getTenantId(event));
         }
     }
 
