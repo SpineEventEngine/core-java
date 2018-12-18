@@ -74,6 +74,8 @@ public class ColumnsTestEnv {
     private static boolean
     containsColumns(Collection<EntityColumn> actual, String... columnNames) {
         checkNotNull(actual);
+        checkNotNull(columnNames);
+
         ImmutableSet<String> expectedColumns = ImmutableSet.copyOf(columnNames);
         ImmutableSet<String> actualColumns = actual
                 .stream()
