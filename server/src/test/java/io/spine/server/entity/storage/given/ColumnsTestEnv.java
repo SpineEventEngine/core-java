@@ -54,7 +54,7 @@ public class ColumnsTestEnv {
      */
     public static void
     assertContainsColumns(Collection<EntityColumn> actual, String... columnNames) {
-        assertTrue(containsColumn(actual, columnNames));
+        assertTrue(containsColumns(actual, columnNames));
     }
 
     /**
@@ -62,7 +62,7 @@ public class ColumnsTestEnv {
      */
     public static void
     assertNotContainsColumns(Collection<EntityColumn> actual, String... columnNames) {
-        assertFalse(containsColumn(actual, columnNames));
+        assertFalse(containsColumns(actual, columnNames));
     }
 
     /**
@@ -71,7 +71,8 @@ public class ColumnsTestEnv {
      * <p>The collection can be safely stored in {@link ImmutableSet} as it will never contain
      * repeated column names.
      */
-    private static boolean containsColumn(Collection<EntityColumn> actual, String... columnNames) {
+    private static boolean
+    containsColumns(Collection<EntityColumn> actual, String... columnNames) {
         checkNotNull(actual);
         ImmutableSet<String> expectedColumns = ImmutableSet.copyOf(columnNames);
         ImmutableSet<String> actualColumns = actual
