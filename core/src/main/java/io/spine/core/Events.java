@@ -160,8 +160,8 @@ public final class Events {
      *         enclosing command context.
      *     <li>For the event react chain, the command context of the most root event context is
      *         used.
-     *     <li>For the imported events, the separate import context contains all necessary
-     *         information.
+     *     <li>For the imported events, the separate import context contains information about an
+     *         actor.
      * </ul>
      *
      * <p>If the given event context contains no origin, the {@link IllegalArgumentException} is
