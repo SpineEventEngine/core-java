@@ -164,8 +164,9 @@ public final class Events {
      *         actor.
      * </ul>
      *
-     * <p>If the given event context contains no origin, the {@link IllegalArgumentException} is
-     * thrown as it contradicts the Spine validation rules.
+     * <p>If the given event context contains no origin, an {@link IllegalArgumentException} is
+     * thrown as it contradicts the Spine validation rules. See {@link EventContext} proto
+     * declaration.
      */
     public static UserId getActor(EventContext context) {
         checkNotNull(context);
@@ -398,9 +399,8 @@ public final class Events {
      *     <li>The import context if the event is imported to an aggregate.
      * </ol>
      *
-     * <p>If at some point the event origin is not set, the {@link IllegalArgumentException} is
-     * thrown as it contradicts the Spine validation rules. See {@link EventContext} proto
-     * declaration.
+     * <p>If at some point the event origin is not set, an {@link IllegalArgumentException} is
+     * thrown as it contradicts the Spine validation rules.
      */
     private static ActorContext retrieveActorContext(EventContext eventContext) {
         ActorContext actorContext = null;
