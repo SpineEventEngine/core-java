@@ -78,7 +78,8 @@ public class ColumnsTestEnv {
                 .stream()
                 .map(EntityColumn::getName)
                 .collect(toImmutableSet());
-        return expectedColumns.equals(actualColumns);
+        boolean result = expectedColumns.equals(actualColumns);
+        return result;
     }
 
     public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
