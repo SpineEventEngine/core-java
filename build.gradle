@@ -54,11 +54,9 @@ buildscript {
 apply from: 'version.gradle'
 
 ext {
-    spineJacocoScript = "${rootDir}/config/gradle/jacoco.gradle"
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
     credentialsPropertyFile = 'credentials.properties'
-    publishPlugin = "$rootDir/config/gradle/publish.gradle"
     projectsToPublish = ["core",
                          "client",
                          "server",
@@ -282,7 +280,8 @@ idea {
     }
 }
 
-// Aggregated coverage report across all subprojects.
-apply from: spineJacocoScript
+apply from: deps.scripts.publish
 
-apply from: publishPlugin
+// Aggregated coverage report across all subprojects.
+apply from: deps.scripts.jacoco
+
