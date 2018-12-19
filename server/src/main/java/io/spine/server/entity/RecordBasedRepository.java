@@ -285,6 +285,18 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
+     * Obtains iterator over {@link EntityRecord} for all entities present in the repository.
+     *
+     * @return an iterator over all records
+     */
+    @Internal
+    public Iterator<EntityRecord> loadAllRecords() {
+        RecordStorage<I> storage = recordStorage();
+        Iterator<EntityRecord> records = storage.readAll();
+        return records;
+    }
+
+    /**
      * Finds the entities passing the given filters and applies the given {@link FieldMask}
      * to the results. A number of elements to retrieve can be limited by {@link Pagination}.
      * OrderBy in which to look for and return results in is specified by the {@link OrderBy}.
@@ -320,18 +332,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
-    }
-
-    /**
-     * Obtains iterator over {@link EntityRecord} for all entities present in the repository.
-     *
-     * @return an iterator over all records
-     */
-    @Internal
-    public Iterator<EntityRecord> loadAllRecords() {
-        RecordStorage<I> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll();
-        return records;
     }
 
     /**
