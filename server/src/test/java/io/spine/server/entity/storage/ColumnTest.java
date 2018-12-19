@@ -52,9 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Many string literals for method names. */})
@@ -141,6 +138,25 @@ class ColumnTest {
         assertEquals(changedState, extractedState);
     }
 
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Just check that column is constructed without an exception.
+    @Nested
+    @DisplayName("allow `is` prefix")
+    class AllowIsPrefix {
+
+        @Test
+        @DisplayName("for `boolean` properties")
+        void forBooleanProperties() {
+            forMethod("isBoolean", TestEntity.class);
+        }
+
+        @Test
+        @DisplayName("for `Boolean` properties")
+        void forBooleanWrapperProperties() {
+            forMethod("isBooleanWrapper", TestEntity.class);
+        }
+    }
+
     @Nested
     @DisplayName("not be constructed from")
     class NotBeConstructedFrom {
@@ -185,6 +201,13 @@ class ColumnTest {
         void getterWithParams() throws NoSuchMethodException {
             Method method = TestEntity.class.getDeclaredMethod("getParameter", String.class);
             assertThrows(IllegalArgumentException.class, () -> EntityColumn.from(method));
+        }
+
+        @Test
+        @DisplayName("getter with `is` prefix and non-boolean return type")
+        void nonBooleanIsGetter() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> forMethod("isNonBoolean", TestEntity.class));
         }
     }
 

@@ -54,9 +54,6 @@ import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
-/**
- * @author Alex Tymchenko
- */
 public class ShardedStreamTestEnv {
 
     private static final TransportFactory transportFactory = InMemoryTransportFactory.newInstance();
@@ -123,7 +120,7 @@ public class ShardedStreamTestEnv {
     }
 
     /**
-     * Prevents this test environment utility from initialization.
+     * Prevents this test environment utility from instantiation.
      */
     private ShardedStreamTestEnv() {
     }
