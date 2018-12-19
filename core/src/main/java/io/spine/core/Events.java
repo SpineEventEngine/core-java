@@ -158,8 +158,7 @@ public final class Events {
      * <ul>
      *     <li>For the events generated from commands, the actor context is taken from the
      *         enclosing command context.
-     *     <li>For the event react chain, the command context of the topmost event context is
-     *         used.
+     *     <li>For the event react chain, the command context of the topmost event is used.
      *     <li>For the imported events, the separate import context contains information about an
      *         actor.
      * </ul>
