@@ -74,6 +74,13 @@ import static java.lang.String.format;
  * <pre>
  *      {@code
  *
+ *         --OrderAggregate.java--
+ *
+ *         \@Column
+ *         public boolean isDuplicate() {
+ *             return getState().isDuplicate();
+ *         }
+ *
  *         --UserGroupAggregate.java--
  *
  *         \@Column
@@ -111,13 +118,17 @@ import static java.lang.String.format;
  *         \@Column
  *         public boolean hasChildren() { ... }
  *
+ *         // "is" prefix is allowed only for methods which return "boolean" or "Boolean"
+ *         \@Column
+ *         public int isNew() { ... }
+ *
  *         // getter methods must not accept arguments
  *         \@Column
  *         public User getStateOf(UserAggregate other) { ... }
  *
  *         // only instance methods are considered Columns
  *         \@Column
- *         public static Integer isNew(UserAggregate aggregate) { ... }
+ *         public static boolean isDeleted(UserAggregate aggregate) { ... }
  *      }
  * </pre>
  *
