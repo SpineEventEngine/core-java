@@ -34,6 +34,7 @@ import "google/protobuf/field_mask.proto";
 import "spine/core/user_id.proto";
 import "spine/core/actor_context.proto";
 import "spine/core/response.proto";
+import "spine/core/version.proto";
 import "spine/client/entities.proto";
 
 // Query identifier.
@@ -158,9 +159,24 @@ message QueryResponse {
     // Reserved for more query response attributes, e.g. to describe paginated response etc.
     reserved 2 to 4;
 
-    // Entity states or their masked views (each packed as `Any`)
-    // returned as a result of Query execution.
-    repeated google.protobuf.Any messages = 5;
+    // Entity states and versions returned to the API user as a result of Query execution.
+    repeated EntityStateWithVersion messages = 5;
+}
+
+// Represents the entity state combined with entity version.
+//
+// This message is a part of Query response.
+//
+message EntityStateWithVersion {
+
+    //TODO:2017-02-20:alexander.yevsyukov: Use EntityRecord instead of Any.
+    // The state of the entity packed as `Any`.
+    //
+    google.protobuf.Any state = 1;
+
+    // The version of the entity.
+    //
+    core.Version version = 2;
 }
 
 // Enumeration of possible technical error reasons occurred in query validation.

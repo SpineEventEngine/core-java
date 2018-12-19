@@ -20,7 +20,7 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.server.event.EventDispatcher;
 
@@ -67,11 +67,11 @@ public interface SystemReadSide {
      *
      * @param query
      *         a query for a domain aggregate
-     * @return an {@code Iterator} over the query results packed as {@link Any}s.
+     * @return an {@code Iterator} over the query results packed as {@link EntityStateWithVersion}.
      * @see MirrorProjection
      * @see io.spine.client.QueryFactory
      */
-    Iterator<Any> readDomainAggregate(Query query);
+    Iterator<EntityStateWithVersion> readDomainAggregate(Query query);
 
     /**
      * Creates a new instance of {@code SystemReadSide} for the given system context.

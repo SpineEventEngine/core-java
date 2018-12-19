@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import io.spine.client.EntityFilters;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.option.EntityOption;
@@ -122,7 +123,7 @@ final class MirrorRepository
      * @return an {@code Iterator} over the result aggregate states
      * @see SystemReadSide#readDomainAggregate(Query)
      */
-    Iterator<Any> execute(Query query) {
+    Iterator<EntityStateWithVersion> execute(Query query) {
         FieldMask aggregateFields = query.getFieldMask();
         Target target = query.getTarget();
         EntityFilters filters = buildFilters(target);
@@ -130,15 +131,25 @@ final class MirrorRepository
                                                   query.getOrderBy(), 
                                                   query.getPagination(), 
                                                   AGGREGATE_STATE_FIELD);
-        Iterator<Any> result = aggregateStates(mirrors, aggregateFields);
+        Iterator<EntityStateWithVersion> result = aggregateStates(mirrors, aggregateFields);
         return result;
     }
 
-    private static Iterator<Any> aggregateStates(Iterator<MirrorProjection> projections,
-                                                 FieldMask requiredFields) {
-        Iterator<Any> result = stream(projections)
-                .map(mirror -> mirror.aggregateState(requiredFields))
+    private static Iterator<EntityStateWithVersion>
+    aggregateStates(Iterator<MirrorProjection> projections, FieldMask requiredFields) {
+        Iterator<EntityStateWithVersion> result = stream(projections)
+                .map(mirror -> toAggregateState(mirror, requiredFields))
                 .iterator();
+        return result;
+    }
+
+    private static EntityStateWithVersion
+    toAggregateState(MirrorProjection mirror, FieldMask requiredFields) {
+        EntityStateWithVersion result = EntityStateWithVersion
+                .newBuilder()
+                .setState(mirror.aggregateState(requiredFields))
+                .setVersion(mirror.getVersion())
+                .build();
         return result;
     }
 }

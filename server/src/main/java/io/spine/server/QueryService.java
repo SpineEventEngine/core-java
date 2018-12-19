@@ -35,6 +35,8 @@ import io.spine.type.TypeUrl;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkState;
+
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
  *
@@ -61,6 +63,10 @@ public class QueryService
 
         TypeUrl type = Queries.typeOf(query);
         BoundedContext boundedContext = typeToContextMap.get(type);
+
+        checkState(boundedContext != null, "Query target type %s is not stored in any of the " +
+                "registered repositories", type);
+
         Stand stand = boundedContext.getStand();
         try {
             stand.execute(query, responseObserver);

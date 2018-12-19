@@ -135,10 +135,18 @@ class QueryServiceTest {
     @Test
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
-        when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
+        when(projectDetailsRepository.loadAllRecords()).thenThrow(RuntimeException.class);
         Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
+    }
+
+    @Test
+    @DisplayName("throw ISE if the Query target type is not found among registered repositories")
+    void throwOnTargetNotFound() {
+        // There is no registered repository for `ProjectTaskNames` projection.
+        Query query = Given.AQuery.readAllProjectTaskNames();
+        assertThrows(IllegalStateException.class, () -> service.read(query, responseObserver));
     }
 
     private static void checkOkResponse(MemoizingObserver<QueryResponse> responseObserver) {

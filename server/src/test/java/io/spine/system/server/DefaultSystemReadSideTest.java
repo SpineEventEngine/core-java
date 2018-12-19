@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Command;
@@ -165,7 +166,9 @@ class DefaultSystemReadSideTest {
         void query() {
             Query query = actorRequestFactory.query()
                                              .byIds(ShoppingList.class, of(aggregateId));
-            Message foundMessage = unpack(systemReadSide.readDomainAggregate(query).next());
+            EntityStateWithVersion next = systemReadSide.readDomainAggregate(query)
+                                                        .next();
+            Message foundMessage = unpack(next.getState());
             assertEquals(aggregate(), foundMessage);
         }
 

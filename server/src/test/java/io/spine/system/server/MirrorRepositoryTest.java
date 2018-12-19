@@ -20,11 +20,11 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.core.Event;
@@ -71,9 +71,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
 @ExtendWith(ShardingReset.class)
 @DisplayName("MirrorRepository should")
 class MirrorRepositoryTest {
@@ -298,8 +295,9 @@ class MirrorRepositoryTest {
     }
 
     private List<? extends Message> execute(Query query) {
-        Iterator<Any> result = repository.execute(query);
+        Iterator<EntityStateWithVersion> result = repository.execute(query);
         List<? extends Message> readMessages = stream(result)
+                .map(EntityStateWithVersion::getState)
                 .map(unpackFunc())
                 .collect(toList());
         return readMessages;

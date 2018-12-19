@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
@@ -277,11 +278,22 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     public Iterator<E> loadAll() {
-        RecordStorage<I> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll();
+        Iterator<EntityRecord> records = loadAllRecords();
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
+    }
+
+    /**
+     * Obtains iterator over {@link EntityRecord} for all entities present in the repository.
+     *
+     * @return an iterator over all records
+     */
+    @Internal
+    public Iterator<EntityRecord> loadAllRecords() {
+        RecordStorage<I> storage = recordStorage();
+        Iterator<EntityRecord> records = storage.readAll();
+        return records;
     }
 
     /**
@@ -316,12 +328,37 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(pagination);
         checkNotNull(fieldMask);
 
-        RecordStorage<I> storage = recordStorage();
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
-        Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
+        Iterator<EntityRecord> records = findRecords(filters, orderBy, pagination, fieldMask);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
+    }
+
+    /**
+     * Obtains iterator over {@link EntityRecord} for entities matching the passed filters.
+     *
+     ** @param filters
+     *         entity filters
+     * @param orderBy
+     *         an orderBy to sort the filtered results before pagination
+     * @param pagination
+     *         a pagination to apply to the sorted result set
+     * @param fieldMask
+     *         a mask to apply to the entities
+     * @return an iterator over the matching records
+     */
+    @Internal
+    public Iterator<EntityRecord> findRecords(EntityFilters filters, OrderBy orderBy,
+                                              Pagination pagination, FieldMask fieldMask) {
+        checkNotNull(filters);
+        checkNotNull(orderBy);
+        checkNotNull(pagination);
+        checkNotNull(fieldMask);
+
+        RecordStorage<I> storage = recordStorage();
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
+        Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
+        return records;
     }
 
     /**

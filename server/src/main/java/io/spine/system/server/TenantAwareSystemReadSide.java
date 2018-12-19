@@ -20,7 +20,7 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.event.EventDispatcher;
@@ -63,7 +63,7 @@ final class TenantAwareSystemReadSide implements SystemReadSide {
     }
 
     @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
+    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
         return runner.evaluate(() -> delegate.readDomainAggregate(query));
     }
 }

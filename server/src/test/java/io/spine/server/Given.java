@@ -56,6 +56,7 @@ import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.CustomerVBuilder;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
+import io.spine.test.projection.ProjectTaskNames;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
@@ -209,6 +210,12 @@ public class Given {
             // DO NOT replace the type name with another Project class.
             Query result = requestFactory.query()
                                          .all(io.spine.test.projection.Project.class);
+            return result;
+        }
+
+        static Query readAllProjectTaskNames() {
+            Query result = requestFactory.query()
+                                         .all(ProjectTaskNames.class);
             return result;
         }
     }

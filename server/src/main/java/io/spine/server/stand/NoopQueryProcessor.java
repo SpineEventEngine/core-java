@@ -21,7 +21,7 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 
 /**
@@ -29,12 +29,10 @@ import io.spine.client.Query;
  *
  * <p>Used to define a processing result for {@link Query} which does not hit any of
  * exposed state objects.
- *
- * @author Alex Tymchenko
  */
 class NoopQueryProcessor implements QueryProcessor {
     @Override
-    public ImmutableCollection<Any> process(Query query) {
+    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         return ImmutableList.of();
     }
 }

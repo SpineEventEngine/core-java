@@ -33,6 +33,7 @@ import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.server.entity.storage.EntityColumnCache;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.testing.server.entity.given.GivenLifecycleFlags;
 import io.spine.testing.server.model.ModelTests;
@@ -173,6 +174,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
     private E loadOrCreate(I id) {
         return repository.findOrCreate(id);
+    }
+
+    private Iterator<EntityRecord> loadAllRecords() {
+        return repository.loadAllRecords();
     }
 
     @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
@@ -335,7 +340,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertEquals(expectedList, foundList);
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("all entities")
         void allEntities() {
@@ -347,6 +351,19 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertFoundEntities.hasSize(entities.size());
 
             assertThat(entities).containsExactlyElementsIn(found);
+        }
+
+        @Test
+        @DisplayName("all entity records")
+        void allEntityRecords() {
+            List<E> entities = createAndStoreEntities(repository, 150);
+            Collection<EntityRecord> found = newArrayList(loadAllRecords());
+            assertThat(found).hasSize(entities.size());
+
+            for (E entity : entities) {
+                final EntityRecordWithColumns record = repository.toRecord(entity);
+                assertThat(found).contains(record.getRecord());
+            }
         }
 
         @Test
