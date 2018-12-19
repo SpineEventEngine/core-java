@@ -160,6 +160,7 @@ message QueryResponse {
     reserved 2 to 4;
 
     // Entity states and versions returned to the API user as a result of Query execution.
+    //
     repeated EntityStateWithVersion messages = 5;
 }
 
