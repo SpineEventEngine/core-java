@@ -35,7 +35,6 @@ import io.spine.string.StringifierRegistry;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,6 +42,7 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.stream.Collectors.toList;
@@ -50,6 +50,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Utility class for working with {@link Event} objects.
  */
+@SuppressWarnings("ClassWithTooManyMethods") // Lots of event-related utility methods.
 public final class Events {
 
     /** Compares two events by their timestamps. */
@@ -151,16 +152,25 @@ public final class Events {
     /**
      * Obtains the actor user ID from the passed {@code EventContext}.
      *
-     * <p>The 'actor' is the user who sent the command, which generated the event which context is
-     * passed to this method.
+     * <p>The 'actor' is the user responsible for producing the given event.
      *
-     * <p>This is a convenience method for obtaining actor in event subscriber methods.
+     * <p>It is obtained as follows:
+     * <ul>
+     *     <li>For the events generated from commands, the actor context is taken from the
+     *         enclosing command context.
+     *     <li>For the event react chain, the command context of the topmost event is used.
+     *     <li>For the imported events, the separate import context contains information about an
+     *         actor.
+     * </ul>
+     *
+     * <p>If the given event context contains no origin, an {@link IllegalArgumentException} is
+     * thrown as it contradicts the Spine validation rules.
      */
     public static UserId getActor(EventContext context) {
         checkNotNull(context);
-        CommandContext commandContext = context.getCommandContext();
-        return commandContext.getActorContext()
-                             .getActor();
+        ActorContext actorContext = retrieveActorContext(context);
+        UserId result = actorContext.getActor();
+        return result;
     }
 
     /**
@@ -273,12 +283,8 @@ public final class Events {
     public static ActorContext getActorContext(Event event) {
         checkNotNull(event);
         EventContext eventContext = event.getContext();
-        Optional<CommandContext> commandContext = findCommandContext(eventContext);
-        if (commandContext.isPresent()) {
-            return commandContext.get()
-                                 .getActorContext();
-        }
-        return eventContext.getImportContext();
+        ActorContext result = retrieveActorContext(eventContext);
+        return result;
     }
 
     /**
@@ -381,37 +387,41 @@ public final class Events {
     }
 
     /**
-     * Obtains a context of the command, which lead to this event.
+     * Obtains an actor context for the given event.
      *
      * <p>The context is obtained by traversing the events origin for a valid context source.
-     * There can be two sources for the command context:
+     * There can be three sources for the actor context:
      * <ol>
      *     <li>The command context set as the event origin.
-     *     <li>The command set as a field of a rejection context if an event was generated in a
-     *     response to a rejection.
+     *     <li>The command context of an event which is an origin of this event.
+     *     <li>The import context if the event is imported to an aggregate.
      * </ol>
      *
-     * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
+     * <p>If at some point the event origin is not set, an {@link IllegalArgumentException} is
+     * thrown as it contradicts the Spine validation rules. See {@link EventContext} proto
+     * declaration.
      */
-    private static Optional<CommandContext> findCommandContext(EventContext eventContext) {
-        CommandContext commandContext = null;
+    private static ActorContext retrieveActorContext(EventContext eventContext) {
+        ActorContext actorContext = null;
         EventContext ctx = eventContext;
 
-        while (commandContext == null) {
+        while (actorContext == null) {
             switch (ctx.getOriginCase()) {
                 case EVENT_CONTEXT:
                     ctx = ctx.getEventContext();
                     break;
                 case COMMAND_CONTEXT:
-                    commandContext = ctx.getCommandContext();
+                    actorContext = ctx.getCommandContext()
+                                      .getActorContext();
                     break;
                 case IMPORT_CONTEXT:
+                    actorContext = ctx.getImportContext();
+                    break;
                 case ORIGIN_NOT_SET:
-                default:
-                    return Optional.empty();
+                    throw newIllegalArgumentException(
+                            "The provided event context has no origin set");
             }
         }
-
-        return Optional.of(commandContext);
+        return actorContext;
     }
 }

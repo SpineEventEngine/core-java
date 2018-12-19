@@ -250,6 +250,7 @@ public class EventStoreTest {
     @Nested
     @DisplayName("not store enrichment for")
     class NotStoreEnrichmentFor {
+
         @Test
         @DisplayName("EventContext")
         void eventContext() {
@@ -271,10 +272,13 @@ public class EventStoreTest {
         @Test
         @DisplayName("origin of EventContext type")
         void eventContextOrigin() {
+            Event event = projectCreated(Time.getCurrentTime());
+            CommandContext commandContext = event.getContext()
+                                                 .getCommandContext();
             EventContext.Builder originContext =
                     EventContext.newBuilder()
-                                .setEnrichment(withOneAttribute());
-            Event event = projectCreated(Time.getCurrentTime());
+                                .setEnrichment(withOneAttribute())
+                                .setCommandContext(commandContext);
             Event enriched = event.toBuilder()
                                   .setContext(event.getContext()
                                                    .toBuilder()
