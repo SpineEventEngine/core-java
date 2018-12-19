@@ -20,16 +20,17 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Queues;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 /**
  * A {@link BusFilter} representing a chain of other bus filters.
@@ -41,28 +42,32 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Dmytro Dashenkov
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<E>>
+final class FilterChain<E extends MessageEnvelope<?, ?, ?>>
         implements BusFilter<E> {
 
-    private final Deque<F> chain;
+    private final Deque<BusFilter<E>> chain;
 
     private volatile boolean closed;
 
-    FilterChain(Iterable<F> chain) {
-        this.chain = Queues.newLinkedBlockingDeque(chain);
+    FilterChain(ChainBuilder<E> builder) {
+        this.chain = builder.getFilters();
+    }
+
+    static <E extends MessageEnvelope<?, ?, ?>> ChainBuilder<E> newBuilder() {
+        return new ChainBuilder<>();
     }
 
     @Override
     public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
         checkNotClosed();
-        for (F filter : chain) {
-            final Optional<Ack> output = filter.accept(envelope);
+        for (BusFilter<E> filter : chain) {
+            Optional<Ack> output = filter.accept(envelope);
             if (output.isPresent()) {
                 return output;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -79,14 +84,23 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
     public void close() throws Exception {
         checkNotClosed();
         closed = true;
-        final Iterator<F> filters = chain.descendingIterator();
+        Iterator<BusFilter<E>> filters = chain.descendingIterator();
         while (filters.hasNext()) {
-            final F filter = filters.next();
+            BusFilter<?> filter = filters.next();
             filter.close();
         }
     }
 
+    @Override
+    public String toString() {
+        String filters = chain.stream()
+                              .map(BusFilter::getClass)
+                              .map(Class::getSimpleName)
+                              .collect(joining(", "));
+        return format("%s[%s]", FilterChain.class.getName(), filters);
+    }
+
     private void checkNotClosed() {
-        checkState(!closed, "The `FilterChain` is already closed.");
+        checkState(!closed, "FilterChain is already closed.");
     }
 }

@@ -25,7 +25,6 @@ import io.spine.base.Time;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
-import io.spine.string.Stringifiers;
 
 /**
  * The converter of messages, which have to be sent to a specific shard, into {@link ShardedMessage}
@@ -42,7 +41,6 @@ import io.spine.string.Stringifiers;
  * @param <I> the identifier of the message targets
  * @param <M> the type of the messages being converted
  * @param <E> the type of the message envelopes
- * @author Alex Tymchenko
  */
 abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEnvelope<?, M, ?>> {
 
@@ -50,33 +48,33 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
 
     protected ShardedMessage convert(I targetId, E envelope) {
 
-        final Message id = envelope.getId();
-        final M originalMessage = envelope.getOuterObject();
-        final String stringId = Stringifiers.toString(id);
-        final ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
-                                                                  .setValue(stringId)
-                                                                  .build();
-        final Any packedOriginalMsg = AnyPacker.pack(originalMessage);
-        final Message message = TypeConverter.toMessage(targetId);
-        final Any packedTargetId = AnyPacker.pack(message);
-        final ShardedMessage result = ShardedMessage.newBuilder()
-                                                    .setId(shardedMessageId)
-                                                    .setTargetId(packedTargetId)
-                                                    .setOriginalMessage(packedOriginalMsg)
-                                                    .setWhenSharded(Time.getCurrentTime())
-                                                    .build();
+        M originalMessage = envelope.getOuterObject();
+        String stringId = envelope.idAsString();
+        ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
+                                                            .setValue(stringId)
+                                                            .build();
+        Any packedOriginalMsg = AnyPacker.pack(originalMessage);
+        Message message = TypeConverter.toMessage(targetId);
+        Any packedTargetId = AnyPacker.pack(message);
+        ShardedMessage result = ShardedMessage
+                .newBuilder()
+                .setId(shardedMessageId)
+                .setTargetId(packedTargetId)
+                .setOriginalMessage(packedOriginalMsg)
+                .setWhenSharded(Time.getCurrentTime())
+                .build();
         return result;
     }
 
     I targetIdOf(ShardedMessage message, Class<I> idClass) {
-        final Any asAny = message.getTargetId();
-        final I result = TypeConverter.toObject(asAny, idClass);
+        Any asAny = message.getTargetId();
+        I result = TypeConverter.toObject(asAny, idClass);
         return result;
     }
 
     E envelopeOf(ShardedMessage message) {
-        final Any packedOriginalMessage = message.getOriginalMessage();
-        final E result = toEnvelope(packedOriginalMessage);
+        Any packedOriginalMessage = message.getOriginalMessage();
+        E result = toEnvelope(packedOriginalMessage);
         return result;
     }
 }

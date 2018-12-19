@@ -19,13 +19,14 @@
  */
 package io.spine.server.transport.memory;
 
-import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
+
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
@@ -60,14 +61,13 @@ public class InMemoryTransportFactory implements TransportFactory {
 
     @Override
     public final synchronized Publisher createPublisher(ChannelId channelId) {
-        final InMemoryPublisher result = new InMemoryPublisher(channelId,
-                                                               providerOf(subscribers));
+        InMemoryPublisher result = new InMemoryPublisher(channelId, providerOf(subscribers));
         return result;
     }
 
     @Override
     public final synchronized Subscriber createSubscriber(ChannelId channelId) {
-        final Subscriber subscriber = newSubscriber(channelId);
+        Subscriber subscriber = newSubscriber(channelId);
         subscribers.put(channelId, subscriber);
         return subscriber;
     }

@@ -21,18 +21,24 @@
 package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Timestamp;
-import io.spine.core.Rejection;
-import io.spine.testing.server.TUProjectAggregate;
-import io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingAggregate;
+import io.spine.testing.server.aggregate.given.SampleCommandTest;
+import io.spine.testing.server.aggregate.given.SamplePartCommandTest;
+import io.spine.testing.server.aggregate.given.SamplePartRejectionThrowingTest;
+import io.spine.testing.server.aggregate.given.SampleRejectionThrowingTest;
+import io.spine.testing.server.aggregate.given.agg.TuAggregate;
+import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
+import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
 import io.spine.testing.server.expected.CommandHandlerExpected;
+import io.spine.testing.server.given.entity.TuComments;
+import io.spine.testing.server.given.entity.TuProject;
+import io.spine.testing.server.given.entity.rejection.Rejections;
+import io.spine.testing.server.given.entity.rejection.Rejections.TuFailedToAssignProject;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingTest;
-import static io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingTest.TEST_COMMAND;
-import static io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.RejectionCommandHandlerTest;
-import static io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.aggregate;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,41 +50,85 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregateCommandTest should")
 class AggregateCommandTestShould {
 
-    private CommandHandlingTest aggregateCommandTest;
-    private RejectionCommandHandlerTest aggregateRejectionCommandTest;
+    @Nested
+    @DisplayName("for aggregate")
+    class ForAggregate {
 
-    @BeforeEach
-    void setUp() {
-        aggregateCommandTest = new CommandHandlingTest();
-        aggregateRejectionCommandTest = new RejectionCommandHandlerTest();
+        private SampleCommandTest aggregateCommandTest;
+        private SampleRejectionThrowingTest aggregateRejectionCommandTest;
+
+        @BeforeEach
+        void setUp() {
+            ModelTests.dropAllModels();
+            aggregateCommandTest = new SampleCommandTest();
+            aggregateRejectionCommandTest = new SampleRejectionThrowingTest();
+        }
+
+        @Test
+        @DisplayName("store tested command")
+        void shouldStoreCommand() {
+            assertEquals(aggregateCommandTest.storedMessage(), SampleCommandTest.TEST_COMMAND);
+        }
+
+        @Test
+        @DisplayName("dispatch tested command")
+        void shouldDispatchCommand() {
+            TuAggregate testAggregate = TuAggregate.newInstance();
+            aggregateCommandTest.expectThat(testAggregate);
+            Timestamp newState = testAggregate.getState()
+                                              .getTimestamp();
+            assertTrue(isNotDefault(newState));
+        }
+
+        @Test
+        @DisplayName("track rejection")
+        void trackGeneratedRejection() {
+            TuAggregate testAggregate = TuAggregate.newInstance();
+            CommandHandlerExpected<TuProject> expected =
+                    aggregateRejectionCommandTest.expectThat(testAggregate);
+            expected.throwsRejection(TuFailedToAssignProject.class);
+        }
     }
 
-    @Test
-    @DisplayName("store tested command")
-    void shouldStoreCommand() {
-        aggregateCommandTest.setUp();
-        assertEquals(aggregateCommandTest.storedMessage(), TEST_COMMAND);
-    }
+    @Nested
+    @DisplayName("for aggregate part")
+    class ForPart {
 
-    @Test
-    @DisplayName("dispatch tested command")
-    void shouldDispatchCommand() {
-        aggregateCommandTest.setUp();
-        CommandHandlingAggregate testAggregate = aggregate();
-        aggregateCommandTest.expectThat(testAggregate);
-        Timestamp newState = testAggregate.getState()
-                                          .getTimestamp();
-        assertTrue(isNotDefault(newState));
-    }
+        private SamplePartCommandTest partCommandTest;
+        private SamplePartRejectionThrowingTest partRejectionCommandTest;
 
-    @Test
-    @DisplayName("not fail when rejected")
-    void shouldHandleRejection() {
-        aggregateRejectionCommandTest.setUp();
-        CommandHandlingAggregate testAggregate = aggregate();
-        CommandHandlerExpected<TUProjectAggregate> expected =
-                aggregateRejectionCommandTest.expectThat(testAggregate);
-        expected.throwsRejection(Rejection.class);
+        @BeforeEach
+        void setUp() {
+            ModelTests.dropAllModels();
+            partCommandTest = new SamplePartCommandTest();
+            partRejectionCommandTest = new SamplePartRejectionThrowingTest();
+        }
+
+        @Test
+        @DisplayName("store tested command")
+        void shouldStoreCommand() {
+            assertEquals(partCommandTest.storedMessage(), SamplePartCommandTest.TEST_COMMAND);
+        }
+
+        @Test
+        @DisplayName("dispatch tested command")
+        void shouldDispatchCommand() {
+            TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
+            TuAggregatePart part = TuAggregatePart.newInstance(root);
+            partCommandTest.expectThat(part);
+            Timestamp newState = part.getState()
+                                     .getTimestamp();
+            assertTrue(isNotDefault(newState));
+        }
+
+        @Test
+        @DisplayName("track rejection")
+        void trackGeneratedRejection() {
+            TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
+            TuAggregatePart part = TuAggregatePart.newInstance(root);
+            CommandHandlerExpected<TuComments> expected =
+                    partRejectionCommandTest.expectThat(part);
+            expected.throwsRejection(Rejections.TuFailedToRemoveComment.class);
+        }
     }
 }
-

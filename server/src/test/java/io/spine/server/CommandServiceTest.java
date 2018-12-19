@@ -21,17 +21,18 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
-import com.google.protobuf.StringValue;
+import com.google.protobuf.Any;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.transport.GrpcContainer;
+import io.spine.test.commandservice.CmdServDontHandle;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,12 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-/**
- * @author Alexander Yevsyukov
- * @author Alexander Litus
- * @author Dmytro Dashenkov
- * @author Alex Tymchenko
- */
 @DisplayName("CommandService should")
 class CommandServiceTest {
 
@@ -70,7 +65,7 @@ class CommandServiceTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         // Create Projects Bounded Context with one repository.
         projectsContext = BoundedContext.newBuilder()
                                         .setMultitenant(true)
@@ -132,16 +127,17 @@ class CommandServiceTest {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
         Ack acked = observer.firstResponse();
-        CommandId id = AnyPacker.unpack(acked.getMessageId());
-        assertEquals(cmd.getId(), id);
+        Any messageId = acked.getMessageId();
+        assertEquals(cmd.getId(), Identifier.unpack(messageId));
     }
 
     @Test
     @DisplayName("return error status if command is unsupported")
+    @MuteLogging
     void returnCommandUnsupportedError() {
         TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
-        Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
+        Command unsupportedCmd = factory.createCommand(CmdServDontHandle.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 

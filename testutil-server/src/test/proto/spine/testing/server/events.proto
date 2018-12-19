@@ -24,28 +24,60 @@ package spine.testing.server;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.server";
+option java_package = "io.spine.testing.server.given.entity.event";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
-import "spine/testing/server/entity.proto";
+import "spine/testing/server/entities.proto";
 
-message TUProjectCreated {
-    TUProjectId id = 1;
+//
+// Project events
+//
+
+message TuProjectCreated {
+    TuProjectId id = 1;
 }
 
-message TUProjectAssigned {
-    TUProjectId id = 1;
+message TuProjectAssigned {
+    TuProjectId id = 1;
 }
 
-message TUCommentAdded {
-    TUProjectId id = 1;
+// An event to be imported into an aggretate.
+//
+message TuTrelloProjectCreated {
+    TuProjectId id = 1;
 }
 
-message TUTaskCreated {
-    TUProjectId id = 1;
+//
+// Task events
+//
+
+message TuCommentAdded {
+    TuTaskId id = 2;
 }
 
-message TUTaskAssigned {
-    TUProjectId id = 1;
+// An event to be imported into an aggretate.
+//
+message TuCommentReceivedByEmail {
+    TuTaskId id = 2;
+}
+
+message TuCommentLimitReached {
+    TuTaskId id = 2;
+}
+
+message TuCommentRemoved {
+    TuTaskId id = 2;
+}
+
+message TuTaskCreated {
+    TuTaskId id = 2;
+}
+
+message TuTaskAssigned {
+    TuTaskId id = 2;
+}
+
+message TuTaskReAssigned {
+    TuTaskId id = 2;
 }

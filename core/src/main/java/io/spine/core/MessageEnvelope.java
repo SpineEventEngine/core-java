@@ -21,16 +21,15 @@
 package io.spine.core;
 
 import com.google.protobuf.Message;
+import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 
 /**
  * A common interface for obtaining messages from wrapping objects.
  *
- * @param <I> the the of the message id
+ * @param <I> the type of the message ID
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  */
 public interface MessageEnvelope<I extends Message, T, C extends Message> {
 
@@ -38,6 +37,16 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
      * The ID of the message.
      */
     I getId();
+
+    /**
+     * Obtains string representation of the message identifier.
+     *
+     * @apiNote The primary purpose of this method is to display the identifier in human-readable
+     *          form in debug and error messages.
+     */
+    default String idAsString() {
+        return Stringifiers.toString(getId());
+    }
 
     /**
      * Obtains the object which contains the message of interest.

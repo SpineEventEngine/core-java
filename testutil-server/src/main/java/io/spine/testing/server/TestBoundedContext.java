@@ -19,9 +19,9 @@
  */
 package io.spine.testing.server;
 
-import com.google.common.base.Supplier;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusFilter;
@@ -30,23 +30,22 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 
+import java.util.function.Supplier;
+
 /**
  * A bounded context used for unit testing.
- *
- * @author Vladyslav Lubenskyi
  */
 @CheckReturnValue
-public class TestBoundedContext {
+public final class TestBoundedContext {
 
     private static final boolean MULTITENANT = false;
 
-    private static final BoundedContextName NAME =
-            BoundedContextName.newBuilder()
-                              .setValue("TestBoundedContext")
-                              .build();
+    private static final BoundedContextName NAME = BoundedContextNames.newName("TestBoundedContext");
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private TestBoundedContext() {
-        // Prevent instantiation.
     }
 
     /**
@@ -54,7 +53,6 @@ public class TestBoundedContext {
      *
      * @return {@code BoundedContext} instance
      */
-    @SuppressWarnings("Guava") // Spine Java 7 API.
     public static BoundedContext create() {
         StorageFactorySwitch storageFactorySwitch =
                 StorageFactorySwitch.newInstance(NAME, MULTITENANT);
@@ -74,7 +72,6 @@ public class TestBoundedContext {
      * @param commandFilter a command filter
      * @return {@link BoundedContext} instance
      */
-    @SuppressWarnings("Guava") // Spine Java 7 API.
     public static BoundedContext create(BusFilter<CommandEnvelope> commandFilter) {
         StorageFactorySwitch storageFactorySwitch =
                 StorageFactorySwitch.newInstance(NAME, MULTITENANT);

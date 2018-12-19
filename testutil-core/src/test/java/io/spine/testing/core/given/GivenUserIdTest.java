@@ -20,35 +20,20 @@
 
 package io.spine.testing.core.given;
 
-import com.google.common.testing.NullPointerTester;
 import io.spine.core.UserId;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.core.given.GivenUserId.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("GivenUserId should")
-class GivenUserIdTest {
+class GivenUserIdTest extends UtilityClassTest<GivenUserId> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(GivenUserId.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(GivenUserId.class);
+    GivenUserIdTest() {
+        super(GivenUserId.class);
     }
 
     @Test
@@ -57,9 +42,10 @@ class GivenUserIdTest {
         String testIdString = "12345";
         UserId userId = of(testIdString);
 
-        UserId expected = UserId.newBuilder()
-                                .setValue(testIdString)
-                                .build();
+        UserId expected = UserId
+                .newBuilder()
+                .setValue(testIdString)
+                .build();
 
         assertEquals(expected, userId);
     }
@@ -70,5 +56,11 @@ class GivenUserIdTest {
         assertFalse(GivenUserId.newUuid()
                                .getValue()
                                .isEmpty());
+    }
+
+    @Test
+    @DisplayName("create test value by test suite class")
+    void byClass() {
+        assertEquals(getClass().getSimpleName(), GivenUserId.byTestClass(getClass()).getValue());
     }
 }

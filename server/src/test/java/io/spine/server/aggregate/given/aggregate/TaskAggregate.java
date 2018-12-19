@@ -20,12 +20,11 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.common.base.Optional;
-import io.spine.core.React;
 import io.spine.core.UserId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.server.tuple.Pair;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
@@ -40,11 +39,12 @@ import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.test.aggregate.task.AggTaskVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
+
 /**
  * An aggregate that fires a {@linkplain Pair pair} with an optional upon handling a command,
  * an event or a rejection.
  *
- * @author Alexander Yevsyukkov
  * @see io.spine.server.aggregate.AggregateTest.CreateSingleEventForPair
  */
 public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder> {
@@ -63,11 +63,11 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
      */
     @Assign
     Pair<AggTaskCreated, Optional<AggTaskAssigned>> handle(AggCreateTask command) {
-        final AggTaskId id = command.getTaskId();
-        final AggTaskCreated createdEvent = taskCreated(id);
+        AggTaskId id = command.getTaskId();
+        AggTaskCreated createdEvent = taskCreated(id);
 
-        final UserId assignee = command.getAssignee();
-        final AggTaskAssigned assignedEvent = taskAssignedOrNull(id, assignee);
+        UserId assignee = command.getAssignee();
+        AggTaskAssigned assignedEvent = taskAssignedOrNull(id, assignee);
 
         return Pair.withNullable(createdEvent, assignedEvent);
     }
@@ -83,40 +83,43 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
      * {@linkplain UserId assignee} is a default empty instance returns {@code null}.
      */
     private static @Nullable AggTaskAssigned taskAssignedOrNull(AggTaskId id, UserId assignee) {
-        final UserId emptyUserId = UserId.getDefaultInstance();
+        UserId emptyUserId = UserId.getDefaultInstance();
         if (assignee.equals(emptyUserId)) {
             return null;
         }
-        final AggTaskAssigned event =
-                AggTaskAssigned.newBuilder()
-                               .setTaskId(id)
-                               .setNewAssignee(assignee)
-                               .build();
+        AggTaskAssigned event = AggTaskAssigned.newBuilder()
+                                               .setTaskId(id)
+                                               .setNewAssignee(assignee)
+                                               .build();
         return event;
     }
 
     @Assign
     AggTaskAssigned handle(AggAssignTask command) {
-        final AggTaskId id = command.getTaskId();
-        final UserId newAssignee = command.getAssignee();
-        final UserId previousAssignee = getState().getAssignee();
+        AggTaskId id = command.getTaskId();
+        UserId newAssignee = command.getAssignee();
+        UserId previousAssignee = getState().getAssignee();
 
-        final AggTaskAssigned event = taskAssigned(id, previousAssignee, newAssignee);
+        AggTaskAssigned event = taskAssigned(id, previousAssignee, newAssignee);
         return event;
     }
 
     @Assign
     AggTaskAssigned handle(AggReassignTask command)
             throws AggCannotReassignUnassignedTask {
-        final AggTaskId id = command.getTaskId();
-        final UserId newAssignee = command.getAssignee();
-        final UserId previousAssignee = getState().getAssignee();
+        AggTaskId id = command.getTaskId();
+        UserId newAssignee = command.getAssignee();
+        UserId previousAssignee = getState().getAssignee();
 
         if (previousAssignee.equals(EMPTY_USER_ID)) {
-            throw new AggCannotReassignUnassignedTask(id, previousAssignee);
+            throw AggCannotReassignUnassignedTask
+                    .newBuilder()
+                    .setTaskId(id)
+                    .setUserId(previousAssignee)
+                    .build();
         }
 
-        final AggTaskAssigned event = taskAssigned(id, previousAssignee, newAssignee);
+        AggTaskAssigned event = taskAssigned(id, previousAssignee, newAssignee);
         return event;
     }
 
@@ -143,12 +146,11 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
     @React
     Pair<AggUserNotified, Optional<AggUserNotified>>
     on(AggTaskAssigned event) {
-        final AggTaskId taskId = event.getTaskId();
-        final UserId previousAssignee = event.getPreviousAssignee();
-        final AggUserNotified previousAssigneeNotified =
-                userNotifiedOrNull(taskId, previousAssignee);
-        final UserId newAssignee = event.getNewAssignee();
-        final AggUserNotified newAssigneeNotified = userNotified(taskId, newAssignee);
+        AggTaskId taskId = event.getTaskId();
+        UserId previousAssignee = event.getPreviousAssignee();
+        AggUserNotified previousAssigneeNotified = userNotifiedOrNull(taskId, previousAssignee);
+        UserId newAssignee = event.getNewAssignee();
+        AggUserNotified newAssigneeNotified = userNotified(taskId, newAssignee);
         return Pair.withNullable(newAssigneeNotified, previousAssigneeNotified);
     }
 
@@ -156,24 +158,23 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
         if (userId.equals(EMPTY_USER_ID)) {
             return null;
         }
-        final AggUserNotified event = userNotified(taskId, userId);
+        AggUserNotified event = userNotified(taskId, userId);
         return event;
     }
 
     private static AggUserNotified userNotified(AggTaskId taskId, UserId userId) {
-        final AggUserNotified event =
-                AggUserNotified.newBuilder()
-                               .setTaskId(taskId)
-                               .setUserId(userId)
-                               .build();
+        AggUserNotified event = AggUserNotified.newBuilder()
+                                               .setTaskId(taskId)
+                                               .setUserId(userId)
+                                               .build();
         return event;
     }
 
     @React
     Pair<AggUserNotified, Optional<AggUserNotified>>
     on(Rejections.AggCannotReassignUnassignedTask rejection) {
-        final AggUserNotified event = userNotified(rejection.getTaskId(),
-                                                   rejection.getUserId());
+        AggUserNotified event = userNotified(rejection.getTaskId(),
+                                             rejection.getUserId());
         return Pair.withNullable(event, null);
     }
 

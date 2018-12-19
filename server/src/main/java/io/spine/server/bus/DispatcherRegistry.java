@@ -21,25 +21,31 @@
 package io.spine.server.bus;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import com.google.protobuf.Message;
+import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
  * A registry of message dispatchers.
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @param <C> the type of the class of dispatched messages
+ * @param <D> the type of the message dispatchers
  */
-public class DispatcherRegistry<C extends MessageClass,
-                                D extends MessageDispatcher<C, ?, ?>> {
+public abstract class DispatcherRegistry<C extends MessageClass<? extends Message>,
+                                         E extends MessageEnvelope<?, ?, ?>,
+                                         D extends MessageDispatcher<C, E, ?>> {
 
     /**
      * The map from a message class to one or more dispatchers of
@@ -49,36 +55,21 @@ public class DispatcherRegistry<C extends MessageClass,
      * will allow only one dispatcher per message class. This should be handled
      * when registering dispatchers.
      */
-    private final Multimap<C, D> dispatchers =
-            Multimaps.synchronizedMultimap(HashMultimap.<C, D>create());
+    private final Multimap<C, D> dispatchers = synchronizedMultimap(HashMultimap.create());
 
-    /**
-     * Registers the passed dispatcher.
-     *
-     * <p>If the dispatcher passes the {@linkplain #checkDispatcher(MessageDispatcher) check}
-     * it is associated with the message classes it
-     * {@linkplain MessageDispatcher#getMessageClasses()}exposes.
-     *
-     * @param dispatcher the dispatcher to register
-     */
-    protected void register(D dispatcher) {
+    public void register(D dispatcher) {
         checkDispatcher(dispatcher);
-        final Set<C> messageClasses = dispatcher.getMessageClasses();
+        Set<C> messageClasses = dispatcher.getMessageClasses();
         for (C messageClass : messageClasses) {
             dispatchers.put(messageClass, dispatcher);
         }
     }
 
-    /**
-     * Removes registration for the passed dispatcher.
-     *
-     * @see #register(MessageDispatcher)
-     */
-    protected void unregister(D dispatcher) {
+    public void unregister(D dispatcher) {
         checkNotNull(dispatcher);
         checkNotEmpty(dispatcher);
 
-        final Set<C> messageClasses = dispatcher.getMessageClasses();
+        Set<C> messageClasses = dispatcher.getMessageClasses();
         for (C messageClass : messageClasses) {
             dispatchers.remove(messageClass, dispatcher);
         }
@@ -101,13 +92,79 @@ public class DispatcherRegistry<C extends MessageClass,
     /**
      * Obtains dispatchers for the passed message class.
      *
-     * @param messageClass the
+     * @param envelope
+     *         the message envelope to find dispatchers for
      * @return a set of dispatchers or an empty set if no dispatchers are registered
      */
-    protected Set<D> getDispatchers(C messageClass) {
+    protected Set<D> getDispatchers(E envelope) {
+        checkNotNull(envelope);
+        C messageClass = classOf(envelope);
+        Set<D> dispatchers = this.dispatchers
+                .get(messageClass)
+                .stream()
+                .filter(dispatcher -> dispatcher.canDispatch(envelope))
+                .collect(toImmutableSet());
+        return dispatchers;
+    }
+
+    /**
+     * Obtains a single dispatcher (if available) for the passed message.
+     *
+     * @param envelope
+     *         the message to find a dispatcher for
+     * @throws IllegalStateException
+     *         if more than one dispatcher is found
+     * @apiNote This method must be called only for serving {@link UnicastBus}es.
+     */
+    protected Optional<? extends D> getDispatcher(E envelope) {
+        checkNotNull(envelope);
+        Set<D> dispatchers = getDispatchers(envelope);
+        checkNotMoreThanOne(dispatchers, classOf(envelope));
+        Optional<D> result = dispatchers.stream()
+                                        .findFirst();
+        return result;
+    }
+
+    /**
+     * Obtains all the dispatchers for the passed message class.
+     *
+     * @param messageClass
+     *         the target message class
+     * @return all the registered dispatchers of the given class
+     */
+    protected Set<D> getDispatchersForType(C messageClass) {
         checkNotNull(messageClass);
-        final Collection<D> dispatchers = this.dispatchers.get(messageClass);
-        return ImmutableSet.copyOf(dispatchers);
+        Collection<D> dispatchersForType = dispatchers.get(messageClass);
+        return copyOf(dispatchersForType);
+    }
+
+    /**
+     * Obtains a single dispatcher (if available) for the passed message.
+     *
+     * @param messageClass
+     *         the class of the message to find a dispatcher for
+     * @throws IllegalStateException
+     *         if more than one dispatcher is found
+     */
+    protected Optional<? extends D> getDispatcherForType(C messageClass) {
+        Collection<D> dispatchersOfClass = dispatchers.get(messageClass);
+        checkNotMoreThanOne(dispatchersOfClass, messageClass);
+        Optional<D> dispatcher = dispatchersOfClass.stream()
+                                                   .findFirst();
+        return dispatcher;
+    }
+
+    private void checkNotMoreThanOne(Collection<D> dispatchers, C messageClass) {
+        int size = dispatchers.size();
+        checkState(size <= 1,
+                   "More than one (%s) dispatchers found for the message class `%s`.",
+                   size, messageClass);
+    }
+
+    private C classOf(E envelope) {
+        @SuppressWarnings("unchecked") // Logically valid.
+                C messageClass = (C) envelope.getMessageClass();
+        return messageClass;
     }
 
     /**
@@ -116,8 +173,10 @@ public class DispatcherRegistry<C extends MessageClass,
      * <p>The passed dispatcher must {@linkplain MessageDispatcher#getMessageClasses() expose}
      * at least one message class.
      *
-     * @param dispatcher the dispatcher to check
-     * @throws IllegalArgumentException if the check is failed
+     * @param dispatcher
+     *         the dispatcher to check
+     * @throws IllegalArgumentException
+     *         if the check is failed
      */
     protected void checkDispatcher(D dispatcher) throws IllegalArgumentException {
         checkNotNull(dispatcher);
@@ -125,7 +184,7 @@ public class DispatcherRegistry<C extends MessageClass,
     }
 
     private static <D extends MessageDispatcher> void checkNotEmpty(D dispatcher) {
-        final Set<?> messageClasses = dispatcher.getMessageClasses();
+        Set<?> messageClasses = dispatcher.getMessageClasses();
         checkArgument(!messageClasses.isEmpty(),
                       "The dispatcher (%s) has empty message class set.",
                       dispatcher);

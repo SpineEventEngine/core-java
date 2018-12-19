@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -43,8 +42,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @param <I> the type of the entity ID
  * @param <S> the type of the entity state
- * @author Alexander Yevsyikov
- * @author Alexander Litus
  */
 public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntity<I, S>
@@ -56,15 +53,21 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     private LifecycleFlags lifecycleFlags;
 
     /**
-     * If {@code true} the visibility of the entity was changed since initialization.
+     * Indicates if the lifecycle flags of the entity were changed since initialization.
      *
-     * <p>If so, the visibility status of the entity should be updated when
+     * <p>Changed lifecycle flags are should be updated when
      * {@linkplain Repository#store(Entity) storing}.
      */
     private volatile boolean lifecycleFlagsChanged;
 
     /**
      * Creates a new instance.
+     *
+     * <p>Upon construction the entity has:
+     * <ul>
+     *     <li>The version number is set to zero.
+     *     <li>{@linkplain #getLifecycleFlags() Lifecycle flag} are cleared.
+     * </ul>
      *
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the
@@ -73,32 +76,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected AbstractVersionableEntity(I id) {
         super(id);
         setVersion(Versions.zero());
-        setVisible();
+        clearLifecycleFlags();
     }
 
-    /**
-     * Sets the object into the default state.
-     *
-     * <p>Results of this method call are:
-     * <ul>
-     *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
-     *   <li>The version number is set to zero.
-     *   <li>The {@link #lifecycleFlags} field is set to the default instance.
-     * </ul>
-     *
-     * <p>This method cannot be called from within {@code Entity} constructor because
-     * the call to {@link #getDefaultState()} relies on completed initialization
-     * of the instance.
-     */
-    @Override
-    protected void init() {
-        super.init();
-        setState(getDefaultState());
-        setVersion(Versions.zero());
-        setVisible();
-    }
-
-    private void setVisible() {
+    private void clearLifecycleFlags() {
         setLifecycleFlags(LifecycleFlags.getDefaultInstance());
         lifecycleFlagsChanged = false;
     }
@@ -119,8 +100,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *                version of the entity
      * @see #validate(Message)
      */
-    @Internal
-    public void updateState(S state, Version version) {
+    void updateState(S state, Version version) {
         updateState(state);
         updateVersion(version);
     }
@@ -135,9 +115,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean lifecycleFlagsChanged() {
         return lifecycleFlagsChanged;
@@ -147,7 +124,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * Obtains the version number of the entity.
      */
     protected int versionNumber() {
-        final int result = getVersion().getNumber();
+        int result = getVersion().getNumber();
         return result;
     }
 
@@ -157,8 +134,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
             return;
         }
 
-        final int currentVersionNumber = versionNumber();
-        final int newVersionNumber = newVersion.getNumber();
+        int currentVersionNumber = versionNumber();
+        int newVersionNumber = newVersion.getNumber();
         if (currentVersionNumber > newVersionNumber) {
             throw newIllegalArgumentException(
                     "A version with the lower number (%d) passed to `updateVersion()` " +
@@ -185,9 +162,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         updateState(newState, incrementedVersion());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Version getVersion() {
         return version;
@@ -218,14 +192,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         return version.getTimestamp();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public LifecycleFlags getLifecycleFlags() {
-        final LifecycleFlags result = this.lifecycleFlags == null
-                ? LifecycleFlags.getDefaultInstance()
-                : this.lifecycleFlags;
+        LifecycleFlags result = this.lifecycleFlags == null
+                                ? LifecycleFlags.getDefaultInstance()
+                                : this.lifecycleFlags;
         return result;
     }
 
@@ -276,8 +247,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getLifecycleFlags().getArchived()) {
-            final Any packedId = Identifier.pack(getId());
-            throw new CannotModifyArchivedEntity(packedId);
+            Any packedId = Identifier.pack(getId());
+            throw CannotModifyArchivedEntity
+                    .newBuilder()
+                    .setEntityId(packedId)
+                    .build();
         }
     }
 
@@ -290,8 +264,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getLifecycleFlags().getDeleted()) {
-            final Any packedId = Identifier.pack(getId());
-            throw new CannotModifyDeletedEntity(packedId);
+            Any packedId = Identifier.pack(getId());
+            throw CannotModifyDeletedEntity
+                    .newBuilder()
+                    .setEntityId(packedId)
+                    .build();
         }
     }
 

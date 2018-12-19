@@ -21,40 +21,41 @@
 package io.spine.core;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks a method as a subscriber for the command output.
  *
- * <p>Use it to subscribe to either events or business rejections
+ * <p>Use it to subscribe to either events, business rejections, or entity state updates.
  *
- * <h2>Subscribing to Events</h2>
+ * <h1>Subscribing to Events</h1>
  *
  * <p>An event subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
  *     <li>is {@code public};
  *     <li>returns {@code void};
- *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
+ *     <li>accepts an event derived from {@link io.spine.base.EventMessage EventMessage}
  *          as the first parameter;
  *     <li>(optional) accepts an {@link io.spine.core.EventContext EventContext}
  *          as the second parameter.
  * </ul>
  *
- * <h2>Subscribing to Rejections</h2>
+ * <h1>Subscribing to Rejections</h1>
  *
  * <p>A rejection subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
  *     <li>is {@code public};
  *     <li>returns {@code void};
- *     <li>accepts a rejection message derived from {@link com.google.protobuf.Message Message}
- *          as the first parameter;
- *     <li>(optional) accepts a command derived from {@link com.google.protobuf.Message Message}
- *          as the second parameter;
+ *     <li>accepts a rejection message derived from {@link io.spine.base.RejectionMessage
+ *         RejectionMessage} as the first parameter;
+ *     <li>(optional) accepts a command derived from {@link io.spine.base.CommandMessage
+ *         CommandMessage} as the second parameter;
  *     <li>(optional) accepts an {@link io.spine.core.CommandContext CommandContext}
  *          as the second or the third parameter.
  * </ul>
@@ -74,15 +75,66 @@ import java.lang.annotation.Target;
  *         by the subscriber.
  * </ul>
  *
+ * <h1>Subscribing to entity state updates</h1>
+ *
+ * <p>An entity state subscriber method:
+ * <ul>
+ *     <li>is annotated with {@link Subscribe};
+ *     <li>is {@code public};
+ *     <li>returns {@code void};
+ *     <li>accepts an entity state message marked with the {@code (entity)} option as the only
+ *         parameter.
+ * </ul>
+ *
+ * <h1>Filtering events by a field value</h1>
+ * <p>If a {@linkplain ByField field filter} is defined, only the events matching this filter are
+ * passed to the subscriber.
+ *
+ * <p>Any combination of {@code external} and {@code filter} is valid, i.e. it is possible
+ * to filter external event subscriptions. Though, it is not possible to filter entity state
+ * updates.
+ *
+ * <p>A single subscribing class may define a number of subscriber methods with different field
+ * filters. Though, all the field filters must target the same field. For example, this event
+ * handling is valid:
+ * <pre>
+ *     {@code
+ *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
+ *     public void onExpired(UserLoggedIn event) {
+ *         // Handle expired subscription.
+ *     }
+ *
+ *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "INACTIVE"))
+ *     public void onInactive(UserLoggedIn event) {
+ *         // Handle inactive subscription.
+ *     }
+ *
+ *     \@Subscribe
+ *     public void on(UserLoggedIn event) {
+ *         // Handle other cases.
+ *     }
+ *     }
+ * </pre>
+ * <p>And this one is not:
+ * <pre>
+ *     {@code
+ *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
+ *     public void onExpired(UserLoggedIn event) {
+ *     }
+ *
+ *     \@Subscribe(filter = @ByField(path = "payment_method.status", value = "UNSET"))
+ *     public void onUnknownBilling(UserLoggedIn event) {
+ *         // Error, different field paths used in the same class for the same event type.
+ *     }
+ *     }
+ * </pre>
+ *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
  * this method is not considered as a subscriber and is not registered for the command output
  * delivery.
- *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target(METHOD)
 @Documented
 public @interface Subscribe {
 
@@ -91,4 +143,14 @@ public @interface Subscribe {
      * Bounded Context to which the annotated method's class belongs.
      */
     boolean external() default false;
+
+    /**
+     * Filter to apply to all the event messages.
+     *
+     * <p>If an event does not match this filter, it is not passed to the subscriber method.
+     *
+     * <p>If the {@link ByField#path() @ByField.path} if empty, the filter is not
+     * applied.
+     */
+    ByField filter() default @ByField(path = "", value = "");
 }

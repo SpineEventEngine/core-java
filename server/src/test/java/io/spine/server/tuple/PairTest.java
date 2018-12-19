@@ -20,7 +20,6 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
@@ -34,6 +33,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -41,13 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings({"LocalVariableNamingConvention" /* OK for tuple element values. */,
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
-
 @DisplayName("Pair should")
 class PairTest {
 
@@ -55,7 +51,7 @@ class PairTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester().setDefault(Message.class, TestValues.newUuidValue())
-                               .setDefault(Either.class, EitherOfTwo.withB(Time.getCurrentTime()))
+                               .setDefault(Either.class, EitherOf2.withB(Time.getCurrentTime()))
                                .testAllPublicStaticMethods(Pair.class);
     }
 
@@ -129,10 +125,10 @@ class PairTest {
     class AllowOptionalB {
 
         @Test
-        @DisplayName("absent")
-        void absent() {
+        @DisplayName("empty")
+        void empty() {
             StringValue a = TestValues.newUuidValue();
-            Optional<BoolValue> b = Optional.absent();
+            Optional<BoolValue> b = Optional.empty();
 
             Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);
 
@@ -154,7 +150,7 @@ class PairTest {
     }
 
     @Test
-    @DisplayName("return Empty for absent Optional in iterator")
+    @DisplayName("return Empty for empty Optional in iterator")
     void getAbsentInIterator() {
         StringValue a = TestValues.newUuidValue();
         Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);
@@ -176,7 +172,7 @@ class PairTest {
         reserializeAndAssert(Pair.withNullable(a, b));
         reserializeAndAssert(Pair.withNullable(a, null));
 
-        reserializeAndAssert(Pair.withEither(a, EitherOfTwo.withA(Time.getCurrentTime())));
-        reserializeAndAssert(Pair.withEither(a, EitherOfTwo.withB(TestValues.newUuidValue())));
+        reserializeAndAssert(Pair.withEither(a, EitherOf2.withA(Time.getCurrentTime())));
+        reserializeAndAssert(Pair.withEither(a, EitherOf2.withB(TestValues.newUuidValue())));
     }
 }

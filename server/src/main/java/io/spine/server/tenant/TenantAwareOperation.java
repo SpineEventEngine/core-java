@@ -20,9 +20,10 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
+
+import java.util.Optional;
 
 /**
  * An abstract base for operations on a tenant data.
@@ -47,7 +48,7 @@ public abstract class TenantAwareOperation extends TenantAware implements Runnab
      * Creates an instance of an operation for the tenant specified by the passed ID.
      *
      * <p>If a default instance of {@link TenantId} is passed (because the application works in
-     * a single-tenant mode, {@linkplain CurrentTenant#singleTenant() singleTenant()} value will be
+     * a single-tenant mode, {@linkplain SingleTenantIndex#tenantId() singleTenant()} value will be
      * substituted.
      *
      * @param tenantId the tenant ID or {@linkplain TenantId#getDefaultInstance() default value}
@@ -68,7 +69,7 @@ public abstract class TenantAwareOperation extends TenantAware implements Runnab
      * </ol>
      */
     public void execute() {
-        final Optional<TenantId> remembered = CurrentTenant.get();
+        Optional<TenantId> remembered = CurrentTenant.get();
         try {
             CurrentTenant.set(tenantId());
             run();

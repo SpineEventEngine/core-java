@@ -21,13 +21,11 @@
 package io.spine.server.bus;
 
 import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.IdentityDispatcher;
-import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,15 +36,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MulticastDispatcherIdentityTest {
 
     @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        Tests.assertHasPrivateParameterlessCtor(MulticastDispatcher.Identity.class);
-    }
-
-    @Test
     @DisplayName("return dispatcher identity")
-    void returnDispatcherIdentity() throws Exception {
-        final Set<String> set = MulticastDispatcher.Identity.of(new IdentityDispatcher());
+    void returnDispatcherIdentity() {
+        Set<String> set = new IdentityDispatcher().identity();
 
         assertTrue(set.contains(IdentityDispatcher.ID));
         assertEquals(1, set.size());

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package spine.test.model.verify;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.model.verify";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+message UploadPhoto {
+    bytes photo = 1;
+    string title = 2;
+}
+
+message EditPhoto {
+    bytes new_photo = 1;
+}
+
+message ChangeTitle {
+    string new_title = 1;
+}

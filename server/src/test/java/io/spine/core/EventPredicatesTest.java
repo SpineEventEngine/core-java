@@ -20,44 +20,34 @@
 
 package io.spine.core;
 
-import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenEvent;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Predicate;
+
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"})
-// JUnit nested classes cannot be static.
 @DisplayName("EventPredicates utility should")
-class EventPredicatesTest {
+class EventPredicatesTest extends UtilityClassTest<EventPredicates> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(EventPredicates.class);
+    EventPredicatesTest() {
+        super(EventPredicates.class);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(Timestamp.class, getCurrentTime())
-                .testAllPublicStaticMethods(EventPredicates.class);
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(Timestamp.class, getCurrentTime());
     }
 
     @Nested
@@ -67,19 +57,19 @@ class EventPredicatesTest {
         @Test
         @DisplayName("in `IsAfter` predicate")
         void inIsAfter() {
-            assertFalse(EventPredicates.isAfter(secondsAgo(5)).apply(null));
+            assertFalse(EventPredicates.isAfter(secondsAgo(5)).test(null));
         }
 
         @Test
         @DisplayName("in `IsBefore` predicate")
         void inIsBefore() {
-            assertFalse(EventPredicates.isBefore(secondsAgo(5)).apply(null));
+            assertFalse(EventPredicates.isBefore(secondsAgo(5)).test(null));
         }
 
         @Test
         @DisplayName("in `IsBetween` predicate")
         void inIsBetween() {
-            assertFalse(EventPredicates.isBetween(secondsAgo(5), secondsAgo(1)).apply(null));
+            assertFalse(EventPredicates.isBetween(secondsAgo(5), secondsAgo(1)).test(null));
         }
     }
 
@@ -91,24 +81,24 @@ class EventPredicatesTest {
         @DisplayName("`IsAfter` predicate")
         void isAfter() {
             Predicate<Event> predicate = EventPredicates.isAfter(minutesAgo(100));
-            assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
-            assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+            assertTrue(predicate.test(GivenEvent.occurredMinutesAgo(20)));
+            assertFalse(predicate.test(GivenEvent.occurredMinutesAgo(360)));
         }
 
         @Test
         @DisplayName("`isBefore` predicate")
         void isBefore() {
             Predicate<Event> predicate = EventPredicates.isBefore(minutesAgo(100));
-            assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
-            assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+            assertFalse(predicate.test(GivenEvent.occurredMinutesAgo(20)));
+            assertTrue(predicate.test(GivenEvent.occurredMinutesAgo(360)));
         }
 
         @Test
         @DisplayName("`isBetween` predicate")
         void isBetween() {
-            final Event event = GivenEvent.occurredMinutesAgo(5);
-            assertTrue(EventPredicates.isBetween(minutesAgo(10), minutesAgo(1)).apply(event));
-            assertFalse(EventPredicates.isBetween(minutesAgo(2), minutesAgo(1)).apply(event));
+            Event event = GivenEvent.occurredMinutesAgo(5);
+            assertTrue(EventPredicates.isBetween(minutesAgo(10), minutesAgo(1)).test(event));
+            assertFalse(EventPredicates.isBetween(minutesAgo(2), minutesAgo(1)).test(event));
         }
     }
 

@@ -27,6 +27,7 @@ import io.spine.core.Event;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Queues.newArrayDeque;
 
@@ -80,8 +81,21 @@ public final class RecentHistory {
      * @return an events iterator
      */
     public Iterator<Event> iterator() {
-        final ImmutableList<Event> events = ImmutableList.copyOf(history);
+        ImmutableList<Event> events = ImmutableList.copyOf(history);
         return events.iterator();
+    }
+
+    /**
+     * Creates a new {@link Stream} of the recent history items.
+     *
+     * <p>The produced stream is sequential and emits items in the reverse chronological order.
+     * That is, most recent event would be returned first.
+     *
+     * @return a stream of the recent events
+     */
+    public Stream<Event> stream() {
+        ImmutableList<Event> events = ImmutableList.copyOf(history);
+        return events.stream();
     }
 
     /**
@@ -108,7 +122,7 @@ public final class RecentHistory {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final RecentHistory other = (RecentHistory) obj;
+        RecentHistory other = (RecentHistory) obj;
         return Objects.equals(this.history, other.history);
     }
 

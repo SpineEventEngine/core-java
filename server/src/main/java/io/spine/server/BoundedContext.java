@@ -19,43 +19,45 @@
  */
 package io.spine.server;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
-import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
-import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
-import io.spine.core.Event;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.aggregate.ImportBus;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandstore.CommandStore;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
+import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventFactory;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.integration.ExternalDispatcherFactory;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
-import io.spine.server.integration.IntegrationEvent;
-import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
-import io.spine.server.model.Model;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemGateway;
+import io.spine.system.server.SystemClient;
+import io.spine.system.server.SystemContext;
+import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -76,16 +78,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>An instance of {@code BoundedContext} acts as a major point of configuration for all
  * the model elements which belong to it.
  *
- * @author Alexander Yevsyukov
- * @author Mikhail Melnik
- * @author Dmitry Ganzha
- * @author Dmytro Dashenkov
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
- * Blog post on bounded contexts</a>
+ *     Martin Fowler on Bounded Contexts</a>
  */
-public abstract class BoundedContext
-        extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
-        implements AutoCloseable {
+@SuppressWarnings("OverlyCoupledClass")
+public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
@@ -99,27 +96,64 @@ public abstract class BoundedContext
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final IntegrationBus integrationBus;
+    private final ImportBus importBus;
     private final Stand stand;
 
-    /** Controls access to entities of all repositories registered with this bounded context. */
+    /** Controls access to entities of all registered repositories. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
 
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
     private final Supplier<StorageFactory> storageFactory;
 
-    private final @Nullable TenantIndex tenantIndex;
+    private final TenantIndex tenantIndex;
 
-    BoundedContext(BoundedContextBuilder builder) {
+    /**
+     * Creates new instance.
+     *
+     * @throws IllegalStateException
+     *         if called from a derived class, which is not a part of the framework
+     * @apiNote This constructor is for internal use of the framework. Application developers
+     *          should not create classes derived from {@code BoundedContext}.
+     */
+    @Internal
+    protected BoundedContext(BoundedContextBuilder builder) {
         super();
+        checkInheritance();
+
         this.name = builder.getName();
         this.multitenant = builder.isMultitenant();
-        this.storageFactory = Suppliers.memoize(builder.buildStorageFactorySupplier());
-        this.commandBus = builder.buildCommandBus();
+        this.storageFactory = memoize(() -> builder.buildStorageFactorySupplier()
+                                                   .get());
         this.eventBus = builder.buildEventBus();
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
 
-        this.integrationBus = buildIntegrationBus(builder, eventBus, commandBus, name);
+        this.commandBus = buildCommandBus(builder, eventBus);
+        this.integrationBus = buildIntegrationBus(builder, eventBus, name);
+        this.importBus = buildImportBus(tenantIndex);
+    }
+
+    /**
+     * Prevents 3rd party code from creating classes extending from {@code BoundedContext}.
+     */
+    @SuppressWarnings("ClassReferencesSubclass")
+    private void checkInheritance() {
+        Class<? extends BoundedContext> thisClass = getClass();
+        checkState(
+                DomainContext.class.equals(thisClass) ||
+                        SystemContext.class.equals(thisClass),
+                "The class `BoundedContext` is not designed for " +
+                        "inheritance by the framework users."
+        );
+    }
+
+    private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
+        Optional<CommandBus.Builder> busBuilder = builder.getCommandBus();
+        checkState(busBuilder.isPresent());
+        CommandBus result = busBuilder.get()
+                                      .injectEventBus(eventBus)
+                                      .build();
+        return result;
     }
 
     /**
@@ -128,22 +162,27 @@ public abstract class BoundedContext
      * @param builder    the {@link BoundedContextBuilder} to obtain
      *                   the {@link IntegrationBus.Builder} from
      * @param eventBus   the initialized {@link EventBus}
-     * @param commandBus the initialized {@link CommandBus} to obtain the {@link RejectionBus} from
      * @param name       the name of the constructed bounded context
      * @return new instance of {@link IntegrationBus}
      */
     private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
                                                       EventBus eventBus,
-                                                      CommandBus commandBus,
                                                       BoundedContextName name) {
         Optional<IntegrationBus.Builder> busBuilder = builder.getIntegrationBus();
-        checkState(busBuilder.isPresent());
-        IntegrationBus result = busBuilder.get()
-                                          .setBoundedContextName(name)
-                                          .setEventBus(eventBus)
-                                          .setRejectionBus(commandBus.rejectionBus())
-                                          .build();
+        checkArgument(busBuilder.isPresent());
+        IntegrationBus result =
+                busBuilder.get()
+                          .setBoundedContextName(name)
+                          .setEventBus(eventBus)
+                          .build();
         return result;
+    }
+
+    private static ImportBus buildImportBus(TenantIndex tenantIndex) {
+        ImportBus.Builder result = ImportBus
+                .newBuilder()
+                .injectTenantIndex(tenantIndex);
+        return result.build();
     }
 
     /**
@@ -170,35 +209,114 @@ public abstract class BoundedContext
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        final Message defaultState = Model.getInstance()
-                                          .getDefaultState(repository.getEntityClass());
-        checkNotNull(defaultState);
-
         repository.setBoundedContext(this);
         guard.register(repository);
         repository.onRegistered();
     }
 
     /**
-     * Sends an integration event to this {@code BoundedContext}.
+     * Registers the passed command dispatcher with the {@code CommandBus} of
+     * this {@code BoundedContext}.
      */
-    @Experimental
-    @Override
-    public void notify(IntegrationEvent integrationEvent, StreamObserver<Ack> observer) {
-        final Event event = EventFactory.toEvent(integrationEvent);
-        eventBus.post(event, observer);
+    public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        if (dispatcher.dispatchesCommands()) {
+            getCommandBus().register(dispatcher);
+        }
+    }
+
+    /**
+     * Registers the passed command dispatcher with the {@code CommandBus} of
+     * this {@code BoundedContext}.
+     */
+    public void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
+        checkNotNull(dispatcher);
+        if (dispatcher.dispatchesCommands()) {
+            registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
+        }
+    }
+
+    private void registerWithIntegrationBus(ExternalDispatcherFactory<?> dispatcher) {
+        ExternalMessageDispatcher<?> externalDispatcher =
+                dispatcher.createExternalDispatcher()
+                          .orElseThrow(notExternalDispatcherFrom(dispatcher));
+
+        getIntegrationBus().register(externalDispatcher);
+    }
+
+    /**
+     * Registers the passed event dispatcher with the {@code EventBus} of
+     * this {@code BoundedContext}, if it dispatches domestic events.
+     * If the passed instance dispatches external events, registers it with
+     * the {@code IntegrationBus}.
+     */
+    public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        if (dispatcher.dispatchesEvents()) {
+            getEventBus().register(dispatcher);
+            SystemReadSide systemReadSide = getSystemClient().readSide();
+            systemReadSide.register(dispatcher);
+        }
+        if (dispatcher.dispatchesExternalEvents()) {
+            registerWithIntegrationBus(dispatcher);
+        }
+    }
+
+    /**
+     * Registers the passed event dispatcher with the {@code EventBus} of
+     * this {@code BoundedContext}, if it dispatchers domestic events.
+     * If the passed instance dispatches external events, registers it with
+     * the {@code IntegrationBus}.
+     */
+    public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
+        checkNotNull(dispatcher);
+        DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
+        registerEventDispatcher(delegate);
+    }
+
+    /**
+     * Supplies {@code IllegalStateException} for the cases when dispatchers or dispatcher
+     * delegates do not provide an external message dispatcher.
+     */
+    private static
+    Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
+        return () -> newIllegalStateException("No external dispatcher provided by %s", dispatcher);
+    }
+
+    /**
+     * Creates a {@code CommandErrorHandler} for objects that handle commands.
+     */
+    public CommandErrorHandler createCommandErrorHandler() {
+        SystemWriteSide systemWriteSide = getSystemClient().writeSide();
+        CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide);
+        return result;
     }
 
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> getEntityTypes(Visibility visibility) {
-        final Set<TypeName> result = guard.getEntityTypes(visibility);
+    public Set<TypeName> getEntityStateTypes(Visibility visibility) {
+        Set<TypeName> result = guard.getEntityStateTypes(visibility);
         return result;
     }
 
     /**
      * Finds a repository by the state class of entities.
+     *
+     * <p>This method assumes that a repository for the given entity state class <b>is</b>
+     * registered in this context. If there is no such repository, throws
+     * an {@link IllegalStateException}.
+     *
+     * <p>If a repository is registered, the method returns it or {@link Optional#empty()} if
+     * the requested entity is {@linkplain Visibility#NONE not visible}.
+     *
+     * @param entityStateClass
+     *         the class of the state of the entity managed by the resulting repository
+     * @return the requested repository or {@link Optional#empty()} if the repository manages
+     *         a {@linkplain Visibility#NONE non-visible} entity
+     * @throws IllegalStateException
+     *         if the requested repository is not registered
+     * @see VisibilityGuard
      */
     @Internal
     public Optional<Repository> findRepository(Class<? extends Message> entityStateClass) {
@@ -207,7 +325,7 @@ public abstract class BoundedContext
             throw newIllegalStateException("No repository found for the the entity state class %s",
                                            entityStateClass.getName());
         }
-        final Optional<Repository> repository = guard.getRepository(entityStateClass);
+        Optional<Repository> repository = guard.getRepository(entityStateClass);
         return repository;
     }
 
@@ -221,14 +339,14 @@ public abstract class BoundedContext
         return this.eventBus;
     }
 
-    /** Obtains instance of {@link RejectionBus} of this {@code BoundedContext}. */
-    public RejectionBus getRejectionBus() {
-        return this.commandBus.rejectionBus();
-    }
-
     /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
     public IntegrationBus getIntegrationBus() {
         return this.integrationBus;
+    }
+
+    /** Obtains instance of {@link ImportBus} of this {@code BoundedContext}. */
+    public ImportBus getImportBus() {
+        return this.importBus;
     }
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
@@ -241,7 +359,7 @@ public abstract class BoundedContext
      *
      * <p>The ID allows to identify a bounded context if a multi-context application.
      * If the ID was not defined, during the building process, the context would get
-     * {@link BoundedContextNames#defaultName()} name.
+     * {@link BoundedContextNames#assumingTests()} name.
      *
      * @return the ID of this {@code BoundedContext}
      */
@@ -257,7 +375,8 @@ public abstract class BoundedContext
     }
 
     /**
-     * @return {@code true} if the bounded context serves many organizations
+     * Returns {@code true} if the Bounded Context is designed to serve more than one tenant of
+     * the application, {@code false} otherwise.
      */
     public boolean isMultitenant() {
         return multitenant;
@@ -267,20 +386,19 @@ public abstract class BoundedContext
      * Obtains a tenant index of this Bounded Context.
      *
      * <p>If the Bounded Context is single-tenant returns
-     * {@linkplain io.spine.server.tenant.TenantIndex.Factory#singleTenant() null-object}
+     * {@linkplain TenantIndex#singleTenant() null-object}
      * implementation.
      */
     @Internal
     public TenantIndex getTenantIndex() {
-        if (!isMultitenant()) {
-            return TenantIndex.Factory.singleTenant();
-        }
         return tenantIndex;
     }
 
-    /** Obtains instance of {@link SystemGateway} of this {@code BoundedContext}. */
+    /**
+     * Obtains instance of {@link SystemClient} of this {@code BoundedContext}.
+     */
     @Internal
-    public abstract SystemGateway getSystemGateway();
+    public abstract SystemClient getSystemClient();
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.
@@ -291,30 +409,27 @@ public abstract class BoundedContext
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
      *     <li>Closes {@link IntegrationBus}.
-     *     <li>Closes {@link CommandStore}.
      *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      *     <li>Closes {@link Stand}.
-     *     <li>Shuts down all registered repositories. Each registered repository is:
-     *      <ul>
-     *          <li>un-registered from {@link CommandBus}
-     *          <li>un-registered from {@link EventBus}
-     *          <li>detached from its storage
-     *      </ul>
+     *     <li>Closes {@link ImportBus}.
+     *     <li>Closes all registered {@linkplain Repository repositories}.
      * </ol>
      *
      * @throws Exception caused by closing one of the components
      */
     @Override
     public void close() throws Exception {
-        storageFactory.get().close();
+        storageFactory.get()
+                      .close();
         commandBus.close();
         eventBus.close();
         integrationBus.close();
         stand.close();
+        importBus.close();
 
         shutDownRepositories();
 
-        log().info(closed(nameForLogging()));
+        log().debug(closed(nameForLogging()));
     }
 
     String nameForLogging() {
@@ -337,15 +452,5 @@ public abstract class BoundedContext
         if (tenantIndex != null) {
             tenantIndex.close();
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(BoundedContext.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

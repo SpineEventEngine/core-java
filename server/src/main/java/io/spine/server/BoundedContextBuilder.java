@@ -20,26 +20,34 @@
 
 package io.spine.server;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
+import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandstore.CommandStore;
+import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
-import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.system.server.NoOpSystemClient;
+import io.spine.system.server.SystemClient;
+import io.spine.system.server.SystemContext;
+import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -51,22 +59,24 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>An application can have more than one bounded context. To distinguish
  * them use {@link #setName(String)}. If no ID is given the default ID will be assigned.
- *
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
-public final class BoundedContextBuilder {
+public final class BoundedContextBuilder implements Logging {
 
-    private BoundedContextName name = BoundedContextNames.defaultName();
+    @SuppressWarnings("TestOnlyProblems")
+        // Be default, assume test environment to simplify test data preparation.
+    private BoundedContextName name = BoundedContextNames.assumingTests();
     private boolean multitenant;
     private TenantIndex tenantIndex;
-    private Supplier<StorageFactory> storageFactorySupplier;
-    private TransportFactory transportFactory;
+    private @Nullable Supplier<StorageFactory> storageFactorySupplier;
 
     private CommandBus.Builder commandBus;
     private EventBus.Builder eventBus;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
+
+    /** Repositories to be registered with the Bounded Context being built after its creation. */
+    private final List<Repository<?, ?>> repositories = new ArrayList<>();
 
     /**
      * Prevents direct instantiation.
@@ -79,15 +89,16 @@ public final class BoundedContextBuilder {
     /**
      * Sets the value of the name for a new bounded context.
      *
-     * <p>If the name is not defined in the builder, the context will get
-     * {@link BoundedContextNames#defaultName()} name.
-     *
      * <p>It is the responsibility of an application developer to provide meaningful and unique
      * names for bounded contexts. The framework does not check for duplication of names.
+     *
+     * <p>If the name is not defined in the builder, the context will get
+     * {@link BoundedContextNames#assumingTests()} name.
      *
      * @param name an identifier string for a new bounded context.
      *             Cannot be null, empty, or blank
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setName(String name) {
         return setName(newName(name));
     }
@@ -95,15 +106,16 @@ public final class BoundedContextBuilder {
     /**
      * Sets the name for a new bounded context.
      *
-     * <p>If the name is not defined in the builder, the context will get
-     * {@link BoundedContextNames#defaultName()} name.
-     *
      * <p>It is the responsibility of an application developer to provide meaningful and unique
      * names for bounded contexts. The framework does not check for duplication of names.
+     *
+     * <p>If the name is not defined in the builder, the context will get
+     * {@link BoundedContextNames#assumingTests()} name.
      *
      * @param name an identifier string for a new bounded context.
      *             Cannot be null, empty, or blank
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setName(BoundedContextName name) {
         BoundedContextNames.checkValid(name);
         this.name = name;
@@ -111,13 +123,14 @@ public final class BoundedContextBuilder {
     }
 
     /**
-     * Returns the previously set name or {@link BoundedContextNames#defaultName()}
+     * Returns the previously set name or {@link BoundedContextNames#assumingTests()}
      * if the name was not explicitly set.
      */
     public BoundedContextName getName() {
         return name;
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setMultitenant(boolean value) {
         this.multitenant = value;
         return this;
@@ -134,13 +147,15 @@ public final class BoundedContextBuilder {
      * {@link StorageFactorySwitch} will be used during the construction of
      * a {@code BoundedContext} instance.
      */
-    public BoundedContextBuilder setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
+    @CanIgnoreReturnValue
+    public
+    BoundedContextBuilder setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
         this.storageFactorySupplier = supplier;
         return this;
     }
 
     public Optional<Supplier<StorageFactory>> getStorageFactorySupplier() {
-        return Optional.fromNullable(storageFactorySupplier);
+        return Optional.ofNullable(storageFactorySupplier);
     }
 
     Supplier<StorageFactory> buildStorageFactorySupplier() {
@@ -148,62 +163,66 @@ public final class BoundedContextBuilder {
         return storageFactorySupplier;
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setCommandBus(CommandBus.Builder commandBus) {
         this.commandBus = checkNotNull(commandBus);
         return this;
     }
 
     public Optional<CommandBus.Builder> getCommandBus() {
-        return Optional.fromNullable(commandBus);
-    }
-
-    CommandBus buildCommandBus() {
-        return commandBus.build();
+        return Optional.ofNullable(commandBus);
     }
 
     public Optional<? extends TenantIndex> getTenantIndex() {
-        return Optional.fromNullable(tenantIndex);
+        return Optional.ofNullable(tenantIndex);
     }
 
     TenantIndex buildTenantIndex() {
-        return tenantIndex;
+        TenantIndex result = isMultitenant()
+            ? checkNotNull(tenantIndex)
+            : TenantIndex.singleTenant();
+        return result;
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setEventBus(EventBus.Builder eventBus) {
         this.eventBus = checkNotNull(eventBus);
         return this;
     }
 
     public Optional<EventBus.Builder> getEventBus() {
-        return Optional.fromNullable(eventBus);
+        return Optional.ofNullable(eventBus);
     }
 
     EventBus buildEventBus() {
         return eventBus.build();
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setStand(Stand.Builder stand) {
         this.stand = checkNotNull(stand);
         return this;
     }
 
     public Optional<Stand.Builder> getStand() {
-        return Optional.fromNullable(stand);
+        return Optional.ofNullable(stand);
     }
 
     Stand buildStand() {
         return stand.build();
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setIntegrationBus(IntegrationBus.Builder integrationBus) {
         this.integrationBus = checkNotNull(integrationBus);
         return this;
     }
 
     public Optional<IntegrationBus.Builder> getIntegrationBus() {
-        return Optional.fromNullable(integrationBus);
+        return Optional.ofNullable(integrationBus);
     }
 
+    @CanIgnoreReturnValue
     public BoundedContextBuilder setTenantIndex(TenantIndex tenantIndex) {
         if (this.multitenant) {
             checkNotNull(tenantIndex,
@@ -213,18 +232,55 @@ public final class BoundedContextBuilder {
         return this;
     }
 
-    public BoundedContextBuilder setTransportFactory(TransportFactory transportFactory) {
-        this.transportFactory = checkNotNull(transportFactory);
+    /**
+     * Adds the passed repository to the registration list which will be processed after
+     * the Bounded Context is created.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder add(Repository<?, ?> repository) {
+        checkNotNull(repository);
+        repositories.add(repository);
         return this;
+    }
+
+    /**
+     * Removes the passed repository from the registration list.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder remove(Repository<?, ?> repository) {
+        checkNotNull(repository);
+        repositories.remove(repository);
+        return this;
+    }
+
+    /**
+     * Verifies if the passed repository was previously added into the registration list
+     * of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    boolean hasRepository(Repository<?, ?> repository) {
+        checkNotNull(repository);
+        boolean result = repositories.contains(repository);
+        return result;
+    }
+
+    /**
+     * Obtains the list of repositories added to the builder by the time of the call.
+     *
+     * <p>Adding repositories to the builder after this method returns will not update the
+     * returned list.
+     */
+    public ImmutableList<Repository<?, ?>> repositories() {
+        return ImmutableList.copyOf(repositories);
     }
 
     /**
      * Creates a new instance of {@code BoundedContext} with the set configurations.
      *
-     * <p>The resulting domain-specific bounded context has as internal System bounded context.
-     * The entities of the System domain describe the entities of the resulting bounded context.
+     * <p>The resulting domain-specific bounded context has as internal System Bounded Context.
+     * The entities of the System domain describe the entities of the resulting Bounded Context.
      *
-     * <p>The System bounded contexts shares some configuration with the domain bounded context,
+     * <p>The System Bounded Context shares some configuration with the Domain Bounded Context,
      * such as:
      * <ul>
      *     <li>{@linkplain #getTenantIndex()} tenancy;
@@ -240,48 +296,60 @@ public final class BoundedContextBuilder {
      * @return new {@code BoundedContext}
      */
     public BoundedContext build() {
-        SystemBoundedContext system = buildSystem();
-        BoundedContext result = buildDefault(system);
-        log().info(result.nameForLogging() + " created.");
+        TransportFactory transport = getTransportFactory()
+                .orElseGet(InMemoryTransportFactory::newInstance);
+        SystemContext system = buildSystem(transport);
+        BoundedContext result = buildDefault(system, transport);
+        log().debug("{} created.", result.nameForLogging());
+
+        registerRepositories(result);
         return result;
     }
 
-    private BoundedContext buildDefault(SystemBoundedContext system) {
-        BoundedContext result =
-                buildPartial(builder -> DomainBoundedContext.newInstance(builder, system));
+    private void registerRepositories(BoundedContext result) {
+        for (Repository<?, ?> repository : repositories) {
+            result.register(repository);
+            log().debug("{} registered.", repository);
+        }
+    }
+
+    private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
+        SystemClient systemClient = system.createClient();
+        Function<BoundedContextBuilder, DomainContext> instanceFactory =
+                builder -> DomainContext.newInstance(builder, systemClient);
+        BoundedContext result = buildPartial(instanceFactory, systemClient, transport);
         return result;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored") // Builder methods.
-    private SystemBoundedContext buildSystem() {
+    private SystemContext buildSystem(TransportFactory transport) {
         BoundedContextName name = BoundedContextNames.system(this.name);
-        BoundedContextBuilder system = BoundedContext.newBuilder()
-                                                     .setMultitenant(multitenant)
-                                                     .setName(name)
-                                                     .setTransportFactory(getTransportFactory());
+        BoundedContextBuilder system = BoundedContext
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setName(name);
         Optional<? extends Supplier<StorageFactory>> storage = getStorageFactorySupplier();
-        if (storage.isPresent()) {
-            system.setStorageFactorySupplier(storage.get());
-        }
+        storage.ifPresent(system::setStorageFactorySupplier);
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
-        if (tenantIndex.isPresent()) {
-            system.setTenantIndex(tenantIndex.get());
-        }
-        SystemBoundedContext result = system.buildPartial(SystemBoundedContext::newInstance);
+        tenantIndex.ifPresent(system::setTenantIndex);
+
+        SystemContext result = system.buildPartial(SystemContext::newInstance,
+                                                   NoOpSystemClient.INSTANCE,
+                                                   transport);
         return result;
     }
 
-    private <B extends BoundedContext> B
-    buildPartial(Function<BoundedContextBuilder, B> instanceFactory) {
+    private <B extends BoundedContext>
+    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
+                   SystemClient client,
+                   TransportFactory transport) {
         StorageFactory storageFactory = getStorageFactory();
 
-        TransportFactory transportFactory = getTransportFactory();
-
         initTenantIndex(storageFactory);
-        initCommandBus(storageFactory);
+        initCommandBus(client.writeSide());
         initEventBus(storageFactory);
-        initStand(storageFactory);
-        initIntegrationBus(transportFactory);
+        initStand(client.readSide());
+        initIntegrationBus(transport);
 
         B result = instanceFactory.apply(this);
         return result;
@@ -289,11 +357,9 @@ public final class BoundedContextBuilder {
 
     private StorageFactory getStorageFactory() {
         if (storageFactorySupplier == null) {
-            storageFactorySupplier =
-                    StorageFactorySwitch.newInstance(name, multitenant);
+            storageFactorySupplier = StorageFactorySwitch.newInstance(name, multitenant);
         }
-
-        final StorageFactory storageFactory = storageFactorySupplier.get();
+        StorageFactory storageFactory = storageFactorySupplier.get();
 
         if (storageFactory == null) {
             throw newIllegalStateException(
@@ -304,42 +370,35 @@ public final class BoundedContextBuilder {
         return storageFactory;
     }
 
-    private TransportFactory getTransportFactory() {
-        if (transportFactory == null) {
-            transportFactory = InMemoryTransportFactory.newInstance();
-        }
-        return transportFactory;
+    private Optional<TransportFactory> getTransportFactory() {
+        return Optional.ofNullable(integrationBus)
+                       .flatMap(IntegrationBus.Builder::getTransportFactory);
     }
 
     private void initTenantIndex(StorageFactory factory) {
         if (tenantIndex == null) {
             tenantIndex = multitenant
-                    ? TenantIndex.Factory.createDefault(factory)
-                    : TenantIndex.Factory.singleTenant();
+                          ? TenantIndex.createDefault(factory)
+                          : TenantIndex.singleTenant();
         }
     }
 
-    private void initCommandBus(StorageFactory factory) {
+    private void initCommandBus(SystemWriteSide systemWriteSide) {
         if (commandBus == null) {
-            final CommandStore commandStore = createCommandStore(factory, tenantIndex);
             commandBus = CommandBus.newBuilder()
-                                   .setMultitenant(this.multitenant)
-                                   .setCommandStore(commandStore);
+                                   .setMultitenant(this.multitenant);
         } else {
-            final Boolean commandBusMultitenancy = commandBus.isMultitenant();
+            Boolean commandBusMultitenancy = commandBus.isMultitenant();
             if (commandBusMultitenancy != null) {
                 checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
-                                        "Status in BoundedContext.Builder: %s CommandBus: %s",
+                                       "Status in BoundedContext.Builder: %s CommandBus: %s",
                                commandBusMultitenancy);
             } else {
                 commandBus.setMultitenant(this.multitenant);
             }
-
-            if (commandBus.getCommandStore() == null) {
-                final CommandStore commandStore = createCommandStore(factory, tenantIndex);
-                commandBus.setCommandStore(commandStore);
-            }
         }
+        commandBus.injectSystem(systemWriteSide)
+                  .injectTenantIndex(tenantIndex);
     }
 
     private void initEventBus(StorageFactory storageFactory) {
@@ -347,38 +406,37 @@ public final class BoundedContextBuilder {
             eventBus = EventBus.newBuilder()
                                .setStorageFactory(storageFactory);
         } else {
-            final boolean eventStoreConfigured = eventBus.getEventStore()
-                                                         .isPresent();
+            boolean eventStoreConfigured = eventBus.getEventStore()
+                                                   .isPresent();
             if (!eventStoreConfigured) {
                 eventBus.setStorageFactory(storageFactory);
             }
         }
     }
 
-    private void initStand(StorageFactory factory) {
+    private void initStand(SystemReadSide systemReadSide) {
         if (stand == null) {
-            stand = createStand(factory);
+            stand = createStand();
         } else {
-            final Boolean standMultitenant = stand.isMultitenant();
+            Boolean standMultitenant = stand.isMultitenant();
             // Check that both either multi-tenant or single-tenant.
             if (standMultitenant == null) {
                 stand.setMultitenant(multitenant);
             } else {
                 checkSameValue("Stand must match multitenancy of BoundedContext. " +
-                                        "Status in BoundedContext.Builder: %s Stand: %s",
+                                       "Status in BoundedContext.Builder: %s Stand: %s",
                                standMultitenant);
             }
         }
+        stand.setSystemReadSide(systemReadSide);
     }
 
-    private void initIntegrationBus(TransportFactory transportFactory) {
+    private void initIntegrationBus(TransportFactory factory) {
         if (integrationBus == null) {
-            integrationBus = IntegrationBus.newBuilder()
-                                           .setTransportFactory(transportFactory);
+            integrationBus = IntegrationBus.newBuilder();
         }
-        if (!integrationBus.getTransportFactory()
-                           .isPresent()) {
-            integrationBus.setTransportFactory(transportFactory);
+        if (!integrationBus.getTransportFactory().isPresent()) {
+            integrationBus.setTransportFactory(factory);
         }
     }
 
@@ -395,29 +453,9 @@ public final class BoundedContextBuilder {
                    String.valueOf(partMultitenancy));
     }
 
-    private static CommandStore createCommandStore(StorageFactory factory, TenantIndex index) {
-        final CommandStore result = new CommandStore(factory, index);
+    private Stand.Builder createStand() {
+        Stand.Builder result = Stand.newBuilder()
+                                    .setMultitenant(multitenant);
         return result;
-    }
-
-    private Stand.Builder createStand(StorageFactory factory) {
-        final StandStorage standStorage = factory.createStandStorage();
-        final Stand.Builder result = Stand.newBuilder()
-                                          .setMultitenant(multitenant)
-                                          .setStorage(standStorage);
-        return result;
-    }
-
-    /**
-     * Obtains the {@link Logger} to
-     */
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(BoundedContext.class);
     }
 }

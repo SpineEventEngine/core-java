@@ -28,7 +28,7 @@ option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
 option java_package = "io.spine.system.server";
-option java_outer_classname = "CommandLicecycleProto";
+option java_outer_classname = "CommandLifecycleProto";
 option java_multiple_files = true;
 
 import "google/protobuf/timestamp.proto";
@@ -43,23 +43,36 @@ import "spine/client/entities.proto";
 // the commads of the `System` bounded contexts, which do not have an explicit lifecycle.
 //
 message CommandLifecycle {
+    option (entity).kind = AGGREGATE;
 
     // The ID of the command.
-    spine.core.CommandId id = 1;
+    //TODO:2018-10-31:dmytro.grankin: make the ID required, see https://github.com/SpineEventEngine/core-java/issues/877
+    spine.core.CommandId id = 1 [(required) = false];
 
     // The command.
     spine.core.Command command = 2;
 
-    // The ID of the command receiver entity.
-    spine.client.EntityId receiver = 3;
+    // The target of the command delivery.
+    CommandTarget target = 3;
 
-    // The current status of the command.
-    CommandStatus status = 4 [(required) = true];
+    // The log of changes of the command.
+    CommandTimeline status = 4 [(required) = true];
 }
 
-// The status of the command processing.
+// An identifier of an entity which is the target of a command.
 //
-message CommandStatus {
+message CommandTarget {
+
+    // The ID of the entity which the command is dispatched to.
+    spine.client.EntityId entity_id = 1 [(valid) = true];
+
+    // The state type URL of the entity which receives the command.
+    string type_url = 2 [(required) = true];
+}
+
+// The log of changes of a command status.
+//
+message CommandTimeline {
 
     // The instant when the command was received.
     //
@@ -70,15 +83,47 @@ message CommandStatus {
     // The instant when the command is acknowledged by the `CommandBus`.
     google.protobuf.Timestamp when_acknowledged = 2;
 
+    // The instant when the command is scheduled for the last time.
+    google.protobuf.Timestamp when_scheduled = 3;
+
     // The instant when the command is sent to a dispatcher.
-    google.protobuf.Timestamp when_dispatched = 3;
+    google.protobuf.Timestamp when_dispatched = 4;
+
+    // The instant when the command target is assigned to the command.
+    google.protobuf.Timestamp when_target_assgined = 5;
 
     // The instant when the command processing is completed, successfully or otherwise.
-    google.protobuf.Timestamp when_processed = 4 [(goes).with = "processing_status"];
+    google.protobuf.Timestamp when_handled = 6 [(goes).with = "how_handled"];
+
+    // The instance when the command was substituted with one or more commands to be
+    // handled instead of this one.
+    //
+    google.protobuf.Timestamp when_substituted = 7 [(goes).with = "substituted"];
 
     // The status of the command after processing.
-    //
-    // An empty field notifies a non-processed command.
-    //
-    spine.core.Status processing_status = 5 [(goes).with = "when_processed"];
+    oneof outcome {
+
+        // The command was handled, rejected, or errored.
+        spine.core.Status how_handled = 8 [(goes).with = "when_handled"];
+
+        // Other commands were generated instead.
+        Substituted substitued = 9 [(goes).with = "when_substituted"];
+    }
+}
+
+// Describes which command(s) were generated instead of incoming one.
+message Substituted {
+
+    oneof kind {
+        // One command was generated.
+        spine.core.CommandId command = 1;
+
+        // Two or more commands were generated.
+        Sequence sequence = 2;
+    }
+
+    // A sequence with two or more command IDs of generated commands.
+    message Sequence {
+        repeated spine.core.CommandId item = 2;
+    }
 }

@@ -21,12 +21,13 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.RejectionMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.Status;
 import io.spine.type.TypeUrl;
@@ -43,18 +44,16 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * Contains the data on provided acknowledgements, allowing it to be queried about acks, errors, 
  * and rejections.
- *
- * @author Mykhailo Drachuk
  */
 @VisibleForTesting
 public class Acknowledgements {
 
-    private static final Rejection EMPTY_REJECTION = Rejection.getDefaultInstance();
+    private static final Event EMPTY_EVENT = Event.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
 
     private final List<Ack> acks = newArrayList();
     private final List<Error> errors = newArrayList();
-    private final List<Rejection> rejections = newArrayList();
+    private final List<Event> rejectionEvents = newArrayList();
     private final Map<RejectionClass, Integer> rejectionTypes;
 
     public Acknowledgements(Iterable<Ack> responses) {
@@ -68,23 +67,23 @@ public class Acknowledgements {
                 errors.add(error);
             }
 
-            Rejection rejection = status.getRejection();
-            if (!rejection.equals(EMPTY_REJECTION)) {
-                rejections.add(rejection);
+            Event rejection = status.getRejection();
+            if (!rejection.equals(EMPTY_EVENT)) {
+                rejectionEvents.add(rejection);
             }
         }
-        rejectionTypes = countRejectionTypes(rejections);
+        rejectionTypes = countRejectionTypes(rejectionEvents);
     }
 
     /**
      * Counts the number of times the domain event types are included in the provided list.
      *
-     * @param rejections a list of {@link Event}
+     * @param rejectionEvents a list of rejection events
      * @return a mapping of Rejection classes to their count
      */
-    private static Map<RejectionClass, Integer> countRejectionTypes(List<Rejection> rejections) {
+    private static Map<RejectionClass, Integer> countRejectionTypes(List<Event> rejectionEvents) {
         Map<RejectionClass, Integer> countForType = new HashMap<>();
-        for (Rejection rejection : rejections) {
+        for (Event rejection : rejectionEvents) {
             RejectionClass type = RejectionClass.of(rejection);
             int currentCount = countForType.getOrDefault(type, 0);
             countForType.put(type, currentCount + 1);
@@ -93,7 +92,7 @@ public class Acknowledgements {
     }
 
     /**
-     * @return the total number of acknowledgements observed in a Bounded Context.
+     * Obtains the total number of acknowledgements observed.
      */
     public int count() {
         return acks.size();
@@ -104,23 +103,30 @@ public class Acknowledgements {
      ******************************************************************************/
 
     /**
-     * @return {@code true} if errors did occur in the Bounded Context during command handling,
-     * {@code false} otherwise.
+     * Verifies if there was at least one error during command handling.
+     *
+     * @return {@code true} if errors did occur, {@code false} otherwise
      */
     public boolean containErrors() {
         return !errors.isEmpty();
     }
 
     /**
-     * @return a total number of errors which were observed in Bounded Context acknowledgements.
+     * Obtains errors occurred during command handling.
+     */
+    public ImmutableList<Error> errors() {
+        return ImmutableList.copyOf(errors);
+    }
+
+    /**
+     * Obtains a total number of errors in the acknowledgements.
      */
     public int countErrors() {
         return errors.size();
     }
 
     /**
-     * @return {@code true} if an error which matches the provided criterion did occur in
-     * the Bounded Context during command handling, {@code false} otherwise.
+     * Verifies if there was at least one error matching the passed criterion.
      */
     public boolean containErrors(ErrorCriterion criterion) {
         checkNotNull(criterion);
@@ -129,9 +135,7 @@ public class Acknowledgements {
     }
 
     /**
-     * @param criterion an error criterion specifying which kind of an error to count
-     * @return a total number of times errors matching the provided criterion were
-     * observed in the Bounded Context responses
+     * Count error matching the passed criterion.
      */
     public long countErrors(ErrorCriterion criterion) {
         checkNotNull(criterion);
@@ -145,67 +149,71 @@ public class Acknowledgements {
      ******************************************************************************/
 
     /**
-     * @return {@code true} if there were any rejections in the Bounded Context,
-     * {@code false} otherwise
+     * Returns {@code true} if there were any rejections in the Bounded Context,
+     * {@code false} otherwise.
      */
     public boolean containRejections() {
-        return !rejections.isEmpty();
+        return !rejectionEvents.isEmpty();
     }
 
     /**
-     * @return a total amount of rejections observed in Bounded Context
+     * Obtains a total amount of rejections observed in Bounded Context.
      */
     public int countRejections() {
-        return rejections.size();
+        return rejectionEvents.size();
     }
 
     /**
-     * @param type rejection type in a form of {@link RejectionClass RejectionClass}
-     * @return {@code true} if the rejection of a provided type was observed in the Bounded Context,
-     * {@code false} otherwise
+     * Verifies if there was a rejection of the passed class.
      */
     public boolean containRejections(RejectionClass type) {
         return rejectionTypes.containsKey(type);
     }
 
     /**
+     * Obtains an amount of rejections of the provided type observed in Bounded Context.
+     *
      * @param type rejection type in a form of {@link RejectionClass RejectionClass}
-     * @return an amount of rejections of the provided type observed in Bounded Context
      */
     public int countRejections(RejectionClass type) {
         return rejectionTypes.getOrDefault(type, 0);
     }
 
     /**
+     * Verifies if there is at least one rejection event which matches the passed criterion.
+     *
      * @param predicate a domain message representing the rejection
      * @param type      a class of a domain rejection
      * @param <T>       a domain rejection type
-     * @return {@code true} if the rejection matching the predicate was observed
-     * in the Bounded Context, {@code false} otherwise
+     * @return {@code true} if the rejection matching the predicate was observed,
+     *         {@code false} otherwise
      */
-    public <T extends Message> boolean containRejection(Class<T> type,
-                                                        RejectionCriterion<T> predicate) {
-        return rejections.stream()
-                         .anyMatch(new RejectionFilter<>(type, predicate));
+    public <T extends RejectionMessage>
+    boolean containRejection(Class<T> type, RejectionCriterion<T> predicate) {
+        return rejectionEvents.stream()
+                              .anyMatch(new RejectionFilter<>(type, predicate));
     }
 
     /**
+     * Counts a number of rejections matching the passed criterion.
+     *
      * @param predicate a domain message representing the rejection
      * @param type      a class of a domain rejection
      * @param <T>       a domain rejection type
-     * @return an amount of rejections matching the predicate observed in Bounded Context
+     * @return an amount of rejections matching the predicate
      */
-    public <T extends Message> long countRejections(Class<T> type,
-                                                    RejectionCriterion<T> predicate) {
-        return rejections.stream()
-                         .filter(new RejectionFilter<>(type, predicate))
-                         .count();
+    public <T extends RejectionMessage>
+    long countRejections(Class<T> type, RejectionCriterion<T> predicate) {
+        return rejectionEvents.stream()
+                              .filter(new RejectionFilter<>(type, predicate))
+                              .count();
     }
 
     /**
-     * A predicate filtering the {@link Rejection rejections} which match the provided predicate.
+     * A predicate filtering the {@link io.spine.base.ThrowableMessage rejections} which match
+     * the provided predicate.
      */
-    private static class RejectionFilter<T extends Message> implements Predicate<Rejection> {
+    private static class RejectionFilter<T extends RejectionMessage> implements Predicate<Event> {
 
         private final TypeUrl typeUrl;
         private final RejectionCriterion<T> predicate;
@@ -216,8 +224,13 @@ public class Acknowledgements {
         }
 
         @Override
-        public boolean test(Rejection rejection) {
-            T message = unpack(rejection.getMessage());
+        public boolean test(Event rejection) {
+            Message unpacked = unpack(rejection.getMessage());
+            if (!(unpacked instanceof RejectionMessage)) {
+                return false;
+            }
+            @SuppressWarnings("unchecked") /* The cast is protected by the check above. */
+                    T message = (T) unpacked;
             return typeUrl.equals(TypeUrl.of(message)) && predicate.matches(message);
         }
     }

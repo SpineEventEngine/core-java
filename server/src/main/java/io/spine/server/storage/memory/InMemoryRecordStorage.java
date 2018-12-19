@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.Entity;
@@ -33,21 +32,21 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Memory-based implementation of {@link RecordStorage}.
  *
- * @param <I> the type of entity IDs
- * @author Alexander Litus
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
+ * @param <I>
+ *         the type of entity IDs
  */
 public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     private final StorageSpec<I> spec;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant, Class<? extends Entity> entityClass) {
+    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant, 
+                          Class<? extends Entity> entityClass) {
         super(multitenant, entityClass);
         this.spec = spec;
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
@@ -56,12 +55,6 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
                 return new TenantRecords<>();
             }
         };
-    }
-
-    protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
-                                                              boolean multitenant,
-                                                              Class<? extends Entity> entityClass) {
-        return new InMemoryRecordStorage<>(spec, multitenant, entityClass);
     }
 
     StorageSpec<I> getSpec() {
@@ -81,43 +74,67 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> givenIds,
                                                                    FieldMask fieldMask) {
-        final TenantRecords<I> storage = getStorage();
+        TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection,
         // since null may be present in it.
-        final Collection<EntityRecord> result = Lists.newLinkedList();
+        Collection<EntityRecord> result = Lists.newLinkedList();
 
         for (I givenId : givenIds) {
-            final EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
+            EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
             result.add(matchingResult);
         }
         return result.iterator();
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
+    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids) {
         return readMultipleRecords(ids, FieldMask.getDefaultInstance());
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        return getStorage().readAllRecords()
-                           .values()
-                           .iterator();
+        return getStorage().readAllRecords();
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return getStorage().readAllRecords(fieldMask)
-                           .values()
-                           .iterator();
+        return getStorage().readAllRecords(fieldMask);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        return getStorage().readAllRecords(query, fieldMask)
-                           .values()
-                           .iterator();
+        EntityQuery<I> completeQuery = toCompleteQuery(query);
+        return getStorage().readAllRecords(completeQuery, fieldMask);
+    }
+
+    /**
+     * Creates an {@link EntityQuery} instance which has:
+     * <ul>
+     *     <li>all the parameters from the {@code src} query;
+     *     <li>at least one parameter limiting the 
+     *     {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns}.
+     * </ul>
+     *
+     * <p>If the {@code query} instance {@linkplain EntityQuery#isLifecycleAttributesSet() 
+     * contains the lifecycle attributes}, then it is returned without any changes. 
+     * Otherwise, a new instance containing with active lifecycle attributes is returned.
+     *
+     * <p>If the type of the Entity which this repository works with is not derived from
+     * the {@link io.spine.server.entity.EntityWithLifecycle}, then no lifecycle attributes are
+     * appended and the {@code query} is returned as is.
+     *
+     * @param query
+     *         the source {@link EntityQuery} to take the parameters from
+     * @return an {@link EntityQuery} which includes
+     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns} 
+     *         unless they are not supported
+     */
+    private EntityQuery<I> toCompleteQuery(EntityQuery<I> query) {
+        if (isLifecycleSupported() && !query.isLifecycleAttributesSet()) {
+            return query.withActiveLifecycle(this);
+        }
+        return query;
     }
 
     private TenantRecords<I> getStorage() {
@@ -127,7 +144,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         return getStorage().get(id)
-                           .transform(EntityRecordUnpacker.INSTANCE);
+                           .map(EntityRecordUnpacker.INSTANCE);
     }
 
     @Override
@@ -137,7 +154,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
-        final TenantRecords<I> storage = getStorage();
+        TenantRecords<I> storage = getStorage();
         for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             storage.put(record.getKey(), record.getValue());
         }

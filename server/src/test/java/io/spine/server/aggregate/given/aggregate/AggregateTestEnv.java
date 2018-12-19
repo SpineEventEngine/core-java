@@ -20,34 +20,26 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
-import io.spine.core.Rejections;
 import io.spine.core.TenantId;
-import io.spine.core.UserId;
-import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.core.given.GivenVersion.withNumber;
 
-/**
- * @author Alexander Yevsyukov
- * @author Mykhailo Drachuk
- */
 public class AggregateTestEnv {
 
-    /** Prevent instantiation of this test environment */
+    /** Prevent instantiation of this test environment. */
     private AggregateTestEnv() {
         // Do nothing.
     }
@@ -56,12 +48,6 @@ public class AggregateTestEnv {
         return AggTaskId.newBuilder()
                         .setId(newUuid())
                         .build();
-    }
-
-    private static UserId newUserId() {
-        return UserId.newBuilder()
-                     .setValue(newUuid())
-                     .build();
     }
 
     public static TenantId newTenantId() {
@@ -79,43 +65,33 @@ public class AggregateTestEnv {
     public static AggAssignTask assignTask() {
         return AggAssignTask.newBuilder()
                             .setTaskId(newTaskId())
-                            .setAssignee(newUserId())
+                            .setAssignee(GivenUserId.generated())
                             .build();
     }
 
     public static AggReassignTask reassignTask() {
         return AggReassignTask.newBuilder()
                               .setTaskId(newTaskId())
-                              .setAssignee(newUserId())
+                              .setAssignee(GivenUserId.generated())
                               .build();
     }
 
-    public static Command command(Message commandMessage, TenantId tenantId) {
+    public static Command command(CommandMessage commandMessage, TenantId tenantId) {
         return requestFactory(tenantId).command()
                                        .create(commandMessage);
     }
 
-    public static Command command(Message commandMessage) {
+    public static Command command(CommandMessage commandMessage) {
         return requestFactory().command()
                                .create(commandMessage);
     }
 
-    public static CommandEnvelope env(Message commandMessage) {
+    public static CommandEnvelope env(CommandMessage commandMessage) {
         return CommandEnvelope.of(command(commandMessage));
     }
 
-    public static Event event(Message eventMessage, int versionNumber) {
+    public static Event event(EventMessage eventMessage, int versionNumber) {
         return eventFactory().createEvent(eventMessage, withNumber(versionNumber));
-    }
-
-    public static RejectionEnvelope 
-    cannotModifyDeletedEntity(Class<? extends Message> commandMessageCls) {
-        final CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
-                                                                                .build();
-        final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
-                Sample.messageOfType(commandMessageCls));
-        final Rejection rejection = Rejections.createRejection(rejectionMsg, command);
-        return RejectionEnvelope.of(rejection);
     }
 
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {

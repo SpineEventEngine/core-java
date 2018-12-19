@@ -49,7 +49,7 @@ public final class Count {
     }
 
     /**
-     * {@link Count Count} static factory creating an instance with the provided value.
+     * {@code Count Count} static factory creating an instance with the provided value.
      *
      * <p>Additionally checks the value to be equal or more than 0, because count
      * cannot be negative.
@@ -65,7 +65,7 @@ public final class Count {
     /**
      * A literate shortcut for {@code count(0)}.
      *
-     * @return an instance of {@link Count Count} with 0 as a value
+     * @return an instance of {@code Count Count} with 0 as a value
      */
     public static Count none() {
         return NONE;
@@ -74,7 +74,7 @@ public final class Count {
     /**
      * A literate shortcut for {@code count(1)}.
      *
-     * @return an instance of {@link Count Count} with 1 as a value
+     * @return an instance of {@code Count Count} with 1 as a value
      */
     public static Count once() {
         return ONCE;
@@ -83,7 +83,7 @@ public final class Count {
     /**
      * A literate shortcut for {@code count(2)}.
      *
-     * @return an instance of {@link Count Count} with 2 as a value
+     * @return an instance of {@code Count Count} with 2 as a value
      */
     public static Count twice() {
         return TWICE;
@@ -92,7 +92,7 @@ public final class Count {
     /**
      * A literate shortcut for {@code count(3)}.
      *
-     * @return an instance of {@link Count Count} with 3 as a value
+     * @return an instance of {@code Count Count} with 3 as a value
      */
     public static Count thrice() {
         return THRICE;

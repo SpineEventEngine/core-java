@@ -21,6 +21,7 @@ package io.spine.server.event;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.server.bus.MessageUnhandled;
@@ -38,17 +39,16 @@ public class UnsupportedEventException extends EventException implements Message
 
     private static final long serialVersionUID = 0L;
 
-    public UnsupportedEventException(Message eventMsg) {
+    public UnsupportedEventException(EventMessage eventMsg) {
         super(messageFormat(eventMsg), eventMsg, unsupportedEventError(eventMsg));
     }
 
     private static String messageFormat(Message eventMsg) {
-        final EventClass eventClass = EventClass.of(eventMsg);
-        final String typeName = TypeName.of(eventMsg)
-                                        .value();
-        final String result = format(
-                "There is no registered handler or dispatcher for the event of class: `%s`." +
-                " Protobuf type: `%s`",
+        EventClass eventClass = EventClass.of(eventMsg);
+        TypeName typeName = eventClass.getTypeName();
+        String result = format(
+                "There is no registered handler or dispatcher for the event of the class: `%s` " +
+                " (proto type: `%s`).",
                 eventClass,
                 typeName);
         return result;
@@ -56,13 +56,17 @@ public class UnsupportedEventException extends EventException implements Message
 
     /** Creates an instance of unsupported event error. */
     private static Error unsupportedEventError(Message eventMessage) {
-        final String type = eventMessage.getDescriptorForType().getFullName();
-        final String errMsg = format("Events of the type `%s` are not supported.", type);
-        final Error.Builder error = Error.newBuilder()
-                .setType(EventValidationError.getDescriptor().getFullName())
+        String type = eventMessage.getDescriptorForType()
+                                  .getFullName();
+        String errMsg = format("Events of the type `%s` are not supported.", type);
+        Error error = Error
+                .newBuilder()
+                .setType(EventValidationError.getDescriptor()
+                                             .getFullName())
                 .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())
                 .putAllAttributes(eventTypeAttribute(eventMessage))
-                .setMessage(errMsg);
-        return error.build();
+                .setMessage(errMsg)
+                .build();
+        return error;
     }
 }

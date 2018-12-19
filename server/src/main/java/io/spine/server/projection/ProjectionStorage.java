@@ -20,9 +20,9 @@
 
 package io.spine.server.projection;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityColumnCache;
@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The storage used by projection repositories for keeping {@link Projection}s
@@ -51,34 +52,35 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
         super(multitenant);
     }
 
+    @Internal
     @Override
-    public EntityColumnCache entityColumnCache() {
+    public final EntityColumnCache entityColumnCache() {
         return recordStorage().entityColumnCache();
     }
 
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
-        final RecordStorage<I> storage = recordStorage();
-        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        final Optional<EntityRecord> record = storage.read(request);
+        RecordStorage<I> storage = recordStorage();
+        RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        Optional<EntityRecord> record = storage.read(request);
         return record;
     }
 
     @Override
     protected void writeRecord(I id, EntityRecordWithColumns record) {
-        final RecordStorage<I> storage = recordStorage();
+        RecordStorage<I> storage = recordStorage();
         storage.write(id, record);
     }
 
     @Override
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
-        final RecordStorage<I> storage = recordStorage();
+        RecordStorage<I> storage = recordStorage();
         storage.write(records);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        final RecordStorage<I> storage = recordStorage();
+        RecordStorage<I> storage = recordStorage();
         return storage.readAll(query, fieldMask);
     }
 
@@ -94,8 +96,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
      *
      * @return the time of the last event or {@code null} if there is no event in the storage
      */
-    @Nullable
-    protected abstract Timestamp readLastHandledEventTime();
+    protected abstract @Nullable Timestamp readLastHandledEventTime();
 
     /** Returns an entity storage implementation. */
     protected abstract RecordStorage<I> recordStorage();

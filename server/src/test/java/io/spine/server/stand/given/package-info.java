@@ -21,6 +21,7 @@
 /**
  * Test environment classes for the {@code io.spine.server.stand} package.
  */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.stand.given;

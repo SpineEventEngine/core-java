@@ -21,17 +21,18 @@
 package io.spine.server.aggregate.given;
 
 import com.google.common.base.Splitter;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.route.CommandRoute;
+import io.spine.test.aggregate.cli.Evaluate;
+import io.spine.test.aggregate.cli.Evaluated;
 import io.spine.validate.StringValueVBuilder;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static java.lang.String.format;
@@ -61,15 +62,19 @@ public class AggregateRepositoryViewTestEnv {
         }
 
         @Assign
-        StringValue handle(StringValue commandMessage) {
-            final String msg = commandMessage.getValue();
+        Evaluated handle(Evaluate commandMessage) {
+            String command = commandMessage.getCmd();
             // Transform the command to the event (the fact in the past).
-            return toMessage(msg + 'd');
+            String result = command + 'd';
+            return Evaluated
+                    .newBuilder()
+                    .setCmd(result)
+                    .build();
         }
 
         @Apply
-        void on(StringValue eventMessage) {
-            final String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
+        void on(Evaluated eventMessage) {
+            String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
             if (archived.name()
                         .equalsIgnoreCase(msg)) {
                 setArchived(true);
@@ -95,14 +100,14 @@ public class AggregateRepositoryViewTestEnv {
         /**
          * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
          */
-        private static final CommandRoute<Long, Message> parsingRoute =
-                new CommandRoute<Long, Message>() {
+        private static final CommandRoute<Long, CommandMessage> parsingRoute =
+                new CommandRoute<Long, CommandMessage>() {
 
                     private static final long serialVersionUID = 0L;
 
                     @Override
-                    public Long apply(Message message, CommandContext context) {
-                        final Long result = getId((StringValue) message);
+                    public Long apply(CommandMessage message, CommandContext context) {
+                        Long result = getId((Evaluate) message);
                         return result;
                     }
                 };
@@ -115,22 +120,24 @@ public class AggregateRepositoryViewTestEnv {
         /**
          * Creates a command message in the form {@code <id>-<action>}.
          *
-         * @see #getId(StringValue)
-         * @see #getMessage(StringValue)
+         * @see #getId(Evaluate)
+         * @see #getMessage(Evaluated)
          */
-        public static StringValue createCommandMessage(Long id, String msg) {
-            return toMessage(format("%d%s%s", id, SEPARATOR, msg));
+        public static Evaluate createCommandMessage(Long id, String msg) {
+            return Evaluate.newBuilder()
+                           .setCmd(format("%d%s%s", id, SEPARATOR, msg))
+                           .build();
         }
 
-        private static Long getId(StringValue commandMessage) {
+        private static Long getId(Evaluate commandMessage) {
             return Long.valueOf(Splitter.on(SEPARATOR)
-                                        .splitToList(commandMessage.getValue())
+                                        .splitToList(commandMessage.getCmd())
                                         .get(0));
         }
 
-        static String getMessage(StringValue commandMessage) {
+        static String getMessage(Evaluated commandMessage) {
             return Splitter.on(SEPARATOR)
-                           .splitToList(commandMessage.getValue())
+                           .splitToList(commandMessage.getCmd())
                            .get(1);
         }
     }

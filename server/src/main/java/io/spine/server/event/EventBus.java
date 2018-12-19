@@ -20,12 +20,14 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -33,49 +35,49 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
-import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.outbus.CommandOutputBus;
-import io.spine.server.outbus.OutputDispatcherRegistry;
+import io.spine.server.bus.MulticastBus;
 import io.spine.server.storage.StorageFactory;
-import io.spine.validate.MessageValidator;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Deque;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.of;
+import static java.lang.String.format;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
  *
- * <h2>Receiving Events</h2>
+ * <h1>Receiving Events</h1>
+ *
  * <p>To receive event messages a subscriber object should:
  * <ol>
- * <li>Expose a {@code public} method that accepts an event message as the first parameter
- * and an {@link EventContext EventContext} as the second
- * (optional) parameter.
- * <li>Mark the method with the {@link io.spine.core.Subscribe @Subscribe} annotation.
- * <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
- * instance of {@code EventBus} directly, or rely on message delivery
- * from an {@link EventDispatcher}. An example of such a dispatcher is
- * {@link io.spine.server.projection.ProjectionRepository ProjectionRepository}
+ *     <li>Expose a {@code public} method that accepts an event message as the first parameter
+ *         and an {@link EventContext EventContext} as the second (optional) parameter.
+ *     <li>Mark the method with the {@link io.spine.core.Subscribe @Subscribe} annotation.
+ *     <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
+ *         instance of {@code EventBus} directly, or rely on message delivery
+ *         from an {@link EventDispatcher}. An example of such a dispatcher is
+ *         {@link io.spine.server.projection.ProjectionRepository ProjectionRepository}.
  * </ol>
  *
  * <p><strong>Note:</strong> A subscriber method cannot accept just {@link Message} as
  * the first parameter. It must be an <strong>exact type</strong> of the event message
  * that needs to be handled.
  *
- * <h2>Posting Events</h2>
+ * <h1>Posting Events</h1>
+ *
  * <p>Events are posted to an EventBus using {@link #post(Message, StreamObserver)} method.
  * Normally this is done by an
- * {@linkplain io.spine.server.aggregate.AggregateRepository AggregateRepository} in the process
- * of handling a command,
- * or by a {@linkplain io.spine.server.procman.ProcessManager ProcessManager}.
+ * {@link io.spine.server.aggregate.AggregateRepository AggregateRepository} in the process
+ * of handling a command, or by a {@link io.spine.server.procman.ProcessManager ProcessManager}.
  *
  * <p>The passed {@link Event} is stored in the {@link EventStore} associated with
  * the {@code EventBus} <strong>before</strong> it is passed to subscribers.
@@ -83,14 +85,10 @@ import static com.google.common.collect.ImmutableSet.of;
  * <p>If there is no subscribers or dispatchers for the posted event, the fact is
  * logged as warning, with no further processing.
  *
- * @author Mikhail Melnik
- * @author Alexander Yevsyuov
- * @author Alex Tymchenko
  * @see io.spine.server.projection.Projection Projection
  * @see io.spine.core.Subscribe @Subscribe
  */
-public class EventBus
-        extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -102,30 +100,26 @@ public class EventBus
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
-    /** The validator for messages of posted events. */
-    private final MessageValidator eventMessageValidator;
-
     /** The handler for dead events. */
     private final DeadMessageHandler<EventEnvelope> deadMessageHandler;
-
-    /** Filters applied when an event is posted. */
-    private final Deque<BusFilter<EventEnvelope>> filterChain;
 
     /** The observer of post operations. */
     private final StreamObserver<Ack> streamObserver;
 
-    /** The validator for events posted to the bus. */
-    private @Nullable EventValidator eventValidator;
+    /**
+     * The validator for events posted to the bus, lazily {@linkplain #getValidator() initialized}.
+     */
+    @LazyInit
+    private @MonotonicNonNull EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
-    private final @Nullable EventEnricher enricher;
+    private final @MonotonicNonNull Enricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
+        super(builder);
         this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
-        this.eventMessageValidator = builder.eventValidator;
-        this.filterChain = builder.getFilters();
         this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
 
         this.deadMessageHandler = new DeadEventTap();
@@ -138,12 +132,13 @@ public class EventBus
 
     @VisibleForTesting
     Set<? extends EventDispatcher<?>> getDispatchers(EventClass eventClass) {
-        return registry().getDispatchers(eventClass);
+        return registry().getDispatchersForType(eventClass);
     }
 
     @VisibleForTesting
     boolean hasDispatchers(EventClass eventClass) {
-        return registry().hasDispatchersFor(eventClass);
+        Set<?> dispatchers = getDispatchers(eventClass);
+        return !dispatchers.isEmpty();
     }
 
     @Override
@@ -154,30 +149,19 @@ public class EventBus
     @Override
     protected EnvelopeValidator<EventEnvelope> getValidator() {
         if (eventValidator == null) {
-            eventValidator = new EventValidator(eventMessageValidator);
+            eventValidator = new EventValidator();
         }
         return eventValidator;
     }
 
     @Override
-    protected OutputDispatcherRegistry<EventClass, EventDispatcher<?>> createRegistry() {
+    protected EventDispatcherRegistry createRegistry() {
         return new EventDispatcherRegistry();
-    }
-
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
-    @Override
-    protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
-        return filterChain;
     }
 
     @Override
     protected EventEnvelope toEnvelope(Event message) {
         return EventEnvelope.of(message);
-    }
-
-    @VisibleForTesting
-    MessageValidator getMessageValidator() {
-        return eventMessageValidator;
     }
 
     /** Returns {@link EventStore} associated with the bus. */
@@ -189,11 +173,11 @@ public class EventBus
      * Posts the event for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain CommandOutputBus#post(Message, StreamObserver)} parent method}, but does not
-     * require any response observer.
+     * {@linkplain io.spine.server.bus.Bus#post(Message, StreamObserver)} parent method},
+     * but does not require any response observer.
      *
      * @param event the event to be handled
-     * @see CommandOutputBus#post(Message, StreamObserver)
+     * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
      */
     public final void post(Event event) {
         post(event, streamObserver);
@@ -203,25 +187,40 @@ public class EventBus
      * Posts the events for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain CommandOutputBus#post(Iterable, StreamObserver)} parent method}, but does not
-     * require any response observer.
+     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method},
+     * but does not require any response observer.
      *
      * <p>This method should be used if the callee does not care about the events acknowledgement.
      *
      * @param events the events to be handled
-     * @see CommandOutputBus#post(Message, StreamObserver)
+     * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
      */
     public final void post(Iterable<Event> events) {
         post(events, streamObserver);
     }
 
-    @Override
+    /**
+     * Obtains {@code Enricher} used by this Event Bus.
+     */
+    @VisibleForTesting
+    public final Optional<Enricher> enricher() {
+        return Optional.ofNullable(enricher);
+    }
+
     protected EventEnvelope enrich(EventEnvelope event) {
         if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
-        final EventEnvelope enriched = enricher.enrich(event);
+        EventEnvelope enriched = enricher.enrich(event);
         return enriched;
+    }
+
+    @Override
+    protected void dispatch(EventEnvelope envelope) {
+        EventEnvelope enrichedEnvelope = enrich(envelope);
+        int dispatchersCalled = callDispatchers(enrichedEnvelope);
+        checkState(dispatchersCalled != 0,
+                   format("Message %s has no dispatchers.", envelope.getMessage()));
     }
 
     @Override
@@ -246,7 +245,8 @@ public class EventBus
     }
 
     /** The {@code Builder} for {@code EventBus}. */
-    public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder> {
+    @CanIgnoreReturnValue
+    public static class Builder extends BusBuilder<EventEnvelope, Event, Builder> {
 
         private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
 
@@ -284,19 +284,12 @@ public class EventBus
         private @Nullable Executor eventStoreStreamExecutor;
 
         /**
-         * Optional validator for events.
-         *
-         * <p>If not set, a default value will be set by the builder.
-         */
-        private @Nullable MessageValidator eventValidator;
-
-        /**
          * Optional enricher for events.
          *
          * <p>If not set, the enrichments will NOT be supported
          * in the {@code EventBus} instance built.
          */
-        private @Nullable EventEnricher enricher;
+        private @Nullable Enricher enricher;
 
         /** Logging level for posted events.  */
         private LoggingObserver.Level logLevelForPost = Level.TRACE;
@@ -326,7 +319,7 @@ public class EventBus
         }
 
         public Optional<StorageFactory> getStorageFactory() {
-            return Optional.fromNullable(storageFactory);
+            return Optional.ofNullable(storageFactory);
         }
 
         /**
@@ -350,7 +343,7 @@ public class EventBus
         }
 
         public Optional<EventStore> getEventStore() {
-            return Optional.fromNullable(eventStore);
+            return Optional.ofNullable(eventStore);
         }
 
         /**
@@ -373,36 +366,26 @@ public class EventBus
         }
 
         public Optional<Executor> getEventStoreStreamExecutor() {
-            return Optional.fromNullable(eventStoreStreamExecutor);
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setEventValidator(MessageValidator eventValidator) {
-            this.eventValidator = checkNotNull(eventValidator);
-            return this;
-        }
-
-        public Optional<MessageValidator> getEventValidator() {
-            return Optional.fromNullable(eventValidator);
+            return Optional.ofNullable(eventStoreStreamExecutor);
         }
 
         /**
-         * Sets a custom {@link EventEnricher} for events posted to
+         * Sets a custom {@link Enricher} for events posted to
          * the {@code EventBus} which is being built.
          *
-         * <p>If the {@code EventEnricher} is not set, the enrichments
+         * <p>If the {@code Enricher} is not set, the enrichments
          * will <strong>NOT</strong> be supported for the {@code EventBus} instance built.
          *
-         * @param enricher the {@code EventEnricher} for events or {@code null} if enrichment is
-         *                 not supported
+         * @param enricher
+         *         the {@code Enricher} for events or {@code null} if enrichment is not supported
          */
-        public Builder setEnricher(EventEnricher enricher) {
+        public Builder setEnricher(Enricher enricher) {
             this.enricher = enricher;
             return this;
         }
 
-        public Optional<EventEnricher> getEnricher() {
-            return Optional.fromNullable(enricher);
+        public Optional<Enricher> getEnricher() {
+            return Optional.ofNullable(enricher);
         }
 
         /**
@@ -431,29 +414,24 @@ public class EventBus
          */
         @Override
         @Internal
+        @CheckReturnValue
         public EventBus build() {
-            final String message = "Either storageFactory or eventStore must be " +
-                                   "set to build the EventBus instance";
+            String message = "Either storageFactory or eventStore must be " +
+                             "set to build the EventBus instance";
             checkState(storageFactory != null || eventStore != null, message);
-
             if (eventStoreStreamExecutor == null) {
                 eventStoreStreamExecutor = MoreExecutors.directExecutor();
             }
             checkNotNull(eventStoreStreamExecutor);
-
             if (eventStore == null) {
-                eventStore = EventStore.newBuilder()
-                                       .setStreamExecutor(eventStoreStreamExecutor)
-                                       .setStorageFactory(storageFactory)
-                                       .setLogger(EventStore.log())
-                                       .build();
+                eventStore = EventStore
+                        .newBuilder()
+                        .setStreamExecutor(eventStoreStreamExecutor)
+                        .setStorageFactory(storageFactory)
+                        .setLogger(EventStore.log())
+                        .build();
             }
-
-            if (eventValidator == null) {
-                eventValidator = MessageValidator.newInstance();
-            }
-
-            final EventBus result = new EventBus(this);
+            EventBus result = new EventBus(this);
             return result;
         }
 
@@ -464,21 +442,21 @@ public class EventBus
     }
 
     /**
-     * Handles a dead event by saving it to the {@link EventStore} and producing an 
+     * Handles a dead event by saving it to the {@link EventStore} and producing an
      * {@link UnsupportedEventException}.
      *
-     * <p> We must store dead events, as they are still emitted by some entity and therefore are 
+     * <p> We must store dead events, as they are still emitted by some entity and therefore are
      * a part of the history for the current bounded context.
      */
     private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
         public UnsupportedEventException handle(EventEnvelope envelope) {
 
-            final Event event = envelope.getOuterObject();
+            Event event = envelope.getOuterObject();
             store(of(event));
 
-            final Message message = envelope.getMessage();
-            final UnsupportedEventException exception = new UnsupportedEventException(message);
+            EventMessage message = envelope.getMessage();
+            UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }
     }

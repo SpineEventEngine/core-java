@@ -20,8 +20,9 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.base.Function;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
+
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,12 +31,10 @@ import static java.lang.String.format;
 /**
  * A utility for dealing with the {@linkplain EntityRecordWithColumns} and
  * the {@linkplain EntityColumn entity columns}.
- *
- * @author Dmytro Dashenkov
  */
 public final class ColumnRecords {
 
-    /** Prevent initialization of the utility class */
+    /** Prevents instantiation of the utility class. */
     private ColumnRecords() {
     }
 

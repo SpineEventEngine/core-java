@@ -20,7 +20,7 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 
 /**
@@ -29,5 +29,6 @@ import io.spine.core.CommandContext;
  * @param <I> the type of the entity ID
  * @author Alexander Yevsyukov
  */
-public interface CommandRoute<I, M extends Message> extends Unicast<I, M, CommandContext> {
+@FunctionalInterface
+public interface CommandRoute<I, M extends CommandMessage> extends Unicast<I, M, CommandContext> {
 }

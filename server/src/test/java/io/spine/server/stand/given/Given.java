@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.Tests.nullRef;
 
 /**
@@ -69,31 +68,29 @@ public class Given {
     }
 
     public static Command validCommand() {
-        final TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(Given.class);
+        TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(Given.class);
         return requestFactory.command()
                              .create(PrjCreateProject.getDefaultInstance());
     }
 
     public static Event validEvent() {
-        final Command cmd = validCommand();
-        final ProjectId.Builder projectIdBuilder = ProjectId.newBuilder()
-                                                            .setId("12345AD0");
-        final PrjProjectCreated eventMessage =
-                PrjProjectCreated.newBuilder()
-                                 .setProjectId(projectIdBuilder)
-                                 .build();
-        final StringValue producerId = toMessage(Given.class.getSimpleName());
-        final EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
-                                                          Identifier.pack(producerId));
-        final Event event = eventFactory.createEvent(eventMessage, nullRef());
-        final Event result = event.toBuilder()
-                                  .setContext(event.getContext()
-                                                   .toBuilder()
-                                                   .setEnrichment(Enrichment.newBuilder()
-                                                                            .setDoNotEnrich(true))
-                                                   .build())
-                                  .build();
+        Command cmd = validCommand();
+        ProjectId.Builder projectIdBuilder = ProjectId.newBuilder()
+                                                      .setId("12345AD0");
+        PrjProjectCreated eventMessage = PrjProjectCreated.newBuilder()
+                                                          .setProjectId(projectIdBuilder)
+                                                          .build();
+        StringValue producerId = StringValue.of(Given.class.getSimpleName());
+        EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
+                                                    Identifier.pack(producerId));
+        Event event = eventFactory.createEvent(eventMessage, nullRef());
+        Event result = event.toBuilder()
+                            .setContext(event.getContext()
+                                             .toBuilder()
+                                             .setEnrichment(Enrichment.newBuilder()
+                                                                      .setDoNotEnrich(true))
+                                             .build())
+                            .build();
         return result;
     }
 
@@ -168,7 +165,7 @@ public class Given {
 
         @SuppressWarnings("unused") // OK for test class.
         @Subscribe
-        public void handle(PrjProjectCreated event, EventContext context) {
+        void handle(PrjProjectCreated event, EventContext context) {
             getBuilder().setId(event.getProjectId());
         }
     }

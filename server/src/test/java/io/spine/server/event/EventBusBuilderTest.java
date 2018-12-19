@@ -26,9 +26,7 @@ import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.testing.Tests;
-import io.spine.validate.MessageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,21 +36,19 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions",
+@SuppressWarnings({"OptionalGetWithoutIsPresent",
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EventBus Builder should")
-class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
-                                                 EventEnvelope,
-                                                 Event> {
+class EventBusBuilderTest
+        extends BusBuilderTest<EventBus.Builder, EventEnvelope, Event> {
 
     private StorageFactory storageFactory;
 
@@ -80,13 +76,6 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
             assertThrows(NullPointerException.class,
                          () -> builder().setEventStore(Tests.nullRef()));
         }
-
-        @Test
-        @DisplayName("EventValidator")
-        void eventValidator() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setEventValidator(Tests.nullRef()));
-        }
     }
 
     @Test
@@ -94,7 +83,7 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
     void acceptNullEnricher() {
         assertNull(builder().setEnricher(Tests.nullRef())
                             .getEnricher()
-                            .orNull());
+                            .orElse(null));
     }
 
     @Nested
@@ -111,8 +100,8 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
 
         @Test
         @DisplayName("EventStore")
-        void eventStore() {
-            EventStore mock = mock(EventStore.class);
+        void obtainEventStore() {
+            EventStore mock = eventStore();
             assertEquals(mock, builder().setEventStore(mock)
                                         .getEventStore()
                                         .get());
@@ -128,32 +117,15 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         }
 
         @Test
-        @DisplayName("EventValidator")
-        void eventValidator() {
-            final MessageValidator validator = MessageValidator.newInstance();
-            assertEquals(validator, builder().setEventValidator(validator)
-                                             .getEventValidator()
-                                             .get());
-        }
-
-        @Test
         @DisplayName("Enricher")
         void enricher() {
-            EventEnricher enricher = mock(EventEnricher.class);
-
-            assertEquals(enricher, builder().setStorageFactory(storageFactory)
-                                            .setEnricher(enricher)
-                                            .getEnricher()
-                                            .get());
+            Enricher enricher = Enricher.newBuilder()
+                                        .build();
+            assertSame(enricher, builder().setStorageFactory(storageFactory)
+                                          .setEnricher(enricher)
+                                          .getEnricher()
+                                          .get());
         }
-    }
-
-    @Test
-    @DisplayName("set event validator if it is not specified explicitly")
-    void setDefaultValidator() {
-        assertNotNull(builder().setStorageFactory(storageFactory)
-                               .build()
-                               .getMessageValidator());
     }
 
     @Test
@@ -167,10 +139,17 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
     @DisplayName("not allow to override")
     class NotOverride {
 
+        private EventStore eventStore;
+
+        @BeforeEach
+        void setUp() {
+            eventStore = eventStore();
+        }
+
         @Test
         @DisplayName("EventStore by StorageFactory")
         void eventStoreByStorageFactory() {
-            EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+            EventBus.Builder builder = builder().setEventStore(eventStore);
             assertThrows(IllegalStateException.class,
                          () -> builder.setStorageFactory(storageFactory));
         }
@@ -180,7 +159,7 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         void storageFactoryByEventStore() {
             EventBus.Builder builder = builder().setStorageFactory(mock(StorageFactory.class));
             assertThrows(IllegalStateException.class,
-                         () -> builder.setEventStore(mock(EventStore.class)));
+                         () -> builder.setEventStore(eventStore));
         }
 
         @Test
@@ -188,13 +167,13 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         void eventExecutorByEventStore() {
             EventBus.Builder builder = builder().setEventStoreStreamExecutor(mock(Executor.class));
             assertThrows(IllegalStateException.class,
-                         () -> builder.setEventStore(mock(EventStore.class)));
+                         () -> builder.setEventStore(eventStore));
         }
 
         @Test
         @DisplayName("EventStore by EventStoreStreamExecutor")
         void eventStoreByEventExecutor() {
-            EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+            EventBus.Builder builder = builder().setEventStore(eventStore);
             assertThrows(IllegalStateException.class,
                          () -> builder.setEventStoreStreamExecutor(mock(Executor.class)));
         }
@@ -237,20 +216,6 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
                 fail("The specified executor was not used.");
             }
         }
-    }
-
-    @Test
-    @DisplayName("allow custom message validators")
-    void allowCustomValidators() {
-        StorageFactory storageFactory =
-                StorageFactorySwitch.newInstance(newName("test"), false)
-                                    .get();
-        MessageValidator validator = mock(MessageValidator.class);
-        EventBus eventBus = builder()
-                .setEventValidator(validator)
-                .setStorageFactory(storageFactory)
-                .build();
-        assertEquals(validator, eventBus.getMessageValidator());
     }
 
     @Test

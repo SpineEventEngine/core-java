@@ -25,14 +25,17 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.integration.IntegrationChannels.toId;
 
 /**
@@ -42,21 +45,19 @@ import static io.spine.server.integration.IntegrationChannels.toId;
  * <p>The events to subscribe are those that are required by external application components
  * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
  * configuration messages}, received by this instance of {@code IntegrationBus}.
- *
- * @author Alex Tymchenko
  */
-final class DomesticEventPublisher extends EventSubscriber {
+final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
 
-    private final BoundedContextName boundedContextName;
+    private final BoundedContextName originContextName;
     private final PublisherHub publisherHub;
     private final Set<EventClass> eventClasses;
 
-    DomesticEventPublisher(BoundedContextName boundedContextName,
+    DomesticEventPublisher(BoundedContextName originContextName,
                            PublisherHub publisherHub,
                            EventClass messageClass) {
         super();
-        this.boundedContextName = boundedContextName;
-        this.publisherHub = publisherHub;
+        this.originContextName = checkNotNull(originContextName);
+        this.publisherHub = checkNotNull(publisherHub);
         this.eventClasses = ImmutableSet.of(messageClass);
     }
 
@@ -68,22 +69,40 @@ final class DomesticEventPublisher extends EventSubscriber {
 
     @Override
     public Set<String> dispatch(EventEnvelope envelope) {
-        final Event event = envelope.getOuterObject();
-        final ExternalMessage msg = ExternalMessages.of(event, boundedContextName);
-        final ExternalMessageClass messageClass =
-                ExternalMessageClass.of(envelope.getMessageClass());
-        final ChannelId channelId = toId(messageClass);
-        final Publisher channel = publisherHub.get(channelId);
+        Event event = envelope.getOuterObject();
+        ExternalMessage msg = ExternalMessages.of(event, originContextName);
+        ExternalMessageClass messageClass = ExternalMessageClass.of(envelope.getMessageClass());
+        ChannelId channelId = toId(messageClass);
+        Publisher channel = publisherHub.get(channelId);
         channel.publish(AnyPacker.pack(envelope.getId()), msg);
 
         return ImmutableSet.of(channel.toString());
+    }
+
+    @Override
+    public void onError(EventEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(envelope);
+        _error(exception,
+               "Error publishing event (class: `%s`, ID: `%s`) from bounded context `%s`.",
+               envelope.getMessageClass(), envelope.getId(), originContextName);
+    }
+
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+        return Optional.empty();
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("boundedContextName", boundedContextName)
+                          .add("originContextName", originContextName)
                           .add("eventClasses", eventClasses)
                           .toString();
     }
@@ -97,12 +116,12 @@ final class DomesticEventPublisher extends EventSubscriber {
             return false;
         }
         DomesticEventPublisher that = (DomesticEventPublisher) o;
-        return Objects.equals(boundedContextName, that.boundedContextName) &&
+        return Objects.equals(originContextName, that.originContextName) &&
                 Objects.equals(eventClasses, that.eventClasses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(boundedContextName, eventClasses);
+        return Objects.hash(originContextName, eventClasses);
     }
 }

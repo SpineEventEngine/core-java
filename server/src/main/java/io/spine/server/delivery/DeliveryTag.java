@@ -24,8 +24,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.RejectionEnvelope;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.model.EntityClass;
 
 import java.util.Objects;
 
@@ -45,15 +44,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
+public final class DeliveryTag {
 
     private final BoundedContextName boundedContextName;
     private final EntityClass<?> entityClass;
-    private final Class<E> envelopeType;
+    private final Class<? extends MessageEnvelope<?, ?, ?>> envelopeType;
 
     private DeliveryTag(BoundedContextName boundedContextName,
                         EntityClass<?> entityClass,
-                        Class<E> envelopeType) {
+                        Class<? extends MessageEnvelope<?, ?, ?>> envelopeType) {
         this.boundedContextName = boundedContextName;
         this.entityClass = entityClass;
         this.envelopeType = envelopeType;
@@ -71,7 +70,7 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final DeliveryTag<?> that = (DeliveryTag<?>) o;
+        DeliveryTag that = (DeliveryTag) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(entityClass, that.entityClass) &&
                 Objects.equals(envelopeType, that.envelopeType);
@@ -86,10 +85,11 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
      * Creates an instance of {@code DeliveryTag} that identifies the need to deliver command
      * envelopes to entities that are sharded within the given {@code Shardable}.
      *
-     * @param shardable the shardable, which entities declare the need in command envelopes
+     * @param shardable
+     *         the shardable, which entities declare the need in command envelopes
      * @return the new instance of {@code DeliveryTag}
      */
-    public static DeliveryTag<CommandEnvelope> forCommandsOf(Shardable shardable) {
+    public static DeliveryTag forCommandsOf(Shardable shardable) {
         checkNotNull(shardable);
         return forEnvelope(shardable.getBoundedContextName(),
                            shardable.getShardedModelClass(),
@@ -100,37 +100,26 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
      * Creates an instance of {@code DeliveryTag} that identifies the need to deliver event
      * envelopes to entities that are sharded within the given {@code Shardable}.
      *
-     * @param shardable the shardable, which entities declare the need in event envelopes
+     * @param shardable
+     *         the shardable, which entities declare the need in event envelopes
      * @return the new instance of {@code DeliveryTag}
      */
-    public static DeliveryTag<EventEnvelope> forEventsOf(Shardable shardable) {
+    public static DeliveryTag forEventsOf(Shardable shardable) {
         checkNotNull(shardable);
         return forEnvelope(shardable.getBoundedContextName(),
                            shardable.getShardedModelClass(),
                            EventEnvelope.class);
     }
 
-    /**
-     * Creates an instance of {@code DeliveryTag} that identifies the need to deliver rejection
-     * envelopes to entities that are sharded within the given {@code Shardable}.
-     *
-     * @param shardable the shardable, which entities declare the need in command rejection
-     * @return the new instance of {@code DeliveryTag}
-     */
-    public static DeliveryTag<RejectionEnvelope> forRejectionsOf(Shardable shardable) {
-        checkNotNull(shardable);
-        return forEnvelope(shardable.getBoundedContextName(),
-                           shardable.getShardedModelClass(),
-                           RejectionEnvelope.class);
-    }
-
-    private static <E extends MessageEnvelope<?, ?, ?>> DeliveryTag<E>
-    forEnvelope(BoundedContextName bcName, EntityClass<?> entityClass, Class<E> envelopeClass) {
+    private static DeliveryTag
+    forEnvelope(BoundedContextName bcName,
+                EntityClass<?> entityClass,
+                Class<? extends MessageEnvelope<?, ?, ?>> envelopeClass) {
         checkNotNull(bcName);
         checkNotNull(entityClass);
         checkNotNull(envelopeClass);
 
-        final DeliveryTag<E> id = new DeliveryTag<>(bcName, entityClass, envelopeClass);
+        DeliveryTag id = new DeliveryTag(bcName, entityClass, envelopeClass);
         return id;
     }
 

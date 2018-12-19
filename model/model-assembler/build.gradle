@@ -19,14 +19,10 @@
  */
 
 buildscript {
-    apply from: "$rootDir/ext.gradle"
+    apply from: "$rootDir/version.gradle"
 }
 
 group 'io.spine.tools'
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     implementation project(':server')

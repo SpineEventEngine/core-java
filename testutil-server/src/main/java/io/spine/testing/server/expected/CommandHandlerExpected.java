@@ -22,6 +22,7 @@ package io.spine.testing.server.expected;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -38,27 +39,28 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Assertions for a command handler invocation results.
  *
+ * @param <S> the type of the tested entity state
  * @author Dmytro Dashenkov
  */
 public class CommandHandlerExpected<S extends Message>
         extends MessageProducingExpected<S, CommandHandlerExpected<S>> {
 
     @Nullable
-    private final Message rejection;
+    private final Message rejectionMessage;
 
     public CommandHandlerExpected(List<? extends Message> events,
-                                  @Nullable Message rejection,
+                                  @Nullable Message rejectionMessage,
                                   S initialState,
                                   S state,
                                   List<Message> interceptedCommands) {
         super(events, initialState, state, interceptedCommands);
-        this.rejection = rejection;
+        this.rejectionMessage = rejectionMessage;
     }
 
     @Override
     @CanIgnoreReturnValue
     public CommandHandlerExpected<S> ignoresMessage() {
-        assertNull(rejection, "Message caused a rejection.");
+        assertNull(rejectionMessage, "Message caused a rejection.");
         return super.ignoresMessage();
     }
 
@@ -67,47 +69,46 @@ public class CommandHandlerExpected<S extends Message>
         return this;
     }
 
-    @Override
     @CanIgnoreReturnValue
-    public <M extends Message> CommandHandlerExpected<S> producesEvent(Class<M> eventClass,
-                                                                       Consumer<M> validator) {
+    public <M extends Message>
+    CommandHandlerExpected<S> producesEvent(Class<M> eventClass, Consumer<M> validator) {
         assertNotRejected(eventClass.getName());
-        return super.producesEvent(eventClass, validator);
+        return producesMessage(eventClass, validator);
     }
 
-    @Override
     @CanIgnoreReturnValue
     public CommandHandlerExpected<S> producesEvents(Class<?>... eventClasses) {
         assertNotRejected(Stream.of(eventClasses)
                                 .map(Class::getSimpleName)
                                 .collect(joining(",")));
-        return super.producesEvents(eventClasses);
+        return producesMessages(eventClasses);
     }
 
     @Override
     @CanIgnoreReturnValue
-    public <M extends Message> CommandHandlerExpected<S> routesCommand(Class<M> commandClass,
-                                                                       Consumer<M> validator) {
+    public <M extends Message>
+    CommandHandlerExpected<S> producesCommand(Class<M> commandClass, Consumer<M> validator) {
         assertNotRejected(commandClass.getName());
-        return super.routesCommand(commandClass, validator);
+        return super.producesCommand(commandClass, validator);
     }
 
     @Override
     @CanIgnoreReturnValue
-    public CommandHandlerExpected<S> routesCommands(Class<?>... commandClasses) {
+    public CommandHandlerExpected<S> producesCommands(Class<?>... commandClasses) {
         assertNotRejected(Stream.of(commandClasses)
                                 .map(Class::getSimpleName)
                                 .collect(joining(",")));
-        return super.routesCommands(commandClasses);
+        return super.producesCommands(commandClasses);
     }
 
     private void assertNotRejected(String eventType) {
-        boolean rejected = rejection != null;
+        boolean rejected = rejectionMessage != null;
         if (rejected) {
-            fail(format("Message was rejected. Expected messages(s): [%s]. Rejection: %s%s%s.",
-                        eventType, rejection.getClass()
-                                            .getSimpleName(),
-                        System.lineSeparator(), rejection));
+            fail(format("Message was rejected. Expected messages(s): [%s]. Rejection: %s%n%s.",
+                        eventType,
+                        TypeUrl.of(rejectionMessage),
+                        rejectionMessage)
+            );
         }
     }
 
@@ -116,15 +117,13 @@ public class CommandHandlerExpected<S extends Message>
      *
      * @param rejectionClass type of the rejection expected to be produced
      */
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
     public CommandHandlerExpected<S> throwsRejection(Class<? extends Message> rejectionClass) {
-        assertNotNull(rejection, format("No rejection encountered. Expected %s",
-                                        rejectionClass.getSimpleName()));
-        assertTrue(rejectionClass.isInstance(rejection),
+        assertNotNull(rejectionMessage, format("No rejection encountered. Expected %s",
+                                               rejectionClass.getSimpleName()));
+        assertTrue(rejectionClass.isInstance(rejectionMessage),
                    format("%s is not an instance of %s.",
-                          rejection.getClass()
-                                   .getSimpleName(),
+                          rejectionMessage.getClass().getSimpleName(),
                           rejectionClass));
         return self();
     }

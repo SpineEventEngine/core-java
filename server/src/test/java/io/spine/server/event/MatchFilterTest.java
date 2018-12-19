@@ -32,7 +32,7 @@ class MatchFilterTest {
     @Test
     @DisplayName("not allow null events to pass")
     void notAllowNullEvents() {
-        final MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
-        assertFalse(filter.apply(null));
+        MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
+        assertFalse(filter.test(null));
     }
 }

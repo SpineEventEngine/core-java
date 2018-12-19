@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 
 import java.util.List;
@@ -46,6 +47,10 @@ public class CommandHistory {
         contexts.add(context);
     }
 
+    public void add(CommandEnvelope e) {
+        add(e.getMessage(), e.getCommandContext());
+    }
+
     public boolean contains(Command command) {
         Message message = Commands.getMessage(command);
 
@@ -57,6 +62,11 @@ public class CommandHistory {
         }
 
         return false;
+    }
+
+    public boolean contains(Class<? extends Message> commandClass) {
+        return messages.stream()
+                       .anyMatch( (m) -> commandClass.equals(m.getClass()));
     }
 
     public void clear() {

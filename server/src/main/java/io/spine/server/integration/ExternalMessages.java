@@ -27,12 +27,12 @@ import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.delivery.ShardedMessage;
 import io.spine.server.delivery.ShardedMessageId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Utilities for working with {@linkplain ExternalMessage external messages}.
@@ -56,7 +56,7 @@ public final class ExternalMessages {
         checkNotNull(event);
         checkNotNull(origin);
 
-        final ExternalMessage result = of(event.getId(), event, origin);
+        ExternalMessage result = of(event.getId(), event, origin);
         return result;
     }
 
@@ -71,22 +71,7 @@ public final class ExternalMessages {
         checkNotNull(command);
         checkNotNull(origin);
 
-        final ExternalMessage result = of(command.getId(), command, origin);
-        return result;
-    }
-
-    /**
-     * Wraps the instance of {@link Rejection} into an {@code ExternalMessage}.
-     *
-     * @param rejection the rejection to wrap
-     * @param origin    the name of bounded context in which the rejection was created
-     * @return the external message wrapping the given rejection
-     */
-    static ExternalMessage of(Rejection rejection, BoundedContextName origin) {
-        checkNotNull(rejection);
-        checkNotNull(origin);
-
-        final ExternalMessage result = of(rejection.getId(), rejection, origin);
+        ExternalMessage result = of(command.getId(), command, origin);
         return result;
     }
 
@@ -101,12 +86,12 @@ public final class ExternalMessages {
         checkNotNull(request);
         checkNotNull(origin);
 
-        final String idString = Identifier.newUuid();
-        final ExternalMessage result = of(StringValue.newBuilder()
-                                                     .setValue(idString)
-                                                     .build(),
-                                          request,
-                                          origin);
+        String idString = Identifier.newUuid();
+        ExternalMessage result = of(StringValue.newBuilder()
+                                               .setValue(idString)
+                                               .build(),
+                                    request,
+                                    origin);
         return result;
     }
 
@@ -121,8 +106,8 @@ public final class ExternalMessages {
         checkNotNull(message);
         checkNotNull(origin);
 
-        final ShardedMessageId id = message.getId();
-        final ExternalMessage result = of(id, message, origin);
+        ShardedMessageId id = message.getId();
+        ExternalMessage result = of(id, message, origin);
         return result;
     }
 
@@ -138,22 +123,23 @@ public final class ExternalMessages {
      */
     public static ShardedMessage asShardedMessage(ExternalMessage value) {
         checkNotNull(value);
-        final Any originalMessage = value.getOriginalMessage();
-        final ShardedMessage result = AnyPacker.unpack(originalMessage);
+        Any originalMessage = value.getOriginalMessage();
+        ShardedMessage result = unpack(originalMessage, ShardedMessage.class);
         return result;
     }
 
     private static ExternalMessage of(Message messageId,
                                       Message message,
                                       BoundedContextName boundedContextName) {
-        final Any packedId = Identifier.pack(messageId);
-        final Any packedMessage = AnyPacker.pack(message);
+        Any packedId = Identifier.pack(messageId);
+        Any packedMessage = AnyPacker.pack(message);
 
-        final ExternalMessage result = ExternalMessage.newBuilder()
-                                                      .setId(packedId)
-                                                      .setOriginalMessage(packedMessage)
-                                                      .setBoundedContextName(boundedContextName)
-                                                      .build();
+        ExternalMessage result = ExternalMessage
+                .newBuilder()
+                .setId(packedId)
+                .setOriginalMessage(packedMessage)
+                .setBoundedContextName(boundedContextName)
+                .build();
         return result;
     }
 }

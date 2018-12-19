@@ -31,6 +31,7 @@ import io.spine.server.entity.storage.given.ColumnTestEnv.BrokenTestEntity;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityRedefiningColumnAnnotation;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithCustomColumnNameForStoring;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.ColumnTestEnv.TestAggregate;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.DisplayName;
@@ -51,9 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Many string literals for method names. */})
@@ -76,7 +74,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null getter without errors")
         void getter() {
-            final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+            EntityColumn column = forMethod("getVersion", VersionableEntity.class);
             column.restoreGetter();
         }
 
@@ -85,7 +83,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null value converter without errors")
         void valueConverter() {
-            final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+            EntityColumn column = forMethod("getVersion", VersionableEntity.class);
             column.restoreValueConverter();
         }
     }
@@ -100,13 +98,12 @@ class ColumnTest {
     @Test
     @DisplayName("invoke getter")
     void invokeGetter() {
-        String entityId = "entity-id";
         int version = 2;
         EntityColumn column = forMethod("getVersion", VersionableEntity.class);
-        TestEntity entity = Given.entityOfClass(TestEntity.class)
-                                 .withId(entityId)
-                                 .withVersion(version)
-                                 .build();
+        TestAggregate entity = Given.aggregateOfClass(TestAggregate.class)
+                                    .withId(1L)
+                                    .withVersion(version)
+                                    .build();
         Version actualVersion = (Version) column.getFor(entity);
         assertEquals(version, actualVersion.getNumber());
     }
@@ -139,6 +136,25 @@ class ColumnTest {
         assertNotNull(value);
         assertEquals(initialState, value.intValue());
         assertEquals(changedState, extractedState);
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Just check that column is constructed without an exception.
+    @Nested
+    @DisplayName("allow `is` prefix")
+    class AllowIsPrefix {
+
+        @Test
+        @DisplayName("for `boolean` properties")
+        void forBooleanProperties() {
+            forMethod("isBoolean", TestEntity.class);
+        }
+
+        @Test
+        @DisplayName("for `Boolean` properties")
+        void forBooleanWrapperProperties() {
+            forMethod("isBooleanWrapper", TestEntity.class);
+        }
     }
 
     @Nested
@@ -185,6 +201,13 @@ class ColumnTest {
         void getterWithParams() throws NoSuchMethodException {
             Method method = TestEntity.class.getDeclaredMethod("getParameter", String.class);
             assertThrows(IllegalArgumentException.class, () -> EntityColumn.from(method));
+        }
+
+        @Test
+        @DisplayName("getter with `is` prefix and non-boolean return type")
+        void nonBooleanIsGetter() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> forMethod("isNonBoolean", TestEntity.class));
         }
     }
 

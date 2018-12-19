@@ -20,10 +20,10 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.isDefault;
@@ -52,7 +52,7 @@ abstract class TenantAware {
      * Creates an instance for the tenant specified by the passed ID.
      *
      * <p>If a default instance of {@link TenantId} is passed (because the application works in
-     * a single-tenant mode, {@linkplain CurrentTenant#singleTenant() singleTenant()} value will be
+     * a single-tenant mode, {@linkplain SingleTenantIndex#tenantId() singleTenant()} value will be
      * substituted.
      *
      * @param tenantId the tenant ID or {@linkplain TenantId#getDefaultInstance() default value}
@@ -60,7 +60,7 @@ abstract class TenantAware {
     TenantAware(TenantId tenantId) {
         checkNotNull(tenantId);
         this.tenantId = isDefault(tenantId)
-                        ? CurrentTenant.singleTenant()
+                        ? SingleTenantIndex.tenantId()
                         : tenantId;
     }
 
@@ -68,9 +68,8 @@ abstract class TenantAware {
      * Verifies whether a current tenant is set in the execution context.
      */
     @Internal
-    @VisibleForTesting
     public static boolean isTenantSet() {
-        final Optional<TenantId> currentTenant = CurrentTenant.get();
+        Optional<TenantId> currentTenant = CurrentTenant.get();
         return currentTenant.isPresent();
     }
 
@@ -79,20 +78,19 @@ abstract class TenantAware {
      *
      * <p>In the multi-tenant context obtains the currently set tenant ID.
      *
-     * <p>In single-tenant context, returns {@link CurrentTenant#singleTenant() singleTenant()}
+     * <p>In single-tenant context, returns {@link SingleTenantIndex#tenantId() singleTenant()}
      *
      * @param multitenantContext {@code true} if execution context is multi-tenant
-     * @return current tenant ID or {@link CurrentTenant#singleTenant() singleTenant()}
+     * @return current tenant ID or {@link SingleTenantIndex#tenantId() singleTenant()}
      * @throws IllegalStateException if there is no current tenant set in a multi-tenant context
      */
     static TenantId getCurrentTenant(boolean multitenantContext) {
         if (!multitenantContext) {
-            return CurrentTenant.singleTenant();
+            return SingleTenantIndex.tenantId();
         }
         return CurrentTenant.ensure();
     }
 
-    @VisibleForTesting
     TenantId tenantId() {
         return tenantId;
     }

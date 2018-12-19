@@ -20,17 +20,18 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
+import io.spine.test.commands.CmdCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for {@linkplain CommandAttribute CommandAttribute API}.
@@ -50,23 +51,25 @@ class CommandAttributeTest {
 
     @BeforeEach
     void setUp() {
-        Command command = factory.createCommand(Empty.getDefaultInstance(),
-                                                Time.getCurrentTime());
-        contextBuilder = command.getContext()
-                                .toBuilder();
+        CmdCreateProject commandMessage = CmdCreateProject
+                .newBuilder()
+                .setId(Identifier.newUuid())
+                .build();
+        Command command = factory.createCommand(commandMessage, Time.getCurrentTime());
+        contextBuilder = command.getContext().toBuilder();
     }
 
     private <T> void assertSetGet(CommandAttribute<T> attr, T value) {
         attr.setValue(contextBuilder, value);
 
         assertEquals(value, attr.getValue(contextBuilder.build())
-                                .get());
+                                .orElseGet(() -> fail("Attribute is absent.")));
     }
 
     @Test
     @DisplayName("set and get bool attribute value")
     void setAndGetBool() {
-        final CommandAttribute<Boolean> attr = new CommandAttribute<Boolean>("flag") {
+        CommandAttribute<Boolean> attr = new CommandAttribute<Boolean>("flag") {
         };
         assertSetGet(attr, true);
         assertSetGet(attr, false);
@@ -75,9 +78,9 @@ class CommandAttributeTest {
     @Test
     @DisplayName("set and get string attribute value")
     void setAndGetString() {
-        final CommandAttribute<String> attr = new CommandAttribute<String>("str") {
+        CommandAttribute<String> attr = new CommandAttribute<String>("str") {
         };
-        final String value = getClass().getName();
+        String value = getClass().getName();
 
         assertSetGet(attr, value);
     }
@@ -85,9 +88,9 @@ class CommandAttributeTest {
     @Test
     @DisplayName("set and get long attribute value")
     void setAndGetLong() {
-        final CommandAttribute<Long> attr = new CommandAttribute<Long>("l-o-n-g") {
+        CommandAttribute<Long> attr = new CommandAttribute<Long>("l-o-n-g") {
         };
-        final Long value = 10101010L;
+        Long value = 10101010L;
 
         assertSetGet(attr, value);
     }
@@ -95,9 +98,9 @@ class CommandAttributeTest {
     @Test
     @DisplayName("set and get int attribute value")
     void setAndGetInt() {
-        final CommandAttribute<Integer> attr = new CommandAttribute<Integer>("int") {
+        CommandAttribute<Integer> attr = new CommandAttribute<Integer>("int") {
         };
-        final Integer value = 1024;
+        Integer value = 1024;
 
         assertSetGet(attr, value);
     }
@@ -105,9 +108,9 @@ class CommandAttributeTest {
     @Test
     @DisplayName("set and get protobuf message attribute value")
     void setAndGetMessage() {
-        final CommandAttribute<StringValue> attr = new CommandAttribute<StringValue>("str-val") {
+        CommandAttribute<StringValue> attr = new CommandAttribute<StringValue>("str-val") {
         };
-        final StringValue value = toMessage(getClass().getName());
+        StringValue value = StringValue.of(getClass().getName());
 
         assertSetGet(attr, value);
     }
@@ -115,9 +118,9 @@ class CommandAttributeTest {
     @Test
     @DisplayName("set and get float attribute value")
     void setAndGetFloat() {
-        final CommandAttribute<Float> attr = new CommandAttribute<Float>("flp") {
+        CommandAttribute<Float> attr = new CommandAttribute<Float>("flp") {
         };
-        final Float value = 1024.512f;
+        Float value = 1024.512f;
 
         assertSetGet(attr, value);
     }
@@ -125,9 +128,9 @@ class CommandAttributeTest {
     @Test
     @DisplayName("set and get double attribute value")
     void setAndGetDouble() {
-        final CommandAttribute<Double> attr = new CommandAttribute<Double>("dbl") {
+        CommandAttribute<Double> attr = new CommandAttribute<Double>("dbl") {
         };
-        final Double value = 100.500;
+        Double value = 100.500;
 
         assertSetGet(attr, value);
     }
@@ -135,10 +138,10 @@ class CommandAttributeTest {
     @Test
     @DisplayName("fail on setting unsupported value type")
     void fail_on_unsupported_type() {
-        final CommandAttribute<Object> attr = new CommandAttribute<Object>("o") {
+        CommandAttribute<Object> attr = new CommandAttribute<Object>("o") {
         };
 
-        @SuppressWarnings("EmptyClass") final Object value = new Object() {
+        @SuppressWarnings("EmptyClass") Object value = new Object() {
         };
 
         assertThrows(IllegalArgumentException.class, () -> attr.setValue(contextBuilder, value));

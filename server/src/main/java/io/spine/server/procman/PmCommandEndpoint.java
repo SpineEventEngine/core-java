@@ -23,8 +23,12 @@ package io.spine.server.procman;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.server.command.DispatchCommand;
+import io.spine.server.entity.EntityLifecycle;
 
 import java.util.List;
+
+import static io.spine.server.command.DispatchCommand.operationFor;
 
 /**
  * Dispatches command to process managers.
@@ -33,9 +37,10 @@ import java.util.List;
  * @param <P> the type of process managers
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
 public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, CommandEnvelope, I> {
+        extends PmEndpoint<I, P, CommandEnvelope> {
 
     protected PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
         super(repository, cmd);
@@ -47,30 +52,17 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
         return new PmCommandEndpoint<>(repository, event);
     }
 
-    static <I, P extends ProcessManager<I, ?, ?>>
-    I handle(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
-        final PmCommandEndpoint<I, P> endpoint = of(repository, cmd);
-        final I result = endpoint.handle();
-        return result;
-    }
-
-    @Override
-    protected I getTargets() {
-        final CommandEnvelope envelope = envelope();
-        final I id = repository().getCommandRouting()
-                                 .apply(envelope.getMessage(), envelope.getCommandContext());
-        return id;
-    }
-
     @Override
     protected PmCommandDelivery<I, P> getEndpointDelivery() {
         return repository().getCommandEndpointDelivery();
     }
 
     @Override
-    protected List<Event> doDispatch(P processManager, CommandEnvelope command) {
-        repository().onCommandDispatched(processManager.getId(), command.getCommand());
-        return processManager.dispatchCommand(command);
+    protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
+        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
+        DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope);
+        PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
+        return tx.perform(dispatch);
     }
 
     @Override

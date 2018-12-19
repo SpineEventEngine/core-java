@@ -24,7 +24,10 @@
  * @author Alex Tymchenko
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.integration.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -44,32 +44,26 @@ public abstract class Consumer<I,
                         implements ShardedStreamConsumer<I, M> {
 
     private final Repository<I, E> repository;
-    private final DeliveryTag<M> deliveryTag;
+    private final DeliveryTag deliveryTag;
 
-    protected Consumer(DeliveryTag<M> tag, Repository<I, E> repository) {
+    protected Consumer(DeliveryTag tag, Repository<I, E> repository) {
         this.deliveryTag = tag;
         this.repository = repository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ShardedStream<I, ?, M> bindToTransport(BoundedContextName name,
                                                   ShardingKey key,
                                                   TransportFactory transportFactory) {
-        final S stream = newShardedStreamBuilder().setBoundedContextName(name)
-                                                  .setKey(key)
-                                                  .setTag(deliveryTag)
-                                                  .setTargetIdClass(repository.getIdClass())
-                                                  .setConsumer(this)
-                                                  .build(transportFactory);
+        S stream = newShardedStreamBuilder().setBoundedContextName(name)
+                                            .setKey(key)
+                                            .setTag(deliveryTag)
+                                            .setTargetIdClass(repository.getIdClass())
+                                            .setConsumer(this)
+                                            .build(transportFactory);
         return stream;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onNext(I targetId, M messageEnvelope) {
         deliverNow(targetId, messageEnvelope);
@@ -84,10 +78,9 @@ public abstract class Consumer<I,
      * @param id              an ID of an entity to deliver the envelope to
      * @param envelopeMessage an envelope to deliver
      */
-    protected void deliverNow(final I id, final M envelopeMessage) {
-        final TenantId tenantId = envelopeMessage.getActorContext()
-                                                 .getTenantId();
-        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
+    protected void deliverNow(I id, M envelopeMessage) {
+        TenantId tenantId = envelopeMessage.getTenantId();
+        TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 passToEndpoint(id, envelopeMessage);
@@ -107,11 +100,8 @@ public abstract class Consumer<I,
      */
     protected abstract B newShardedStreamBuilder();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public DeliveryTag<M> getTag() {
+    public DeliveryTag getTag() {
         return deliveryTag;
     }
 
@@ -129,7 +119,7 @@ public abstract class Consumer<I,
      * @param messageEnvelope the envelope to obtain the endpoint for
      * @return the message endpoint
      */
-    protected abstract EntityMessageEndpoint<I, E, M, ?> getEndpoint(M messageEnvelope);
+    protected abstract EntityMessageEndpoint<I, E, M> getEndpoint(M messageEnvelope);
 
     protected Repository<I, E> repository() {
         return repository;

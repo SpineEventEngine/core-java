@@ -20,9 +20,12 @@
 package io.spine.server.projection;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
@@ -33,7 +36,6 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +48,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * Tests for {@link io.spine.server.projection.ProjectionTransaction}.
+ *
  * @author Alex Tymchenko
  */
 @DisplayName("ProjectionTransaction should")
@@ -125,17 +129,24 @@ class ProjectionTransactionTest
     }
 
     @Override
-    protected Message createEventMessage() {
+    protected EventMessage createEventMessage() {
         return PrjProjectCreated.newBuilder()
                                 .setProjectId(ID)
                                 .build();
     }
 
     @Override
-    protected Message createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventMessageThatFailsInHandler() {
         return PrjTaskAdded.newBuilder()
                            .setProjectId(ID)
                            .build();
+    }
+
+    @Override
+    protected void applyEvent(Transaction tx, Event event) {
+        ProjectionTransaction cast = (ProjectionTransaction) tx;
+        EventEnvelope envelope = EventEnvelope.of(event);
+        cast.play(envelope);
     }
 
     @Override
@@ -147,36 +158,22 @@ class ProjectionTransactionTest
     }
 
     /**
-     * This test is ignored as the expected behavior has been changed for the projection
-     * transactions.
-     *
-     * <p>{@linkplain #incrementVersionOnEvent() Another test method} is created to test the new
-     * behavior. Please refer to it for more details.
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Same display names to ancestor.
-    @Disabled
-    @Test
-    @DisplayName("advance version from event")
-    @Override
-    public void advanceVersionFromEvent() {
-    }
-
-    /**
      * Tests the version advancement strategy for the {@link Projection}s.
      *
      * <p>The versioning strategy for {@link Projection} is
-     * {@link io.spine.server.entity.EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT}. This test
-     * case substitutes {@link #advanceVersionFromEvent()}, which tested the behavior of
-     * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
+     * {@link io.spine.server.entity.AutoIncrement}. This test case substitutes
+     * {@link #advanceVersionFromEvent()}, which tested the behavior of
+     * {@link io.spine.server.entity.IncrementFromEvent} strategy.
      */
-    @SuppressWarnings("CheckReturnValue") // Can ignore value of play() in this test.
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Can ignore value of play() in this test.
     @Test
     @DisplayName("increment version on event")
     void incrementVersionOnEvent() {
         Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
         Version oldVersion = entity.getVersion();
-        Event event = createEvent(createEventMessage());
-        Projection.play(entity, Collections.singleton(event));
+        Event event = GivenEvent.withMessage(createEventMessage());
+        Projection.playOn(entity, Collections.singleton(event));
         Version expected = Versions.increment(oldVersion);
         assertEquals(expected.getNumber(), entity.getVersion()
                                                  .getNumber());

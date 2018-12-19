@@ -32,15 +32,13 @@ import java.util.List;
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
  * @param <M> the type of message envelopes processed by the endpoint
- * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
- *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("unchecked") // Operations on repository are logically checked.
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
-                          M extends ActorMessageEnvelope<?, ?, ?>,
-                          R>
-        extends EntityMessageEndpoint<I, P, M, R> {
+                          M extends ActorMessageEnvelope<?, ?, ?>>
+        extends EntityMessageEndpoint<I, P, M> {
 
     PmEndpoint(ProcessManagerRepository<I, P, ?> repository, M envelope) {
         super(repository, envelope);
@@ -73,8 +71,7 @@ abstract class PmEndpoint<I,
 
     protected List<Event> dispatchInTx(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        @SuppressWarnings("unchecked") // all PM handlers return events.
-        List<Event> events = (List<Event>) doDispatch(processManager, envelope());
+        List<Event> events = doDispatch(processManager, envelope());
         tx.commit();
         return events;
     }

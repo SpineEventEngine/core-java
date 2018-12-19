@@ -20,16 +20,15 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
-import com.google.protobuf.Empty;
 import io.spine.server.route.DefaultCommandRoute;
 import io.spine.test.entity.command.EntCreateProject;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -42,19 +41,11 @@ class DefaultCommandRouteTest {
     @Test
     @DisplayName("get ID from command message")
     void getIdFromCommand() {
-        final EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
+        EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
 
-        final Optional id = DefaultCommandRoute.asOptional(msg);
+        Optional<?> id = DefaultCommandRoute.asOptional(msg);
 
         assertTrue(id.isPresent());
         assertEquals(msg.getProjectId(), id.get());
-    }
-
-    @Test
-    @DisplayName("return empty Optional for command message without ID field")
-    void returnEmptyForNoId() {
-        final Optional id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
-
-        assertFalse(id.isPresent());
     }
 }

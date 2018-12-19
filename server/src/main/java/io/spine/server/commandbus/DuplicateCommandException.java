@@ -54,10 +54,10 @@ public class DuplicateCommandException extends CommandException implements Messa
      * @return a newly constructed instance
      */
     public static DuplicateCommandException of(Command command) {
-        final CommandEnvelope envelope = CommandEnvelope.of(command);
-        final Message commandMessage = envelope.getMessage();
-        final String errorMessage = aggregateErrorMessage(envelope);
-        final Error error = error(commandMessage, errorMessage);
+        CommandEnvelope envelope = CommandEnvelope.of(command);
+        Message commandMessage = envelope.getMessage();
+        String errorMessage = aggregateErrorMessage(envelope);
+        Error error = error(commandMessage, errorMessage);
         return new DuplicateCommandException(errorMessage, command, error);
     }
 
@@ -69,12 +69,11 @@ public class DuplicateCommandException extends CommandException implements Messa
      * @return a newly constructed instance
      */
     public static Error error(Message commandMessage, String errorText) {
-        final Error.Builder error =
-                Error.newBuilder()
-                     .setType(DuplicateCommandException.class.getCanonicalName())
-                     .setCode(CommandValidationError.DUPLICATE.getNumber())
-                     .setMessage(errorText)
-                     .putAllAttributes(commandTypeAttribute(commandMessage));
+        Error.Builder error = Error.newBuilder()
+                                   .setType(DuplicateCommandException.class.getCanonicalName())
+                                   .setCode(CommandValidationError.DUPLICATE.getNumber())
+                                   .setMessage(errorText)
+                                   .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
     }
 
@@ -86,8 +85,8 @@ public class DuplicateCommandException extends CommandException implements Messa
      */
     private static String aggregateErrorMessage(CommandEnvelope envelope) {
         return format(
-                "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched twice to a "
-                        + "single aggregate.",
+                "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched to a "
+                        + "single entity twice.",
                 envelope.getMessageClass()
                         .value()
                         .getName(),

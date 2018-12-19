@@ -20,18 +20,22 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.DoubleValue;
-import com.google.protobuf.Message;
+import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.base.RejectionMessage;
+import io.spine.base.ThrowableMessage;
 import io.spine.base.Time;
 import io.spine.core.given.EventsTestEnv;
 import io.spine.core.given.GivenEvent;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
+import io.spine.test.core.given.GivenProjectCreated;
 import io.spine.testing.Tests;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,22 +47,18 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.getActor;
-import static io.spine.core.Events.getActorContextOrThrow;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Events.getProducer;
 import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
 import static io.spine.core.given.EventsTestEnv.tenantId;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,52 +69,44 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * <p>This test suite is placed under the {@code server} module to avoid dependency on the event
  * generation code which belongs to server-side.
- *
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- * @author Mykhailo Drachuk
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
-// Simple test names duplicate random literals.
 @DisplayName("Events utility should")
-public class EventsTest {
+public class EventsTest extends UtilityClassTest<Events> {
 
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(EventsTest.class);
 
+    private EventFactory eventFactory;
+
     private Event event;
     private EventContext context;
 
-    private final StringValue stringValue = toMessage(newUuid());
-    private final BoolValue boolValue = toMessage(true);
-    @SuppressWarnings("MagicNumber")
-    private final DoubleValue doubleValue = toMessage(10.1);
+    EventsTest() {
+        super(Events.class);
+    }
 
     @BeforeEach
     void setUp() {
-        final TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(getClass());
-        final CommandEnvelope cmd = requestFactory.generateEnvelope();
-        final StringValue producerId = toMessage(getClass().getSimpleName());
-        EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
-        event = eventFactory.createEvent(Time.getCurrentTime(),
-                                         Tests.nullRef());
+        TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(getClass());
+        CommandEnvelope cmd = requestFactory.generateEnvelope();
+        StringValue producerId = StringValue.of(getClass().getSimpleName());
+        eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
+        event = eventFactory.createEvent(GivenEvent.message(), null);
         context = event.getContext();
     }
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Events.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(StringValue.class, StringValue.getDefaultInstance())
-                .setDefault(EventContext.class, GivenEvent.context())
-                .testAllPublicStaticMethods(Events.class);
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        EntityAlreadyArchived defaultThrowableMessage = EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(Any.getDefaultInstance())
+                .build();
+        tester.setDefault(StringValue.class, StringValue.getDefaultInstance())
+              .setDefault(EventContext.class, GivenEvent.context())
+              .setDefault(Version.class, Version.getDefaultInstance())
+              .setDefault(Event.class, Event.getDefaultInstance())
+              .setDefault(ThrowableMessage.class, defaultThrowableMessage);
     }
 
     @Nested
@@ -132,27 +124,9 @@ public class EventsTest {
         @Test
         @DisplayName("producer")
         void producer() {
-            StringValue msg = unpack(context.getProducerId());
-
+            StringValue msg = unpack(context.getProducerId(), StringValue.class);
             String id = (String) getProducer(context);
-
             assertEquals(msg.getValue(), id);
-        }
-
-        @Test
-        @DisplayName("actor context")
-        void actorContext() {
-            assertEquals(context.getCommandContext().getActorContext(),
-                         Events.getActorContextOrThrow(context));
-        }
-
-        @Test
-        @DisplayName("throw of no ActorContext found")
-        void throwIfNoActorContext() {
-            assertThrows(
-                    IllegalStateException.class,
-                    () -> getActorContextOrThrow(EventContext.getDefaultInstance())
-            );
         }
     }
 
@@ -163,9 +137,9 @@ public class EventsTest {
         @Test
         @DisplayName("message")
         void message() {
-            createEventAndAssertReturnedMessageFor(stringValue);
-            createEventAndAssertReturnedMessageFor(boolValue);
-            createEventAndAssertReturnedMessageFor(doubleValue);
+            EventMessage message = GivenEvent.message();
+            Event event = GivenEvent.withMessage(message);
+            assertEquals(message, getMessage(event));
         }
 
         @Test
@@ -181,9 +155,7 @@ public class EventsTest {
         @DisplayName("root command ID")
         void rootCommandId() {
             CommandEnvelope command = requestFactory.generateEnvelope();
-            StringValue producerId = toMessage(getClass().getSimpleName());
-            EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-            Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+            Event event = newEvent(command);
 
             assertEquals(command.getId(), Events.getRootCommandId(event));
         }
@@ -192,20 +164,18 @@ public class EventsTest {
         @DisplayName("type name")
         void typeName() {
             CommandEnvelope command = requestFactory.generateEnvelope();
-            StringValue producerId = toMessage(getClass().getSimpleName());
-            EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
-            Event event = ef.createEvent(Time.getCurrentTime(), Tests.nullRef());
+            Event event = newEvent(command);
 
             TypeName typeName = EventEnvelope.of(event)
                                              .getTypeName();
             assertNotNull(typeName);
-            assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
+            assertEquals(GivenProjectCreated.class.getSimpleName(), typeName.getSimpleName());
         }
 
-        private void createEventAndAssertReturnedMessageFor(Message msg) {
-            Event event = GivenEvent.withMessage(msg);
-
-            assertEquals(msg, getMessage(event));
+        private Event newEvent(CommandEnvelope command) {
+            StringValue producerId = StringValue.of(getClass().getSimpleName());
+            EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
+            return ef.createEvent(GivenEvent.message(), null);
         }
     }
 
@@ -285,21 +255,6 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("for event with rejection context without command")
-        void forRejectionContextWithoutCommand() {
-            RejectionContext rejectionContext = EventsTestEnv.rejectionContext();
-            EventContext context = contextWithoutOrigin().setRejectionContext(
-                    rejectionContext)
-                                                         .build();
-            Event event = EventsTestEnv.event(context);
-
-            TenantId tenantId = Events.getTenantId(event);
-
-            TenantId defaultTenantId = TenantId.getDefaultInstance();
-            assertEquals(defaultTenantId, tenantId);
-        }
-
-        @Test
         @DisplayName("for event with event context without origin")
         void forEventContextWithoutOrigin() {
             EventContext context = contextWithoutOrigin().setEventContext(
@@ -334,22 +289,6 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("from event with rejection context")
-        void fromRejectionContext() {
-            TenantId targetTenantId = tenantId();
-            RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
-                    targetTenantId);
-            EventContext context = contextWithoutOrigin().setRejectionContext(
-                    rejectionContext)
-                                                         .build();
-            Event event = EventsTestEnv.event(context);
-
-            TenantId tenantId = Events.getTenantId(event);
-
-            assertEquals(targetTenantId, tenantId);
-        }
-
-        @Test
         @DisplayName("from event with event context originated from command context")
         void fromEventContextWithCommandContext() {
             TenantId targetTenantId = tenantId();
@@ -365,30 +304,34 @@ public class EventsTest {
 
             assertEquals(targetTenantId, tenantId);
         }
-
-        @Test
-        @DisplayName("from event with event context originated from rejection context")
-        void fromEventContextWithRejectionContext() {
-            TenantId targetTenantId = tenantId();
-            RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
-                    targetTenantId);
-            EventContext outerContext =
-                    contextWithoutOrigin().setRejectionContext(rejectionContext)
-                                          .build();
-            EventContext context = contextWithoutOrigin().setEventContext(outerContext)
-                                                         .build();
-            Event event = EventsTestEnv.event(context);
-
-            TenantId tenantId = Events.getTenantId(event);
-
-            assertEquals(targetTenantId, tenantId);
-        }
     }
 
     @Test
     @DisplayName("throw NullPointerException when getting tenant ID of null event")
     void notAcceptNullEvent() {
         assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
+    }
+
+    @Test
+    @DisplayName("tell if an Event is a rejection event")
+    void tellWhenRejection() {
+        RejectionEventContext rejectionContext = RejectionEventContext
+                .newBuilder()
+                .setStacktrace("at package.name.Class.method(Class.java:42)")
+                .build();
+        RejectionMessage message = StandardRejections.EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(pack(Time.getCurrentTime()))
+                .build();
+        Event event =
+                eventFactory.createRejectionEvent(message, null, rejectionContext);
+        assertTrue(Events.isRejection(event));
+    }
+
+    @Test
+    @DisplayName("tell if an Event is NOT a rejection event")
+    void tellWhenNotRejection() {
+        assertFalse(Events.isRejection(event));
     }
 
     private EventContext.Builder contextWithoutOrigin() {

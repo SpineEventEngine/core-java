@@ -21,10 +21,10 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.Version;
-import io.spine.server.entity.Transaction.Phase;
 import io.spine.server.event.EventFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.model.ModelTests;
@@ -41,8 +41,8 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.Events.getMessage;
 import static io.spine.core.Versions.newVersion;
+import static io.spine.core.given.GivenEvent.withMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -61,7 +61,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  *
  * @author Alex Tymchenko
  */
-@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
+@SuppressWarnings({"unused" /* JUnit nested classes. */, "ClassWithTooManyMethods"})
 public abstract class TransactionTest<I,
         E extends TransactionalEntity<I, S, B>,
         S extends Message,
@@ -84,14 +84,11 @@ public abstract class TransactionTest<I,
     }
 
     private static boolean checkPhase(Event event, Phase phase) {
-        Message eventMessage = getMessage(event);
-        boolean equalMessages = eventMessage.equals(phase.getEventMessage());
-        boolean equalContexts = event.getContext()
-                                     .equals(phase.getContext());
+        EventId id = event.getId();
+        Message phaseId = phase.getMessageId();
+        boolean equalIds = id.equals(phaseId);
         boolean isSuccessful = phase.isSuccessful();
-        return equalMessages
-                && equalContexts
-                && isSuccessful;
+        return equalIds && isSuccessful;
     }
 
     private static Version someVersion() {
@@ -115,15 +112,17 @@ public abstract class TransactionTest<I,
 
     protected abstract void checkEventReceived(E entity, Event event);
 
-    protected abstract Message createEventMessage();
+    protected abstract EventMessage createEventMessage();
 
-    protected abstract Message createEventMessageThatFailsInHandler();
+    protected abstract EventMessage createEventMessageThatFailsInHandler();
+
+    protected abstract void applyEvent(Transaction tx, Event event);
 
     protected abstract void breakEntityValidation(E entity, RuntimeException toThrow);
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
     }
 
     @Nested
@@ -185,7 +184,7 @@ public abstract class TransactionTest<I,
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
 
         checkEventReceived(entity, event);
@@ -197,13 +196,13 @@ public abstract class TransactionTest<I,
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
 
         assertEquals(1, tx.getPhases()
                           .size());
-        Phase<I, E, S, B> phase = tx.getPhases()
-                                    .get(0);
+        Phase<I, ?> phase = tx.getPhases()
+                              .get(0);
         assertTrue(checkPhase(event, phase));
     }
 
@@ -214,7 +213,7 @@ public abstract class TransactionTest<I,
 
         Transaction<I, E, S, B> tx = createTx(entity);
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
         S stateBeforeCommit = entity.getState();
         Version versionBeforeCommit = entity.getVersion();
@@ -233,7 +232,7 @@ public abstract class TransactionTest<I,
 
         Transaction<I, E, S, B> tx = createTx(entity);
 
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
         S stateBeforeRollback = entity.getState();
         Version versionBeforeRollback = entity.getVersion();
@@ -251,7 +250,7 @@ public abstract class TransactionTest<I,
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
 
         Version ctxVersion = event.getContext()
                                   .getVersion();
@@ -269,7 +268,7 @@ public abstract class TransactionTest<I,
         TransactionListener<I, E, S, B> listener = mock(TransactionListener.class);
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTxWithListener(entity, listener);
-        Event event = createEvent(createEventMessage());
+        Event event = withMessage(createEventMessage());
 
         verifyZeroInteractions(listener);
         applyEvent(tx, event);
@@ -301,7 +300,7 @@ public abstract class TransactionTest<I,
 
             Transaction<I, E, S, B> tx = createTx(entity);
 
-            Event event = createEvent(createEventMessageThatFailsInHandler());
+            Event event = withMessage(createEventMessageThatFailsInHandler());
 
             assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
         }
@@ -337,7 +336,7 @@ public abstract class TransactionTest<I,
 
             Transaction<I, E, S, B> tx = createTx(entity);
 
-            Event event = createEvent(createEventMessageThatFailsInHandler());
+            Event event = withMessage(createEventMessageThatFailsInHandler());
             try {
                 applyEvent(tx, event);
                 fail("Expected an `Exception` due to a failed phase execution.");
@@ -364,6 +363,12 @@ public abstract class TransactionTest<I,
                 checkRollback(entity, originalState, originalVersion);
             }
         }
+
+        private void checkRollback(E entity, S originalState, Version originalVersion) {
+            assertNull(entity.getTransaction());
+            assertEquals(originalState, entity.getState());
+            assertEquals(originalVersion, entity.getVersion());
+        }
     }
 
     @Test
@@ -381,40 +386,27 @@ public abstract class TransactionTest<I,
         assertThrows(InvalidEntityStateException.class, tx::commit);
     }
 
-    @Test
-    @DisplayName("advance version from event")
-    protected void advanceVersionFromEvent() {
+    /**
+     * Call this method in derived transaction tests if corresponding transaction
+     * carries version number into an entity.
+     *
+     * @implNote This method uses package-private API of the {@link Transaction} class.
+     */
+    protected final void advanceVersionFromEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
         assertEquals(entity.getVersion(), tx.getVersion());
 
-        Event event = createEvent(createEventMessage());
-        EventEnvelope envelope = EventEnvelope.of(event);
-        tx.apply(envelope);
-
-        assertEquals(event.getContext()
-                          .getVersion(), tx.getVersion());
+        Event event = withMessage(createEventMessage());
+        applyEvent(tx, event);
+        Version versionFromEvent = event.getContext()
+                                        .getVersion();
+        assertEquals(versionFromEvent, tx.getVersion());
         tx.commit();
-        assertEquals(event.getContext()
-                          .getVersion(), entity.getVersion());
+        assertEquals(versionFromEvent, entity.getVersion());
     }
 
-    protected final Event createEvent(Message eventMessage) {
-        return eventFactory.createEvent(eventMessage,
-                                        someVersion());
-    }
-
-    private void checkRollback(E entity, S originalState, Version originalVersion) {
-        assertNull(entity.getTransaction());
-        assertEquals(originalState, entity.getState());
-        assertEquals(originalVersion, entity.getVersion());
-    }
-
-    private ArgumentMatcher<Phase<I, E, S, B>> matchesSuccessfulPhaseFor(Event event) {
+    private ArgumentMatcher<Phase<I, ?>> matchesSuccessfulPhaseFor(Event event) {
         return phase -> checkPhase(event, phase);
-    }
-
-    private void applyEvent(Transaction<I, E, S, B> tx, Event event) {
-        tx.apply(EventEnvelope.of(event));
     }
 }

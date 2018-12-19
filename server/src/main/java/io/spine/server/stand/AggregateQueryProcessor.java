@@ -19,121 +19,55 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterators;
-import com.google.protobuf.Any;
-import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
-import io.spine.client.Target;
-import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.RecordReadRequest;
-import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import io.spine.client.EntityStateWithVersion;
+import io.spine.client.Query;
+import io.spine.core.ActorContext;
+import io.spine.core.TenantId;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.system.server.SystemReadSide;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.notNull;
+import static com.google.common.collect.ImmutableList.copyOf;
+import static io.spine.system.server.ReadSideFunction.delegatingTo;
 
 /**
- * Processes the queries targeting {@link io.spine.server.aggregate.Aggregate Aggregate} state.
- *
- * @author Alex Tymchenko
+ * Processes the queries targeting {@link Aggregate Aggregate} state.
  */
-class AggregateQueryProcessor extends RecordQueryProcessor {
+class AggregateQueryProcessor implements QueryProcessor {
 
-    private final StandStorage standStorage;
-    private final TypeUrl type;
+    private final SystemReadSide systemReadSide;
 
-    AggregateQueryProcessor(StandStorage standStorage, TypeUrl type) {
-        this.standStorage = standStorage;
-        this.type = type;
+    AggregateQueryProcessor(SystemReadSide systemReadSide) {
+        this.systemReadSide = systemReadSide;
     }
-
-    private final Function<EntityId, AggregateStateId> stateIdTransformer =
-            new Function<EntityId, AggregateStateId>() {
-                @Override
-                public @Nullable AggregateStateId apply(@Nullable EntityId input) {
-                    checkNotNull(input);
-
-                    final Any rawId = input.getId();
-                    final Message unpackedId = AnyPacker.unpack(rawId);
-                    final AggregateStateId stateId = AggregateStateId.of(unpackedId, type);
-                    return stateId;
-                }
-            };
 
     @Override
-    protected Iterator<EntityRecord> queryForRecords(Target target, FieldMask fieldMask) {
-        Iterator<EntityRecord> result;
-        if (target.getIncludeAll()) {
-            final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
-                                                           .isEmpty();
-            result = shouldApplyFieldMask
-                     ? standStorage.readAllByType(type, fieldMask)
-                     : standStorage.readAllByType(type);
-        } else {
-            result = doFetchWithFilters(target, fieldMask);
-        }
+    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
+        TenantId tenant = tenantOf(query);
+        SystemReadSide readSide = delegatingTo(systemReadSide).get(tenant);
+        Iterator<EntityStateWithVersion> read = readSide.readDomainAggregate(query);
+        ImmutableList<EntityStateWithVersion> result = copyOf(read);
         return result;
     }
 
-    private Iterator<EntityRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {
-        final EntityFilters filters = target.getFilters();
-        final boolean idsAreDefined = !filters.getIdFilter()
-                                              .getIdsList()
-                                              .isEmpty();
-        if (!idsAreDefined) {
-            return ImmutableList.<EntityRecord>of().iterator();
-        }
+    /**
+     * Obtains the {@link TenantId} of the given {@link Query}.
+     *
+     * <p>In a single-tenant environment, this value should be
+     * the {@linkplain TenantId#getDefaultInstance() default ID}.
+     *
+     * @param query the query to extract tenant from
+     * @return the tenant of this query
+     */
+    private static TenantId tenantOf(Query query) {
+        checkNotNull(query);
 
-        final EntityIdFilter idFilter = filters.getIdFilter();
-        final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(),
-                                                                             stateIdTransformer);
-
-        final Iterator<EntityRecord> result = stateIds.size() == 1
-                                              ? readOne(stateIds.iterator()
-                                                                .next(), fieldMask)
-                                              : readMany(stateIds, fieldMask);
-
-        return result;
-    }
-
-    private Iterator<EntityRecord> readOne(AggregateStateId singleId, FieldMask fieldMask) {
-        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
-                                                       .isEmpty();
-        final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(singleId);
-        final Optional<EntityRecord> singleResult = shouldApplyFieldMask
-                                                    ? standStorage.read(request, fieldMask)
-                                                    : standStorage.read(request);
-        Iterator<EntityRecord> result;
-        if (!singleResult.isPresent()) {
-            result = Collections.emptyIterator();
-        } else {
-            result = Collections.singleton(singleResult.get())
-                                .iterator();
-        }
-        return result;
-    }
-
-    private Iterator<EntityRecord> readMany(Collection<AggregateStateId> stateIds,
-                                            FieldMask fieldMask) {
-        final boolean applyFieldMask = !fieldMask.getPathsList()
-                                                 .isEmpty();
-        final Iterator<EntityRecord> bulkReadResults = applyFieldMask
-                                                       ? standStorage.readMultiple(stateIds,
-                                                                                   fieldMask)
-                                                       : standStorage.readMultiple(stateIds);
-        final Iterator<EntityRecord> result = Iterators.filter(bulkReadResults, notNull());
+        ActorContext context = query.getContext();
+        TenantId result = context.getTenantId();
         return result;
     }
 }

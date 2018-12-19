@@ -20,28 +20,38 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.ColumnFilter;
+import io.spine.client.OrderBy;
+import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
  * The parameters of an {@link EntityQuery}.
  *
  * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
  * implementations.
- *
- * @author Dmytro Dashenkov
  */
 @SPI /* Available to SPI users, providing own {@code Storage} implementations. */
 public final class QueryParameters implements Iterable<CompositeQueryParameter>, Serializable {
 
     private static final long serialVersionUID = 0L;
+    static final String FIELD_PARAMETERS = "parameters";
 
     private final ImmutableCollection<CompositeQueryParameter> parameters;
 
@@ -55,11 +65,47 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      * it is {@code false}.
      */
     private final boolean hasLifecycle;
+    private final int limit;
+    private final OrderBy orderBy;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
                                  .build();
+        this.limit = builder.limit();
+        this.orderBy = builder.orderBy();
         this.hasLifecycle = builder.hasLifecycle;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilder(QueryParameters parameters) {
+        return new Builder()
+                .addAll(parameters)
+                .orderBy(parameters.orderBy())
+                .limit(parameters.limit());
+    }
+
+    /**
+     * Creates a new {@code QueryParameters} instance which includes filters for column lifecycle
+     * flags to equal {@code false}. Such an entity is considered to be active.
+     *
+     * @param storage
+     *         a record storage persisting target entities
+     * @return new {@code QueryParameters} with {@linkplain io.spine.server.entity.LifecycleFlags
+     *         lifecycle flags} filters
+     */
+    public static QueryParameters activeEntityQueryParams(RecordStorage<?> storage) {
+        Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
+        EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
+        EntityColumn deletedColumn = lifecycleColumns.get(deleted.name());
+        CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
+                ImmutableMultimap.of(archivedColumn, eq(archivedColumn.getStoredName(), false),
+                                     deletedColumn, eq(deletedColumn.getStoredName(), false)),
+                ALL
+        );
+        return newBuilder().add(lifecycleParameter).build();
     }
 
     /**
@@ -75,9 +121,25 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         return parameters.iterator();
     }
 
+    public OrderBy orderBy() {
+        return orderBy;
+    }
+
+    public boolean ordered() {
+        return !orderBy.equals(OrderBy.getDefaultInstance());
+    }
+
+    public int limit() {
+        return limit;
+    }
+
+    public boolean limited() {
+        return limit != 0;
+    }
+
     /**
-     * @return whether this parameters include filters by
-     * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags} or not
+     * Verifies whether this parameters include filters by
+     * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags} or not.
      */
     public boolean isLifecycleAttributesSet() {
         return hasLifecycle;
@@ -100,8 +162,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         return Objects.hashCode(parameters);
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add(FIELD_PARAMETERS, parameters)
+                          .add("hasLifecycle", hasLifecycle)
+                          .toString();
     }
 
     /**
@@ -112,9 +178,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         private final ImmutableCollection.Builder<CompositeQueryParameter> parameters;
 
         private boolean hasLifecycle;
+        private OrderBy orderBy;
+        private int limit;
 
         private Builder() {
             parameters = ImmutableList.builder();
+            orderBy = OrderBy.getDefaultInstance();
         }
 
         @CanIgnoreReturnValue
@@ -134,6 +203,25 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
 
         public ImmutableCollection.Builder<CompositeQueryParameter> getParameters() {
             return parameters;
+        }
+
+        public Builder limit(int value) {
+            limit = value;
+            return this;
+        }
+
+        public int limit() {
+            return limit;
+        }
+
+        public Builder orderBy(OrderBy orderBy) {
+            checkNotNull(orderBy);
+            this.orderBy = orderBy;
+            return this;
+        }
+
+        public OrderBy orderBy() {
+            return orderBy;
         }
 
         /**

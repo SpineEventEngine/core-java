@@ -21,16 +21,14 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import io.spine.client.Query;
 import io.spine.client.EntityStateWithVersion;
+import io.spine.client.Query;
 
 /**
  * An {@link QueryProcessor} implementation that always returns empty result.
  *
  * <p>Used to define a processing result for {@link Query} which does not hit any of
  * exposed state objects.
- *
- * @author Alex Tymchenko
  */
 class NoopQueryProcessor implements QueryProcessor {
     @Override

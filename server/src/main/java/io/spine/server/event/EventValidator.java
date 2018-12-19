@@ -20,46 +20,38 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Optional;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
-import io.spine.core.MessageInvalid;
 import io.spine.validate.MessageValidator;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.InvalidEventException.onConstraintViolations;
+import static java.util.Optional.ofNullable;
 
 /**
- * The {@link EventEnvelope} validator.
- *
- * <p>Checks if the message of the passed event is {@linkplain MessageValidator#validate(Message)
- * valid}.
- *
- * @author Dmytro Dashenkov
+ * Checks if the message of the passed event is {@linkplain MessageValidator#validate() valid}.
  */
 final class EventValidator implements EnvelopeValidator<EventEnvelope> {
-
-    private final MessageValidator messageValidator;
-
-    EventValidator(MessageValidator messageValidator) {
-        this.messageValidator = messageValidator;
-    }
 
     @Override
     public Optional<MessageInvalid> validate(EventEnvelope envelope) {
         checkNotNull(envelope);
 
-        final Event event = envelope.getOuterObject();
+        Event event = envelope.getOuterObject();
         MessageInvalid result = null;
-        final List<ConstraintViolation> violations = messageValidator.validate(event);
+        MessageValidator validator = MessageValidator.newInstance(event);
+        List<ConstraintViolation> violations = validator.validate();
         if (!violations.isEmpty()) {
-            result = onConstraintViolations(event, violations);
+            EventMessage message = envelope.getMessage();
+            result = onConstraintViolations(message, violations);
         }
-        return Optional.fromNullable(result);
+        return ofNullable(result);
     }
 }

@@ -27,9 +27,6 @@ import io.spine.type.TypeUrl;
  * Implementation of {@link RecordBasedRepository} that manages entities
  * derived from {@link AbstractEntity}.
  *
- * @param <I> the type of IDs of entities
- * @param <E> the type of entities
- * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
 public abstract class DefaultRecordBasedRepository<I,
@@ -48,9 +45,9 @@ public abstract class DefaultRecordBasedRepository<I,
     protected DefaultRecordBasedRepository() {
         super();
         @SuppressWarnings("OverridableMethodCallDuringObjectConstruction") // get generic param
-        final Class<E> entityClass = getEntityClass();
+        Class<E> entityClass = getEntityClass();
         this.entityFactory = new DefaultEntityFactory<>(entityClass);
-        final TypeUrl stateType = entityClass().getStateType();
+        TypeUrl stateType = entityClass().getStateType();
         this.storageConverter = DefaultEntityStorageConverter.forAllFields(stateType,
                                                                            this.entityFactory);
     }

@@ -20,42 +20,89 @@
 
 package io.spine.testing.server.aggregate;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.testing.server.aggregate.given.AggregateBuilderTestEnv.TestAggregate;
 import io.spine.time.testing.TimeTests;
+import io.spine.validate.TimestampVBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.aggregate.given.AggregateBuilderTestEnv.givenAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-@DisplayName("AggregateBuilder should")
+@DisplayName("AggregateBuilder should create an aggregate with requested...")
 class AggregateBuilderTest {
 
-    @Test
-    @DisplayName("create aggregate")
-    void createAggregate() {
-        int id = 2048;
-        int version = 2017;
-        Timestamp whenModified = Time.getCurrentTime();
-        Timestamp state = TimeTests.Past.minutesAgo(60);
+    private int id;
+    private int version;
+    private Message state;
+    private Timestamp whenModified;
 
-        Aggregate aggregate = givenAggregate()
+    private Aggregate aggregate;
+
+    @BeforeEach
+    void setUp() {
+        id = 2048;
+        version = 2017;
+        whenModified = Time.getCurrentTime();
+        state = TimeTests.Past.minutesAgo(60);
+
+        aggregate = givenAggregate()
                 .withId(id)
                 .withVersion(version)
-                .withState(state)
+                .withState((Timestamp) state)
                 .modifiedOn(whenModified)
                 .build();
+    }
 
+    @Test
+    @DisplayName("class")
+    void requestedClass() {
         assertEquals(TestAggregate.class, aggregate.getClass());
+    }
+
+    @Test
+    @DisplayName("ID")
+    void id() {
         assertEquals(id, aggregate.getId());
+    }
+
+    @Test
+    @DisplayName("state")
+    void state() {
         assertEquals(state, aggregate.getState());
+    }
+
+    @Test
+    @DisplayName("version")
+    void version() {
         assertEquals(version, aggregate.getVersion().getNumber());
+    }
+
+    @Test
+    @DisplayName("modification time")
+    void timestamp() {
         assertEquals(whenModified, aggregate.whenModified());
+    }
+
+    /*
+     * Test Environment
+     ************************/
+
+    private static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
+        AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
+        result.setResultClass(TestAggregate.class);
+        return result;
+    }
+
+    private static class TestAggregate extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
+        protected TestAggregate(Integer id) {
+            super(id);
+        }
     }
 }

@@ -22,13 +22,10 @@ package io.spine.server.entity.storage;
 
 import java.util.Collection;
 
-/**
- * @author Dmytro Dashenkov
- */
 public final class TestEntityQueryFactory {
 
+    /** Prevents the class instantiation. */
     private TestEntityQueryFactory() {
-        // Prevent static class initialization
     }
 
     /**

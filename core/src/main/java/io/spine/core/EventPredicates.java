@@ -20,10 +20,11 @@
 
 package io.spine.core;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
-import io.spine.time.Timestamps2;
+import io.spine.protobuf.Timestamps2;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -32,13 +33,11 @@ import static com.google.protobuf.util.Timestamps.compare;
 
 /**
  * Predicates for working with {@code Event}s.
- *
- * @author Alexander Yevsyukov
  */
 public final class EventPredicates {
 
+    /** Prevent instantiation of this utility class. */
     private EventPredicates() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -78,7 +77,7 @@ public final class EventPredicates {
         }
 
         @Override
-        public boolean apply(@Nullable Event record) {
+        public boolean test(@Nullable Event record) {
             if (record == null) {
                 return false;
             }
@@ -98,7 +97,7 @@ public final class EventPredicates {
         }
 
         @Override
-        public boolean apply(@Nullable Event record) {
+        public boolean test(@Nullable Event record) {
             if (record == null) {
                 return false;
             }
@@ -130,7 +129,7 @@ public final class EventPredicates {
         }
 
         @Override
-        public boolean apply(@Nullable Event event) {
+        public boolean test(@Nullable Event event) {
             if (event == null) {
                 return false;
             }

@@ -72,13 +72,6 @@ public class AggregateRoot<I> {
     }
 
     /**
-     * Obtains the {@code BoundedContext} to which the aggregate belongs.
-     */
-    private BoundedContext getBoundedContext() {
-        return boundedContext;
-    }
-
-    /**
      * Obtains a part state by its class.
      *
      * @param partStateClass the class of the state of the part
@@ -90,9 +83,9 @@ public class AggregateRoot<I> {
      */
     protected <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     S getPartState(Class<S> partStateClass) {
-        final AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
-        final AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
-        final S partState = aggregatePart.getState();
+        AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
+        AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
+        S partState = aggregatePart.getState();
         return partState;
     }
 
@@ -107,7 +100,7 @@ public class AggregateRoot<I> {
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> getRepository(Class<S> stateClass) {
 
-        final AggregatePartRepository<I, A, ?> result;
+        AggregatePartRepository<I, A, ?> result;
         try {
             result = (AggregatePartRepository<I, A, ?>) cache.get(stateClass);
         } catch (ExecutionException e) {
@@ -126,25 +119,45 @@ public class AggregateRoot<I> {
     /** Creates a loader which calls {@link #lookup(Class)}. */
     private CacheLoader<Class<? extends Message>,
             AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>> newLoader() {
-        return new CacheLoader<Class<? extends Message>,
-                       AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>>() {
-                   @Override
-                   public AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
-                   load(Class<? extends Message> key) throws Exception {
-                       return AggregateRoot.this.lookup(key);
-                   }
-               };
+        return new PartRepositoryCacheLoader<>(this);
     }
 
     /** Finds an aggregate part repository in the Bounded Context. */
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
-        final Class<I> idClass = (Class<I>) getId().getClass();
-        final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
-                                                                        idClass,
-                                                                        stateClass);
-        final AggregatePartRepository<I, A, ?> result = lookup.find();
+        Class<I> idClass = (Class<I>) getId().getClass();
+        AggregatePartRepositoryLookup<I, S> lookup =
+                createLookup(boundedContext, idClass, stateClass);
+        AggregatePartRepository<I, A, ?> result = lookup.find();
         return result;
+    }
+
+    /**
+     * The loader for the cache of aggregate part repositories.
+     *
+     * @param <I> the type of root identifier
+     * @see #createCache()
+     * @see #newLoader()
+     */
+    private static final
+    class PartRepositoryCacheLoader<I>
+            extends CacheLoader<
+                Class<? extends Message>,
+                AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
+            > {
+
+        private final AggregateRoot<I> root;
+
+        private PartRepositoryCacheLoader(AggregateRoot<I> root) {
+            super();
+            this.root = root;
+        }
+
+        @Override
+        public AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
+        load(Class<? extends Message> key) throws IllegalStateException {
+            return root.lookup(key);
+        }
     }
 }

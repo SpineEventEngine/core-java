@@ -35,16 +35,12 @@ import io.spine.validate.ValidatingBuilder;
  * @param <A> the type of the aggregate to build
  * @param <I> the type of aggregate IDs
  * @param <S> the type of the aggregate state
- * @author Alexander Yevsyukov
  */
 @VisibleForTesting
 public class AggregateBuilder<A extends Aggregate<I, S, ?>,
                               I,
                               S extends Message> extends EntityBuilder<A, I, S> {
 
-    /**
-     * {@inheritDoc}
-     */
     public AggregateBuilder() {
         super();
         // Have the constructor for easier location of usages.
@@ -68,7 +64,7 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
      * A test-only implementation of an {@link AggregateTransaction} that sets the given
      * {@code state} and {@code version} as a starting point for the transaction.
      *
-     * @param <B> <B> the type of a {@code ValidatingBuilder} for the aggregate state
+     * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
      */
     private final class
     TestAggregateTransaction<B extends ValidatingBuilder<S, ? extends Message.Builder>>

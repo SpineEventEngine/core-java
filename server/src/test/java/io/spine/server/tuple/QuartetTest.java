@@ -20,7 +20,6 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
@@ -32,6 +31,8 @@ import io.spine.test.tuple.quartet.Monkey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -102,20 +103,21 @@ class QuartetTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        new EqualsTester().addEqualityGroup(Quartet.of(monkey, donkey, goat, bear),
-                                            Quartet.of(monkey, donkey, goat, bear))
+        new EqualsTester()
+                .addEqualityGroup(Quartet.of(monkey, donkey, goat, bear),
+                                  Quartet.of(monkey, donkey, goat, bear))
 
-                          .addEqualityGroup(Quartet.of(bear, donkey, monkey, goat))
+                .addEqualityGroup(Quartet.of(bear, donkey, monkey, goat))
 
-                          .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, bear))
-                          .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, null))
+                .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, bear))
+                .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, null))
 
-                          .addEqualityGroup(Quartet.withNullable2(monkey, donkey, goat, bear))
-                          .addEqualityGroup(Quartet.withNullable2(monkey, donkey, null, null))
+                .addEqualityGroup(Quartet.withNullable2(monkey, donkey, goat, bear))
+                .addEqualityGroup(Quartet.withNullable2(monkey, donkey, null, null))
 
-                          .addEqualityGroup(Quartet.withNullable3(monkey, donkey, goat, bear))
-                          .addEqualityGroup(Quartet.withNullable3(monkey, null, null, null))
-                          .testEquals();
+                .addEqualityGroup(Quartet.withNullable3(monkey, donkey, goat, bear))
+                .addEqualityGroup(Quartet.withNullable3(monkey, null, null, null))
+                .testEquals();
     }
 
     @Test

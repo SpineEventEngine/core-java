@@ -22,10 +22,11 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
-import io.spine.server.entity.Transaction;
+import io.spine.server.entity.EventPlayingTransaction;
+import io.spine.server.entity.IncrementFromEvent;
+import io.spine.server.entity.VersionIncrement;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -34,13 +35,12 @@ import io.spine.validate.ValidatingBuilder;
  * @param <I> the type of aggregate IDs
  * @param <S> the type of aggregate state
  * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
- * @author Alex Tymchenko
  */
 @Internal
 public class AggregateTransaction<I,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        extends Transaction<I, Aggregate<I, S, B>, S, B> {
+        extends EventPlayingTransaction<I, Aggregate<I, S, B>, S, B> {
 
     @VisibleForTesting
     AggregateTransaction(Aggregate<I, S, B> aggregate) {
@@ -50,17 +50,6 @@ public class AggregateTransaction<I,
     @VisibleForTesting
     protected AggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
         super(aggregate, state, version);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>As long as {@linkplain EventApplierMethod event applier method}
-     * does not operate with {@linkplain EventContext event context}, this parameter is ignored.
-     */
-    @Override
-    protected void dispatch(Aggregate aggregate, EventEnvelope event) {
-        aggregate.invokeApplier(event.getMessage());
     }
 
     /**
@@ -82,7 +71,17 @@ public class AggregateTransaction<I,
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
     static AggregateTransaction start(Aggregate aggregate) {
-        final AggregateTransaction tx = new AggregateTransaction(aggregate);
+        AggregateTransaction tx = new AggregateTransaction(aggregate);
         return tx;
+    }
+
+    @Override
+    protected final void doDispatch(Aggregate<I, S, B> aggregate, EventEnvelope event) {
+        aggregate.invokeApplier(event);
+    }
+
+    @Override
+    protected VersionIncrement createVersionIncrement(EventEnvelope event) {
+        return new IncrementFromEvent(this, event);
     }
 }

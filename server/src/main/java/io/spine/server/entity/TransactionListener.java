@@ -22,7 +22,6 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
-import io.spine.server.entity.Transaction.Phase;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -49,7 +48,7 @@ public interface TransactionListener<I,
      *
      * @param phase the phase which was applied before this callback is invoked
      */
-    void onAfterPhase(Phase<I, E, S, B> phase);
+    void onAfterPhase(Phase<I, ?> phase);
 
     /**
      * A callback invoked before committing the transaction.
@@ -91,7 +90,7 @@ public interface TransactionListener<I,
             implements TransactionListener<I, E, S, B> {
 
         @Override
-        public void onAfterPhase(Phase<I, E, S, B> phase) {
+        public void onAfterPhase(Phase<I, ?> phase) {
             // Do nothing.
         }
 

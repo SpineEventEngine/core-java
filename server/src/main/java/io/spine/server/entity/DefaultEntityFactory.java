@@ -20,7 +20,11 @@
 
 package io.spine.server.entity;
 
+import io.spine.server.entity.model.EntityClass;
+
 import java.util.Objects;
+
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
  * Default factory that creates entities by invoking constructor that
@@ -37,7 +41,7 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
     private final EntityClass<E> entityClass;
 
     DefaultEntityFactory(Class<E> entityClass) {
-        this.entityClass = new EntityClass<>(entityClass);
+        this.entityClass = asEntityClass(entityClass);
     }
 
     @Override
@@ -58,7 +62,7 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final DefaultEntityFactory other = (DefaultEntityFactory) obj;
+        DefaultEntityFactory other = (DefaultEntityFactory) obj;
         return Objects.equals(this.entityClass, other.entityClass);
     }
 }

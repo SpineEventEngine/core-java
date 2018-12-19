@@ -35,10 +35,10 @@ import io.spine.server.entity.Repository;
  *
  * @param <I> the ID type of aggregate, to which messages are being delivered
  * @param <A> the type of aggregate
- * @param <E> the type of message envelope, which is used for message delivery
  * @author Alex Tymchenko
  */
 @SPI
+@SuppressWarnings("WeakerAccess") // is public for customizable delivery mechanisms
 public abstract class AggregateDelivery<I,
                                         A extends Aggregate<I, ?, ?>,
                                         E extends ActorMessageEnvelope<?, ?, ?>,
@@ -58,12 +58,12 @@ public abstract class AggregateDelivery<I,
                                    B extends ShardedStream.AbstractBuilder<I, E, B, S>>
             extends Consumer<I, A, E, S, B> {
 
-        protected AggregateMessageConsumer(DeliveryTag<E> tag, Repository<I, A> repository) {
+        protected AggregateMessageConsumer(DeliveryTag tag, Repository<I, A> repository) {
             super(tag, repository);
         }
 
         @Override
-        protected abstract AggregateEndpoint<I, A, E, ?> getEndpoint(E messageEnvelope);
+        protected abstract AggregateEndpoint<I, A, E> getEndpoint(E messageEnvelope);
 
         @Override
         protected void passToEndpoint(I id, E envelopeMessage) {

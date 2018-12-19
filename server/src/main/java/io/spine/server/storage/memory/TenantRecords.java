@@ -20,47 +20,44 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.type.TypeUrl;
+import io.spine.server.entity.storage.QueryParameters;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static com.google.common.collect.Maps.transformValues;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsVisible;
 import static io.spine.server.entity.FieldMasks.applyMask;
+import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
 
 /**
  * The memory-based storage for {@link EntityRecord} that represents
  * all storage operations available for data of a single tenant.
- *
- * @author Alexander Yevsyukov
- * @author Dmitry Ganzha
  */
 class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
-    private final Map<I, EntityRecordWithColumns> filtered =
-            filterValues(records, isRecordWithColumnsVisible());
+    private final Map<I, EntityRecordWithColumns> activeRecords =
+            filterValues(records, r -> r != null && r.isActive());
+    private static final EntityRecordUnpacker UNPACKER = EntityRecordUnpacker.INSTANCE;
 
     @Override
     public Iterator<I> index() {
-        final Iterator<I> result = filtered.keySet()
-                                           .iterator();
+        Iterator<I> result = activeRecords.keySet()
+                                          .iterator();
         return result;
     }
 
@@ -71,98 +68,87 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     @Override
     public Optional<EntityRecordWithColumns> get(I id) {
-        final EntityRecordWithColumns record = records.get(id);
-        return Optional.fromNullable(record);
+        EntityRecordWithColumns record = records.get(id);
+        return Optional.ofNullable(record);
     }
 
     boolean delete(I id) {
         return records.remove(id) != null;
     }
 
-    private Map<I, EntityRecordWithColumns> filtered() {
-        return filtered;
+    private Map<I, EntityRecordWithColumns> activeRecords() {
+        return activeRecords;
     }
 
-    Map<I, EntityRecord> readAllRecords() {
-        final Map<I, EntityRecordWithColumns> filtered = filtered();
-        final Map<I, EntityRecord> records = transformValues(filtered,
-                                                             EntityRecordUnpacker.INSTANCE);
-        final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(records);
-        return result;
+    Iterator<EntityRecord> readAllRecords() {
+        return activeRecords()
+                .values()
+                .stream()
+                .map(UNPACKER)
+                .iterator();
     }
 
-    Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        final Map<I, EntityRecordWithColumns> filtered =
-                filterValues(records, new EntityQueryMatcher<>(query));
-        final Map<I, EntityRecord> records = transformValues(filtered,
-                                                             EntityRecordUnpacker.INSTANCE);
-        final Function<EntityRecord, EntityRecord> fieldMaskApplier =
-                new FieldMaskApplier(fieldMask);
-        final Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier);
-        final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(maskedRecords);
-        return result;
-    }
-
-    @SuppressWarnings("CheckReturnValue") // calling builder
-    @Nullable
-    EntityRecord findAndApplyFieldMask(I givenId, FieldMask fieldMask) {
-        EntityRecord result = null;
-        for (I recordId : filtered.keySet()) {
-            if (recordId.equals(givenId)) {
-                final Optional<EntityRecordWithColumns> record = get(recordId);
-                if (!record.isPresent()) {
-                    continue;
-                }
-                EntityRecord.Builder matchingRecord = record.get()
-                                                            .getRecord()
-                                                            .toBuilder();
-                final Any state = matchingRecord.getState();
-                final TypeUrl typeUrl = TypeUrl.parse(state.getTypeUrl());
-                final Message wholeState = unpack(state);
-                final Message maskedState = applyMask(fieldMask, wholeState, typeUrl);
-                final Any processed = pack(maskedState);
-
-                matchingRecord.setState(processed);
-                result = matchingRecord.build();
-            }
-        }
-        return result;
-    }
-
-    Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
-        if (fieldMask.getPathsList()
-                     .isEmpty()) {
+    Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
+        if (fieldMask.getPathsCount() == 0) {
             return readAllRecords();
         }
 
-        if (isEmpty()) {
-            return ImmutableMap.of();
+        return activeRecords()
+                .values()
+                .stream()
+                .map(UNPACKER)
+                .map(new FieldMaskApplier(fieldMask))
+                .iterator();
+    }
+
+    Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+        return findRecords(query)
+                .map(UNPACKER)
+                .map(new FieldMaskApplier(fieldMask))
+                .iterator();
+    }
+
+    private Stream<EntityRecordWithColumns> findRecords(EntityQuery<I> query) {
+        Map<I, EntityRecordWithColumns> records = filterRecords(query);
+        QueryParameters parameters = query.getParameters();
+        Stream<EntityRecordWithColumns> stream = records.values()
+                                                        .stream();
+        if (parameters.ordered()) {
+            stream = stream.sorted(orderedBy(parameters.orderBy()));
         }
-
-        final ImmutableMap.Builder<I, EntityRecord> result = ImmutableMap.builder();
-
-        for (Map.Entry<I, EntityRecordWithColumns> storageEntry : filtered.entrySet()) {
-            final I id = storageEntry.getKey();
-            final EntityRecord rawRecord = storageEntry.getValue()
-                                                       .getRecord();
-            final TypeUrl type = TypeUrl.parse(rawRecord.getState()
-                                                        .getTypeUrl());
-            final Any recordState = rawRecord.getState();
-            final Message stateAsMessage = unpack(recordState);
-            final Message processedState = applyMask(fieldMask, stateAsMessage, type);
-            final Any packedState = pack(processedState);
-            final EntityRecord resultingRecord = EntityRecord.newBuilder()
-                                                             .setState(packedState)
-                                                             .build();
-            result.put(id, resultingRecord);
+        if (parameters.limited()) {
+            stream = stream.limit(parameters.limit());
         }
+        return stream;
+    }
 
-        return result.build();
+    /**
+     * Filters the records returning only the ones matching the
+     * {@linkplain EntityQuery entity query}.
+     */
+    private Map<I, EntityRecordWithColumns> filterRecords(EntityQuery<I> query) {
+        EntityQueryMatcher<I> matcher = new EntityQueryMatcher<>(query);
+        return filterValues(records, matcher::test);
+    }
+
+    @Nullable
+    EntityRecord findAndApplyFieldMask(I targetId, FieldMask fieldMask) {
+        EntityRecordWithColumns recordWithColumns = activeRecords().get(targetId);
+        if (recordWithColumns == null) {
+            return null;
+        }
+        EntityRecord record = recordWithColumns.getRecord();
+        Any recordState = record.getState();
+        Any maskedState = new FieldMaskApplier(fieldMask).maskAny(recordState);
+        EntityRecord maskedRecord = record.toBuilder()
+                                          .setState(maskedState)
+                                          .build();
+        return maskedRecord;
     }
 
     @Override
     public boolean isEmpty() {
-        return filtered.isEmpty();
+        return activeRecords.isEmpty();
     }
 
     /**
@@ -180,18 +166,21 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             this.fieldMask = fieldMask;
         }
 
-        @Nullable
         @Override
-        public EntityRecord apply(@Nullable EntityRecord input) {
+        public @Nullable EntityRecord apply(@Nullable EntityRecord input) {
             checkNotNull(input);
-            final Any packedState = input.getState();
-            final Message state = unpack(packedState);
-            final TypeUrl typeUrl = TypeUrl.ofEnclosed(packedState);
-            final Message maskedState = applyMask(fieldMask, state, typeUrl);
-            final Any repackedState = pack(maskedState);
-            final EntityRecord result = EntityRecord.newBuilder(input)
-                                                    .setState(repackedState)
-                                                    .build();
+            Any maskedState = maskAny(input.getState());
+            EntityRecord result = EntityRecord
+                    .newBuilder(input)
+                    .setState(maskedState)
+                    .build();
+            return result;
+        }
+
+        private Any maskAny(Any message) {
+            Message stateMessage = unpack(message);
+            Message maskedMessage = applyMask(fieldMask, stateMessage);
+            Any result = pack(maskedMessage);
             return result;
         }
     }

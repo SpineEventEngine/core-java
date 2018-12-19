@@ -27,7 +27,6 @@ import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AbstractMe
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AnyType;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.GeneratedMessageType;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.IntegerType;
-import io.spine.testing.Verify;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,17 +34,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
-import static io.spine.testing.Verify.assertEmpty;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("ColumnTypeRegistry should")
 class ColumnTypeRegistryTest {
 
@@ -69,7 +63,7 @@ class ColumnTypeRegistryTest {
     void haveEmptyInstance() {
         ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.newBuilder()
                                                              .build();
-        assertEmpty(emptyInstance.getColumnTypeMap());
+        assertThat(emptyInstance.getColumnTypeMap()).isEmpty();
     }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"}) // OK for a test.
@@ -90,7 +84,7 @@ class ColumnTypeRegistryTest {
 
         for (Class<?> cls : classes) {
             ColumnType type = registry.get(mockProperty(cls));
-            Verify.assertInstanceOf(AnyType.class, type);
+            assertThat(type).isInstanceOf(AnyType.class);
         }
     }
 
@@ -105,7 +99,7 @@ class ColumnTypeRegistryTest {
         EntityColumn column = mockProperty(Any.class);
         ColumnType type = registry.get(column);
         assertNotNull(type);
-        assertThat(type, instanceOf(GeneratedMessageType.class));
+        assertThat(type).isInstanceOf(GeneratedMessageType.class);
     }
 
     @Test

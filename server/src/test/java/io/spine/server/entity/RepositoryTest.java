@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Predicates;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.given.RepositoryTestEnv.ProjectEntity;
@@ -29,8 +28,8 @@ import io.spine.server.entity.given.RepositoryTestEnv.TestRepo;
 import io.spine.server.model.ModelError;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.entity.ProjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,13 +37,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
-import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Iterators.size;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -128,11 +127,18 @@ class RepositoryTest {
     }
 
     @Test
+    @DisplayName("provide default event filter")
+    void provideDefaultEventFilter() {
+        EventFilter filter = repository.eventFilter();
+        assertSame(EventFilter.allowAll(), filter);
+    }
+
+    @Test
     @DisplayName("close storage on close")
     void closeStorageOnClose() {
         repository.initStorage(storageFactory);
 
-        final RecordStorage<?> storage = (RecordStorage<?>) repository.getStorage();
+        RecordStorage<?> storage = (RecordStorage<?>) repository.getStorage();
         repository.close();
 
         assertTrue(storage.isClosed());
@@ -152,7 +158,7 @@ class RepositoryTest {
      * Creates three entities in the repository.
      */
     private void createAndStoreEntities() {
-        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 repository.initStorage(storageFactory);
@@ -169,15 +175,7 @@ class RepositoryTest {
     @DisplayName("iterate over entities")
     void iterateOverEntities() {
         createAndStoreEntities();
-
-        final int numEntities = new TenantAwareFunction0<Integer>(tenantId) {
-            @Override
-            public Integer apply() {
-                final List<ProjectEntity> entities = newArrayList(getIterator(tenantId));
-                return entities.size();
-            }
-        }.execute();
-
+        int numEntities = size(getIterator(tenantId));
         assertEquals(3, numEntities);
     }
 
@@ -185,19 +183,15 @@ class RepositoryTest {
     @DisplayName("not allow removal in entities iterator")
     void notAllowRemovalInIterator() {
         createAndStoreEntities();
-        final Iterator<ProjectEntity> iterator = getIterator(tenantId);
+        Iterator<ProjectEntity> iterator = getIterator(tenantId);
         assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 
     private Iterator<ProjectEntity> getIterator(TenantId tenantId) {
-        final TenantAwareFunction0<Iterator<ProjectEntity>> op =
-                new TenantAwareFunction0<Iterator<ProjectEntity>>(tenantId) {
-                    @Override
-                    public Iterator<ProjectEntity> apply() {
-                        return repository.iterator(Predicates.alwaysTrue());
-                    }
-                };
-        return op.execute();
+        Iterator<ProjectEntity> result =
+                TenantAwareRunner.with(tenantId)
+                                 .evaluate(() -> repository.iterator(entity -> true));
+        return result;
     }
 
     private void createAndStore(String entityId) {

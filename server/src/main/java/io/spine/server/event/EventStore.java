@@ -20,40 +20,34 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.TextFormat;
-import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.Events;
 import io.spine.core.TenantId;
-import io.spine.server.event.grpc.EventStoreGrpc;
+import io.spine.logging.Logging;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.tryFind;
 import static java.util.stream.Collectors.toSet;
 
 /**
  * A store of all events in a bounded context.
- *
- * @author Alexander Yevsyukov
  */
-public class EventStore implements AutoCloseable {
+public final class EventStore implements AutoCloseable {
 
     private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
@@ -74,22 +68,12 @@ public class EventStore implements AutoCloseable {
         return new Builder();
     }
 
-    /**
-     * Creates new {@link ServiceBuilder} for building {@code EventStore} instance
-     * that will be exposed as a gRPC service.
-     */
-    public static ServiceBuilder newServiceBuilder() {
-        return new ServiceBuilder();
-    }
-
     private static void ensureSameTenant(Iterable<Event> events) {
         checkNotNull(events);
         Set<TenantId> tenants = Streams.stream(events)
                                        .map(Events::getTenantId)
                                        .collect(toSet());
-        checkArgument(tenants.size() == 1,
-                      TENANT_MISMATCH_ERROR_MSG,
-                      tenants);
+        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }
 
     /**
@@ -103,7 +87,7 @@ public class EventStore implements AutoCloseable {
                        StorageFactory storageFactory,
                        @Nullable Logger logger) {
         super();
-        final ERepository eventRepository = new ERepository();
+        ERepository eventRepository = new ERepository();
         eventRepository.initStorage(storageFactory);
         this.storage = eventRepository;
         this.streamExecutor = streamExecutor;
@@ -119,12 +103,12 @@ public class EventStore implements AutoCloseable {
      *
      * @param event the record to append
      */
-    public void append(final Event event) {
+    public void append(Event event) {
         checkNotNull(event);
-        final TenantAwareOperation op = new EventOperation(event) {
+        TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
-                store(event);
+                storage.store(event);
             }
         };
         op.execute();
@@ -142,9 +126,11 @@ public class EventStore implements AutoCloseable {
      *
      * @param events the events to append
      */
-    public void appendAll(final Iterable<Event> events) {
+    public void appendAll(Iterable<Event> events) {
         checkNotNull(events);
-        Optional<Event> tenantDefiningEvent = tryFind(events, Predicates.notNull());
+        Optional<Event> tenantDefiningEvent = Streams.stream(events)
+                                                     .filter(Objects::nonNull)
+                                                     .findFirst();
         if (!tenantDefiningEvent.isPresent()) {
             return;
         }
@@ -155,7 +141,7 @@ public class EventStore implements AutoCloseable {
                 if (isTenantSet()) { // If multitenant context
                     ensureSameTenant(events);
                 }
-                store(events);
+                storage.store(events);
             }
         };
         op.execute();
@@ -164,56 +150,25 @@ public class EventStore implements AutoCloseable {
     }
 
     /**
-     * Stores the passed event.
-     *
-     * @param event the event to store.
-     */
-    protected void store(Event event) {
-        storage.store(event);
-    }
-
-    /**
-     * Stores the passed events.
-     *
-     * @param events the events to store.
-     */
-    protected void store(Iterable<Event> events) {
-        storage.store(events);
-    }
-
-    /**
-     * Creates iterator for traversing through the history of events matching the passed query.
-     *
-     * @param query the query filtering the history
-     * @return iterator instance
-     */
-    protected Iterator<Event> iterator(EventStreamQuery query) {
-        return storage.iterator(query);
-    }
-
-    /**
      * Creates the stream with events matching the passed query.
      *
      * @param request          the query with filtering parameters for the event history
      * @param responseObserver observer for the resulting stream
      */
-    public void read(final EventStreamQuery request, final StreamObserver<Event> responseObserver) {
+    public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
         checkNotNull(request);
         checkNotNull(responseObserver);
 
         logReadingStart(request, responseObserver);
 
-        streamExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                final Iterator<Event> eventRecords = iterator(request);
-                while (eventRecords.hasNext()) {
-                    final Event event = eventRecords.next();
-                    responseObserver.onNext(event);
-                }
-                responseObserver.onCompleted();
-                logReadingComplete(responseObserver);
+        streamExecutor.execute(() -> {
+            Iterator<Event> eventRecords = storage.iterator(request);
+            while (eventRecords.hasNext()) {
+                Event event = eventRecords.next();
+                responseObserver.onNext(event);
             }
+            responseObserver.onCompleted();
+            logReadingComplete(responseObserver);
         });
     }
 
@@ -224,40 +179,35 @@ public class EventStore implements AutoCloseable {
 
     /**
      * Closes the underlying storage.
-     *
-     * @throws IOException if the attempt to close the storage throws an exception
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         storage.close();
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventStore.class);
+    @VisibleForTesting
+    boolean isOpen() {
+        return storage.isOpen();
     }
 
     /**
-     * Abstract builder base for building.
-     *
-     * @param <T> the type of the builder product
-     * @param <B> the type of the builder for covariance in derived classes
+     * Builder for creating new {@code EventStore} instance.
      */
-    private abstract static class AbstractBuilder<T, B extends AbstractBuilder<T, B>> {
+    public static final class Builder {
 
         private Executor streamExecutor;
         private StorageFactory storageFactory;
         private @Nullable Logger logger;
 
-        public abstract T build();
+        /** Prevents instantiation from outside. */
+        private Builder() {
+        }
 
         /**
          * This method must be called in {@link #build()} implementations to
          * verify that all required parameters are set.
          */
-        protected void checkState() {
+        private void checkState() {
             checkNotNull(getStreamExecutor(), "streamExecutor must be set");
             checkNotNull(getStorageFactory(), "eventStorage must be set");
         }
@@ -267,9 +217,9 @@ public class EventStore implements AutoCloseable {
         }
 
         @CanIgnoreReturnValue
-        public B setStreamExecutor(Executor executor) {
+        public Builder setStreamExecutor(Executor executor) {
             this.streamExecutor = checkNotNull(executor);
-            return castThis();
+            return this;
         }
 
         public StorageFactory getStorageFactory() {
@@ -277,9 +227,9 @@ public class EventStore implements AutoCloseable {
         }
 
         @CanIgnoreReturnValue
-        public B setStorageFactory(StorageFactory storageFactory) {
+        public Builder setStorageFactory(StorageFactory storageFactory) {
             this.storageFactory = checkNotNull(storageFactory);
-            return castThis();
+            return this;
         }
 
         public @Nullable Logger getLogger() {
@@ -287,59 +237,29 @@ public class EventStore implements AutoCloseable {
         }
 
         @CanIgnoreReturnValue
-        public B setLogger(@Nullable Logger logger) {
+        public Builder setLogger(@Nullable Logger logger) {
             this.logger = logger;
-            return castThis();
+            return this;
         }
 
         /**
          * Sets default logger.
          *
-         * @see EventStore#log()
+         * @see io.spine.server.event.EventStore#log()
          */
         @CanIgnoreReturnValue
-        public B withDefaultLogger() {
+        public Builder withDefaultLogger() {
             setLogger(log());
-            return castThis();
+            return this;
         }
 
-        /** Casts this to generic type to provide type covariance in the derived classes. */
-        @SuppressWarnings("unchecked") // See Javadoc
-        private B castThis() {
-            return (B) this;
-        }
-    }
-
-    /**
-     * Builder for creating new local {@code EventStore} instance.
-     */
-    public static class Builder extends AbstractBuilder<EventStore, Builder> {
-
-        @Override
+        /**
+         * Creates new {@code EventStore} instance.
+         */
         public EventStore build() {
             checkState();
             EventStore result =
                     new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
-            return result;
-        }
-    }
-
-    /**
-     * The builder of {@code EventStore} instance exposed as gRPC service.
-     *
-     * @see EventStoreGrpc.EventStoreImplBase
-     *      EventStoreGrpc.EventStoreImplBase
-     */
-    public static class ServiceBuilder
-            extends AbstractBuilder<ServerServiceDefinition, ServiceBuilder> {
-
-        @Override
-        public ServerServiceDefinition build() {
-            checkState();
-            EventStore eventStore =
-                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
-            EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
-            ServerServiceDefinition result = grpcService.bindService();
             return result;
         }
     }
@@ -352,8 +272,8 @@ public class EventStore implements AutoCloseable {
         if (logger == null) {
             return;
         }
-        if (logger.isTraceEnabled()) {
-            logger.trace("Stored: {}", TextFormat.shortDebugString(request));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Stored: {}", TextFormat.shortDebugString(request));
         }
     }
 
@@ -368,25 +288,25 @@ public class EventStore implements AutoCloseable {
             return;
         }
 
-        if (logger.isInfoEnabled()) {
-            final String requestData = TextFormat.shortDebugString(request);
-            logger.info("Creating stream on request: {} for observer: {}",
-                        requestData,
-                        responseObserver);
+        if (logger.isDebugEnabled()) {
+            String requestData = TextFormat.shortDebugString(request);
+            logger.debug("Creating stream on request: {} for observer: {}",
+                         requestData,
+                         responseObserver);
         }
-    }
-
-    /** Returns default logger for the class. */
-    public static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 
     private void logReadingComplete(StreamObserver<Event> observer) {
         if (logger == null) {
             return;
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("Observer {} got all queried events.", observer);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Observer {} got all queried events.", observer);
         }
+    }
+
+    /** Returns default logger for this class. */
+    public static Logger log() {
+        return Logging.get(EventStore.class);
     }
 }

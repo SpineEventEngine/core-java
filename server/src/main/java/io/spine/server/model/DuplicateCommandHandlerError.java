@@ -22,17 +22,22 @@ package io.spine.server.model;
 
 import com.google.common.base.Joiner;
 import io.spine.core.CommandClass;
-import io.spine.server.command.CommandHandlingClass;
+import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.command.model.CommandHandlingClass;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 /**
  * An error thrown on attempt to add a class which declares a
- * {@linkplain io.spine.server.command.CommandHandlerMethod method} that handles a command which is
+ * {@linkplain CommandHandlerMethod method} that handles a command which is
  * already handled by a class already added to the {@link Model}.
  *
  * @author Alexander Yevsyukov
@@ -50,22 +55,67 @@ public class DuplicateCommandHandlerError extends ModelError {
                               Map<Set<CommandClass>, CommandHandlingClass> registeredHandlers) {
         checkNotNull(duplicatingClass);
         checkNotNull(registeredHandlers);
-        final StringBuilder builder = new StringBuilder(512);
-        builder.append(format("The class %s declares handler methods for commands that are " +
-                              "already handled by other classes.", duplicatingClass));
+        @SuppressWarnings("MagicNumber") // the buffer size that should cover most cases.
+        StringBuilder builder = new StringBuilder(512);
+
+        builder.append(format("The class `%s` declares handler ", duplicatingClass));
+
+        // Do we have more than one command to report?
+        long totalDuplicatedCommands =
+                registeredHandlers.keySet()
+                                  .stream()
+                                  .mapToLong(Collection::size)
+                                  .sum();
+        checkState(totalDuplicatedCommands >= 1);
+        builder.append(
+                totalDuplicatedCommands == 1
+                ? "method for the command which is "
+                : "methods for commands that are "
+        );
+        builder.append("already handled by ");
+
+        // How many handling classes do we have already?
+        long totalHandlingClasses = registeredHandlers.values()
+                                                      .size();
+        builder.append(
+                totalHandlingClasses == 1
+                ? "another class."
+                : "other classes."
+        );
+
+        String newLine = format("%n");
+        builder.append(newLine);
+
+        // Now list the commands and their handlers.
         for (Set<CommandClass> commandClasses : registeredHandlers.keySet()) {
+            builder.append(newLine);
             if (commandClasses.size() > 1) {
                 builder.append(" Commands ");
-                builder.append(Joiner.on(", ").join(commandClasses));
+                List<String> commandsBackTicked =
+                        commandClasses.stream()
+                                      .map(DuplicateCommandHandlerError::backtick)
+                                      .collect(toList());
+                builder.append(
+                        Joiner.on(", ")
+                              .join(commandsBackTicked)
+                );
                 builder.append(" are handled by ");
             } else {
                 // One command.
                 builder.append(" The command ");
-                builder.append(commandClasses.iterator().next());
+                CommandClass cmdClass = commandClasses.iterator()
+                                                      .next();
+                builder.append(backtick(cmdClass));
                 builder.append(" is handled by ");
             }
-            builder.append(registeredHandlers.get(commandClasses));
+            CommandHandlingClass handlingClass = registeredHandlers.get(commandClasses);
+            builder.append(backtick(handlingClass));
+            builder.append('.');
         }
         return builder.toString();
+    }
+
+    private static String backtick(Object obj) {
+        return format("`%s`", obj);
     }
 }

@@ -19,6 +19,8 @@
  */
 package io.spine.server.aggregate;
 
+import io.spine.annotation.SPI;
+import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.DeliveryTag;
 import io.spine.server.delivery.EventShardedStream;
@@ -30,6 +32,8 @@ import io.spine.server.delivery.EventShardedStream;
  * @param <A> the type of aggregate
  * @author Alex Tymchenko
  */
+@SPI
+@SuppressWarnings("WeakerAccess") // is public for customizable delivery mechanisms
 public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
         extends AggregateDelivery<I,
                                   A,
@@ -59,7 +63,11 @@ public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
 
         @Override
         protected AggregateEventEndpoint<I, A> getEndpoint(EventEnvelope envelope) {
-            return AggregateEventEndpoint.of(repository(), envelope);
+            EventClass eventClass = envelope.getMessageClass();
+            if (repository().importsEvent(eventClass)) {
+                return new EventImportEndpoint<>(repository(), envelope);
+            }
+            return new AggregateEventReactionEndpoint<>(repository(), envelope);
         }
     }
 }

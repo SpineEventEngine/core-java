@@ -27,19 +27,17 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.model.EntityStateClass;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
 import static io.spine.server.entity.EntityStateValidationError.INVALID_ENTITY_STATE;
 
 /**
- * Signals that an entity state does not pass {@linkplain AbstractEntity#validate(Message)
- * validation}.
- *
- * @author Dmytro Grankin
+ * Signals that an entity state does not pass validation.
  */
 public final class InvalidEntityStateException extends RuntimeException {
 
@@ -78,7 +76,7 @@ public final class InvalidEntityStateException extends RuntimeException {
      */
     public static InvalidEntityStateException onConstraintViolations(
             Message entityState, Iterable<ConstraintViolation> violations) {
-        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
+        ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
                 entityState, violations);
         return helper.newException();
     }
@@ -88,7 +86,7 @@ public final class InvalidEntityStateException extends RuntimeException {
      */
     public Message getEntityState() {
         if (entityState instanceof Any) {
-            final Any any = (Any) entityState;
+            Any any = (Any) entityState;
             Message unpacked = AnyPacker.unpack(any);
             return unpacked;
         }
@@ -108,9 +106,9 @@ public final class InvalidEntityStateException extends RuntimeException {
      */
     private static class ConstraintViolationExceptionFactory
             extends ExceptionFactory<InvalidEntityStateException,
-            Message,
-            EntityStateClass,
-            EntityStateValidationError> {
+                                     Message,
+                                     EntityStateClass,
+                                     EntityStateValidationError> {
 
         /**
          * The name of the attribute of the entity state type reported in an error.
@@ -146,15 +144,16 @@ public final class InvalidEntityStateException extends RuntimeException {
         /**
          * Returns a map with an entity state type attribute.
          *
-         * @param entityState the entity state to get the type from
+         * @param entityState
+         *         the entity state to get the type from
          */
         @Override
         protected Map<String, Value> getMessageTypeAttribute(Message entityState) {
-            final String entityStateType = TypeName.of(entityState)
-                                                   .value();
-            final Value value = Value.newBuilder()
-                                     .setStringValue(entityStateType)
-                                     .build();
+            String entityStateType = TypeName.of(entityState)
+                                             .value();
+            Value value = Value.newBuilder()
+                               .setStringValue(entityStateType)
+                               .build();
             return ImmutableMap.of(ATTR_ENTITY_STATE_TYPE_NAME, value);
         }
 

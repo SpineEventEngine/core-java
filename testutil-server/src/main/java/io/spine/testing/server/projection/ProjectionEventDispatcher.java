@@ -21,13 +21,16 @@ package io.spine.testing.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionEndpoint;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.testing.server.NoOpLifecycle;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Any.pack;
@@ -50,8 +53,7 @@ public class ProjectionEventDispatcher {
     /**
      * Dispatches the {@code Event} to the given {@code Projection}.
      */
-    public static void dispatch(Projection<?, ?, ?> projection,
-                                Event event) {
+    public static void dispatch(Projection<?, ?, ?> projection, Event event) {
         checkNotNull(projection);
         checkNotNull(event);
         EventEnvelope envelope = EventEnvelope.of(event);
@@ -63,7 +65,7 @@ public class ProjectionEventDispatcher {
      * to the given {@code Projection}.
      */
     public static void dispatch(Projection<?, ?, ?> projection,
-                                Message eventMessage,
+                                EventMessage eventMessage,
                                 EventContext eventContext) {
         checkNotNull(projection);
         checkNotNull(eventMessage);
@@ -95,9 +97,8 @@ public class ProjectionEventDispatcher {
     private static <I, P extends Projection<I, S, ?>, S extends Message>
     ProjectionRepository<I, P, S> mockRepository() {
         TestProjectionRepository mockedRepo = mock(TestProjectionRepository.class);
-        TestProjectionRepository.TestLifecycle mockedLifecycle =
-                mock(TestProjectionRepository.TestLifecycle.class);
-        when(mockedRepo.lifecycleOf(any())).thenReturn(mockedLifecycle);
+        when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
+        when(mockedRepo.getIdClass()).thenReturn(Object.class);
         return mockedRepo;
     }
 
@@ -110,15 +111,8 @@ public class ProjectionEventDispatcher {
             extends ProjectionRepository<I, P, S> {
 
         @Override
-        protected Lifecycle lifecycleOf(I id) {
-            return super.lifecycleOf(id);
-        }
-
-        private class TestLifecycle extends Lifecycle {
-
-            protected TestLifecycle(I id) {
-                super(id);
-            }
+        protected EntityLifecycle lifecycleOf(I id) {
+            return NoOpLifecycle.instance();
         }
     }
 }

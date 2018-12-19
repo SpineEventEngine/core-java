@@ -24,10 +24,15 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.core.Rejection;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.event.RejectionEnvelope;
+import io.spine.test.commandbus.CmdBusStartProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -47,14 +52,25 @@ class BusesTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
+        Command command = Command
+                .newBuilder()
+                .setMessage(pack(CmdBusStartProject.getDefaultInstance()))
+                .build();
+        CannotModifyArchivedEntity throwable = CannotModifyArchivedEntity
+                .newBuilder()
+                .setEntityId(Any.getDefaultInstance())
+                .build();
+        throwable.initProducer(Any.getDefaultInstance());
+        RejectionEnvelope defaultRejection = RejectionEnvelope.from(
+                CommandEnvelope.of(command),
+                throwable
+        );
         new NullPointerTester()
                 .setDefault(Message.class, Any.getDefaultInstance())
                 .setDefault(Error.class, Error.newBuilder()
                                               .setCode(1)
                                               .build())
-                .setDefault(Rejection.class, Rejection.newBuilder()
-                                                      .setMessage(Any.getDefaultInstance())
-                                                      .build())
+                .setDefault(RejectionEnvelope.class, defaultRejection)
                 .testAllPublicStaticMethods(Buses.class);
     }
 }

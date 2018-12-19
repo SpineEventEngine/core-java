@@ -24,8 +24,9 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
-import io.spine.server.entity.EntityVersioning;
-import io.spine.server.entity.Transaction;
+import io.spine.server.entity.AutoIncrement;
+import io.spine.server.entity.EventPlayingTransaction;
+import io.spine.server.entity.VersionIncrement;
 import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ProjectionTransaction<I,
                                    M extends Message,
                                    B extends ValidatingBuilder<M, ? extends Message.Builder>>
-        extends Transaction<I, Projection<I, M, B>, M, B> {
+        extends EventPlayingTransaction<I, Projection<I, M, B>, M, B> {
 
     @VisibleForTesting
     ProjectionTransaction(Projection<I, M, B> projection) {
@@ -52,23 +53,6 @@ public class ProjectionTransaction<I,
     @VisibleForTesting
     protected ProjectionTransaction(Projection<I, M, B> projection, M state, Version version) {
         super(projection, state, version);
-    }
-
-    @Override
-    protected void dispatch(Projection projection, EventEnvelope event) {
-        projection.apply(event.getMessage(), event.getEventContext());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The {@code ProjectionTransaction} uses the
-     * {@link EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT} strategy as the event versions are
-     * irrelevant to the projection version.
-     */
-    @Override
-    protected EntityVersioning versioningStrategy() {
-        return EntityVersioning.AUTO_INCREMENT;
     }
 
     /**
@@ -94,7 +78,17 @@ public class ProjectionTransaction<I,
     ProjectionTransaction<I, M, B> start(Projection<I, M, B> projection) {
         checkNotNull(projection);
 
-        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection);
+        ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection);
         return tx;
+    }
+
+    @Override
+    protected void doDispatch(Projection<I, M, B> projection, EventEnvelope event) {
+        projection.apply(event);
+    }
+
+    @Override
+    protected VersionIncrement createVersionIncrement(EventEnvelope ignored) {
+        return new AutoIncrement(this);
     }
 }

@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Error;
 import io.spine.core.Ack;
-import io.spine.core.Rejection;
+import io.spine.core.Event;
 import io.spine.core.Status;
 import io.spine.testing.client.blackbox.ProjectId;
 import io.spine.testing.client.blackbox.Rejections.BbProjectAlreadyStarted;
@@ -41,28 +41,23 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.Any.pack;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.stream.Collectors.toList;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class CommandAcksTestEnv {
 
-    private static final String SPINE_TYPE_PREFIX = "type.spine.io";
     public static final String MISSING_ERROR_TYPE = "missing-error";
     public static final String UNIQUE_ERROR_TYPE = "unique-error";
     public static final String DUPLICATE_ERROR_TYPE = "duplicate-error";
     public static final String PRESENT_ERROR_TYPE = "present-error";
-    public static final String UNIQUE_TASK_TITLEE = "single-title";
+    public static final String UNIQUE_TASK_TITLE = "single-title";
     public static final String DUPLICATE_TASK_TITLE = "duplicate-title";
     public static final String MISSING_TASK_TITLE = "missing-title";
     public static final String PRESENT_TASK_TITLE = "present-title";
 
     /** Prevents instantiation of this utility class. */
     private CommandAcksTestEnv() {
-        // Does nothing.
     }
 
     public static Ack newOkAck() {
@@ -106,7 +101,7 @@ public class CommandAcksTestEnv {
     }
 
     private static Any newMessageId() {
-        return pack(StringValue.of(newUuid()), SPINE_TYPE_PREFIX);
+        return pack(StringValue.of(newUuid()));
     }
 
     private static Status newOkStatus() {
@@ -116,12 +111,12 @@ public class CommandAcksTestEnv {
     }
 
     private static Status newRejectedStatus(Message domainRejection) {
-        Rejection rejection =
-                Rejection.newBuilder()
-                         .setMessage(pack(domainRejection, SPINE_TYPE_PREFIX))
-                         .build();
+        Event rejectionEvent = Event
+                .newBuilder()
+                .setMessage(pack(domainRejection))
+                .build();
         return Status.newBuilder()
-                     .setRejection(rejection)
+                     .setRejection(rejectionEvent)
                      .build();
     }
 

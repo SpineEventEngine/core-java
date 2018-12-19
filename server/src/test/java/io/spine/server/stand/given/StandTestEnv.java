@@ -25,17 +25,47 @@ import io.grpc.stub.StreamObserver;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.server.Given.CustomerAggregateRepository;
+import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
+import io.spine.server.stand.given.Given.StandTestProjectionRepository;
+import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.system.server.NoOpSystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author Alexander Yevsyukov
- * @author Dmytro Kuzmin
- */
+import java.util.stream.Stream;
+
+import static io.spine.core.BoundedContextNames.assumingTests;
+import static io.spine.server.storage.StorageFactorySwitch.newInstance;
+
 public class StandTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private StandTestEnv() {
+    }
+
+    public static Stand newStand(boolean multitenant) {
+        return newStand(multitenant,
+                        new CustomerAggregateRepository(), new StandTestProjectionRepository());
+    }
+
+    @SuppressWarnings("unchecked") // Generic type matching issues. OK for tests.
+    public static Stand newStand(boolean multitenant, Repository... repositories) {
+        Stand stand = Stand
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setSystemReadSide(NoOpSystemReadSide.INSTANCE)
+                .build();
+        StorageFactorySwitch storage = newInstance(assumingTests(), multitenant);
+        for (Repository repository : repositories) {
+            stand.registerTypeSupplier(repository);
+            repository.initStorage(storage.get());
+        }
+        Stream.of(repositories)
+              .forEach(repository -> {
+
+              });
+        return stand;
     }
 
     /**

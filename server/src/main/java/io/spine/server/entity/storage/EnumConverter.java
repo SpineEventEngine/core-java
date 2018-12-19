@@ -29,7 +29,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * An abstract base for converting the {@link Enum} entity column value into the value for
  * persistence in the data storage.
  *
- * @author Dmytro Kuzmin
  * @see EnumConverters
  * @see EnumType
  */
@@ -42,7 +41,9 @@ abstract class EnumConverter implements ColumnValueConverter {
     }
 
     /**
-     * {@inheritDoc}
+     * Converts the passed enum value to its {@linkplain #convertEnumValue(Enum)} serializable}
+     * form.
+     *
      * @throws IllegalArgumentException in case the passed value is not of the {@link Enum} type
      */
     @Override
@@ -53,14 +54,11 @@ abstract class EnumConverter implements ColumnValueConverter {
                     "Value passed to the EnumConverter should be of Enum type, actual type: %s",
                     value.getClass());
         }
-        final Enum enumValue = (Enum) value;
-        final Serializable convertedValue = convertEnumValue(enumValue);
+        Enum enumValue = (Enum) value;
+        Serializable convertedValue = convertEnumValue(enumValue);
         return convertedValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<? extends Enum> getSourceType() {
         return sourceType;
@@ -82,8 +80,8 @@ abstract class EnumConverter implements ColumnValueConverter {
      * @return {@code true} if the value is of the {@link Enum} type, {@code false} otherwise
      */
     private static boolean isEnumType(Object value) {
-        final Class<?> valueType = value.getClass();
-        final boolean isJavaEnum = Enum.class.isAssignableFrom(valueType);
+        Class<?> valueType = value.getClass();
+        boolean isJavaEnum = Enum.class.isAssignableFrom(valueType);
         return isJavaEnum;
     }
 }

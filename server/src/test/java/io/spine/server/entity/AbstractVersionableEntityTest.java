@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.StringValue;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -41,9 +40,9 @@ class AbstractVersionableEntityTest {
     @SuppressWarnings("MagicNumber")
     @Test
     @DisplayName("support equality")
-    void supportEquality() throws Exception {
-        final AvEntity entity = new AvEntity(88L);
-        final AvEntity another = new AvEntity(88L);
+    void supportEquality() {
+        AvEntity entity = new AvEntity(88L);
+        AvEntity another = new AvEntity(88L);
         another.updateState(entity.getState(), entity.getVersion());
 
         new EqualsTester().addEqualityGroup(entity, another)
@@ -52,15 +51,14 @@ class AbstractVersionableEntityTest {
     }
 
     @Test
-    @Disabled // The `updateState` method was made public to be accessible from `testutil-server`
     @DisplayName("have `updateState` method visible to package only")
-    void haveUpdateStatePackagePrivate() throws NoSuchMethodException {
+    void haveUpdateStatePackagePrivate() {
         boolean methodFound = false;
 
-        final Method[] methods = AbstractVersionableEntity.class.getDeclaredMethods();
+        Method[] methods = AbstractVersionableEntity.class.getDeclaredMethods();
         for (Method method : methods) {
             if ("updateState".equals(method.getName())) {
-                final Invokable<?, Object> updateState = Invokable.from(method);
+                Invokable<?, Object> updateState = Invokable.from(method);
                 assertTrue(updateState.isPackagePrivate());
                 methodFound = true;
             }
@@ -70,7 +68,7 @@ class AbstractVersionableEntityTest {
     }
 
     private static class AvEntity extends AbstractVersionableEntity<Long, StringValue> {
-        protected AvEntity(Long id) {
+        private AvEntity(Long id) {
             super(id);
         }
     }

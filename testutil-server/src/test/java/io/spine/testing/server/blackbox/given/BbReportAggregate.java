@@ -20,24 +20,21 @@
 
 package io.spine.testing.server.blackbox.given;
 
-import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.testing.server.blackbox.BbCreateReport;
-import io.spine.testing.server.blackbox.BbReportCreated;
-import io.spine.testing.server.blackbox.BbTaskAdded;
-import io.spine.testing.server.blackbox.BbTaskAddedToReport;
-import io.spine.testing.server.blackbox.Report;
-import io.spine.testing.server.blackbox.ReportId;
-import io.spine.testing.server.blackbox.ReportVBuilder;
+import io.spine.server.event.React;
+import io.spine.testing.server.blackbox.BbReport;
+import io.spine.testing.server.blackbox.BbReportId;
+import io.spine.testing.server.blackbox.BbReportVBuilder;
+import io.spine.testing.server.blackbox.command.BbCreateReport;
+import io.spine.testing.server.blackbox.event.BbReportCreated;
+import io.spine.testing.server.blackbox.event.BbTaskAdded;
+import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 
-/**
- * @author Mykhailo Drachuk
- */
-public class BbReportAggregate extends Aggregate<ReportId, Report, ReportVBuilder> {
+public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportVBuilder> {
 
-    protected BbReportAggregate(ReportId id) {
+    protected BbReportAggregate(BbReportId id) {
         super(id);
     }
 
@@ -61,14 +58,12 @@ public class BbReportAggregate extends Aggregate<ReportId, Report, ReportVBuilde
 
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Apply
     void on(BbReportCreated event) {
         getBuilder().setId(event.getReportId())
                     .addAllProjectIds(event.getProjectIdList());
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Apply
     void on(BbTaskAddedToReport event) {
         getBuilder().addTasks(event.getTask());

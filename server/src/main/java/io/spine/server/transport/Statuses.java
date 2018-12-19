@@ -25,22 +25,20 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.grpc.MetadataConverter;
 import io.spine.core.MessageRejection;
+import io.spine.grpc.MetadataConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.grpc.Status.INVALID_ARGUMENT;
 
 /**
  * Utility class for working with {@link Status}es.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 public class Statuses {
 
+    /** Prevent instantiation of this utility class. */
     private Statuses() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -65,9 +63,9 @@ public class Statuses {
      * @see #invalidArgumentWithCause(MessageRejection)
      */
     private static StatusRuntimeException createException(Throwable cause, Error error) {
-        final Metadata metadata = MetadataConverter.toMetadata(error);
-        final StatusRuntimeException result = INVALID_ARGUMENT.withCause(cause)
-                                                              .asRuntimeException(metadata);
+        Metadata metadata = MetadataConverter.toMetadata(error);
+        StatusRuntimeException result = INVALID_ARGUMENT.withCause(cause)
+                                                        .asRuntimeException(metadata);
         return result;
     }
 }

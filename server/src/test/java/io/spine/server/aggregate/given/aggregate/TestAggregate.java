@@ -21,17 +21,15 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Commands;
-import io.spine.core.Event;
-import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -39,7 +37,6 @@ import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
-import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -48,6 +45,7 @@ import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.Commands.getMessage;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
@@ -58,8 +56,6 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
  *
  * <p>This class is declared here instead of being inner class of {@link AggregateTestEnv}
  * because it is heavily connected with internals of this test suite.
- *
- * @author Alexander Yevsyukkov
  */
 @SuppressWarnings("PublicField") /* For inspection in tests. */
 public class TestAggregate
@@ -86,27 +82,18 @@ public class TestAggregate
         super(id);
     }
 
-    /**
-     * Overrides to expose the method to the test.
-     */
-    @VisibleForTesting
-    @Override
-    public void init() {
-        super.init();
-    }
-
     @Assign
     AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
         isCreateProjectCommandHandled = true;
-        final AggProjectCreated event = projectCreated(cmd.getProjectId(),
-                                                       cmd.getName());
+        AggProjectCreated event = projectCreated(cmd.getProjectId(),
+                                                 cmd.getName());
         return event;
     }
 
     @Assign
     AggTaskAdded handle(AggAddTask cmd, CommandContext ctx) {
         isAddTaskCommandHandled = true;
-        final AggTaskAdded event = taskAdded(cmd.getProjectId());
+        AggTaskAdded event = taskAdded(cmd.getProjectId());
         return event.toBuilder()
                     .setTask(cmd.getTask())
                     .build();
@@ -115,20 +102,14 @@ public class TestAggregate
     @Assign
     List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
         isStartProjectCommandHandled = true;
-        final AggProjectStarted message = projectStarted(cmd.getProjectId());
+        AggProjectStarted message = projectStarted(cmd.getProjectId());
         return newArrayList(message);
-    }
-
-    @Assign
-    List<Event> handle(ImportEvents command, CommandContext ctx) {
-        return command.getEventList();
     }
 
     @Apply
     void event(AggProjectCreated event) {
-        getBuilder()
-                .setId(event.getProjectId())
-                .setStatus(Status.CREATED);
+        getBuilder().setId(event.getProjectId())
+                    .setStatus(Status.CREATED);
 
         isProjectCreatedEventApplied = true;
     }
@@ -141,29 +122,28 @@ public class TestAggregate
 
     @Apply
     void event(AggProjectStarted event) {
-        getBuilder()
-                .setId(event.getProjectId())
-                .setStatus(Status.STARTED);
+        getBuilder().setId(event.getProjectId())
+                    .setStatus(Status.STARTED);
 
         isProjectStartedEventApplied = true;
     }
 
     @React
-    Empty on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
+    Nothing on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
         isRejectionWithCmdHandled = true;
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @React
-    Empty on(StandardRejections.CannotModifyDeletedEntity rejection) {
+    Nothing on(StandardRejections.CannotModifyDeletedEntity rejection) {
         isRejectionHandled = true;
-        return Empty.getDefaultInstance();
+        return nothing();
     }
 
     @VisibleForTesting
     public void dispatchCommands(Command... commands) {
         for (Command cmd : commands) {
-            final Message commandMessage = Commands.getMessage(cmd);
+            CommandMessage commandMessage = getMessage(cmd);
             AggregateMessageDispatcher.dispatchCommand(this, env(commandMessage));
         }
     }

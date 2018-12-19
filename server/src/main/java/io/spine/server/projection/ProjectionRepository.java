@@ -23,6 +23,7 @@ package io.spine.server.projection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
@@ -32,7 +33,6 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
@@ -42,24 +42,27 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.model.Model;
-import io.spine.server.route.EventProducers;
-import io.spine.server.route.EventRouting;
+import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
+import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.server.route.EventRoute.byProducerId;
+import static io.spine.server.route.EventRoute.ignoreEntityUpdates;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -68,7 +71,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of IDs of projections
  * @param <P> the type of projections
  * @param <S> the type of projection state messages
- * @author Alexander Yevsyukov
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S>
@@ -86,7 +88,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(EventProducers.fromContext());
+        super(ignoreEntityUpdates(byProducerId()));
     }
 
     @VisibleForTesting
@@ -109,11 +111,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return (ProjectionClass<P>) entityClass();
     }
 
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Internal
     @Override
     protected final ProjectionClass<P> getModelClass(Class<P> cls) {
-        return (ProjectionClass<P>) Model.getInstance()
-                                         .asProjectionClass(cls);
+        return asProjectionClass(cls);
     }
 
     @Override
@@ -125,9 +126,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .unregister(this);
+        unregisterWithSharding();
         super.close();
     }
 
@@ -141,11 +140,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     public void onRegistered() {
         super.onRegistered();
 
-        boolean noEventSubscriptions = getMessageClasses().isEmpty();
+        boolean noEventSubscriptions = !dispatchesEvents();
         if (noEventSubscriptions) {
-            boolean noExternalSubscriptions =
-                    getExternalEventDispatcher().getMessageClasses()
-                                                .isEmpty();
+            boolean noExternalSubscriptions = !dispatchesExternalEvents();
             if (noExternalSubscriptions) {
                 throw newIllegalStateException(
                         "Projections of the repository %s have neither domestic nor external " +
@@ -153,14 +150,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             }
         }
 
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .register(this);
+        ProjectionSystemEventWatcher<I> systemSubscriber =
+                new ProjectionSystemEventWatcher<>(this);
+        BoundedContext boundedContext = getBoundedContext();
+        systemSubscriber.registerIn(boundedContext);
+
+        registerWithSharding();
     }
 
     @Override
-    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
-        return new ProjectionExternalEventDispatcher();
+    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+        if (!dispatchesExternalEvents()) {
+            return Optional.empty();
+        }
+        return Optional.of(new ProjectionExternalEventDispatcher());
     }
 
     /**
@@ -249,17 +252,43 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<EventClass> getMessageClasses() {
-        return projectionClass().getEventSubscriptions();
+        return projectionClass().getEventClasses();
     }
 
     @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
-        Set<I> ids = ProjectionEndpoint.handle(this, envelope);
-        return ids;
+    public Set<EventClass> getExternalEventClasses() {
+        return projectionClass().getExternalEventClasses();
     }
 
-    void onEventDispatched(I id, Event event) {
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(envelope);
+        return subscriber.isPresent();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sends a system command to dispatch the given event to a subscriber.
+     */
+    @Override
+    protected void dispatchTo(I id, Event event) {
         lifecycleOf(id).onDispatchEventToSubscriber(event);
+    }
+
+    /**
+     * Dispatches the given event to the projection with the given ID.
+     *
+     * @param id
+     *         the ID of the target projection
+     * @param envelope
+     *         the event to dispatch
+     */
+    @Internal
+    protected void dispatchNowTo(I id, EventEnvelope envelope) {
+        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
+        endpoint.dispatchTo(id);
     }
 
     @Internal
@@ -274,6 +303,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return nullToDefault(timestamp);
     }
 
+    @VisibleForTesting
     EventStreamQuery createStreamQuery() {
         Set<EventFilter> eventFilters = createEventFilters();
 
@@ -300,11 +330,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @SPI
     protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
         return eventDeliverySupplier.get();
-    }
-
-    /** Exposes routing to the package. */
-    EventRouting<I> eventRouting() {
-        return getEventRouting();
     }
 
     @Override
@@ -338,7 +363,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         @Override
         public Set<ExternalMessageClass> getMessageClasses() {
-            Set<EventClass> eventClasses = projectionClass().getExternalEventSubscriptions();
+            Set<EventClass> eventClasses = projectionClass().getExternalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 
@@ -346,7 +371,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
             checkNotNull(envelope);
             checkNotNull(exception);
-            logError("Error dispatching external event to projection (class: %s, id: %s)",
+            logError("Error dispatching external event (class: %s, id: %s)" +
+                             " to projection of type %s.",
                      envelope, exception);
         }
     }

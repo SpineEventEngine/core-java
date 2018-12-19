@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
@@ -68,31 +69,31 @@ class CommandDispatcherRegistryTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
 
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setName(getClass().getSimpleName())
-                                                            .build();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setName(getClass().getSimpleName())
+                                                      .build();
         eventBus = boundedContext.getEventBus();
         registry = new CommandDispatcherRegistry();
     }
 
     @SafeVarargs
-    private final void assertSupported(Class<? extends Message>... cmdClasses) {
-        final Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
+    private final void assertSupported(Class<? extends CommandMessage>... cmdClasses) {
+        Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
 
-        for (Class<? extends Message> clazz : cmdClasses) {
-            final CommandClass cmdClass = CommandClass.of(clazz);
+        for (Class<? extends CommandMessage> cls : cmdClasses) {
+            CommandClass cmdClass = CommandClass.from(cls);
             assertTrue(supportedClasses.contains(cmdClass));
         }
     }
 
     @SafeVarargs
-    private final void assertNotSupported(Class<? extends Message>... cmdClasses) {
-        final Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
+    private final void assertNotSupported(Class<? extends CommandMessage>... cmdClasses) {
+        Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
 
-        for (Class<? extends Message> clazz : cmdClasses) {
-            final CommandClass cmdClass = CommandClass.of(clazz);
+        for (Class<? extends CommandMessage> cls : cmdClasses) {
+            CommandClass cmdClass = CommandClass.from(cls);
             assertFalse(supportedClasses.contains(cmdClass));
         }
     }
@@ -125,7 +126,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("command dispatcher")
         void commandDispatcher() {
-            final CommandDispatcher<Message> dispatcher = new AllCommandDispatcher();
+            CommandDispatcher<Message> dispatcher = new AllCommandDispatcher();
 
             registry.register(dispatcher);
             registry.unregister(dispatcher);
@@ -136,7 +137,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            final AllCommandHandler handler = new AllCommandHandler(eventBus);
+            AllCommandHandler handler = new AllCommandHandler(eventBus);
 
             registry.register(handler);
             registry.unregister(handler);
@@ -183,7 +184,7 @@ class CommandDispatcherRegistryTest {
     @Test
     @DisplayName("accept empty process manager repository dispatcher")
     void acceptEmptyProcessManagerRepository() {
-        final NoCommandsDispatcherRepo pmRepo = new NoCommandsDispatcherRepo();
+        NoCommandsDispatcherRepo pmRepo = new NoCommandsDispatcherRepo();
         registry.register(DelegatingCommandDispatcher.of(pmRepo));
     }
 

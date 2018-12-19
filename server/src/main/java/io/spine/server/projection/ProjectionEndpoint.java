@@ -22,9 +22,9 @@ package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Delivery;
@@ -34,14 +34,13 @@ import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Dispatches an event to projections.
  */
 @Internal
 public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
-        extends EntityMessageEndpoint<I, P, EventEnvelope, Set<I>> {
+        extends EntityMessageEndpoint<I, P, EventEnvelope> {
 
     protected ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
@@ -52,24 +51,9 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         return new ProjectionEndpoint<>(repository, event);
     }
 
-    static <I, P extends Projection<I, ?, ?>>
-    Set<I> handle(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
-        final ProjectionEndpoint<I, P> endpoint = of(repository, event);
-        final Set<I> result = endpoint.handle();
-        return result;
-    }
-
     @Override
     protected ProjectionRepository<I, P, ?> repository() {
         return (ProjectionRepository<I, P, ?>) super.repository();
-    }
-
-    @Override
-    protected Set<I> getTargets() {
-        EventEnvelope event = envelope();
-        Set<I> ids = repository().eventRouting()
-                                 .apply(event.getMessage(), event.getEventContext());
-        return ids;
     }
 
     @Override
@@ -86,7 +70,6 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
         doDispatch(projection, envelope());
-        repository().onEventDispatched(projection.getId(), envelope().getOuterObject());
         tx.commit();
     }
 
@@ -97,14 +80,14 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @CanIgnoreReturnValue
     @Override
-    protected List<? extends Message> doDispatch(P projection, EventEnvelope event) {
+    protected List<Event> doDispatch(P projection, EventEnvelope event) {
         projection.play(event.getOuterObject());
         return ImmutableList.of();
     }
 
     @Override
     protected boolean isModified(P projection) {
-        final boolean result = projection.isChanged();
+        boolean result = projection.isChanged();
         return result;
     }
 
@@ -119,9 +102,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
                   .writeLastHandledEventTime(eventTime);
 
         repository.getStand()
-                  .post(eventContext.getCommandContext()
-                                    .getActorContext()
-                                    .getTenantId(), projection);
+                  .post(envelope().getTenantId(), projection);
     }
 
     /**

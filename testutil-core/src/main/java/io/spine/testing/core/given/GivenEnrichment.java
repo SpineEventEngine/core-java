@@ -29,10 +29,8 @@ import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**
  * Factory methods to create {@code Enrichment} instances in test purposes.
- *
- * @author Dmytro Grankin
  */
-public class GivenEnrichment {
+public final class GivenEnrichment {
 
     /** Prevents instantiation of this utility class. */
     private GivenEnrichment() {
@@ -46,13 +44,13 @@ public class GivenEnrichment {
      * @return a new enrichment instance
      */
     public static Enrichment withOneAttribute() {
-        final String key = newUuid();
-        final Any value = pack(toMessage(newUuid()));
-        final Enrichment result = Enrichment.newBuilder()
-                                            .setContainer(Enrichment.Container.newBuilder()
-                                                                              .putItems(key, value)
-                                                                              .build())
-                                            .build();
+        String key = newUuid();
+        Any value = pack(toMessage(newUuid()));
+        Enrichment result = Enrichment.newBuilder()
+                                      .setContainer(Enrichment.Container.newBuilder()
+                                                                        .putItems(key, value)
+                                                                        .build())
+                                      .build();
         return result;
     }
 }

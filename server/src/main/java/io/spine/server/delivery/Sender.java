@@ -34,9 +34,9 @@ import java.util.Set;
  */
 public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
-    private final DeliveryTag<M> deliveryTag;
+    private final DeliveryTag deliveryTag;
 
-    public Sender(DeliveryTag<M> deliveryTag) {
+    public Sender(DeliveryTag deliveryTag) {
         this.deliveryTag = deliveryTag;
     }
 
@@ -48,7 +48,7 @@ public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * @param message the message to deliver to the target entity, packed into an envelope
      */
     public void send(I id, M message) {
-        final Set<ShardedStream<I, ?, M>> streams = sharding().find(deliveryTag, id);
+        Set<ShardedStream<I, ?, M>> streams = sharding().find(deliveryTag, id);
 
         for (ShardedStream<I, ?, M> shardedStream : streams) {
             shardedStream.post(id, message);
@@ -65,8 +65,8 @@ public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * @return the instance of sharding service
      */
     private static Sharding sharding() {
-        final Sharding result = ServerEnvironment.getInstance()
-                                                 .getSharding();
+        Sharding result = ServerEnvironment.getInstance()
+                                           .getSharding();
         return result;
     }
 }

@@ -20,11 +20,11 @@
 
 package io.spine.testing.server.model.given;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Timestamp;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.Nothing;
+import io.spine.testing.server.given.entity.command.TuRemoveProject;
 
 /**
  * @author Alexander Yevsyukov
@@ -36,28 +36,28 @@ public class ModelTestsTestEnv {
     private ModelTestsTestEnv() {
     }
 
-    public static class TestCommandHandler extends CommandHandler {
+    public static class TestCommandHandler extends AbstractCommandHandler {
         private TestCommandHandler(EventBus eventBus) {
             super(eventBus);
         }
 
         @Assign
-        Empty handle(Timestamp cmd) {
-            return Empty.getDefaultInstance();
+        Nothing handle(TuRemoveProject cmd) {
+            return nothing();
         }
     }
 
-    public static class DuplicatedCommandHandler extends CommandHandler {
+    public static class DuplicatedCommandHandler extends AbstractCommandHandler {
         private DuplicatedCommandHandler(EventBus eventBus) {
             super(eventBus);
         }
 
         /**
-         * Handles the same command as {@link TestCommandHandler#handle(Timestamp)}.
+         * Handles the same command as {@link TestCommandHandler#handle(TuRemoveProject)}.
          */
         @Assign
-        Empty handle(Timestamp cmd) {
-            return Empty.getDefaultInstance();
+        Nothing handle(TuRemoveProject cmd) {
+            return nothing();
         }
     }
 }

@@ -40,13 +40,13 @@ class ShardingKeyTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
 
-        final ShardingKey projectsZero = projectsShardZero().getKey();
-        final ShardingKey theSameProjectsZero = anotherProjectsShardZero().getKey();
-        final ShardingKey projectsOne = projectsShardOne().getKey();
-        final ShardingKey tasksZeroKey = tasksShardZero().getKey();
-        final ShardingKey tasksOneKey = tasksShardOne().getKey();
+        ShardingKey projectsZero = projectsShardZero().getKey();
+        ShardingKey theSameProjectsZero = anotherProjectsShardZero().getKey();
+        ShardingKey projectsOne = projectsShardOne().getKey();
+        ShardingKey tasksZeroKey = tasksShardZero().getKey();
+        ShardingKey tasksOneKey = tasksShardOne().getKey();
 
         new EqualsTester().addEqualityGroup(projectsZero, theSameProjectsZero)
                           .addEqualityGroup(projectsOne)

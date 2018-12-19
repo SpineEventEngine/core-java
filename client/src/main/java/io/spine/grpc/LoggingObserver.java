@@ -29,8 +29,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Supplier;
-
 import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
 
@@ -46,15 +44,17 @@ import static java.lang.String.format;
 public final class LoggingObserver<V> implements StreamObserver<V> {
 
     private static final String FMT_ON_NEXT = "onNext(%s)";
+
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Used in other scope.
     private static final String ON_COMPLETED = "onCompleted()";
     private static final Object[] emptyParam = {};
 
+    private final Logger log;
     private final Level level;
-    private final Supplier<Logger> loggerSupplier;
 
     private LoggingObserver(Class<?> parentClass, Level level) {
+        this.log = Logging.get(parentClass);
         this.level = level;
-        this.loggerSupplier = Logging.supplyFor(parentClass);
     }
 
     /**
@@ -90,14 +90,14 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
     }
 
     private void doLog(String format, @Nullable V v) {
-        final String out;
+        String out;
         if (v != null) {
-            final String value = Stringifiers.toString(v);
+            String value = Stringifiers.toString(v);
             out = format(format, value);
         } else {
             out = format;
         }
-        final Logger logger = log();
+        Logger logger = log();
         switch (level) {
             case TRACE:
                 logger.trace(out);
@@ -125,7 +125,7 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
      */
     @VisibleForTesting
     Logger log() {
-        return loggerSupplier.get();
+        return this.log;
     }
 
     /**

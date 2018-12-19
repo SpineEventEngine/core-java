@@ -21,341 +21,488 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
+import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
-import io.spine.core.Command;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
-import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
-import io.spine.testing.client.blackbox.AcknowledgementsVerifier;
-import io.spine.testing.server.TestEventFactory;
-import io.spine.util.Exceptions;
+import io.spine.testing.client.blackbox.VerifyAcknowledgements;
+import io.spine.testing.server.blackbox.verify.state.VerifyState;
+import io.spine.type.TypeName;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.asList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 /**
- * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
+ * This class provides means for integration testing of Bounded Contexts.
  *
- * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link AcknowledgementsVerifier acknowledgement verfier},
- * {@link EmittedEventsVerifier emitted events verifier}).
+ * <p>Such a test suite would send commands or events to the Bounded Context under the test,
+ * and then verify consequences of handling a command or an event.
  *
- * @author Mykhailo Drachuk
+ * <p>Handling a command or an event usually results in {@link VerifyEvents emitted events}) and
+ * {@linkplain VerifyState updated state} of an entity. This class provides API for testing such
+ * effects.
+ *
+ * @param <T>
+ *         the type of a sub-class for return type covariance
+ * @apiNote It is expected that instances of classes derived from
+ *         {@code BlackBoxBoundedContext} are obtained by factory
+ *         methods provided by this class.
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({
+        "ClassReferencesSubclass", /* See the API note. */
+        "ClassWithTooManyMethods",
+        "OverlyCoupledClass"})
 @VisibleForTesting
-public class BlackBoxBoundedContext {
+public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
-    private static final String NOT_A_DOMAIN_EVENT_ERROR = 
-            "The Black Box bounded context expects a domain event, not a Spine Event instance";
     private final BoundedContext boundedContext;
-    private final TestActorRequestFactory requestFactory;
-    private final TestEventFactory eventFactory;
-    private final CommandBus commandBus;
-    private final EventBus eventBus;
-    private final TenantId tenantId;
+    private final CommandMemoizingTap commandTap;
     private final MemoizingObserver<Ack> observer;
 
-    private BlackBoxBoundedContext() {
-        this.boundedContext = newBoundedContext();
-        this.tenantId = newTenantId();
-        this.requestFactory = requestFactory(tenantId);
-        this.eventFactory = eventFactory(requestFactory);
-        this.commandBus = boundedContext.getCommandBus();
-        this.eventBus = boundedContext.getEventBus();
+    /**
+     * Events received by {@code BlackBoxBoundedContext} and posted to the event bus.
+     *
+     * <p>These events are filtered out from those which are stored in the Bounded Context to
+     * collect only the emitted events, which are used for assertions.
+     *
+     * @see #emittedEvents()
+     */
+    private final Set<Message> postedEvents;
+
+    protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
+        this.commandTap = new CommandMemoizingTap();
+        EventBus.Builder eventBus = EventBus
+                .newBuilder()
+                .setEnricher(enricher);
+        CommandBus.Builder commandBus = CommandBus
+                .newBuilder()
+                .appendFilter(commandTap);
+        this.boundedContext = BoundedContext
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setCommandBus(commandBus)
+                .setEventBus(eventBus)
+                .build();
         this.observer = memoizingObserver();
+        this.postedEvents = new HashSet<>();
     }
 
-    /*
-     * Utilities for instance initialization.
-     ******************************************************************************/
+    /**
+     * Creates a single-tenant instance with the default configuration.
+     */
+    public static SingleTenantBlackBoxContext singleTenant() {
+        return new SingleTenantBlackBoxContext(emptyEnricher());
+    }
 
     /**
-     * Creates a new {@link io.spine.client.ActorRequestFactory actor request factory} for tests
-     * with a provided tenant ID.
+     * Creates new single-tenant instance with the default configuration.
      *
-     * @param tenantId an identifier of a tenant that is executing requests in this Bounded Context
-     * @return a new request factory instance
+     * @deprecated use {@link #singleTenant()} or {@link #multiTenant()} instead
      */
-    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(BlackBoxBoundedContext.class, tenantId);
+    @Deprecated
+    public static SingleTenantBlackBoxContext newInstance() {
+        return singleTenant();
     }
 
     /**
-     * Creates a new {@link io.spine.server.event.EventFactory event factory} for tests which uses
-     * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory request factory}.
+     * Creates a single-tenant instance with the specified enricher.
+     */
+    public static SingleTenantBlackBoxContext singleTenant(Enricher enricher) {
+        return new SingleTenantBlackBoxContext(enricher);
+    }
+
+    /**
+     * Creates a multitenant instance the default configuration.
+     */
+    public static MultitenantBlackBoxContext multiTenant() {
+        return new MultitenantBlackBoxContext(emptyEnricher());
+    }
+
+    /**
+     * Creates a multitenant instance with the specified enricher.
+     */
+    public static MultitenantBlackBoxContext multiTenant(Enricher enricher) {
+        return new MultitenantBlackBoxContext(enricher);
+    }
+
+    /**
+     * Creates new instance obtaining configuration parameters from the passed builder.
      *
-     * @param requestFactory a request factory bearing the actor and able to provide an origin for
-     *                       factory generated events
-     * @return a new event factory instance
+     * <p>In particular:
+     * <ul>
+     *     <li>multi-tenancy status;
+     *     <li>{@code Enricher};
+     *     <li>added repositories.
+     * </ul>
      */
-    private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
-        return TestEventFactory.newInstance(requestFactory);
+    public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
+        Optional<EventBus.Builder> eventBus = builder.getEventBus();
+        Enricher enricher =
+                eventBus.isPresent()
+                ? eventBus.get()
+                          .getEnricher()
+                          .orElse(emptyEnricher())
+                : emptyEnricher();
+
+        BlackBoxBoundedContext<?> result = builder.isMultitenant()
+                                           ? multiTenant(enricher)
+                                           : singleTenant(enricher);
+
+        builder.repositories()
+               .forEach(result::with);
+
+        return result;
     }
 
     /**
-     * @return a new {@link TenantId Tenant ID} with a random UUID value convenient
-     * for test purposes.
+     * Obtains set of type names of entities known to this Bounded Context.
      */
-    private static TenantId newTenantId() {
-        return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
-    }
-
-    /**
-     * @return a new multitenant bounded context
-     */
-    private static BoundedContext newBoundedContext() {
-        return BoundedContext.newBuilder()
-                             .setMultitenant(true)
-                             .build();
-    }
-
-    /*
-     * Methods populating the bounded context with repositories.
-     ******************************************************************************/
-
-    /**
-     * Creates a new {@link BlackBoxBoundedContext black box Bounded Context} with provided
-     * repositories.
-     *
-     * @param repositories repositories to register in the bounded context
-     * @param <I>          the type of IDs used in the repository
-     * @param <E>          the type of entities or aggregates
-     * @return a newly created {@link BlackBoxBoundedContext Bounded Context black box}
-     */
-    @SafeVarargs
-    public static <I, E extends Entity<I, ?>> BlackBoxBoundedContext
-    with(Repository<I, E>... repositories) {
-        BlackBoxBoundedContext blackBox = new BlackBoxBoundedContext();
-        for (Repository<I, E> repository : repositories) {
-            blackBox.boundedContext.register(repository);
+    @VisibleForTesting
+    Set<TypeName> getAllEntityStateTypes() {
+        ImmutableSet.Builder<TypeName> result = ImmutableSet.builder();
+        for (Visibility visibility : Visibility.values()) {
+            if (visibility == Visibility.VISIBILITY_UNKNOWN) {
+                continue;
+            }
+            result.addAll(boundedContext.getEntityStateTypes(visibility));
         }
-        return blackBox;
+        return result.build();
+    }
+
+    @VisibleForTesting
+    EventBus getEventBus() {
+        return boundedContext.getEventBus();
     }
 
     /**
-     * Registers the provided repositories with the Bounded Context.
+     * Registers passed repositories with the Bounded Context under the test.
      *
-     * @param repositories repositories to register in the bounded context
-     * @param <I>          the type of IDs used in the repository
-     * @param <E>          the type of entities or aggregates
-     * @return current {@link BlackBoxBoundedContext} instance
+     * @param repositories
+     *         repositories to register in the Bounded Context
+     * @return current instance
      */
-    @SafeVarargs
-    public final <I, E extends Entity<I, ?>> BlackBoxBoundedContext
-    andWith(Repository<I, E> firstRepository, Repository<I, E>... repositories) {
-        checkNotNull(firstRepository);
-        boundedContext.register(firstRepository);
-        for (Repository<I, E> repository : repositories) {
+    @CanIgnoreReturnValue
+    public final T with(Repository<?, ?>... repositories) {
+        checkNotNull(repositories);
+        for (Repository<?, ?> repository : repositories) {
+            checkNotNull(repository);
             boundedContext.register(repository);
         }
-        return this;
+        return thisRef();
     }
-
-    /*
-     * Methods sending commands to the bounded context.
-     ******************************************************************************/
 
     /**
      * Sends off a provided command to the Bounded Context.
      *
-     * @param domainCommand a domain command to be dispatched to the Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @param domainCommand
+     *         a domain command to be dispatched to the Bounded Context
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
-    public BlackBoxBoundedContext receivesCommand(Message domainCommand) {
+    @CanIgnoreReturnValue
+    public T receivesCommand(Message domainCommand) {
         return this.receivesCommands(singletonList(domainCommand));
     }
 
     /**
      * Sends off provided commands to the Bounded Context.
      *
-     * @param firstCommand  a domain command to be dispatched to the Bounded Context first
-     * @param secondCommand a domain command to be dispatched to the Bounded Context second
-     * @param otherCommands optional domain commands to be dispatched to the Bounded Context
-     *                      in supplied order
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @param firstCommand
+     *         a domain command to be dispatched to the Bounded Context first
+     * @param secondCommand
+     *         a domain command to be dispatched to the Bounded Context second
+     * @param otherCommands
+     *         optional domain commands to be dispatched to the Bounded Context in supplied order
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
-    public BlackBoxBoundedContext
-    receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
+    @CanIgnoreReturnValue
+    public T receivesCommands(Message firstCommand, Message secondCommand,
+                              Message... otherCommands) {
         return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
     /**
      * Sends off a provided command to the Bounded Context.
      *
-     * @param domainCommands a list of domain commands to be dispatched to the Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @param domainCommands
+     *         a list of domain commands to be dispatched to the Bounded Context
+     * @return current instance
      */
-    private BlackBoxBoundedContext receivesCommands(Collection<Message> domainCommands) {
-        List<Command> commands = newArrayListWithCapacity(domainCommands.size());
-        for (Message domainCommand : domainCommands) {
-            commands.add(command(domainCommand));
-        }
-        commandBus.post(commands, observer);
-        return this;
+    private T receivesCommands(Collection<Message> domainCommands) {
+        setup().postCommands(domainCommands);
+        return thisRef();
     }
-
-    /**
-     * Wraps the provided domain command message in a {@link Event Spine command}.
-     *
-     * @param commandMessage a domain command message
-     * @return a newly created command instance
-     */
-    private Command command(Message commandMessage) {
-        return requestFactory.command()
-                             .create(commandMessage);
-    }
-
-    /*
-     * Methods sending events to the bounded context.
-     ******************************************************************************/
 
     /**
      * Sends off a provided event to the Bounded Context.
      *
-     * @param domainEvent a domain event to be dispatched to the Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @param messageOrEvent
+     *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is
+     *         passed, it will be posted to {@link EventBus} as is.
+     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
+     *         event message and posted to the bus.
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
-    public BlackBoxBoundedContext receivesEvent(Message domainEvent) {
-        checkArgument(!(domainEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
-        return this.receivesEvents(singletonList(domainEvent));
+    @CanIgnoreReturnValue
+    public T receivesEvent(Message messageOrEvent) {
+        return this.receivesEvents(singletonList(messageOrEvent));
     }
 
     /**
      * Sends off provided events to the Bounded Context.
      *
-     * @param firstEvent  a domain event to be dispatched to the Bounded Context first
-     * @param secondEvent a domain event to be dispatched to the Bounded Context second
-     * @param otherEvents optional domain events to be dispatched to the Bounded Context
-     *                    in supplied order
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * <p>The method accepts event messages or instances of {@link io.spine.core.Event}.
+     * If an instance of {@code Event} is passed, it will be posted to {@link EventBus} as is.
+     * Otherwise, an instance of {@code Event} will be generated basing on the passed event
+     * message and posted to the bus.
+     *
+     * @param firstEvent
+     *         a domain event to be dispatched to the Bounded Context first
+     * @param secondEvent
+     *         a domain event to be dispatched to the Bounded Context second
+     * @param otherEvents
+     *         optional domain events to be dispatched to the Bounded Context in supplied order
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
-    public BlackBoxBoundedContext
-    receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
-        checkArgument(!(firstEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
-        checkArgument(!(secondEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
+    @CanIgnoreReturnValue
+    public T receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
     /**
+     * Sends off a provided event to the Bounded Context as event from an external source.
+     *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
+     * @param messageOrEvent
+     *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is
+     *         passed, it will be posted to {@link io.spine.server.integration.IntegrationBus}
+     *         as is.
+     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
+     *         event message and posted to the bus.
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
+     */
+    @CanIgnoreReturnValue
+    public T receivesExternalEvent(BoundedContextName sourceContext, Message messageOrEvent) {
+        return this.receivesExternalEvents(sourceContext, singletonList(messageOrEvent));
+    }
+
+    /**
+     * Sends off provided events to the Bounded Context as events from an external source.
+     *
+     * <p>The method accepts event messages or instances of {@link io.spine.core.Event}.
+     * If an instance of {@code Event} is passed, it will be posted to
+     * {@link io.spine.server.integration.IntegrationBus} as is.
+     * Otherwise, an instance of {@code Event} will be generated basing on the passed event
+     * message and posted to the bus.
+     *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
+     * @param firstEvent
+     *         an external event to be dispatched to the Bounded Context first
+     * @param secondEvent
+     *         an external event to be dispatched to the Bounded Context second
+     * @param otherEvents
+     *         optional external events to be dispatched to the Bounded Context
+     *         in supplied order
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
+     */
+    @CanIgnoreReturnValue
+    public T receivesExternalEvents(BoundedContextName sourceContext,
+                                    Message firstEvent,
+                                    Message secondEvent,
+                                    Message... otherEvents) {
+        return this.receivesExternalEvents(sourceContext,
+                                           asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    /**
+     * Sends off provided events to the Bounded Context as events from an external source.
+     *
+     * @param sourceContext
+     *         a name of the Bounded Context external events come from
+     * @param domainEvents
+     *         a list of external events to be dispatched to the Bounded Context
+     * @return current instance
+     */
+    private T receivesExternalEvents(BoundedContextName sourceContext,
+                                     Collection<Message> domainEvents) {
+        setup().postExternalEvents(sourceContext, domainEvents);
+        return thisRef();
+    }
+
+    /**
+     * Sends off events using the specified producer to the Bounded Context.
+     *
+     * <p>The method is needed to route events based on a proper producer ID.
+     *
+     * @param producerId
+     *         the {@linkplain io.spine.core.EventContext#getProducerId() producer} for events
+     * @param firstEvent
+     *         a domain event to be dispatched to the Bounded Context first
+     * @param otherEvents
+     *         optional domain events to be dispatched to the Bounded Context in supplied order
+     * @return current instance
+     */
+    public T receivesEventsProducedBy(Object producerId,
+                                      EventMessage firstEvent,
+                                      EventMessage... otherEvents) {
+        List<Event> sentEvents = setup().postEvents(producerId, firstEvent, otherEvents);
+        this.postedEvents.addAll(sentEvents);
+        return thisRef();
+    }
+
+    /**
      * Sends off provided events to the Bounded Context.
      *
-     * @param domainEvents a list of domain event to be dispatched to the Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @param domainEvents
+     *         a list of domain event to be dispatched to the Bounded Context
+     * @return current instance
      */
-    private BlackBoxBoundedContext receivesEvents(Collection<Message> domainEvents) {
-        List<Event> events = newArrayListWithCapacity(domainEvents.size());
-        for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent));
-        }
-        eventBus.post(events, observer);
-        return this;
+    private T receivesEvents(Collection<Message> domainEvents) {
+        List<Event> sentEvents = setup().postEvents(domainEvents);
+        this.postedEvents.addAll(sentEvents);
+        return thisRef();
+    }
+
+    @CanIgnoreReturnValue
+    public T importsEvent(Message eventOrMessage) {
+        return this.importAll(singletonList(eventOrMessage));
+    }
+
+    @CanIgnoreReturnValue
+    public T importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+        return this.importAll(asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    private T importAll(Collection<Message> domainEvents) {
+        setup().importEvents(domainEvents);
+        return thisRef();
     }
 
     /**
-     * Wraps the provided domain event message in a {@link Event Spine event}.
+     * Verifies emitted events by the passed verifier.
      *
-     * @param eventMessage a domain event message
-     * @return a newly created command instance
-     */
-    private Event event(Message eventMessage) {
-        return eventFactory.createEvent(eventMessage);
-    }
-
-    /*
-     * Methods verifying the bounded context behaviour.
-     ******************************************************************************/
-
-    /**
-     * Executes the provided verifier, which throws an assertion error in case of unexpected results.
-     *
-     * @param verifier a verifier that checks the events emitted in this Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @param verifier
+     *         a verifier that checks the events emitted in this Bounded Context
+     * @return current instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext verifiesThat(EmittedEventsVerifier verifier) {
+    public T assertThat(VerifyEvents verifier) {
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
-        return this;
-    }
-
-    private EmittedEvents emittedEvents() {
-        List<Event> events = readAllEvents();
-        return new EmittedEvents(events);
+        return thisRef();
     }
 
     /**
-     * Executes the provided verifier, which throws an assertion error in case of unexpected results.
+     * Asserts that an event of the passed class was emitted once.
      *
-     * @param verifier a verifier that checks the acknowledgements in this Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @param eventClass
+     *         the class of events to verify
+     * @return current instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext verifiesThat(AcknowledgementsVerifier verifier) {
-        Acknowledgements acks = commandAcks();
+    public T assertEmitted(Class<? extends EventMessage> eventClass) {
+        VerifyEvents verifier = VerifyEvents.emittedEvent(eventClass, once());
+        EmittedEvents events = emittedEvents();
+        verifier.verify(events);
+        return thisRef();
+    }
+
+    /**
+     * Asserts that a rejection of the passed class was emitted once.
+     *
+     * @param rejectionClass
+     *         the class of the rejection to verify
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
+        VerifyEvents verifier = VerifyEvents.emittedEvent(rejectionClass, once());
+        EmittedEvents events = emittedEvents();
+        verifier.verify(events);
+        return thisRef();
+    }
+
+    /**
+     * Executes the provided verifier, which throws an assertion error in case of
+     * unexpected results.
+     *
+     * @param verifier
+     *         a verifier that checks the acknowledgements in this Bounded Context
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertThat(VerifyAcknowledgements verifier) {
+        Acknowledgements acks = commandAcknowledgements(observer);
         verifier.verify(acks);
-        return this;
-    }
-
-    private Acknowledgements commandAcks() {
-        return new Acknowledgements(observer.responses());
-    }
-
-    /*
-     * Methods reading the events which were emitted in the bounded context.
-     ******************************************************************************/
-
-    /**
-     * Reads all events from the bounded context for the provided tenant.
-     */
-    private List<Event> readAllEvents() {
-        MemoizingObserver<Event> queryObserver = memoizingObserver();
-        TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
-            @Override
-            public void run() {
-                eventBus.getEventStore()
-                        .read(allEventsQuery(), queryObserver);
-            }
-        };
-        operation.execute();
-
-        List<Event> responses = queryObserver.responses();
-        return responses;
+        return thisRef();
     }
 
     /**
-     * @return a new {@link EventStreamQuery} without any filters.
+     * Verifies emitted commands by the passed verifier.
+     *
+     * @param verifier
+     *         a verifier that checks the commands emitted in this Bounded Context
+     * @return current instance
      */
-    private static EventStreamQuery allEventsQuery() {
-        return EventStreamQuery.newBuilder()
-                               .build();
+    @CanIgnoreReturnValue
+    public T assertThat(VerifyCommands verifier) {
+        EmittedCommands commands = emittedCommands(commandTap);
+        verifier.verify(commands);
+        return thisRef();
     }
 
+    /**
+     * Asserts the state of an entity using the specified tenant ID.
+     *
+     * @param verifier
+     *         a verifier of entity states
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public T assertThat(VerifyState verifier) {
+        QueryFactory queryFactory = requestFactory().query();
+        verifier.verify(boundedContext, queryFactory);
+        return thisRef();
+    }
 
-    /*
-     * Bounded context lifecycle.
-     ******************************************************************************/
+    private BlackBoxSetup setup() {
+        return new BlackBoxSetup(boundedContext, requestFactory(), observer);
+    }
 
     /**
      * Closes the bounded context so that it shutting down all of its repositories.
@@ -367,7 +514,63 @@ public class BlackBoxBoundedContext {
         try {
             boundedContext.close();
         } catch (Exception e) {
-            throw Exceptions.illegalStateWithCauseOf(e);
+            throw illegalStateWithCauseOf(e);
         }
+    }
+
+    /** Casts this to generic type to provide type covariance in the derived classes. */
+    @SuppressWarnings("unchecked" /* See Javadoc. */)
+    private T thisRef() {
+        return (T) this;
+    }
+
+    /**
+     * Obtains the request factory to operate with.
+     */
+    protected abstract TestActorRequestFactory requestFactory();
+
+    /**
+     * Obtains commands emitted in the bounded context.
+     */
+    protected abstract EmittedCommands emittedCommands(CommandMemoizingTap commandTap);
+
+    /**
+     * Obtains acknowledgements of {@linkplain #emittedCommands(CommandMemoizingTap)
+     * emitted commands}.
+     */
+    protected Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
+        List<Ack> acknowledgements = observer.responses();
+        return new Acknowledgements(acknowledgements);
+    }
+
+    /**
+     * Obtains events emitted in the bounded context.
+     *
+     * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
+     * calls.
+     */
+    protected EmittedEvents emittedEvents() {
+        MemoizingObserver<Event> queryObserver = memoizingObserver();
+        boundedContext.getEventBus()
+                      .getEventStore()
+                      .read(allEventsQuery(), queryObserver);
+        List<Event> responses = queryObserver.responses()
+                                             .stream()
+                                             .filter(not(postedEvents::contains))
+                                             .collect(toList());
+        return new EmittedEvents(responses);
+    }
+
+    /**
+     * Creates a new {@link io.spine.server.event.EventStreamQuery} without any filters.
+     */
+    private static EventStreamQuery allEventsQuery() {
+        return EventStreamQuery.newBuilder()
+                               .build();
+    }
+
+    private static Enricher emptyEnricher() {
+        return Enricher.newBuilder()
+                       .build();
     }
 }

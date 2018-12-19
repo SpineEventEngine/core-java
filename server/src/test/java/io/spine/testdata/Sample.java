@@ -48,11 +48,10 @@ import static java.lang.String.format;
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
  * {@link Command}), storage objects and else.
- *
- * @author Dmytro Dashenkov
  */
 public class Sample {
 
+    /** Prevents instantiation of this utility class. */
     private Sample() {
     }
 
@@ -64,21 +63,27 @@ public class Sample {
      * Number and {@code boolean} fields may or may not have their default values ({@code 0} and
      * {@code false}).
      *
-     * @param clazz Java class of the stub message
-     * @param <M>   type of the required message
-     * @param <B>   type of the {@link Message.Builder} for the message
+     * @param clazz
+     *         Java class of the stub message
+     * @param <M>
+     *         type of the required message
+     * @param <B>
+     *         type of the {@link Message.Builder} for the message
      * @return new instance of the {@link Message.Builder} for given type
+     * @apiNote This method casts the builder to the generic parameter {@code <B>} for
+     *         brevity of test code. It is the caller responsibility to ensure that the message
+     *         type {@code <M>} corresponds to the builder type {@code <B>}.
      * @see #valueFor(FieldDescriptor)
      */
+    @SuppressWarnings("TypeParameterUnusedInFormals") // See apiNote.
     public static <M extends Message, B extends Message.Builder> B builderForType(Class<M> clazz) {
         checkClass(clazz);
-
-        final B builder = builderFor(clazz);
-        final Descriptor builderDescriptor = builder.getDescriptorForType();
-        final Collection<FieldDescriptor> fields = builderDescriptor.getFields();
-
+        @SuppressWarnings("unchecked") // We cast here for brevity of the test code.
+        B builder = (B) builderFor(clazz);
+        Descriptor builderDescriptor = builder.getDescriptorForType();
+        Collection<FieldDescriptor> fields = builderDescriptor.getFields();
         for (FieldDescriptor field : fields) {
-            final Object value = valueFor(field);
+            Object value = valueFor(field);
             if (field.isRepeated()) {
                 builder.addRepeatedField(field, value);
             } else {
@@ -107,15 +112,15 @@ public class Sample {
         checkClass(clazz);
 
         if (Any.class.equals(clazz)) {
-            final Any any = Any.getDefaultInstance();
+            Any any = Any.getDefaultInstance();
             @SuppressWarnings("unchecked") //
-            final M result = (M) AnyPacker.pack(any);
+            M result = (M) AnyPacker.pack(any);
             return result;
         }
 
-        final Message.Builder builder = builderForType(clazz);
+        Message.Builder builder = builderForType(clazz);
         @SuppressWarnings("unchecked") // Checked cast
-        final M result = (M) builder.build();
+        M result = (M) builder.build();
 
         return result;
     }
@@ -138,9 +143,9 @@ public class Sample {
      */
     @SuppressWarnings("OverlyComplexMethod")
     private static Object valueFor(FieldDescriptor field) {
-        final Type type = field.getType();
-        final JavaType javaType = type.getJavaType();
-        final Random random = new SecureRandom();
+        Type type = field.getType();
+        JavaType javaType = type.getJavaType();
+        Random random = new SecureRandom();
         switch (javaType) {
             case INT:
                 return random.nextInt();
@@ -153,11 +158,11 @@ public class Sample {
             case BOOLEAN:
                 return random.nextBoolean();
             case STRING:
-                final byte[] bytes = new byte[8];
+                byte[] bytes = new byte[8];
                 random.nextBytes(bytes);
                 return new String(bytes, Charsets.UTF_8);
             case BYTE_STRING:
-                final byte[] bytesPrimitive = new byte[8];
+                byte[] bytesPrimitive = new byte[8];
                 random.nextBytes(bytesPrimitive);
                 return ByteString.copyFrom(bytesPrimitive);
             case ENUM:
@@ -170,23 +175,23 @@ public class Sample {
     }
 
     private static Object enumValueFor(FieldDescriptor field, Random random) {
-        final Descriptors.EnumDescriptor descriptor = field.getEnumType();
-        final List<Descriptors.EnumValueDescriptor> enumValues = descriptor.getValues();
+        Descriptors.EnumDescriptor descriptor = field.getEnumType();
+        List<Descriptors.EnumValueDescriptor> enumValues = descriptor.getValues();
         if (enumValues.isEmpty()) {
             return null;
         }
 
         // Value under index 0 is usually used to store `undefined` option
         // Use values with indexes from 1 to n
-        final int index = random.nextInt(enumValues.size() - 1) + 1;
-        final Descriptors.EnumValueDescriptor enumValue = descriptor.findValueByNumber(index);
+        int index = random.nextInt(enumValues.size() - 1) + 1;
+        Descriptors.EnumValueDescriptor enumValue = descriptor.findValueByNumber(index);
         return enumValue;
     }
 
     private static Message messageValueFor(FieldDescriptor field) {
-        final TypeUrl messageType = TypeUrl.from(field.getMessageType());
-        final Class<? extends Message> javaClass = messageType.getMessageClass();
-        final Message fieldValue = messageOfType(javaClass);
+        TypeUrl messageType = TypeUrl.from(field.getMessageType());
+        Class<? extends Message> javaClass = messageType.getMessageClass();
+        Message fieldValue = messageOfType(javaClass);
         return fieldValue;
     }
 }

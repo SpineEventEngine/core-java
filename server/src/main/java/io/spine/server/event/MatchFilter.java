@@ -20,8 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.FieldFilter;
@@ -35,6 +33,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static java.util.stream.Collectors.toList;
@@ -72,31 +72,31 @@ class MatchFilter implements Predicate<Event> {
     }
 
     private static @Nullable TypeUrl getEventTypeUrl(EventFilter filter) {
-        final String eventType = filter.getEventType();
-        final TypeUrl result = eventType.isEmpty()
-                               ? null
-                               : TypeName.of(eventType)
-                                         .toUrl();
+        String eventType = filter.getEventType();
+        TypeUrl result = eventType.isEmpty()
+                         ? null
+                         : TypeName.of(eventType)
+                                   .toUrl();
         return result;
     }
 
     private static @Nullable List<Any> getAggregateIdentifiers(EventFilter filter) {
-        final List<Any> aggregateIdList = filter.getAggregateIdList();
-        final List<Any> result = aggregateIdList.isEmpty()
-                            ? null
-                            : aggregateIdList;
+        List<Any> aggregateIdList = filter.getAggregateIdList();
+        List<Any> result = aggregateIdList.isEmpty()
+                           ? null
+                           : aggregateIdList;
         return result;
     }
 
     @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want traceability of exits.
     @Override
-    public boolean apply(@Nullable Event event) {
+    public boolean test(@Nullable Event event) {
         if (event == null) {
             return false;
         }
 
-        final Message message = Events.getMessage(event);
-        final EventContext context = event.getContext();
+        Message message = Events.getMessage(event);
+        EventContext context = event.getContext();
 
         if (!checkEventType(message)) {
             return false;
@@ -110,7 +110,7 @@ class MatchFilter implements Predicate<Event> {
             return false;
         }
 
-        final boolean result = checkContextFields(context);
+        boolean result = checkContextFields(context);
         return result;
     }
 
@@ -118,23 +118,23 @@ class MatchFilter implements Predicate<Event> {
         if (aggregateIds == null) {
             return true;
         }
-        final Any aggregateId = context.getProducerId();
-        final boolean result = aggregateIds.contains(aggregateId);
+        Any aggregateId = context.getProducerId();
+        boolean result = aggregateIds.contains(aggregateId);
         return result;
     }
 
     private boolean checkEventType(Message message) {
-        final TypeUrl actualTypeUrl = TypeUrl.of(message);
+        TypeUrl actualTypeUrl = TypeUrl.of(message);
         if (eventTypeUrl == null) {
             return true;
         }
-        final boolean result = actualTypeUrl.equals(eventTypeUrl);
+        boolean result = actualTypeUrl.equals(eventTypeUrl);
         return result;
     }
 
     private boolean checkContextFields(EventContext context) {
         for (FieldFilter filter : contextFieldFilters) {
-            final boolean matchesFilter = checkFields(context, filter);
+            boolean matchesFilter = checkFields(context, filter);
             if (!matchesFilter) {
                 return false;
             }
@@ -144,7 +144,7 @@ class MatchFilter implements Predicate<Event> {
 
     private boolean checkEventFields(Message message) {
         for (FieldFilter filter : eventFieldFilters) {
-            final boolean matchesFilter = checkFields(message, filter);
+            boolean matchesFilter = checkFields(message, filter);
             if (!matchesFilter) {
                 return false;
             }
@@ -153,13 +153,13 @@ class MatchFilter implements Predicate<Event> {
     }
 
     private static boolean checkFields(Message object, FieldFilter filter) {
-        final Optional<Field> fieldOptional = Field.forFilter(object.getClass(), filter);
+        Optional<Field> fieldOptional = Field.forFilter(object.getClass(), filter);
         if (!fieldOptional.isPresent()) {
             return false;
         }
 
-        final Field field = fieldOptional.get();
-        final Optional<Message> value;
+        Field field = fieldOptional.get();
+        Optional<Message> value;
 
         try {
             value = field.getValue(object);
@@ -167,18 +167,18 @@ class MatchFilter implements Predicate<Event> {
             // Wrong Message class -> does not satisfy the criteria.
             return false;
         }
-        final Collection<Message> expectedValues = filter.getValueList()
-                                                         .stream()
-                                                         .map(unpackFunc())
-                                                         .collect(toList());
+        Collection<Message> expectedValues = filter.getValueList()
+                                                   .stream()
+                                                   .map(unpackFunc())
+                                                   .collect(toList());
         if (!value.isPresent()) {
             /* If there is no value in the field return `true`
                if the list of required values is also empty. */
-            final boolean nothingIsExpected = expectedValues.isEmpty();
+            boolean nothingIsExpected = expectedValues.isEmpty();
             return nothingIsExpected;
         }
 
-        final boolean result = expectedValues.contains(value.get());
+        boolean result = expectedValues.contains(value.get());
         return result;
     }
 }

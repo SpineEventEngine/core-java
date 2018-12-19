@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
@@ -45,8 +44,6 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectPaused;
  * in any of event appliers.
  *
  * <p>One might say, this aggregate sticks to its roots and denies changes. Hence the name.
- *
- * @author Alex Tymchenko
  */
 public class AmishAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
@@ -54,25 +51,16 @@ public class AmishAggregate extends Aggregate<ProjectId, Project, ProjectVBuilde
         super(id);
     }
 
-    /**
-     * Overrides to expose the method to the text.
-     */
-    @VisibleForTesting
-    @Override
-    public void init() {
-        super.init();
-    }
-
     @Assign
     AggProjectPaused handle(AggPauseProject cmd, CommandContext ctx) {
-        final AggProjectPaused event = projectPaused(cmd.getProjectId());
+        AggProjectPaused event = projectPaused(cmd.getProjectId());
         return event;
     }
 
     @Assign
     List<Message> handle(AggCancelProject cmd, CommandContext ctx) {
-        final AggProjectPaused firstPaused = projectPaused(cmd.getProjectId());
-        final AggProjectCancelled thenCancelled = projectCancelled(cmd.getProjectId());
+        AggProjectPaused firstPaused = projectPaused(cmd.getProjectId());
+        AggProjectCancelled thenCancelled = projectCancelled(cmd.getProjectId());
         return Lists.newArrayList(firstPaused, thenCancelled);
     }
 

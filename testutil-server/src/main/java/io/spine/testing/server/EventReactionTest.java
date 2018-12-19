@@ -20,13 +20,13 @@
 
 package io.spine.testing.server;
 
-import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.testing.server.expected.EventHandlerExpected;
+import io.spine.testing.server.expected.EventReactorExpected;
 
 import java.util.List;
 
@@ -41,27 +41,28 @@ import java.util.List;
  * </ol>
  *
  * @param <I> ID message of the command and the handling entity
- * @param <M> the type of the command message to test
+ * @param <M> the type of the event message to test
  * @param <S> state message of the handling entity
  * @param <E> the type of the {@link CommandHandlingEntity} being tested
  * @author Dmytro Dashenkov
  */
-@CheckReturnValue
 public abstract class EventReactionTest<I,
-                                        M extends Message,
+                                        M extends EventMessage,
                                         S extends Message,
                                         E extends CommandHandlingEntity<I, S, ?>>
-        extends MessageHandlerTest<I, M, S, E, EventHandlerExpected<S>> {
+        extends MessageHandlerTest<I, M, S, E, EventReactorExpected<S>> {
 
-    protected EventReactionTest() {
-        super();
+    private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+
+    protected EventReactionTest(I entityId, M message) {
+        super(entityId, message);
     }
 
     @Override
-    protected EventHandlerExpected<S> expectThat(E entity) {
+    protected EventReactorExpected<S> expectThat(E entity) {
         S initialState = entity.getState();
         List<? extends Message> events = dispatchTo(entity);
-        return new EventHandlerExpected<>(events, initialState, entity.getState(),
+        return new EventReactorExpected<>(events, initialState, entity.getState(),
                                           interceptedCommands());
     }
 
@@ -72,7 +73,6 @@ public abstract class EventReactionTest<I,
      * @return a new {@link Event}
      */
     protected final Event createEvent(M message) {
-        TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         Event event = eventFactory.createEvent(message);
         EventContext context = event.getContext()
                                     .toBuilder()

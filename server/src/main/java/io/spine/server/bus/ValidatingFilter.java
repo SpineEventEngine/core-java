@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
@@ -29,8 +28,12 @@ import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.MessageInvalid;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * A filter validating the {@linkplain MessageEnvelope envelopes} with the given
@@ -39,7 +42,7 @@ import static io.spine.server.bus.Buses.reject;
  * @author Dmytro Dashenkov
  */
 final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Message>
-        extends AbstractBusFilter<E> {
+        implements BusFilter<E> {
 
     private final EnvelopeValidator<E> validator;
 
@@ -51,14 +54,15 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
     @Override
     public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
-        final Optional<MessageInvalid> violation = validator.validate(envelope);
+        Optional<MessageInvalid> violation = validator.validate(envelope);
         if (violation.isPresent()) {
-            final Error error = violation.get().asError();
-            final Any packedId = Identifier.pack(envelope.getId());
-            final Ack result = reject(packedId, error);
-            return Optional.of(result);
+            Error error = violation.get()
+                                   .asError();
+            Any packedId = Identifier.pack(envelope.getId());
+            Ack result = reject(packedId, error);
+            return of(result);
         } else {
-            return Optional.absent();
+            return empty();
         }
     }
 }

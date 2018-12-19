@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.EntityLifecycleMonitor;
@@ -37,50 +36,68 @@ import java.util.List;
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
  * @param <M> the type of message envelopes
- * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
- *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
-                                 M extends ActorMessageEnvelope<?, ?, ?>, R>
-        extends EntityMessageEndpoint<I, A, M, R> {
+                                 M extends ActorMessageEnvelope<?, ?, ?>>
+        extends EntityMessageEndpoint<I, A, M> {
 
     AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
         super(repository, envelope);
     }
 
     @Override
-    protected void deliverNowTo(I aggregateId) {
-        final A aggregate = instanceFor(aggregateId);
-        final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
+    protected final void deliverNowTo(I aggregateId) {
+        A aggregate = loadOrCreate(aggregateId);
+        LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        dispatchInTx(aggregate);
+        List<Event> produced = dispatchInTx(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
-        final LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
+        LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
         if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
             storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }
 
         store(aggregate);
+        repository().postEvents(produced);
     }
 
-    @CanIgnoreReturnValue
-    protected List<? extends Message> dispatchInTx(A aggregate) {
-        final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
-        final AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope());
-        tx.commit();
-        return eventMessages;
-    }
-
-    protected A instanceFor(I aggregateId) {
+    private A loadOrCreate(I aggregateId) {
         return repository().loadOrCreate(aggregateId);
     }
 
+    @CanIgnoreReturnValue
+    final List<Event> dispatchInTx(A aggregate) {
+        List<Event> events = doDispatch(aggregate, envelope());
+        AggregateTransaction tx = startTransaction(aggregate);
+        List<Event> producedEvents = aggregate.apply(events);
+        tx.commit();
+        onDispatched(aggregate, envelope(), producedEvents);
+        return producedEvents;
+    }
+
+    /**
+     * Called after the message was successfully dispatched to the passed aggregate,
+     * and the transaction successfully committed.
+     *
+     * <p>Default implementation does nothing.
+     *
+     * @param aggregate
+     *        the aggregate that handled the message
+     * @param envelope
+     *        the envelope with the message
+     * @param producedEvents
+     *        events produced by the aggregate
+     */
+    @SuppressWarnings({"NoopMethodInAbstractClass", "unused"}) // see Javadoc.
+    protected void onDispatched(A aggregate, M envelope, List<Event> producedEvents) {
+        // No op. by default.
+    }
+
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
-    protected AggregateTransaction startTransaction(A aggregate) {
+    private AggregateTransaction startTransaction(A aggregate) {
         AggregateTransaction tx = AggregateTransaction.start(aggregate);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
@@ -88,19 +105,19 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected void onModified(A entity) {
+    protected final void onModified(A entity) {
         repository().onModifiedAggregate(envelope().getTenantId(), entity);
     }
 
     @Override
-    protected boolean isModified(A aggregate) {
-        final List<Event> events = aggregate.getUncommittedEvents();
-        return !events.isEmpty();
+    protected final boolean isModified(A aggregate) {
+        UncommittedEvents events = aggregate.getUncommittedEvents();
+        return events.nonEmpty();
     }
 
     @Override
-    protected AggregateRepository<I, A> repository() {
-        return (AggregateRepository<I, A>)super.repository();
+    protected final AggregateRepository<I, A> repository() {
+        return (AggregateRepository<I, A>) super.repository();
     }
 
     private AggregateStorage<I> storage() {

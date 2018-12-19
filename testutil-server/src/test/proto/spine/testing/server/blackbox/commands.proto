@@ -24,27 +24,33 @@ package spine.testing.server.blackbox;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.server.blackbox";
+option java_package = "io.spine.testing.server.blackbox.command";
 option java_outer_classname = "TestIntCommandsProto";
 option java_multiple_files = true;
 
-import "spine/testing/server/blackbox/project.proto";
+import "spine/testing/server/blackbox/entities.proto";
 import "spine/testing/server/blackbox/report.proto";
+import "spine/core/user_id.proto";
 
 message BbCreateProject {
-    ProjectId project_id = 1;
+    BbProjectId project_id = 1;
 }
 
 message BbAddTask {
-    ProjectId project_id = 1;
-    Task task = 2;
+    BbProjectId project_id = 1;
+    BbTask task = 2;
 }
 
 message BbStartProject {
-    ProjectId project_id = 1;
+    BbProjectId project_id = 1;
 }
 
 message BbCreateReport {
-    ReportId report_id = 1;
-    repeated ProjectId project_id = 2;
+    BbReportId report_id = 1;
+    repeated BbProjectId project_id = 2;
+}
+
+message BbAssignProject {
+    BbProjectId id = 1;
+    spine.core.UserId user_id = 2;
 }

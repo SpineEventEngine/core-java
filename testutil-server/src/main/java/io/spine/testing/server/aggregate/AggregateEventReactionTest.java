@@ -21,6 +21,7 @@
 package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
@@ -33,17 +34,25 @@ import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispa
 /**
  * The implementation base for testing a single event reactor in an {@link Aggregate}.
  *
- * @param <I> ID message of the aggregate
- * @param <E> type of the event to test
- * @param <S> the aggregate state type
- * @param <A> the {@link Aggregate} type
+ * @param <I>
+ *         ID message of the aggregate
+ * @param <E>
+ *         type of the event to test
+ * @param <S>
+ *         the aggregate state type
+ * @param <A>
+ *         the {@link Aggregate} type
  * @author Dmytro Dashenkov
  */
 public abstract class AggregateEventReactionTest<I,
-                                                 E extends Message,
+                                                 E extends EventMessage,
                                                  S extends Message,
                                                  A extends Aggregate<I, S, ?>>
         extends EventReactionTest<I, E, S, A> {
+
+    protected AggregateEventReactionTest(I aggregateId, E eventMessage) {
+        super(aggregateId, eventMessage);
+    }
 
     @Override
     protected List<? extends Message> dispatchTo(A aggregate) {

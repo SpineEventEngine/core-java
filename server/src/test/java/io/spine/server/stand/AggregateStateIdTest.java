@@ -53,7 +53,7 @@ class AggregateStateIdTest {
         // Ensure class loaded.
         Class.forName(AggregateStateId.class.getCanonicalName());
 
-        final Optional<Stringifier<AggregateStateId>> stringifierOptional =
+        Optional<Stringifier<AggregateStateId>> stringifierOptional =
                 StringifierRegistry.getInstance()
                                    .get(AggregateStateId.class);
         assertTrue(stringifierOptional.isPresent());

@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.entity.TransactionalEntity.GenericParameter.STATE_BUILDER;
 
 /**
  * A base for entities, perform transactions {@linkplain Event events}.
@@ -122,7 +121,13 @@ public abstract class TransactionalEntity<I,
         return tx().getBuilder();
     }
 
-    private Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> ensureTransaction() {
+    /**
+     * Ensures that the entity has non-null and active transaction.
+     *
+     * @throws IllegalStateException if the transaction is null or not active
+     */
+    @SuppressWarnings("ConstantConditions") // see Javadoc
+    private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(getMissingTxMessage());
         }
@@ -137,7 +142,7 @@ public abstract class TransactionalEntity<I,
         return "Cannot modify entity state: transaction is not available.";
     }
 
-    Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> tx() {
+    protected Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx() {
         return ensureTransaction();
     }
 
@@ -153,7 +158,8 @@ public abstract class TransactionalEntity<I,
         return result;
     }
 
-    @SuppressWarnings("ObjectEquality") // the refs must to point to the same object; see below.
+    @SuppressWarnings({"ObjectEquality", "ReferenceEquality"}
+            /* The refs must to point to the same object; see below. */)
     void injectTransaction(Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx) {
         checkNotNull(tx);
 
@@ -186,7 +192,7 @@ public abstract class TransactionalEntity<I,
     }
 
     B builderFromState() {
-        final B builder = newBuilderInstance();
+        B builder = newBuilderInstance();
         builder.setOriginalState(getState());
         return builder;
     }
@@ -208,7 +214,7 @@ public abstract class TransactionalEntity<I,
      */
     @Override
     public LifecycleFlags getLifecycleFlags() {
-        if(isTransactionInProgress()) {
+        if (isTransactionInProgress()) {
             return tx().getLifecycleFlags();
         }
         return super.getLifecycleFlags();
@@ -238,10 +244,10 @@ public abstract class TransactionalEntity<I,
 
     private B newBuilderInstance() {
         @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
-        final Class<? extends TransactionalEntity<I, S, B>> cls =
+        Class<? extends TransactionalEntity<I, S, B>> cls =
                 (Class<? extends TransactionalEntity<I, S, B>>) getClass();
-        final Class<B> builderClass = TypeInfo.getBuilderClass(cls);
-        final B builder = ValidatingBuilders.newInstance(builderClass);
+        Class<B> builderClass = getBuilderClass(cls);
+        B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
     }
 
@@ -270,35 +276,18 @@ public abstract class TransactionalEntity<I,
             return this.index;
         }
 
-        @Override
-        public Class<?> getArgumentIn(Class<? extends TransactionalEntity> cls) {
-            return Default.getArgument(this, cls);
-        }
     }
 
     /**
-     * Provides type information on classes extending {@code TransactionalEntity}.
+     * Obtains the class of the {@linkplain io.spine.validate.ValidatingBuilder} for the given
+     * {@code TransactionalEntity} descendant class {@code entityClass}.
      */
-    static class TypeInfo {
-
-        /**
-         * Prevents instantiation.
-         */
-        private TypeInfo() {
-        }
-
-        /**
-         * Obtains the class of the {@linkplain ValidatingBuilder} for the given
-         * {@code TransactionalEntity} descendant class {@code entityClass}.
-         */
-        private static <I,
-                        S extends Message,
-                        B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        Class<B> getBuilderClass(Class<? extends TransactionalEntity<I, S, B>> entityClass) {
-            checkNotNull(entityClass);
-            @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
-            final Class<B> builderClass = (Class<B>)STATE_BUILDER.getArgumentIn(entityClass);
-            return builderClass;
-        }
+    private static <I, S extends Message, B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    Class<B> getBuilderClass(Class<? extends TransactionalEntity<I, S, B>> entityClass) {
+        checkNotNull(entityClass);
+        @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
+        Class<B> builderClass = (Class<B>)
+                    GenericParameter.STATE_BUILDER.getArgumentIn(entityClass);
+        return builderClass;
     }
 }

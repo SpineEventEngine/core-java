@@ -23,55 +23,74 @@ package io.spine.server.event.given;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
+import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.tuple.Pair;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdCreateTask;
 import io.spine.test.command.CmdStartProject;
+import io.spine.test.command.ProjectId;
+import io.spine.test.command.TaskId;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
+import io.spine.test.command.event.CmdTaskAssigned;
+import io.spine.test.command.event.CmdTaskStarted;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.core.EventClass.from;
+import static io.spine.util.Exceptions.unsupported;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class CommandHandlerTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private CommandHandlerTestEnv() {
     }
 
-    public static class EventCatcher implements EventDispatcher<String> {
+    public static final class EventCatcher implements EventDispatcher<String> {
 
         private final List<EventEnvelope> dispatched = newLinkedList();
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(CmdProjectStarted.class),
-                                   EventClass.of(StringValue.class));
+            return ImmutableSet.of(
+                    from(CmdProjectStarted.class),
+                    from(CmdTaskAssigned.class),
+                    from(CmdTaskStarted.class)
+            );
+        }
+
+        @Override
+        public Set<EventClass> getExternalEventClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+            throw unsupported();
         }
 
         @Override
         public Set<String> dispatch(EventEnvelope envelope) {
             dispatched.add(envelope);
-            return Identity.of(this);
+            return identity();
         }
 
         @Override
@@ -87,9 +106,9 @@ public class CommandHandlerTestEnv {
 
     @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters",
                        "ReturnOfCollectionOrArrayField"})
-    public static class TestCommandHandler extends CommandHandler {
+    public static class TestCommandHandler extends AbstractCommandHandler {
 
-        private final ImmutableList<Message> eventsOnStartProjectCmd =
+        private final ImmutableList<EventMessage> eventsOnStartProjectCmd =
                 createEventsOnStartProjectCmd();
 
         private final CommandHistory commandsHandled = new CommandHistory();
@@ -112,7 +131,7 @@ public class CommandHandlerTestEnv {
             dispatch(commandEnvelope);
         }
 
-        public ImmutableList<Message> getEventsOnStartProjectCmd() {
+        public ImmutableList<EventMessage> getEventsOnStartProjectCmd() {
             return eventsOnStartProjectCmd;
         }
 
@@ -135,9 +154,16 @@ public class CommandHandlerTestEnv {
         }
 
         @Assign
-        List<Message> handle(CmdStartProject msg, CommandContext context) {
+        List<EventMessage> handle(CmdStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return eventsOnStartProjectCmd;
+        }
+
+        @Assign
+        Pair<CmdTaskAssigned, Optional<CmdTaskStarted>>
+        handle(CmdCreateTask msg, CommandContext context) {
+            commandsHandled.add(msg, context);
+            return createEventsOnCreateTaskCmd(msg);
         }
 
         @Override
@@ -155,11 +181,33 @@ public class CommandHandlerTestEnv {
             return lastException;
         }
 
-        private static ImmutableList<Message> createEventsOnStartProjectCmd() {
-            ImmutableList.Builder<Message> builder = ImmutableList.<Message>builder()
-                    .add(CmdProjectStarted.getDefaultInstance(),
-                         StringValue.getDefaultInstance());
-            return builder.build();
+        private ImmutableList<EventMessage> createEventsOnStartProjectCmd() {
+            ProjectId id = ProjectId
+                    .newBuilder()
+                    .setId(getId())
+                    .build();
+            CmdProjectStarted startedEvent = CmdProjectStarted
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            CmdProjectStarted defaultEvent = CmdProjectStarted.getDefaultInstance();
+            return ImmutableList.of(startedEvent, defaultEvent);
+        }
+
+        private static Pair<CmdTaskAssigned, Optional<CmdTaskStarted>>
+        createEventsOnCreateTaskCmd(CmdCreateTask msg) {
+            TaskId taskId = msg.getTaskId();
+            CmdTaskAssigned cmdTaskAssigned = CmdTaskAssigned
+                    .newBuilder()
+                    .setTaskId(taskId)
+                    .build();
+            CmdTaskStarted cmdTaskStarted = msg.getStart()
+                                            ? CmdTaskStarted
+                                                    .newBuilder()
+                                                    .setTaskId(taskId)
+                                                    .build()
+                                            : null;
+            return Pair.withNullable(cmdTaskAssigned, cmdTaskStarted);
         }
     }
 }

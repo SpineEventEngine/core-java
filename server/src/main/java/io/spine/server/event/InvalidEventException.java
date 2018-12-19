@@ -23,11 +23,12 @@ package io.spine.server.event;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
-import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolations.ExceptionFactory;
 import io.spine.core.MessageInvalid;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
@@ -38,6 +39,7 @@ import java.util.Map;
  * attributes are not populated according to framework conventions or validation constraints.
  *
  * @author Alexander Litus
+ * @author Alex Tymchenko
  */
 public class InvalidEventException extends EventException implements MessageInvalid {
 
@@ -46,7 +48,7 @@ public class InvalidEventException extends EventException implements MessageInva
     private static final String MSG_VALIDATION_ERROR = "Event message does not match " +
                                                        "the validation constraints.";
 
-    private InvalidEventException(String messageText, Message eventMsg, Error error) {
+    private InvalidEventException(String messageText, EventMessage eventMsg, Error error) {
         super(messageText, eventMsg, error);
     }
 
@@ -57,11 +59,12 @@ public class InvalidEventException extends EventException implements MessageInva
      * @param eventMsg   an invalid event message
      * @param violations constraint violations for the event message
      */
-    public static InvalidEventException onConstraintViolations(
-            Message eventMsg, Iterable<ConstraintViolation> violations) {
+    public static
+    InvalidEventException onConstraintViolations(EventMessage eventMsg,
+                                                 Iterable<ConstraintViolation> violations) {
 
-        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
-                eventMsg, violations);
+        ConstraintViolationExceptionFactory helper =
+                new ConstraintViolationExceptionFactory(eventMsg, violations);
         return helper.newException();
     }
 
@@ -70,14 +73,14 @@ public class InvalidEventException extends EventException implements MessageInva
      * event which field values violate validation constraint(s).
      */
     private static class ConstraintViolationExceptionFactory
-                                extends ExceptionFactory<InvalidEventException,
-                                                         Message,
-                                                         EventClass,
-                                                         EventValidationError> {
+            extends ExceptionFactory<InvalidEventException,
+                                     EventMessage,
+                                     EventClass,
+                                     EventValidationError> {
 
         private final EventClass eventClass;
 
-        private ConstraintViolationExceptionFactory(Message eventMsg,
+        private ConstraintViolationExceptionFactory(EventMessage eventMsg,
                                                     Iterable<ConstraintViolation> violations) {
             super(eventMsg, violations);
             this.eventClass = EventClass.of(eventMsg);
@@ -105,7 +108,7 @@ public class InvalidEventException extends EventException implements MessageInva
 
         @Override
         protected InvalidEventException createException(String exceptionMsg,
-                                                        Message event,
+                                                        EventMessage event,
                                                         Error error) {
             return new InvalidEventException(exceptionMsg, event, error);
         }

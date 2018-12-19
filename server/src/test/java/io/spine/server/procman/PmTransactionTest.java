@@ -20,30 +20,26 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.procman.given.PmTransactionTestEnv.PatchedProjectBuilder;
-import io.spine.server.procman.given.PmTransactionTestEnv.TestProcessManager;
+import io.spine.server.procman.given.tx.PatchedProjectBuilder;
+import io.spine.server.procman.given.tx.TestProcessManager;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alex Tymchenko
- */
 class PmTransactionTest
         extends TransactionTest<ProjectId,
                                 ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
@@ -55,34 +51,44 @@ class PmTransactionTest
                                                  .build();
 
     @Override
-    protected Transaction<ProjectId,
+    protected Transaction<
+            ProjectId,
             ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
             Project,
-            PatchedProjectBuilder>
+            PatchedProjectBuilder
+            >
     createTx(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity) {
         return new PmTransaction<>(entity);
     }
 
     @Override
-    protected Transaction<ProjectId,
+    protected Transaction<
+            ProjectId,
             ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
             Project,
-            PatchedProjectBuilder> createTxWithState(
-            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
-            Version version) {
+            PatchedProjectBuilder
+            >
+    createTxWithState(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
+                      Project state,
+                      Version version) {
         return new PmTransaction<>(entity, state, version);
     }
 
     @Override
-    protected Transaction<ProjectId, ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
-            Project, PatchedProjectBuilder>
-    createTxWithListener(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
-                         TransactionListener<ProjectId,
-                                             ProcessManager<ProjectId,
-                                                            Project,
-                                                            PatchedProjectBuilder>,
-                                             Project,
-                                             PatchedProjectBuilder> listener) {
+    protected Transaction<
+            ProjectId,
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+            Project,
+            PatchedProjectBuilder
+            >
+    createTxWithListener(
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
+            TransactionListener<
+                    ProjectId,
+                    ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+                    Project,
+                    PatchedProjectBuilder
+                    > listener) {
         PmTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
                 new PmTransaction<>(entity);
         transaction.setListener(listener);
@@ -113,24 +119,33 @@ class PmTransactionTest
             ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
             Event event) {
 
-        final TestProcessManager aggregate = (TestProcessManager) entity;
-        final Message actualMessage = unpack(event.getMessage());
+        TestProcessManager aggregate = (TestProcessManager) entity;
+        Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.getReceivedEvents()
                             .contains(actualMessage));
     }
 
     @Override
-    protected Message createEventMessage() {
+    protected EventMessage createEventMessage() {
         return PmProjectCreated.newBuilder()
                                .setProjectId(ID)
                                .build();
     }
 
     @Override
-    protected Message createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventMessageThatFailsInHandler() {
         return PmTaskAdded.newBuilder()
                           .setProjectId(ID)
                           .build();
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Method called to dispatch event.
+    @Override
+    protected void applyEvent(Transaction tx, Event event) {
+        PmTransaction cast = (PmTransaction) tx;
+        EventEnvelope envelope = EventEnvelope.of(event);
+        cast.dispatchEvent(envelope);
     }
 
     @Override
@@ -139,13 +154,5 @@ class PmTransactionTest
             RuntimeException toThrow) {
         entity.getBuilder()
               .setShouldThrow(toThrow);
-    }
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Test case common to ancestor.
-    @Disabled // The behavior is changed. The version should be auto incremented.
-    @Test
-    @DisplayName("advance version from event")
-    @Override
-    protected void advanceVersionFromEvent() {
     }
 }

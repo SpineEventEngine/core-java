@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Queues;
+import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
@@ -48,17 +49,10 @@ import org.slf4j.helpers.SubstituteLogger;
 import java.util.List;
 import java.util.Queue;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandHandler should")
 class CommandHandlerTest {
@@ -69,10 +63,10 @@ class CommandHandlerTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(true)
-                                                            .build();
+        ModelTests.dropAllModels();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setMultitenant(true)
+                                                      .build();
         commandBus = boundedContext.getCommandBus();
         eventBus = boundedContext.getEventBus();
         handler = new TestCommandHandler(eventBus);
@@ -121,78 +115,66 @@ class CommandHandlerTest {
     @Test
     @DisplayName("post generated events to EventBus")
     void postGeneratedEventsToBus() {
-        final Command cmd = Given.ACommand.startProject();
+        Command cmd = Given.ACommand.startProject();
 
-        final EventCatcher eventCatcher = new EventCatcher();
+        EventCatcher eventCatcher = new EventCatcher();
         eventBus.register(eventCatcher);
 
         handler.handle(cmd);
 
-        final ImmutableList<Message> expectedMessages = handler.getEventsOnStartProjectCmd();
-        final List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
+        ImmutableList<? extends Message> expectedMessages = handler.getEventsOnStartProjectCmd();
+        List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
         for (int i = 0; i < expectedMessages.size(); i++) {
-            final Message expected = expectedMessages.get(i);
-            final Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
+            Message expected = expectedMessages.get(i);
+            Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
             assertEquals(expected, actual);
         }
     }
 
     @Nested
-    @DisplayName("provide `hashCode` method such that")
-    class ProvideHashCode {
+    @DisplayName("post Pair of events")
+    class PostPair {
 
         @Test
-        @DisplayName("for non-empty handler ID non-zero hashcode is generated")
-        void nonZeroForNonEmptyId() {
-            final int hashCode = handler.hashCode();
+        @DisplayName("with two non-null values")
+        void withBothValues() {
+            Command cmd = Given.ACommand.createTask(true);
 
-            assertTrue(hashCode != 0);
+            EventCatcher eventCatcher = new EventCatcher();
+            eventBus.register(eventCatcher);
+
+            handler.handle(cmd);
+
+            List<EventEnvelope> dispatchedEvents = eventCatcher.getDispatched();
+            assertEquals(2, dispatchedEvents.size());
         }
 
         @Test
-        @DisplayName("for same handler instances same hashcode is generated")
-        void sameForSameInstances() {
-            assertEquals(handler.hashCode(), handler.hashCode());
+        @DisplayName("with null second value")
+        void withNullSecondValue() {
+            Command cmd = Given.ACommand.createTask(false);
+
+            EventCatcher eventCatcher = new EventCatcher();
+            eventBus.register(eventCatcher);
+
+            handler.handle(cmd);
+
+            List<EventEnvelope> dispatchedEvents = eventCatcher.getDispatched();
+            assertEquals(1, dispatchedEvents.size());
         }
     }
 
-    @Nested
-    @DisplayName("provide `equals` method such that")
-    class ProvideEqualsSuchThat {
-
-        @Test
-        @DisplayName("same handlers are equal")
-        void equalsToSame() {
-            final TestCommandHandler same = new TestCommandHandler(eventBus);
-
-            assertTrue(handler.equals(same));
-        }
-
-        @SuppressWarnings("EqualsWithItself") // is the goal of the test
-        @Test
-        @DisplayName("handler is equal to itself")
-        void equalsToSelf() {
-            assertTrue(handler.equals(handler));
-        }
-
-        @Test
-        @DisplayName("handler is not equal to null")
-        void notEqualsToNull() {
-            assertFalse(handler.equals(nullRef()));
-        }
-
-        @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the goal of the test
-        @Test
-        @DisplayName("handler is not equal to object of another class")
-        void notEqualsToOtherClass() {
-            assertFalse(handler.equals(newUuid()));
-        }
+    @Test
+    @DisplayName("handle equality")
+    void equality() {
+        new EqualsTester().addEqualityGroup(handler, new TestCommandHandler(eventBus))
+                          .testEquals();
     }
 
     @Test
     @DisplayName("have class-specific logger")
     void haveClassSpecificLogger() {
-        final Logger logger = handler.log();
+        Logger logger = handler.log();
         assertNotNull(logger);
         assertEquals(logger.getName(), handler.getClass()
                                               .getName());
@@ -201,18 +183,18 @@ class CommandHandlerTest {
     @Test
     @DisplayName("log errors")
     void logErrors() {
-        final CommandEnvelope commandEnvelope = givenCommandEnvelope();
+        CommandEnvelope commandEnvelope = givenCommandEnvelope();
 
         // Since we're in the tests mode `Environment` returns `SubstituteLogger` instance.
-        final SubstituteLogger log = (SubstituteLogger) handler.log();
+        SubstituteLogger log = (SubstituteLogger) handler.log();
 
         // Restrict the queue size only to the number of calls we want to make.
-        final Queue<SubstituteLoggingEvent> queue = Queues.newArrayBlockingQueue(1);
+        Queue<SubstituteLoggingEvent> queue = Queues.newArrayBlockingQueue(1);
         log.setDelegate(new EventRecodingLogger(log, queue));
 
         SubstituteLoggingEvent loggingEvent;
 
-        final RuntimeException exception = new RuntimeException("log_errors");
+        RuntimeException exception = new RuntimeException("log_errors");
         handler.onError(commandEnvelope, exception);
 
         loggingEvent = queue.poll();
@@ -223,6 +205,7 @@ class CommandHandlerTest {
     }
 
     private CommandEnvelope givenCommandEnvelope() {
-        return TestActorRequestFactory.newInstance(getClass()).generateEnvelope();
+        return TestActorRequestFactory.newInstance(getClass())
+                                      .generateEnvelope();
     }
 }

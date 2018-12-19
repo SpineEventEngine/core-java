@@ -21,8 +21,10 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
@@ -38,6 +40,7 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -46,9 +49,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("AggregateTransaction should")
 class AggregateTransactionTest
         extends TransactionTest<ProjectId,
@@ -121,20 +121,27 @@ class AggregateTransactionTest
             Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             Event event) {
 
-        final TestAggregate aggregate = (TestAggregate) entity;
-        final Message actualMessage = unpack(event.getMessage());
+        TestAggregate aggregate = (TestAggregate) entity;
+        Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.getReceivedEvents()
                             .contains(actualMessage));
     }
 
     @Override
-    protected Message createEventMessage() {
+    protected EventMessage createEventMessage() {
         return projectCreated(ID, "Project created in a transaction");
     }
 
     @Override
-    protected Message createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventMessageThatFailsInHandler() {
         return Given.EventMessage.taskAdded(ID);
+    }
+
+    @Override
+    protected void applyEvent(Transaction tx, Event event) {
+        AggregateTransaction cast = (AggregateTransaction) tx;
+        EventEnvelope envelope = EventEnvelope.of(event);
+        cast.play(envelope);
     }
 
     @Override
@@ -142,6 +149,12 @@ class AggregateTransactionTest
             Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
         entity.getBuilder().setShouldThrow(toThrow);
+    }
+
+    @Test
+    @DisplayName("advance version from event")
+    void eventFromVersion() {
+       advanceVersionFromEvent();
     }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.

@@ -34,15 +34,15 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 /**
  * A {@link Stringifier} for the {@link AggregateStateId}.
  *
- * <p>An example of a stringified {@link AggregateStateId AggregateStateId<Int>}:
+ * <p>An example of a stringified {@link AggregateStateId AggregateStateId&lt;Int&gt;}:
  * {@code "my.domain/my.type.of.State-Integer-271828"}.
  *
- * <p>An example of a stringified {@link AggregateStateId AggregateStateId<MyType>}:
+ * <p>An example of a stringified {@link AggregateStateId AggregateStateId&lt;MyType&gt;}:
  * {@code "my.domain/my.type.of.State-my.type.MyType-{foo=42, bar="abc"}"}.
- *
- * @author Dmytro Dashenkov
  */
 final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
+
+    private static final AggregateStateIdStringifier INSTANCE = new AggregateStateIdStringifier();
 
     private static final String DIVIDER = "-";
     private static final int MEAN_STRING_LENGTH = 256;
@@ -50,30 +50,31 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
     private static final String JAVA_LANG_PACKAGE_NAME = "java.lang.";
 
     static Stringifier<AggregateStateId> getInstance() {
-        return Singleton.INSTANCE.value;
+        return INSTANCE;
     }
 
+    /** Prevents direct instantiation. */
     private AggregateStateIdStringifier() {
-        // Prevent direct instantiation.
     }
 
     @Override
     protected String toString(AggregateStateId id) {
         checkNotNull(id);
 
-        final String typeUrl = id.getStateType()
-                                 .value();
-        final Object genericId = id.getAggregateId();
-        final Class genericIdType = genericId.getClass();
-        final String idTypeString = idTypeToString(genericIdType);
-        final String genericIdString = Stringifiers.toString(genericId);
+        String typeUrl = id.getStateType()
+                           .value();
+        Object genericId = id.getAggregateId();
+        Class genericIdType = genericId.getClass();
+        String idTypeString = idTypeToString(genericIdType);
+        String genericIdString = Stringifiers.toString(genericId);
 
-        final String result = new StringBuilder(MEAN_STRING_LENGTH).append(typeUrl)
-                                                                   .append(DIVIDER)
-                                                                   .append(idTypeString)
-                                                                   .append(DIVIDER)
-                                                                   .append(genericIdString)
-                                                                   .toString();
+        String result = new StringBuilder(MEAN_STRING_LENGTH)
+                .append(typeUrl)
+                .append(DIVIDER)
+                .append(idTypeString)
+                .append(DIVIDER)
+                .append(genericIdString)
+                .toString();
         return result;
     }
 
@@ -81,42 +82,45 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
     protected AggregateStateId fromString(String s) {
         checkNotNull(s);
 
-        final int typeUrlEndIndex = s.indexOf(DIVIDER);
+        int typeUrlEndIndex = s.indexOf(DIVIDER);
         checkArgument(typeUrlEndIndex > 0,
                       "Passed string does not contain a type URL.");
-        final String typeUrlString = s.substring(0, typeUrlEndIndex);
-        final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
+        String typeUrlString = s.substring(0, typeUrlEndIndex);
+        TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
 
-        final int idTypeStartIndex = typeUrlEndIndex + 1;
-        final int idTypeEndIndex = s.indexOf(DIVIDER, idTypeStartIndex);
+        int idTypeStartIndex = typeUrlEndIndex + 1;
+        int idTypeEndIndex = s.indexOf(DIVIDER, idTypeStartIndex);
         checkArgument(idTypeEndIndex > 0,
                       "Passed string does not contain the ID type.");
-        final String idTypeString = s.substring(idTypeStartIndex, idTypeEndIndex);
-        final Class idType = idTypeFromString(idTypeString);
+        String idTypeString = s.substring(idTypeStartIndex, idTypeEndIndex);
+        Class<?> idType = idTypeFromString(idTypeString);
 
-        final String idStringValue = s.substring(idTypeEndIndex + 1);
-        final Object genericId = Stringifiers.fromString(idStringValue, idType);
+        String idStringValue = s.substring(idTypeEndIndex + 1);
+        Object genericId = Stringifiers.fromString(idStringValue, idType);
 
-        final AggregateStateId result = AggregateStateId.of(genericId, typeUrl);
+        AggregateStateId result = AggregateStateId.of(genericId, typeUrl);
 
         return result;
     }
 
-    private static String idTypeToString(Class idType) {
+    private static String idTypeToString(Class<?> idType) {
         checkSupported(idType);
-        final String result;
+        String result;
         if (Message.class.isAssignableFrom(idType)) {
-            result = TypeName.of(idType).value();
+            @SuppressWarnings("unchecked") // Checked by `if` above.
+            Class<? extends Message> messageClass = (Class<? extends Message>) idType;
+            result = TypeName.of(messageClass)
+                             .value();
         } else {
             result = idType.getSimpleName();
         }
         return result;
     }
 
-    private static Class idTypeFromString(String idTypeString) {
-        final Class result;
+    private static Class<?> idTypeFromString(String idTypeString) {
+        Class result;
         if (idTypeString.contains(TYPE_NAME_DIVIDER)) {
-            final TypeName typeName = TypeName.of(idTypeString);
+            TypeName typeName = TypeName.of(idTypeString);
             result = typeName.getJavaClass();
         } else {
             try {
@@ -126,11 +130,5 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
             }
         }
         return result;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Stringifier<AggregateStateId> value = new AggregateStateIdStringifier();
     }
 }

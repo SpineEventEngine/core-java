@@ -20,11 +20,13 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,11 +42,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of the entity IDs of this repository
  * @author Alexander Yevsyukov
  */
-public final class CommandRouting<I> extends MessageRouting<CommandContext, CommandClass, I> {
+public final class CommandRouting<I>
+        extends MessageRouting<CommandMessage, CommandContext, CommandClass, I> {
 
     private static final long serialVersionUID = 0L;
 
-    private CommandRouting(CommandRoute<I, Message> defaultRoute) {
+    private CommandRouting(CommandRoute<I, CommandMessage> defaultRoute) {
         super(defaultRoute);
     }
 
@@ -55,16 +58,13 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
      * @return new routing instance
      */
     public static <I> CommandRouting<I> newInstance() {
-        final CommandRoute<I, Message> defaultRoute = DefaultCommandRoute.newInstance();
+        CommandRoute<I, CommandMessage> defaultRoute = DefaultCommandRoute.newInstance();
         return new CommandRouting<>(defaultRoute);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public final CommandRoute<I, Message> getDefault() {
-        return (CommandRoute<I, Message>) super.getDefault();
+    public final CommandRoute<I, CommandMessage> getDefault() {
+        return (CommandRoute<I, CommandMessage>) super.getDefault();
     }
 
     /**
@@ -74,7 +74,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
      * @return {@code this} to allow chained calls when configuring the routing
      */
     @CanIgnoreReturnValue
-    public CommandRouting<I> replaceDefault(CommandRoute<I, Message> newDefault) {
+    public CommandRouting<I> replaceDefault(CommandRoute<I, CommandMessage> newDefault) {
         checkNotNull(newDefault);
         return (CommandRouting<I>) super.replaceDefault(newDefault);
     }
@@ -97,13 +97,14 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
      * @throws IllegalStateException if the route for this command class is already set
      */
     @CanIgnoreReturnValue
-    public <M extends Message> CommandRouting<I> route(Class<M> commandClass,
-                                                       CommandRoute<I, M> via)
+    public <M extends CommandMessage> CommandRouting<I> route(Class<M> commandClass,
+                                                              CommandRoute<I, M> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        final Route<Message, CommandContext, I> casted =
-                (Route<Message, CommandContext, I>) via;
-        return (CommandRouting<I>) doRoute(commandClass, casted);
+        Route<CommandMessage, CommandContext, I> casted =
+                (Route<CommandMessage, CommandContext, I>) via;
+        doRoute(commandClass, casted);
+        return this;
     }
 
     /**
@@ -113,18 +114,18 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
      * @param <M>          the type of the command message
      * @return optionally available route
      */
-    public <M extends Message> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
-        final Optional<? extends Route<Message, CommandContext, I>> optional = doGet(commandClass);
+    public <M extends CommandMessage> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
+        Optional<? extends Route<CommandMessage, CommandContext, I>> optional = doGet(commandClass);
         if (optional.isPresent()) {
-            final CommandRoute<I, M> route = (CommandRoute<I, M>) optional.get();
+            CommandRoute<I, M> route = (CommandRoute<I, M>) optional.get();
             return Optional.of(route);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override
-    CommandClass toMessageClass(Class<? extends Message> classOfMessages) {
-        return CommandClass.of(classOfMessages);
+    CommandClass toMessageClass(Class<? extends CommandMessage> classOfMessages) {
+        return CommandClass.from(classOfMessages);
     }
 
     @Override

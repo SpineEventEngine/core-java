@@ -22,17 +22,16 @@ package io.spine.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Streams;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,14 +48,11 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  */
 public final class CompositeQueryParameter implements Serializable {
 
-    private static final Predicate<EntityColumn> isLifecycleColumn = new Predicate<EntityColumn>() {
-        @Override
-        public boolean apply(@Nullable EntityColumn column) {
-            checkNotNull(column);
-            final boolean result = archived.name().equals(column.getName())
-                    || deleted.name().equals(column.getName());
-            return result;
-        }
+    private static final Predicate<EntityColumn> isLifecycleColumn = column -> {
+        checkNotNull(column);
+        boolean result = archived.name().equals(column.getName())
+                || deleted.name().equals(column.getName());
+        return result;
     };
 
     private static final long serialVersionUID = 0L;
@@ -96,7 +92,8 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     private static boolean containsLifecycle(Iterable<EntityColumn> columns) {
-        final boolean result = Iterables.any(columns, isLifecycleColumn);
+        boolean result = Streams.stream(columns)
+                                .anyMatch(isLifecycleColumn);
         return result;
     }
 
@@ -127,12 +124,12 @@ public final class CompositeQueryParameter implements Serializable {
     public CompositeQueryParameter conjunct(Iterable<CompositeQueryParameter> other) {
         checkNotNull(other);
 
-        final Multimap<EntityColumn, ColumnFilter> mergedFilters = LinkedListMultimap.create();
+        Multimap<EntityColumn, ColumnFilter> mergedFilters = LinkedListMultimap.create();
         mergedFilters.putAll(filters);
         for (CompositeQueryParameter parameter : other) {
             mergedFilters.putAll(parameter.getFilters());
         }
-        final CompositeQueryParameter result = from(mergedFilters, ALL);
+        CompositeQueryParameter result = from(mergedFilters, ALL);
         return result;
     }
 
@@ -151,9 +148,9 @@ public final class CompositeQueryParameter implements Serializable {
         checkNotNull(column);
         checkNotNull(columnFilter);
 
-        final Multimap<EntityColumn, ColumnFilter> newFilters = HashMultimap.create(filters);
+        Multimap<EntityColumn, ColumnFilter> newFilters = HashMultimap.create(filters);
         newFilters.put(column, columnFilter);
-        final CompositeQueryParameter parameter = from(newFilters, ALL);
+        CompositeQueryParameter parameter = from(newFilters, ALL);
         return parameter;
     }
 

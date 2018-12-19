@@ -32,4 +32,11 @@ import io.spine.server.bus.UnicastDispatcher;
  * @author Alexander Yevsyukov
  */
 public interface CommandDispatcher<I> extends UnicastDispatcher<CommandClass, CommandEnvelope, I> {
+
+    /**
+     * Verifies if this instance dispatches at least one command.
+     */
+    default boolean dispatchesCommands() {
+        return !getMessageClasses().isEmpty();
+    }
 }

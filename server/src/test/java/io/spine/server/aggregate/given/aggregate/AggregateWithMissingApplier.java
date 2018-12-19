@@ -33,8 +33,6 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 
 /**
  * The test environment class for test of missing command handler or missing event applier.
- *
- * @author Alexander Yevsyukkov
  */
 public class AggregateWithMissingApplier
         extends Aggregate<ProjectId, Project, ProjectVBuilder> {

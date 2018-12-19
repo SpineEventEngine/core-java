@@ -58,8 +58,15 @@ message EventDispatchedToSubscriber {
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1 [(required) = true];
 
-    // The info about the event.
-    DispatchedEvent payload = 2 [(required) = true, (valid) = true];
+    // The dispatched event.
+    core.Event payload = 2 [(valid) = true];
+
+    // The time when the event was dispatched.
+    //
+    // This timestamp may differ from the one in the context of the event, since the time of
+    // dispatching may not be the same as the time of creation.
+    //
+    google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
 
 // An event emitted when an event is dispatched to a reactor.
@@ -71,8 +78,15 @@ message EventDispatchedToReactor {
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1 [(required) = true];
 
-    // The info about the event.
-    DispatchedEvent payload = 2 [(required) = true, (valid) = true];
+    // The dispatched event.
+    core.Event payload = 2 [(valid) = true];
+
+    // The time when the event was dispatched.
+    //
+    // This timestamp may differ from the one in the context of the event, since the time of
+    // dispatching may not be the same as the time of creation.
+    //
+    google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
 
 // An event emitted when a command is dispatched to a command handler.
@@ -84,8 +98,28 @@ message CommandDispatchedToHandler {
     // The ID of the entity, which the command is dispatched to.
     EntityHistoryId receiver = 1 [(required) = true];
 
-    // The info about the command.
-    DispatchedCommand payload = 2 [(required) = true, (valid) = true];
+    // The dispatched command.
+    core.Command payload = 2 [(valid) = true];
+
+    // The time when the command was dispatched.
+    //
+    // This timestamp may differ from the one in the context of the event, since the time of
+    // dispatching may not be the same as the time of creation.
+    //
+    google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
+}
+
+// An event emitted when an event was imported into an aggregate.
+message EventImported {
+
+    // The ID of the aggregate, which imported the event.
+    EntityHistoryId receiver = 1 [(required) = true];
+
+    // The info about the event.
+    spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
+
+    // The time when the event was imported.
+    google.protobuf.Timestamp when_imported = 3 [(required) = true, (valid) = true];
 }
 
 // An event emitted when an entity state is changed.
@@ -103,7 +137,7 @@ message EntityStateChanged {
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 3;
 
-    // The instant when the entity was archived.
+    // The instant when the entity was changed.
     google.protobuf.Timestamp when = 4;
 }
 

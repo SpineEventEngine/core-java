@@ -19,9 +19,15 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
+import io.spine.client.EntityStateWithVersion;
+import io.spine.client.OrderBy;
+import io.spine.client.Pagination;
+import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -29,12 +35,13 @@ import io.spine.server.entity.RecordBasedRepository;
 
 import java.util.Iterator;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Streams.stream;
+
 /**
  * Processes the queries targeting {@link io.spine.server.entity.Entity Entity} objects.
- *
- * @author Alex Tymchenko
  */
-class EntityQueryProcessor extends RecordQueryProcessor {
+class EntityQueryProcessor implements QueryProcessor {
 
     private final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository;
 
@@ -43,16 +50,32 @@ class EntityQueryProcessor extends RecordQueryProcessor {
     }
 
     @Override
-    protected Iterator<EntityRecord> queryForRecords(Target target, FieldMask fieldMask) {
-        Iterator<EntityRecord> result;
+    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
+        Target target = query.getTarget();
+        FieldMask fieldMask = query.getFieldMask();
+
+        Iterator<EntityRecord> entities;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
-            result = repository.loadAllRecords();
+            entities = repository.loadAllRecords();
         } else {
-
-            final EntityFilters filters = target.getFilters();
-            result = repository.findRecords(filters, fieldMask);
+            EntityFilters filters = target.getFilters();
+            OrderBy orderBy = query.getOrderBy();
+            Pagination pagination = query.getPagination();
+            entities = repository.findRecords(filters, orderBy, pagination, fieldMask);
         }
+        ImmutableList<EntityStateWithVersion> result = stream(entities)
+                .map(EntityQueryProcessor::toEntityState)
+                .collect(toImmutableList());
+        return result;
+    }
+
+    private static EntityStateWithVersion toEntityState(EntityRecord record) {
+        EntityStateWithVersion result = EntityStateWithVersion
+                .newBuilder()
+                .setState(record.getState())
+                .setVersion(record.getVersion())
+                .build();
         return result;
     }
 }

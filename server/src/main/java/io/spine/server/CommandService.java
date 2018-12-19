@@ -22,16 +22,16 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
+import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -41,10 +41,10 @@ import static io.spine.server.bus.Buses.reject;
 /**
  * The {@code CommandService} allows client applications to post commands and
  * receive updates from the application backend.
- *
- * @author Alexander Yevsyukov
  */
-public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
+public class CommandService
+        extends CommandServiceGrpc.CommandServiceImplBase
+        implements Logging {
 
     private final ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
 
@@ -64,26 +64,23 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         this.boundedContextMap = ImmutableMap.copyOf(map);
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    // as we override default implementation with `unimplemented` status.
     @Override
     public void post(Command request, StreamObserver<Ack> responseObserver) {
-        final CommandClass commandClass = CommandClass.of(request);
-        final BoundedContext boundedContext = boundedContextMap.get(commandClass);
+        CommandClass commandClass = CommandClass.of(request);
+        BoundedContext boundedContext = boundedContextMap.get(commandClass);
         if (boundedContext == null) {
             handleUnsupported(request, responseObserver);
         } else {
-            final CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.getCommandBus();
             commandBus.post(request, responseObserver);
         }
     }
 
-    private static void handleUnsupported(Command request,
-                                          StreamObserver<Ack> responseObserver) {
-        final UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
+    private void handleUnsupported(Command request, StreamObserver<Ack> responseObserver) {
+        UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
-        final Error error = unsupported.asError();
-        final Ack response = reject(request.getId(), error);
+        Error error = unsupported.asError();
+        Ack response = reject(request.getId(), error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
@@ -95,6 +92,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         /**
          * Adds the {@code BoundedContext} to the builder.
          */
+        @CanIgnoreReturnValue
         public Builder add(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
@@ -104,6 +102,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         /**
          * Removes the {@code BoundedContext} from the builder.
          */
+        @CanIgnoreReturnValue
         public Builder remove(BoundedContext boundedContext) {
             boundedContexts.remove(boundedContext);
             return this;
@@ -116,7 +115,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * @return {@code true} if the instance was added to the builder, {@code false} otherwise
          */
         public boolean contains(BoundedContext boundedContext) {
-            final boolean contains = boundedContexts.contains(boundedContext);
+            boolean contains = boundedContexts.contains(boundedContext);
             return contains;
         }
 
@@ -124,8 +123,8 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * Builds a new {@link CommandService}.
          */
         public CommandService build() {
-            final ImmutableMap<CommandClass, BoundedContext> map = createMap();
-            final CommandService result = new CommandService(map);
+            ImmutableMap<CommandClass, BoundedContext> map = createMap();
+            CommandService result = new CommandService(map);
             return result;
         }
 
@@ -134,8 +133,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * handle such commands.
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
-            final ImmutableMap.Builder<CommandClass, BoundedContext> builder =
-                    ImmutableMap.builder();
+            ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
                 putIntoMap(boundedContext, builder);
             }
@@ -148,21 +146,11 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          */
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
-            final CommandBus commandBus = boundedContext.getCommandBus();
-            final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
+            CommandBus commandBus = boundedContext.getCommandBus();
+            Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
                 builder.put(commandClass, boundedContext);
             }
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandService.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

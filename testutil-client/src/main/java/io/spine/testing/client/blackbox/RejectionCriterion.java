@@ -21,7 +21,7 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
+import io.spine.base.RejectionMessage;
 
 /**
  * Specifies the rules a rejection must match.
@@ -29,16 +29,15 @@ import com.google.protobuf.Message;
  * <p>Optionally can contain an the criterion description, useful for display by test assertions.
  *
  * <p>These criteria are consumed by acks verifier
- * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorCriterion) ackedWithError method}.
+ * {@link VerifyAcknowledgements#ackedWithErrors(ErrorCriterion) ackedWithError method}.
  *
  * @param <T> a domain rejection type
- * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public interface RejectionCriterion<T extends Message> extends MessageCriterion<T> {
+public interface RejectionCriterion<T extends RejectionMessage> extends MessageCriterion<T> {
 
     /**
-     * @return a message specifying the reason the rejection did not match the predicate
+     * Obtains a message specifying the reason the rejection did not match the predicate.
      */
     @Override
     default String description() {

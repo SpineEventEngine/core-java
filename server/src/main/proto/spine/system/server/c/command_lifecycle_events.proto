@@ -33,10 +33,10 @@ option java_multiple_files = true;
 
 import "spine/base/error.proto";
 import "spine/core/command.proto";
-import "spine/core/rejection.proto";
-import "spine/client/entities.proto";
+import "spine/core/event.proto";
+import "spine/system/server/command_lifecycle.proto";
 
-// An event emitted when a new command is received.
+// An event emitted when a new command is received by the `CommandBus`.
 //
 message CommandReceived {
 
@@ -44,7 +44,7 @@ message CommandReceived {
     spine.core.CommandId id = 1;
 
     // The command.
-    spine.core.Command payload = 2;
+    spine.core.Command payload = 2 [(required) = true];
 }
 
 // An event emitted when the command is acknowledged by the `CommandBus`.
@@ -55,15 +55,37 @@ message CommandAcknowledged {
     spine.core.CommandId id = 1;
 }
 
-// An event emitted when a command is dispatched to a handler
+// An event emitted when the command is scheduled.
+//
+message CommandScheduled {
+    option (enrichment) = "spine.system.server.CommandEnrichment";
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The schedule to execute the command.
+    spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
+}
+
+// An event emitted when a command is passed to a dispatcher after being acknowledged.
 //
 message CommandDispatched {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
+}
 
-    // The ID of the entity which the command is dispatched to.
-    spine.client.EntityId receiver = 2;
+// An event emitted when the command target is determined.
+//
+// This event is emitted before the command is delivered to the target.
+//
+message TargetAssignedToCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The target of the command.
+    CommandTarget target = 2 [(valid) = true];
 }
 
 // An event emitted when a command is successfully handled.
@@ -82,7 +104,7 @@ message CommandErrored {
     spine.core.CommandId id = 1;
 
     // The runtime error.
-    spine.base.Error error = 2;
+    spine.base.Error error = 2 [(valid) = true];
 }
 
 // An event emitted if the handler rejects the command.
@@ -92,6 +114,27 @@ message CommandRejected {
     // The ID of the command.
     spine.core.CommandId id = 1;
 
-    // The command rejection.
-    spine.core.Rejection rejection = 2;
+    // The command rejection event.
+    spine.core.Event rejection_event = 2 [(valid) = true];
+}
+
+// An event emitted when another command was generated in response to a received command.
+//
+message CommandTransformed {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The ID of the command generated in response to the received command.
+    spine.core.CommandId produced = 2 [(required) = true];
+}
+
+// An event emitted when two or more commands were generated in response to a received command.
+message CommandSplit {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // Identifiers of the command generated in response to the received command.
+    repeated spine.core.CommandId produced = 2 [(required) = true];
 }

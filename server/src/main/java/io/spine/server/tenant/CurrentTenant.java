@@ -20,9 +20,9 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Optional;
-import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,38 +33,25 @@ import static io.spine.validate.Validate.isNotDefault;
  * a command or a query in a multi-tenant application.
  *
  * @author Alexander Yevsyukov
- * @see <a href="https://msdn.microsoft.com/en-us/library/aa479086.aspx">Multi-Tenant Data Architecture</a>
+ * @see <a href="http://ramblingsofraju.com/wp-content/uploads/2016/08/Multi-Tenant-Data-Architecture.pdf">Multi-Tenant Data Architecture</a>
  */
-@Internal
-public class CurrentTenant {
+final class CurrentTenant {
 
     private static final ThreadLocal<TenantId> threadLocal = new ThreadLocal<>();
 
-    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
-    private static final TenantId singleTenant = TenantId.newBuilder()
-                                                         .setValue("SINGLE_TENANT")
-                                                         .build();
-
+    /** Prevent instantiation of this utility class. */
     private CurrentTenant() {
-        // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Returns a constant for single-tenant applications.
-     */
-    static TenantId singleTenant() {
-        return singleTenant;
     }
 
     /**
      * Obtains the ID of a tenant served in the current thread.
      *
-     * @return ID of the tenant or {@linkplain Optional#absent() empty Optional} if
+     * @return ID of the tenant or {@linkplain Optional#empty() empty Optional} if
      *         the current thread works not in a multi-tenant context
      */
-    public static Optional<TenantId> get() {
-        final TenantId result = threadLocal.get();
-        return Optional.fromNullable(result);
+    static Optional<TenantId> get() {
+        TenantId result = threadLocal.get();
+        return Optional.ofNullable(result);
     }
 
     /**
@@ -76,7 +63,7 @@ public class CurrentTenant {
      * @throws IllegalStateException if the is no current tenant ID set
      */
     static TenantId ensure() throws IllegalStateException {
-        final Optional<TenantId> currentTenant = get();
+        Optional<TenantId> currentTenant = get();
         if (!currentTenant.isPresent()) {
             throw new IllegalStateException(
                     "No current TenantId set in multi-tenant execution context.");
@@ -89,7 +76,7 @@ public class CurrentTenant {
      *
      * @param tenantId a non-null and non-default instance of {@code TenantId}
      */
-    public static void set(TenantId tenantId) {
+    static void set(TenantId tenantId) {
         checkNotNull(tenantId);
         checkArgument(isNotDefault(tenantId));
         threadLocal.set(tenantId);
@@ -98,7 +85,7 @@ public class CurrentTenant {
     /**
      * Clears the stored value.
      */
-    public static void clear() {
+    static void clear() {
         threadLocal.set(null);
     }
 }

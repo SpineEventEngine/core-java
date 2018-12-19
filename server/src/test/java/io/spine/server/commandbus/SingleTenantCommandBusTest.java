@@ -21,20 +21,19 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
-import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.CommandPostingHandler;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
-import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.MemoizingRejectionSubscriber;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
-import io.spine.test.reflect.InvalidProjectName;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,9 +43,7 @@ import java.util.List;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
-import static io.spine.core.Rejections.toRejection;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.firstCreateProject;
 import static io.spine.server.commandbus.Given.ACommand.removeTask;
@@ -90,7 +87,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("invalid command")
         void invalidCmd() {
-            final Command cmd = newCommandWithoutContext();
+            Command cmd = newCommandWithoutContext();
 
             commandBus.post(cmd, observer);
 
@@ -104,7 +101,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @DisplayName("multitenant command in single tenant context")
         void multitenantCmdIfSingleTenant() {
             // Create a multi-tenant command.
-            final Command cmd = createProject();
+            Command cmd = createProject();
 
             commandBus.post(cmd, observer);
 
@@ -116,27 +113,6 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("propagate rejections to rejection bus")
-    void propagateRejections() {
-        final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
-        commandBus.register(faultyHandler);
-        MemoizingRejectionSubscriber rejectionSubscriber = new MemoizingRejectionSubscriber();
-        rejectionBus.register(rejectionSubscriber);
-
-        final Command addTaskCommand = clearTenantId(addTask());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
-        commandBus.post(addTaskCommand, observer);
-
-        final InvalidProjectName throwable = faultyHandler.getThrowable();
-        final Rejection expectedRejection = toRejection(throwable, addTaskCommand);
-        rejectionSubscriber.verifyGot(expectedRejection);
-
-        final Ack ack = observer.firstResponse();
-        assertTrue(ack.getStatus()
-                      .hasOk());
-    }
-
-    @Test
     @DisplayName("post commands in FIFO order")
     void doPostCommandsInFIFO() {
         Command secondCommand = clearTenantId(secondStartProject());
@@ -144,27 +120,28 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
                                                                   secondCommand);
         commandBus.register(handler);
 
-        final Command firstCommand = clearTenantId(firstCreateProject());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        Command firstCommand = clearTenantId(firstCreateProject());
+        MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(firstCommand, observer);
 
         List<Message> handledCommands = handler.handledCommands();
         assertEquals(2, handledCommands.size());
-        assertTrue(FirstCmdCreateProject.class.isInstance(handledCommands.get(0)));
-        assertTrue(SecondCmdStartProject.class.isInstance(handledCommands.get(1)));
+        assertTrue(handledCommands.get(0) instanceof FirstCmdCreateProject);
+        assertTrue(handledCommands.get(1) instanceof SecondCmdStartProject);
     }
 
+    @MuteLogging
     @Test
     @DisplayName("do not propagate dispatching errors")
     void doNotPropagateExceptions() {
-        final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
+        FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
 
-        final Command remoteTaskCommand = clearTenantId(removeTask());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        Command remoteTaskCommand = clearTenantId(removeTask());
+        MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(remoteTaskCommand, observer);
 
-        final Ack ack = observer.firstResponse();
+        Ack ack = observer.firstResponse();
         assertTrue(ack.getStatus()
                       .hasOk());
     }
@@ -172,14 +149,14 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("create validator once")
     void createValidatorOnce() {
-        final EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
+        EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, commandBus.getValidator());
     }
 
     @Override
     protected Command newCommand() {
-        final Message commandMessage = Given.CommandMessage.createProjectMessage();
+        CommandMessage commandMessage = Given.CommandMessage.createProjectMessage();
         return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
                                       .createCommand(commandMessage);
     }

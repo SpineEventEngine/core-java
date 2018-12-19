@@ -22,14 +22,18 @@ package io.spine.server.entity.given;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.entity.given.Given;
+import io.spine.validate.StringValueVBuilder;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+import static io.spine.base.Identifier.newUuid;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
@@ -43,12 +47,12 @@ public class EntityTestEnv {
     private EntityTestEnv() {
     }
 
-    public static Matcher<Long> isBetween(final Long lower, final Long higher) {
+    public static Matcher<Long> isBetween(Long lower, Long higher) {
         return new BaseMatcher<Long>() {
             @Override
             public boolean matches(Object o) {
                 assertThat(o, instanceOf(Long.class));
-                final Long number = (Long) o;
+                Long number = (Long) o;
                 return number >= lower && number <= higher;
             }
 
@@ -98,6 +102,38 @@ public class EntityTestEnv {
 
         public EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));
+        }
+    }
+
+    // TODO:2018-07-25:vladyslav.lubenskyi: https://github.com/SpineEventEngine/core-java/issues/788
+    // Figure out a way not to use Aggregate here.
+    public static class TestAggregate extends Aggregate<String, StringValue, StringValueVBuilder> {
+
+        protected TestAggregate(String id) {
+            super(id);
+        }
+
+        public static TestAggregate copyOf(TestAggregate entity) {
+            TestAggregate result = Given.aggregateOfClass(TestAggregate.class)
+                                        .withId(entity.getId())
+                                        .withState(entity.getState())
+                                        .modifiedOn(entity.whenModified())
+                                        .withVersion(entity.getVersion()
+                                                           .getNumber())
+                                        .build();
+            return result;
+        }
+
+        public static TestAggregate withState() {
+            StringValue state = StringValue.newBuilder()
+                                           .setValue("state")
+                                           .build();
+            TestAggregate result = Given.aggregateOfClass(TestAggregate.class)
+                                        .withId(newUuid())
+                                        .withState(state)
+                                        .withVersion(3)
+                                        .build();
+            return result;
         }
     }
 }

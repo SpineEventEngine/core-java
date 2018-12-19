@@ -23,31 +23,42 @@ package io.spine.server.event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
+import io.spine.server.integration.ExternalDispatcherFactory;
+
+import java.util.Set;
 
 /**
- * {@code EventDispatcher} delivers events to subscribers.
+ * {@code EventDispatcher} delivers events to {@linkplain EventReceiver receiving} objects.
  *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
-public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
+public interface EventDispatcher<I>
+        extends MulticastDispatcher<EventClass, EventEnvelope, I>, ExternalDispatcherFactory<I> {
 
-    enum Error {
+    /**
+     * Obtains classes of domestic events processed by this dispatcher.
+     */
+    default Set<EventClass> getEventClasses() {
+        return getMessageClasses();
+    }
 
-        DISPATCHING_EXTERNAL_EVENT("Error dispatching external event (class: %s, id: %s)");
+    /**
+     * Obtains classes of external events processed by this dispatcher.
+     */
+    Set<EventClass> getExternalEventClasses();
 
-        private final String messageFormat;
+    /**
+     * Verifies if this instance dispatches at least one domestic event.
+     */
+    default boolean dispatchesEvents() {
+        return !getEventClasses().isEmpty();
+    }
 
-        Error(String messageFormat) {
-            this.messageFormat = messageFormat;
-        }
-
-        public String getMessageFormat() {
-            return messageFormat;
-        }
-
-        public String format(Object... args) {
-            return String.format(messageFormat, args);
-        }
+    /**
+     * Verifies if this instance dispatches at least one external event.
+     */
+    default boolean dispatchesExternalEvents() {
+        return !getExternalEventClasses().isEmpty();
     }
 }

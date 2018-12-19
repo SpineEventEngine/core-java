@@ -21,12 +21,12 @@
 package io.spine.testing.server.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.tenant.CurrentTenant;
+import io.spine.server.tenant.TenantAwareTestSupport;
+import io.spine.server.tenant.TenantFunction;
 import io.spine.server.tenant.TenantIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,11 +43,11 @@ import static com.google.common.base.Preconditions.checkState;
 @VisibleForTesting
 public abstract class TenantAwareTest {
 
-    public static TenantIndex createTenantIndex(boolean multitenant,
-                                                StorageFactory storageFactory) {
+    public static
+    TenantIndex createTenantIndex(boolean multitenant, StorageFactory storageFactory) {
         return multitenant
-               ? TenantIndex.Factory.createDefault(storageFactory)
-               : TenantIndex.Factory.singleTenant();
+               ? TenantIndex.createDefault(storageFactory)
+               : TenantIndex.singleTenant();
     }
 
     /**
@@ -58,7 +58,7 @@ public abstract class TenantAwareTest {
     protected void setCurrentTenant(TenantId tenantId) {
         checkNotNull(tenantId);
         checkInTests();
-        CurrentTenant.set(tenantId);
+        TenantAwareTestSupport.inject(tenantId);
     }
 
     /**
@@ -68,24 +68,32 @@ public abstract class TenantAwareTest {
      */
     protected void clearCurrentTenant() {
         checkInTests();
-        CurrentTenant.clear();
+        TenantAwareTestSupport.clear();
     }
 
     /**
      * Obtains current tenant ID.
      *
-     * @throws IllegalStateException if the current tenant ID was
-     *                               {@linkplain #setCurrentTenant(TenantId) not set} or already
-     *                               {@linkplain #clearCurrentTenant() cleared}
+     * @throws IllegalStateException
+     *         if the current tenant ID was {@linkplain #setCurrentTenant(TenantId) not set}, or
+     *         already {@linkplain #clearCurrentTenant() cleared}
      */
-    @SuppressWarnings("ConstantConditions") // see Javadoc
     protected TenantId tenantId() {
-        final Optional<TenantId> optional = CurrentTenant.get();
-        return optional.get();
+        return currentTenant();
     }
 
     private static void checkInTests() {
         checkState(Environment.getInstance()
                               .isTests());
+    }
+
+    private static TenantId currentTenant() {
+        TenantId result = new TenantFunction<TenantId>(true) {
+            @Override
+            public TenantId apply(TenantId id) {
+                return id;
+            }
+        }.execute();
+        return checkNotNull(result);
     }
 }

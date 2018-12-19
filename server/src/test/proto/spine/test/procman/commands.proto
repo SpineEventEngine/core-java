@@ -22,7 +22,6 @@ syntax = "proto3";
 package spine.test.procman.command;
 
 import "spine/options.proto";
-import "spine/server/entity/entity.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.procman.command";
@@ -44,6 +43,10 @@ message PmStartProject {
     ProjectId project_id = 1;
 }
 
+message PmReviewBacklog {
+    ProjectId project_id = 1;
+}
+
 // A command, which does not modify a process manager state.
 message PmDoNothing {
     ProjectId project_id = 1;
@@ -59,5 +62,21 @@ message PmArchiveProcess {
 }
 
 message PmDeleteProcess {
+    ProjectId project_id = 1;
+}
+
+message PmStartIteration {
+    ProjectId project_id = 1;
+}
+
+message PmCancelIteration {
+    ProjectId project_id = 1;
+}
+
+message PmScheduleRetrospective {
+    ProjectId project_id = 1;
+}
+
+message PmPlanIteration {
     ProjectId project_id = 1;
 }

@@ -20,14 +20,13 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.DispatcherRegistry;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -36,10 +35,9 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * The registry of objects dispatching command request to where they are processed.
  *
  * <p>There can be only one dispatcher per command class.
- *
- * @author Alexander Yevsyukov
  */
-class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, CommandDispatcher<?>> {
+class CommandDispatcherRegistry
+        extends DispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher<?>> {
 
     /**
      * {@inheritDoc}
@@ -55,9 +53,9 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      * @param dispatcher the dispatcher to register
      */
     @Override
-    protected void register(CommandDispatcher<?> dispatcher) {
+    public void register(CommandDispatcher<?> dispatcher) {
         if (dispatcher instanceof DelegatingCommandDispatcher
-            && dispatcher.getMessageClasses().isEmpty()) {
+                && dispatcher.getMessageClasses().isEmpty()) {
             return;
         }
         super.register(dispatcher);
@@ -80,19 +78,6 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
         checkNotAlreadyRegistered(dispatcher);
     }
 
-    Optional<? extends CommandDispatcher<?>> getDispatcher(CommandClass commandClass) {
-        final Set<CommandDispatcher<?>> dispatchers = getDispatchers(commandClass);
-        if (dispatchers.isEmpty()) {
-            return Optional.absent();
-        }
-
-        // Since there can be only one dispatcher per command the returned set
-        // contains only one element.
-        final CommandDispatcher<?> result = FluentIterable.from(dispatchers)
-                                                          .get(0);
-        return Optional.of(result);
-    }
-
     /**
      * Ensures that all of the commands of the passed dispatcher are not
      * already registered for dispatched in this command bus.
@@ -101,15 +86,13 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      *                                  a registered dispatcher
      */
     private void checkNotAlreadyRegistered(CommandDispatcher<?> dispatcher) {
-        final Set<CommandClass> commandClasses = dispatcher.getMessageClasses();
-        final Map<CommandClass, CommandDispatcher<?>> alreadyRegistered = Maps.newHashMap();
+        Set<CommandClass> commandClasses = dispatcher.getMessageClasses();
+        Map<CommandClass, CommandDispatcher<?>> alreadyRegistered = Maps.newHashMap();
         // Gather command classes from this dispatcher that are registered.
         for (CommandClass commandClass : commandClasses) {
-            final Optional<? extends CommandDispatcher<?>> registeredDispatcher =
-                    getDispatcher(commandClass);
-            if (registeredDispatcher.isPresent()) {
-                alreadyRegistered.put(commandClass, registeredDispatcher.get());
-            }
+            Optional<? extends CommandDispatcher<?>> registeredDispatcher =
+                    getDispatcherForType(commandClass);
+            registeredDispatcher.ifPresent(d -> alreadyRegistered.put(commandClass, d));
         }
 
         doCheck(alreadyRegistered, dispatcher);
@@ -144,17 +127,6 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
     @Override
     protected Set<CommandClass> getRegisteredMessageClasses() {
         return super.getRegisteredMessageClasses();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the tests.
-     */
-    @VisibleForTesting
-    @Override
-    protected void unregister(CommandDispatcher<?> dispatcher) {
-        super.unregister(dispatcher);
     }
 
     /**

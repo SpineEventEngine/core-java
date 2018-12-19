@@ -19,10 +19,11 @@
  */
 package io.spine.server.model;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 
 /**
- * Meta-data set to a {@link HandlerMethod HandlerMethod}.
+ * Meta-data set to a {@link HandlerMethod#getAttributes()} HandlerMethod} attributes.
  *
  * <p>Typical way to add more semantics to a method is via a parameterized annotation,
  * such as {@link io.spine.core.Subscribe Subscribe}.
@@ -30,6 +31,7 @@ import io.spine.annotation.Internal;
  * @author Alex Tymchenko
  */
 @Internal
+@Immutable(containerOf = "V")
 public interface MethodAttribute<V> {
 
     /**

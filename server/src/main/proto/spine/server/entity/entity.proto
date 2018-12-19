@@ -37,6 +37,7 @@ import "spine/core/version.proto";
 //
 message EntityRecord {
     option (SPI_type) = true;
+    option (is).java_type = "WithLifecycle";
 
     // The ID of the entity.
     google.protobuf.Any entity_id = 1;

@@ -19,18 +19,21 @@
  */
 package io.spine.client;
 
-import com.google.common.collect.Sets;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
-import java.util.Collections;
+
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.base.Identifier.checkSupported;
+import static io.spine.base.Identifier.pack;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Client-side utilities for working with {@link Query} and
@@ -49,75 +52,137 @@ public final class Targets {
     /**
      * Create a {@link Target} for a subset of the entity states by specifying their IDs.
      *
-     * @param entityClass the class of a target entity
-     * @param ids         the IDs of interest
+     * @param entityClass
+     *         the class of a target entity
+     * @param ids
+     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
+     *         which is supported as identifier}
      * @return the instance of {@code Target} assembled according to the parameters.
+     * @throws IllegalArgumentException
+     *         if any of IDs have invalid type or are {@code null}
      */
     public static Target someOf(Class<? extends Message> entityClass,
-                                Set<? extends Message> ids) {
+                                Set<?> ids) {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
-        final Target result = composeTarget(entityClass, ids, null);
+        Target result = composeTarget(entityClass, ids, null);
         return result;
     }
 
     /**
      * Create a {@link Target} for all of the specified entity states.
      *
-     * @param entityClass the class of a target entity
+     * @param entityClass
+     *         the class of a target entity
      * @return the instance of {@code Target} assembled according to the parameters.
      */
     public static Target allOf(Class<? extends Message> entityClass) {
         checkNotNull(entityClass);
 
-        final Target result = composeTarget(entityClass, null, null);
+        Target result = composeTarget(entityClass, null, null);
         return result;
     }
 
-    @SuppressWarnings("CheckReturnValue") // calling builder
+    /**
+     * Composes a target for entities matching declared predicates.
+     *
+     * @param entityClass
+     *         the class of a target entity
+     * @param ids
+     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
+     *         which is supported as identifier}
+     * @param columnFilters
+     *         a set of entity column predicates each target entity must match
+     * @return a {@code Target} instance formed according to the provided parameters
+     */
     static Target composeTarget(Class<? extends Message> entityClass,
-                                @Nullable Set<? extends Message> ids,
+                                @Nullable Set<?> ids,
                                 @Nullable Set<CompositeColumnFilter> columnFilters) {
-        final boolean includeAll = (ids == null && columnFilters == null);
 
-        final Set<? extends Message> entityIds = nullToEmpty(ids);
-        final Set<CompositeColumnFilter> entityColumnValues = nullToEmpty(columnFilters);
+        boolean includeAll = (ids == null && columnFilters == null);
 
-        final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
-
-        if (!includeAll) {
-            for (Message rawId : entityIds) {
-                final Any packedId = AnyPacker.pack(rawId);
-                final EntityId entityId = EntityId.newBuilder()
-                                                  .setId(packedId)
-                                                  .build();
-                idFilterBuilder.addIds(entityId);
-            }
-        }
-        final EntityIdFilter idFilter = idFilterBuilder.build();
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .setIdFilter(idFilter)
-                                                   .addAllFilter(entityColumnValues)
-                                                   .build();
-        final String typeUrl = TypeUrl.of(entityClass)
-                                      .value();
-        final Target.Builder builder = Target.newBuilder()
-                                             .setType(typeUrl);
+        TypeUrl typeUrl = TypeUrl.of(entityClass);
+        TargetVBuilder builder = TargetVBuilder.newBuilder()
+                                               .setType(typeUrl.value());
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {
+            List<?> idsList = notNullList(ids);
+            EntityIdFilter idFilter = composeIdFilter(idsList);
+
+            List<CompositeColumnFilter> columnFiltersList = notNullList(columnFilters);
+            EntityFilters filters = entityFilters(columnFiltersList, idFilter);
             builder.setFilters(filters);
         }
 
         return builder.build();
     }
 
-    private static <T> Set<T> nullToEmpty(@Nullable Iterable<T> input) {
+    private static EntityIdFilter composeIdFilter(Collection<?> items) {
+        List<EntityId> ids = items.stream()
+                                  .distinct()
+                                  .map(Targets::entityId)
+                                  .collect(toList());
+        EntityIdFilter filter = idFilter(ids);
+        return filter;
+    }
+
+    private static EntityIdFilter idFilter(List<EntityId> ids) {
+        return EntityIdFilterVBuilder.newBuilder()
+                                     .addAllIds(ids)
+                                     .build();
+    }
+
+    /**
+     * Creates an Entity ID from a provided object.
+     *
+     * @param value
+     *         a value to set as {@link EntityId#getId() id} attribute of {@code EntityId}
+     * @return an {@link EntityId} with provided value
+     * @throws IllegalArgumentException
+     *         if the object cannot be an {@link io.spine.base.Identifier} or is {@code null}
+     */
+    private static EntityId entityId(Object value) {
+        return EntityIdVBuilder.newBuilder()
+                               .setId(pack(checkId(value)))
+                               .build();
+    }
+
+    /**
+     * Checks that object is not {@code null} and its type
+     * {@link io.spine.base.Identifier#checkSupported(Class)
+     * is supported as an identifier}.
+     *
+     * @param item
+     *         an object to check
+     * @param <I>
+     *         a type of an object to check
+     * @return the passed object
+     */
+    private static <I> I checkId(I item) {
+        checkNotNull(item);
+        checkSupported(item.getClass());
+        return item;
+    }
+
+    private static EntityFilters entityFilters(List<CompositeColumnFilter> entityColumnValues,
+                                               EntityIdFilter idFilter) {
+        return EntityFiltersVBuilder.newBuilder()
+                                    .setIdFilter(idFilter)
+                                    .addAllFilter(entityColumnValues)
+                                    .build();
+    }
+
+    /**
+     * Returns an empty list in case of {@code null} input.
+     *
+     * @return a new {@link List} instance
+     */
+    private static <T> List<T> notNullList(@Nullable Iterable<T> input) {
         if (input == null) {
-            return Collections.emptySet();
-        } else {
-            return Sets.newHashSet(input);
+            return emptyList();
         }
+        return newLinkedList(input);
     }
 }

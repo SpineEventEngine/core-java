@@ -20,10 +20,11 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Function;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Function;
 
 /**
  * The {@link Function} converting the {@link EntityRecordWithColumns} into {@link EntityRecord}.
@@ -33,11 +34,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Dmytro Dashenkov
  */
 enum EntityRecordUnpacker implements Function<EntityRecordWithColumns, EntityRecord> {
+
     INSTANCE;
 
-    @Nullable
     @Override
-    public EntityRecord apply(@Nullable EntityRecordWithColumns input) {
+    public @Nullable EntityRecord apply(@Nullable EntityRecordWithColumns input) {
         if (input == null) {
             return null;
         }

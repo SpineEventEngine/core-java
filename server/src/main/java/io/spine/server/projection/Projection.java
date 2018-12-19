@@ -21,15 +21,16 @@
 package io.spine.server.projection;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
-import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.event.EventSubscriberMethod;
-import io.spine.server.model.Model;
+import io.spine.server.event.EventSubscriber;
+import io.spine.server.projection.model.ProjectionClass;
 import io.spine.validate.ValidatingBuilder;
+
+import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -48,7 +49,7 @@ public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends TransactionalEntity<I, M, B>
-        implements EventPlayer {
+        implements EventPlayer, EventSubscriber {
 
     /**
      * Creates a new instance.
@@ -65,10 +66,10 @@ public abstract class Projection<I,
         return (ProjectionClass<?>) super.thisClass();
     }
 
+    @Internal
     @Override
     protected ProjectionClass<?> getModelClass() {
-        return Model.getInstance()
-                    .asProjectionClass(getClass());
+        return asProjectionClass(getClass());
     }
 
     /**
@@ -95,21 +96,21 @@ public abstract class Projection<I,
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
-    static boolean play(Projection projection, Iterable<Event> events) {
-        final ProjectionTransaction tx = ProjectionTransaction.start(projection);
+    static boolean playOn(Projection<?, ?, ?> projection, Iterable<Event> events) {
+        ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.play(events);
         tx.commit();
         return projection.isChanged();
     }
 
-    void apply(Message eventMessage, EventContext eventContext) {
-        final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
-        method.invoke(this, eventMessage, eventContext);
+    void apply(EventEnvelope event) {
+        thisClass().getSubscriber(event)
+                   .ifPresent(method -> method.invoke(this, event));
     }
 
     @Override
     public void play(Iterable<Event> events) {
-        final EventPlayer eventPlayer = EventPlayers.forTransactionOf(this);
+        EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
         eventPlayer.play(events);
     }
 }

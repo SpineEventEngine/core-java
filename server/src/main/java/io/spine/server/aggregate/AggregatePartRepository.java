@@ -20,7 +20,10 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.model.Model;
+import io.spine.annotation.Internal;
+import io.spine.server.aggregate.model.AggregatePartClass;
+
+import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
 
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
@@ -45,16 +48,15 @@ public abstract class AggregatePartRepository<I,
     @SuppressWarnings("MethodDoesntCallSuperMethod") // We create objects of another class.
     @Override
     public A create(I id) {
-        final AggregateRoot<I> root = createAggregateRoot(id);
-        final A result = createAggregatePart(root);
+        AggregateRoot<I> root = createAggregateRoot(id);
+        A result = createAggregatePart(root);
         return result;
     }
 
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Internal
     @Override
     protected final AggregatePartClass<A> getModelClass(Class<A> cls) {
-        return (AggregatePartClass<A>) Model.getInstance()
-                                            .asAggregatePartClass(cls);
+        return asAggregatePartClass(cls);
     }
 
     private AggregatePartClass<A> aggregatePartClass() {
@@ -63,7 +65,7 @@ public abstract class AggregatePartRepository<I,
 
     //TODO:2017-06-06:alexander.yevsyukov: Cache aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
-        final AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
+        AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
         return result;
     }
 

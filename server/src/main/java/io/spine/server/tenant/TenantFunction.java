@@ -20,10 +20,11 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Function;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Function;
 
 /**
  * A function which can work in single-tenant and multi-tenant context and return a
@@ -51,8 +52,8 @@ public abstract class TenantFunction<T> extends TenantAware implements Function<
      * @return the result of the function
      */
     public @Nullable T execute() {
-        final TenantId currentTenant = tenantId();
-        final T result = apply(currentTenant);
+        TenantId currentTenant = tenantId();
+        T result = apply(currentTenant);
         return result;
     }
 }

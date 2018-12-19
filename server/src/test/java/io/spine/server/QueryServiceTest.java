@@ -19,12 +19,10 @@
  */
 package io.spine.server;
 
-import com.google.common.collect.Sets;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.ProjectDetailsRepository;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +32,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.Given.PROJECTS_CONTEXT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,31 +44,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("QueryService should")
 class QueryServiceTest {
 
-    private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
-
+    private Set<BoundedContext> boundedContexts;
     private QueryService service;
-
-    private BoundedContext projectsContext;
-
-    private BoundedContext customersContext;
-
-    private final MemoizingObserver<QueryResponse> responseObserver =
-            StreamObservers.memoizingObserver();
+    private MemoizingObserver<QueryResponse> responseObserver;
     private ProjectDetailsRepository projectDetailsRepository;
 
+    @SuppressWarnings("CheckReturnValue") // Calling builder.
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
+
+        boundedContexts = newHashSet();
+        responseObserver = memoizingObserver();
         // Create Projects Bounded Context with one repository and one projection.
-        projectsContext = BoundedContext.newBuilder()
-                                        .setName(PROJECTS_CONTEXT_NAME)
-                                        .build();
+        BoundedContext projectsContext = BoundedContext
+                .newBuilder()
+                .setName(PROJECTS_CONTEXT_NAME)
+                .build();
         Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         projectDetailsRepository = spy(new ProjectDetailsRepository());
@@ -77,20 +72,20 @@ class QueryServiceTest {
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        customersContext = BoundedContext.newBuilder()
-                                         .setName("Customers")
-                                         .build();
+        BoundedContext customersContext = BoundedContext
+                .newBuilder()
+                .setName("Customers")
+                .build();
         Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
-        QueryService.Builder builder = QueryService.newBuilder();
-
+        QueryService.Builder queryService = QueryService.newBuilder();
         for (BoundedContext context : boundedContexts) {
-            builder.add(context);
+            queryService.add(context);
         }
 
-        service = spy(builder.build());
+        service = spy(queryService.build());
     }
 
     @AfterEach
@@ -109,7 +104,7 @@ class QueryServiceTest {
     }
 
     @Test
-    @DisplayName("dispatch queries to proper bounded context")
+    @DisplayName("dispatch queries to proper Bounded Context")
     void dispatchQueriesToBc() {
         Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
@@ -118,7 +113,7 @@ class QueryServiceTest {
     }
 
     @Test
-    @DisplayName("fail to create with bounded context removed from builder")
+    @DisplayName("fail to create with Bounded Context removed from builder")
     void notCreateWithRemovedBc() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
@@ -130,9 +125,8 @@ class QueryServiceTest {
                                                                .build());
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    @DisplayName("fail to create with no bounded context")
+    @DisplayName("fail to create with no Bounded Context")
     void notCreateWithNoBc() {
         assertThrows(IllegalStateException.class, () -> QueryService.newBuilder()
                                                                     .build());
@@ -148,7 +142,7 @@ class QueryServiceTest {
     }
 
     @Test
-    @DisplayName("throw ISE if Query target type is not found in any registered repository")
+    @DisplayName("throw ISE if the Query target type is not found among registered repositories")
     void throwOnTargetNotFound() {
         // There is no registered repository for `ProjectTaskNames` projection.
         Query query = Given.AQuery.readAllProjectTaskNames();

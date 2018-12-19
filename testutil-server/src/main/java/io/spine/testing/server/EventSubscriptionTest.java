@@ -22,54 +22,50 @@ package io.spine.testing.server;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.server.entity.Entity;
-import io.spine.testing.server.expected.AbstractExpected;
+import io.spine.testing.server.expected.EventSubscriberExpected;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The base class for testing the single event handling by a subscriber.
  *
  * @param <I> ID message of the event and the handling entity
  * @param <M> the type of the event message to test
- * @param <S> state message of the handling entity
+ * @param <S> the type of the state message of the handling entity
  * @param <E> the type of the event subscriber being tested
  * @author Vladyslav Lubenskyi
  */
 @CheckReturnValue
 public abstract class EventSubscriptionTest<I,
-                                            M extends Message,
+                                            M extends EventMessage,
                                             S extends Message,
                                             E extends Entity<I, S>>
-        extends MessageHandlerTest<I, M, S, E, EventSubscriptionTest.Expected<S>> {
+        extends MessageHandlerTest<I, M, S, E, EventSubscriberExpected<S>> {
 
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
+    protected EventSubscriptionTest(I entityId, M eventMessage) {
+        super(entityId, eventMessage);
+    }
+
     @Override
     @SuppressWarnings("CheckReturnValue")
-    protected Expected<S> expectThat(E entity) {
+    protected EventSubscriberExpected<S> expectThat(E entity) {
         S initialState = entity.getState();
         dispatchTo(entity);
-        return new Expected<>(initialState, entity.getState());
+        return new EventSubscriberExpected<>(initialState, entity.getState());
     }
 
     /**
      * Creates {@link Event} from the tested message.
      */
     protected final Event createEvent() {
-        Message eventMessage = message();
+        EventMessage eventMessage = message();
+        checkNotNull(eventMessage);
         Event result = eventFactory.createEvent(eventMessage);
         return result;
-    }
-
-    public static class Expected<S extends Message> extends AbstractExpected<S, Expected<S>> {
-
-        private Expected(S initialState, S state) {
-            super(initialState, state);
-        }
-
-        @Override
-        protected Expected<S> self() {
-            return this;
-        }
     }
 }

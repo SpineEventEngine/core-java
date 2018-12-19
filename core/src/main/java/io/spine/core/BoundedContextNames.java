@@ -20,23 +20,23 @@
 
 package io.spine.core;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
- * A name of {@code BoundedContext} used to distinguish an instance of bounded context among other
- * bounded contexts that exist in the same application.
+ * Utility class for working with Bounded Context names.
  *
- * <p>Must be unique in scope of the application.
- *
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
+ * @see io.spine.core.BoundedContextName
  */
 public final class BoundedContextNames {
 
-    private static final BoundedContextName MAIN = newName("Main");
+    /** The name of a Bounded Context to be used if the name was explicitly set. */
+    private static final BoundedContextName ASSUMING_TESTS = newName("AssumingTests");
     private static final String SYSTEM_TEMPLATE = "%s_System";
 
     /**
@@ -56,9 +56,12 @@ public final class BoundedContextNames {
      * @return a newly created name
      */
     public static BoundedContextName newName(String name) {
-        BoundedContextName result = BoundedContextName.newBuilder()
-                                                      .setValue(name)
-                                                      .build();
+        checkNotNull(name);
+        checkArgument(!name.isEmpty());
+        BoundedContextName result = BoundedContextName
+                .newBuilder()
+                .setValue(name)
+                .build();
         checkValid(result);
         return result;
     }
@@ -76,11 +79,12 @@ public final class BoundedContextNames {
     }
 
     /**
-     * Obtains the name of the {@code Main} bounded context.
+     * Obtains the name for a Bounded Context, which will be used when no name was specified.
      */
     @Internal
-    public static BoundedContextName defaultName() {
-        return MAIN;
+    @VisibleForTesting
+    public static BoundedContextName assumingTests() {
+        return ASSUMING_TESTS;
     }
 
     /**

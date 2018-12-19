@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package spine.testing.client;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.testing.client.command";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+// A command message used for generating test commands in `TestActorRequestFactory`.
+message TestCommandMessage {
+
+    string id = 1;
+}

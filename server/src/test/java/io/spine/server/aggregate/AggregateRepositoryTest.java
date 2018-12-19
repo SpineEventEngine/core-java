@@ -20,12 +20,8 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.protobuf.FloatValue;
-import com.google.protobuf.UInt64Value;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
@@ -38,6 +34,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
@@ -49,24 +46,34 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReact
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.model.HandlerMethodFailedException;
-import io.spine.server.model.Model;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.Task;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
+import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
+import io.spine.test.aggregate.number.FloatEncountered;
+import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
+import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
@@ -78,20 +85,25 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.reposit
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.requestFactory;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBoundedContext;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.testing.client.blackbox.Count.none;
+import static io.spine.testing.client.blackbox.Count.thrice;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
@@ -100,7 +112,7 @@ public class AggregateRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         resetBoundedContext();
         resetRepository();
         boundedContext().register(repository());
@@ -108,7 +120,6 @@ public class AggregateRepositoryTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        repository().close();
         boundedContext().close();
     }
 
@@ -126,9 +137,8 @@ public class AggregateRepositoryTest {
         @DisplayName("command classes handled by aggregate")
         void aggregateCommandClasses() {
             Set<CommandClass> aggregateCommands =
-                    Model.getInstance()
-                         .asAggregateClass(ProjectAggregate.class)
-                         .getCommands();
+                    asAggregateClass(ProjectAggregate.class)
+                            .getCommands();
             Set<CommandClass> exposedByRepository = repository().getMessageClasses();
 
             assertTrue(exposedByRepository.containsAll(aggregateCommands));
@@ -138,8 +148,8 @@ public class AggregateRepositoryTest {
         @DisplayName("event classes on which aggregate reacts")
         void aggregateEventClasses() {
             Set<EventClass> eventClasses = repository().getEventClasses();
-            assertTrue(eventClasses.contains(EventClass.of(AggProjectArchived.class)));
-            assertTrue(eventClasses.contains(EventClass.of(AggProjectDeleted.class)));
+            assertTrue(eventClasses.contains(EventClass.from(AggProjectArchived.class)));
+            assertTrue(eventClasses.contains(EventClass.from(AggProjectDeleted.class)));
         }
     }
 
@@ -153,7 +163,9 @@ public class AggregateRepositoryTest {
             ProjectId id = Sample.messageOfType(ProjectId.class);
             ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
-            repository().setSnapshotTrigger(expected.uncommittedEventsCount());
+            UncommittedEvents events = ((Aggregate<?, ?, ?>) expected).getUncommittedEvents();
+            repository().setSnapshotTrigger(events.list()
+                                                  .size());
             repository().store(expected);
 
             ProjectAggregate actual = assertFound(id);
@@ -192,13 +204,14 @@ public class AggregateRepositoryTest {
         void whenNeededToStore() {
             ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
             // This should make the repository write the snapshot.
-            repository().setSnapshotTrigger(aggregate.uncommittedEventsCount());
+            UncommittedEvents events = ((Aggregate<?, ?, ?>) aggregate).getUncommittedEvents();
+            repository().setSnapshotTrigger(events.list()
+                                                  .size());
 
             repository().store(aggregate);
             AggregateStateRecord record = readRecord(aggregate);
             assertTrue(record.hasSnapshot());
-            assertEquals(0, repository().aggregateStorage()
-                                        .readEventCountAfterLastSnapshot(aggregate.getId()));
+            assertEquals(0, record.getEventCount());
         }
 
         @Test
@@ -255,7 +268,7 @@ public class AggregateRepositoryTest {
     }
 
     @Nested
-    @DisplayName("pass snapshot trigger to AggregateReadRequest")
+    @DisplayName("pass snapshot trigger + 1 to AggregateReadRequest")
     class PassSnapshotTrigger {
 
         @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
@@ -276,7 +289,7 @@ public class AggregateRepositoryTest {
 
             AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
             assertEquals(id, passedRequest.getRecordId());
-            assertEquals(repositorySpy.getSnapshotTrigger(), passedRequest.getBatchSize());
+            assertEquals(repositorySpy.getSnapshotTrigger() + 1, passedRequest.getBatchSize());
         }
 
         @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
@@ -299,7 +312,39 @@ public class AggregateRepositoryTest {
 
             AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
             assertEquals(id, passedRequest.getRecordId());
-            assertEquals(nonDefaultSnapshotTrigger, passedRequest.getBatchSize());
+            assertEquals(nonDefaultSnapshotTrigger + 1, passedRequest.getBatchSize());
+        }
+    }
+
+    @Nested
+    @DisplayName("pass event count after last snapshot + 1 to AggregateReadRequest")
+    class PassEventCount {
+
+        @SuppressWarnings("CheckReturnValue")
+            // Calling `AggregateRepository.loadOrCreate` for the side effect.
+        @Test
+        @DisplayName("when the count is greater than the snapshot trigger")
+        void whenGreaterThanTrigger() {
+            AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository());
+            AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+            when(repositorySpy.aggregateStorage())
+                    .thenReturn(storageSpy);
+            int snapshotTrigger = repositorySpy.getSnapshotTrigger();
+            int eventCount = snapshotTrigger * 2;
+            when(storageSpy.readEventCountAfterLastSnapshot(any(ProjectId.class)))
+                    .thenReturn(eventCount);
+
+            ProjectId id = Sample.messageOfType(ProjectId.class);
+            repositorySpy.loadOrCreate(id);
+
+            @SuppressWarnings("unchecked") // Reflective mock creation.
+            ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+                    ArgumentCaptor.forClass(AggregateReadRequest.class);
+            verify(storageSpy).read(requestCaptor.capture());
+
+            AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+            assertEquals(id, passedRequest.getRecordId());
+            assertEquals(eventCount + 1, passedRequest.getBatchSize());
         }
     }
 
@@ -362,7 +407,7 @@ public class AggregateRepositoryTest {
         op.execute();
 
         Iterator<ProjectAggregate> iterator =
-                repository().iterator(Predicates.alwaysTrue());
+                repository().iterator(aggregate -> true);
 
         // This should iterate through all and fail.
         assertThrows(IllegalStateException.class, () -> Lists.newArrayList(iterator));
@@ -461,6 +506,101 @@ public class AggregateRepositoryTest {
         }
     }
 
+    @Nested
+    @ExtendWith(ShardingReset.class)
+    @MuteLogging
+    @DisplayName("post produced events to EventBus")
+    class PostEventsToBus {
+
+        @Test
+        @DisplayName("after command dispatching")
+        void afterCommand() {
+            ProjectId id = givenAggregateId(Identifier.newUuid());
+            AggCreateProject create = AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setName("Command Dispatching")
+                    .build();
+            Task task = Task
+                    .newBuilder()
+                    .setTitle("Dummy Task")
+                    .setDescription("Dummy Task Description")
+                    .build();
+            AggAddTask addTask = AggAddTask
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setTask(task)
+                    .build();
+            AggStartProject start = AggStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            BlackBoxBoundedContext.singleTenant()
+                                  .with(repository())
+                                  .receivesCommands(create, addTask, start)
+                                  .assertThat(emittedEventsHadVersions(1, 2, 3))
+                                  .close();
+        }
+
+        @Test
+        @DisplayName("after event dispatching")
+        void afterEvent() {
+            ProjectId id = givenAggregateId(Identifier.newUuid());
+            AggCreateProject create = AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setName("Command Dispatching")
+                    .build();
+            AggStartProject start = AggStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            ProjectId parent = givenAggregateId(Identifier.newUuid());
+            AggProjectArchived archived = AggProjectArchived
+                    .newBuilder()
+                    .setProjectId(parent)
+                    .addChildProjectId(id)
+                    .build();
+            BlackBoxBoundedContext.singleTenant()
+                                  .with(repository())
+                                  .receivesCommands(create, start)
+                                  .receivesEvent(archived)
+                                  .assertThat(emittedEventsHadVersions(
+                                          1, 2, // Product creation
+                                          3     // Event produced in response to `archived` event
+                                  ))
+                                  .close();
+        }
+
+        @Test
+        @DisplayName("through the repository EventFilter")
+        void throughEventFilter() {
+            ProjectId id = givenAggregateId(Identifier.newUuid());
+            AggCreateProject create = AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setName("Test Project")
+                    .build();
+            AggStartProject start = AggStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            ProjectId parent = givenAggregateId(Identifier.newUuid());
+            AggProjectArchived archived = AggProjectArchived
+                    .newBuilder()
+                    .setProjectId(parent)
+                    .addChildProjectId(id)
+                    .build();
+            BlackBoxBoundedContext.singleTenant()
+                                  .with(new EventDiscardingAggregateRepository())
+                                  .receivesCommands(create, start)
+                                  .receivesEvent(archived)
+                                  .assertThat(emittedEvent(none()))
+                                  .assertThat(acked(thrice()).withoutErrorsOrRejections())
+                                  .close();
+        }
+    }
+
     @Test
     @DisplayName("route events to aggregates")
     void routeEventsToAggregates() {
@@ -496,8 +636,9 @@ public class AggregateRepositoryTest {
     }
 
     @Test
-    @DisplayName("log error when event reaction fails")
-    void logErrorWhenEventReactionFails() {
+    @DisplayName("do nothing when event reaction fails")
+    @MuteLogging
+    void doNothingWhenEventReactionFails() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext().register(repository);
 
@@ -505,9 +646,9 @@ public class AggregateRepositoryTest {
 
         // Passing negative float value should cause an exception.
         EventEnvelope envelope =
-                EventEnvelope.of(factory.createEvent(FloatValue.newBuilder()
-                                                               .setValue(-412.0f)
-                                                               .build()));
+                EventEnvelope.of(factory.createEvent(FloatEncountered.newBuilder()
+                                                                     .setNumber(-412.0f)
+                                                                     .build()));
         boundedContext().getEventBus()
                         .post(envelope.getOuterObject());
 
@@ -535,9 +676,9 @@ public class AggregateRepositoryTest {
 
         // Passing negative long value to `FailingAggregate` should cause a rejection.
         CommandEnvelope ce = CommandEnvelope.of(
-                requestFactory().createCommand(UInt64Value.newBuilder()
-                                                          .setValue(-100_000_000L)
-                                                          .build()));
+                requestFactory().createCommand(RejectNegativeLong.newBuilder()
+                                                                 .setNumber(-100_000_000L)
+                                                                 .build()));
         boundedContext().getCommandBus()
                         .post(ce.getCommand(), StreamObservers.noOpObserver());
 

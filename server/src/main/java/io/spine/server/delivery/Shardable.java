@@ -20,15 +20,16 @@
 package io.spine.server.delivery;
 
 import io.spine.core.BoundedContextName;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.entity.model.EntityClass;
 
 /**
  * A contract for all message destinations, which require the messages sent to them
  * to be grouped and processed in shards.
  *
  * <p>Typically, the message destinations are repositories of entities, which dispatch the messages,
- * such as {@linkplain io.spine.core.Command Commands}, {@linkplain io.spine.core.Events Events}
- * and {@linkplain io.spine.core.Rejection Rejections}, to the entities.
+ * such as {@linkplain io.spine.core.Command Commands} and {@linkplain io.spine.core.Events Events},
+ * to the entities.
  *
  * <p>In order to avoid concurrent modifications of the same entity in several processing nodes,
  * the entities are virtually grouped into shards by their identifiers. The items which belong
@@ -78,4 +79,22 @@ public interface Shardable {
      * in this {@code Shardable}
      */
     EntityClass getShardedModelClass();
+
+    /**
+     * Registers this instance with {@link Sharding} obtained from the {@link ServerEnvironment}.
+     */
+    default void registerWithSharding() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .register(this);
+    }
+
+    /**
+     * Unregisters this instance {@link Sharding} obtained from the {@link ServerEnvironment}.
+     */
+    default void unregisterWithSharding() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
+    }
 }

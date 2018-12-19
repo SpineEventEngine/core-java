@@ -20,9 +20,11 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.BoolValue;
+import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
+import io.spine.test.event.FailRequested;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,7 +42,7 @@ class EventSubscriberTest {
 
     private final TestEventFactory factory = TestEventFactory.newInstance(getClass());
 
-    private EventSubscriber subscriber;
+    private AbstractEventSubscriber subscriber;
 
     @BeforeEach
     void setUp() {
@@ -49,13 +51,14 @@ class EventSubscriberTest {
 
     @Test
     @DisplayName("catch exceptions caused by methods")
+    @MuteLogging
     void catchMethodExceptions() {
         // Create event which should fail.
-        final EventEnvelope eventEnvelope = createEvent(false);
+        EventEnvelope eventEnvelope = createEvent(false);
 
-        final Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
+        Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
 
-        final FailingSubscriber sub = (FailingSubscriber) this.subscriber;
+        FailingSubscriber sub = (FailingSubscriber) this.subscriber;
         assertTrue(sub.isMethodCalled());
         assertEquals(0, dispatchingResult.size());
         assertEquals(eventEnvelope, sub.getLastErrorEnvelope());
@@ -65,11 +68,11 @@ class EventSubscriberTest {
     @Test
     @DisplayName("dispatch event")
     void dispatchEvent() {
-        final EventEnvelope eventEnvelope = createEvent(true);
+        EventEnvelope eventEnvelope = createEvent(true);
 
-        final Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
+        Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
 
-        final FailingSubscriber sub = (FailingSubscriber) this.subscriber;
+        FailingSubscriber sub = (FailingSubscriber) this.subscriber;
         assertTrue(sub.isMethodCalled());
         assertEquals(1, dispatchingResult.size());
         assertNull(sub.getLastException());
@@ -92,9 +95,17 @@ class EventSubscriberTest {
                                   .size());
     }
 
-    private EventEnvelope createEvent(boolean value) {
-        return EventEnvelope.of(factory.createEvent(BoolValue.newBuilder()
-                                                             .setValue(value)
-                                                             .build()));
+    @Test
+    @DisplayName("expose handled external message classes")
+    void exposeExternalClasses() {
+        assertEquals(1, subscriber.getExternalEventClasses()
+                                  .size());
+    }
+
+    private EventEnvelope createEvent(boolean shouldFail) {
+        Event event = factory.createEvent(FailRequested.newBuilder()
+                                                       .setShouldFail(shouldFail)
+                                                       .build());
+        return EventEnvelope.of(event);
     }
 }

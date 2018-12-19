@@ -32,13 +32,11 @@ import static io.spine.base.Time.getCurrentTime;
 
 /**
  * Factory methods to create {@code CommandContext} instances for test purposes.
- *
- * @author Mikhail Mikhaylov
  */
-public class GivenCommandContext {
+public final class GivenCommandContext {
 
+    /** Prevent instantiation of this utility class. */
     private GivenCommandContext() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -48,8 +46,8 @@ public class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     public static CommandContext withRandomActor() {
-        final UserId userId = GivenUserId.newUuid();
-        final Timestamp now = getCurrentTime();
+        UserId userId = GivenUserId.newUuid();
+        Timestamp now = getCurrentTime();
         return withActorAndTime(userId, now);
     }
 
@@ -59,13 +57,13 @@ public class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     public static CommandContext withActorAndTime(UserId actor, Timestamp when) {
-        final TenantId tenantId = GivenTenantId.newUuid();
-        final ActorContext.Builder actorContext = ActorContext.newBuilder()
-                                                              .setActor(actor)
-                                                              .setTimestamp(when)
-                                                              .setTenantId(tenantId);
-        final CommandContext.Builder builder = CommandContext.newBuilder()
-                                                             .setActorContext(actorContext);
+        TenantId tenantId = GivenTenantId.newUuid();
+        ActorContext.Builder actorContext = ActorContext.newBuilder()
+                                                        .setActor(actor)
+                                                        .setTimestamp(when)
+                                                        .setTenantId(tenantId);
+        CommandContext.Builder builder = CommandContext.newBuilder()
+                                                       .setActorContext(actorContext);
         return builder.build();
     }
 
@@ -77,9 +75,9 @@ public class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     public static CommandContext withScheduledDelayOf(Duration delay) {
-        final Schedule schedule = Schedule.newBuilder()
-                                          .setDelay(delay)
-                                          .build();
+        Schedule schedule = Schedule.newBuilder()
+                                    .setDelay(delay)
+                                    .build();
         return withSchedule(schedule);
     }
 
@@ -91,8 +89,8 @@ public class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     private static CommandContext withSchedule(Schedule schedule) {
-        final CommandContext.Builder builder = withRandomActor().toBuilder()
-                                                                .setSchedule(schedule);
+        CommandContext.Builder builder = withRandomActor().toBuilder()
+                                                          .setSchedule(schedule);
         return builder.build();
     }
 }

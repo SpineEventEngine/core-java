@@ -23,21 +23,25 @@ package io.spine.server.commandbus;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.BusBuilderTest;
-import io.spine.server.commandstore.CommandStore;
-import io.spine.server.rejection.RejectionBus;
+import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.server.tenant.TenantAwareTest.createTenantIndex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -50,42 +54,66 @@ import static org.mockito.Mockito.mock;
 class CommandBusBuilderTest
         extends BusBuilderTest<CommandBus.Builder, CommandEnvelope, Command> {
 
-    private CommandStore commandStore;
+    private static final SystemWriteSide SYSTEM_WRITE_SIDE = NoOpSystemWriteSide.INSTANCE;
+
+    private TenantIndex tenantIndex;
+    private EventBus eventBus;
 
     @Override
     protected CommandBus.Builder builder() {
-        return CommandBus.newBuilder();
+        return CommandBus.newBuilder()
+                         .injectSystem(SYSTEM_WRITE_SIDE)
+                         .injectTenantIndex(tenantIndex)
+                         .injectEventBus(eventBus);
     }
 
     @BeforeEach
     void setUp() {
-        final boolean multitenant = true;
+        boolean multitenant = true;
         InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    multitenant);
-        TenantIndex tenantIndex = createTenantIndex(multitenant, storageFactory);
-        commandStore = new CommandStore(storageFactory, tenantIndex);
+        tenantIndex = createTenantIndex(multitenant, storageFactory);
+        eventBus = EventBus
+                .newBuilder()
+                .setStorageFactory(storageFactory)
+                .build();
     }
 
     @Test
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
-        final CommandBus commandBus = builder().setCommandStore(commandStore)
-                                               .build();
+        CommandBus commandBus = CommandBus.newBuilder()
+                                          .injectTenantIndex(tenantIndex)
+                                          .injectSystem(SYSTEM_WRITE_SIDE)
+                                          .injectEventBus(eventBus)
+                                          .build();
         assertNotNull(commandBus);
     }
 
     @Test
     @DisplayName("not accept null CommandStore")
     void notAcceptNullCommandStore() {
-        assertThrows(NullPointerException.class, () -> builder().setCommandStore(Tests.nullRef()));
+        assertThrows(NullPointerException.class,
+                     () -> builder().injectTenantIndex(Tests.nullRef()));
     }
 
     @Test
     @DisplayName("not allow to omit setting CommandStore")
     void neverOmitCommandStore() {
-        assertThrows(IllegalStateException.class, () -> CommandBus.newBuilder()
-                                                                  .build());
+        assertThrows(IllegalStateException.class,
+                     () -> CommandBus.newBuilder()
+                                     .injectSystem(SYSTEM_WRITE_SIDE)
+                                     .build());
+    }
+
+    @Test
+    @DisplayName("not allow to omit setting SystemWriteSide")
+    void neverOmitSystem() {
+        assertThrows(IllegalStateException.class,
+                     () -> CommandBus.newBuilder()
+                                     .injectTenantIndex(tenantIndex)
+                                     .build());
     }
 
     @Nested
@@ -95,45 +123,32 @@ class CommandBusBuilderTest
         @Test
         @DisplayName("CommandScheduler")
         void commandScheduler() {
-            final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
+            CommandScheduler expectedScheduler = mock(CommandScheduler.class);
 
-            final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                        .setCommandScheduler(expectedScheduler);
+            CommandBus.Builder builder = builder().setCommandScheduler(expectedScheduler);
 
             assertTrue(builder.getCommandScheduler()
                               .isPresent());
             assertEquals(expectedScheduler, builder.getCommandScheduler()
                                                    .get());
 
-            final CommandBus commandBus = builder.build();
+            CommandBus commandBus = builder.build();
             assertNotNull(commandBus);
 
-            final CommandScheduler actualScheduler = commandBus.scheduler();
+            CommandScheduler actualScheduler = commandBus.scheduler();
             assertEquals(expectedScheduler, actualScheduler);
         }
 
         @Test
-        @DisplayName("RejectionBus")
-        void rejectionBus() {
-            final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
+        @DisplayName("EventBus")
+        void eventBus() {
+            EventBus expectedEventBus = mock(EventBus.class);
 
-            final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                        .setRejectionBus(expectedRejectionBus);
-            assertTrue(builder.getRejectionBus()
+            CommandBus.Builder builder = builder().injectEventBus(expectedEventBus);
+            assertTrue(builder.getEventBus()
                               .isPresent());
-            assertEquals(expectedRejectionBus, builder.getRejectionBus()
-                                                      .get());
-        }
-
-        @Test
-        @DisplayName("if thread spawn is allowed")
-        void ifThreadSpawnAllowed() {
-            assertTrue(builder().setThreadSpawnAllowed(true)
-                                .isThreadSpawnAllowed());
-
-            assertFalse(CommandBus.newBuilder()
-                                  .setThreadSpawnAllowed(false)
-                                  .isThreadSpawnAllowed());
+            assertEquals(expectedEventBus, builder.getEventBus()
+                                                  .get());
         }
 
         @Test
@@ -146,12 +161,23 @@ class CommandBusBuilderTest
         }
 
         @Test
-        @DisplayName("CommandStore")
-        void commandStore() {
-            final CommandStore commandStore = mock(CommandStore.class);
+        @DisplayName("system write side")
+        void system() {
+            SystemWriteSide systemWriteSide = mock(SystemWriteSide.class);
+            CommandBus.Builder builder = builder().injectSystem(systemWriteSide);
+            Optional<SystemWriteSide> actual = builder.system();
+            assertTrue(actual.isPresent());
+            assertSame(systemWriteSide, actual.get());
+        }
 
-            assertEquals(commandStore, builder().setCommandStore(commandStore)
-                                                .getCommandStore());
+        @Test
+        @DisplayName("tenant index")
+        void tenantIndex() {
+            TenantIndex index = mock(TenantIndex.class);
+            CommandBus.Builder builder = builder().injectTenantIndex(index);
+            Optional<TenantIndex> actual = builder.tenantIndex();
+            assertTrue(actual.isPresent());
+            assertSame(index, actual.get());
         }
     }
 }

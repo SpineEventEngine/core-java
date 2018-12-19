@@ -24,9 +24,9 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionId;
 import io.spine.testing.server.expected.CommandHandlerExpected;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.rejection.Rejections.TuFailedToAssignProject;
 
 import java.util.List;
 
@@ -48,16 +48,18 @@ public class CommandExpectedTestEnv {
     private CommandExpectedTestEnv() {
     }
 
-    public static Message rejection() {
-        RejectionId id = RejectionId.newBuilder()
-                                    .setValue("test rejection")
-                                    .build();
-        return Rejection.newBuilder()
-                        .setId(id)
-                        .build();
+    public static Message rejectionMessage() {
+        TuProjectId entityId = TuProjectId.newBuilder()
+                                          .setValue("entity ID")
+                                          .build();
+        TuFailedToAssignProject rejectionMessage = TuFailedToAssignProject
+                .newBuilder()
+                .setId(entityId)
+                .build();
+        return rejectionMessage;
     }
 
-    public static List<Message> interceptedCommands() {
+    private static List<Message> interceptedCommands() {
         StringValue firstCommand = StringValue.newBuilder()
                                               .setValue("command 1")
                                               .build();
@@ -67,10 +69,11 @@ public class CommandExpectedTestEnv {
         return asList(firstCommand, secondCommand);
     }
 
-    public static CommandHandlerExpected<UInt64Value> commandExpectedWithRejection(Message rejection) {
+    public static CommandHandlerExpected<UInt64Value>
+    commandExpectedWithRejection(Message rejectionMessage) {
         CommandHandlerExpected<UInt64Value> expected =
                 new CommandHandlerExpected<>(events(),
-                                             rejection,
+                                             rejectionMessage,
                                              oldState(),
                                              newState(),
                                              interceptedCommands());
@@ -97,9 +100,7 @@ public class CommandExpectedTestEnv {
         return expected;
     }
 
-    public static CommandHandlerExpected<UInt64Value> commandExpected(
-
-    ) {
+    public static CommandHandlerExpected<UInt64Value> commandExpected() {
         CommandHandlerExpected<UInt64Value> expected =
                 new CommandHandlerExpected<>(events(),
                                              null,

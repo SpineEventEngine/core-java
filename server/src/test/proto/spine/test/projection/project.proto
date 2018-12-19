@@ -33,7 +33,10 @@ message ProjectId {
 
 message Project {
 
-    ProjectId id = 1;
+    // Keep the message generic. It is used both as an aggregate and a projection state.
+    option (entity).kind = ENTITY;
+
+    ProjectId id = 1 [(required) = false];
 
     string name = 2;
 
@@ -62,10 +65,11 @@ message Task {
 
 // A projection of all `Task` names for a certain `Project`.
 message ProjectTaskNames {
+    option (entity).kind = PROJECTION;
 
-    ProjectId project_id = 1;
+    ProjectId project_id = 1 [(required) = false];
 
-    string project_name = 2 [(required) = true];
+    string project_name = 2;
 
     repeated string task_name = 3;
 }

@@ -30,14 +30,13 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.ColumnFilter.Operator;
-import static io.spine.time.Timestamps2.isLaterThan;
+import static io.spine.protobuf.Timestamps2.isLaterThan;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
 /**
  * A boolean non-typed comparison operation on two given instances.
  *
- * @author Dmytro Dashenkov
  * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
  */
 @Internal
@@ -64,15 +63,15 @@ public enum OperatorEvaluator {
                 );
             }
             if (left instanceof Timestamp) {
-                final Timestamp tsLeft = (Timestamp) left;
-                final Timestamp tsRight = (Timestamp) right;
+                Timestamp tsLeft = (Timestamp) left;
+                Timestamp tsRight = (Timestamp) right;
                 return isLaterThan(tsLeft, tsRight);
             }
             if (left instanceof Comparable<?>) {
-                final Comparable cmpLeft = (Comparable<?>) left;
-                final Comparable cmpRight = (Comparable<?>) right;
+                Comparable cmpLeft = (Comparable<?>) left;
+                Comparable cmpRight = (Comparable<?>) right;
                 @SuppressWarnings("unchecked") // Type is unknown but checked at runtime
-                final int comparisonResult = cmpLeft.compareTo(cmpRight);
+                int comparisonResult = cmpLeft.compareTo(cmpRight);
                 return comparisonResult > 0;
             }
             throw newIllegalArgumentException("Operation \'%s\' is not supported for type %s.",
@@ -130,9 +129,9 @@ public enum OperatorEvaluator {
     public static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
-        final OperatorEvaluator evaluator = EVALUATORS.get(operator);
+        OperatorEvaluator evaluator = EVALUATORS.get(operator);
         checkArgument(evaluator != null, operator);
-        final boolean result = evaluator.eval(left, right);
+        boolean result = evaluator.eval(left, right);
         return result;
     }
 

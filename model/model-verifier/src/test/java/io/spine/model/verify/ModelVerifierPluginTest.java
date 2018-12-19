@@ -20,18 +20,20 @@
 
 package io.spine.model.verify;
 
-import io.spine.testing.TempDirectory;
-import io.spine.testing.TempDirectory.TempDir;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.TempDirectory;
+import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
 import java.nio.file.Path;
 
@@ -40,28 +42,30 @@ import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Dmytro Dashenkov
- */
 @ExtendWith(TempDirectory.class)
 @DisplayName("ModelVerifierPlugin should")
 class ModelVerifierPluginTest {
 
     private static final String PROJECT_NAME = "model-verifier-test";
-    private static final String COMPILING_TEST_ENTITY_PATH =
+    private static final String VALID_AGGREGATE_JAVA =
             "io/spine/model/verify/ValidAggregate.java";
+    private static final ImmutableCollection<String> PROTO_FILES = ImmutableList.of(
+            "spine/model/verify/commands.proto",
+            "spine/model/verify/events.proto"
+    );
 
     private Path tempDir;
 
     @BeforeEach
     void setUp(@TempDir Path junitCreatedDir) {
         tempDir = junitCreatedDir;
+        ModelTests.dropAllModels();
     }
 
     @Test
     @DisplayName("pass valid model classes")
     void passValidModelClasses() {
-        newProjectWithJava(COMPILING_TEST_ENTITY_PATH,
+        newProjectWithJava(VALID_AGGREGATE_JAVA,
                            "io/spine/model/verify/ValidProcMan.java",
                            "io/spine/model/verify/ValidCommandHandler.java")
                 .executeTask(VERIFY_MODEL);
@@ -75,31 +79,28 @@ class ModelVerifierPluginTest {
                 "io/spine/model/verify/DuplicateCommandHandler.java")
                 .executeAndFail(VERIFY_MODEL);
         BuildTask task = result.task(toPath(VERIFY_MODEL));
-        assertNotNull(task);
+        assertNotNull(task, result.getOutput());
         TaskOutcome generationResult = task.getOutcome();
-        assertEquals(FAILED, generationResult);
+        assertEquals(FAILED, generationResult, result.getOutput());
     }
 
     @Test
-    @DisplayName("ignore duplicate entries")
+    @DisplayName("ignore duplicate entries in a Gradle project")
     void ignoreDuplicateEntries() {
-        GradleProject project = newProjectWithJava(COMPILING_TEST_ENTITY_PATH);
+        GradleProject project = newProjectWithJava(VALID_AGGREGATE_JAVA);
         project.executeTask(VERIFY_MODEL);
         project.executeTask(VERIFY_MODEL);
     }
 
-    @Disabled // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of
-              // checking the handler methods.
-              // https://github.com/SpineEventEngine/base/issues/49
     @Test
     @DisplayName("halt build on malformed command handling methods")
     void rejectMalformedHandlingMethods() {
         BuildResult result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
                 .executeAndFail(VERIFY_MODEL);
         BuildTask task = result.task(toPath(VERIFY_MODEL));
-        assertNotNull(task);
+        assertNotNull(task, result.getOutput());
         TaskOutcome generationResult = task.getOutcome();
-        assertEquals(FAILED, generationResult);
+        assertEquals(FAILED, generationResult, result.getOutput());
     }
 
     private GradleProject newProjectWithJava(String... fileNames) {
@@ -107,6 +108,7 @@ class ModelVerifierPluginTest {
                             .setProjectName(PROJECT_NAME)
                             .setProjectFolder(tempDir.toFile())
                             .addJavaFiles(fileNames)
+                            .addProtoFiles(PROTO_FILES)
                             .build();
     }
 

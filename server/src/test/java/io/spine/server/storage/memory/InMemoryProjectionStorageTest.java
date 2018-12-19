@@ -29,21 +29,19 @@ import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.core.BoundedContextNames.newName;
 
-/**
- * @author Alexander Litus
- */
 @DisplayName("InMemoryProjectionStorage should")
 class InMemoryProjectionStorageTest extends ProjectionStorageTest {
 
     @Override
     protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
-        final StorageSpec<ProjectId> spec =
+        StorageSpec<ProjectId> spec =
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(io.spine.test.projection.Project.class),
                                ProjectId.class);
-        final InMemoryProjectionStorage<ProjectId> storage =
-                InMemoryProjectionStorage.newInstance(
-                        InMemoryRecordStorage.newInstance(spec, false, cls));
+        InMemoryProjectionStorage<ProjectId> storage =
+                new InMemoryProjectionStorage<>(
+                        new InMemoryRecordStorage<>(spec, false, cls)
+                );
         return storage;
     }
 }

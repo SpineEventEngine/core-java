@@ -20,7 +20,6 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -29,6 +28,7 @@ import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
@@ -39,14 +39,14 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
-import io.spine.server.stand.StandStorage;
-import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,52 +56,59 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A storage keeping messages with identity.
  *
  * @param <I> the type of entity IDs
- * @author Alexander Yevsyukov
- * @author Dmytro Grankin
- * @author Dmytro Dashenkov
  */
 public abstract class RecordStorage<I>
         extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
         implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
-    private final EntityColumnCache entityColumnCache;
+    /**
+     * The cache for entity columns.
+     *
+     * <p>Is {@code null} for instances that do not support entity columns.
+     * @see RecordStorage(boolean)
+     */
+    private final @MonotonicNonNull EntityColumnCache entityColumnCache;
+    private final boolean lifecycleSupported;
 
     /**
-     * Creates an instance of {@link RecordStorage} which doesn't support the {@link EntityColumnCache}.
+     * Creates an instance of {@code RecordStorage} which does not support
+     * the {@link EntityColumnCache}.
      *
-     * <p>This creation method should only be used for the {@link RecordStorage} descendants, that are
-     * containers for the other {@link RecordStorage} instance, which actually supports
-     * {@link EntityColumnCache}, for example: {@link ProjectionStorage}, {@link StandStorage}.
+     * <p>This creation method should only be used for the {@code RecordStorage} descendants,
+     * that are containers for another {@code RecordStorage} instance, which actually supports
+     * {@link EntityColumnCache}, for example, a {@link ProjectionStorage}.
      *
-     * <p>Instances created by this constructor should override {@link RecordStorage#entityColumnCache()}
-     * method.
+     * <p>Instances created by this constructor should override
+     * {@link RecordStorage#entityColumnCache()} method.
      */
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
         this.entityColumnCache = null;
+        lifecycleSupported = false;
     }
 
     /**
-     * Creates an instance of {@link RecordStorage} which supports the {@link EntityColumnCache}.
+     * Creates an instance of {@code RecordStorage} which supports the {@link EntityColumnCache}.
      */
     protected RecordStorage(boolean multitenant, Class<? extends Entity> entityClass) {
         super(multitenant);
         this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);
+        this.lifecycleSupported = EntityWithLifecycle.class.isAssignableFrom(entityClass);
     }
 
     /**
      * Reads a record, which matches the specified {@linkplain RecordReadRequest request}.
      *
      * @param  request the request to read the record
-     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
+     * @return a record instance or {@code Optional.empty()} if there is no record with this ID
      */
     @Override
     public Optional<EntityRecord> read(RecordReadRequest<I> request) {
         checkNotClosed();
         checkNotNull(request);
 
-        final Optional<EntityRecord> record = readRecord(request.getRecordId());
+        Optional<EntityRecord> record = readRecord(request.getRecordId());
         return record;
     }
 
@@ -112,25 +119,24 @@ public abstract class RecordStorage<I>
      * @param  request   the request to read the record
      * @param  fieldMask fields to read.
      * @return the item with the given ID and with the {@code FieldMask} applied
-     *         or {@code Optional.absent()} if there is no record matching this request
+     *         or {@code Optional.empty()} if there is no record matching this request
      * @see    #read(RecordReadRequest)
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
-        final Optional<EntityRecord> rawResult = read(request);
+        Optional<EntityRecord> rawResult = read(request);
 
         if (!rawResult.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
-        final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
-        final Any state = builder.getState();
-        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
-        final Message stateAsMessage = AnyPacker.unpack(state);
+        EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
+        Any state = builder.getState();
+        Message stateAsMessage = AnyPacker.unpack(state);
 
-        final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
+        Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage);
 
-        final Any packedState = AnyPacker.pack(maskedState);
+        Any packedState = AnyPacker.pack(maskedState);
         builder.setState(packedState);
         return Optional.of(builder.build());
     }
@@ -154,13 +160,9 @@ public abstract class RecordStorage<I>
         writeRecord(id, record);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void write(I id, EntityRecord record) {
-        final EntityRecordWithColumns recordWithStorageFields =
-                EntityRecordWithColumns.of(record);
+        EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
         write(id, recordWithStorageFields);
     }
 
@@ -181,32 +183,27 @@ public abstract class RecordStorage<I>
 
     @Override
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
-        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        final Optional<EntityRecord> optional = read(request);
-        if (optional.isPresent()) {
-            return Optional.of(optional.get()
-                                       .getLifecycleFlags());
-        }
-        return Optional.absent();
+        RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        Optional<EntityRecord> optional = read(request);
+        return optional.map(EntityRecord::getLifecycleFlags);
     }
 
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        final Optional<EntityRecord> optional = read(request);
+        RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
-            final EntityRecord record = optional.get();
-            final EntityRecord updated = record.toBuilder()
-                                               .setLifecycleFlags(flags)
-                                               .build();
+            EntityRecord record = optional.get();
+            EntityRecord updated = record.toBuilder()
+                                         .setLifecycleFlags(flags)
+                                         .build();
             write(id, updated);
         } else {
             // The AggregateStateId is a special case, which is not handled by the Identifier class.
-            final String idStr = id instanceof AggregateStateId
-                                 ? id.toString()
-                                 : Identifier.toString(id);
-            throw newIllegalStateException("Unable to load record for entity with ID: %s",
-                                           idStr);
+            String idStr = id instanceof AggregateStateId
+                              ? id.toString()
+                              : Identifier.toString(id);
+            throw newIllegalStateException("Unable to load record for entity with ID: %s", idStr);
         }
     }
 
@@ -218,11 +215,8 @@ public abstract class RecordStorage<I>
      */
     public abstract boolean delete(I id);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Iterator<EntityRecord> readMultiple(Iterable<I> ids) {
+    public Iterator<@Nullable EntityRecord> readMultiple(Iterable<I> ids) {
         checkNotClosed();
         checkNotNull(ids);
 
@@ -230,22 +224,24 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Reads multiple items from the storage and apply {@link FieldMask} to each of the results.
+     * Reads multiple active items from the storage and apply {@link FieldMask} to the results.
      *
-     * @param ids       the IDs of the items to read
-     * @param fieldMask the mask to apply
+     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
+     * with nulls in place of missing or inactive entities.
+     *
+     * @param ids
+     *         the IDs of the items to read
+     * @param fieldMask
+     *         the mask to apply
      * @return the items with the given IDs and with the given {@code FieldMask} applied
      */
-    public Iterator<EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
+    public Iterator<@Nullable EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
         checkNotClosed();
         checkNotNull(ids);
 
         return readMultipleRecords(ids, fieldMask);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Iterator<EntityRecord> readAll() {
         checkNotClosed();
@@ -254,7 +250,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Reads all items from the storage and apply {@link FieldMask} to each of the results.
+     * Reads all active items from the storage and apply {@link FieldMask} to each of the results.
      *
      * @param fieldMask the {@code FieldMask} to apply
      * @return all items from this repository with the given {@code FieldMask} applied
@@ -269,9 +265,9 @@ public abstract class RecordStorage<I>
      * Reads all the records matching the given {@link EntityQuery} and applies the given
      * {@link FieldMask} to the resulting record states.
      *
-     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags}, but the entity
-     * supports them, all the resulting records are active. Otherwise the records obey
-     * the constraints provided by the query.
+     * <p>By default, the entities supporting lifecycle will be returned only if they are active. 
+     * To get inactive entities, the lifecycle attribute must be set to the 
+     * {@linkplain EntityQuery provided query}.
      *
      * @param  query     the query to execute
      * @param  fieldMask the fields to retrieve
@@ -283,6 +279,21 @@ public abstract class RecordStorage<I>
         checkNotNull(fieldMask);
 
         return readAllRecords(query, fieldMask);
+    }
+
+    /**
+     * Reads all the records matching the given {@link EntityQuery} and applies the given
+     * {@link FieldMask} to the resulting record states.
+     *
+     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags}, but the entity
+     * supports them, all the resulting records are active. Otherwise the records obey
+     * the constraints provided by the query.
+     *
+     * @param  query     the query to execute
+     * @return the matching records mapped upon their IDs
+     */
+    public Iterator<EntityRecord> readAll(EntityQuery<I> query) {
+        return readAll(query, FieldMask.getDefaultInstance());
     }
 
     /**
@@ -299,32 +310,53 @@ public abstract class RecordStorage<I>
     }
 
     /**
+     * Indicates if the entity managed by this storage supports the {@link LifecycleFlags
+     * lifecycle flags}.
+     *
+     * @return {@code true} if the stored entities inherit {@link EntityWithLifecycle},
+     *         {@code false} otherwise
+     */
+    public boolean isLifecycleSupported() {
+        return lifecycleSupported;
+    }
+
+    /**
      * Returns a {@code Map} of {@linkplain EntityColumn columns} corresponded to the
-     * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed by this storage.
+     * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed
+     * by this storage.
      *
      * @return a {@code Map} of managed {@link Entity} lifecycle columns
-     * @throws IllegalArgumentException if a lifecycle field is not present in the managed {@link Entity} class
+     * @throws IllegalArgumentException if a lifecycle field is not present
+     *         in the managed {@link Entity} class
      * @see EntityColumn
      * @see Columns
      * @see LifecycleFlagField
      */
     @Internal
     public Map<String, EntityColumn> entityLifecycleColumns() {
-        final HashMap<String, EntityColumn> lifecycleColumns = new HashMap<>();
+        Map<String, EntityColumn> lifecycleColumns = new HashMap<>();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
-            final String name = field.name();
-            final EntityColumn column = entityColumnCache().findColumn(name);
+            String name = field.name();
+            EntityColumn column = entityColumnCache().findColumn(name);
             lifecycleColumns.put(name, column);
         }
         return lifecycleColumns;
     }
 
+    /**
+     * Obtains the entity column cache.
+     *
+     * @throws IllegalStateException if the storage {@linkplain RecordStorage#RecordStorage(boolean)
+     * does not support} the cache
+     */
     @Internal
     public EntityColumnCache entityColumnCache() {
         if (entityColumnCache == null) {
-            throw new IllegalStateException("Entity column cache not initialized for this storage.");
+            throw newIllegalStateException(
+                    "Entity column cache is not initialized for the storage %s.",
+                    this
+            );
         }
-
         return entityColumnCache;
     }
 
@@ -340,24 +372,63 @@ public abstract class RecordStorage<I>
      */
     protected abstract Optional<EntityRecord> readRecord(I id);
 
-    /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
-    protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids);
+    /**
+     * Obtains an iterator for reading multiple records by IDs.
+     * 
+     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids}, 
+     * with nulls in place of missing or inactive entities.
+     *
+     * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
+     */
+    protected abstract Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids);
 
-    /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
+    /**
+     * Obtains an iterator for reading multiple records by IDs, and
+     * applying the passed field mask to the results.
+     *
+     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids}, 
+     * with nulls in place of missing or inactive entities.
+     *
+     * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
+     */
     protected abstract Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids,
                                                                             FieldMask fieldMask);
 
-    /** @see BulkStorageOperationsMixin#readAll() */
+    /**
+     * Obtains an iterator for reading all records.
+     * 
+     * <p>Only active entities are returned if the entity class inherits 
+     * {@link io.spine.server.entity.EntityWithLifecycle}.
+     *
+     * @see BulkStorageOperationsMixin#readAll()
+     */
     protected abstract Iterator<EntityRecord> readAllRecords();
 
-    /** @see BulkStorageOperationsMixin#readAll() */
+    /**
+     * Obtains an iterator for reading all records, and applying the passed field mask to
+     * the results.
+     * 
+     * <p>Only active entities are returned if the entity class inherits 
+     * {@link io.spine.server.entity.EntityWithLifecycle} 
+     *
+     * @see BulkStorageOperationsMixin#readAll()
+     */
     protected abstract Iterator<EntityRecord> readAllRecords(FieldMask fieldMask);
 
     /**
+     * Obtains an iterator for reading records matching the query,
+     * and applying the passed field mask to the results.
+     * 
+     * <p>Returns only active entities if the query does not specify the {@linkplain LifecycleFlags
+     * lifecycle flags} when the entity supports them (i.e. inherits 
+     * {@link io.spine.server.entity.EntityWithLifecycle EntityWithLifecycle}). 
+     * In order to read inactive entities, the corresponding filters must be set to the provided 
+     * {@link EntityQuery query}. 
+     *
      * @see #readAll(EntityQuery, FieldMask)
      */
-    protected abstract Iterator<EntityRecord> readAllRecords(EntityQuery<I> query,
-                                                             FieldMask fieldMask);
+    protected abstract
+    Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask);
 
     /**
      * Writes a record and the associated {@link EntityColumn} values into the storage.

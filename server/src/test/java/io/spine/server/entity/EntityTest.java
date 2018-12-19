@@ -25,6 +25,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.given.EntityTestEnv.BareBonesEntity;
 import io.spine.server.entity.given.EntityTestEnv.EntityWithMessageId;
+import io.spine.server.entity.given.EntityTestEnv.TestAggregate;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdInteger;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdLong;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdMessage;
@@ -42,9 +43,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.given.EntityTestEnv.isBetween;
-import static io.spine.testing.Tests.assertSecondsEqual;
 import static io.spine.testing.Tests.nullRef;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,10 +55,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Litus
- * @author Dmytro Kuzmin
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
@@ -69,12 +64,14 @@ class EntityTest {
     private Project state = Sample.messageOfType(Project.class);
     private TestEntity entityNew;
     private TestEntity entityWithState;
+    private TestAggregate aggregateWithState;
 
     @BeforeEach
     void setUp() {
         state = Sample.messageOfType(Project.class);
         entityNew = TestEntity.newInstance(newUuid());
         entityWithState = TestEntity.withState();
+        aggregateWithState = TestAggregate.withState();
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // Because we expect the exception.
@@ -91,7 +88,7 @@ class EntityTest {
         @Test
         @DisplayName("for single entity")
         void forSingleEntity() {
-            final Project state = entityNew.getDefaultState();
+            Project state = entityNew.getDefaultState();
             assertEquals(Project.getDefaultInstance(), state);
         }
 
@@ -100,8 +97,8 @@ class EntityTest {
         void forDifferentEntities() {
             assertEquals(Project.getDefaultInstance(), entityNew.getDefaultState());
 
-            final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
-            final StringValue expected = StringValue.getDefaultInstance();
+            EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
+            StringValue expected = StringValue.getDefaultInstance();
             assertEquals(expected, entityWithMessageId.getDefaultState());
         }
     }
@@ -113,8 +110,8 @@ class EntityTest {
         @Test
         @DisplayName("String")
         void ofStringType() {
-            final String stringId = "stringId";
-            final TestEntityWithIdString entityWithStringId = new TestEntityWithIdString(stringId);
+            String stringId = "stringId";
+            TestEntityWithIdString entityWithStringId = new TestEntityWithIdString(stringId);
 
             assertEquals(stringId, entityWithStringId.getId());
         }
@@ -122,8 +119,8 @@ class EntityTest {
         @Test
         @DisplayName("Long")
         void ofLongType() {
-            final Long longId = 12L;
-            final TestEntityWithIdLong entityWithLongId = new TestEntityWithIdLong(longId);
+            Long longId = 12L;
+            TestEntityWithIdLong entityWithLongId = new TestEntityWithIdLong(longId);
 
             assertEquals(longId, entityWithLongId.getId());
         }
@@ -131,9 +128,8 @@ class EntityTest {
         @Test
         @DisplayName("Integer")
         void ofIntegerType() {
-            final Integer integerId = 12;
-            final TestEntityWithIdInteger entityWithIntegerId =
-                    new TestEntityWithIdInteger(integerId);
+            Integer integerId = 12;
+            TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
 
             assertEquals(integerId, entityWithIntegerId.getId());
         }
@@ -141,18 +137,23 @@ class EntityTest {
         @Test
         @DisplayName("Message")
         void ofMessageType() {
-            final StringValue messageId = toMessage("messageId");
-            final TestEntityWithIdMessage entityWithMessageID =
-                    new TestEntityWithIdMessage(messageId);
+            StringValue messageId = StringValue.of("messageId");
+            TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
             assertEquals(messageId, entityWithMessageID.getId());
         }
     }
 
     @Test
+    @DisplayName("have default state after construction")
+    void defaultState() {
+        assertEquals(entityNew.getDefaultState(), entityNew.getState());
+    }
+
+    @Test
     @DisplayName("have state")
     void haveState() {
-        final Version ver = Versions.newVersion(3, getCurrentTime());
+        Version ver = Versions.newVersion(3, getCurrentTime());
 
         entityNew.updateState(state, ver);
 
@@ -163,7 +164,7 @@ class EntityTest {
     @Test
     @DisplayName("check entity state when setting it")
     void checkStateWhenUpdating() {
-        final TestEntity spyEntityNew = spy(entityNew);
+        TestEntity spyEntityNew = spy(entityNew);
         spyEntityNew.updateState(state, Versions.zero());
         verify(spyEntityNew).checkEntityState(eq(state));
     }
@@ -197,7 +198,7 @@ class EntityTest {
         @Test
         @DisplayName("when told to do so")
         void whenAsked() {
-            final int version = entityNew.incrementVersion();
+            int version = entityNew.incrementVersion();
             assertEquals(1, version);
         }
 
@@ -220,9 +221,9 @@ class EntityTest {
         @Test
         @DisplayName("when incrementing version")
         void onVersionIncrement() {
-            final long timeBeforeIncrement = TimeTests.currentTimeSeconds();
+            long timeBeforeIncrement = TimeTests.currentTimeSeconds();
             entityNew.incrementVersion();
-            final long timeAfterIncrement = TimeTests.currentTimeSeconds();
+            long timeAfterIncrement = TimeTests.currentTimeSeconds();
             assertThat(entityNew.whenModified()
                                 .getSeconds(),
                        isBetween(timeBeforeIncrement, timeAfterIncrement));
@@ -232,10 +233,8 @@ class EntityTest {
         @DisplayName("when updating state")
         void onStateUpdate() {
             entityNew.incrementState(state);
-            final long expectedTimeSec = TimeTests.currentTimeSeconds();
-
-            assertSecondsEqual(expectedTimeSec, entityNew.whenModified()
-                                                         .getSeconds(), 1);
+            long expectedTimeSec = TimeTests.currentTimeSeconds();
+            assertEquals(expectedTimeSec, entityNew.whenModified().getSeconds());
         }
     }
 
@@ -246,9 +245,9 @@ class EntityTest {
         @Test
         @DisplayName("same entities are equal")
         void equalToSame() {
-            final TestEntity another = TestEntity.withStateOf(entityWithState);
+            TestAggregate another = TestAggregate.copyOf(aggregateWithState);
 
-            assertEquals(entityWithState, another);
+            assertEquals(aggregateWithState, another);
         }
 
         @SuppressWarnings("EqualsWithItself") // Is the purpose of this method.
@@ -274,7 +273,7 @@ class EntityTest {
         @Test
         @DisplayName("entities with different IDs are not equal")
         void notEqualToDifferentId() {
-            final TestEntity another = TestEntity.newInstance(newUuid());
+            TestEntity another = TestEntity.newInstance(newUuid());
 
             assertNotEquals(entityWithState.getId(), another.getId());
             assertNotEquals(entityWithState, another);
@@ -283,7 +282,7 @@ class EntityTest {
         @Test
         @DisplayName("entities with different states are not equal")
         void notEqualToDifferentState() {
-            final TestEntity another = TestEntity.withStateOf(entityWithState);
+            TestEntity another = TestEntity.withStateOf(entityWithState);
             another.updateState(Sample.messageOfType(Project.class), another.getVersion());
 
             assertNotEquals(entityWithState.getState(), another.getState());
@@ -294,7 +293,7 @@ class EntityTest {
         @Test
         @DisplayName("entities with different versions are not equal")
         void notEqualToDifferentVersion() {
-            final TestEntity another = TestEntity.withStateOf(entityWithState);
+            TestEntity another = TestEntity.withStateOf(entityWithState);
             another.incrementVersion();
 
             assertNotEquals(entityWithState, another);
@@ -312,7 +311,7 @@ class EntityTest {
                                        .trim()
                                        .isEmpty());
 
-            final int hashCode = entityWithState.hashCode();
+            int hashCode = entityWithState.hashCode();
 
             assertTrue(hashCode != 0);
         }
@@ -326,15 +325,15 @@ class EntityTest {
         @Test
         @DisplayName("for different instances, unique hash code is generated")
         void uniqueForDifferentInstances() {
-            final TestEntity another = TestEntity.withState();
+            TestEntity another = TestEntity.withState();
 
             assertNotEquals(entityWithState.hashCode(), another.hashCode());
         }
     }
 
     @Nested
-    @DisplayName("have visibility status such that")
-    class HaveVisibilityStatus {
+    @DisplayName("have lifecycle flags status such that")
+    class HaveLifecycleFlagsStatus {
 
         @Test
         @DisplayName("entity has default status after construction")
@@ -391,20 +390,20 @@ class EntityTest {
         @DisplayName("entities with different status are not equal")
         void consideredForEquality() {
             // Create an entity with the same ID and the same (default) state.
-            final AbstractVersionableEntity another = new TestEntityWithIdString(entityNew.getId());
+            AbstractVersionableEntity another = new TestEntityWithIdString(entityNew.getId());
 
             another.setArchived(true);
 
-            assertFalse(entityNew.equals(another));
+            assertNotEquals(entityNew, another);
         }
 
         @Test
         @DisplayName("status can be assigned")
         void supportAssignment() {
-            final LifecycleFlags status = LifecycleFlags.newBuilder()
-                                                        .setArchived(true)
-                                                        .setDeleted(false)
-                                                        .build();
+            LifecycleFlags status = LifecycleFlags.newBuilder()
+                                                  .setArchived(true)
+                                                  .setDeleted(false)
+                                                  .build();
             entityNew.setLifecycleFlags(status);
             assertEquals(status, entityNew.getLifecycleFlags());
         }

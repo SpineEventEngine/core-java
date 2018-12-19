@@ -21,49 +21,32 @@
 package io.spine.core.given;
 
 import io.spine.core.ActorContext;
-import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.RejectionContext;
 import io.spine.core.TenantId;
 
-/**
- * @author Mykhailo Drachuk
- */
+import static io.spine.core.given.GivenEvent.message;
+import static io.spine.protobuf.AnyPacker.pack;
+
 public class EventsTestEnv {
 
+    /** Prevents instantiation of this utility class. */
     private EventsTestEnv() {
     }
 
-    public static RejectionContext rejectionContext(TenantId id) {
-        final Command command = Command.newBuilder()
-                                       .setContext(commandContext(id))
-                                       .build();
-        final RejectionContext result = RejectionContext.newBuilder()
-                                                        .setCommand(command)
-                                                        .build();
-        return result;
-    }
-
-    public static RejectionContext rejectionContext() {
-        final RejectionContext result = RejectionContext.newBuilder()
-                                                        .build();
-        return result;
-    }
-
     public static CommandContext commandContext(TenantId id) {
-        final ActorContext actorContext = ActorContext.newBuilder()
-                                                      .setTenantId(id)
-                                                      .build();
-        final CommandContext result = CommandContext.newBuilder()
-                                                    .setActorContext(actorContext)
-                                                    .build();
+        ActorContext actorContext = ActorContext.newBuilder()
+                                                .setTenantId(id)
+                                                .build();
+        CommandContext result = CommandContext.newBuilder()
+                                              .setActorContext(actorContext)
+                                              .build();
         return result;
     }
 
     public static TenantId tenantId() {
-        final String value = EventsTestEnv.class.getName();
+        String value = EventsTestEnv.class.getName();
         return TenantId.newBuilder()
                        .setValue(value)
                        .build();
@@ -71,6 +54,7 @@ public class EventsTestEnv {
 
     public static Event event(EventContext context) {
         return Event.newBuilder()
+                    .setMessage(pack(message()))
                     .setContext(context)
                     .build();
     }

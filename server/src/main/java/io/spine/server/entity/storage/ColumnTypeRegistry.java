@@ -93,7 +93,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
     public C get(EntityColumn field) {
         checkNotNull(field);
 
-        Class javaType = field.getPersistedType();
+        Class<?> javaType = field.getPersistedType();
         javaType = Primitives.wrap(javaType);
         C type = null;
 
@@ -123,7 +123,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
             "CheckReturnValue" // calling builder
     })
     public static <C extends ColumnType> Builder<C> newBuilder(ColumnTypeRegistry<C> src) {
-        final Builder<C> builder = newBuilder();
+        Builder<C> builder = newBuilder();
         for (Map.Entry<Class, C> typeMapping : src.columnTypeMap.entrySet()) {
             builder.put(typeMapping.getKey(), typeMapping.getValue());
         }

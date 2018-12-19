@@ -20,9 +20,10 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
+import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Any;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.ActorContext;
@@ -34,13 +35,13 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -55,15 +56,12 @@ import org.mockito.ArgumentCaptor;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -76,10 +74,8 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.
- *
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ProtectedField") // OK for brevity of derived tests.
+@SuppressWarnings("ProtectedField") // for brevity of derived tests.
 abstract class AbstractCommandBusTestSuite {
 
     private final boolean multitenant;
@@ -87,13 +83,12 @@ abstract class AbstractCommandBusTestSuite {
     protected ActorRequestFactory requestFactory;
 
     protected CommandBus commandBus;
-    protected CommandStore commandStore;
-    protected Log log;
     protected EventBus eventBus;
-    protected RejectionBus rejectionBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
+    protected TenantIndex tenantIndex;
+    protected SystemWriteSide systemWriteSide;
 
     /**
      * A public constructor for derived test cases.
@@ -105,10 +100,10 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     static Command newCommandWithoutContext() {
-        final Command cmd = createProject();
-        final Command invalidCmd = cmd.toBuilder()
-                                      .setContext(CommandContext.getDefaultInstance())
-                                      .build();
+        Command cmd = createProject();
+        Command invalidCmd = cmd.toBuilder()
+                                .setContext(CommandContext.getDefaultInstance())
+                                .build();
         return invalidCmd;
     }
 
@@ -126,12 +121,12 @@ abstract class AbstractCommandBusTestSuite {
                                   CommandValidationError validationError,
                                   String errorType,
                                   Command cmd) {
-        final Status status = sendingResult.getStatus();
+        Status status = sendingResult.getStatus();
         assertEquals(status.getStatusCase(), Status.StatusCase.ERROR);
-        final CommandId commandId = cmd.getId();
+        CommandId commandId = cmd.getId();
         assertEquals(commandId, unpack(sendingResult.getMessageId()));
 
-        final Error error = status.getError();
+        Error error = status.getError();
         assertEquals(errorType,
                      error.getType());
         assertEquals(validationError.getNumber(), error.getCode());
@@ -145,11 +140,11 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command newCommandWithoutTenantId() {
-        final Command cmd = createProject();
-        final ActorContext.Builder withNoTenant =
-                ActorContext.newBuilder()
-                            .setTenantId(TenantId.getDefaultInstance());
-        final Command invalidCmd =
+        Command cmd = createProject();
+        ActorContext.Builder withNoTenant = ActorContext
+                .newBuilder()
+                .setTenantId(TenantId.getDefaultInstance());
+        Command invalidCmd =
                 cmd.toBuilder()
                    .setContext(cmd.getContext()
                                   .toBuilder()
@@ -159,84 +154,76 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command clearTenantId(Command cmd) {
-        final ActorContext.Builder withNoTenant =
-                ActorContext.newBuilder()
-                            .setTenantId(TenantId.getDefaultInstance());
-        final Command result = cmd.toBuilder()
-                                  .setContext(cmd.getContext()
-                                                 .toBuilder()
-                                                 .setActorContext(withNoTenant))
-                                  .build();
+        ActorContext.Builder withNoTenant = ActorContext
+                .newBuilder()
+                .setTenantId(TenantId.getDefaultInstance());
+        Command result = cmd.toBuilder()
+                            .setContext(cmd.getContext()
+                                           .toBuilder()
+                                           .setActorContext(withNoTenant))
+                            .build();
         return result;
     }
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
-
-        final InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
-                                                   this.multitenant);
-        final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
-                                                                          storageFactory);
-        commandStore = spy(new CommandStore(storageFactory, tenantIndex));
+        ModelTests.dropAllModels();
+        Class<? extends AbstractCommandBusTestSuite> cls = getClass();
+        InMemoryStorageFactory storageFactory =
+                InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);
+        tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new Log());
-        rejectionBus = spy(RejectionBus.newBuilder()
-                                       .build());
-        commandBus = CommandBus.newBuilder()
-                               .setMultitenant(this.multitenant)
-                               .setCommandStore(commandStore)
-                               .setCommandScheduler(scheduler)
-                               .setRejectionBus(rejectionBus)
-                               .setThreadSpawnAllowed(false)
-                               .setLog(log)
-                               .setAutoReschedule(false)
-                               .build();
+        systemWriteSide = NoOpSystemWriteSide.INSTANCE;
         eventBus = EventBus.newBuilder()
                            .setStorageFactory(storageFactory)
                            .build();
-        requestFactory = this.multitenant
-                            ? TestActorRequestFactory.newInstance(getClass(), newUuid())
-                            : TestActorRequestFactory.newInstance(getClass());
+        commandBus = CommandBus
+                .newBuilder()
+                .setMultitenant(this.multitenant)
+                .setCommandScheduler(scheduler)
+                .injectEventBus(eventBus)
+                .injectSystem(systemWriteSide)
+                .injectTenantIndex(tenantIndex)
+                .build();
+        requestFactory =
+                multitenant
+                ? TestActorRequestFactory.newInstance(getClass(), newUuid())
+                : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = memoizingObserver();
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        if (commandStore.isOpen()) { // then CommandBus is opened, too
-            commandBus.close();
-        }
         eventBus.close();
     }
 
     @Test
     @DisplayName("post commands in bulk")
     void postCommandsInBulk() {
-        final Command first = newCommand();
-        final Command second = newCommand();
-        final List<Command> commands = newArrayList(first, second);
+        Command first = newCommand();
+        Command second = newCommand();
+        List<Command> commands = newArrayList(first, second);
 
         // Some derived test suite classes may register the handler in setUp().
         // This prevents the repeating registration (which is an illegal operation).
         commandBus.unregister(createProjectHandler);
         commandBus.register(createProjectHandler);
 
-        final CommandBus spy = spy(commandBus);
+        CommandBus spy = spy(commandBus);
         spy.post(commands, memoizingObserver());
 
-        @SuppressWarnings("unchecked")
-        final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
+        @SuppressWarnings("unchecked") ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
         verify(spy).store(storingCaptor.capture());
-        final Iterable<Command> storingArgs = storingCaptor.getValue();
-        assertSize(commands.size(), storingArgs);
-        assertContainsAll(storingArgs, first, second);
+        Iterable<Command> storingArgs = storingCaptor.getValue();
+        IterableSubject assertStoringArgs = assertThat(storingArgs);
+        assertStoringArgs.hasSize(commands.size());
+        assertStoringArgs.containsExactly(first, second);
 
-        final ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
+        ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
         verify(spy, times(2)).dispatch(postingCaptor.capture());
-        final List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
-        assertSize(commands.size(), postingArgs);
+        List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
+        assertThat(postingArgs).hasSize(commands.size());
         assertEquals(commands.get(0), postingArgs.get(0).getCommand());
         assertEquals(commands.get(1), postingArgs.get(1).getCommand());
 
@@ -250,23 +237,15 @@ abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        final CommandId commandId = unpack(observer.firstResponse().getMessageId());
-        assertEquals(cmd.getId(), commandId);
-    }
-
-    void storeAsScheduled(Iterable<Command> commands,
-                          Duration delay,
-                          Timestamp schedulingTime) {
-        for (Command cmd : commands) {
-            final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
-            commandStore.store(cmdWithSchedule, SCHEDULED);
-        }
+        Ack ack = observer.firstResponse();
+        Any messageId = ack.getMessageId();
+        assertEquals(cmd.getId(), Identifier.unpack(messageId));
     }
 
     /**
      * A sample command handler that tells whether a handler was invoked.
      */
-    class CreateProjectHandler extends CommandHandler {
+    class CreateProjectHandler extends AbstractCommandHandler {
 
         private boolean handlerInvoked = false;
 

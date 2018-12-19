@@ -20,7 +20,6 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -34,6 +33,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -54,20 +54,18 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      *
      * <p>Other entries can be either {@link GeneratedMessageV3} or {@link Optional}.
      */
-    @SuppressWarnings("NonSerializableFieldInSerializableClass") // ensured in constructor
     private final List<Element> values;
 
     /**
      * Creates a new instance with the passed values.
      */
-    @SuppressWarnings("ChainOfInstanceofChecks") // Need for supporting optional entries.
     protected Tuple(Object... values) {
         super();
 
-        final ImmutableList.Builder<Element> builder = ImmutableList.builder();
+        ImmutableList.Builder<Element> builder = ImmutableList.builder();
         for (Object value : values) {
             checkNotNull(value);
-            final Element element = new Element(value);
+            Element element = new Element(value);
             builder.add(element);
         }
 
@@ -76,8 +74,6 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
     /**
      * Ensures that the passed message is not an instance of {@link Empty}.
-     *
-     * <p>If the passed
      *
      * @return the passed value
      * @throws IllegalArgumentException if the passed value is {@link Empty}
@@ -88,9 +84,9 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         if (value == null) {
             return null;
         }
-        final boolean isEmpty = value instanceof Empty;
+        boolean isEmpty = value instanceof Empty;
         if (isEmpty) {
-            final String shortClassName = checkingClass.getSimpleName();
+            String shortClassName = checkingClass.getSimpleName();
             throw newIllegalArgumentException(
                     "`%s` cannot have `Empty` elements. Use `Optional` instead",
                     shortClassName);
@@ -98,11 +94,13 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return value;
     }
 
+    @SuppressWarnings("ConstantConditions") // Cannot return null if passed value is non-null.
     @CanIgnoreReturnValue
     static <M extends Message, T extends Tuple>
     M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
         checkNotNull(value);
-        return checkNotEmpty(checkingClass, value);
+        M result = checkNotEmpty(checkingClass, value);
+        return result;
     }
 
     static <T extends Tuple>
@@ -121,7 +119,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
     @Override
     public final @NonNull Iterator<Message> iterator() {
-        final Iterator<Message> result = new ExtractingIterator(values);
+        Iterator<Message> result = new ExtractingIterator(values);
         return result;
     }
 
@@ -133,8 +131,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * @throws IndexOutOfBoundsException if the index is out of range
      */
     protected final Object get(int index) {
-        final Element element = values.get(index);
-        final Object result = element.getValue();
+        Element element = values.get(index);
+        Object result = element.getValue();
         return result;
     }
 
@@ -151,7 +149,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final Tuple other = (Tuple) obj;
+        Tuple other = (Tuple) obj;
         return Objects.equals(this.values, other.values);
     }
 
@@ -174,8 +172,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
         @Override
         public Message next() {
-            final Element next = source.next();
-            final Message result = next.getMessage();
+            Element next = source.next();
+            Message result = next.getMessage();
             return result;
         }
     }

@@ -34,11 +34,6 @@ import io.spine.validate.StringValueVBuilder;
 import io.spine.validate.TimestampVBuilder;
 import io.spine.validate.UInt32ValueVBuilder;
 
-/**
- * @author Alexander Yevsyukov
- * @author Illia Shepilov
- * @author Dmytro Kuzmin
- */
 class GivenTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -57,7 +52,6 @@ class GivenTestEnv {
             super(id);
         }
     }
-
 
     static class AnAggregatePart extends AggregatePart<Long,
             Timestamp,

@@ -20,113 +20,39 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
  *
- * @author Alexander Yevsyukov
+ * <p>Lifecycle flags determine if an entity is active.
+ * An entity is considered to be active if the lifecycle flags are missing.
+ * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted}, 
+ * then it’s regarded to be inactive.
  */
-public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> {
+public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S>, WithLifecycle {
 
     /**
-     * Obtains the current visibility status.
-     */
-    LifecycleFlags getLifecycleFlags();
-
-    /**
-     * Shows if current instance is archived or not.
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add the {@code Column} annotation.
      */
     @Column
+    @Override
     boolean isArchived();
 
     /**
-     * Shows if current instance is deleted or not.
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add {@code Column} annotation.
      */
     @Column
+    @Override
     boolean isDeleted();
 
     /**
-     * Tells whether visibility of the entity changed since its initialization.
+     * Tells whether lifecycle flags of the entity changed since its initialization.
      */
     boolean lifecycleFlagsChanged();
-
-    /**
-     * Collection of predicates for filtering entities with lifecycle flags.
-     */
-    class Predicates {
-
-        private static final Predicate<LifecycleFlags> isEntityVisible =
-                new Predicate<LifecycleFlags>() {
-                    @Override
-                    public boolean apply(@Nullable LifecycleFlags input) {
-                        return input == null ||
-                                !(input.getArchived() || input.getDeleted());
-                    }
-                };
-
-        private static final Predicate<EntityRecord> isRecordVisible =
-                new Predicate<EntityRecord>() {
-
-                    @Override
-                    public boolean apply(@Nullable EntityRecord input) {
-                        if (input == null) {
-                            return true;
-                        }
-                        final LifecycleFlags flags = input.getLifecycleFlags();
-                        final boolean result = isEntityVisible.apply(flags);
-                        return result;
-                    }
-                };
-
-        private static final Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible =
-                new Predicate<EntityRecordWithColumns>() {
-                    @Override
-                    public boolean apply(@Nullable EntityRecordWithColumns input) {
-                        if (input == null) {
-                            return false;
-                        }
-                        final EntityRecord record = input.getRecord();
-                        return isRecordVisible().apply(record);
-                    }
-                };
-
-        private Predicates() {
-            // Prevent instantiation of this utility class.
-        }
-
-        /**
-         * Obtains the predicate for checking if an entity has
-         * any of the {@link LifecycleFlags} set.
-         *
-         * <p>If so, an entity becomes "invisible" to load methods of a repository.
-         * Entities with flags set must be treated by special {@linkplain RepositoryView views}
-         * of a repository.
-         *
-         * @return the filter predicate
-         * @see LifecycleFlags
-         */
-        public static Predicate<LifecycleFlags> isEntityVisible() {
-            return isEntityVisible;
-        }
-
-        /**
-         * Obtains the predicate for checking if an entity record has any
-         * of the {@link LifecycleFlags} set.
-         *
-         * @return the predicate that filters "invisible" {@code EntityStorageRecord}s
-         * @see EntityRecord#getLifecycleFlags()
-         */
-        public static Predicate<EntityRecord> isRecordVisible() {
-            return isRecordVisible;
-        }
-
-        public static Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible() {
-            return isRecordWithColumnsVisible;
-        }
-    }
 }

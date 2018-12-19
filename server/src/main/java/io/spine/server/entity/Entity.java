@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.reflect.GenericTypeIndex;
+import io.spine.string.Stringifiers;
 
 /**
  * A server-side object with an {@link Identifier#checkSupported(Class) identity}.
@@ -33,7 +34,6 @@ import io.spine.reflect.GenericTypeIndex;
  *
  * @param <I> the type of entity identifier
  * @param <S> the type of entity state
- * @author Alexander Yevsyukov
  * @see VersionableEntity
  */
 public interface Entity<I, S extends Message> {
@@ -44,21 +44,19 @@ public interface Entity<I, S extends Message> {
     I getId();
 
     /**
-     * Obtains the entity state.
+     * Obtains string representation of the entity identifier.
      *
-     * <p>This method returns the current state of the entity or,
-     * if the entity does not have state yet, the value produced by {@link #getDefaultState()}.
-     *
-     * @return the current state of default state value
+     * @apiNote The primary purpose of this method is to display the identifier in human-readable
+     *          form in debug and error messages.
      */
-    S getState();
+    default String idAsString() {
+        return Stringifiers.toString(getId());
+    }
 
     /**
-     * Obtains the default entity state.
-     *
-     * @return an empty instance of the entity state
+     * Obtains the state of the entity.
      */
-    S getDefaultState();
+    S getState();
 
     /**
      * Enumeration of generic type parameters of this interface.
@@ -66,14 +64,14 @@ public interface Entity<I, S extends Message> {
     enum GenericParameter implements GenericTypeIndex<Entity> {
 
         /**
-         * The index of the declaration of the generic parameter type {@code <I>}
-         * in {@link Entity}.
+         * The index of the declaration of the generic parameter type {@code <I>} in
+         * the {@link Entity} interface.
          */
         ID(0),
 
         /**
          * The index of the declaration of the generic parameter type {@code <S>}
-         * in {@link Entity}
+         * in the {@link Entity} interface.
          */
         STATE(1);
 
@@ -81,11 +79,6 @@ public interface Entity<I, S extends Message> {
 
         GenericParameter(int index) {
             this.index = index;
-        }
-
-        @Override
-        public Class<?> getArgumentIn(Class<? extends Entity> entityClass) {
-            return Default.getArgument(this, entityClass);
         }
 
         @Override

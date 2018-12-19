@@ -20,26 +20,22 @@
 
 package io.spine.server.commandbus.given;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Rejection;
-import io.spine.core.Rejections;
-import io.spine.core.Subscribe;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
+import io.spine.test.command.event.CmdProjectCreated;
+import io.spine.test.command.event.CmdProjectStarted;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
-import io.spine.test.reflect.ReflectRejections;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +43,6 @@ import java.util.List;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.unmodifiableList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SingleTenantCommandBusTestEnv {
 
@@ -58,10 +53,12 @@ public class SingleTenantCommandBusTestEnv {
     /**
      * A {@code CommandHandler}, which throws a rejection upon a command.
      */
-    public static class FaultyHandler extends CommandHandler {
+    public static class FaultyHandler extends AbstractCommandHandler {
 
-        private final InvalidProjectName rejection =
-                new InvalidProjectName(ProjectId.getDefaultInstance());
+        private final InvalidProjectName rejection = InvalidProjectName
+                .newBuilder()
+                .setProjectId(ProjectId.getDefaultInstance())
+                .build();
 
         public FaultyHandler(EventBus eventBus) {
             super(eventBus);
@@ -84,26 +81,10 @@ public class SingleTenantCommandBusTestEnv {
         }
     }
 
-    public static class MemoizingRejectionSubscriber extends VerifiableSubscriber {
-
-        private ReflectRejections.InvalidProjectName rejection;
-
-        @Subscribe
-        public void on(ReflectRejections.InvalidProjectName rejection) {
-            triggerCall();
-            this.rejection = rejection;
-        }
-
-        @Override
-        public void verifyGot(Rejection rejection) {
-            assertEquals(Rejections.getMessage(rejection), this.rejection);
-        }
-    }
-
     /**
      * A command handler that posts a nested command.
      */
-    public static class CommandPostingHandler extends CommandHandler {
+    public static class CommandPostingHandler extends AbstractCommandHandler {
 
         private final CommandBus commandBus;
         private final List<Message> handledCommands = new ArrayList<>();
@@ -117,16 +98,22 @@ public class SingleTenantCommandBusTestEnv {
         }
 
         @Assign
-        Empty handle(FirstCmdCreateProject command) {
+        CmdProjectCreated handle(FirstCmdCreateProject command) {
             commandBus.post(commandToPost, noOpObserver());
             handledCommands.add(command);
-            return Empty.getDefaultInstance();
+            return CmdProjectCreated
+                    .newBuilder()
+                    .setProjectId(command.getId())
+                    .build();
         }
 
         @Assign
-        Empty handle(SecondCmdStartProject command) {
+        CmdProjectStarted handle(SecondCmdStartProject command) {
             handledCommands.add(command);
-            return Empty.getDefaultInstance();
+            return CmdProjectStarted
+                    .newBuilder()
+                    .setProjectId(command.getId())
+                    .build();
         }
 
         public List<Message> handledCommands() {

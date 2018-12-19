@@ -23,13 +23,12 @@ package io.spine.server.entity;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.testing.TestValues.newUuidValue;
+import static io.spine.core.given.GivenEvent.arbitrary;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,31 +37,24 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("TransactionalEventPlayer should")
 class TransactionalEventPlayerTest {
-
-    private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(TransactionalEntityTest.class);
 
     @Test
     @DisplayName("require active transaction to play events")
     void requireActiveTx() {
         assertThrows(IllegalStateException.class,
-                     () -> new TxPlayingEntity().play(
-                             eventFactory.createEvent(StringValue.getDefaultInstance())));
+                     () -> new TxPlayingEntity().play(arbitrary()));
     }
 
     @Test
     @DisplayName("delegate applying events to transaction when playing")
     void delegateEventsToTx() {
-        final TxPlayingEntity entity = entityWithActiveTx(false);
-        final Transaction txMock = entity.getTransaction();
+        TxPlayingEntity entity = entityWithActiveTx(false);
+        EventPlayingTransaction txMock = (EventPlayingTransaction) entity.getTransaction();
         assertNotNull(txMock);
-        final Event firstEvent = eventFactory.createEvent(newUuidValue());
-        final Event secondEvent = eventFactory.createEvent(newUuidValue());
+        Event firstEvent = arbitrary();
+        Event secondEvent = arbitrary();
 
         entity.play(newArrayList(firstEvent, secondEvent));
 
@@ -72,8 +64,8 @@ class TransactionalEventPlayerTest {
 
     @SuppressWarnings("unchecked")  // OK for the test.
     private static TxPlayingEntity entityWithActiveTx(boolean txChanged) {
-        final TxPlayingEntity entity = new TxPlayingEntity();
-        final Transaction tx = spy(mock(Transaction.class));
+        TxPlayingEntity entity = new TxPlayingEntity();
+        EventPlayingTransaction tx = spy(mock(EventPlayingTransaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
         when(tx.getEntity()).thenReturn(entity);
@@ -82,8 +74,8 @@ class TransactionalEventPlayerTest {
         return entity;
     }
 
-    private static void verifyEventApplied(Transaction txMock, Event event) {
-        verify(txMock).apply(eq(EventEnvelope.of(event)));
+    private static void verifyEventApplied(EventPlayingTransaction txMock, Event event) {
+        verify(txMock).play(eq(EventEnvelope.of(event)));
     }
 
     private static class TxPlayingEntity
@@ -96,7 +88,7 @@ class TransactionalEventPlayerTest {
 
         @Override
         public void play(Iterable<Event> events) {
-            EventPlayers.forTransactionOf(this).play(events);
+            EventPlayer.forTransactionOf(this).play(events);
         }
     }
 }

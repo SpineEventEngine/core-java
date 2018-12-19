@@ -65,21 +65,17 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     static final String TYPE_COLUMN = "type";
 
     /** Cached value of the event message type name. */
-    @Nullable
-    private TypeName typeName;
+    private @Nullable TypeName typeName;
 
     /**
      * Compares event entities by timestamps of events.
      */
-    private static final Comparator<EEntity> comparator = new Comparator<EEntity>() {
-        @Override
-        public int compare(EEntity e1, EEntity e2) {
-            final Event event1 = e1.getState();
-            final Event event2 = e2.getState();
-            final int result = Events.eventComparator()
-                                     .compare(event1, event2);
-            return result;
-        }
+    private static final Comparator<EEntity> comparator = (e1, e2) -> {
+        Event event1 = e1.getState();
+        Event event2 = e2.getState();
+        int result = Events.eventComparator()
+                           .compare(event1, event2);
+        return result;
     };
 
     EEntity(EventId id) {
@@ -88,7 +84,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
 
     EEntity(Event event) {
         this(event.getId());
-        final Event eventWithoutEnrichments = clearEnrichments(event);
+        Event eventWithoutEnrichments = clearEnrichments(event);
         updateState(eventWithoutEnrichments);
     }
 

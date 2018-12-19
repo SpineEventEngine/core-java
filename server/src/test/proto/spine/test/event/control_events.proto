@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package spine.test.event;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.event";
+option java_outer_classname = "ControlEventsProto";
+option java_multiple_files = true;
+
+message FailRequested {
+
+    bool should_fail = 1;
+}

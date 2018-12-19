@@ -55,7 +55,7 @@ public final class Queries {
     }
 
     public static QueryId generateId() {
-        final String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
+        String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
         return QueryId.newBuilder()
                       .setValue(formattedId)
                       .build();
@@ -67,33 +67,42 @@ public final class Queries {
      * <p>Throws an {@link IllegalStateException} if the {@code Target} type is unknown to
      * the application.
      *
-     * @param query the query of interest.
+     * @param query
+     *         the query of interest.
      * @return the URL of the type of the query {@linkplain Query#getTarget() target}
      */
     public static TypeUrl typeOf(Query query) {
         checkNotNull(query);
 
-        final Target target = query.getTarget();
-        final String type = target.getType();
-        final TypeUrl typeUrl = TypeUrl.parse(type);
-        checkState(KnownTypes.instance().contains(typeUrl),
+        Target target = query.getTarget();
+        String type = target.getType();
+        TypeUrl typeUrl = TypeUrl.parse(type);
+        checkState(KnownTypes.instance()
+                             .contains(typeUrl),
                    "Unknown type URL: `%s`.", type);
         return typeUrl;
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
-                                         @Nullable Set<? extends Message> ids,
+    static QueryVBuilder queryBuilderFor(Class<? extends Message> entityClass,
+                                         @Nullable Set<?> ids,
                                          @Nullable Set<CompositeColumnFilter> columnFilters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
-        final Target target = composeTarget(entityClass, ids, columnFilters);
-        final Query.Builder queryBuilder = Query.newBuilder()
-                                                .setTarget(target);
+        Target target = composeTarget(entityClass, ids, columnFilters);
+        QueryVBuilder builder = queryBuilderFor(target, fieldMask);
+        return builder;
+    }
+
+    static QueryVBuilder queryBuilderFor(Target target, @Nullable FieldMask fieldMask) {
+        checkNotNull(target);
+
+        QueryVBuilder builder = QueryVBuilder.newBuilder()
+                                             .setTarget(target);
         if (fieldMask != null) {
-            queryBuilder.setFieldMask(fieldMask);
+            builder.setFieldMask(fieldMask);
         }
-        return queryBuilder;
+        return builder;
     }
 }

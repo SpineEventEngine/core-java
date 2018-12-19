@@ -20,7 +20,7 @@
 
 package io.spine.server.storage;
 
-import io.spine.server.aggregate.storage.AggregateField;
+import io.spine.server.aggregate.AggregateField;
 import io.spine.server.event.storage.EventContextField;
 import io.spine.server.event.storage.EventField;
 import org.junit.jupiter.api.DisplayName;
@@ -42,8 +42,8 @@ class StorageFieldTest {
     @Test
     @DisplayName("declare no methods")
     void declareNoMethods() {
-        final Class<?> clazz = StorageField.class;
-        final Method[] methods = clazz.getDeclaredMethods();
+        Class<?> clazz = StorageField.class;
+        Method[] methods = clazz.getDeclaredMethods();
 
         assertEquals(0, methods.length);
     }

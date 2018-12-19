@@ -20,11 +20,14 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.server.command.DispatchCommand;
+import io.spine.server.entity.EntityLifecycle;
 
 import java.util.List;
+
+import static io.spine.server.command.DispatchCommand.operationFor;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -33,48 +36,23 @@ import java.util.List;
  * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-@Internal
-public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, CommandEnvelope, I> {
+final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateEndpoint<I, A, CommandEnvelope> {
 
-    protected AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
+    AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
         super(repo, command);
     }
 
-    static <I, A extends Aggregate<I, ?, ?>>
-    I handle(AggregateRepository<I, A> repository, CommandEnvelope command) {
-        final AggregateCommandEndpoint<I, A> endpoint = of(repository, command);
-
-        return endpoint.handle();
-    }
-
-
-    static <I, A extends Aggregate<I, ?, ?>>
-    AggregateCommandEndpoint<I, A>
-    of(AggregateRepository<I, A> repository, CommandEnvelope command) {
-        return new AggregateCommandEndpoint<>(repository, command);
-    }
-
     @Override
-    protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
-        repository().onDispatchCommand(aggregate.getId(), envelope.getCommand());
-        return aggregate.dispatchCommand(envelope);
+    protected List<Event> doDispatch(A aggregate, CommandEnvelope envelope) {
+        EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.getId());
+        DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope);
+        return dispatch.perform();
     }
 
     @Override
     protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getEndpointDelivery() {
         return repository().getCommandEndpointDelivery();
-    }
-
-    /**
-     * Returns ID of the aggregate that is responsible for handling the command.
-     */
-    @Override
-    protected I getTargets() {
-        final CommandEnvelope envelope = envelope();
-        final I id = repository().getCommandRouting()
-                                 .apply(envelope.getMessage(), envelope.getCommandContext());
-        return id;
     }
 
     @Override
@@ -90,9 +68,8 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
-        final String format =
-                "The aggregate (class: %s, id: %s) produced empty response for " +
-                "the command (class: %s, id: %s).";
+        String format = "The aggregate (class: %s, id: %s) produced empty response for " +
+                        "the command (class: %s, id: %s).";
         onUnhandledCommand(aggregate, cmd, format);
     }
 }

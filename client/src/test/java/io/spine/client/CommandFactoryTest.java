@@ -20,81 +20,78 @@
 
 package io.spine.client;
 
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.core.ActorContext;
+import io.spine.base.CommandMessage;
+import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
-import io.spine.core.UserId;
-import io.spine.test.commands.RequiredFieldCommand;
-import io.spine.testing.core.given.GivenTenantId;
-import io.spine.testing.core.given.GivenUserId;
-import io.spine.time.Timestamps2;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
-import io.spine.time.testing.TimeTests;
+import io.spine.test.commands.CmdCreateProject;
 import io.spine.validate.ValidationException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.client.given.ActorRequestFactoryTestEnv.ACTOR;
+import static io.spine.client.given.ActorRequestFactoryTestEnv.ZONE_OFFSET;
+import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
+import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder;
+import static io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND;
+import static io.spine.protobuf.Timestamps2.isBetween;
+import static io.spine.time.testing.TimeTests.Future.secondsFromNow;
+import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Command factory should")
-class CommandFactoryTest extends ActorRequestFactoryTest {
+class CommandFactoryTest {
 
-    @Test
-    @DisplayName("create command context for given parameters")
-    void createCommandContext() {
-        TenantId tenantId = GivenTenantId.newUuid();
-        UserId userId = GivenUserId.newUuid();
-        ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
-        int targetVersion = 100500;
+    private CommandFactory factory;
 
-        CommandContext commandContext =
-                CommandFactory.createContext(tenantId, userId, zoneOffset, targetVersion);
-
-        ActorContext actorContext = commandContext.getActorContext();
-
-        assertEquals(tenantId, actorContext.getTenantId());
-        assertEquals(userId, actorContext.getActor());
-        assertEquals(zoneOffset, actorContext.getZoneOffset());
-        assertEquals(targetVersion, commandContext.getTargetVersion());
+    @BeforeEach
+    void createFactory() {
+        factory = requestFactory().command();
     }
 
     @Nested
     @DisplayName("create command")
     class CreateCommand {
 
+        /**
+         * Tests that a command is created with the current time.
+         *
+         * @implNote We are creating a range of +/- second between the call to make sure the
+         *         timestamp
+         *         would fit into this range. This way the test the test ensures the sub-second
+         *         precision
+         *         of timestamps, which is enough for the purpose of this test.
+         */
         @Test
         @DisplayName("with current time")
         void withTimestamp() {
-            // We are creating a range of +/- second between the call to make sure the timestamp
-            // would fit into this range. The purpose of this test is to make sure it works with
-            // this precision and to add coverage.
-            Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
-            Command command = factory().command()
-                                       .create(StringValue.getDefaultInstance());
-            Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
+            Timestamp beforeCall = secondsAgo(1);
+            CmdCreateProject commandMessage = CmdCreateProject
+                    .newBuilder()
+                    .setId(Identifier.newUuid())
+                    .build();
+            Command command = factory.create(commandMessage);
+            Timestamp afterCall = secondsFromNow(1);
 
-            assertTrue(Timestamps2.isBetween(
-                    command.getContext()
-                           .getActorContext()
-                           .getTimestamp(), beforeCall, afterCall)
-            );
+            Timestamp timestamp = command.getContext()
+                                         .getActorContext()
+                                         .getTimestamp();
+            assertTrue(isBetween(timestamp, beforeCall, afterCall));
         }
 
         @Test
         @DisplayName("with given entity version")
         void withEntityVersion() {
-            Command command = factory().command()
-                                       .create(StringValue.getDefaultInstance(), 2);
+            Command command = factory.create(command(), 2);
 
-            assertEquals(2, command.getContext()
-                                   .getTargetVersion());
+            CommandContext context = command.getContext();
+            assertEquals(2, context.getTargetVersion());
         }
 
         @Test
@@ -104,17 +101,23 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
                     .newBuilder()
                     .setValue(getClass().getSimpleName())
                     .build();
-            ActorRequestFactory mtFactory = builder()
+            ActorRequestFactory mtFactory = requestFactoryBuilder()
                     .setTenantId(tenantId)
-                    .setActor(actor())
-                    .setZoneOffset(zoneOffset())
+                    .setActor(ACTOR)
+                    .setZoneOffset(ZONE_OFFSET)
                     .build();
-            Command command = mtFactory.command()
-                                       .create(StringValue.getDefaultInstance());
-
+            Command command = mtFactory.command().create(command());
             assertEquals(tenantId, command.getContext()
                                           .getActorContext()
                                           .getTenantId());
+        }
+
+        private CommandMessage command() {
+            CmdCreateProject commandMessage = CmdCreateProject
+                    .newBuilder()
+                    .setId(Identifier.newUuid())
+                    .build();
+            return commandMessage;
         }
     }
 
@@ -122,21 +125,16 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @DisplayName("throw ValidationException when creating command")
     class NotAccept {
 
-        private final RequiredFieldCommand invalidCommand =
-                RequiredFieldCommand.getDefaultInstance();
-
         @Test
         @DisplayName("from invalid Message")
         void invalidMessage() {
-            assertThrows(ValidationException.class, () -> factory().command()
-                                                                   .create(invalidCommand));
+            assertThrows(ValidationException.class, () -> factory.create(INVALID_COMMAND));
         }
 
         @Test
         @DisplayName("from invalid Message with version")
         void invalidMessageWithVersion() {
-            assertThrows(ValidationException.class, () -> factory().command()
-                                                                   .create(invalidCommand, 42));
+            assertThrows(ValidationException.class, () -> factory.create(INVALID_COMMAND, 42));
         }
     }
 }

@@ -20,48 +20,170 @@
 
 package io.spine.server.storage.given;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
+import io.spine.client.EntityFilters;
+import io.spine.client.EntityId;
+import io.spine.client.OrderBy;
+import io.spine.client.Pagination;
 import io.spine.core.Version;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityQuery;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.Enumerated;
+import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectVBuilder;
+import io.spine.testing.core.given.GivenVersion;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
+import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EnumType.STRING;
+import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
 public class RecordStorageTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private RecordStorageTestEnv() {
     }
 
+    public static EntityRecord buildStorageRecord(ProjectId id, Message state) {
+        Any wrappedState = pack(state);
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(pack(id))
+                .setState(wrappedState)
+                .setVersion(GivenVersion.withNumber(0))
+                .build();
+        return record;
+    }
+
+    public static EntityRecord buildStorageRecord(ProjectId id, Message state,
+                                                  LifecycleFlags lifecycleFlags) {
+        Any wrappedState = pack(state);
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(pack(id))
+                .setState(wrappedState)
+                .setVersion(GivenVersion.withNumber(0))
+                .setLifecycleFlags(lifecycleFlags)
+                .build();
+        return record;
+    }
+
+    /**
+     * Creates new instance of the test entity.
+     */
+    public static TestCounterEntity newEntity(ProjectId id) {
+        return new TestCounterEntity(id);
+    }
+
+    public static void archive(TransactionalEntity<ProjectId, ?, ?> entity) {
+        TestTransaction.archive(entity);
+    }
+
+    public static void delete(TransactionalEntity<ProjectId, ?, ?> entity) {
+        TestTransaction.delete(entity);
+    }
+
+    public static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
+        LifecycleFlags flags = record.getLifecycleFlags();
+        Map<String, EntityColumn.MemoizedValue> columns = ImmutableMap.of(
+                LifecycleColumns.ARCHIVED.columnName(),
+                booleanColumn(LifecycleColumns.ARCHIVED.column(), flags.getArchived()),
+                LifecycleColumns.DELETED.columnName(),
+                booleanColumn(LifecycleColumns.DELETED.column(), flags.getDeleted())
+        );
+        EntityRecordWithColumns result = createRecord(record, columns);
+        return result;
+    }
+
+    private static EntityColumn.MemoizedValue booleanColumn(EntityColumn column, boolean value) {
+        EntityColumn.MemoizedValue memoizedValue = mock(EntityColumn.MemoizedValue.class);
+        when(memoizedValue.getSourceColumn()).thenReturn(column);
+        when(memoizedValue.getValue()).thenReturn(value);
+        return memoizedValue;
+    }
+
+    public static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
+        assertTrue(actual.hasNext());
+        EntityRecord singleRecord = actual.next();
+        assertFalse(actual.hasNext());
+        assertEquals(expected, singleRecord);
+    }
+
+    public static EntityId toEntityId(ProjectId id) {
+        Any packed = Identifier.pack(id);
+        EntityId entityId = EntityId
+                .newBuilder()
+                .setId(packed)
+                .build();
+        return entityId;
+    }
+
+    public static <T> EntityQuery<T> newEntityQuery(EntityFilters filters,
+                                                    RecordStorage<T> storage) {
+        return from(filters, emptyOrderBy(), emptyPagination(), storage);
+    }
+
+    public static OrderBy emptyOrderBy() {
+        return OrderBy.getDefaultInstance();
+    }
+
+    public static Pagination emptyPagination() {
+        return Pagination.getDefaultInstance();
+    }
+
+    public static EntityFilters emptyFilters() {
+        return EntityFilters.getDefaultInstance();
+    }
+
+    public static <E> void assertIteratorsEqual(Iterator<? extends E> first,
+                                                Iterator<? extends E> second) {
+        Collection<? extends E> firstCollection = newArrayList(first);
+        Collection<? extends E> secondCollection = newArrayList(second);
+        assertEquals(firstCollection.size(), secondCollection.size());
+        assertThat(firstCollection).containsExactlyElementsIn(secondCollection);
+    }
+
     @SuppressWarnings("unused") // Reflective access
-    public static class TestCounterEntity<I> extends TransactionalEntity<I,
-            Project,
-            ProjectVBuilder> {
+    public static class TestCounterEntity
+            extends TransactionalEntity<ProjectId, Project, ProjectVBuilder> {
 
         private int counter = 0;
 
-        public TestCounterEntity(I id) {
+        public TestCounterEntity(ProjectId id) {
             super(id);
         }
 
         @CanIgnoreReturnValue
         @Column
         public int getCounter() {
-            counter++;
             return counter;
         }
 
@@ -105,28 +227,27 @@ public class RecordStorageTestEnv {
 
         @Column
         public Project.Status getProjectStatusOrdinal() {
-            return Enum.valueOf(Project.Status.class, getState().getStatus().name());
+            return Enum.valueOf(Project.Status.class, getState().getStatus()
+                                                                .name());
         }
 
         @Column
         @Enumerated(STRING)
         public Project.Status getProjectStatusString() {
-            return Enum.valueOf(Project.Status.class, getState().getStatus().name());
+            return Enum.valueOf(Project.Status.class, getState().getStatus()
+                                                                .name());
         }
 
         public void assignStatus(Project.Status status) {
-            final Project newState = Project.newBuilder(getState())
-                                            .setStatus(status)
-                                            .build();
+            Project newState = Project
+                    .newBuilder(getState())
+                    .setStatus(status)
+                    .build();
             injectState(this, newState, getCounterVersion());
         }
 
-        public void archive() {
-            TestTransaction.archive(this);
-        }
-
-        public void delete() {
-            TestTransaction.delete(this);
+        public void assignCounter(int counter) {
+            this.counter = counter;
         }
     }
 

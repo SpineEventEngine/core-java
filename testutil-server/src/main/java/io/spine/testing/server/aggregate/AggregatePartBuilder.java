@@ -23,19 +23,18 @@ package io.spine.testing.server.aggregate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.AggregatePart;
-import io.spine.server.aggregate.AggregatePartClass;
 import io.spine.server.aggregate.AggregateRoot;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.aggregate.model.AggregatePartClass;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.testing.server.entity.EntityBuilder;
 
 import java.lang.reflect.Constructor;
 
+import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
+
 /**
  * Utility class for building {@code AggregatePart}s for tests.
- *
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
 public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
                                   I,
                                   S extends Message,
@@ -44,9 +43,6 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
 
     private R aggregateRoot;
 
-    /**
-     * {@inheritDoc}
-     */
     public AggregatePartBuilder() {
         super();
         // Have the constructor for easier location of usages.
@@ -65,8 +61,8 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
     }
 
     @Override
-    protected EntityClass<A> createModelClass(Class<A> entityClass) {
-        return new AggregatePartClass<>(entityClass);
+    protected EntityClass<A> getModelClass(Class<A> entityClass) {
+        return asAggregatePartClass(entityClass);
     }
 
     @Override
@@ -76,13 +72,13 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
 
     @Override
     protected A createEntity(I id) {
-        final A result = entityClass().createEntity(aggregateRoot);
+        A result = entityClass().createEntity(aggregateRoot);
         return result;
     }
 
     @Override
     protected Constructor<A> getConstructor() {
-        final Constructor<A> constructor = entityClass().getConstructor();
+        Constructor<A> constructor = entityClass().getConstructor();
         return constructor;
     }
 }

@@ -58,34 +58,22 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         return new MultitenantSubscriptionRegistry(multitenant);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void activate(Subscription subscription,
                                       Stand.EntityUpdateCallback callback) {
         registrySlice().activate(subscription, callback);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized Subscription add(Topic topic) {
         return registrySlice().add(topic);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void remove(Subscription subscription) {
         registrySlice().remove(subscription);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
         return registrySlice().byType(type);
@@ -96,9 +84,6 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         return registrySlice().containsId(subscriptionId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized boolean hasType(TypeUrl type) {
         return registrySlice().hasType(type);
@@ -109,7 +94,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     }
 
     private SubscriptionRegistry registrySlice() {
-        final TenantFunction<SubscriptionRegistry> func =
+        TenantFunction<SubscriptionRegistry> func =
                 new TenantFunction<SubscriptionRegistry>(isMultitenant()) {
                     @Override
                     public SubscriptionRegistry apply(@Nullable TenantId tenantId) {
@@ -122,7 +107,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
                         return registryForTenant;
                     }
                 };
-        final SubscriptionRegistry result = func.execute();
+        SubscriptionRegistry result = func.execute();
         return result;
     }
 
@@ -131,32 +116,26 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         private final Map<TypeUrl, Set<SubscriptionRecord>> typeToRecord = newHashMap();
         private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized void activate(Subscription subscription,
                                           Stand.EntityUpdateCallback callback) {
             checkState(subscriptionToAttrs.containsKey(subscription),
                        "Cannot find the subscription in the registry.");
-            final SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
+            SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
             subscriptionRecord.activate(callback);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized Subscription add(Topic topic) {
-            final SubscriptionId subscriptionId = Subscriptions.generateId();
-            final Target target = topic.getTarget();
-            final String typeAsString = target.getType();
-            final TypeUrl type = TypeUrl.parse(typeAsString);
-            final Subscription subscription = Subscription.newBuilder()
-                                                          .setId(subscriptionId)
-                                                          .setTopic(topic)
-                                                          .build();
-            final SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
+            SubscriptionId subscriptionId = Subscriptions.generateId();
+            Target target = topic.getTarget();
+            String typeAsString = target.getType();
+            TypeUrl type = TypeUrl.parse(typeAsString);
+            Subscription subscription = Subscription.newBuilder()
+                                                    .setId(subscriptionId)
+                                                    .setTopic(topic)
+                                                    .build();
+            SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
 
             if (!typeToRecord.containsKey(type)) {
                 typeToRecord.put(type, new HashSet<SubscriptionRecord>());
@@ -168,15 +147,12 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             return subscription;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized void remove(Subscription subscription) {
             if (!subscriptionToAttrs.containsKey(subscription)) {
                 return;
             }
-            final SubscriptionRecord record = subscriptionToAttrs.get(subscription);
+            SubscriptionRecord record = subscriptionToAttrs.get(subscription);
 
             if (typeToRecord.containsKey(record.getType())) {
                 typeToRecord.get(record.getType())
@@ -185,21 +161,15 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             subscriptionToAttrs.remove(subscription);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
-            final Set<SubscriptionRecord> result = typeToRecord.get(type);
+            Set<SubscriptionRecord> result = typeToRecord.get(type);
             return result;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public synchronized boolean hasType(TypeUrl type) {
-            final boolean result = typeToRecord.containsKey(type);
+            boolean result = typeToRecord.containsKey(type);
             return result;
         }
 

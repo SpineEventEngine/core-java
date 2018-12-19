@@ -20,7 +20,7 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,18 +44,18 @@ class EventProducersTest {
     @Test
     @DisplayName("create function for taking ID from context")
     void getIdFromContext() {
-        EventRoute<Object, Message> fn = EventProducers.fromContext();
+        EventRoute<?, EventMessage> fn = EventRoute.byProducerId();
         assertFunction(fn);
     }
 
     @Test
     @DisplayName("create function for getting ID from first message field")
     void getIdFromFirstMsgField() {
-        EventRoute<Object, Message> fn = EventProducers.fromFirstMessageField();
+        EventRoute<?, EventMessage> fn = EventRoute.byFirstMessageField();
         assertFunction(fn);
     }
 
-    private static void assertFunction(EventRoute<Object, Message> fn) {
+    private static void assertFunction(EventRoute<?, ?> fn) {
         assertNotNull(fn);
 
         // Check that custom toString() is provided.

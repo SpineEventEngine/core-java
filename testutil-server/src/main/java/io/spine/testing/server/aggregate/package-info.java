@@ -25,7 +25,6 @@
 
  * @see io.spine.testing.server.aggregate.AggregateCommandTest
  * @see io.spine.testing.server.aggregate.AggregateEventReactionTest
- * @see io.spine.testing.server.aggregate.AggregatePartCommandTest
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

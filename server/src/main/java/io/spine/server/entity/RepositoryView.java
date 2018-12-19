@@ -20,24 +20,21 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-
 import java.util.Iterator;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * A view on a repository.
  *
  * <p>A {@link Repository} may have a view that provides a different set of entities.
- * For example, there can be views that represent archived or deleted entities (that are
- * not "visible" by default).
+ * For example, there can be views that represent inactive entities (e.g. archived or deleted).
  *
  * <p>{@code Repository} itself is also a {@code RepositoryView}, which loads only
- * "visible" entities.
+ * active entities.
  *
- * @param <I> the type of IDs of entities returned by the view
- * @param <E> the entity type
- * @author Alexander Yevsyukov
+ * @param <I> the type of IDs of entities
+ * @param <E> the type of entities
  */
 public interface RepositoryView<I, E extends Entity<I, ?>> {
 
@@ -45,7 +42,7 @@ public interface RepositoryView<I, E extends Entity<I, ?>> {
      * Finds an entity with the passed ID.
      *
      * @param id the ID of the entity to load
-     * @return the entity or {@link Optional#absent()} if there's no entity with such ID
+     * @return the entity or {@link Optional#empty()} if there's no entity with such ID
      */
     Optional<E> find(I id);
 
@@ -53,7 +50,7 @@ public interface RepositoryView<I, E extends Entity<I, ?>> {
      * Returns an iterator over the entities exposed by the view
      * that match the passed filter.
      *
-     * @param filter the {@linkplain Predicate#apply(Object) filtering} predicate
+     * @param filter the {@linkplain Predicate#test(Object)} filtering} predicate
      * @return new iterator
      */
     Iterator<E> iterator(Predicate<E> filter);

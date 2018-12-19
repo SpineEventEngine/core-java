@@ -20,51 +20,35 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Optional;
-import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.test.event.ProjectCreated;
-import io.spine.testdata.Sample;
-import io.spine.testing.server.TestEventFactory;
-import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.collect.Lists.newArrayList;
+import java.util.Optional;
+
+import static io.spine.core.EventEnvelope.of;
+import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("EventValidator should")
 class EventValidatorTest {
-
-    private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventValidatorTest.class);
 
     @Test
     @DisplayName("validate event messages")
     void validateEventMessages() {
-        final MessageValidator messageValidator = mock(MessageValidator.class);
-        when(messageValidator.validate(any(Message.class)))
-                .thenReturn(newArrayList(ConstraintViolation.getDefaultInstance(),
-                                         ConstraintViolation.getDefaultInstance()));
-        final Event event = eventFactory.createEvent(Sample.messageOfType(ProjectCreated.class));
-
-        final EventValidator eventValidator = new EventValidator(messageValidator);
-
-        final Optional<MessageInvalid> error = eventValidator.validate(EventEnvelope.of(event));
+        Event eventWithDefaultMessage = Event
+                .newBuilder()
+                .setMessage(pack(ProjectCreated.getDefaultInstance()))
+                .build();
+        EventValidator eventValidator = new EventValidator();
+        Optional<MessageInvalid> error = eventValidator.validate(of(eventWithDefaultMessage));
         assertTrue(error.isPresent());
-        final Error actualError = error.get().asError();
+        Error actualError = error.get().asError();
         assertEquals(EventValidationError.getDescriptor().getFullName(), actualError.getType());
     }
 }

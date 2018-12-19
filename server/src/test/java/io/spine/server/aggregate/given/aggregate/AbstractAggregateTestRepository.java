@@ -20,11 +20,12 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.common.base.Optional;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.tenant.TenantAwareFunction;
+import io.spine.server.tenant.TenantAwareRunner;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -34,23 +35,21 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @param <I> the type of aggregate identifiers
  * @param <A> the type of aggregates
- * @author Alexander Yevsyukov
  */
 public class AbstractAggregateTestRepository<I, A extends Aggregate<I, ?, ?>>
         extends AggregateRepository<I, A> {
 
+    public A loadAggregate(I id) {
+        Optional<A> optional = find(id);
+        if (!optional.isPresent()) {
+            fail("Aggregate not found.");
+        }
+        return optional.get();
+    }
+
     public A loadAggregate(TenantId tenantId, I id) {
-        final TenantAwareFunction<I, A> load =
-                new TenantAwareFunction<I, A>(tenantId) {
-                    @Override
-                    public A apply(I input) {
-                        final Optional<A> optional = find(input);
-                        if (!optional.isPresent()) {
-                            fail("Aggregate not found.");
-                        }
-                        return optional.get();
-                    }
-                };
-        return load.execute(id);
+        TenantAwareRunner runner = TenantAwareRunner.with(tenantId);
+        A result = runner.evaluate(() -> loadAggregate(id));
+        return result;
     }
 }

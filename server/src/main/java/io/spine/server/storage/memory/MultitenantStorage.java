@@ -59,10 +59,9 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
      * <p>If the slice has not been created for this tenant, it will be created.
      */
     S getStorage() {
-        final TenantFunction<S> func = new TenantFunction<S>(isMultitenant()) {
-            @Nullable
+        TenantFunction<S> func = new TenantFunction<S>(isMultitenant()) {
             @Override
-            public S apply(@Nullable TenantId tenantId) {
+            public @Nullable S apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
                 lock.lock();
                 try {
@@ -77,7 +76,7 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
                 }
             }
         };
-        final S result = func.execute();
+        S result = func.execute();
         return result;
     }
 

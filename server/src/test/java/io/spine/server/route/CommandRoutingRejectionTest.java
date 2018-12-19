@@ -20,17 +20,13 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandStatus;
-import io.spine.protobuf.AnyPacker;
+import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.ProcessingStatus;
-import io.spine.server.commandstore.CommandStore;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.rout.given.switchman.LogState;
 import io.spine.server.rout.given.switchman.SwitchId;
 import io.spine.server.rout.given.switchman.SwitchPosition;
@@ -38,13 +34,17 @@ import io.spine.server.route.given.switchman.Log;
 import io.spine.server.route.given.switchman.Switchman;
 import io.spine.server.route.given.switchman.SwitchmanBureau;
 import io.spine.server.route.given.switchman.command.SetSwitch;
-import io.spine.server.route.given.switchman.rejection.Rejections;
+import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Optional;
+
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,8 +64,8 @@ class CommandRoutingRejectionTest {
 
     private BoundedContext boundedContext;
     private CommandBus commandBus;
-    private CommandStore commandStore;
     private Log.Repository logRepository;
+    private SwitchmanObserver switchmanObserver;
 
     @BeforeEach
     void setUp() {
@@ -74,10 +74,12 @@ class CommandRoutingRejectionTest {
                                        .setMultitenant(false)
                                        .build();
         boundedContext.register(new SwitchmanBureau());
+        switchmanObserver = new SwitchmanObserver();
+        boundedContext.getEventBus()
+                      .register(switchmanObserver);
         logRepository = new Log.Repository();
         boundedContext.register(logRepository);
         commandBus = boundedContext.getCommandBus();
-        commandStore = commandBus.commandStore();
     }
 
     @AfterEach
@@ -98,19 +100,20 @@ class CommandRoutingRejectionTest {
     @DisplayName("result in rejected command")
     void resultInRejectedCommand() {
         // Post a successful command to make sure general case works.
-        final String switchmanName = Switchman.class.getName();
-        final Command command = requestFactory.createCommand(
+        String switchmanName = Switchman.class.getName();
+        Command command = requestFactory.createCommand(
                 SetSwitch.newBuilder()
                          .setSwitchId(generateSwitchId())
                          .setSwitchmanName(switchmanName)
                          .setPosition(SwitchPosition.RIGHT)
                          .build()
         );
+        assertEquals(0, switchmanObserver.events.size());
         commandBus.post(command, observer);
-        assertEquals(CommandStatus.OK, commandStore.getStatus(command).getCode());
+        assertEquals(1, switchmanObserver.events.size());
 
         // Post a command with the argument which causes rejection in routing.
-        final Command commandToReject = requestFactory.createCommand(
+        Command commandToReject = requestFactory.createCommand(
                 SetSwitch.newBuilder()
                          .setSwitchmanName(SwitchmanBureau.MISSING_SWITCHMAN_NAME)
                          .setSwitchId(generateSwitchId())
@@ -119,19 +122,9 @@ class CommandRoutingRejectionTest {
         );
 
         commandBus.post(commandToReject, observer);
-        final ProcessingStatus status = commandStore.getStatus(commandToReject);
-
-        // Check that the command is rejected.
-        assertEquals(CommandStatus.REJECTED, status.getCode());
-        final Message rejectionMessage = AnyPacker.unpack(status.getRejection()
-                                                                .getMessage());
-        assertTrue(rejectionMessage instanceof Rejections.SwitchmanUnavailable);
-
-        // Check that the event and the rejection were dispatched.
-        final Optional<Log> optional = logRepository.find(Log.ID);
-        assertTrue(optional.isPresent());
-        final LogState log = optional.get()
-                                     .getState();
+        Optional<Log> foundLog = logRepository.find(Log.ID);
+        assertTrue(foundLog.isPresent());
+        LogState log = foundLog.get().getState();
         assertTrue(log.containsCounters(switchmanName));
         assertTrue(log.getMissingSwitchmanList()
                       .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));
@@ -141,5 +134,15 @@ class CommandRoutingRejectionTest {
         return SwitchId.newBuilder()
                        .setId(newUuid())
                        .build();
+    }
+
+    private static class SwitchmanObserver extends AbstractEventSubscriber {
+
+        private final List<SwitchPositionConfirmed> events = newLinkedList();
+
+        @Subscribe
+        void to(SwitchPositionConfirmed event) {
+            events.add(event);
+        }
     }
 }

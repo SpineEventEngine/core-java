@@ -23,22 +23,21 @@ package io.spine.testing.core.given;
 import io.spine.base.Identifier;
 import io.spine.core.UserId;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Factory methods for creating test values of {@link io.spine.core.UserId UserId}.
- *
- * @author Alexander Yevsyukov
  */
-public class GivenUserId {
+public final class GivenUserId {
 
     /**
      * The prefix for generated user identifiers.
      */
     private static final String USER_PREFIX = "user-";
 
+    /** Prevent instantiation of this utility class. */
     private GivenUserId() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -49,7 +48,7 @@ public class GivenUserId {
      */
     public static UserId of(String value) {
         checkNotNull(value);
-
+        checkArgument(!value.isEmpty(), "UserId cannot be empty");
         return UserId.newBuilder()
                      .setValue(value)
                      .build();
@@ -60,5 +59,29 @@ public class GivenUserId {
      */
     public static UserId newUuid() {
         return of(USER_PREFIX + Identifier.newUuid());
+    }
+
+    /**
+     * Generates a new UUID-based {@code UserId}.
+     *
+     * @apiNote This method is an alias for {@link #newUuid()}. The reason for having it this.
+     * The code {@code GivenUserId.newUuid()} is somewhat awkward to read and pronounce.
+     * Some tests or test environments require setup where the code {@code GivenUserId.generated()}
+     * reads natural as it tells a story. In other places having {@code newUuid()}
+     * (which is statically imported) looks better, and it also clearly tells what it does.
+     *
+     * <p>So, this method is meant to be used with the class name, while its
+     * {@linkplain #newUuid() sibling} is meant to be used when statically imported.
+     */
+    public static UserId generated() {
+        return newUuid();
+    }
+
+    /**
+     * Creates a test value of {@code UserId} based on the simple class name of a test suite.
+     */
+    public static UserId byTestClass(Class<?> cls) {
+        checkNotNull(cls);
+        return of(cls.getSimpleName());
     }
 }

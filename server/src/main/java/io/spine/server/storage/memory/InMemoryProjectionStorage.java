@@ -39,7 +39,6 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  * The in-memory implementation of {@link ProjectionStorage}.
  *
  * @param <I> the type of stream projection IDs
- * @author Alexander Litus
  */
 public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
@@ -49,12 +48,7 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     /** The time of the last handled event per tenant. */
     private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
 
-    public static <I>
-    InMemoryProjectionStorage<I> newInstance(InMemoryRecordStorage<I> entityStorage) {
-        return new InMemoryProjectionStorage<>(entityStorage);
-    }
-
-    private InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
+    InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
         super(recordStorage.isMultitenant());
         this.recordStorage = recordStorage;
     }
@@ -69,12 +63,11 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    public void writeLastHandledEventTime(final Timestamp timestamp) {
+    public void writeLastHandledEventTime(Timestamp timestamp) {
         checkNotNull(timestamp);
-        final TenantFunction<Void> func = new TenantFunction<Void>(isMultitenant()) {
-            @Nullable
+        TenantFunction<Void> func = new TenantFunction<Void>(isMultitenant()) {
             @Override
-            public Void apply(@Nullable TenantId tenantId) {
+            public @Nullable Void apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
                 timestampOfLastEvent.put(tenantId, timestamp);
                 return null;
@@ -85,12 +78,11 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public Timestamp readLastHandledEventTime() {
-        final TenantFunction<Timestamp> func = new TenantFunction<Timestamp>(isMultitenant()) {
-            @Nullable
+        TenantFunction<Timestamp> func = new TenantFunction<Timestamp>(isMultitenant()) {
             @Override
-            public Timestamp apply(@Nullable TenantId tenantId) {
+            public @Nullable Timestamp apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
-                final Timestamp result = timestampOfLastEvent.get(tenantId);
+                Timestamp result = timestampOfLastEvent.get(tenantId);
                 return result;
             }
         };
@@ -114,8 +106,8 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        final Iterator<EntityRecord> result = recordStorage.readMultiple(ids);
+    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids) {
+        Iterator<@Nullable EntityRecord> result = recordStorage.readMultiple(ids);
         return result;
     }
 
@@ -127,13 +119,13 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        final Iterator<EntityRecord> result = recordStorage.readAll();
+        Iterator<EntityRecord> result = recordStorage.readAll();
         return result;
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        final Iterator<EntityRecord> result = recordStorage.readAll(fieldMask);
+        Iterator<EntityRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
 }

@@ -20,34 +20,18 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandClass;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateClass;
-import io.spine.server.aggregate.AggregatePart;
-import io.spine.server.aggregate.AggregatePartClass;
-import io.spine.server.command.CommandHandler;
-import io.spine.server.command.CommandHandlerClass;
-import io.spine.server.command.CommandHandlingClass;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityClass;
-import io.spine.server.event.EventSubscriber;
-import io.spine.server.event.EventSubscriberClass;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.procman.ProcessManagerClass;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionClass;
-import io.spine.server.rejection.RejectionSubscriber;
-import io.spine.server.rejection.RejectionSubscriberClass;
+import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
+import io.spine.reflect.PackageInfo;
+import io.spine.server.annotation.BoundedContext;
+import io.spine.server.security.InvocationGuard;
 
 import java.util.Map;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.intersection;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Stores information of message handling classes.
@@ -59,17 +43,71 @@ import static com.google.common.collect.Sets.intersection;
 public class Model {
 
     /**
-     * A map from a {@linkplain #nameOf(Class) a class name} to an extended class information
-     * instance.
+     * Maps a raw class of a model object to corresponding Model instance.
      */
-    private final Map<String, ModelClass<?>> classes = Maps.newConcurrentMap();
+    private static final Map<Class<?>, Model> models = Maps.newConcurrentMap();
 
-    public static Model getInstance() {
-        return Singleton.INSTANCE.value;
+    /** The name of the Bounded Context to which this instance belongs. */
+    private final BoundedContextName context;
+
+    /** Maps a raw Java class to a {@code ModelClass}. */
+    private final ClassMap classes = new ClassMap();
+
+    /**
+     * Creates a new instance for the Bounded Context with the passed name. */
+    private Model(BoundedContextName context) {
+        this.context = context;
     }
 
-    /** Prevents instantiation from outside. */
-    private Model() {
+    public static synchronized <T> Model getInstance(Class<? extends T> rawClass) {
+        Model model = models.get(rawClass);
+        if (model != null) {
+            return model;
+        }
+        Optional<BoundedContextName> optional = findContext(rawClass);
+
+        // If no name of a Bounded Context found, assume the default name.
+        // This is a safety net for newcomers and our tests.
+        // We may want to make this check strict, and require specifying Bounded Context names.
+        BoundedContextName context = optional.orElseGet(BoundedContextNames::assumingTests);
+
+        // Try to find a Model if it already exists.
+        Optional<Model> alreadyAvailable =
+                models.values()
+                      .stream()
+                      .filter((m) -> m.context.equals(context))
+                      .findAny();
+        if (alreadyAvailable.isPresent()) {
+            return alreadyAvailable.get();
+        }
+
+        // Since a model is not found, create for new Bounded Context and associated with the
+        // passed raw class.
+        Model newModel = new Model(context);
+        models.put(rawClass, newModel);
+        return newModel;
+    }
+
+    /**
+     * Finds Bounded Context name in the package annotations of the raw class,
+     * or in the packages into which the package of the class is nested.
+     */
+    @VisibleForTesting
+    static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
+        PackageInfo pkg = PackageInfo.of(rawClass);
+        Optional<BoundedContext> annotation = pkg.findAnnotation(BoundedContext.class);
+        if (!annotation.isPresent()) {
+            return Optional.empty();
+        }
+        String contextName = annotation.get()
+                                       .value();
+        BoundedContextName result = BoundedContextNames.newName(contextName);
+        return Optional.of(result);
+    }
+
+    /** Obtains the name of the bounded context which encapsulates this model. */
+    public BoundedContextName contextName() {
+        return context;
     }
 
     /**
@@ -78,209 +116,51 @@ public class Model {
      * <p>This method can be useful when multiple Spine projects are processed under the same
      * static context, e.g. in tests.
      */
-    public void clear() {
+    private void clear() {
         classes.clear();
     }
 
     /**
-     * Obtains an instance of aggregate class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     *
-     * @throws DuplicateCommandHandlerError if there is the aggregate class handles one or more
-     *         commands that are handled by another class, which was added to the model before
-     *         calling this method
+     * Clears all models, and then clears the {@link #models} map.
      */
-    public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = new AggregateClass<>(cls);
-            checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(nameOf(cls), modelClass);
+    private static void reset() {
+        for (Model model : models.values()) {
+            model.clear();
         }
-        return (AggregateClass<?>) modelClass;
+        models.clear();
     }
 
     /**
-     * Obtains an instance of aggregate part class information.
+     * Clears all models and removes them.
      *
-     * <p>If the passed class is not added to the model before, it will be added as the result of
-     * this method call.
+     * <p>This method must <em>not</em> be called from the production code.
      *
-     * @throws DuplicateCommandHandlerError if the given aggregate part class handles one or
-     *         more commands which are already known to the model as handled by another class
+     * @throws SecurityException
+     *         if called directly by non-authorized class
+     * @apiNote This method <em>may</em> be called indirectly from authorized tool classes
+     *         or test utility classes.
      */
-    public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = new AggregatePartClass<>(cls);
-            checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(nameOf(cls), modelClass);
-        }
-        return (AggregatePartClass<?>) modelClass;
+    @VisibleForTesting
+    public static synchronized void dropAllModels() {
+        InvocationGuard.allowOnly(
+                "io.spine.server.model.ModelTest",
+                "io.spine.testing.server.model.ModelTests",
+                "io.spine.server.command.model.DuplicateHandlerCheck"
+        );
+        reset();
     }
 
     /**
-     * Obtains an instance of a process manager class information.
+     * Obtains the model class for the passed raw class.
      *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     *
-     * @throws DuplicateCommandHandlerError if there is the passed process manager class handles one
-     *         or more commands that are handled by another class, which was added to the model
-     *         before calling this method
+     * <p>If the model does not have the model class yet, it would be obtained
+     * from the passed supplier and remembered.
      */
-    public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
-        throws DuplicateCommandHandlerError {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = ProcessManagerClass.of(cls);
-            checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(nameOf(cls), modelClass);
-        }
-        return (ProcessManagerClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of a projection class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = ProjectionClass.of(cls);
-            classes.put(nameOf(cls), modelClass);
-        }
-        return (ProjectionClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of event subscriber class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = EventSubscriberClass.of(cls);
-            classes.put(nameOf(cls), modelClass);
-        }
-        return (EventSubscriberClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of a command handler class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     *
-     * @throws DuplicateCommandHandlerError if there is the passed command handler class handles one
-     *         or more commands that are handled by another class, which was added to the model
-     *         before calling this method
-     */
-    public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
-            throws DuplicateCommandHandlerError {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = CommandHandlerClass.of(cls);
-            checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(nameOf(cls), modelClass);
-        }
-        return (CommandHandlerClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of a rejection subscriber class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public
-    RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = RejectionSubscriberClass.of(cls);
-            classes.put(nameOf(cls), modelClass);
-        }
-        return (RejectionSubscriberClass<?>) modelClass;
-    }
-
-    private void checkDuplicates(CommandHandlingClass candidate)
-        throws DuplicateCommandHandlerError {
-        Set<CommandClass> candidateCommands = candidate.getCommands();
-        ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> map = ImmutableMap.builder();
-
-        for (ModelClass<?> modelClass : classes.values()) {
-            if (modelClass instanceof CommandHandlingClass) {
-                CommandHandlingClass commandHandler = (CommandHandlingClass) modelClass;
-                Set<CommandClass> commandClasses = commandHandler.getCommands();
-                Set<CommandClass> intersection = intersection(commandClasses, candidateCommands);
-                if (intersection.size() > 0) {
-                    map.put(intersection, commandHandler);
-                }
-            }
-        }
-
-        ImmutableMap<Set<CommandClass>, CommandHandlingClass> currentHandlers = map.build();
-        if (!currentHandlers.isEmpty()) {
-            throw new DuplicateCommandHandlerError(candidate, currentHandlers);
-        }
-    }
-
-    /**
-     * Obtains an instance of an entity class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = new EntityClass<>(cls);
-            classes.put(nameOf(cls), modelClass);
-        }
-        return (EntityClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains the default entity state by entity class.
-     *
-     * @return default entity state
-     */
-    public Message getDefaultState(Class<? extends Entity> cls) {
-        checkNotNull(cls);
-        DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        Message result = registry.get(cls);
+    <T, M extends ModelClass>
+    ModelClass<T> getClass(Class<? extends T> cls,
+                           Class<M> classOfModelClass,
+                           Supplier<ModelClass<T>> supplier) {
+        ModelClass<T> result = classes.get(cls, classOfModelClass, supplier);
         return result;
-    }
-
-    /**
-     * Returns a unique identifying name of the given class.
-     *
-     * <p>The returned value is guaranteed to be unique per class and non-null.
-     *
-     * @param cls the {@link Class} to identity
-     * @return a non-null class name
-     */
-    private static String nameOf(Class<?> cls) {
-        return cls.getName();
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Model value = new Model();
     }
 }

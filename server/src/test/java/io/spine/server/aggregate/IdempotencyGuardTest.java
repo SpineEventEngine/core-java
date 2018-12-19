@@ -23,26 +23,34 @@ package io.spine.server.aggregate;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.TenantId;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.event.DuplicateEventException;
+import io.spine.server.event.EventBus;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.core.CommandEnvelope.of;
+import static io.spine.core.EventEnvelope.of;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.command;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProject;
+import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.event;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newProjectId;
-import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newTenantId;
+import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.projectPaused;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProject;
+import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.taskStarted;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -53,16 +61,15 @@ class IdempotencyGuardTest {
 
     private BoundedContext boundedContext;
     private IgTestAggregateRepository repository;
+    private ProjectId projectId;
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
-        boundedContext = BoundedContext.newBuilder()
-                                       .setMultitenant(true)
-                                       .build();
-
+        ModelTests.dropAllModels();
+        boundedContext = BoundedContext.newBuilder().build();
         repository = new IgTestAggregateRepository();
         boundedContext.register(repository);
+        projectId = newProjectId();
     }
 
     @AfterEach
@@ -71,68 +78,142 @@ class IdempotencyGuardTest {
         boundedContext.close();
     }
 
-    @Test
-    @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
-    void throwExceptionForDuplicateCommand() {
-        final TenantId tenantId = newTenantId();
-        final ProjectId projectId = newProjectId();
-        final Command createCommand = command(createProject(projectId), tenantId);
-
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
-
-        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
-        final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        assertThrows(DuplicateCommandException.class, () -> guard.check(of(createCommand)));
+    private IgTestAggregate aggregate() {
+        return repository.loadAggregate(projectId);
     }
 
-    @Test
-    @DisplayName("not throw exception when command was handled but snapshot was made")
-    void notThrowForCommandHandledAfterSnapshot() {
-        repository.setSnapshotTrigger(1);
+    @Nested
+    @DisplayName("check commands and")
+    class Commands {
 
-        final TenantId tenantId = newTenantId();
-        final ProjectId projectId = newProjectId();
-        final Command createCommand = command(createProject(projectId), tenantId);
+        @Test
+        @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
+        void throwExceptionForDuplicateCommand() {
+            Command createCommand = command(createProject(projectId));
 
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
+            post(createCommand);
 
-        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+            IgTestAggregate aggregate = repository.loadAggregate(projectId);
+            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+            assertThrows(DuplicateCommandException.class, () -> check(guard, createCommand));
+        }
 
-        final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        guard.check(of(createCommand));
+        @Test
+        @DisplayName("not throw exception when command was handled but snapshot was made")
+        void notThrowForCommandHandledAfterSnapshot() {
+            repository.setSnapshotTrigger(1);
+            Command createCommand = command(createProject(projectId));
+            post(createCommand);
+
+            IgTestAggregate aggregate = aggregate();
+
+            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+            check(guard, createCommand);
+        }
+
+        @Test
+        @DisplayName("not throw exception if command was not handled")
+        void notThrowForCommandNotHandled() {
+            Command createCommand = command(createProject(projectId));
+            IgTestAggregate aggregate = new IgTestAggregate(projectId);
+
+            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+            guard.check(of(createCommand));
+        }
+
+        @Test
+        @DisplayName("not throw exception if another command was handled")
+        void notThrowIfAnotherCommandHandled() {
+            Command createCommand = command(createProject(projectId));
+            Command startCommand = command(startProject(projectId));
+
+            post(createCommand);
+
+            IgTestAggregate aggregate = aggregate();
+
+            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+            check(guard, startCommand);
+        }
+
+        private void post(Command command) {
+            CommandBus commandBus = boundedContext.getCommandBus();
+            StreamObserver<Ack> noOpObserver = noOpObserver();
+            commandBus.post(command, noOpObserver);
+        }
+
+        private void check(IdempotencyGuard guard, Command command) {
+            CommandEnvelope envelope = of(command);
+            guard.check(envelope);
+        }
     }
 
-    @Test
-    @DisplayName("not throw exception if command was not handled")
-    void notThrowForCommandNotHandled() {
-        final TenantId tenantId = newTenantId();
-        final ProjectId projectId = newProjectId();
-        final Command createCommand = command(createProject(projectId), tenantId);
-        final IgTestAggregate aggregate = new IgTestAggregate(projectId);
+    @Nested
+    @DisplayName("check events and")
+    class Events {
 
-        final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        guard.check(of(createCommand));
-    }
+        @BeforeEach
+        void setUp() {
+            boundedContext.getCommandBus()
+                          .post(command(createProject(projectId)), noOpObserver());
+        }
 
-    @Test
-    @DisplayName("not throw exception if another command was handled")
-    void notThrowIfAnotherCommandHandled() {
-        final TenantId tenantId = newTenantId();
-        final ProjectId projectId = newProjectId();
-        final Command createCommand = command(createProject(projectId), tenantId);
-        final Command startCommand = command(startProject(projectId), tenantId);
+        @Test
+        @DisplayName("throw DuplicateEventException when event was handled since last snapshot")
+        void throwExceptionForDuplicateCommand() {
+            Event event = event(taskStarted(projectId));
+            post(event);
 
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
+            IgTestAggregate aggregate = repository.loadAggregate(projectId);
+            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+            assertThrows(DuplicateEventException.class, () -> check(guard, event));
+        }
 
-        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+        @Test
+        @DisplayName("not throw exception when event was handled but snapshot was made")
+        void notThrowForCommandHandledAfterSnapshot() {
+            repository.setSnapshotTrigger(1);
 
-        final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-        guard.check(of(startCommand));
+            Event event = event(taskStarted(projectId));
+            post(event);
+
+            IgTestAggregate aggregate = repository.loadAggregate(projectId);
+            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+            check(guard, event);
+        }
+
+        @Test
+        @DisplayName("not throw exception if event was not handled")
+        void notThrowForCommandNotHandled() {
+            Event event = event(taskStarted(projectId));
+            IgTestAggregate aggregate = new IgTestAggregate(projectId);
+
+            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+            check(guard, event);
+        }
+
+        @Test
+        @DisplayName("not throw exception if another event was handled")
+        void notThrowIfAnotherCommandHandled() {
+            Event taskEvent = event(taskStarted(projectId));
+            Event projectEvent = event(projectPaused(projectId));;
+
+            EventBus eventBus = boundedContext.getEventBus();
+            eventBus.post(taskEvent);
+
+            IgTestAggregate aggregate = repository.loadAggregate(projectId);
+
+            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+            check(guard, projectEvent);
+        }
+
+        private void post(Event event) {
+            boundedContext.getEventBus()
+                          .post(event);
+        }
+
+        private void check(IdempotencyGuard guard, Event event) {
+            EventEnvelope envelope = of(event);
+            guard.check(envelope);
+        }
     }
 }

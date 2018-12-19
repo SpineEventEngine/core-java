@@ -21,14 +21,19 @@
 package io.spine.model.verify;
 
 import io.spine.annotation.Experimental;
+import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.assemble.AssignLookup;
 import io.spine.tools.gradle.SpinePlugin;
+import io.spine.tools.gradle.compiler.Extension;
+import io.spine.tools.gradle.compiler.ModelCompilerPlugin;
+import io.spine.tools.type.MoreKnownTypes;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -53,7 +58,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     @Override
     public void apply(Project project) {
         log().debug("Applying Spine model verifier plugin.");
-        final Path rawModelStorage = rawModelPath(project);
+        Path rawModelStorage = rawModelPath(project);
         // Ensure right environment (`main` scope sources with the `java` plugin)
         if (project.getTasks()
                    .findByPath(CLASSES.getValue()) != null) {
@@ -71,24 +76,13 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     }
 
     private static Path rawModelPath(Project project) {
-        final Path rootDir = project.getRootDir().toPath();
-        final Path result = rootDir.resolve(RELATIVE_RAW_MODEL_PATH);
+        Path rootDir = project.getRootDir().toPath();
+        Path result = rootDir.resolve(RELATIVE_RAW_MODEL_PATH);
         return result;
     }
 
     private Action<Task> action(Path path) {
         return new VerifierAction(this, path);
-    }
-
-    /**
-     * Verifies the {@link CommandHandlers} upon the {@linkplain Project Gradle project}.
-     *
-     * @param model   the Spine model to process
-     * @param project the Gradle project to process the model upon
-     */
-    private static void verifyModel(CommandHandlers model, Project project) {
-        final ModelVerifier verifier = new ModelVerifier(project);
-        verifier.verify(model);
     }
 
     /**
@@ -108,7 +102,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
      * <p>Reads the {@link CommandHandlers} from the given file and
      * {@linkplain #verifyModel processes} the model.
      */
-    private static class VerifierAction implements Action<Task> {
+    private static class VerifierAction implements Action<Task>, Logging {
 
         private final ModelVerifierPlugin parent;
         private final Path rawModelPath;
@@ -121,18 +115,57 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         @Override
         public void execute(Task task) {
             if (!exists(rawModelPath)) {
-                final Logger log = parent.log();
-                log.warn("No Spine model definition found under {}. Completing the task.",
-                         rawModelPath);
-                return;
+                _warn("No Spine model definition found under {}.", rawModelPath);
+            } else {
+                Project project = task.getProject();
+                extendKnownTypes(project);
+                verifyModel(project);
             }
-            final CommandHandlers model;
+        }
+
+        private void extendKnownTypes(Project project) {
+            String pluginExtensionName = ModelCompilerPlugin.extensionName();
+            if (project.getExtensions().findByName(pluginExtensionName) != null) {
+                String path = Extension.getMainDescriptorSetPath(project);
+                File descriptorFile = new File(path);
+                tryExtend(descriptorFile);
+            } else {
+                _warn("{} plugin extension is not found. Apply the Spine model compiler plugin.",
+                      pluginExtensionName);
+            }
+        }
+
+        private void tryExtend(File descriptorFile) {
+            if (descriptorFile.exists()) {
+                _debug("Extending known types with types from {}.", descriptorFile);
+                MoreKnownTypes.extendWith(descriptorFile);
+            } else {
+                _warn("Descriptor file {} does not exist.", descriptorFile);
+            }
+        }
+
+        /**
+         * Verifies the {@link CommandHandlers} upon the {@linkplain Project Gradle project}.
+         *
+         * @param project the Gradle project to process the model upon
+         */
+        private void verifyModel(Project project) {
+            ModelVerifier verifier = new ModelVerifier(project);
+            CommandHandlers commandHandlers = readCommandHandlers();
+            verifier.verify(commandHandlers);
+        }
+
+        private CommandHandlers readCommandHandlers() {
             try (InputStream in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
-                model = CommandHandlers.parseFrom(in);
+                return CommandHandlers.parseFrom(in);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
-            verifyModel(model, task.getProject());
+        }
+
+        @Override
+        public Logger log() {
+            return parent.log();
         }
     }
 }

@@ -19,10 +19,13 @@
  */
 
 /**
- * Test environments for the {@link io.spine.base} package.
+ * Test environment for the {@link io.spine.base} package.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.core.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

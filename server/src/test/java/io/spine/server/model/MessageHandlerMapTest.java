@@ -20,7 +20,7 @@
 
 package io.spine.server.model;
 
-import io.spine.server.command.CommandHandlerMethod;
+import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.given.MessageHandlerMapTestEnv.HandlerWithDuplicatingMethods;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class MessageHandlerMapTest {
     @DisplayName("not allow duplicating message classes in handlers")
     void rejectDuplicateHandlers() {
         assertThrows(DuplicateHandlerMethodError.class,
-                     () -> new MessageHandlerMap<>(HandlerWithDuplicatingMethods.class,
-                                                   CommandHandlerMethod.factory()));
+                     () -> MessageHandlerMap.create(HandlerWithDuplicatingMethods.class,
+                                                    new CommandHandlerSignature()));
     }
 }

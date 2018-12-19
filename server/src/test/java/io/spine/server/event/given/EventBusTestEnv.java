@@ -20,11 +20,12 @@
 
 package io.spine.server.event.given;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
+import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -35,20 +36,23 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Status;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.json.Json;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.bus.AbstractBusFilter;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.command.Assign;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EBProjectArchived;
 import io.spine.test.event.EBProjectCreated;
@@ -62,19 +66,26 @@ import io.spine.test.event.Task;
 import io.spine.test.event.command.EBAddTasks;
 import io.spine.test.event.command.EBArchiveProject;
 import io.spine.test.event.command.EBCreateProject;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Optional.absent;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
+import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;
+import static io.spine.testdata.Sample.builderForType;
+import static io.spine.util.Exceptions.unsupported;
+import static java.lang.String.format;
+import static java.util.Optional.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test environment classes for the {@code server.event} package.
@@ -92,45 +103,41 @@ public class EventBusTestEnv {
     }
 
     private static ProjectId projectId() {
-        final ProjectId id = ProjectId.newBuilder()
-                                      .setId(newUuid())
-                                      .build();
+        ProjectId id = ProjectId.newBuilder()
+                                .setId(newUuid())
+                                .build();
         return id;
     }
 
     private static TenantId tenantId() {
-        final String value = EventBusTestEnv.class.getName();
-        final TenantId id = TenantId.newBuilder()
-                                    .setValue(value)
-                                    .build();
+        String value = EventBusTestEnv.class.getName();
+        TenantId id = TenantId.newBuilder()
+                              .setValue(value)
+                              .build();
         return id;
     }
 
     public static EBCreateProject createProject() {
-        final EBCreateProject command =
-                ((EBCreateProject.Builder) Sample.builderForType(EBCreateProject.class))
-                        .setProjectId(PROJECT_ID)
-                        .build();
-        return command;
+        EBCreateProject.Builder command = builderForType(EBCreateProject.class);
+        return command.setProjectId(PROJECT_ID)
+                      .build();
     }
 
     public static EBAddTasks addTasks(Task... tasks) {
-        final EBAddTasks.Builder builder =
-                ((EBAddTasks.Builder) Sample.builderForType(EBAddTasks.class))
-                        .setProjectId(PROJECT_ID)
-                        .clearTask();
+        EBAddTasks.Builder builder = builderForType(EBAddTasks.class);
+        builder.setProjectId(PROJECT_ID)
+               .clearTask();
         for (Task task : tasks) {
             builder.addTask(task);
         }
-        final EBAddTasks command = builder.build();
+        EBAddTasks command = builder.build();
         return command;
     }
 
     public static Task newTask(boolean done) {
-        final Task task = ((Task.Builder) Sample.builderForType(Task.class))
-                .setDone(done)
-                .build();
-        return task;
+        Task.Builder task = builderForType(Task.class);
+        return task.setDone(done)
+                   .build();
     }
 
     /**
@@ -138,14 +145,12 @@ public class EventBusTestEnv {
      * {@link EBArchiveProject#getReason()} field.
      */
     public static EBArchiveProject invalidArchiveProject() {
-        final EBArchiveProject command =
-                ((EBArchiveProject.Builder) Sample.builderForType(EBArchiveProject.class))
-                        .setProjectId(PROJECT_ID)
-                        .build();
-        return command;
+        EBArchiveProject.Builder command = builderForType(EBArchiveProject.class);
+        return command.setProjectId(PROJECT_ID)
+                      .build();
     }
 
-    public static Command command(Message message) {
+    public static Command command(CommandMessage message) {
         return requestFactory.command()
                              .create(message);
     }
@@ -154,9 +159,9 @@ public class EventBusTestEnv {
      * Reads all events from the event bus event store for a tenant specified by
      * the {@link EventBusTestEnv#TENANT_ID}.
      */
-    public static List<Event> readEvents(final EventBus eventBus) {
-        final MemoizingObserver<Event> observer = memoizingObserver();
-        final TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
+    public static List<Event> readEvents(EventBus eventBus) {
+        MemoizingObserver<Event> observer = memoizingObserver();
+        TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
                 eventBus.getEventStore()
@@ -165,12 +170,12 @@ public class EventBusTestEnv {
         };
         operation.execute();
 
-        final List<Event> results = observer.responses();
+        List<Event> results = observer.responses();
         return results;
     }
 
     @SuppressWarnings("CheckReturnValue") // Conditionally calling builder.
-    public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
+    public static EventBus.Builder eventBusBuilder(@Nullable Enricher enricher) {
         EventBus.Builder busBuilder = EventBus
                 .newBuilder()
                 .appendFilter(new TaskCreatedFilter());
@@ -192,16 +197,16 @@ public class EventBusTestEnv {
 
         @Assign
         EBProjectCreated on(EBCreateProject command, CommandContext ctx) {
-            final EBProjectCreated event = projectCreated(command.getProjectId());
+            EBProjectCreated event = projectCreated(command.getProjectId());
             return event;
         }
 
         @Assign
         List<EBTaskAdded> on(EBAddTasks command, CommandContext ctx) {
-            final ImmutableList.Builder<EBTaskAdded> events = ImmutableList.builder();
+            ImmutableList.Builder<EBTaskAdded> events = ImmutableList.builder();
 
             for (Task task : command.getTaskList()) {
-                final EBTaskAdded event = taskAdded(command.getProjectId(), task);
+                EBTaskAdded event = taskAdded(command.getProjectId(), task);
                 events.add(event);
             }
 
@@ -209,17 +214,15 @@ public class EventBusTestEnv {
         }
 
         @Apply
-        private void event(EBProjectCreated event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
+        void event(EBProjectCreated event) {
+            getBuilder().setId(event.getProjectId())
+                        .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(EBTaskAdded event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .addTask(event.getTask());
+        void event(EBTaskAdded event) {
+            getBuilder().setId(event.getProjectId())
+                        .addTask(event.getTask());
         }
 
         private static EBProjectCreated projectCreated(ProjectId projectId) {
@@ -234,7 +237,6 @@ public class EventBusTestEnv {
                               .setTask(task)
                               .build();
         }
-
     }
 
     /**
@@ -249,23 +251,23 @@ public class EventBusTestEnv {
      * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()}
      * property set to {@code true}.
      */
-    public static class TaskCreatedFilter extends AbstractBusFilter<EventEnvelope> {
+    public static class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
-        private static final EventClass TASK_ADDED_CLASS = EventClass.of(EBTaskAdded.class);
+        private static final EventClass TASK_ADDED_CLASS = EventClass.from(EBTaskAdded.class);
 
         @Override
         public Optional<Ack> accept(EventEnvelope envelope) {
             if (TASK_ADDED_CLASS.equals(envelope.getMessageClass())) {
-                final EBTaskAdded message = (EBTaskAdded) envelope.getMessage();
-                final Task task = message.getTask();
+                EBTaskAdded message = (EBTaskAdded) envelope.getMessage();
+                Task task = message.getTask();
                 if (task.getDone()) {
-                    final Error error = error();
-                    final Any packedId = Identifier.pack(envelope.getId());
-                    final Ack result = reject(packedId, error);
+                    Error error = error();
+                    Any packedId = Identifier.pack(envelope.getId());
+                    Ack result = reject(packedId, error);
                     return Optional.of(result);
                 }
             }
-            return absent();
+            return empty();
         }
 
         private static Error error() {
@@ -278,22 +280,23 @@ public class EventBusTestEnv {
     /**
      * {@link EBProjectCreated} subscriber that does nothing.
      *
-     * <p>Can be used for the event to get pass the {@link io.spine.server.bus.DeadMessageFilter}.
+     * <p>Can be used for the event to get pass
+     * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
      */
-    public static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
+    public static class EBProjectCreatedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
-        public void on(EBProjectCreated message, EventContext context) {
+        void on(EBProjectCreated message, EventContext context) {
             // Do nothing.
         }
     }
 
-    public static class EBProjectArchivedSubscriber extends EventSubscriber {
+    public static class EBProjectArchivedSubscriber extends AbstractEventSubscriber {
 
         private Message eventMessage;
 
         @Subscribe
-        public void on(EBProjectArchived message, EventContext ignored) {
+        void on(EBProjectArchived message, EventContext ignored) {
             this.eventMessage = message;
         }
 
@@ -302,13 +305,13 @@ public class EventBusTestEnv {
         }
     }
 
-    public static class ProjectCreatedSubscriber extends EventSubscriber {
+    public static class ProjectCreatedSubscriber extends AbstractEventSubscriber {
 
         private Message eventMessage;
         private EventContext eventContext;
 
         @Subscribe
-        public void on(ProjectCreated eventMsg, EventContext context) {
+        void on(ProjectCreated eventMsg, EventContext context) {
             this.eventMessage = eventMsg;
             this.eventContext = context;
         }
@@ -324,13 +327,38 @@ public class EventBusTestEnv {
 
     /**
      * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
-     * {@link io.spine.server.bus.DeadMessageFilter}.
+     * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
      */
-    public static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
+    public static class EBTaskAddedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
-        public void on(EBTaskAdded message, EventContext context) {
+        void on(EBTaskAdded message, EventContext context) {
             // Do nothing.
+        }
+    }
+
+    public static class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
+
+        @Subscribe(external = true)
+        void on(EBTaskAdded message, EventContext context) {
+            if (!context.getExternal()) {
+                fail(format(
+                        "Domestic event %s was delivered to an external subscriber.",
+                        message.getClass()
+                ));
+            }
+        }
+
+        /**
+         * Must be present in order for the subscriber to be valid for EventBus registration.
+         *
+         * <p>This subscriber should never be called.
+         *
+         * @param event ignored
+         */
+        @Subscribe
+        void on(ProjectCreated event) {
+            fail("Unexpected event " + Json.toJson(event));
         }
     }
 
@@ -344,13 +372,23 @@ public class EventBusTestEnv {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+            return ImmutableSet.of(EventClass.from(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<EventClass> getExternalEventClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+            throw unsupported();
         }
 
         @Override
         public Set<String> dispatch(EventEnvelope event) {
             dispatchCalled = true;
-            return Identity.of(this);
+            return identity();
         }
 
         @Override
@@ -404,15 +442,57 @@ public class EventBusTestEnv {
         }
 
         public static Event projectStarted() {
-            final ProjectStarted msg = EventMessage.projectStarted();
-            final Event event = eventFactory().createEvent(msg);
+            ProjectStarted msg = EventMessage.projectStarted();
+            Event event = eventFactory().createEvent(msg);
             return event;
         }
 
         public static Event projectCreated(ProjectId projectId) {
-            final ProjectCreated msg = EventMessage.projectCreated(projectId);
-            final Event event = eventFactory().createEvent(msg);
+            ProjectCreated msg = EventMessage.projectCreated(projectId);
+            Event event = eventFactory().createEvent(msg);
             return event;
+        }
+    }
+
+    public static class UnsupportedEventAckObserver implements StreamObserver<Ack> {
+
+        private boolean intercepted;
+        private boolean completed;
+
+        public UnsupportedEventAckObserver() {
+            this.intercepted = false;
+            this.completed = false;
+        }
+
+        @Override
+        public void onNext(Ack value) {
+            Status status = value.getStatus();
+            if (status.getStatusCase() == ERROR) {
+                Error error = status.getError();
+                int code = error.getCode();
+                assertEquals(UNSUPPORTED_EVENT_VALUE, code);
+            } else {
+                fail(Json.toJson(value));
+            }
+            intercepted = true;
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            fail(t);
+        }
+
+        @Override
+        public void onCompleted() {
+            completed = true;
+        }
+
+        public boolean isCompleted() {
+            return completed;
+        }
+
+        public boolean observedUnsupportedEvent() {
+            return intercepted;
         }
     }
 }

@@ -29,8 +29,8 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Subscribe;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.event.EventBus;
@@ -80,7 +80,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        public void on(CmdProjectCreated event) {
+        void on(CmdProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -88,39 +88,39 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         private void handleProjectCreated(ProjectId projectId) {
-            final Project newState = getState().toBuilder()
-                                               .setId(projectId)
-                                               .setStatus(Project.Status.CREATED)
-                                               .build();
+            Project newState = getState().toBuilder()
+                                         .setId(projectId)
+                                         .setStatus(Project.Status.CREATED)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
-        public void on(CmdTaskAdded event) {
+        void on(CmdTaskAdded event) {
             keep(event);
 
-            final Task task = event.getTask();
+            Task task = event.getTask();
             handleTaskAdded(task);
         }
 
         private void handleTaskAdded(Task task) {
-            final Project newState = getState().toBuilder()
-                                               .addTask(task)
-                                               .build();
+            Project newState = getState().toBuilder()
+                                         .addTask(task)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
-        public void on(CmdProjectStarted event) {
+        void on(CmdProjectStarted event) {
             keep(event);
 
             handleProjectStarted();
         }
 
         private void handleProjectStarted() {
-            final Project newState = getState().toBuilder()
-                                               .setStatus(Project.Status.STARTED)
-                                               .build();
+            Project newState = getState().toBuilder()
+                                         .setStatus(Project.Status.STARTED)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
@@ -210,7 +210,7 @@ public class CommandDispatcherRegistryTestEnv {
      * Test command handlers.
      ************************/
 
-    public static class CreateProjectHandler extends CommandHandler {
+    public static class CreateProjectHandler extends AbstractCommandHandler {
 
         public CreateProjectHandler(EventBus eventBus) {
             super(eventBus);
@@ -222,7 +222,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class AllCommandHandler extends CommandHandler {
+    public static class AllCommandHandler extends AbstractCommandHandler {
 
         public AllCommandHandler(EventBus eventBus) {
             super(eventBus);
@@ -244,7 +244,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class EmptyCommandHandler extends CommandHandler {
+    public static class EmptyCommandHandler extends AbstractCommandHandler {
 
         public EmptyCommandHandler(EventBus eventBus) {
             super(eventBus);

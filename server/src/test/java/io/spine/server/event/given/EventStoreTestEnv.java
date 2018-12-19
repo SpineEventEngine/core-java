@@ -20,6 +20,7 @@
 
 package io.spine.server.event.given;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -35,6 +36,7 @@ import io.spine.testing.server.TestEventFactory;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EventStoreTestEnv {
@@ -50,9 +52,9 @@ public class EventStoreTestEnv {
     }
 
     public static EventStore eventStore() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(false)
-                                                .build();
+        BoundedContext bc = BoundedContext.newBuilder()
+                                          .setMultitenant(false)
+                                          .build();
         return EventStore.newBuilder()
                          .setStorageFactory(bc.getStorageFactory())
                          .setStreamExecutor(MoreExecutors.directExecutor())
@@ -61,12 +63,12 @@ public class EventStoreTestEnv {
     }
 
     public static Event projectCreated(Timestamp when) {
-        final ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
+        ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
         return eventFactory.createEvent(msg, null, when);
     }
 
     public static Event taskAdded(Timestamp when) {
-        final TaskAdded msg = Sample.messageOfType(TaskAdded.class);
+        TaskAdded msg = Sample.messageOfType(TaskAdded.class);
         return eventFactory.createEvent(msg, null, when);
     }
 
@@ -78,17 +80,20 @@ public class EventStoreTestEnv {
 
     public static class ResponseObserver implements StreamObserver<Event> {
 
-        private final Collection<Event> resultStorage;
+        private final Collection<Event> events = newConcurrentHashSet();
         private final AtomicBoolean doneFlag;
 
-        public ResponseObserver(Collection<Event> resultStorage, AtomicBoolean doneFlag) {
-            this.resultStorage = resultStorage;
+        public ResponseObserver(AtomicBoolean doneFlag) {
             this.doneFlag = doneFlag;
+        }
+
+        public ImmutableSet<Event> getEvents() {
+            return ImmutableSet.copyOf(events);
         }
 
         @Override
         public void onNext(Event value) {
-            resultStorage.add(value);
+            events.add(value);
         }
 
         @Override

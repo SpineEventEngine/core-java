@@ -21,15 +21,14 @@ package io.spine.server.procman;
 
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.AbstractMessageDeliveryTest;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
-import io.spine.server.procman.given.PmMessageDeliveryTestEnv.DeliveryPm;
-import io.spine.server.procman.given.PmMessageDeliveryTestEnv.QuadrupleShardPmRepository;
-import io.spine.server.procman.given.PmMessageDeliveryTestEnv.SingleShardPmRepository;
+import io.spine.server.procman.given.delivery.DeliveryPm;
+import io.spine.server.procman.given.delivery.QuadrupleShardPmRepository;
+import io.spine.server.procman.given.delivery.SingleShardPmRepository;
 import io.spine.test.procman.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,9 +36,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.cannotStartProject;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.createProject;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStarted;
+import static io.spine.server.procman.given.delivery.GivenMessage.createProject;
+import static io.spine.server.procman.given.delivery.GivenMessage.projectStarted;
 
 /**
  * @author Alex Tymchenko
@@ -47,7 +45,7 @@ import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStar
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
-@DisplayName("ProcessManager message delivery should")
+@DisplayName("ProcessManager message delivery in multithreaded env should")
 class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
     @Override
@@ -58,13 +56,13 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
     }
 
     @Nested
-    @DisplayName("in multithreaded env, dispatch commands")
+    @DisplayName("dispatch commands")
     class DispatchCommands {
 
         @Test
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Command> dispatcher =
+            ParallelDispatcher<ProjectId, Command> dispatcher =
                     new ParallelDispatcher<ProjectId, Command>(
                             42, 400, dispatchWaitTime()) {
                         @Override
@@ -90,7 +88,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Command> dispatcher =
+            ParallelDispatcher<ProjectId, Command> dispatcher =
                     new ParallelDispatcher<ProjectId, Command>(
                             59, 473, dispatchWaitTime()) {
                         @Override
@@ -115,13 +113,13 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
     }
 
     @Nested
-    @DisplayName("in multithreaded env, dispatch events")
+    @DisplayName("dispatch events")
     class DispatchEvents {
 
         @Test
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Event> dispatcher =
+            ParallelDispatcher<ProjectId, Event> dispatcher =
                     new ParallelDispatcher<ProjectId, Event>(
                             180, 819, dispatchWaitTime()) {
                         @Override
@@ -147,7 +145,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Event> dispatcher =
+            ParallelDispatcher<ProjectId, Event> dispatcher =
                     new ParallelDispatcher<ProjectId, Event>(
                             179, 918, dispatchWaitTime()) {
                         @Override
@@ -164,63 +162,6 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         protected void postToBus(BoundedContext context, Event event) {
                             context.getEventBus()
                                    .post(event, StreamObservers.noOpObserver());
-                        }
-                    };
-
-            dispatcher.dispatchMessagesTo(new QuadrupleShardPmRepository());
-        }
-    }
-
-    @Nested
-    @DisplayName("in multithreaded env, dispatch rejections")
-    class DispatchRejections {
-
-        @Test
-        @DisplayName("to single shard")
-        void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(
-                            30, 619, dispatchWaitTime()) {
-                        @Override
-                        protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryPm.getStats();
-                        }
-
-                        @Override
-                        protected Rejection newMessage() {
-                            return cannotStartProject();
-                        }
-
-                        @Override
-                        protected void postToBus(BoundedContext context, Rejection rejection) {
-                            context.getRejectionBus()
-                                   .post(rejection, StreamObservers.noOpObserver());
-                        }
-                    };
-
-            dispatcher.dispatchMessagesTo(new SingleShardPmRepository());
-        }
-
-        @Test
-        @DisplayName("to several shards")
-        void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(
-                            43, 719, dispatchWaitTime()) {
-                        @Override
-                        protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryPm.getStats();
-                        }
-
-                        @Override
-                        protected Rejection newMessage() {
-                            return cannotStartProject();
-                        }
-
-                        @Override
-                        protected void postToBus(BoundedContext context, Rejection rejection) {
-                            context.getRejectionBus()
-                                   .post(rejection, StreamObservers.noOpObserver());
                         }
                     };
 

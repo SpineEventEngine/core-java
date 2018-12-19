@@ -20,137 +20,212 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Streams;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.core.EmptyClass;
+import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
+import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
- * Provides mapping from a class of messages to a method which handles such messages.
+ * Provides mapping from a class of messages to methods which handle such messages.
  *
- * @param <M> the type of messages
- * @param <H> the type of handler methods
- * @author Alexander Yevsyukov
+ * @param <M>
+ *         the type of messages
+ * @param <H>
+ *         the type of handler methods
  */
-public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M, ?>>
+@Immutable(containerOf = {"M", "H"})
+public final class MessageHandlerMap<M extends MessageClass<?>,
+                                     H extends HandlerMethod<?, M, ?, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableMap<HandlerKey, H> map;
+    private final ImmutableMultimap<HandlerTypeInfo, H> map;
+    private final ImmutableSet<M> messageClasses;
+
+    private MessageHandlerMap(ImmutableMultimap<HandlerTypeInfo, H> map,
+                              ImmutableSet<M> messageClasses) {
+        this.map = map;
+        this.messageClasses = messageClasses;
+    }
 
     /**
      * Creates a map of methods found in the passed class.
      *
-     * @param cls     the class to inspect
-     * @param factory the factory of methods
+     * @param declaringClass
+     *         the class to inspect
+     * @param signature
+     *         the signature of methods
+     * @return new {@code MessageHandlerMap} of methods of the given class matching the given
+     *         signature
      */
-    public MessageHandlerMap(Class<?> cls, HandlerMethod.Factory<H> factory) {
-        this.map = scan(cls, factory);
+    public static <M extends MessageClass<?>, H extends HandlerMethod<?, M, ?, ?>>
+    MessageHandlerMap<M, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+        checkNotNull(declaringClass);
+        checkNotNull(signature);
+
+        ClassScanner scanner = ClassScanner.of(declaringClass);
+        ImmutableMultimap<HandlerTypeInfo, H> map = scanner.findMethodsBy(signature);
+        ImmutableSet<M> messageClasses = messageClasses(map.values());
+        return new MessageHandlerMap<>(map, messageClasses);
     }
 
     /**
      * Obtains classes of messages for which handlers are stored in this map.
      */
     public Set<M> getMessageClasses() {
-        return messageClasses(map.values());
+        return messageClasses;
+    }
+
+    /**
+     * Returns {@code true} if the handler map contains a method that handles the passed class
+     * of messages, {@code false} otherwise.
+     */
+    public boolean containsClass(M messageClass) {
+        return messageClasses.contains(messageClass);
     }
 
     /**
      * Obtains classes of messages which handlers satisfy the passed {@code predicate}.
      *
-     * @param predicate a predicate for handler methods to filter the corresponding message classes
+     * @param predicate
+     *         a predicate for handler methods to filter the corresponding message classes
      */
-    public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
-        final Map<HandlerKey, H> filtered = Maps.filterValues(map, predicate);
+    public ImmutableSet<M> getMessageClasses(Predicate<? super H> predicate) {
+        Multimap<HandlerTypeInfo, H> filtered = Multimaps.filterValues(map, predicate::test);
         return messageClasses(filtered.values());
     }
 
     /**
      * Obtains the method for handling by the passed key.
      *
-     * @param handlerKey the key of the handler to get
+     * @param handlerKey
+     *         the key of the handler to get
      * @return a handler method
-     * @throws IllegalStateException if there is no method found in the map
+     * @throws IllegalStateException
+     *         if there is no method found in the map
      */
-    public H getMethod(HandlerKey handlerKey) {
-        final H handlerMethod = map.get(handlerKey);
-        checkState(handlerMethod != null,
+    private ImmutableCollection<H> getMethods(HandlerTypeInfo handlerKey) {
+        ImmutableCollection<H> handlers = map.get(handlerKey);
+        checkState(!handlers.isEmpty(),
                    "Unable to find handler with key %s", handlerKey);
-        return handlerMethod;
+        return handlers;
     }
 
     /**
-     * Obtains the method for handling by the passed message and origin classes.
+     * Obtains methods for handling messages of the given class and with the given origin.
      *
-     * <p>If there is no handler matching both the message and origin class,
-     * a handler will be searched by a message class only.
+     * <p>If there is no handler matching both the message and origin class, handlers will be
+     * searched by the message class only.
      *
-     * @param messageClass the message class of the handled message
-     * @param originClass  the class of the message, from which the handled message is originate
+     * @param messageClass
+     *         the message class of the handled message
+     * @param originClass
+     *         the class of the message, from which the handled message is originate
      * @return a handler method
-     * @throws IllegalStateException if there is no method found in the map
+     * @throws IllegalStateException
+     *         if there is no method found in the map
      */
-    public H getMethod(M messageClass, MessageClass originClass) {
-        final HandlerKey keyWithOrigin = HandlerKey.of(messageClass, originClass);
-        if (map.containsKey(keyWithOrigin)) {
-            return getMethod(keyWithOrigin);
-        }
-        return getMethod(messageClass);
+    public ImmutableCollection<H> getMethods(M messageClass, MessageClass originClass) {
+        HandlerTypeInfo keyWithOrigin = HandlerTypeInfo
+                .newBuilder()
+                .setMessageType(typeUrl(messageClass).value())
+                .setOriginType(typeUrl(originClass).value())
+                .build();
+        HandlerTypeInfo presentKey = map.containsKey(keyWithOrigin)
+                                 ? keyWithOrigin
+                                 : keyWithOrigin.toBuilder()
+                                                .clearOriginType()
+                                                .build();
+        return getMethods(presentKey);
     }
 
     /**
-     * Obtains the method for handling by the passed message classes.
+     * Obtains a single handler method for messages of the given class and with the given origin.
+     *
+     * <p>If there is no handler matching both the message and origin class, a handler will be
+     * searched by the message class only.
+     *
+     * <p>If there is no such method or several such methods, an {@link IllegalStateException} is
+     * thrown.
+     *
+     * @param messageClass
+     *         the message class of the handled message
+     * @return a handler method
+     * @throws IllegalStateException
+     *         if there is no such method or several such methods found in the map
+     */
+    public H getSingleMethod(M messageClass, MessageClass originClass) {
+        ImmutableCollection<H> methods = getMethods(messageClass, originClass);
+        return checkSingle(methods, messageClass);
+    }
+
+    /**
+     * Obtains methods for handling messages of the given class.
+     *
+     * @param messageClass
+     *         the message class of the handled message
+     * @return handlers method
+     * @throws IllegalStateException
+     *         if there is no method found in the map
+     */
+    public ImmutableCollection<H> getMethods(M messageClass) {
+        return getMethods(messageClass, EmptyClass.instance());
+    }
+
+    /**
+     * Obtains a single handler method for messages of the given class.
+     *
+     * <p>If there is no such method or several such methods, an {@link IllegalStateException} is
+     * thrown.
      *
      * @param messageClass the message class of the handled message
      * @return a handler method
-     * @throws IllegalStateException if there is no method found in the map
+     * @throws IllegalStateException
+     *         if there is no such method or several such methods found in the map
      */
-    public H getMethod(M messageClass) {
-        final HandlerKey key = HandlerKey.of(messageClass);
-        return getMethod(key);
+    public H getSingleMethod(M messageClass) {
+        ImmutableCollection<H> methods = getMethods(messageClass);
+        return checkSingle(methods, messageClass);
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
-    ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
-        final Set<M> setToSwallowDuplicates = newHashSet();
-        for (H handler : handlerMethods) {
-            setToSwallowDuplicates.add(handler.getMessageClass());
-        }
-        return ImmutableSet.copyOf(setToSwallowDuplicates);
-    }
-
-    private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
-    ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
-        final Predicate<Method> filter = factory.getPredicate();
-        final Map<HandlerKey, H> tempMap = Maps.newHashMap();
-        final Method[] declaredMethods = declaringClass.getDeclaredMethods();
-        for (Method method : declaredMethods) {
-            if (filter.apply(method)) {
-                final H handler = factory.create(method);
-                final HandlerKey handlerKey = handler.key();
-                if (tempMap.containsKey(handlerKey)) {
-                    final Method alreadyPresent = tempMap.get(handlerKey)
-                                                         .getMethod();
-                    throw new DuplicateHandlerMethodError(
-                            declaringClass,
-                            handlerKey,
-                            alreadyPresent.getName(),
-                            method.getName());
-                }
-                tempMap.put(handlerKey, handler);
-            }
-        }
-        final ImmutableMap<HandlerKey, H> result = ImmutableMap.copyOf(tempMap);
+    private H checkSingle(Collection<H> handlers, M targetType) {
+        int count = handlers.size();
+        checkState(count == 1,
+                   "Unexpected number of handlers for messages of class %s: %s.%n%s",
+                   targetType, count, handlers);
+        H result = handlers
+                .stream()
+                .findFirst()
+                .get();
         return result;
+    }
+
+    private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
+    ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
+        ImmutableSet<M> result = Streams.stream(handlerMethods)
+                                        .map(HandlerMethod::getMessageClass)
+                                        .collect(toImmutableSet());
+        return result;
+    }
+
+    private static TypeUrl typeUrl(MessageClass<?> cls) {
+        return TypeUrl.of(cls.value());
     }
 }

@@ -20,10 +20,11 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A function, which is calculated in a tenant context.
@@ -56,8 +57,8 @@ public abstract class TenantAwareFunction<F, T> extends TenantAware implements F
      * </ol>
      */
     public T execute(F input) {
-        final T result;
-        final Optional<TenantId> remembered = CurrentTenant.get();
+        T result;
+        Optional<TenantId> remembered = CurrentTenant.get();
         try {
             CurrentTenant.set(tenantId());
             result = apply(input);

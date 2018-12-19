@@ -89,12 +89,22 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
     public void dispatchMessagesTo(Repository<I, ?> repository) throws Exception {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
+        try {
+            doDispatch(boundedContext, repository);
+        } finally {
+            repository.close();
+            boundedContext.close();
+        }
+    }
+
+    private void doDispatch(BoundedContext boundedContext, Repository<I, ?> repository)
+            throws InterruptedException {
         boundedContext.register(repository);
+
+        getStats().assertIdCount(0);
 
         int numberOfShards = ((Shardable) repository).getShardingStrategy()
                                                      .getNumberOfShards();
-        getStats().assertIdCount(0);
-
         ExecutorService executorService = newFixedThreadPool(threadCount);
         ImmutableList.Builder<Callable<Object>> builder = ImmutableList.builder();
 
@@ -106,16 +116,12 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
             });
         }
 
-        final List<Callable<Object>> commandPostingJobs = builder.build();
+        List<Callable<Object>> commandPostingJobs = builder.build();
         executorService.invokeAll(commandPostingJobs);
 
         Thread.sleep(dispatchWaitTime);
-        executorService.shutdown();
 
         verifyStats(messageCount, numberOfShards);
-
-        repository.close();
-        boundedContext.close();
     }
 
     private void verifyStats(int totalMessages, int numberOfShards) {

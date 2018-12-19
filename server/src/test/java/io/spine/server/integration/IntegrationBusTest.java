@@ -25,22 +25,19 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ExternalMismatchSubscriber;
+import io.spine.server.integration.given.IntegrationBusTestEnv.MemoizingProjectDetails1Repository;
+import io.spine.server.integration.given.IntegrationBusTestEnv.MemoizingProjectDetails2Repository;
+import io.spine.server.integration.given.IntegrationBusTestEnv.MemoizingProjection;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectRejectionsExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
-import io.spine.server.rejection.RejectionBus;
-import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,12 +45,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
-import static io.spine.server.integration.given.IntegrationBusTestEnv.cannotStartArchivedProject;
-import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithContextAwareEntitySubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithProjectCreatedNeeds;
@@ -61,17 +53,12 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWit
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
-import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Alex Tymchenko
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
@@ -83,10 +70,9 @@ class IntegrationBusTest {
         ProjectDetails.clear();
         ProjectWizard.clear();
         ProjectCountAggregate.clear();
-        ContextAwareProjectDetails.clear();
+        MemoizingProjection.clear();
         ProjectEventsSubscriber.clear();
         ProjectStartedExtSubscriber.clear();
-        ProjectRejectionsExtSubscriber.clear();
     }
 
     @Nested
@@ -96,21 +82,20 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to entities with external subscribers of another BC")
         void toEntitiesOfBc() {
-            final InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-            final BoundedContext sourceContext = contextWithTransport(transportFactory);
+            BoundedContext sourceContext = contextWithTransport(transportFactory);
             contextWithExtEntitySubscribers(transportFactory);
 
             assertNull(ProjectDetails.getExternalEvent());
             assertNull(ProjectWizard.getExternalEvent());
             assertNull(ProjectCountAggregate.getExternalEvent());
 
-            final Event event = projectCreated();
+            Event event = projectCreated();
             sourceContext.getEventBus()
                          .post(event);
 
-            final Message expectedMessage = AnyPacker.unpack(event.getMessage());
+            Message expectedMessage = AnyPacker.unpack(event.getMessage());
             assertEquals(expectedMessage, ProjectDetails.getExternalEvent());
             assertEquals(expectedMessage, ProjectWizard.getExternalEvent());
             assertEquals(expectedMessage, ProjectCountAggregate.getExternalEvent());
@@ -119,15 +104,14 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to external subscribers of another BC")
         void toBcSubscribers() {
-            final InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-            final BoundedContext sourceContext = contextWithTransport(transportFactory);
+            BoundedContext sourceContext = contextWithTransport(transportFactory);
             contextWithExternalSubscribers(transportFactory);
 
             assertNull(ProjectEventsSubscriber.getExternalEvent());
 
-            final Event event = projectCreated();
+            Event event = projectCreated();
             sourceContext.getEventBus()
                          .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()),
@@ -137,53 +121,41 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to entities with external subscribers of multiple BCs")
         void toEntitiesOfMultipleBcs() {
-            final InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
 
-            final Set<BoundedContextName> destinationNames = newHashSet();
-            final BoundedContext sourceContext = contextWithTransport(transportFactory);
-            for (int i = 0; i < 42; i++) {
-                final BoundedContext destinationCtx =
-                        contextWithContextAwareEntitySubscriber(transportFactory);
-                final BoundedContextName name = destinationCtx.getName();
-                destinationNames.add(name);
-            }
+            BoundedContext sourceContext = contextWithTransport(transport);
 
-            assertTrue(ContextAwareProjectDetails.getExternalContexts()
-                                                 .isEmpty());
+            BoundedContext destination1 = contextWithTransport(transport);
+            destination1.register(new MemoizingProjectDetails1Repository());
 
-            final Event event = projectCreated();
+            BoundedContext destination2 = contextWithTransport(transport);
+            destination2.register(new MemoizingProjectDetails2Repository());
+
+            assertTrue(MemoizingProjection.events()
+                                          .isEmpty());
+            Event event = projectCreated();
             sourceContext.getEventBus()
                          .post(event);
-
-            assertEquals(destinationNames.size(),
-                         ContextAwareProjectDetails.getExternalContexts()
-                                                   .size());
-
-            assertEquals(destinationNames.size(),
-                         ContextAwareProjectDetails.getExternalEvents()
-                                                   .size());
-
+            assertEquals(2, MemoizingProjection.events().size());
         }
 
         @SuppressWarnings("unused") // Variables declared for readability.
         @Test
         @DisplayName("to two BCs with different needs")
         void toTwoBcSubscribers() {
-            final InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-            final BoundedContext sourceContext = contextWithTransport(transportFactory);
-            final BoundedContext destA = contextWithProjectCreatedNeeds(transportFactory);
-            final BoundedContext destB = contextWithProjectStartedNeeds(transportFactory);
+            BoundedContext sourceContext = contextWithTransport(transportFactory);
+            BoundedContext destA = contextWithProjectCreatedNeeds(transportFactory);
+            BoundedContext destB = contextWithProjectStartedNeeds(transportFactory);
 
             assertNull(ProjectStartedExtSubscriber.getExternalEvent());
             assertNull(ProjectEventsSubscriber.getExternalEvent());
 
-            final EventBus sourceEventBus = sourceContext.getEventBus();
-            final Event eventA = projectCreated();
+            EventBus sourceEventBus = sourceContext.getEventBus();
+            Event eventA = projectCreated();
             sourceEventBus.post(eventA);
-            final Event eventB = projectStarted();
+            Event eventB = projectStarted();
             sourceEventBus.post(eventB);
 
             assertEquals(AnyPacker.unpack(eventA.getMessage()),
@@ -194,28 +166,6 @@ class IntegrationBusTest {
         }
     }
 
-    @Test
-    @DisplayName("dispatch rejections from one BC to external subscribers of another BC")
-    void dispatchRejectionsToOtherBc() {
-        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-        final BoundedContext sourceContext = contextWithTransport(transportFactory);
-        contextWithExternalSubscribers(transportFactory);
-
-        assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-        assertNull(ProjectCountAggregate.getExternalRejection());
-        assertNull(ProjectWizard.getExternalRejection());
-
-        final Rejection rejection = cannotStartArchivedProject();
-        sourceContext.getRejectionBus()
-                     .post(rejection);
-        final Message rejectionMessage = AnyPacker.unpack(rejection.getMessage());
-
-        assertEquals(rejectionMessage, ProjectRejectionsExtSubscriber.getExternalRejection());
-        assertEquals(rejectionMessage, ProjectCountAggregate.getExternalRejection());
-        assertEquals(rejectionMessage, ProjectWizard.getExternalRejection());
-    }
-
     @Nested
     @DisplayName("avoid dispatching events from one BC")
     class AvoidDispatching {
@@ -223,15 +173,14 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to domestic entity subscribers of another BC")
         void toDomesticEntitySubscribers() {
-            final InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-            final BoundedContext sourceContext = contextWithTransport(transportFactory);
-            final BoundedContext destContext = contextWithExtEntitySubscribers(transportFactory);
+            BoundedContext sourceContext = contextWithTransport(transportFactory);
+            BoundedContext destContext = contextWithExtEntitySubscribers(transportFactory);
 
             assertNull(ProjectDetails.getDomesticEvent());
 
-            final Event event = projectStarted();
+            Event event = projectStarted();
             sourceContext.getEventBus()
                          .post(event);
 
@@ -247,15 +196,14 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to domestic standalone subscribers of another BC")
         void toDomesticStandaloneSubscribers() {
-            final InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-            final BoundedContext sourceContext = contextWithTransport(transportFactory);
-            final BoundedContext destContext = contextWithExternalSubscribers(transportFactory);
+            BoundedContext sourceContext = contextWithTransport(transportFactory);
+            BoundedContext destContext = contextWithExternalSubscribers(transportFactory);
 
             assertNull(ProjectEventsSubscriber.getDomesticEvent());
 
-            final Event event = projectStarted();
+            Event event = projectStarted();
             sourceContext.getEventBus()
                          .post(event);
 
@@ -273,15 +221,15 @@ class IntegrationBusTest {
     @Test
     @DisplayName("update local subscriptions upon repeated RequestedMessageTypes")
     void updateLocalSubscriptions() {
-        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
+        InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-        final BoundedContext sourceContext = contextWithTransport(transportFactory);
-        final BoundedContext destinationCtx = contextWithTransport(transportFactory);
+        BoundedContext sourceContext = contextWithTransport(transportFactory);
+        BoundedContext destinationCtx = contextWithTransport(transportFactory);
 
         // Prepare two external subscribers for the different events in the the `destinationCtx`.
-        final ProjectEventsSubscriber projectCreatedSubscriber
+        ProjectEventsSubscriber projectCreatedSubscriber
                 = new ProjectEventsSubscriber();
-        final ProjectStartedExtSubscriber projectStartedSubscriber
+        ProjectStartedExtSubscriber projectStartedSubscriber
                 = new ProjectStartedExtSubscriber();
 
         // Before anything happens, there were no events received by those.
@@ -289,9 +237,9 @@ class IntegrationBusTest {
         assertNull(ProjectStartedExtSubscriber.getExternalEvent());
 
         // Both events are prepared along with the `EventBus` of the source bounded context.
-        final EventBus sourceEventBus = sourceContext.getEventBus();
-        final Event eventA = projectCreated();
-        final Event eventB = projectStarted();
+        EventBus sourceEventBus = sourceContext.getEventBus();
+        Event eventA = projectCreated();
+        Event eventB = projectStarted();
 
         // Both events are emitted, `ProjectCreated` subscriber only is present.
         destinationCtx.getIntegrationBus()
@@ -327,28 +275,6 @@ class IntegrationBusTest {
                      ProjectStartedExtSubscriber.getExternalEvent());
     }
 
-    @Test
-    @DisplayName("throw exception on mismatch of external attribute during dispatching")
-    void throwOnExtAttributeMismatch() {
-        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-        final BoundedContext sourceContext = contextWithTransport(transportFactory);
-        final RejectionSubscriber rejectionSubscriber = new ExternalMismatchSubscriber();
-        sourceContext.getRejectionBus()
-                     .register(rejectionSubscriber);
-        sourceContext.getIntegrationBus()
-                     .register(rejectionSubscriber);
-        final Rejection rejection = cannotStartArchivedProject();
-        try {
-            sourceContext.getRejectionBus()
-                         .post(rejection);
-            fail("An exception is expected.");
-        } catch (Exception e) {
-            final String exceptionMsg = e.getMessage();
-            assertContains("external", exceptionMsg);
-        }
-    }
-
     @Nested
     @DisplayName("not dispatch to domestic subscribers if they requested external")
     class NotDispatchToDomestic {
@@ -356,12 +282,11 @@ class IntegrationBusTest {
         @Test
         @DisplayName("events")
         void eventsIfNeedExternal() {
-            final InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
-            final BoundedContext context = contextWithExtEntitySubscribers(transportFactory);
-            final ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
-            final EventBus eventBus = context.getEventBus();
+            BoundedContext context = contextWithExtEntitySubscribers(transportFactory);
+            ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
+            EventBus eventBus = context.getEventBus();
             eventBus.register(eventSubscriber);
 
             assertNull(ProjectEventsSubscriber.getExternalEvent());
@@ -369,7 +294,7 @@ class IntegrationBusTest {
             assertNull(ProjectWizard.getExternalEvent());
             assertNull(ProjectCountAggregate.getExternalEvent());
 
-            final Event projectCreated = projectCreated();
+            Event projectCreated = projectCreated();
             eventBus.post(projectCreated);
 
             assertNull(ProjectEventsSubscriber.getExternalEvent());
@@ -377,53 +302,28 @@ class IntegrationBusTest {
             assertNull(ProjectWizard.getExternalEvent());
             assertNull(ProjectCountAggregate.getExternalEvent());
         }
-
-        @Test
-        @DisplayName("rejections")
-        void rejectionsIfNeedExternal() {
-            final InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
-
-            final BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory);
-            final ProjectRejectionsExtSubscriber standaloneSubscriber =
-                    new ProjectRejectionsExtSubscriber();
-
-            final RejectionBus rejectionBus = sourceContext.getRejectionBus();
-            rejectionBus.register(standaloneSubscriber);
-
-            assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-            assertNull(ProjectWizard.getExternalRejection());
-            assertNull(ProjectCountAggregate.getExternalRejection());
-
-            final Rejection rejection = cannotStartArchivedProject();
-            rejectionBus.post(rejection);
-
-            assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-            assertNull(ProjectWizard.getExternalRejection());
-            assertNull(ProjectCountAggregate.getExternalRejection());
-        }
     }
 
     @Test
     @DisplayName("emit unsupported external message exception if message type is unknown")
     void throwOnUnknownMessage() {
-        final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-        final BoundedContext boundedContext = contextWithTransport(transportFactory);
+        InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
+        BoundedContext boundedContext = contextWithTransport(transportFactory);
 
-        final Event event = projectCreated();
-        final BoundedContextName boundedContextName = BoundedContextNames.newName("External context ID");
-        final ExternalMessage externalMessage = ExternalMessages.of(event,
+        Event event = projectCreated();
+        BoundedContextName boundedContextName = BoundedContextNames.newName("External context ID");
+        ExternalMessage externalMessage = ExternalMessages.of(event,
                                                                     boundedContextName);
-        final MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
+        MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
         boundedContext.getIntegrationBus()
                       .post(externalMessage, observer);
-        final Error error = observer.firstResponse()
-                                    .getStatus()
-                                    .getError();
+        Error error = observer.firstResponse()
+                              .getStatus()
+                              .getError();
         assertFalse(Validate.isDefault(error));
         assertEquals(ExternalMessageValidationError.getDescriptor()
                                                    .getFullName(),
                      error.getType());
-        assertTrue(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber() == error.getCode());
+        assertEquals(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber(), error.getCode());
     }
 }

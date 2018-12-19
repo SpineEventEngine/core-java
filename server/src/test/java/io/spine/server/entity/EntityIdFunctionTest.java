@@ -20,11 +20,12 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import io.spine.client.EntityId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Function;
 
 import static io.spine.protobuf.TypeConverter.toAny;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,26 +41,26 @@ class EntityIdFunctionTest {
     @Test
     @DisplayName("not accept wrong ID type")
     void rejectWrongIdType() {
-        final Function<EntityId, StringValue> func =
+        Function<EntityId, StringValue> func =
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 
-        final EntityId wrongType = EntityId.newBuilder()
-                                           .setId(toAny(100L))
-                                           .build();
+        EntityId wrongType = EntityId.newBuilder()
+                                     .setId(toAny(100L))
+                                     .build();
         assertThrows(IllegalStateException.class, () -> func.apply(wrongType));
     }
 
     @Test
     @DisplayName("accept proper ID type")
     void acceptProperIdType() {
-        final Function<EntityId, StringValue> func =
+        Function<EntityId, StringValue> func =
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 
-        final String value = "abcd";
-        final EntityId type = EntityId.newBuilder()
-                                      .setId(toAny(value))
-                                      .build();
-        final StringValue result = func.apply(type);
+        String value = "abcd";
+        EntityId type = EntityId.newBuilder()
+                                .setId(toAny(value))
+                                .build();
+        StringValue result = func.apply(type);
         assertNotNull(result);
         assertEquals(value, result.getValue());
     }

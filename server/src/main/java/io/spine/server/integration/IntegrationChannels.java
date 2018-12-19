@@ -23,28 +23,22 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
-import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.transport.MessageChannel;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * A utility class for working with {@link MessageChannel message channels} and their
  * {@link ChannelId identifiers}, when they are used for {@link IntegrationBus} needs.
- *
- * @author Alex Tymchenko
  */
-class IntegrationChannels {
+final class IntegrationChannels {
 
-    private static final TypeUrl REJECTION_TYPE_URL = TypeUrl.of(Rejection.class);
     private static final TypeUrl EVENT_TYPE_URL = TypeUrl.of(Event.class);
 
-    /**
-     * Prevents the creation of the class instances.
-     */
+    /** Prevents instantiation of this utility class. */
     private IntegrationChannels() {
     }
 
@@ -59,7 +53,7 @@ class IntegrationChannels {
     static ChannelId toId(ExternalMessageClass messageCls) {
         checkNotNull(messageCls);
 
-        final ChannelId result = toId(messageCls.value());
+        ChannelId result = toId(messageCls.value());
         return result;
     }
 
@@ -73,15 +67,17 @@ class IntegrationChannels {
     static ChannelId toId(Class<? extends Message> messageType) {
         checkNotNull(messageType);
 
-        final TypeUrl typeUrl = TypeUrl.of(messageType);
+        TypeUrl typeUrl = TypeUrl.of(messageType);
 
-        final StringValue asStringValue = StringValue.newBuilder()
-                                                     .setValue(typeUrl.value())
-                                                     .build();
-        final Any packed = AnyPacker.pack(asStringValue);
-        final ChannelId channelId = ChannelId.newBuilder()
-                                             .setIdentifier(packed)
-                                             .build();
+        StringValue asStringValue = StringValue
+                .newBuilder()
+                .setValue(typeUrl.value())
+                .build();
+        Any packed = AnyPacker.pack(asStringValue);
+        ChannelId channelId = ChannelId
+                .newBuilder()
+                .setIdentifier(packed)
+                .build();
         return channelId;
     }
 
@@ -97,16 +93,14 @@ class IntegrationChannels {
     static ExternalMessageType fromId(ChannelId channelId) {
         checkNotNull(channelId);
 
-        final StringValue rawValue = AnyPacker.unpack(channelId.getIdentifier());
-        final TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
+        StringValue rawValue = unpack(channelId.getIdentifier(), StringValue.class);
+        TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
-        final boolean isRejection = Rejections.isRejection(typeUrl.getMessageClass());
-        final String wrapperTypeUrl = isRejection ? REJECTION_TYPE_URL.value()
-                                                  : EVENT_TYPE_URL.value();
-        final ExternalMessageType result = ExternalMessageType.newBuilder()
-                                                             .setMessageTypeUrl(typeUrl.value())
-                                                             .setWrapperTypeUrl(wrapperTypeUrl)
-                                                             .build();
+        ExternalMessageType result = ExternalMessageType
+                .newBuilder()
+                .setMessageTypeUrl(typeUrl.value())
+                .setWrapperTypeUrl(EVENT_TYPE_URL.value())
+                .build();
         return result;
     }
 }

@@ -32,17 +32,23 @@ import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.EventBusTestEnv.BareDispatcher;
+import io.spine.server.event.given.EventBusTestEnv.EBExternalTaskAddedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.EBProjectArchivedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.EBProjectCreatedNoOpSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.EBTaskAddedNoOpSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.event.given.EventBusTestEnv.ProjectCreatedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
+import io.spine.server.event.given.EventBusTestEnv.UnsupportedEventAckObserver;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectId;
 import io.spine.test.event.Task;
+import io.spine.testdata.Sample;
+import io.spine.testing.server.ShardingReset;
+import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +56,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,6 +64,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -68,7 +76,7 @@ import static io.spine.server.event.given.EventBusTestEnv.eventBusBuilder;
 import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.server.event.given.EventBusTestEnv.newTask;
 import static io.spine.server.event.given.EventBusTestEnv.readEvents;
-import static io.spine.testing.Verify.assertSize;
+import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -79,21 +87,19 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Mykhailo Drachuk
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names
+@ExtendWith(ShardingReset.class)
 @DisplayName("EventBus should")
 public class EventBusTest {
 
+    private TestEventFactory eventFactory;
     private EventBus eventBus;
     private CommandBus commandBus;
     private BoundedContext bc;
 
-    private void setUp(@Nullable EventEnricher enricher) {
+    private void setUp(@Nullable Enricher enricher) {
+        this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
         bc = BoundedContext.newBuilder()
@@ -128,7 +134,7 @@ public class EventBusTest {
     @Test
     @DisplayName("return associated EventStore")
     void returnEventStore() {
-        EventStore eventStore = mock(EventStore.class);
+        EventStore eventStore = eventStore();
         EventBus result = EventBus.newBuilder()
                                   .setEventStore(eventStore)
                                   .build();
@@ -141,7 +147,7 @@ public class EventBusTest {
 
         // Pass just String instance.
         assertThrows(IllegalArgumentException.class,
-                     () -> eventBus.register(new EventSubscriber() {
+                     () -> eventBus.register(new AbstractEventSubscriber() {
                      }));
     }
 
@@ -152,13 +158,13 @@ public class EventBusTest {
         @Test
         @DisplayName("event subscriber")
         void eventSubscriber() {
-            EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
-            EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberOne = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
 
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
 
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
             assertTrue(eventBus.hasDispatchers(eventClass));
 
             Collection<? extends EventDispatcher<?>> dispatchers =
@@ -174,7 +180,7 @@ public class EventBusTest {
 
             eventBus.register(dispatcher);
 
-            assertTrue(eventBus.getDispatchers(EventClass.of(ProjectCreated.class))
+            assertTrue(eventBus.getDispatchers(EventClass.from(ProjectCreated.class))
                                .contains(dispatcher));
         }
     }
@@ -186,11 +192,11 @@ public class EventBusTest {
         @Test
         @DisplayName("event subscriber")
         void eventSubscriber() {
-            EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
-            EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberOne = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
 
             eventBus.unregister(subscriberOne);
 
@@ -213,7 +219,7 @@ public class EventBusTest {
         void eventDispatcher() {
             EventDispatcher dispatcherOne = new BareDispatcher();
             EventDispatcher dispatcherTwo = new BareDispatcher();
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
             eventBus.register(dispatcherOne);
             eventBus.register(dispatcherTwo);
 
@@ -264,20 +270,21 @@ public class EventBusTest {
     @Test
     @DisplayName("unregister registries on close")
     void unregisterRegistriesOnClose() throws Exception {
-        EventStore eventStore = spy(mock(EventStore.class));
+        EventStore eventStore = eventStore();
         EventBus eventBus = EventBus
                 .newBuilder()
                 .setEventStore(eventStore)
                 .build();
         eventBus.register(new BareDispatcher());
         eventBus.register(new ProjectCreatedSubscriber());
-        EventClass eventClass = EventClass.of(ProjectCreated.class);
+        EventClass eventClass = EventClass.from(ProjectCreated.class);
 
         eventBus.close();
 
         assertTrue(eventBus.getDispatchers(eventClass)
                            .isEmpty());
-        verify(eventStore).close();
+
+        assertFalse(eventStore.isOpen());
     }
 
     @Nested
@@ -287,7 +294,7 @@ public class EventBusTest {
         @Test
         @DisplayName("for event that can be enriched")
         void forEnrichable() {
-            EventEnricher enricher = mock(EventEnricher.class);
+            Enricher enricher = mock(Enricher.class);
             EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
             doReturn(true).when(enricher)
                           .canBeEnriched(any(EventEnvelope.class));
@@ -307,7 +314,7 @@ public class EventBusTest {
         @Test
         @DisplayName("for event that cannot be enriched")
         void forNonEnrichable() {
-            EventEnricher enricher = mock(EventEnricher.class);
+            Enricher enricher = mock(Enricher.class);
             doReturn(false).when(enricher)
                            .canBeEnriched(any(EventEnvelope.class));
 
@@ -319,6 +326,13 @@ public class EventBusTest {
             eventBus.post(GivenEvent.projectCreated());
 
             verify(enricher, never()).enrich(any(EventEnvelope.class));
+        }
+
+        private void closeBoundedContext() {
+            try {
+                bc.close();
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -342,7 +356,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> events = readEvents(eventBus);
-            assertSize(1, events);
+            assertThat(events).hasSize(1);
         }
 
         @Test
@@ -353,7 +367,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> events = readEvents(eventBus);
-            assertSize(1, events);
+            assertThat(events).hasSize(1);
         }
 
         /**
@@ -375,7 +389,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> storedEvents = readEvents(eventBus);
-            assertSize(3, storedEvents);
+            assertThat(storedEvents).hasSize(3);
         }
     }
 
@@ -392,7 +406,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> events = readEvents(eventBus);
-            assertSize(0, events);
+            assertThat(events).isEmpty();
         }
 
         @Test
@@ -403,7 +417,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> events = readEvents(eventBus);
-            assertSize(0, events);
+            assertThat(events).isEmpty();
         }
 
         /**
@@ -425,7 +439,7 @@ public class EventBusTest {
             commandBus.post(command, StreamObservers.noOpObserver());
 
             List<Event> storedEvents = readEvents(eventBus);
-            assertSize(0, storedEvents);
+            assertThat(storedEvents).isEmpty();
         }
     }
 
@@ -450,13 +464,32 @@ public class EventBusTest {
         commandBus.post(command, StreamObservers.noOpObserver());
 
         List<Event> storedEvents = readEvents(eventBus);
-        assertSize(2, storedEvents);
+        assertThat(storedEvents).hasSize(2);
 
         for (Event event : storedEvents) {
-            EBTaskAdded contents = unpack(event.getMessage());
+            EBTaskAdded contents = unpack(event.getMessage(), EBTaskAdded.class);
             Task task = contents.getTask();
             assertFalse(task.getDone());
         }
+    }
+
+    @Test
+    @DisplayName("not dispatch domestic event to external handler")
+    void domesticEventToExternalMethod() {
+        eventBus.register(new EBExternalTaskAddedSubscriber());
+
+        ProjectId projectId = Sample.messageOfType(ProjectId.class);
+        Task task = Sample.messageOfType(Task.class);
+        EBTaskAdded eventMessage = EBTaskAdded
+                .newBuilder()
+                .setProjectId(projectId)
+                .setTask(task)
+                .build();
+        Event event = eventFactory.createEvent(eventMessage);
+        UnsupportedEventAckObserver observer = new UnsupportedEventAckObserver();
+        eventBus.post(event, observer);
+        assertTrue(observer.observedUnsupportedEvent());
+        assertTrue(observer.isCompleted());
     }
 
     /**
@@ -507,12 +540,5 @@ public class EventBusTest {
             Thread.sleep(100);
         }
         executor.shutdownNow();
-    }
-
-    private void closeBoundedContext() {
-        try {
-            bc.close();
-        } catch (Exception ignored) {
-        }
     }
 }

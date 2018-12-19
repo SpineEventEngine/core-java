@@ -32,13 +32,12 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * An abstract base for converters of entities into {@link EntityRecord}.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
         extends Converter<E, EntityRecord> implements Serializable {
@@ -86,13 +85,27 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
 
     @Override
     protected EntityRecord doForward(E entity) {
-        final Any entityId = Identifier.pack(entity.getId());
-        final Any stateAny = pack(entity.getState());
-        final EntityRecord.Builder builder = EntityRecord.newBuilder()
-                                                         .setEntityId(entityId)
-                                                         .setState(stateAny);
+        Any entityId = Identifier.pack(entity.getId());
+        Any stateAny = pack(entity.getState());
+        EntityRecord.Builder builder = EntityRecord
+                .newBuilder()
+                .setEntityId(entityId)
+                .setState(stateAny);
         updateBuilder(builder, entity);
         return builder.build();
+    }
+
+    @SuppressWarnings("unchecked" /* The cast is safe since the <I> and <S> types are bound with
+            the type <E>, and forward conversion is performed on the entity of type <E>. */)
+    @Override
+    protected E doBackward(EntityRecord entityRecord) {
+        S unpacked = (S) unpack(entityRecord.getState());
+        S state = FieldMasks.applyMask(getFieldMask(), unpacked);
+        I id = (I) Identifier.unpack(entityRecord.getEntityId());
+        E entity = entityFactory.create(id);
+        checkState(entity != null, "EntityFactory produced null entity.");
+        injectState(entity, state, entityRecord);
+        return entity;
     }
 
     /**
@@ -106,21 +119,6 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     @SuppressWarnings("NoopMethodInAbstractClass") // Avoid forcing empty implementations.
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
         // Do nothing.
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected E doBackward(EntityRecord entityRecord) {
-        final S unpacked = unpack(entityRecord.getState());
-        final S state = FieldMasks.applyMask(getFieldMask(), unpacked, entityStateType);
-
-        final I id = Identifier.unpack(entityRecord.getEntityId());
-        final E entity = entityFactory.create(id);
-
-        if (entity != null) {
-            injectState(entity, state, entityRecord);
-        }
-        return entity;
     }
 
     /**
@@ -145,7 +143,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final EntityStorageConverter other = (EntityStorageConverter) obj;
+        EntityStorageConverter other = (EntityStorageConverter) obj;
         return Objects.equals(this.entityStateType, other.entityStateType)
                 && Objects.equals(this.entityFactory, other.entityFactory)
                 && Objects.equals(this.fieldMask, other.fieldMask);

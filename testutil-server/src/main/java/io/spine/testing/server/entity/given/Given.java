@@ -24,12 +24,10 @@ import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.projection.Projection;
 import io.spine.testing.server.aggregate.AggregateBuilder;
 import io.spine.testing.server.aggregate.AggregatePartBuilder;
-import io.spine.testing.server.entity.EntityBuilder;
 import io.spine.testing.server.procman.ProcessManagerBuilder;
 import io.spine.testing.server.projection.ProjectionBuilder;
 import io.spine.validate.ValidatingBuilder;
@@ -45,17 +43,6 @@ public class Given {
 
     /** Prevents instantiation of this utility class. */
     private Given() {
-    }
-
-    /**
-     * Creates a builder for an {@code Entity}.
-     */
-    public static <E extends AbstractVersionableEntity<I, S>, I, S extends Message>
-    EntityBuilder<E, I, S> entityOfClass(Class<E> entityClass) {
-        checkNotNull(entityClass);
-        EntityBuilder<E, I, S> result = new EntityBuilder<>();
-        result.setResultClass(entityClass);
-        return result;
     }
 
     /**
@@ -106,7 +93,7 @@ public class Given {
                    B extends ValidatingBuilder<S, ?>>
     ProcessManagerBuilder<P, I, S, B> processManagerOfClass(Class<P> pmClass) {
         checkNotNull(pmClass);
-        ProcessManagerBuilder<P, I, S, B> result = new ProcessManagerBuilder<>();
+        ProcessManagerBuilder<P, I, S, B> result = ProcessManagerBuilder.newInstance();
         result.setResultClass(pmClass);
         return result;
     }

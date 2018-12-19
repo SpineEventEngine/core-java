@@ -20,30 +20,25 @@
 package io.spine.server.integration.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.React;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.React;
 import io.spine.server.integration.IntegrationBus;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.test.integration.Project;
 import io.spine.test.integration.ProjectId;
@@ -52,11 +47,11 @@ import io.spine.test.integration.command.ItgStartProject;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
-import io.spine.test.integration.rejection.IntegrationRejections.ItgProjectAlreadyExists;
-import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.Int32ValueVBuilder;
+import io.spine.validate.Int64ValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -64,114 +59,86 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.Rejections.toRejection;
-import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.base.Identifier.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
- * @author Alex Tymchenko
+ * Test environment for {@link io.spine.server.integration.IntegrationBusTest}.
  */
 public class IntegrationBusTestEnv {
 
+    /** Prevents instantiation of this utility class. */
     private IntegrationBusTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
+    @CanIgnoreReturnValue
     public static BoundedContext
     contextWithExtEntitySubscribers(TransportFactory transportFactory) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory);
+        BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ProjectDetailsRepository());
         boundedContext.register(new ProjectWizardRepository());
         boundedContext.register(new ProjectCountAggregateRepository());
         return boundedContext;
     }
 
-    public static BoundedContext contextWithContextAwareEntitySubscriber(
-            TransportFactory transportFactory) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory);
-        boundedContext.register(new ContextAwareProjectDetailsRepository());
-        return boundedContext;
-    }
-
+    @CanIgnoreReturnValue
     public static BoundedContext contextWithExternalSubscribers(TransportFactory transportFactory) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory);
-        final EventSubscriber eventSubscriber = new ProjectEventsSubscriber();
+        BoundedContext boundedContext = contextWithTransport(transportFactory);
+        AbstractEventSubscriber eventSubscriber = new ProjectEventsSubscriber();
         boundedContext.getIntegrationBus()
                       .register(eventSubscriber);
         boundedContext.getEventBus()
                       .register(eventSubscriber);
-
-        final RejectionSubscriber rejectionSubscriber = new ProjectRejectionsExtSubscriber();
-        boundedContext.getRejectionBus().register(rejectionSubscriber);
-        boundedContext.getIntegrationBus().register(rejectionSubscriber);
-
         boundedContext.register(new ProjectCountAggregateRepository());
         boundedContext.register(new ProjectWizardRepository());
         return boundedContext;
     }
 
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
-        final IntegrationBus.Builder builder = IntegrationBus.newBuilder()
-                                                             .setTransportFactory(transportFactory);
-        final BoundedContext result = BoundedContext.newBuilder()
-                                                    .setName(newUuid())
-                                                    .setIntegrationBus(builder)
-                                                    .build();
+        IntegrationBus.Builder builder = IntegrationBus.newBuilder()
+                                                       .setTransportFactory(transportFactory);
+        BoundedContext result = BoundedContext
+                .newBuilder()
+                .setName(newUuid())
+                .setIntegrationBus(builder)
+                .build();
         return result;
     }
 
     public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory) {
-        final BoundedContext result = contextWithTransport(factory);
+        BoundedContext result = contextWithTransport(factory);
         result.getIntegrationBus()
               .register(new ProjectEventsSubscriber());
         return result;
     }
 
     public static BoundedContext contextWithProjectStartedNeeds(TransportFactory factory) {
-        final BoundedContext result = contextWithTransport(factory);
+        BoundedContext result = contextWithTransport(factory);
         result.getIntegrationBus()
               .register(new ProjectStartedExtSubscriber());
         return result;
     }
 
     public static Event projectCreated() {
-        final ProjectId projectId = projectId();
-        final TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                          IntegrationBusTestEnv.class);
-        return eventFactory.createEvent(ItgProjectCreated.newBuilder()
-                                                         .setProjectId(projectId)
-                                                         .build()
+        ProjectId projectId = projectId();
+        TestEventFactory eventFactory = newInstance(pack(projectId), IntegrationBusTestEnv.class);
+        return eventFactory.createEvent(
+                ItgProjectCreated.newBuilder()
+                                 .setProjectId(projectId)
+                                 .build()
         );
     }
 
     public static Event projectStarted() {
-        final ProjectId projectId = projectId();
-        final TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                          IntegrationBusTestEnv.class);
-        return eventFactory.createEvent(ItgProjectStarted.newBuilder()
-                                                         .setProjectId(projectId)
-                                                         .build()
+        ProjectId projectId = projectId();
+        TestEventFactory eventFactory =
+                newInstance(pack(projectId), IntegrationBusTestEnv.class);
+        return eventFactory.createEvent(
+                ItgProjectStarted.newBuilder()
+                                 .setProjectId(projectId)
+                                 .build()
         );
-    }
-
-    @SuppressWarnings("ThrowableNotThrown")     // used to create a rejection
-    public static Rejection cannotStartArchivedProject() {
-        final ProjectId projectId = projectId();
-        final ItgStartProject cmdMessage = ItgStartProject.newBuilder()
-                                                          .setProjectId(projectId)
-                                                          .build();
-        final Command startProjectCmd = toCommand(cmdMessage);
-        final io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
-                new io.spine.test.integration.rejection.ItgCannotStartArchivedProject(projectId);
-        throwable.initProducer(AnyPacker.pack(projectId));
-        final Rejection rejection = toRejection(throwable, startProjectCmd);
-        return rejection;
-    }
-
-    private static Command toCommand(ItgStartProject cmdMessage) {
-        return TestActorRequestFactory.newInstance(IntegrationBusTestEnv.class)
-                                      .createCommand(cmdMessage);
     }
 
     private static ProjectId projectId() {
@@ -233,9 +200,7 @@ public class IntegrationBusTestEnv {
             super(id);
         }
 
-        private static ItgProjectCreated externalEvent = null;
-
-        private static ItgCannotStartArchivedProject externalRejection = null;
+        private static Message externalEvent = null;
 
         @React(external = true)
         List<Message> on(ItgProjectCreated event) {
@@ -245,31 +210,21 @@ public class IntegrationBusTestEnv {
 
         @React(external = true)
         List<Message> on(ItgCannotStartArchivedProject rejection) {
-            externalRejection = rejection;
+            externalEvent = rejection;
             return Collections.emptyList();
         }
 
-        public static ItgProjectCreated getExternalEvent() {
+        public static Message getExternalEvent() {
             return externalEvent;
-        }
-
-        public static ItgCannotStartArchivedProject getExternalRejection() {
-            return externalRejection;
         }
 
         public static void clear() {
             externalEvent = null;
-            externalRejection = null;
         }
     }
 
     private static class ProjectWizardRepository
             extends ProcessManagerRepository<ProjectId, ProjectWizard, Project> {
-
-        @Override
-        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-            throw illegalStateWithCauseOf(exception);
-        }
 
         @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
@@ -283,8 +238,6 @@ public class IntegrationBusTestEnv {
 
         private static ItgProjectCreated externalEvent = null;
 
-        private static ItgCannotStartArchivedProject externalRejection = null;
-
         protected ProjectCountAggregate(ProjectId id) {
             super(id);
         }
@@ -295,23 +248,12 @@ public class IntegrationBusTestEnv {
             return Collections.emptyList();
         }
 
-        @React(external = true)
-        List<Message> on(ItgCannotStartArchivedProject rejection) {
-            externalRejection = rejection;
-            return Collections.emptyList();
-        }
-
         public static ItgProjectCreated getExternalEvent() {
             return externalEvent;
         }
 
-        public static ItgCannotStartArchivedProject getExternalRejection() {
-            return externalRejection;
-        }
-
         public static void clear() {
             externalEvent = null;
-            externalRejection = null;
         }
     }
 
@@ -327,19 +269,43 @@ public class IntegrationBusTestEnv {
         public void onError(EventEnvelope envelope, RuntimeException exception) {
             throw illegalStateWithCauseOf(exception);
         }
+    }
 
-        @Override
-        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-            throw illegalStateWithCauseOf(exception);
+    public abstract static class MemoizingProjection<I,
+                                                      M extends Message,
+                                                      B extends ValidatingBuilder<M, ?>>
+            extends Projection<I, M, B> {
+
+        private static final Collection<Message> events = newLinkedList();
+
+        /**
+         * Creates a new instance.
+         *
+         * @param id
+         *         the ID for the new instance
+         * @throws IllegalArgumentException
+         *         if the ID is not of one of the supported types
+         */
+        protected MemoizingProjection(I id) {
+            super(id);
+        }
+
+        static void memoize(Message event) {
+            events.add(event);
+        }
+
+        public static ImmutableList<Message> events() {
+            return ImmutableList.copyOf(events);
+        }
+
+        public static void clear() {
+            events.clear();
         }
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ContextAwareProjectDetails
-            extends Projection<ProjectId, StringValue, StringValueVBuilder> {
-
-        private static final Collection<EventContext> externalContexts = newLinkedList();
-        private static final Collection<ItgProjectCreated> externalEvents = newLinkedList();
+    public static class MemoizingProjectDetails1
+            extends MemoizingProjection<ProjectId, StringValue, StringValueVBuilder> {
 
         /**
          * Creates a new instance.
@@ -347,41 +313,47 @@ public class IntegrationBusTestEnv {
          * @param id the ID for the new instance
          * @throws IllegalArgumentException if the ID is not of one of the supported types
          */
-        protected ContextAwareProjectDetails(ProjectId id) {
+        protected MemoizingProjectDetails1(ProjectId id) {
             super(id);
         }
 
         @Subscribe(external = true)
-        public void on(ItgProjectCreated event, EventContext eventContext) {
-            externalEvents.add(event);
-            externalContexts.add(eventContext);
-        }
-
-        public static List<EventContext> getExternalContexts() {
-            return ImmutableList.copyOf(externalContexts);
-        }
-
-        public static List<ItgProjectCreated> getExternalEvents() {
-            return ImmutableList.copyOf(externalEvents);
-        }
-
-        public static void clear() {
-            externalContexts.clear();
-            externalEvents.clear();
+        public void on(ItgProjectCreated event) {
+            memoize(event);
         }
     }
 
-    private static class ContextAwareProjectDetailsRepository
-            extends ProjectionRepository<ProjectId, ContextAwareProjectDetails, StringValue> {
+    public static class MemoizingProjectDetails2
+            extends MemoizingProjection<ProjectId, Int64Value, Int64ValueVBuilder> {
 
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            throw illegalStateWithCauseOf(exception);
+        /**
+         * Creates a new instance.
+         *
+         * @param id
+         *         the ID for the new instance
+         * @throws IllegalArgumentException
+         *         if the ID is not of one of the supported types
+         */
+        protected MemoizingProjectDetails2(ProjectId id) {
+            super(id);
         }
+
+        @Subscribe(external = true)
+        public void on(ItgProjectCreated event) {
+            memoize(event);
+        }
+    }
+
+    public static class MemoizingProjectDetails1Repository
+            extends ProjectionRepository<ProjectId, MemoizingProjectDetails1, StringValue> {
+    }
+
+    public static class MemoizingProjectDetails2Repository
+            extends ProjectionRepository<ProjectId, MemoizingProjectDetails2, Int64Value> {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ProjectEventsSubscriber extends EventSubscriber {
+    public static class ProjectEventsSubscriber extends AbstractEventSubscriber {
 
         private static ItgProjectCreated externalEvent = null;
 
@@ -420,12 +392,12 @@ public class IntegrationBusTestEnv {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ProjectStartedExtSubscriber extends EventSubscriber {
+    public static class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
 
         private static ItgProjectStarted externalEvent = null;
 
         @Subscribe(external = true)
-        public void on(ItgProjectStarted msg) {
+        void on(ItgProjectStarted msg) {
             externalEvent = msg;
         }
 
@@ -446,59 +418,19 @@ public class IntegrationBusTestEnv {
         }
     }
 
-    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ProjectRejectionsExtSubscriber extends RejectionSubscriber {
-
-        private static ItgCannotStartArchivedProject externalRejection = null;
-
-        private static ItgProjectAlreadyExists domesticRejection = null;
-
-        @Subscribe(external = true)
-        public void on(ItgCannotStartArchivedProject rejection) {
-            externalRejection = rejection;
-        }
-
-        @Subscribe
-        public void on(ItgProjectAlreadyExists rejection) {
-            domesticRejection = rejection;
-        }
-
-        public static ItgCannotStartArchivedProject getExternalRejection() {
-            return externalRejection;
-        }
-
-        public static ItgProjectAlreadyExists getDomesticRejection() {
-            return domesticRejection;
-        }
-
-        public static void clear() {
-            externalRejection = null;
-            domesticRejection = null;
-        }
-
-        /**
-         * Rethrow all the issues, so that they are visible to tests.
-         */
-        @Override
-        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-            throw illegalStateWithCauseOf(exception);
-        }
-    }
-
     /**
-     * A subscriber for testing of
-     * {@linkplain io.spine.server.model.HandlerMethods#ensureExternalMatch(HandlerMethod, boolean)
-     * external attribute mismatch check}.
+     * A subscriber for testing of external attribute mismatch check.
      */
-    public static final class ExternalMismatchSubscriber extends RejectionSubscriber {
+    @SuppressWarnings("unused") // OK to have unused params in this test env. class
+    public static final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
 
         @Subscribe(external = true)
-        public void on(ItgCannotStartArchivedProject rejection, ItgStartProject command) {
+        void on(ItgCannotStartArchivedProject rejection, ItgStartProject command) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(ItgCannotStartArchivedProject rejection) {
+        void on(ItgCannotStartArchivedProject rejection) {
             // do nothing.
         }
 
@@ -506,7 +438,7 @@ public class IntegrationBusTestEnv {
          * Rethrow all the issues, so that they are visible to tests.
          */
         @Override
-        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
             throw illegalStateWithCauseOf(exception);
         }
     }

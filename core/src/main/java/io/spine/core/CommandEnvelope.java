@@ -20,7 +20,7 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -40,7 +40,7 @@ public final class CommandEnvelope
     private final CommandId commandId;
 
     /** The command message. */
-    private final Message commandMessage;
+    private final CommandMessage commandMessage;
 
     /** The command class. */
     private final CommandClass commandClass;
@@ -87,7 +87,7 @@ public final class CommandEnvelope
      * Obtains the command message.
      */
     @Override
-    public Message getMessage() {
+    public CommandMessage getMessage() {
         return commandMessage;
     }
 
@@ -127,8 +127,9 @@ public final class CommandEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        builder.setCommandContext(getCommandContext());
-        builder.setRootCommandId(getId());
+        builder.setCommandContext(getCommandContext())
+               .setRootCommandId(getId())
+               .setCommandId(getId());
     }
 
     /**

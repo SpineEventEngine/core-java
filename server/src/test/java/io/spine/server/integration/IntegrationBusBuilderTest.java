@@ -23,15 +23,17 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.transport.TransportFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -66,13 +68,6 @@ class IntegrationBusBuilderTest
         }
 
         @Test
-        @DisplayName("RejectionBus")
-        void rejectionBus() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setRejectionBus(nullRef()));
-        }
-
-        @Test
         @DisplayName("BoundedContextName")
         void boundedContextName() {
             assertThrows(NullPointerException.class,
@@ -87,38 +82,32 @@ class IntegrationBusBuilderTest
         @Test
         @DisplayName("TransportFactory")
         void transportFactory() {
-            final TransportFactory mock = mock(TransportFactory.class);
-            assertEquals(mock, builder().setTransportFactory(mock)
-                                        .getTransportFactory()
-                                        .get());
+            TransportFactory mock = mock(TransportFactory.class);
+            assertPresent(mock, builder().setTransportFactory(mock)
+                                         .getTransportFactory());
         }
 
         @Test
         @DisplayName("EventBus")
         void eventBus() {
-            final EventBus mock = mock(EventBus.class);
-            assertEquals(mock, builder().setEventBus(mock)
-                                        .getEventBus()
-                                        .get());
-        }
-
-        @Test
-        @DisplayName("RejectionBus")
-        void rejectionBus() {
-            final RejectionBus mock = mock(RejectionBus.class);
-            assertEquals(mock, builder().setRejectionBus(mock)
-                                        .getRejectionBus()
-                                        .get());
+            EventBus mock = mock(EventBus.class);
+            assertPresent(mock, builder().setEventBus(mock)
+                                         .getEventBus());
         }
 
         @Test
         @DisplayName("BoundedContextName")
         void boundedContextName() {
-            final BoundedContextName name =
+            BoundedContextName name =
                     BoundedContextNames.newName("Name that is expected back from the Builder");
-            assertEquals(name, builder().setBoundedContextName(name)
-                                        .getBoundedContextName()
-                                        .get());
+            assertPresent(name, builder().setBoundedContextName(name)
+                                         .getBoundedContextName());
+        }
+
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // is the purpose of the method.
+        private <T> void assertPresent(T expected, Optional<T> optional) {
+            assertTrue(optional.isPresent());
+            assertEquals(expected, optional.get());
         }
     }
 }

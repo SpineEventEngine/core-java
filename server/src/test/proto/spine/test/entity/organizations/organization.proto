@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package spine.test.server.organizations;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.organizations";
+option java_outer_classname = "GroupProto";
+option java_multiple_files = true;
+
+import "spine/core/user_id.proto";
+
+message OrganizationId {
+
+    string uuid = 1;
+}
+
+message Organization {
+    option (entity).kind = AGGREGATE;
+
+    OrganizationId id = 1;
+
+    string name = 2;
+
+    core.UserId head = 3;
+
+    repeated core.UserId members = 4;
+}

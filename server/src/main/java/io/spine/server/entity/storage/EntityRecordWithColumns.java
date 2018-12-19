@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
@@ -38,10 +40,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A value of {@link EntityRecord} associated with its {@linkplain EntityColumn columns}.
- *
- * @author Dmytro Dashenkov
  */
-public final class EntityRecordWithColumns implements Serializable {
+public final class EntityRecordWithColumns implements WithLifecycle, Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -50,10 +50,10 @@ public final class EntityRecordWithColumns implements Serializable {
     private final boolean hasStorageFields;
 
     /**
-     * Creates a new instance of the {@code EntityRecordWithColumns}.
+     * Creates a new instance with columns.
      *
-     * @param record  {@link EntityRecord} to pack
-     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} map to pack
+     * @param record the record to pack
+     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
                                     Map<String, EntityColumn.MemoizedValue> columns) {
@@ -63,8 +63,7 @@ public final class EntityRecordWithColumns implements Serializable {
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithColumns} with no
-     * {@linkplain EntityColumn columns}.
+     * Creates an instance with no {@linkplain EntityColumn columns}.
      *
      * <p>An object created with this constructor will always return {@code false} on
      * {@link #hasColumns()}.
@@ -85,26 +84,26 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
      * and then combines it with the given {@link EntityRecord}.
      *
-     * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction. This way
-     * the {@linkplain Columns#getAllColumns(Class) column retrieval operation} can be omitted when calling
-     * this method.
+     * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction.
+     * This way the {@linkplain Columns#getAllColumns(Class) column retrieval operation} can be
+     * omitted when calling this method.
      *
      * @param record  the {@link EntityRecord} to create value from
      * @param entity  the {@link Entity} to extract {@linkplain EntityColumn column} values from
      * @param storage the {@linkplain RecordStorage storage} for which the record is created
-     * @return new instance of {@link EntityRecordWithColumns}
+     * @return new instance
      */
     public static EntityRecordWithColumns create(EntityRecord record,
-                                                 Entity entity,
+                                                 Entity<?, ?> entity,
                                                  RecordStorage<?> storage) {
-        final Collection<EntityColumn> entityColumns = storage.entityColumns();
-        final Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity, entityColumns);
+        Collection<EntityColumn> entityColumns = storage.entityColumns();
+        Map<String, EntityColumn.MemoizedValue> columns =
+                extractColumnValues(entity, entityColumns);
         return of(record, columns);
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithColumns}
-     * with no {@linkplain EntityColumn columns}.
+     * Creates an instance with no {@linkplain EntityColumn columns}.
      *
      * <p>An object created with this factory method will always return {@code false} on
      * {@link #hasColumns()}.
@@ -116,7 +115,7 @@ public final class EntityRecordWithColumns implements Serializable {
     }
 
     /**
-     * Creates a new instance of the {@code EntityRecordWithColumns}.
+     * Creates a new instance.
      */
     @VisibleForTesting
     static EntityRecordWithColumns of(EntityRecord record,
@@ -163,11 +162,32 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity, RecordStorage)}
-     *         and the entity has columns; {@code false} otherwise
+     * @return {@code true} if the object was constructed via
+     *  {@link #create(EntityRecord, Entity, RecordStorage)} and the entity has columns;
+     *  {@code false} otherwise
      */
     public boolean hasColumns() {
         return hasStorageFields;
+    }
+
+    @Override
+    public LifecycleFlags getLifecycleFlags() {
+        return record.getLifecycleFlags();
+    }
+
+    @Override
+    public boolean isArchived() {
+        return record.isArchived();
+    }
+
+    @Override
+    public boolean isDeleted() {
+        return record.isDeleted();
+    }
+
+    @Override
+    public boolean isActive() {
+        return record.isActive();
     }
 
     @Override

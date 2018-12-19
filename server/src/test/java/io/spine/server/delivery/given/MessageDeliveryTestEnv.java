@@ -19,35 +19,32 @@
  */
 package io.spine.server.delivery.given;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
-import io.spine.core.React;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateClass;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.command.Assign;
-import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
-import io.spine.server.delivery.Sharding;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.entity.EntityClass;
-import io.spine.server.model.Model;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.server.entity.model.EntityClass;
+import io.spine.server.event.React;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
+import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
 
+import java.util.Optional;
+
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 
 /**
  * An abstract base for environments, which are created to ease the message delivery testing.
@@ -64,16 +61,10 @@ public class MessageDeliveryTestEnv {
      * The alternatives would imply injecting multiple mocks that would send reports
      * down the dispatching route. Which seems to be much more complex.
      */
-    private static final int DISPATCH_WAIT_TIME = 3_000;
+    private static final int DISPATCH_WAIT_TIME = 4_000;
 
     /** Prevents instantiation of this test environment class. */
     private MessageDeliveryTestEnv() {
-    }
-
-    public static void setShardingTransport(InMemoryTransportFactory transport) {
-        final Sharding inProcessSharding = new InProcessSharding(transport);
-        ServerEnvironment.getInstance()
-                         .replaceSharding(inProcessSharding);
     }
 
     /**
@@ -102,18 +93,18 @@ public class MessageDeliveryTestEnv {
         }
 
         @Apply
-        private void on(AggProjectStarted event) {
+        void on(AggProjectStarted event) {
             //Do nothing for this test.
         }
 
         @React
-        public Optional<AggProjectCancelled> on(AggProjectCancelled event) {
-            return Optional.absent();
+        Optional<AggProjectCancelled> on(AggProjectCancelled event) {
+            return Optional.empty();
         }
 
         @React
-        public Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
-            return Optional.absent();
+        Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
+            return Optional.empty();
         }
     }
 
@@ -154,9 +145,8 @@ public class MessageDeliveryTestEnv {
 
         @Override
         public EntityClass getShardedModelClass() {
-            final Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
-            final AggregateClass<?> result = Model.getInstance()
-                                                  .asAggregateClass(someAggregate);
+            Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
+            AggregateClass<?> result = asAggregateClass(someAggregate);
             return result;
         }
     }

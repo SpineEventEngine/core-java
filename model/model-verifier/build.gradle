@@ -19,15 +19,14 @@
  */
 
 buildscript {
-    apply from: "$rootDir/ext.gradle"
+    apply from: "$rootDir/version.gradle"
+}
+
+ext {
+    jUnitPioneerVersion = '0.1.2'
 }
 
 group 'io.spine.tools'
-
-repositories {
-    mavenCentral()
-    maven { url = repos.sonatypeSnapshots }
-}
 
 sourceSets {
     main {
@@ -41,12 +40,15 @@ sourceSets {
 dependencies {
     implementation gradleApi()
     implementation "io.spine.tools:spine-plugin-base:$spineBaseVersion"
+    implementation "io.spine.tools:spine-model-compiler:$spineBaseVersion"
     implementation project(':server')
     implementation project(':model-assembler')
 
     testImplementation gradleTestKit()
     testImplementation "io.spine:spine-testlib:$spineBaseVersion"
     testImplementation "io.spine.tools:spine-plugin-testlib:$spineBaseVersion"
+    testImplementation "org.junit-pioneer:junit-pioneer:$jUnitPioneerVersion"
+    testImplementation project(":testutil-server")
 }
 
 test {

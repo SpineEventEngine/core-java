@@ -36,7 +36,7 @@ import static java.lang.String.format;
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public class ErrorAttributeCriterion implements ErrorCriterion {
+public final class ErrorAttributeCriterion implements ErrorCriterion {
 
     private final String name;
 
@@ -45,13 +45,11 @@ public class ErrorAttributeCriterion implements ErrorCriterion {
         this.name = name;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String description() {
         return format("Error contains an attribute \"%s\"", name);
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean matches(Error error) {
         Map<String, Value> attributes = error.getAttributesMap();

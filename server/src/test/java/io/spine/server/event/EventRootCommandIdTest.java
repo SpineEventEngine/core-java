@@ -36,14 +36,17 @@ import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
@@ -56,13 +59,9 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProjec
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Mykhailo Drachuk
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@ExtendWith(ShardingReset.class)
 @DisplayName("Event root CommandId should")
 public class EventRootCommandIdTest {
 
@@ -73,11 +72,10 @@ public class EventRootCommandIdTest {
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
-
-        final ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
-        final TeamAggregateRepository teamRepository = new TeamAggregateRepository();
-        final TeamCreationRepository teamCreationRepository = new TeamCreationRepository();
-        final UserSignUpRepository userSignUpRepository = new UserSignUpRepository();
+        ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
+        TeamAggregateRepository teamRepository = new TeamAggregateRepository();
+        TeamCreationRepository teamCreationRepository = new TeamCreationRepository();
+        UserSignUpRepository userSignUpRepository = new UserSignUpRepository();
 
         boundedContext.register(projectRepository);
         boundedContext.register(teamRepository);
@@ -97,23 +95,23 @@ public class EventRootCommandIdTest {
         @Test
         @DisplayName("aggregate")
         void aggregate() {
-            final Command command = command(createProject(projectId(), teamId()));
+            Command command = command(createProject(projectId(), teamId()));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
+            List<Event> events = readEvents();
             assertEquals(command.getId(), getRootCommandId(events.get(0)));
         }
 
         @Test
         @DisplayName("aggregate in case command returns multiple events")
         void aggregateForMultipleEvents() {
-            final Command command = command(addTasks(projectId(), 3));
+            Command command = command(addTasks(projectId(), 3));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
-            assertSize(3, events);
+            List<Event> events = readEvents();
+            assertThat(events).hasSize(3);
             assertEquals(command.getId(), getRootCommandId(events.get(0)));
             assertEquals(command.getId(), getRootCommandId(events.get(1)));
             assertEquals(command.getId(), getRootCommandId(events.get(2)));
@@ -122,26 +120,26 @@ public class EventRootCommandIdTest {
         @Test
         @DisplayName("process manager")
         void processManager() {
-            final Command command = command(addTeamMember(teamId()));
+            Command command = command(addTeamMember(teamId()));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
-            assertSize(1, events);
+            List<Event> events = readEvents();
+            assertThat(events).hasSize(1);
 
-            final Event event = events.get(0);
+            Event event = events.get(0);
             assertEquals(command.getId(), getRootCommandId(event));
         }
 
         @Test
         @DisplayName("process manager in case command returns multiple events")
         void processManagerForMultipleEvents() {
-            final Command command = command(inviteTeamMembers(teamId(), 3));
+            Command command = command(inviteTeamMembers(teamId(), 3));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
-            assertSize(3, events);
+            List<Event> events = readEvents();
+            assertThat(events).hasSize(3);
             assertEquals(command.getId(), getRootCommandId(events.get(0)));
             assertEquals(command.getId(), getRootCommandId(events.get(1)));
             assertEquals(command.getId(), getRootCommandId(events.get(2)));
@@ -168,14 +166,14 @@ public class EventRootCommandIdTest {
         @Test
         @DisplayName("aggregate")
         void aggregate() {
-            final Command command = command(createProject(projectId(), teamId()));
+            Command command = command(createProject(projectId(), teamId()));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
-            assertSize(2, events);
+            List<Event> events = readEvents();
+            assertThat(events).hasSize(2);
 
-            final Event reaction = events.get(1);
+            Event reaction = events.get(1);
             assertEquals(command.getId(), getRootCommandId(reaction));
         }
 
@@ -196,20 +194,20 @@ public class EventRootCommandIdTest {
         @Test
         @DisplayName("process manager")
         void processManager() {
-            final Command command = command(acceptInvitation(teamId()));
+            Command command = command(acceptInvitation(teamId()));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
-            assertSize(2, events);
+            List<Event> events = readEvents();
+            assertThat(events).hasSize(2);
 
-            final Event reaction = events.get(1);
+            Event reaction = events.get(1);
             assertEquals(command.getId(), getRootCommandId(reaction));
         }
     }
 
     private void postCommand(Command command) {
-        final StreamObserver<Ack> observer = noOpObserver();
+        StreamObserver<Ack> observer = noOpObserver();
         boundedContext.getCommandBus()
                       .post(command, observer);
     }
@@ -218,9 +216,9 @@ public class EventRootCommandIdTest {
      * Reads all events from the bounded context event store.
      */
     private List<Event> readEvents() {
-        final MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
+        MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
 
-        final TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
+        TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
                 boundedContext.getEventBus()
@@ -230,7 +228,7 @@ public class EventRootCommandIdTest {
         };
         operation.execute();
 
-        final List<Event> results = observer.responses();
+        List<Event> results = observer.responses();
         return results;
     }
 }

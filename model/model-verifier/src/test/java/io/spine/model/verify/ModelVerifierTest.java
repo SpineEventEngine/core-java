@@ -20,15 +20,15 @@
 
 package io.spine.model.verify;
 
-import com.google.common.base.Function;
 import com.google.common.io.Files;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
-import io.spine.model.verify.given.ModelVerifierTestEnv.AnyCommandHandler;
-import io.spine.model.verify.given.ModelVerifierTestEnv.DuplicateAnyCommandHandler;
-import io.spine.model.verify.given.ModelVerifierTestEnv.Int32HandlerAggregate;
-import io.spine.model.verify.given.ModelVerifierTestEnv.Int64HandlerProcMan;
+import io.spine.model.verify.given.ModelVerifierTestEnv.DuplicateCommandHandler;
+import io.spine.model.verify.given.ModelVerifierTestEnv.EditAggregate;
+import io.spine.model.verify.given.ModelVerifierTestEnv.RenameProcMan;
+import io.spine.model.verify.given.ModelVerifierTestEnv.UploadCommandHandler;
 import io.spine.server.model.DuplicateCommandHandlerError;
+import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.tasks.TaskCollection;
@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Function;
 
 import static io.spine.model.verify.given.ModelVerifierTestEnv.actualProject;
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
@@ -54,9 +55,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("ModelVerifier should")
 class ModelVerifierTest {
 
@@ -89,9 +87,9 @@ class ModelVerifierTest {
 
         verify(project).getSubprojects();
 
-        String commandHandlerTypeName = AnyCommandHandler.class.getName();
-        String aggregateTypeName = Int32HandlerAggregate.class.getName();
-        String procManTypeName = Int64HandlerProcMan.class.getName();
+        String commandHandlerTypeName = UploadCommandHandler.class.getName();
+        String aggregateTypeName = EditAggregate.class.getName();
+        String procManTypeName = RenameProcMan.class.getName();
         CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                     .addCommandHandlingTypes(commandHandlerTypeName)
                                                     .addCommandHandlingTypes(aggregateTypeName)
@@ -104,8 +102,8 @@ class ModelVerifierTest {
     @DisplayName("fail on duplicate command handlers")
     void failOnDuplicateHandlers() {
         ModelVerifier verifier = new ModelVerifier(project);
-        String firstType = AnyCommandHandler.class.getName();
-        String secondType = DuplicateAnyCommandHandler.class.getName();
+        String firstType = UploadCommandHandler.class.getName();
+        String secondType = DuplicateCommandHandler.class.getName();
 
         CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                     .addCommandHandlingTypes(firstType)
@@ -115,6 +113,7 @@ class ModelVerifierTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
         String invalidClassname = "non.existing.class.Name";

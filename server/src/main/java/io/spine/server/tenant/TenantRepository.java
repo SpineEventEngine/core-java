@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
@@ -29,9 +28,12 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.tenant.TenantRepository.Entity;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Abstract base for repositories storing information about tenants.
@@ -39,7 +41,7 @@ import java.util.Set;
  * @param <T> the type of data associated with the tenant ID
  * @author Alexander Yevsyukov
  */
-public abstract class TenantRepository<T extends Message, E extends TenantRepository.Entity<T>>
+public abstract class TenantRepository<T extends Message, E extends Entity<T>>
         extends DefaultRecordBasedRepository<TenantId, E, T>
         implements TenantIndex {
 
@@ -64,9 +66,9 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
             return;
         }
 
-        final Optional<E> optional = find(id);
+        Optional<E> optional = find(id);
         if (!optional.isPresent()) {
-            final E newEntity = create(id);
+            E newEntity = create(id);
             store(newEntity);
         }
         cache(id);
@@ -86,7 +88,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
      * @return {@code true} if the value was cached before and removed, {@code false} otherwise
      */
     protected boolean unCache(TenantId id) {
-        final boolean result = cache.remove(id);
+        boolean result = cache.remove(id);
         return result;
     }
 
@@ -99,13 +101,9 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
 
     @Override
     public Set<TenantId> getAll() {
-        final Storage<TenantId, ?, ?> storage = getStorage();
-        final Iterator<TenantId> index = storage != null
-                                         ? storage.index()
-                                         : null;
-        final Set<TenantId> result = index != null
-                                     ? ImmutableSet.copyOf(index)
-                                     : ImmutableSet.<TenantId>of();
+        Storage<TenantId, ?, ?> storage = getStorage();
+        Iterator<TenantId> index = storage.index();
+        Set<TenantId> result = ImmutableSet.copyOf(index);
         cache.addAll(result);
         return result;
     }
@@ -116,8 +114,13 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
      * @param <T> the type of the data associated with the tenant ID
      */
     public static class Entity<T extends Message> extends AbstractEntity<TenantId, T> {
+
         protected Entity(TenantId id) {
             super(id);
+        }
+
+        protected Entity(TenantId id, Function<TenantId, T> defaultState) {
+            super(id, defaultState);
         }
     }
 }

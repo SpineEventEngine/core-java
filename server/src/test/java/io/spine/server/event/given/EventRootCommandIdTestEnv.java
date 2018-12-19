@@ -21,11 +21,10 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.React;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.net.EmailAddress;
@@ -35,6 +34,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventRootCommandIdTest;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRoute;
@@ -62,18 +62,15 @@ import io.spine.test.event.command.EvAcceptInvitation;
 import io.spine.test.event.command.EvAddTasks;
 import io.spine.test.event.command.EvAddTeamMember;
 import io.spine.test.event.command.EvInviteTeamMembers;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.testdata.Sample.builderForType;
 import static java.util.Collections.singleton;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class EventRootCommandIdTestEnv {
 
     public static final TenantId TENANT_ID = tenantId();
@@ -86,24 +83,25 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static ProjectId projectId() {
-        return ((ProjectId.Builder) Sample.builderForType(ProjectId.class))
+        return ((ProjectId.Builder) builderForType(ProjectId.class))
                 .build();
     }
 
     public static EvTeamId teamId() {
-        return ((EvTeamId.Builder) Sample.builderForType(EvTeamId.class))
+        return ((EvTeamId.Builder) builderForType(EvTeamId.class))
                 .build();
     }
 
     private static TenantId tenantId() {
-        final String value = EventRootCommandIdTestEnv.class.getName();
-        final TenantId id = TenantId.newBuilder()
-                                    .setValue(value)
-                                    .build();
+        String value = EventRootCommandIdTestEnv.class.getName();
+        TenantId id = TenantId
+                .newBuilder()
+                .setValue(value)
+                .build();
         return id;
     }
 
-    public static Command command(Message message) {
+    public static Command command(CommandMessage message) {
         return requestFactory.createCommand(message);
     }
 
@@ -120,10 +118,10 @@ public class EventRootCommandIdTestEnv {
     public static EvAddTasks addTasks(ProjectId id, int count) {
         checkNotNull(id);
 
-        final EvAddTasks.Builder builder = EvAddTasks.newBuilder();
+        EvAddTasks.Builder builder = EvAddTasks.newBuilder();
         for (int i = 0; i < count; i++) {
-            final Task task = (Task) Sample.builderForType(Task.class)
-                                           .build();
+            Task task = (Task) builderForType(Task.class)
+                                     .build();
             builder.addTask(task);
         }
 
@@ -134,7 +132,7 @@ public class EventRootCommandIdTestEnv {
     public static EvAddTeamMember addTeamMember(EvTeamId teamId) {
         checkNotNull(teamId);
 
-        return ((EvAddTeamMember.Builder) Sample.builderForType(EvAddTeamMember.class))
+        return ((EvAddTeamMember.Builder) builderForType(EvAddTeamMember.class))
                 .setTeamId(teamId)
                 .build();
     }
@@ -142,8 +140,8 @@ public class EventRootCommandIdTestEnv {
     public static EvAcceptInvitation acceptInvitation(EvTeamId teamId) {
         checkNotNull(teamId);
 
-        final EvMemberInvitation invitation = memberInvitation(teamId);
-        return ((EvAcceptInvitation.Builder) Sample.builderForType(EvAcceptInvitation.class))
+        EvMemberInvitation invitation = memberInvitation(teamId);
+        return ((EvAcceptInvitation.Builder) builderForType(EvAcceptInvitation.class))
                 .setInvitation(invitation)
                 .build();
     }
@@ -151,10 +149,11 @@ public class EventRootCommandIdTestEnv {
     public static EvInviteTeamMembers inviteTeamMembers(EvTeamId teamId, int count) {
         checkNotNull(teamId);
 
-        final EvInviteTeamMembers.Builder builder = EvInviteTeamMembers.newBuilder();
+        EvInviteTeamMembers.Builder builder = EvInviteTeamMembers.newBuilder();
         for (int i = 0; i < count; i++) {
-            final EmailAddress task = (EmailAddress) Sample.builderForType(EmailAddress.class)
-                                                           .build();
+            EmailAddress task = (EmailAddress)
+                    builderForType(EmailAddress.class)
+                            .build();
             builder.addEmail(task);
         }
 
@@ -163,7 +162,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     private static EvMemberInvitation memberInvitation(EvTeamId teamId) {
-        return ((EvMemberInvitation.Builder) Sample.builderForType(EvMemberInvitation.class))
+        return ((EvMemberInvitation.Builder) builderForType(EvMemberInvitation.class))
                 .setTeamId(teamId)
                 .build();
     }
@@ -253,16 +252,16 @@ public class EventRootCommandIdTestEnv {
 
         @Assign
         ProjectCreated on(CreateProject command, CommandContext ctx) {
-            final ProjectCreated event = projectCreated(command.getProjectId());
+            ProjectCreated event = projectCreated(command.getProjectId());
             return event;
         }
 
         @Assign
         List<TaskAdded> on(EvAddTasks command, CommandContext ctx) {
-            final ImmutableList.Builder<TaskAdded> events = ImmutableList.builder();
+            ImmutableList.Builder<TaskAdded> events = ImmutableList.builder();
 
             for (Task task : command.getTaskList()) {
-                final TaskAdded event = taskAdded(command.getProjectId(), task);
+                TaskAdded event = taskAdded(command.getProjectId(), task);
                 events.add(event);
             }
 
@@ -270,14 +269,14 @@ public class EventRootCommandIdTestEnv {
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(TaskAdded event) {
+        void event(TaskAdded event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .addTask(event.getTask());
@@ -292,12 +291,12 @@ public class EventRootCommandIdTestEnv {
 
         @React
         EvTeamProjectAdded on(ProjectCreated command, EventContext ctx) {
-            final EvTeamProjectAdded event = projectAdded(command);
+            EvTeamProjectAdded event = projectAdded(command);
             return event;
         }
 
         @Apply
-        private void event(EvTeamProjectAdded event) {
+        void event(EvTeamProjectAdded event) {
             getBuilder()
                     .setId(event.getTeamId())
                     .addProjectId(event.getProjectId());
@@ -321,20 +320,20 @@ public class EventRootCommandIdTestEnv {
         EvTeamMemberAdded on(EvAddTeamMember command, CommandContext ctx) {
             getBuilder().addMember(command.getMember());
 
-            final EvTeamMemberAdded event = memberAdded(command.getMember());
+            EvTeamMemberAdded event = memberAdded(command.getMember());
             return event;
         }
 
         @Assign
         List<EvTeamMemberInvited> on(EvInviteTeamMembers command, CommandContext ctx) {
-            final ImmutableList.Builder<EvTeamMemberInvited> events = ImmutableList.builder();
+            ImmutableList.Builder<EvTeamMemberInvited> events = ImmutableList.builder();
 
             for (EmailAddress email : command.getEmailList()) {
 
-                final EvMemberInvitation invitation = memberInvitation(email);
+                EvMemberInvitation invitation = memberInvitation(email);
                 getBuilder().addInvitation(invitation);
 
-                final EvTeamMemberInvited event = teamMemberInvited(email);
+                EvTeamMemberInvited event = teamMemberInvited(email);
                 events.add(event);
             }
 
@@ -343,33 +342,37 @@ public class EventRootCommandIdTestEnv {
 
         @React
         EvTeamMemberAdded on(EvInvitationAccepted event, EventContext ctx) {
-            final EvMember member = member(event.getUserId());
-            final EvTeamMemberAdded newEvent = memberAdded(member);
+            EvMember member = member(event.getUserId());
+            EvTeamMemberAdded newEvent = memberAdded(member);
             return newEvent;
         }
 
         private EvTeamMemberAdded memberAdded(EvMember member) {
-            return EvTeamMemberAdded.newBuilder()
-                                    .setTeamId(getId())
-                                    .setMember(member)
-                                    .build();
+            return EvTeamMemberAdded
+                    .newBuilder()
+                    .setTeamId(getId())
+                    .setMember(member)
+                    .build();
         }
 
         private EvTeamMemberInvited teamMemberInvited(EmailAddress email) {
-            return EvTeamMemberInvited.newBuilder()
-                                      .setTeamId(getId())
-                                      .setEmail(email)
-                                      .build();
+            return EvTeamMemberInvited
+                    .newBuilder()
+                    .setTeamId(getId())
+                    .setEmail(email)
+                    .build();
         }
 
         private static EvMemberInvitation memberInvitation(EmailAddress email) {
-            return EvMemberInvitation.newBuilder()
-                                     .setEmail(email)
-                                     .build();
+            return EvMemberInvitation
+                    .newBuilder()
+                    .setEmail(email)
+                    .build();
         }
 
         private static EvMember member(UserId userId) {
-            return ((EvMember.Builder) Sample.builderForType(EvMember.class))
+            return EvMember
+                    .newBuilder()
                     .setUserId(userId)
                     .build();
         }
@@ -385,15 +388,16 @@ public class EventRootCommandIdTestEnv {
         @Assign
         EvInvitationAccepted on(EvAcceptInvitation command, CommandContext ctx) {
             getBuilder().setInvitation(command.getInvitation());
-            final EvInvitationAccepted event = invitationAccepted(command.getInvitation());
+            EvInvitationAccepted event = invitationAccepted(command.getInvitation());
             return event;
         }
 
         private EvInvitationAccepted invitationAccepted(EvMemberInvitation invitation) {
-            return EvInvitationAccepted.newBuilder()
-                                       .setInvitation(invitation)
-                                       .setUserId(getId())
-                                       .build();
+            return EvInvitationAccepted
+                    .newBuilder()
+                    .setInvitation(invitation)
+                    .setUserId(getId())
+                    .build();
         }
     }
 }

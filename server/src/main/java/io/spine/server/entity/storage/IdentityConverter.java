@@ -37,27 +37,18 @@ final class IdentityConverter implements ColumnValueConverter {
         this.type = type;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Serializable convert(Object value) {
         checkNotNull(value);
-        final Serializable result = (Serializable) value;
+        Serializable result = (Serializable) value;
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<?> getSourceType() {
         return type;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<? extends Serializable> getTargetType() {
         return type;

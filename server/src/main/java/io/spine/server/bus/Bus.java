@@ -20,32 +20,30 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.Rejection;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.Deque;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.isEmpty;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 
 /**
  * Abstract base for buses.
  *
- * @param <T> the type of outer objects (containing messages of interest) that are posted the bus
+ * @param <T> the type of outer objects (containing messages of interest) that are posted to the bus
  * @param <E> the type of envelopes for outer objects used by this bus
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
@@ -53,34 +51,38 @@ import static java.util.Collections.singleton;
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
-                          C extends MessageClass,
-                          D extends MessageDispatcher<C, E, ?>> implements AutoCloseable {
+                          C extends MessageClass<? extends Message>,
+                          D extends MessageDispatcher<C, E, ?>>
+        implements AutoCloseable {
 
-    private final Function<T, E> messageConverter = new MessageToEnvelope();
-
-    // A queue of envelopes to post.
+    /** A queue of envelopes to post. */
     private @Nullable DispatchingQueue<E> queue;
 
-    private @Nullable DispatcherRegistry<C, D> registry;
+    /** Dispatchers of messages by their class. */
+    @LazyInit
+    private @MonotonicNonNull DispatcherRegistry<C, E, D> registry;
 
-    /**
-     * The chain of filters for this bus.
-     *
-     * <p>This field is effectively final, but is initialized lazily.
-     *
-     * @see #filterChain() for the non-null filter chain value
-     */
-    private @Nullable FilterChain<E, ?> filterChain;
+    /** The chain of filters for this bus, {@linkplain #filterChain() lazily initialized}. */
+    @LazyInit
+    private @MonotonicNonNull FilterChain<E> filterChain;
+
+    private final ChainBuilder<E> chainBuilder;
+
+    protected Bus(BusBuilder<E, T, ?> builder) {
+        super();
+        this.chainBuilder = builder.chainBuilderCopy();
+    }
 
     /**
      * Registers the passed dispatcher.
      *
      * @param dispatcher the dispatcher to register
-     * @throws IllegalArgumentException if the set of message classes
-     *                                  {@linkplain MessageDispatcher#getMessageClasses() exposed}
-     *                                  by the dispatcher is empty
+     * @throws IllegalArgumentException
+     *         if the set of message classes {@linkplain MessageDispatcher#getMessageClasses()
+     *         exposed} by the dispatcher is empty
      */
     public void register(D dispatcher) {
         registry().register(checkNotNull(dispatcher));
@@ -124,10 +126,10 @@ public abstract class Bus<T extends Message,
      * {@link io.spine.base.Error Error} status is passed in {@code Ack} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
-     * {@link Rejection} may result ether a {@link Rejection} status or
+     * {@linkplain io.spine.base.ThrowableMessage rejection} may result either a rejection status or
      * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
-     * the {@link Rejection} status may only pop up if the {@link MessageDispatcher}
-     * processes the message sequentially and throws the rejection (wrapped in a
+     * the rejection status may only pop up if the {@link MessageDispatcher} processes the message
+     * sequentially and throws the rejection (wrapped in a
      * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
      *
@@ -141,13 +143,47 @@ public abstract class Bus<T extends Message,
         checkNotNull(messages);
         checkNotNull(observer);
 
-        final Iterable<T> filteredMessages = filter(messages, observer);
-        if (!isEmpty(filteredMessages)) {
-            store(filteredMessages);
-            final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
+        StreamObserver<Ack> wrappedObserver = prepareObserver(messages, observer);
+        filterAndPost(messages, wrappedObserver);
+    }
+
+    private void filterAndPost(Iterable<T> messages, StreamObserver<Ack> observer) {
+        Map<T, E> filteredMessages = filter(messages, observer);
+        if (!filteredMessages.isEmpty()) {
+            store(filteredMessages.keySet());
+            Iterable<E> envelopes = filteredMessages.values();
             doPost(envelopes, observer);
         }
         observer.onCompleted();
+    }
+
+    /**
+     * Prepares the given {@link StreamObserver} in order to post messages into this bus.
+     *
+     * <p>This method is an extension point of a {@code Bus}.
+     *
+     * <p>When {@linkplain #post(Iterable, StreamObserver) posting} messages into the bus,
+     * the message {@linkplain Ack acknowledgements} are passed to the observer created by this
+     * method.
+     *
+     * <p>Conventionally, the resulting {@link StreamObserver} should delegate calls to
+     * the {@code source} observer, so that the caller receives the posting outcome. If violating
+     * this convention, the {@code Bus} implementation should specify the altered behavior
+     * explicitly.
+     *
+     * <p>The {@code messages} can be used in order to construct the observer. The resulting
+     * observer is used only for acknowledgment of the given messages.
+     *
+     * <p>By default, this method returns the {@code source} observer. See {@code Bus} subclasses
+     * for the altered behavior specification.
+     *
+     * @param messages the messages to create an observer for
+     * @param source   the source {@link StreamObserver} to be transformed
+     * @return a transformed observer of {@link Ack} streams
+     */
+    protected StreamObserver<Ack> prepareObserver(Iterable<T> messages,
+                                                  StreamObserver<Ack> source) {
+        return source;
     }
 
     /**
@@ -175,7 +211,7 @@ public abstract class Bus<T extends Message,
     /**
      * Obtains the dispatcher registry.
      */
-    protected DispatcherRegistry<C, D> registry() {
+    protected DispatcherRegistry<C, E, D> registry() {
         if (registry == null) {
             registry = createRegistry();
         }
@@ -190,22 +226,57 @@ public abstract class Bus<T extends Message,
      * a chain always has the following format:
      *
      * <pre>
-     *     {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters if any...
+     *     Chain head -> {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters from {@linkplain BusBuilder Builder} -> chain tail.
      * </pre>
+     *
+     * <p>The head and the tail of the chain are created by the {@code Bus} itself. Those are
+     * typically empty. Override {@link #filterChainHead()} and {@link #filterChainHead()} to add
+     * some filters to the respective chain side.
      *
      * @return the value of the bus filter chain
      */
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
-            final Deque<BusFilter<E>> filters = createFilterChain();
-            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
-                                                                       registry());
-            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
-            filters.push(deadMsgFilter);
-            filters.push(validatingFilter);
-            filterChain = new FilterChain<>(filters);
+            initChain();
         }
         return filterChain;
+    }
+
+    private void initChain() {
+        Collection<BusFilter<E>> tail = filterChainTail();
+        tail.forEach(chainBuilder::append);
+
+        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(), registry());
+        BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
+
+        chainBuilder.prepend(deadMsgFilter);
+        chainBuilder.prepend(validatingFilter);
+        Collection<BusFilter<E>> head = filterChainHead();
+        head.forEach(chainBuilder::prepend);
+
+        filterChain = chainBuilder.build();
+    }
+
+    /**
+     * Obtains the {@link BusFilter}s to append to the chain tail.
+     *
+     * <p>By default, returns an empty collection.
+     *
+     * @see #filterChain()
+     */
+    protected Collection<BusFilter<E>> filterChainTail() {
+        return emptyList();
+    }
+
+    /**
+     * Obtains the {@link BusFilter}s to prepend to the chain head.
+     *
+     * <p>By default, returns an empty collection.
+     *
+     * @see #filterChain()
+     */
+    protected Collection<BusFilter<E>> filterChainHead() {
+        return emptyList();
     }
 
     /**
@@ -225,18 +296,7 @@ public abstract class Bus<T extends Message,
     /**
      * Factory method for creating an instance of the registry for dispatchers of the bus.
      */
-    protected abstract DispatcherRegistry<C, D> createRegistry();
-
-    /**
-     * Creates a {@link Deque} of the custom {@linkplain BusFilter bus filters} for the current
-     * instance of {@code Bus}.
-     *
-     * <p>This method should be invoked only once when initializing
-     * the {@linkplain #filterChain() filter chain} of this bus.
-     *
-     * @return a deque of the bus custom filters
-     */
-    protected abstract Deque<BusFilter<E>> createFilterChain();
+    protected abstract DispatcherRegistry<C, E, D> createRegistry();
 
     /**
      * Filters the given messages.
@@ -252,19 +312,22 @@ public abstract class Bus<T extends Message,
      *
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
-     * @return the message itself if it passes the filtering or
-     * {@link Optional#absent() Optional.absent()} otherwise
+     * @return a map of filtered messages where keys are messages, and values are envelopes with
+     *         these messages
+     * @implNote This method returns a map to avoid repeated creation of envelopes when dispatching.
+     * Messages in the returned map come in the same order as in the incoming sequence.
      */
-    private Iterable<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
+    private Map<T, E> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-        final Collection<T> result = newLinkedList();
+        Map<T, E> result = new LinkedHashMap<>();
         for (T message : messages) {
-            final Optional<Ack> response = filter(toEnvelope(message));
+            E envelope = toEnvelope(message);
+            Optional<Ack> response = filter(envelope);
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
-                result.add(message);
+                result.put(message, envelope);
             }
         }
         return result;
@@ -277,14 +340,14 @@ public abstract class Bus<T extends Message,
      * the returned {@link Optional} contains a value with either status.
      *
      * <p>If the message should be passed to the dispatchers, the result of this method is
-     * {@link Optional#absent() Optional.absent()}.
+     * {@link Optional#empty()}.
      *
      * @param message the {@linkplain MessageEnvelope message envelope} to pre-process
      * @return the result of message processing by this bus if any, or
-     * {@link Optional#absent() Optional.absent()} otherwise
+     * {@link Optional#empty()} otherwise
      */
     private Optional<Ack> filter(E message) {
-        final Optional<Ack> filterOutput = filterChain().accept(message);
+        Optional<Ack> filterOutput = filterChain().accept(message);
         return filterOutput;
     }
 
@@ -327,95 +390,4 @@ public abstract class Bus<T extends Message,
      * @param messages the messages to store
      */
     protected abstract void store(Iterable<T> messages);
-
-    /**
-     * @return a {@link Function} converting the messages into the envelopes of the specified
-     * type
-     */
-    private Function<T, E> toEnvelope() {
-        return messageConverter;
-    }
-
-    /**
-     * The implementation base for the bus builders.
-     *
-     * @param <E> the type of {@link MessageEnvelope} posted by the bus
-     * @param <T> the type of {@link Message} posted by the bus
-     * @param <B> the own type of the builder
-     */
-    public abstract static class AbstractBuilder<E extends MessageEnvelope<?, T, ?>,
-                                                 T extends Message,
-                                                 B extends AbstractBuilder<E, T, B>> {
-
-        private final Deque<BusFilter<E>> filters;
-
-        /**
-         * Creates a new instance of the bus builder.
-         */
-        protected AbstractBuilder() {
-            this.filters = newLinkedList();
-        }
-
-        /**
-         * Adds the given {@linkplain BusFilter filter} to the builder.
-         *
-         * <p>The order of appending the filters to the builder is the order of the filters in
-         * the resulting bus.
-         *
-         * @param filter the filter to append
-         */
-        public final B appendFilter(BusFilter<E> filter) {
-            checkNotNull(filter);
-            this.filters.offer(filter);
-            return self();
-        }
-
-        /**
-         * Removes the specified filter from the filter queue.
-         *
-         * <p>If the filter is not present in the queue, no action is performed.
-         *
-         * @param filter the filter to delete
-         */
-        public final B removeFilter(BusFilter<E> filter) {
-            checkNotNull(filter);
-            this.filters.remove(filter);
-            return self();
-        }
-
-        /**
-         * Obtains the {@linkplain BusFilter bus filters} of this builder.
-         *
-         * @see #appendFilter(BusFilter)
-         */
-        public final Deque<BusFilter<E>> getFilters() {
-            return new ConcurrentLinkedDeque<>(filters);
-        }
-
-        /**
-         * Creates new instance of {@code Bus} with the set parameters.
-         *
-         * <p>It is recommended to specify the exact resulting type of the bus in the return type
-         * when overriding this method.
-         */
-        public abstract Bus<?, E, ?, ?> build();
-
-        /**
-         * @return {@code this} reference to avoid redundant casts
-         */
-        protected abstract B self();
-    }
-
-    /**
-     * A function creating the instances of {@link MessageEnvelope} from the given message.
-     */
-    private class MessageToEnvelope implements Function<T, E> {
-
-        @Override
-        public E apply(@Nullable T message) {
-            checkNotNull(message);
-            final E result = toEnvelope(message);
-            return result;
-        }
-    }
 }

@@ -33,14 +33,10 @@ import io.spine.core.TenantId;
 final class DefaultTenantRepository
       extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
 
-    public static class Entity extends TenantRepository.Entity<Timestamp> {
-        protected Entity(TenantId id) {
-            super(id);
-        }
+    static class Entity extends TenantRepository.Entity<Timestamp> {
 
-        @Override
-        public Timestamp getDefaultState() {
-            return Time.getCurrentTime();
+        protected Entity(TenantId id) {
+            super(id, (i) -> Time.getCurrentTime());
         }
     }
 }

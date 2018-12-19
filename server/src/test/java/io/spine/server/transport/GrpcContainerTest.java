@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.testing.Verify.assertSize;
+import static com.google.common.truth.Truth.assertThat;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,9 +49,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("GrpcContainer should")
 class GrpcContainerTest {
     private Server server;
@@ -78,10 +75,13 @@ class GrpcContainerTest {
     @Test
     @DisplayName("add and remove parameters from builder")
     void setParamsInBuilder() {
-        GrpcContainer.Builder builder = GrpcContainer.newBuilder()
-                                                     .setPort(8080)
-                                                     .setPort(60);
-        assertEquals(60, builder.getPort());
+        int port = 60;
+        GrpcContainer.Builder builder = GrpcContainer
+                .newBuilder()
+                .setPort(8080)
+                .setPort(port);
+
+        assertEquals(port, builder.getPort());
 
         int count = 3;
         List<ServerServiceDefinition> definitions = new ArrayList<>(count);
@@ -102,7 +102,7 @@ class GrpcContainerTest {
         assertEquals(builder, builder.removeService(definitions.get(count)));
 
         Set<ServerServiceDefinition> serviceSet = builder.getServices();
-        assertSize(count, serviceSet);
+        assertThat(serviceSet).hasSize(count);
 
         GrpcContainer container = builder.build();
         assertNotNull(container);
@@ -118,11 +118,20 @@ class GrpcContainerTest {
 
     @Test
     @DisplayName("shutdown server")
-    void shutdownItself() throws IOException, InterruptedException {
+    void shutdownItself() throws IOException {
         grpcContainer.start();
         grpcContainer.shutdown();
 
         verify(server).shutdown();
+    }
+
+    @Test
+    @DisplayName("forcefully shutdown server")
+    void shutdownAndWait() throws IOException {
+        grpcContainer.start();
+        grpcContainer.shutdownNowAndWait();
+
+        assertTrue(grpcContainer.isShutdown());
     }
 
     @Test
@@ -220,7 +229,7 @@ class GrpcContainerTest {
 
         @Test
         @DisplayName("not started")
-        void notStarted() throws IOException {
+        void notStarted() {
             assertTrue(grpcContainer.isShutdown());
         }
 

@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.lt;
@@ -44,14 +45,9 @@ import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertContainsAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CompositeQueryParameter should")
 class CompositeQueryParameterTest {
 
@@ -109,9 +105,10 @@ class CompositeQueryParameterTest {
         assertEquals(all.getOperator(), ALL);
 
         Multimap<EntityColumn, ColumnFilter> asMultimap = all.getFilters();
-        assertContainsAll(asMultimap.get(versionColumn), versionLower, versionUpper);
-        assertContainsAll(asMultimap.get(archivedColumn), archived);
-        assertContainsAll(asMultimap.get(deletedColumn), deleted);
+
+        assertThat(asMultimap.get(versionColumn)).containsExactly(versionLower, versionUpper);
+        assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
+        assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);
     }
 
     @Test
@@ -140,8 +137,9 @@ class CompositeQueryParameterTest {
         assertEquals(all.getOperator(), ALL);
 
         Multimap<EntityColumn, ColumnFilter> asMultimap = all.getFilters();
-        assertContainsAll(asMultimap.get(versionColumn), version);
-        assertContainsAll(asMultimap.get(archivedColumn), archived);
-        assertContainsAll(asMultimap.get(deletedColumn), deleted);
+
+        assertThat(asMultimap.get(versionColumn)).containsExactly(version);
+        assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
+        assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);
     }
 }

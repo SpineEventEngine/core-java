@@ -21,28 +21,23 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 
-import java.util.Collections;
 import java.util.Set;
 
-import static io.spine.protobuf.AnyPacker.unpack;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
  *
- * @param <I> the type of IDs of entities
- * @param <E> the type of entities
- * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
 public abstract class EventDispatchingRepository<I,
@@ -58,7 +53,7 @@ public abstract class EventDispatchingRepository<I,
      *
      * @param defaultFunction the default function for getting target entity IDs
      */
-    protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(EventRoute<I, EventMessage> defaultFunction) {
         super();
         this.eventRouting = EventRouting.withDefault(defaultFunction);
     }
@@ -80,24 +75,52 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public void onRegistered() {
         super.onRegistered();
-        if(!getMessageClasses().isEmpty()) {
-            registerAsEventDispatcher();
-        }
-
-        final ExternalMessageDispatcher<I> thisAsExternal = getExternalEventDispatcher();
-        if(!thisAsExternal.getMessageClasses().isEmpty()) {
-            getBoundedContext().getIntegrationBus()
-                               .register(getExternalEventDispatcher());
-        }
+        getBoundedContext().registerEventDispatcher(this);
     }
 
     /**
-     * Register itself as {@link io.spine.server.event.EventDispatcher EventDispatcher} in
-     * the {@linkplain BoundedContext#getEventBus() EventBus}.
+     * Dispatches the event to the corresponding entities.
+     *
+     * <p>If there is no stored entity with such an ID, a new one is created and stored after it
+     * handles the passed event.
+     *
+     * @param envelope the event to dispatch
      */
-    protected void registerAsEventDispatcher() {
-        getBoundedContext().getEventBus()
-                           .register(this);
+    @Override
+    public final Set<I> dispatch(EventEnvelope envelope) {
+        checkNotNull(envelope);
+        Set<I> targets = with(envelope.getTenantId())
+                .evaluate(() -> doDispatch(envelope));
+        return targets;
+    }
+
+    private Set<I> doDispatch(EventEnvelope envelope) {
+        Set<I> targets = route(envelope);
+        Event event = envelope.getOuterObject();
+        targets.forEach(id -> dispatchTo(id, event));
+        return targets;
+    }
+
+    /**
+     * Dispatches the given event to an entity with the given ID.
+     *
+     * @param id
+     *         the target entity ID
+     * @param event
+     *         the event to dispatch
+     */
+    protected abstract void dispatchTo(I id, Event event);
+
+    /**
+     * Determines the targets of the given event.
+     *
+     * @param envelope the event to find targets for
+     * @return a set of IDs of projections to dispatch the given event to
+     */
+    private Set<I> route(EventEnvelope envelope) {
+        EventRouting<I> routing = getEventRouting();
+        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        return targets;
     }
 
     /**
@@ -108,35 +131,8 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
-        logError("Error dispatching event (class: %s, id: %s", envelope, exception);
-    }
-
-    /**
-     * Obtains an external event dispatcher for this repository.
-     *
-     * <p>This method should be overridden by the repositories, which are eligible
-     * to handle external events. In this case the implementation would typically delegate
-     * the dispatching of external events to the repository itself.
-     *
-     * <p>Such a delegate-based approach is chosen, since it's not possible to make
-     * {@code EventDispatchingRepository} extend another
-     * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} interface due to clashes
-     * in the class hierarchy.
-     *
-     * @return the external event dispatcher
-     */
-    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
-        return new AbstractExternalEventDispatcher() {
-            @Override
-            public Set<ExternalMessageClass> getMessageClasses() {
-                return Collections.emptySet();
-            }
-
-            @Override
-            public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-                logError(Error.DISPATCHING_EXTERNAL_EVENT.getMessageFormat(), envelope, exception);
-            }
-        };
+        logError("Error dispatching event (class: `%s`, id: `%s`) to entity of type `%s`.",
+                 envelope, exception);
     }
 
     /**
@@ -148,10 +144,14 @@ public abstract class EventDispatchingRepository<I,
 
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            final ExternalMessage externalMessage = envelope.getOuterObject();
-            final Event event = unpack(externalMessage.getOriginalMessage());
-            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            return EventDispatchingRepository.this.dispatch(eventEnvelope);
+            EventEnvelope event = envelope.toEventEnvelope();
+            return EventDispatchingRepository.this.dispatch(event);
+        }
+
+        @Override
+        public boolean canDispatch(ExternalMessageEnvelope envelope) {
+            EventEnvelope event = envelope.toEventEnvelope();
+            return EventDispatchingRepository.this.canDispatch(event);
         }
     }
 }

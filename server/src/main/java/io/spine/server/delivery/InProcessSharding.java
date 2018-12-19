@@ -19,15 +19,15 @@
  */
 package io.spine.server.delivery;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.transport.TransportFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -60,17 +60,17 @@ public class InProcessSharding implements Sharding {
      */
     @Override
     public final void register(Shardable shardable) {
-        final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
+        Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         if (!consumers.iterator()
                       .hasNext()) {
             throw newIllegalArgumentException("Cannot register the shardable with no consumers: %s",
                                               shardable);
         }
-        final BoundedContextName bcName = shardable.getBoundedContextName();
-        final Set<ShardingKey> keys = obtainKeys(shardable);
+        BoundedContextName bcName = shardable.getBoundedContextName();
+        Set<ShardingKey> keys = obtainKeys(shardable);
 
         for (ShardingKey key : keys) {
-            final Set<ShardedStream<?, ?, ?>> streams = bindWithKey(consumers, bcName, key);
+            Set<ShardedStream<?, ?, ?>> streams = bindWithKey(consumers, bcName, key);
             registry.register(shardable.getShardingStrategy(), streams);
         }
     }
@@ -81,7 +81,7 @@ public class InProcessSharding implements Sharding {
      */
     @Override
     public final void unregister(Shardable shardable) {
-        final Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
+        Iterable<ShardedStreamConsumer<?, ?>> consumers = shardable.getMessageConsumers();
         for (ShardedStreamConsumer<?, ?> consumer : consumers) {
             registry.unregister(consumer);
         }
@@ -100,36 +100,36 @@ public class InProcessSharding implements Sharding {
      */
     @Override
     public <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(DeliveryTag<E> tag, I targetId) {
-        final Set<ShardedStream<I, ?, E>> result = registry.find(tag, targetId);
+    find(DeliveryTag tag, I targetId) {
+        Set<ShardedStream<I, ?, E>> result = registry.find(tag, targetId);
         return result;
     }
 
     private Set<ShardingKey> obtainKeys(Shardable shardable) {
-        final Set<ShardIndex> allIndexes = shardable.getShardingStrategy()
-                                                    .allIndexes();
+        Set<ShardIndex> allIndexes = shardable.getShardingStrategy()
+                                              .allIndexes();
 
-        final ImmutableSet.Builder<ShardingKey> keySetBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<ShardingKey> keySetBuilder = ImmutableSet.builder();
         for (ShardIndex shardIndex : allIndexes) {
-            final ShardingKey key = new ShardingKey(shardable.getShardedModelClass(),
-                                                    shardIndex);
+            ShardingKey key = new ShardingKey(shardable.getShardedModelClass(),
+                                              shardIndex);
             keySetBuilder.add(key);
         }
-        final Set<ShardingKey> allKeys = keySetBuilder.build();
+        Set<ShardingKey> allKeys = keySetBuilder.build();
 
-        final Set<ShardingKey> keysForThisNode = pickKeysForNode(shardable, allKeys);
+        Set<ShardingKey> keysForThisNode = pickKeysForNode(shardable, allKeys);
         return keysForThisNode;
     }
 
     private Set<ShardedStream<?, ?, ?>>
-    bindWithKey(final Iterable<ShardedStreamConsumer<?, ?>> consumers,
-                final BoundedContextName bcName,
-                final ShardingKey shardingKey) {
-        final TransportBindFn fn = new TransportBindFn(bcName, shardingKey,
-                                                       transportFactory);
-        final ImmutableSet<ShardedStream<?, ?, ?>> result = FluentIterable.from(consumers)
-                                                                          .transform(fn)
-                                                                          .toSet();
+    bindWithKey(Iterable<ShardedStreamConsumer<?, ?>> consumers,
+                BoundedContextName bcName,
+                ShardingKey shardingKey) {
+        TransportBindFn fn = new TransportBindFn(bcName, shardingKey, transportFactory);
+        ImmutableSet<ShardedStream<?, ?, ?>> result =
+                Streams.stream(consumers)
+                       .map(fn)
+                       .collect(ImmutableSet.toImmutableSet());
         return result;
     }
 
@@ -156,9 +156,9 @@ public class InProcessSharding implements Sharding {
         public ShardedStream<?, ?, ?> apply(@Nullable ShardedStreamConsumer<?, ?> consumer) {
             checkNotNull(
                     consumer);
-            final ShardedStream<?, ?, ?> result = consumer.bindToTransport(bcName,
-                                                                           shardingKey,
-                                                                           transportFactory);
+            ShardedStream<?, ?, ?> result = consumer.bindToTransport(bcName,
+                                                                     shardingKey,
+                                                                     transportFactory);
             return result;
         }
     }

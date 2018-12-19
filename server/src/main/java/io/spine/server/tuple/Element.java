@@ -20,14 +20,18 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.validate.Validate;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -36,18 +40,15 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * An element of a tuple.
  *
- * <p>Can hold either {@link Message}, or {@link Optional} message, or an instance of
+ * <p>Can hold either an {@link EventMessage}, or {@link Optional} message, or an instance of
  * {@link Either}.
- *
- * @author Alexander Yevsyukov
  */
-class Element implements Serializable {
+final class Element implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    @SuppressWarnings("NonSerializableFieldInSerializableClass") // possible values are serializable
-    private final Object value;
-    private final Type type;
+    private Object value;
+    private Type type;
 
     /**
      * Creates a tuple element with a value which can be {@link GeneratedMessageV3},
@@ -60,7 +61,7 @@ class Element implements Serializable {
         } else if (value instanceof Optional) {
             this.type = Type.OPTIONAL;
         } else if (value instanceof GeneratedMessageV3) {
-            final GeneratedMessageV3 messageV3 = (GeneratedMessageV3) value;
+            GeneratedMessageV3 messageV3 = (GeneratedMessageV3) value;
             checkNotDefault(messageV3);
             this.type = Type.MESSAGE;
         } else {
@@ -75,9 +76,10 @@ class Element implements Serializable {
     /**
      * Obtains the value of the element by its index and casts it to the type {@code <T>}.
      */
+    @SuppressWarnings("TypeParameterUnusedInFormals") // See Javadoc.
     static <T> T value(Tuple tuple, int index) {
         @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
-        final T value = (T) tuple.get(index);
+        T value = (T) tuple.get(index);
         return value;
     }
 
@@ -85,8 +87,8 @@ class Element implements Serializable {
      * Ensures that the passed message is not default or is an instance of {@link Empty}.
      */
     private static void checkNotDefault(Message value) {
-        final String valueClass = value.getClass()
-                                       .getName();
+        String valueClass = value.getClass()
+                                 .getName();
         checkArgument(
                 Validate.isNotDefault(value),
                 "Tuples cannot contain default values. Default value of %s encountered.",
@@ -104,7 +106,7 @@ class Element implements Serializable {
             case EITHER:
                 return ((Either) value).getValue();
             case OPTIONAL: {
-                final Optional optional = (Optional) value;
+                Optional optional = (Optional) value;
                 Message result = optional.isPresent()
                                  ? (Message) optional.get()
                                  : Empty.getDefaultInstance();
@@ -119,11 +121,40 @@ class Element implements Serializable {
         throw newIllegalStateException("Unsupported element type encountered %s", this.type);
     }
 
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeObject(type);
+        final Serializable obj;
+        if (type != Type.OPTIONAL) {
+            obj = (Serializable) value;
+            out.writeObject(obj);
+        } else /* (type == Type.OPTIONAL) */ {
+            Optional<?> optionalValue = (Optional) value;
+            obj = (Serializable) optionalValue.orElse(null);
+        }
+        out.writeObject(obj);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        type = (Type) in.readObject();
+        if (type == Type.OPTIONAL) {
+            value = Optional.ofNullable(in.readObject());
+        }
+        if (type != Type.OPTIONAL) {
+            value = in.readObject();
+        }
+    }
+
+    @SuppressWarnings("NonFinalFieldReferencedInHashCode")
+        // The fields are non-final to support serialization.
+        // Otherwise, they are set only in the constructor.
     @Override
     public int hashCode() {
         return Objects.hash(value, type);
     }
 
+    @SuppressWarnings("NonFinalFieldReferenceInEquals")
+        // The fields are non-final to support serialization.
+        // Otherwise, they are set only in the constructor.
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -132,9 +163,9 @@ class Element implements Serializable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final Element other = (Element) obj;
+        Element other = (Element) obj;
         return Objects.equals(this.value, other.value)
-                && Objects.equals(this.type, other.type);
+                && this.type == other.type;
     }
 
     private enum Type {
@@ -152,7 +183,7 @@ class Element implements Serializable {
 
     /**
      * A marker interface for a tuple element which value can be
-     * {@link com.google.common.base.Optional Optional}.
+     * {@link java.util.Optional Optional}.
      */
     interface OptionalValue {
     }

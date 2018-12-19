@@ -101,7 +101,7 @@ public interface ColumnType<J, S, R, C> {
      * <p>Used if the actual value of the {@link EntityColumn},
      * defined for storing, is {@code null}.
      *
-     * @param storageRecord the database record
+     * @param storageRecord    the database record
      * @param columnIdentifier the identifier of the column, e.g. its index
      * @see #setColumnValue(Object, Object, Object)
      */

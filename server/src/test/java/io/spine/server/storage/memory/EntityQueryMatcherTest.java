@@ -70,35 +70,35 @@ class EntityQueryMatcherTest {
     @Test
     @DisplayName("match everything except null to empty query")
     void matchEverythingToEmpty() {
-        final Collection<Object> idFilter = Collections.emptyList();
-        final EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
+        Collection<Object> idFilter = Collections.emptyList();
+        EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
 
-        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
 
-        assertFalse(matcher.apply(null));
-        assertTrue(matcher.apply(of(EntityRecord.getDefaultInstance())));
+        assertFalse(matcher.test(null));
+        assertTrue(matcher.test(of(EntityRecord.getDefaultInstance())));
     }
 
     @Test
     @DisplayName("match IDs")
     void matchIds() {
-        final Message genericId = Sample.messageOfType(ProjectId.class);
-        final Collection<Object> idFilter = singleton(genericId);
-        final Any entityId = AnyPacker.pack(genericId);
-        final EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
+        Message genericId = Sample.messageOfType(ProjectId.class);
+        Collection<Object> idFilter = singleton(genericId);
+        Any entityId = AnyPacker.pack(genericId);
+        EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
 
-        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
-        final EntityRecord matching = EntityRecord.newBuilder()
-                                                  .setEntityId(entityId)
-                                                  .build();
-        final Any otherEntityId = AnyPacker.pack(Sample.messageOfType(ProjectId.class));
-        final EntityRecord nonMatching = EntityRecord.newBuilder()
-                                                     .setEntityId(otherEntityId)
-                                                     .build();
-        final EntityRecordWithColumns matchingRecord = of(matching);
-        final EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
-        assertTrue(matcher.apply(matchingRecord));
-        assertFalse(matcher.apply(nonMatchingRecord));
+        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        EntityRecord matching = EntityRecord.newBuilder()
+                                            .setEntityId(entityId)
+                                            .build();
+        Any otherEntityId = AnyPacker.pack(Sample.messageOfType(ProjectId.class));
+        EntityRecord nonMatching = EntityRecord.newBuilder()
+                                               .setEntityId(otherEntityId)
+                                               .build();
+        EntityRecordWithColumns matchingRecord = of(matching);
+        EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
+        assertTrue(matcher.test(matchingRecord));
+        assertFalse(matcher.test(nonMatchingRecord));
     }
 
     @SuppressWarnings({"unchecked",           // Mocks <-> reflection issues
@@ -106,99 +106,96 @@ class EntityQueryMatcherTest {
     @Test
     @DisplayName("match columns")
     void matchColumns() {
-        final String targetName = "feature";
-        final Serializable acceptedValue = true;
-        final EntityColumn target = mock(EntityColumn.class);
+        String targetName = "feature";
+        Serializable acceptedValue = true;
+        EntityColumn target = mock(EntityColumn.class);
         when(target.isNullable()).thenReturn(true);
         when(target.getStoredName()).thenReturn(targetName);
         when(target.getType()).thenReturn(Boolean.class);
         when(target.toPersistedValue(any())).thenReturn(acceptedValue);
 
-        final Collection<Object> ids = Collections.emptyList();
+        Collection<Object> ids = Collections.emptyList();
 
-        final Multimap<EntityColumn, ColumnFilter> filters = of(target,
-                                                                eq(targetName, acceptedValue));
-        final CompositeQueryParameter parameter = createParams(filters, ALL);
-        final QueryParameters params = QueryParameters.newBuilder()
-                                                      .add(parameter)
-                                                      .build();
-        final EntityQuery<?> query = createQuery(ids, params);
+        Multimap<EntityColumn, ColumnFilter> filters = of(target, eq(targetName, acceptedValue));
+        CompositeQueryParameter parameter = createParams(filters, ALL);
+        QueryParameters params = QueryParameters.newBuilder()
+                                                .add(parameter)
+                                                .build();
+        EntityQuery<?> query = createQuery(ids, params);
 
-        final Any matchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));
-        final Any nonMatchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));
+        Any matchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));
+        Any nonMatchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));
 
-        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
-        final EntityRecord matching = EntityRecord.newBuilder()
-                                                  .setEntityId(matchingId)
-                                                  .build();
-        final EntityRecord nonMatching = EntityRecord.newBuilder()
-                                                     .setEntityId(nonMatchingId)
-                                                     .build();
-        final EntityColumn.MemoizedValue storedValue = mock(EntityColumn.MemoizedValue.class);
+        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        EntityRecord matching = EntityRecord.newBuilder()
+                                            .setEntityId(matchingId)
+                                            .build();
+        EntityRecord nonMatching = EntityRecord.newBuilder()
+                                               .setEntityId(nonMatchingId)
+                                               .build();
+        EntityColumn.MemoizedValue storedValue = mock(EntityColumn.MemoizedValue.class);
         when(storedValue.getSourceColumn()).thenReturn(target);
         when(storedValue.getValue()).thenReturn(acceptedValue);
-        final Map<String, EntityColumn.MemoizedValue> matchingColumns =
+        Map<String, EntityColumn.MemoizedValue> matchingColumns =
                 ImmutableMap.of(targetName, storedValue);
-        final EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
-        final EntityRecordWithColumns matchingRecord = createRecord(matching, matchingColumns);
+        EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
+        EntityRecordWithColumns matchingRecord = createRecord(matching, matchingColumns);
 
-        assertTrue(matcher.apply(matchingRecord));
-        assertFalse(matcher.apply(nonMatchingRecord));
+        assertTrue(matcher.test(matchingRecord));
+        assertFalse(matcher.test(nonMatchingRecord));
     }
 
     @Test
     @DisplayName("match Any instances")
     void matchAnyInstances() {
-        final String columnName = "column";
+        String columnName = "column";
 
-        final Project someMessage = Sample.messageOfType(Project.class);
-        final Any actualValue = AnyPacker.pack(someMessage);
+        Project someMessage = Sample.messageOfType(Project.class);
+        Any actualValue = AnyPacker.pack(someMessage);
 
-        final EntityColumn column = mock(EntityColumn.class);
+        EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(Any.class);
         when(column.getStoredName()).thenReturn(columnName);
         when(column.toPersistedValue(any())).thenReturn(actualValue);
 
-        final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
+        EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
         when(value.getSourceColumn()).thenReturn(column);
         when(value.getValue()).thenReturn(actualValue);
 
-        final EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        final Map<String, EntityColumn.MemoizedValue> columns = singletonMap(columnName, value);
-        final EntityRecordWithColumns recordWithColumns = createRecord(record, columns);
+        EntityRecord record = Sample.messageOfType(EntityRecord.class);
+        Map<String, EntityColumn.MemoizedValue> columns = singletonMap(columnName, value);
+        EntityRecordWithColumns recordWithColumns = createRecord(record, columns);
 
-        final Multimap<EntityColumn, ColumnFilter> filters = of(column,
-                                                                eq(columnName, actualValue));
-        final CompositeQueryParameter parameter = createParams(filters, ALL);
-        final QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .add(parameter)
-                                                          .build();
-        final EntityQuery<?> query = createQuery(emptySet(), parameters);
+        Multimap<EntityColumn, ColumnFilter> filters = of(column, eq(columnName, actualValue));
+        CompositeQueryParameter parameter = createParams(filters, ALL);
+        QueryParameters parameters = QueryParameters.newBuilder()
+                                                    .add(parameter)
+                                                    .build();
+        EntityQuery<?> query = createQuery(emptySet(), parameters);
 
-        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
-        assertTrue(matcher.apply(recordWithColumns));
+        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        assertTrue(matcher.test(recordWithColumns));
     }
 
     @Test
     @DisplayName("not match by wrong field name")
     void notMatchByWrongField() {
-        final String wrongName = "wrong";
-        final EntityColumn target = mock(EntityColumn.class);
+        String wrongName = "wrong";
+        EntityColumn target = mock(EntityColumn.class);
 
-        final Multimap<EntityColumn, ColumnFilter> filters = of(target,
-                                                                eq(wrongName, "any"));
-        final CompositeQueryParameter parameter = createParams(filters, EITHER);
-        final QueryParameters params = QueryParameters.newBuilder()
-                                                      .add(parameter)
-                                                      .build();
-        final EntityQuery<?> query = createQuery(Collections.emptyList(), params);
-        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
-
-        final EntityRecord record = EntityRecord.newBuilder()
-                                                .setEntityId(Any.getDefaultInstance())
+        Multimap<EntityColumn, ColumnFilter> filters = of(target, eq(wrongName, "any"));
+        CompositeQueryParameter parameter = createParams(filters, EITHER);
+        QueryParameters params = QueryParameters.newBuilder()
+                                                .add(parameter)
                                                 .build();
-        final EntityRecordWithColumns recordWithColumns = of(record);
-        assertFalse(matcher.apply(recordWithColumns));
+        EntityQuery<?> query = createQuery(Collections.emptyList(), params);
+        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+
+        EntityRecord record = EntityRecord.newBuilder()
+                                          .setEntityId(Any.getDefaultInstance())
+                                          .build();
+        EntityRecordWithColumns recordWithColumns = of(record);
+        assertFalse(matcher.test(recordWithColumns));
     }
 
     private static QueryParameters defaultQueryParameters() {

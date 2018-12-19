@@ -22,7 +22,6 @@ syntax = "proto3";
 package spine.test.projection.event;
 
 import "spine/options.proto";
-import "spine/server/entity/entity.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.projection.event";
@@ -33,6 +32,7 @@ import "spine/test/projection/project.proto";
 
 message PrjProjectCreated {
     ProjectId project_id = 1;
+    string name = 2;
 }
 
 message PrjTaskAdded {
@@ -50,4 +50,17 @@ message PrjProjectArchived {
 
 message PrjProjectDeleted {
     ProjectId project_id = 1;
+}
+
+message StringImported {
+    string value = 1;
+}
+
+message Int32Imported {
+    int32 value = 1;
+}
+
+message PairImported {
+    string str = 1;
+    int32 integer = 2;
 }

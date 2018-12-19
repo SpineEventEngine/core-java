@@ -71,16 +71,16 @@ public class ProjectionTransactionTestEnv {
         }
 
         @Subscribe
-        public void event(PrjProjectCreated event) {
+        void event(PrjProjectCreated event) {
             receivedEvents.add(event);
-            final Project newState = Project.newBuilder(getState())
-                                            .setId(event.getProjectId())
-                                            .build();
+            Project newState = Project.newBuilder(getState())
+                                      .setId(event.getProjectId())
+                                      .build();
             getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
-        public void event(PrjTaskAdded event) {
+        void event(PrjTaskAdded event) {
             throw new RuntimeException("that tests the projection tx behaviour");
         }
 

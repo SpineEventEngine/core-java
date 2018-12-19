@@ -21,33 +21,31 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
-import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
-import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
-import io.spine.time.Timestamps2;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.core.CommandContext.Schedule;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Timestamps2.isBetween;
+import static io.spine.protobuf.Timestamps2.isLaterThan;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Client-side utilities for working with commands.
- *
- * @author Alexander Yevsyukov
  */
 public final class Commands {
 
@@ -58,8 +56,8 @@ public final class Commands {
                            .register(idStringifier(), CommandId.class);
     }
 
+    /** Prevent instantiation of this utility class. */
     private Commands() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -68,11 +66,7 @@ public final class Commands {
      * @return new command ID
      */
     public static CommandId generateId() {
-        String value = UUID.randomUUID()
-                           .toString();
-        return CommandId.newBuilder()
-                        .setUuid(value)
-                        .build();
+        return Identifier.generate(CommandId.class);
     }
 
     /**
@@ -81,24 +75,9 @@ public final class Commands {
      * @param command a command to extract a message from
      * @return an unpacked message
      */
-    public static Message getMessage(Command command) {
+    public static CommandMessage getMessage(Command command) {
         checkNotNull(command);
-        return getMessage(command.getMessage());
-    }
-
-    /**
-     * Extracts the message from the passed {@code Command} instance.
-     *
-     * @param command a command to extract a message from
-     * @return an unpacked message
-     */
-    public static Message getMessage(DispatchedCommand command) {
-        checkNotNull(command);
-        return getMessage(command.getMessage());
-    }
-
-    private static Message getMessage(Any message) {
-        Message result = AnyPacker.unpack(message);
+        CommandMessage result = (CommandMessage) unpack(command.getMessage());
         return result;
     }
 
@@ -106,12 +85,13 @@ public final class Commands {
      * Extracts a command message if the passed instance is a {@link Command} object or
      * {@link com.google.protobuf.Any Any}, otherwise returns the passed message.
      */
-    public static Message ensureMessage(Message commandOrMessage) {
+    public static CommandMessage ensureMessage(Message commandOrMessage) {
         checkNotNull(commandOrMessage);
         if (commandOrMessage instanceof Command) {
             return getMessage((Command) commandOrMessage);
         }
-        return io.spine.protobuf.Messages.ensureMessage(commandOrMessage);
+        CommandMessage unpacked = (CommandMessage) Messages.ensureMessage(commandOrMessage);
+        return unpacked;
     }
 
     /**
@@ -144,7 +124,7 @@ public final class Commands {
         return request -> {
             checkNotNull(request);
             Timestamp timestamp = getTimestamp(request);
-            return Timestamps2.isLaterThan(timestamp, from);
+            return isLaterThan(timestamp, from);
         };
     }
 
@@ -157,7 +137,7 @@ public final class Commands {
         return request -> {
             checkNotNull(request);
             Timestamp timestamp = getTimestamp(request);
-            return Timestamps2.isBetween(timestamp, from, to);
+            return isBetween(timestamp, from, to);
         };
     }
 
@@ -237,30 +217,6 @@ public final class Commands {
         String idStr = Identifier.toString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
-    }
-
-    /**
-     * Produces a {@link Rejection} for the given {@link Command} based on the given
-     * {@linkplain ThrowableMessage cause}.
-     *
-     * <p>The given {@link Throwable} should be
-     * {@linkplain Rejections#causedByRejection caused by a Rejection} or
-     * an {@link IllegalArgumentException} is thrown.
-     *
-     * @param command the command to reject
-     * @param cause the rejection cause (may be wrapped into other kinds of {@code Throwable})
-     * @return a {@link Rejection} for the given command
-     * @throws IllegalArgumentException upon an invalid rejection cause
-     */
-    @Internal
-    public static Rejection rejectWithCause(Command command, Throwable cause)
-            throws IllegalArgumentException {
-        checkNotNull(command);
-        checkNotNull(cause);
-
-        ThrowableMessage rejectionThrowable = Rejections.getCause(cause);
-        Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
-        return rejection;
     }
 
     /**

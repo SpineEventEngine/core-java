@@ -20,15 +20,15 @@
 
 package io.spine.testing.server.blackbox.given;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BbProjectCreated;
-import io.spine.testing.server.blackbox.BbTaskAdded;
+import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.ProjectId;
+import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.testing.server.blackbox.event.BbTaskAdded;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -46,7 +46,7 @@ public class EmittedEventsTestEnv {
         // Does nothing.
     }
 
-    public static List<Event> events(int count, Supplier<Message> messageSupplier) {
+    public static List<Event> events(int count, Supplier<EventMessage> messageSupplier) {
         List<Event> events = newArrayList();
         for (int i = 0; i < count; i++) {
             events.add(event(messageSupplier.get()));
@@ -54,7 +54,7 @@ public class EmittedEventsTestEnv {
         return events;
     }
 
-    public static Event event(Message domainEvent) {
+    public static Event event(EventMessage domainEvent) {
         TestEventFactory factory = eventFactory(requestFactory(newTenantId()));
         return factory.createEvent(domainEvent);
     }
@@ -73,8 +73,8 @@ public class EmittedEventsTestEnv {
         return TestActorRequestFactory.newInstance(BlackBoxBoundedContext.class, tenantId);
     }
 
-    private static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
+    private static BbProjectId newProjectId() {
+        return BbProjectId.newBuilder()
                         .setId(newUuid())
                         .build();
     }

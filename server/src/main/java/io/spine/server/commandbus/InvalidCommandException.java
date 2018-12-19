@@ -31,7 +31,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
@@ -66,7 +66,7 @@ public class InvalidCommandException extends CommandException implements Message
     public static InvalidCommandException onConstraintViolations(
             Command command, Iterable<ConstraintViolation> violations) {
 
-        final ConstraintViolationExceptionFactory helper =
+        ConstraintViolationExceptionFactory helper =
                 new ConstraintViolationExceptionFactory(command, violations);
         return helper.newException();
     }
@@ -75,10 +75,10 @@ public class InvalidCommandException extends CommandException implements Message
      * Creates an exception for a command with missing {@code tenant_id} attribute in
      * the {@code CommandContext}, which is required in a multitenant application.
      */
-    public static InvalidCommandException onMissingTenantId(Command command) {
-        final CommandEnvelope envelope = CommandEnvelope.of(command);
-        final Message commandMessage = envelope.getMessage();
-        final String errMsg = format(
+    public static InvalidCommandException missingTenantId(Command command) {
+        CommandEnvelope envelope = CommandEnvelope.of(command);
+        Message commandMessage = envelope.getMessage();
+        String errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to " +
                 "multitenant Command Bus, but has no `tenant_id` attribute in the context.",
                 CommandClass.of(commandMessage)
@@ -86,7 +86,7 @@ public class InvalidCommandException extends CommandException implements Message
                             .getName(),
                 TypeName.of(commandMessage),
                 Identifier.toString(envelope.getId()));
-        final Error error = unknownTenantError(commandMessage, errMsg);
+        Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 
@@ -95,46 +95,50 @@ public class InvalidCommandException extends CommandException implements Message
      * attribute in the {@code CommandContext}, which is required in a multitenant application.
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
-        final Error.Builder error = Error.newBuilder()
+        Error error = Error
+                .newBuilder()
                 .setType(InvalidCommandException.class.getCanonicalName())
                 .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
                 .setMessage(errorText)
-                .putAllAttributes(commandTypeAttribute(commandMessage));
-        return error.build();
+                .putAllAttributes(commandTypeAttribute(commandMessage))
+                .build();
+        return error;
     }
 
-    public static InvalidCommandException onInapplicableTenantId(Command command) {
-        final CommandEnvelope cmd = CommandEnvelope.of(command);
-        final TypeName typeName = TypeName.of(cmd.getMessage());
-        final String errMsg = format(
+    public static InvalidCommandException inapplicableTenantId(Command command) {
+        CommandEnvelope cmd = CommandEnvelope.of(command);
+        TypeName typeName = TypeName.of(cmd.getMessage());
+        String errMsg = format(
                 "The command (class: %s, type: %s, id: %s) was posted to single-tenant " +
                 "CommandBus, but has tenant_id: %s attribute set in the command context.",
                 cmd.getMessageClass(),
                 typeName,
                 cmd.getId(),
                 cmd.getTenantId());
-        final Error error = inapplicableTenantError(cmd.getMessage(), errMsg);
+        Error error = inapplicableTenantError(cmd.getMessage(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 
     private static Error inapplicableTenantError(Message commandMessage, String errMsg) {
-        final Error.Builder error =
-                Error.newBuilder()
-                     .setType(InvalidCommandException.class.getCanonicalName())
-                     .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
-                     .setMessage(errMsg)
-                     .putAllAttributes(commandTypeAttribute(commandMessage));
-        return error.build();
+        Error error = Error
+                .newBuilder()
+                .setType(InvalidCommandException.class.getCanonicalName())
+                .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
+                .setMessage(errMsg)
+                .putAllAttributes(commandTypeAttribute(commandMessage))
+                .build();
+        return error;
     }
     /**
      * A helper utility aimed to create an {@code InvalidCommandException} to report the
      * command which field values violate validation constraint(s).
      */
     private static class ConstraintViolationExceptionFactory
-                                 extends ExceptionFactory<InvalidCommandException,
-                                                          Command,
-                                                          CommandClass,
-                                                          CommandValidationError> {
+            extends ExceptionFactory<InvalidCommandException,
+                                     Command,
+                                     CommandClass,
+                                     CommandValidationError> {
+
         private final CommandClass commandClass;
 
         protected ConstraintViolationExceptionFactory(Command command,

@@ -21,10 +21,8 @@
 package io.spine.testing.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
+import io.spine.base.CommandMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
@@ -33,75 +31,89 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.testing.TestValues;
+import io.spine.testing.client.command.TestCommandMessage;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
+import java.time.ZonedDateTime;
+
 import static io.spine.testing.core.given.GivenUserId.of;
 
 /**
  * An {@code ActorRequestFactory} for running tests.
- *
- * @author Alexaner Yevsyukov
  */
-@Internal
 @VisibleForTesting
 public class TestActorRequestFactory extends ActorRequestFactory {
 
-    protected TestActorRequestFactory(UserId actor, ZoneOffset zoneOffset, ZoneId zoneId) {
-        super(ActorRequestFactory.newBuilder()
-                                 .setActor(actor)
-                                 .setZoneOffset(zoneOffset)
-                                 .setZoneId(zoneId));
+    protected TestActorRequestFactory(UserId actor, ZoneId zoneId) {
+        super(ActorRequestFactory
+                      .newBuilder()
+                      .setActor(actor)
+                      .setZoneOffset(idToZoneOffset(zoneId))
+                      .setZoneId(zoneId)
+        );
     }
 
-    protected TestActorRequestFactory(TenantId tenantId, 
-                                      UserId actor, 
+    protected TestActorRequestFactory(TenantId tenantId,
+                                      UserId actor,
                                       ZoneOffset zoneOffset,
                                       ZoneId zoneId) {
-        super(ActorRequestFactory.newBuilder()
-                                 .setTenantId(tenantId)
-                                 .setActor(actor)
-                                 .setZoneOffset(zoneOffset)
-                                 .setZoneId(zoneId));
+        super(ActorRequestFactory
+                      .newBuilder()
+                      .setTenantId(tenantId)
+                      .setActor(actor)
+                      .setZoneOffset(zoneOffset)
+                      .setZoneId(zoneId)
+        );
     }
 
-    public static TestActorRequestFactory newInstance(String actor, 
-                                                      ZoneOffset zoneOffset,
-                                                      ZoneId zoneId) {
-        return newInstance(of(actor), zoneOffset, zoneId);
+    public static
+    TestActorRequestFactory newInstance(String actor, ZoneId zoneId) {
+        return newInstance(of(actor), zoneId);
     }
 
-    public static TestActorRequestFactory newInstance(UserId actor,
-                                                      ZoneOffset zoneOffset,
-                                                      ZoneId zoneId) {
-        return new TestActorRequestFactory(actor, zoneOffset, zoneId);
+    public static
+    TestActorRequestFactory newInstance(UserId actor, ZoneId zoneId) {
+        return new TestActorRequestFactory(actor, zoneId);
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass) {
-        return newInstance(testClass.getName(), ZoneOffsets.getDefault(), ZoneIds.systemDefault());
+        return newInstance(testClass.getName(), ZoneIds.systemDefault());
     }
 
     public static TestActorRequestFactory newInstance(UserId actor) {
-        return newInstance(actor, ZoneOffsets.getDefault(), ZoneIds.systemDefault());
+        return newInstance(actor, ZoneIds.systemDefault());
     }
 
     public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
-        return new TestActorRequestFactory(tenantId, actor, 
-                                           ZoneOffsets.getDefault(), 
+        return new TestActorRequestFactory(tenantId, actor,
+                                           ZoneOffsets.getDefault(),
                                            ZoneIds.systemDefault());
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
-        return new TestActorRequestFactory(tenantId, 
+        return new TestActorRequestFactory(tenantId,
                                            of(testClass.getName()),
                                            ZoneOffsets.getDefault(),
                                            ZoneIds.systemDefault());
     }
 
+    private static ZoneOffset idToZoneOffset(ZoneId zoneId) {
+        java.time.ZoneId javaZoneId = java.time.ZoneId.of(zoneId.getValue());
+        int offsetInSeconds = ZonedDateTime.now(javaZoneId)
+                                           .getOffset()
+                                           .getTotalSeconds();
+        ZoneOffset offset = ZoneOffset
+                .newBuilder()
+                .setAmountSeconds(offsetInSeconds)
+                .build();
+        return offset;
+    }
+
     /** Creates new command with the passed timestamp. */
-    public Command createCommand(Message message, Timestamp timestamp) {
+    public Command createCommand(CommandMessage message, Timestamp timestamp) {
         Command command = command().create(message);
         return withTimestamp(command, timestamp);
     }
@@ -118,20 +130,27 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         return commandBuilder.build();
     }
 
-    public Command createCommand(Message message) {
+    public Command createCommand(CommandMessage message) {
         Command command = command().create(message);
         return command;
     }
 
-    public CommandEnvelope createEnvelope(Message message) {
+    public CommandEnvelope createEnvelope(CommandMessage message) {
         return CommandEnvelope.of(createCommand(message));
     }
 
     /**
-     * Generates a test instance of a command based on {@link StringValue}
+     * Generates a test instance of a command with the message
+     * {@link io.spine.testing.client.command.TestCommandMessage TestCommandMessage}.
      */
     public Command generateCommand() {
-        return generate();
+        @SuppressWarnings("MagicNumber")
+        String randomSuffix = String.format("%04d", TestValues.random(10_000));
+        TestCommandMessage msg = TestCommandMessage
+                .newBuilder()
+                .setId("random-number-" + randomSuffix)
+                .build();
+        return createCommand(msg);
     }
 
     /**
@@ -141,16 +160,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         Command command = generateCommand();
         CommandEnvelope result = CommandEnvelope.of(command);
         return result;
-    }
-
-    @SuppressWarnings("MagicNumber")
-    private Command generate() {
-        String randomSuffix = String.valueOf(TestValues.random(10_000));
-        StringValue msg = StringValue
-                .newBuilder()
-                .setValue("GeneratedTestCommand" + randomSuffix)
-                .build();
-        return createCommand(msg);
     }
 
     /**

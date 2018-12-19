@@ -20,6 +20,8 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
@@ -29,6 +31,8 @@ import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.client.OrderBy;
+import io.spine.client.Pagination;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
@@ -38,82 +42,63 @@ import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.server.entity.storage.EntityQueries.from;
+import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.order;
+import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.pagination;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EntityQueries utility should")
-class EntityQueriesTest {
+class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
+
+    private EntityQueriesTest() {
+        super(EntityQueries.class);
+    }
+
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
+              .setDefault(Pagination.class, Pagination.getDefaultInstance())
+              .setDefault(EntityFilters.class, EntityFilters.getDefaultInstance())
+              .setDefault(RecordStorage.class, mock(RecordStorage.class))
+              .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
+    }
 
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
                                                     Class<? extends Entity> entityClass) {
+        return createEntityQuery(filters, OrderBy.getDefaultInstance(),
+                                 Pagination.getDefaultInstance(), entityClass);
+    }
+
+    /**
+     * This method is not placed in test environment because it uses package-private 
+     * {@link EntityQueries#from(EntityFilters, OrderBy, Pagination, Collection)}.
+     */
+    private static EntityQuery<?> createEntityQuery(EntityFilters filters,
+                                                    OrderBy orderBy,
+                                                    Pagination pagination,
+                                                    Class<? extends Entity> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return from(filters, entityColumns);
-    }
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(EntityQueries.class);
-    }
-
-    @Nested
-    @DisplayName("not accept null")
-    class NotAcceptNull {
-
-        @SuppressWarnings("ConstantConditions")
-        // The purpose of the check is passing null for @NotNull field.
-        @Test
-        @DisplayName("filters")
-        void filters() {
-            assertThrows(NullPointerException.class, () -> from(null, Collections.emptyList()));
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        // The purpose of the check is passing null for @NotNull field.
-        @Test
-        @DisplayName("storage")
-        void storage() {
-            RecordStorage<?> storage = null;
-            assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), storage));
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        // The purpose of the check is passing null for @NotNull field.
-        @Test
-        @DisplayName("entity class")
-        void entityClass() {
-            Collection<EntityColumn> entityColumns = null;
-            assertThrows(NullPointerException.class,
-                         () -> from(EntityFilters.getDefaultInstance(), entityColumns));
-        }
+        return from(filters, orderBy, pagination, entityColumns);
     }
 
     @Test
@@ -151,10 +136,13 @@ class EntityQueriesTest {
         EntityFilters filters = EntityFilters.getDefaultInstance();
         EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
         assertNotNull(query);
-        assertEquals(0, size(query.getParameters()
-                                  .iterator()));
-        assertTrue(query.getIds()
-                        .isEmpty());
+        
+        assertTrue(query.getIds().isEmpty());
+        
+        QueryParameters parameters = query.getParameters();
+        assertEquals(0, size(parameters.iterator()));
+        assertFalse(parameters.limited());
+        assertFalse(parameters.ordered());
     }
 
     @Test
@@ -198,18 +186,48 @@ class EntityQueriesTest {
 
         Collection<?> ids = query.getIds();
         assertFalse(ids.isEmpty());
-        assertSize(1, ids);
+        assertThat(ids).hasSize(1);
         Object singleId = ids.iterator()
                              .next();
         assertEquals(someGenericId, singleId);
 
-        List<CompositeQueryParameter> values = newArrayList(query.getParameters());
-        assertSize(1, values);
+        QueryParameters parameters = query.getParameters();
+        
+        List<CompositeQueryParameter> values = newArrayList(parameters);
+        assertThat(values).hasSize(1);
+
+        assertFalse(parameters.limited());
+        assertFalse(parameters.ordered());
+        
         CompositeQueryParameter singleParam = values.get(0);
         Collection<ColumnFilter> columnFilters = singleParam.getFilters()
                                                             .values();
         assertEquals(EITHER, singleParam.getOperator());
-        assertContains(versionFilter, columnFilters);
-        assertContains(archivedFilter, columnFilters);
+        IterableSubject assertColumFilters = assertThat(columnFilters);
+        assertColumFilters.contains(versionFilter);
+        assertColumFilters.contains(archivedFilter);
+    }
+
+    @Test
+    @DisplayName("construct queries with limit and order")
+    void constructWithLimitAndOrder() {
+        String expectedColumn = "test";
+        OrderBy.Direction expectedDirection = ASCENDING;
+        int expectedLimit = 10;
+        EntityQuery<?> query = createEntityQuery(EntityFilters.getDefaultInstance(),
+                                                 order(expectedColumn, expectedDirection),
+                                                 pagination(expectedLimit),
+                                                 AbstractEntity.class);
+        assertNotNull(query);
+        
+        QueryParameters parameters = query.getParameters();
+        assertTrue(parameters.ordered());
+        assertTrue(parameters.limited());
+        
+        OrderBy orderBy = parameters.orderBy();
+        assertEquals(expectedColumn, orderBy.getColumn());
+        assertEquals(expectedDirection, orderBy.getDirection());
+        
+        assertEquals(expectedLimit, parameters.limit());
     }
 }

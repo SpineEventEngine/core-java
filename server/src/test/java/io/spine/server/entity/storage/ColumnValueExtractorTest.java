@@ -28,23 +28,20 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.testing.Helpers.assertEmpty;
 import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertEmpty;
-import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-/**
- * @author Dmytro Kuzmin
- */
 @DisplayName("ColumnValueExtractor should")
 class ColumnValueExtractorTest {
 
@@ -56,16 +53,29 @@ class ColumnValueExtractorTest {
         new NullPointerTester().testStaticMethods(ColumnValueExtractor.class, Visibility.PACKAGE);
     }
 
-    @Test
-    @DisplayName("extract column values from entity")
-    void extractColumnValues() {
-        EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
-        Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
+    @Nested
+    @DisplayName("extract column values from")
+    class ExtractColumnValues {
 
-        assertSize(3, columnValues);
-        assertEquals(entity.getSomeMessage(),
-                     columnValues.get("someMessage")
-                                 .getValue());
+        @Test
+        @DisplayName("public entity")
+        void publicEntity() {
+            EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
+            Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
+
+            assertEquals(entity.getSomeMessage(), columnValues.get("someMessage")
+                                                              .getValue());
+        }
+
+        @Test
+        @DisplayName("non-public entity")
+        void nonPublicEntity() {
+            PrivateEntity entity = new PrivateEntity(TEST_ENTITY_ID);
+            Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
+
+            assertEquals(entity.getIntValue(), columnValues.get("intValue")
+                                                           .getValue());
+        }
     }
 
     @Test
@@ -101,17 +111,6 @@ class ColumnValueExtractorTest {
         assertEmpty(columnValues);
     }
 
-    @SuppressWarnings("unchecked") // Okay for test.
-    @Test
-    @DisplayName("handle non-public entity class")
-    void handleNonPublic() {
-        Entity entity = new PrivateEntity(TEST_ENTITY_ID);
-        Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
-
-        assertNotNull(columnValues);
-        assertEmpty(columnValues);
-    }
-
     private static <E extends Entity<?, ?>>
     Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
         Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
@@ -120,10 +119,15 @@ class ColumnValueExtractorTest {
         return columnValueExtractor.extractColumnValues();
     }
 
-    @SuppressWarnings("unused") // Reflective access
+    @SuppressWarnings("WeakerAccess") // Entity column should be public.
     private static class PrivateEntity extends AbstractEntity<String, Any> {
-        protected PrivateEntity(String id) {
+        PrivateEntity(String id) {
             super(id);
+        }
+
+        @Column
+        public int getIntValue() {
+            return 42;
         }
     }
 }

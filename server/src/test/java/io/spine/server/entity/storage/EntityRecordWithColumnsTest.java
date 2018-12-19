@@ -24,11 +24,11 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.TestEntity;
+import io.spine.server.entity.TestEntity.TestEntityBuilder;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.EntityWithoutColumns;
-import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.TestEntity;
 import io.spine.testdata.Sample;
-import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,12 +38,12 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
-import static io.spine.testing.Verify.assertSize;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,12 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EntityRecordWithColumns should")
 class EntityRecordWithColumnsTest {
 
@@ -82,9 +76,9 @@ class EntityRecordWithColumnsTest {
     @DisplayName("be serializable")
     void beSerializable() {
         EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        VersionableEntity<?, ?> entity = Given.entityOfClass(TestEntity.class)
-                                              .withVersion(1)
-                                              .build();
+        VersionableEntity<?, ?> entity = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                                .withVersion(1)
+                                                                .build();
         String columnName = version.name();
         EntityColumn column = findColumn(VersionableEntity.class, columnName);
         MemoizedValue value = column.memoizeFor(entity);
@@ -156,7 +150,7 @@ class EntityRecordWithColumnsTest {
             EntityRecordWithColumns record = of(Sample.messageOfType(EntityRecord.class),
                                                 columnsExpected);
             Collection<String> columnNames = record.getColumnNames();
-            assertSize(1, columnNames);
+            assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
             assertEquals(mockValue, record.getColumnValue(columnName));
         }

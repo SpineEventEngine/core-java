@@ -26,7 +26,7 @@ import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
-import io.spine.protobuf.AnyPacker;
+import io.spine.base.EventMessage;
 import io.spine.core.MessageRejection;
 import io.spine.type.TypeName;
 
@@ -49,7 +49,7 @@ public abstract class EventException extends RuntimeException implements Message
      * <p>We use {@link GeneratedMessageV3} (not {@code Message}) because
      * it is {@link java.io.Serializable Serializable}.
      */
-    private final GeneratedMessageV3 eventMessage;
+    private final EventMessage eventMessage;
 
     /**
      * The error passed with the exception.
@@ -63,15 +63,9 @@ public abstract class EventException extends RuntimeException implements Message
      * @param eventMessage a related event message
      * @param error        an error occurred
      */
-    protected EventException(String messageText, Message eventMessage, Error error) {
+    protected EventException(String messageText, EventMessage eventMessage, Error error) {
         super(messageText);
-        if (eventMessage instanceof GeneratedMessageV3) {
-            this.eventMessage = (GeneratedMessageV3) eventMessage;
-        } else {
-            // In an unlikely case on encountering a message, which is not `GeneratedMessageV3`,
-            // wrap it into `Any`.
-            this.eventMessage = AnyPacker.pack(eventMessage);
-        }
+        this.eventMessage = eventMessage;
         this.error = error;
     }
 
@@ -81,24 +75,19 @@ public abstract class EventException extends RuntimeException implements Message
      * @param eventMessage an event message to get the type from
      */
     public static Map<String, Value> eventTypeAttribute(Message eventMessage) {
-        final String type = TypeName.of(eventMessage)
-                                    .value();
-        final Value value = Value.newBuilder()
-                                 .setStringValue(type)
-                                 .build();
-        final Map<String, Value> result = ImmutableMap.of(ATTR_EVENT_TYPE_NAME, value);
+        String type = TypeName.of(eventMessage)
+                              .value();
+        Value value = Value.newBuilder()
+                           .setStringValue(type)
+                           .build();
+        Map<String, Value> result = ImmutableMap.of(ATTR_EVENT_TYPE_NAME, value);
         return result;
     }
 
     /**
      * Returns a related event message.
      */
-    public Message getEventMessage() {
-        if (eventMessage instanceof Any) {
-            final Any any = (Any) eventMessage;
-            Message unpacked = AnyPacker.unpack(any);
-            return unpacked;
-        }
+    public EventMessage getEventMessage() {
         return eventMessage;
     }
 

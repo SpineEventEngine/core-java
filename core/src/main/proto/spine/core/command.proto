@@ -77,7 +77,9 @@ message Command {
         reserved 1 to 10; // for future priority properties.
 
         // The time when the command was scheduled.
-        // Is set automatically and used only by Spine when re-scheduling a command.
+        //
+        // Set automatically and used only by Spine when re-scheduling a command.
+        //
         google.protobuf.Timestamp scheduling_time = 11;
 
         reserved 12 to 20; // for other scheduling-related properties.
@@ -89,6 +91,7 @@ message Command {
 
 // Meta-information about the command and the environment, which generated the command.
 message CommandContext {
+    option (is) = {java_type: "io.spine.core.MessageContext" generate: true};
 
     // Information about the environment of the user who created the command.
     ActorContext actor_context = 1 [(required) = true];
@@ -152,32 +155,6 @@ enum CommandValidationError {
     // A command is considered a duplicate if its ID matches the ID of another command.
     //
     DUPLICATE = 6;
-}
-
-// This enumeration defines possible statuses of command processing.
-enum CommandStatus {
-    option deprecated = true; // TODO:2018-07-05:dmytro.dashenkov: Delete this type.
-
-    // Reserved value.
-    UNDEFINED = 0;
-
-    // The command has been received by backend and stored.
-    RECEIVED = 1;
-
-    // The command has been received by backend and stored,
-    // but will be delivered to the target later.
-    SCHEDULED = 2;
-
-    // The command has been successfully handled.
-    // Expect one or more events produced in as the result of handling this command.
-    OK = 3; // We name this status with such a short text (e.g. instead of `HANDLED`)
-            // so that an abnormal command status is more visible in diagnostic messages.
-
-    // There was an exception or another kind of technical error during command processing.
-    ERROR = 4;
-
-    // A command was rejected during processing. No events were generated.
-    REJECTED = 5;
 }
 
 // Data from a `Command` which is accessible from the end user code to which

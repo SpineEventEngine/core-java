@@ -27,14 +27,22 @@ import java.util.Collection;
 
 /**
  * A {@code Bus}, which delivers a single message to multiple dispatchers.
- *
+
+ * @param <M> the type of outer objects (containing messages of interest) that are posted to the bus
+ * @param <E> the type of envelopes for outer objects used by this bus
+ * @param <C> the type of message class
+ * @param <D> the type of dispatches used by this bus
  * @author Alex Tymchenko
  */
 public abstract class MulticastBus<M extends Message,
                                    E extends MessageEnvelope<?, M, ?>,
-                                   C extends MessageClass,
+                                   C extends MessageClass<? extends Message>,
                                    D extends MessageDispatcher<C, E, ?>>
         extends Bus<M, E, C, D> {
+
+    protected MulticastBus(BusBuilder<E, M, ?> builder) {
+        super(builder);
+    }
 
     /**
      * Call the dispatchers for the {@code messageEnvelope}.
@@ -43,9 +51,7 @@ public abstract class MulticastBus<M extends Message,
      * @return the number of the dispatchers called, or {@code 0} if there weren't any.
      */
     protected int callDispatchers(E messageEnvelope) {
-        @SuppressWarnings("unchecked")  // it's fine, since the message is validated previously.
-        final C messageClass = (C) messageEnvelope.getMessageClass();
-        final Collection<D> dispatchers = registry().getDispatchers(messageClass);
+        Collection<D> dispatchers = registry().getDispatchers(messageEnvelope);
         for (D dispatcher : dispatchers) {
             dispatcher.dispatch(messageEnvelope);
         }

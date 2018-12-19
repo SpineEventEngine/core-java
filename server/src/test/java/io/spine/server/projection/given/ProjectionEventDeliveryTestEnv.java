@@ -45,18 +45,18 @@ public class ProjectionEventDeliveryTestEnv {
     }
 
     public static Event projectCreated() {
-        final ProjectId projectId = projectId();
-        final TestEventFactory eventFactory =
+        ProjectId projectId = projectId();
+        TestEventFactory eventFactory =
                 TestEventFactory.newInstance(
                         pack(projectId),
                         ProjectionEventDeliveryTestEnv.class
                 );
 
-        final PrjProjectCreated msg = PrjProjectCreated.newBuilder()
-                                                       .setProjectId(projectId)
-                                                       .build();
+        PrjProjectCreated msg = PrjProjectCreated.newBuilder()
+                                                 .setProjectId(projectId)
+                                                 .build();
 
-        final Event result = eventFactory.createEvent(msg);
+        Event result = eventFactory.createEvent(msg);
         return result;
     }
 
@@ -84,7 +84,7 @@ public class ProjectionEventDeliveryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjProjectCreated event) {
+        void on(PrjProjectCreated event) {
             stats.recordCallingThread(getId());
         }
 

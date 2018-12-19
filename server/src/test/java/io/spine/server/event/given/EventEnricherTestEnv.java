@@ -20,20 +20,17 @@
 
 package io.spine.server.event.given;
 
-import com.google.common.base.Function;
-import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
-import io.spine.server.event.EventEnricher;
-import io.spine.server.event.EventEnricherTest;
-import io.spine.server.outbus.enrich.given.StringToPersonName;
-import io.spine.server.outbus.enrich.given.StringToZoneOffset;
+import io.spine.server.event.Enricher;
+import io.spine.server.event.EnricherTest;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -46,6 +43,8 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
@@ -67,9 +66,9 @@ public class EventEnricherTestEnv {
                         .build();
     }
 
-    public static Event createEvent(Message msg) {
-        final TestEventFactory eventFactory = newInstance(EventEnricherTest.class);
-        final Event event = eventFactory.createEvent(msg);
+    public static Event createEvent(EventMessage msg) {
+        TestEventFactory eventFactory = newInstance(EnricherTest.class);
+        Event event = eventFactory.createEvent(msg);
         return event;
     }
 
@@ -194,9 +193,8 @@ public class EventEnricherTestEnv {
             return sharingRequestApproved;
         }
 
-        private static Event createGenericEvent(Message eventMessage) {
-            Any wrappedMessage = pack(eventMessage);
-            Event permissionRevoked = eventFactory().createEvent(wrappedMessage);
+        private static Event createGenericEvent(EventMessage eventMessage) {
+            Event permissionRevoked = eventFactory().createEvent(eventMessage);
             return permissionRevoked;
         }
     }
@@ -207,8 +205,8 @@ public class EventEnricherTestEnv {
         }
 
         /** Creates a new enricher with all required enrichment functions set. */
-        public static EventEnricher newEventEnricher() {
-            EventEnricher.Builder builder = EventEnricher
+        public static Enricher newEventEnricher() {
+            Enricher.Builder builder = Enricher
                     .newBuilder()
                     .add(ProjectId.class, String.class, new GetProjectName())
                     .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
@@ -223,50 +221,51 @@ public class EventEnricherTestEnv {
             return builder.build();
         }
 
-        public static class GetProjectName implements Function<ProjectId, String> {
+        public static class GetProjectName implements BiFunction<ProjectId, EventContext, String> {
             @Override
-            public @Nullable String apply(@Nullable ProjectId id) {
+            public @Nullable String apply(@Nullable ProjectId id, EventContext context) {
                 checkNotNull(id);
-                final String name = "prj_" + id.getId();
+                String name = "prj_" + id.getId();
                 return name;
             }
         }
 
-        public static class GetProjectOwnerId implements Function<ProjectId, UserId> {
+        public static class GetProjectOwnerId implements BiFunction<ProjectId, EventContext, UserId> {
             @Override
-            public @Nullable UserId apply(@Nullable ProjectId id) {
+            public @Nullable UserId apply(@Nullable ProjectId id, EventContext context) {
                 checkNotNull(id);
                 return GivenUserId.of("po_" + id.getId());
             }
         }
 
-        private static final Function<EventId, String> EVENT_ID_TO_STRING =
-                new Function<EventId, String>() {
+        private static final BiFunction<EventId, EventContext, String> EVENT_ID_TO_STRING =
+                new BiFunction<EventId, EventContext, String>() {
                     @Override
-                    public @Nullable String apply(@Nullable EventId input) {
+                    public @Nullable String apply(@Nullable EventId input, EventContext context) {
                         checkNotNull(input);
                         return input.getValue();
                     }
                 };
 
-        private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
-                AbstractMessage::toString;
+        private static final BiFunction<Timestamp, EventContext, String>
+                TIMESTAMP_TO_STRING = (input, context) -> input.toString();
 
-        private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
-                input -> checkNotNull(input).toString();
+        private static final BiFunction<CommandContext, EventContext, String>
+                CMD_CONTEXT_TO_STRING = (input, context) -> checkNotNull(input).toString();
 
-        private static final Function<Any, String> ANY_TO_STRING =
-                input -> checkNotNull(input).toString();
+        private static final BiFunction<Any, EventContext, String>
+                ANY_TO_STRING = (input, context) -> checkNotNull(input).toString();
 
-        private static final Function<Integer, String> VERSION_TO_STRING =
-                input -> checkNotNull(input).toString();
+        private static final BiFunction<Integer, EventContext, String>
+                VERSION_TO_STRING = (input, context) -> checkNotNull(input).toString();
 
-        private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
-                new StringToZoneOffset();
+        private static final BiFunction<String, EventContext, ZoneOffset>
+                STRING_TO_ZONE_OFFSET = new StringToZoneOffset();
 
-        private static final Function<String, PersonName> STRING_TO_PERSON_NAME =
-                new StringToPersonName();
+        private static final BiFunction<String, EventContext, PersonName>
+                STRING_TO_PERSON_NAME = new StringToPersonName();
 
-        private static final Function<String, Integer> STRING_TO_INT = Integer::valueOf;
+        private static final BiFunction<String, EventContext, Integer>
+                STRING_TO_INT = (input, context) -> Integer.valueOf(input);
     }
 }

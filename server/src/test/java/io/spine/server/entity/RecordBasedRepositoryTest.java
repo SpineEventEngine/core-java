@@ -20,13 +20,13 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.truth.IterableSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
@@ -35,8 +35,7 @@ import io.spine.client.EntityIdFilter;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
-import io.spine.testing.Tests;
-import io.spine.testing.server.entity.given.Given;
+import io.spine.testing.server.entity.given.GivenLifecycleFlags;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
@@ -48,19 +47,29 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.reverse;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
+import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.archive;
 import static io.spine.server.entity.TestTransaction.delete;
+import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.assertMatches;
+import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFieldMask;
+import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFilters;
+import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyOrder;
+import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyPagination;
+import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.orderByName;
+import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.pagination;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertNotContains;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -70,13 +79,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
  *
- * @param <E> the type of the {@link Entity} of this repository; the type is checked to implement
- *            {@link TestEntityWithStringColumn} at runtime
+ * @param <E>
+ *         the type of the {@link Entity} of this repository; the type is checked to implement
+ *         {@link TestEntityWithStringColumn} at runtime
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings({"ConstantConditions",
-        "DuplicateStringLiteralInspection" /* Common test display names. */,
-        "unused" /* JUnit nested classes considered unused in abstract class. */})
 public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
         I,
         S extends Message>
@@ -85,23 +92,43 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
 
-    private static <E extends AbstractVersionableEntity<?, ?>>
-    void assertMatches(E entity, FieldMask fieldMask) {
-        Message state = entity.getState();
-        Tests.assertMatchesMask(state, fieldMask);
-    }
-
     protected abstract RecordBasedRepository<I, E, S> createRepository();
 
-    protected abstract E createEntity();
+    protected abstract E createEntity(I id);
+
+    protected final E createEntity(int idValue) {
+        I id = createId(idValue);
+        return createEntity(id);
+    }
 
     protected abstract List<E> createEntities(int count);
 
+    /**
+     * Creates the entities using the supplied names for entities
+     * {@link io.spine.server.entity.given.RecordBasedRepositoryTestEnv#ENTITY_NAME_COLUMN "name"}
+     * state property.
+     */
+    protected abstract List<E> createNamed(int count, Supplier<String> nameSupplier);
+
+    /**
+     * Orders the entities by the
+     * {@link io.spine.server.entity.given.RecordBasedRepositoryTestEnv#ENTITY_NAME_COLUMN "name"}
+     * state property.
+     */
+    protected abstract List<E> orderedByName(List<E> entities);
+
     protected abstract I createId(int value);
+
+    /**
+     * Sets the {@code package-local} {@link AbstractEntity#getState() state} property of an entity.
+     */
+    protected void setEntityState(E entity, S state) {
+        entity.setState(state);
+    }
 
     @BeforeEach
     protected void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         this.repository = createRepository();
         setCurrentTenant(newUuid());
     }
@@ -122,13 +149,17 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @CanIgnoreReturnValue
     private List<E> createAndStoreEntities(RecordBasedRepository<I, E, S> repo, int count) {
         List<E> entities = createEntities(count);
-        for (E entity : entities) {
-            repo.store(entity);
-        }
+        storeEntities(repo, entities);
         return entities;
     }
 
-    private Optional<E> find(I id) {
+    private void storeEntities(RecordBasedRepository<I, E, S> repo, List<E> entities) {
+        for (E entity : entities) {
+            repo.store(entity);
+        }
+    }
+
+    private Optional<E> findById(I id) {
         return repository.find(id);
     }
 
@@ -136,20 +167,22 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         return repository.loadAll(ids);
     }
 
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
     private Iterator<E> loadAll() {
         return repository.loadAll();
-    }
-
-    private Iterator<EntityRecord> loadAllRecords() {
-        return repository.loadAllRecords();
     }
 
     private E loadOrCreate(I id) {
         return repository.findOrCreate(id);
     }
 
+    private Iterator<EntityRecord> loadAllRecords() {
+        return repository.loadAllRecords();
+    }
+
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
     private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
-        return repository.find(filters, firstFieldOnly);
+        return repository.find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
     }
 
     /*
@@ -172,18 +205,17 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("single entity by ID")
         void singleEntityById() {
-            E entity = createEntity();
+            E entity = createEntity(985);
 
             storeEntity(entity);
 
-            final Optional<E> optional = find(entity.getId());
+            Optional<E> optional = findById(entity.getId());
             assertTrue(optional.isPresent());
 
             Entity<?, ?> found = optional.get();
             assertEquals(found, entity);
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("multiple entities by IDs")
         void multipleEntitiesByIds() {
@@ -200,11 +232,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             Collection<E> found = newArrayList(loadMany(ids));
 
-            assertSize(ids.size(), found);
-
-            for (E entity : found) {
-                assertContains(entity, entities);
-            }
+            assertThat(found).hasSize(ids.size());
+            assertThat(entities).containsAllIn(found);
         }
 
         @Test
@@ -212,13 +241,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void entitiesByQuery() {
             I id1 = createId(271);
             I id2 = createId(314);
-            Class<E> entityClass = repository.getEntityClass();
-            E entity1 = Given.entityOfClass(entityClass)
-                             .withId(id1)
-                             .build();
-            E entity2 = Given.entityOfClass(entityClass)
-                             .withId(id2)
-                             .build();
+            E entity1 = createEntity(id1);
+            E entity2 = createEntity(id2);
             repository.store(entity1);
             repository.store(entity2);
 
@@ -237,23 +261,132 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                     .addFilter(aggregatingFilter)
                     .build();
             Collection<E> found = newArrayList(
-                    repository.find(filters, FieldMask.getDefaultInstance())
+                    repository.find(filters, emptyOrder(), emptyPagination(), emptyFieldMask())
             );
-            assertSize(1, found);
-            assertContains(entity1, found);
-            assertNotContains(entity2, found);
+
+            IterableSubject assertThatFound = assertThat(found);
+            assertThatFound.hasSize(1);
+            assertThatFound.contains(entity1);
+            assertThatFound.doesNotContain(entity2);
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("entities by query and field mask")
         void entitiesByQueryAndFields() {
             int count = 10;
             List<E> entities = createAndStoreEntities(repository, count);
-            List<EntityId> ids = Lists.newLinkedList();
 
-            // Find some of the records (half of them in this case)
-            for (int i = 0; i < count / 2; i++) {
+            // Find some of the entities (half of them in this case).
+            int idsToObtain = count / 2;
+            List<EntityId> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
+
+            EntityFilters filters = createEntityIdFilters(ids);
+            FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
+            Iterator<E> readEntities = find(filters, firstFieldOnly);
+            Collection<E> foundList = newArrayList(readEntities);
+
+            assertThat(foundList).hasSize(ids.size());
+            for (E entity : foundList) {
+                assertMatches(entity, firstFieldOnly);
+            }
+        }
+
+        @Test
+        @DisplayName("entities in ascending order")
+        void entitiesInAscendingOrder() {
+            int count = 10;
+            // UUIDs are guaranteed to produced a collection with unordered names. 
+            List<E> entities = createAndStoreNamed(repository, count, Identifier::newUuid);
+
+            Iterator<E> readEntities = repository.find(emptyFilters(), orderByName(ASCENDING),
+                                                       emptyPagination(), emptyFieldMask());
+            Collection<E> foundList = newArrayList(readEntities);
+
+            List<E> expectedList = orderedByName(entities);
+            assertThat(foundList).hasSize(count);
+            assertEquals(expectedList, foundList);
+        }
+
+        @Test
+        @DisplayName("entities in descending order")
+        void entitiesInDescendingOrder() {
+            int count = 10;
+            // UUIDs are guaranteed to produced a collection with unordered names. 
+            List<E> entities = createAndStoreNamed(repository, count, Identifier::newUuid);
+
+            Iterator<E> readEntities = repository.find(emptyFilters(), orderByName(DESCENDING),
+                                                       emptyPagination(), emptyFieldMask());
+            Collection<E> foundList = newArrayList(readEntities);
+
+            List<E> expectedList = reverse(orderedByName(entities));
+            assertThat(foundList).hasSize(count);
+            assertEquals(expectedList, foundList);
+        }
+
+        @Test
+        @DisplayName("limited number of entities")
+        void limitedNumberOfEntities() {
+            int totalCount = 10;
+            int pageSize = 5;
+            // UUIDs are guaranteed to produced a collection with unordered names. 
+            List<E> entities = createAndStoreNamed(repository, totalCount, Identifier::newUuid);
+
+            Iterator<E> readEntities = repository.find(emptyFilters(), orderByName(ASCENDING),
+                                                       pagination(pageSize), emptyFieldMask());
+            Collection<E> foundList = newArrayList(readEntities);
+
+            List<E> expectedList = orderedByName(entities).subList(0, pageSize);
+            assertThat(foundList).hasSize(pageSize);
+            assertEquals(expectedList, foundList);
+        }
+
+        @Test
+        @DisplayName("all entities")
+        void allEntities() {
+            List<E> entities = createAndStoreEntities(repository, 150);
+            Collection<E> found = newArrayList(loadAll());
+
+            IterableSubject assertFoundEntities = assertThat(found);
+
+            assertFoundEntities.hasSize(entities.size());
+
+            assertThat(entities).containsExactlyElementsIn(found);
+        }
+
+        @Test
+        @DisplayName("all entity records")
+        void allEntityRecords() {
+            List<E> entities = createAndStoreEntities(repository, 150);
+            Collection<EntityRecord> found = newArrayList(loadAllRecords());
+            assertThat(found).hasSize(entities.size());
+
+            for (E entity : entities) {
+                final EntityRecordWithColumns record = repository.toRecord(entity);
+                assertThat(found).contains(record.getRecord());
+            }
+        }
+
+        @Test
+        @DisplayName("no entities if repository is empty")
+        void noEntitiesIfEmpty() {
+            Collection<E> found = newArrayList(loadAll());
+            assertThat(found).isEmpty();
+        }
+
+        private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
+            return repository.find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
+        }
+
+        private List<E> createAndStoreNamed(RecordBasedRepository<I, E, S> repo, int count,
+                                            Supplier<String> nameSupplier) {
+            List<E> entities = createNamed(count, nameSupplier);
+            storeEntities(repo, entities);
+            return entities;
+        }
+
+        private List<EntityId> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
+            List<EntityId> ids = Lists.newLinkedList();
+            for (int i = 0; i < count; i++) {
                 Message entityId = (Message) entities.get(i)
                                                      .getId();
                 EntityId id = EntityId.newBuilder()
@@ -261,7 +394,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                                       .build();
                 ids.add(id);
             }
+            return ids;
+        }
 
+        private EntityFilters createEntityIdFilters(List<EntityId> ids) {
             EntityIdFilter filter = EntityIdFilter
                     .newBuilder()
                     .addAllIds(ids)
@@ -270,51 +406,18 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                     .newBuilder()
                     .setIdFilter(filter)
                     .build();
-            Descriptor entityDescriptor =
-                    entities.get(0)
-                            .getState()
-                            .getDescriptorForType();
-            FieldMask firstFieldOnly = FieldMasks.maskOf(entityDescriptor, 1);
-            Iterator<E> readEntities = find(filters, firstFieldOnly);
-            Collection<E> foundList = newArrayList(readEntities);
-
-            assertSize(ids.size(), foundList);
-
-            for (E entity : foundList) {
-                assertMatches(entity, firstFieldOnly);
-            }
+            return filters;
         }
 
-        @Test
-        @DisplayName("all entities")
-        void allEntities() {
-            List<E> entities = createAndStoreEntities(repository, 150);
-            Collection<E> found = newArrayList(loadAll());
-            assertSize(entities.size(), found);
-
-            for (E entity : found) {
-                assertContains(entity, entities);
-            }
+        private FieldMask createFirstFieldOnlyMask(List<E> entities) {
+            E firstEntity = entities.get(0);
+            FieldMask fieldMask = fromFieldNumbers(firstEntity.getDefaultState()
+                                                              .getClass(), 1);
+            return fieldMask;
         }
 
-        @Test
-        @DisplayName("no entities if repository is empty")
-        void noEntitiesIfEmpty() {
-            Collection<E> found = newArrayList(loadAll());
-            assertSize(0, found);
-        }
-
-        @Test
-        @DisplayName("all entity records")
-        void allEntityRecords() {
-            List<E> entities = createAndStoreEntities(repository, 150);
-            Collection<EntityRecord> found = newArrayList(loadAllRecords());
-            assertSize(entities.size(), found);
-
-            for (E entity : entities) {
-                final EntityRecordWithColumns record = repository.toRecord(entity);
-                assertContains(record.getRecord(), found);
-            }
+        private Iterator<E> loadAll() {
+            return repository.loadAll();
         }
     }
 
@@ -331,7 +434,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         assertEquals(id, entity.getId());
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     @DisplayName("handle wrong passed IDs")
     void handleWrongPassedIds() {
@@ -342,15 +444,13 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             ids.add(entities.get(i)
                             .getId());
         }
-        Entity<I, S> sideEntity = createEntity();
+        Entity<I, S> sideEntity = createEntity(375);
         ids.add(sideEntity.getId());
 
         Collection<E> found = newArrayList(loadMany(ids));
-        assertSize(ids.size() - 1, found); // Check we've found all existing items
-
-        for (E entity : found) {
-            assertContains(entity, entities);
-        }
+        IterableSubject assertThatFound = assertThat(found);
+        assertThatFound.hasSize(ids.size() - 1); // Check we've found all existing items
+        assertThatFound.containsExactlyElementsIn(entities);
     }
 
     @Nested
@@ -360,68 +460,55 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("archived")
         void archived() {
-            E entity = createEntity();
+            E entity = createEntity(821);
             I id = entity.getId();
 
             storeEntity(entity);
 
-            assertTrue(find(id).isPresent());
+            assertTrue(findById(id).isPresent());
 
-            entity.setLifecycleFlags(
-                    LifecycleFlags.newBuilder()
-                                  .setArchived(true)
-                                  .build()
-            );
+            entity.setLifecycleFlags(GivenLifecycleFlags.archived());
             storeEntity(entity);
 
-            assertFalse(find(id).isPresent());
+            assertFalse(findById(id).isPresent());
         }
 
         @Test
         @DisplayName("deleted")
         void deleted() {
-            E entity = createEntity();
+            E entity = createEntity(822);
             I id = entity.getId();
 
             storeEntity(entity);
 
-            assertTrue(find(id).isPresent());
+            assertTrue(findById(id).isPresent());
 
-            entity.setLifecycleFlags(
-                    LifecycleFlags
-                            .newBuilder()
-                            .setDeleted(true)
-                            .build()
-            );
+            entity.setLifecycleFlags(GivenLifecycleFlags.deleted());
             storeEntity(entity);
 
-            assertFalse(find(id).isPresent());
+            assertFalse(findById(id).isPresent());
         }
     }
 
     @Test
     @DisplayName("exclude non-active records from entity query")
     void excludeNonActiveRecords() {
-        I archivedId = createId(42);
-        I deletedId = createId(314);
-        I activeId = createId(271);
-
-        E activeEntity = repository.create(activeId);
-        E archivedEntity = repository.create(archivedId);
-        E deletedEntity = repository.create(deletedId);
+        E activeEntity = createEntity(271);
+        E archivedEntity = createEntity(42);
+        E deletedEntity = createEntity(314);
         delete((TransactionalEntity) deletedEntity);
         archive((TransactionalEntity) archivedEntity);
 
         // Fill the storage
-        repository.store(activeEntity);
-        repository.store(archivedEntity);
-        repository.store(deletedEntity);
+        storeEntity(activeEntity);
+        storeEntity(archivedEntity);
+        storeEntity(deletedEntity);
 
-        Iterator<E> found = repository.find(EntityFilters.getDefaultInstance(),
-                                            FieldMask.getDefaultInstance());
+        Iterator<E> found = repository.find(emptyFilters(), emptyOrder(), emptyPagination(),
+                                            emptyFieldMask());
         List<E> foundList = newArrayList(found);
         // Check results
-        assertSize(1, foundList);
+        assertThat(foundList).hasSize(1);
         E actualEntity = foundList.get(0);
         assertEquals(activeEntity, actualEntity);
     }
@@ -429,20 +516,16 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @Test
     @DisplayName("allow any lifecycle if column is involved in query")
     void ignoreLifecycleForColumns() {
-        I archivedId = createId(42);
-        I deletedId = createId(314);
-        I activeId = createId(271);
-
-        E activeEntity = repository.create(activeId);
-        E archivedEntity = repository.create(archivedId);
-        E deletedEntity = repository.create(deletedId);
+        E activeEntity = createEntity(42);
+        E archivedEntity = createEntity(314);
+        E deletedEntity = createEntity(271);
         delete((TransactionalEntity) deletedEntity);
         archive((TransactionalEntity) archivedEntity);
 
         // Fill the storage
-        repository.store(activeEntity);
-        repository.store(archivedEntity);
-        repository.store(deletedEntity);
+        storeEntity(activeEntity);
+        storeEntity(archivedEntity);
+        storeEntity(deletedEntity);
 
         CompositeColumnFilter columnFilter = all(eq(archived.name(), false));
         EntityFilters filters = EntityFilters
@@ -450,11 +533,13 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                 .addFilter(columnFilter)
                 .build();
 
-        Iterator<E> found = repository.find(filters, FieldMask.getDefaultInstance());
+        Iterator<E> found = repository.find(filters, emptyOrder(), emptyPagination(),
+                                            emptyFieldMask());
         Collection<E> foundList = newArrayList(found);
         // Check result
-        assertSize(2, foundList);
-        assertContainsAll(foundList, activeEntity, deletedEntity);
+        IterableSubject assertFoundList = assertThat(foundList);
+        assertFoundList.hasSize(2);
+        assertFoundList.containsExactly(activeEntity, deletedEntity);
     }
 
     @Test

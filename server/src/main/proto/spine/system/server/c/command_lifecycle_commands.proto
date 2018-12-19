@@ -31,73 +31,34 @@ option java_package = "io.spine.system.server";
 option java_outer_classname = "CommandLifecycleCommandsProto";
 option java_multiple_files = true;
 
-import "spine/base/error.proto";
 import "spine/core/command.proto";
-import "spine/core/rejection.proto";
-import "spine/client/entities.proto";
+import "spine/core/event.proto";
+import "spine/system/server/command_lifecycle.proto";
 
-// A comand to receive a new command.
+// Schedules a domain command.
 //
-message ReceiveCommand {
+// See `spine.system.server.ScheduledCommandRecord` projection for the scheduled command
+// representation.
+//
+message ScheduleCommand {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
 
-    // The command.
-    spine.core.Command payload = 2;
+    // The schedule to execute the command.
+    spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
 }
 
-// A comand to acknowledge a command.
+// Assigns a target to a command.
 //
-message AcknowledgeCommand {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-}
-
-// A comand to dispatch a command to a handler.
+// This command is posted when the command target is determined, but before the command is delivered
+// to the target.
 //
-message DispatchCommand {
+message AssignTargetToCommand {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
 
-    // The ID of the entity which the command is dispatched to.
-    spine.client.EntityId receiver = 2;
-}
-
-// A comand to mark a command as handled.
-//
-// Posted only after a successful command handling.
-//
-message MarkCommandAsHandled {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-}
-
-// A comand to mark a command as handled.
-//
-// Posted if the command handler has failed with a runtime error.
-//
-message MarkCommandAsErrored {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-
-    // The runtime error.
-    spine.base.Error error = 2;
-}
-
-// A comand to mark a command as rejected.
-//
-// Posted if the command handler has rejected the command.
-//
-message MarkCommandAsRejected {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-
-    // The command rejection.
-    spine.core.Rejection rejection = 2;
+    // The command target.
+    CommandTarget target = 2 [(valid) = true];
 }

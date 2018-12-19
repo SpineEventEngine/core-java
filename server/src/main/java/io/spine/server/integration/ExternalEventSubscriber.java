@@ -19,31 +19,22 @@
  */
 package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
-import io.spine.protobuf.AnyPacker;
-import io.spine.server.event.EventSubscriber;
-import io.spine.server.event.EventSubscriberClass;
-import io.spine.server.model.Model;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Events.isExternal;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
- * An internal wrapper class, which exposes an {@link EventSubscriber}
+ * An internal wrapper class, which exposes an {@link AbstractEventSubscriber}
  * as an {@link ExternalMessageDispatcher}.
  *
  * <p>Allows to register {@code EventSubscriber}s as dispatchers of
@@ -51,41 +42,27 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  */
-final class ExternalEventSubscriber implements ExternalMessageDispatcher<String> {
+final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>, Logging {
 
-    /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
+    private final AbstractEventSubscriber delegate;
 
-    private final EventSubscriber delegate;
-
-    ExternalEventSubscriber(EventSubscriber delegate) {
+    ExternalEventSubscriber(AbstractEventSubscriber delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public Set<ExternalMessageClass> getMessageClasses() {
-        final EventSubscriberClass<?> subscriberClass =
-                Model.getInstance()
-                     .asEventSubscriberClass(delegate.getClass());
-        final Set<EventClass> extSubscriptions =
-                subscriberClass.getExternalEventSubscriptions();
+        Set<EventClass> extSubscriptions = delegate.getExternalEventClasses();
         return ExternalMessageClass.fromEventClasses(extSubscriptions);
     }
 
     @Override
     public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-        final ExternalMessage externalMessage = envelope.getOuterObject();
-        final Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
-        if (!(unpacked instanceof Event)) {
-            throw newIllegalStateException("Unexpected object %s while dispatching " +
-                                                   "the external event to the event subscriber.",
-                                           Stringifiers.toString(unpacked));
-        }
-        final Event event = (Event) unpacked;
-        checkArgument(isExternal(event.getContext()),
+        EventEnvelope eventEnvelope = envelope.toEventEnvelope();
+        checkArgument(eventEnvelope.isExternal(),
                       "External event expected, but got %s",
-                      Stringifiers.toString(event));
-        return delegate.dispatch(EventEnvelope.of(event));
+                      Stringifiers.toString(eventEnvelope.getOuterObject()));
+        return delegate.dispatch(eventEnvelope);
     }
 
     @Override
@@ -93,16 +70,17 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
         checkNotNull(envelope);
         checkNotNull(exception);
 
-        final MessageClass messageClass = envelope.getMessageClass();
-        final String messageId = Stringifiers.toString(envelope.getId());
-        final String errorMessage =
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = envelope.idAsString();
+        String errorMessage =
                 format("Error handling external event subscription (class: %s id: %s).",
                        messageClass, messageId);
         log().error(errorMessage, exception);
     }
 
-    private Logger log() {
-        return loggerSupplier.get();
+    @Override
+    public boolean canDispatch(ExternalMessageEnvelope envelope) {
+        return delegate.canDispatch(envelope.toEventEnvelope());
     }
 
     @Override

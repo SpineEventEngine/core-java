@@ -20,24 +20,24 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.EventMessage;
 import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.RejectionContext;
 import io.spine.core.Version;
-import io.spine.server.aggregate.given.StorageRecord;
+import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
+import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
 import io.spine.testing.Tests;
 import io.spine.testing.server.TestEventFactory;
@@ -48,19 +48,22 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Lists.transform;
+import static com.google.protobuf.Any.pack;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
+import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.aggregate.given.StorageRecords.sequenceFor;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.testing.server.TestEventFactory.newInstance;
-import static io.spine.time.Durations2.seconds;
 import static io.spine.validate.Validate.isDefault;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.reverse;
@@ -70,13 +73,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names */,
-        "unused" /* JUnit nested classes considered unused in abstract test class */})
 public abstract class AggregateStorageTest
         extends AbstractStorageTest<ProjectId,
                                     AggregateStateRecord,
@@ -125,7 +121,11 @@ public abstract class AggregateStorageTest
 
     @Override
     protected ProjectId newId() {
-        return Sample.messageOfType(ProjectId.class);
+        ProjectId id = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        return id;
     }
 
     @Override
@@ -255,7 +255,7 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("write and read one record")
     void writeAndReadRecord() {
-        AggregateEventRecord expected = StorageRecord.create(getCurrentTime());
+        AggregateEventRecord expected = StorageRecords.create(getCurrentTime());
 
         storage.writeRecord(id, expected);
 
@@ -270,7 +270,6 @@ public abstract class AggregateStorageTest
     @SuppressWarnings({
             "NoopMethodInAbstractClass",
             "RefusedBequest",
-            "MethodDoesntCallSuperMethod"
     })
     @Override
     @Test
@@ -313,7 +312,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
                                                                .setArchived(true)
                                                                .build();
-            storage.writeRecord(id, StorageRecord.create(getCurrentTime()));
+            storage.writeRecord(id, StorageRecords.create(getCurrentTime()));
             storage.writeLifecycleFlags(id, archivedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -325,7 +324,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
                                                               .setDeleted(true)
                                                               .build();
-            storage.writeRecord(id, StorageRecord.create(getCurrentTime()));
+            storage.writeRecord(id, StorageRecords.create(getCurrentTime()));
             storage.writeLifecycleFlags(id, deletedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -365,9 +364,7 @@ public abstract class AggregateStorageTest
             AggregateStateRecord record = newStorageRecord();
             storage.write(id, record);
             storage.writeLifecycleFlags(id, flags);
-            Optional<AggregateStateRecord> read = storage.read(newReadRequest(id));
-            assertTrue(read.isPresent());
-            AggregateStateRecord readRecord = read.get();
+            AggregateStateRecord readRecord = readRecord(id);
             assertEquals(record, readRecord);
         }
     }
@@ -398,8 +395,8 @@ public abstract class AggregateStorageTest
             Version currentVersion = zero();
             for (int i = 0; i < eventsNumber; i++) {
                 Project state = Project.getDefaultInstance();
-                Event event = eventFactory.createEvent(state, currentVersion, timestamp);
-                AggregateEventRecord record = StorageRecord.create(timestamp, event);
+                Event event = eventFactory.createEvent(event(state), currentVersion, timestamp);
+                AggregateEventRecord record = StorageRecords.create(timestamp, event);
                 records.add(record);
                 currentVersion = increment(currentVersion);
             }
@@ -422,15 +419,14 @@ public abstract class AggregateStorageTest
         Timestamp maxTimestamp = Timestamps.MAX_VALUE;
 
         // The first event is an event, which is the oldest, i.e. with the minimal version.
-        Event expectedFirst = eventFactory.createEvent(state, minVersion, maxTimestamp);
-        Event expectedSecond = eventFactory.createEvent(state, maxVersion, minTimestamp);
+        Event expectedFirst = eventFactory.createEvent(event(state), minVersion, maxTimestamp);
+        Event expectedSecond = eventFactory.createEvent(event(state), maxVersion, minTimestamp);
 
         storage.writeEvent(id, expectedSecond);
         storage.writeEvent(id, expectedFirst);
 
-        List<Event> events = storage.read(newReadRequest(id))
-                                    .get()
-                                    .getEventList();
+        AggregateStateRecord record = readRecord(id);
+        List<Event> events = record.getEventList();
         assertTrue(events.indexOf(expectedFirst) < events.indexOf(expectedSecond));
     }
 
@@ -466,7 +462,7 @@ public abstract class AggregateStorageTest
             Timestamp time2 = add(time1, delta);
             Timestamp time3 = add(time2, delta);
 
-            storage.writeRecord(id, StorageRecord.create(time1));
+            storage.writeRecord(id, StorageRecords.create(time1));
             storage.writeSnapshot(id, newSnapshot(time2));
 
             testWriteRecordsAndLoadHistory(time3);
@@ -521,7 +517,7 @@ public abstract class AggregateStorageTest
         for (int i = 0; i < eventCountAfterSnapshot; i++) {
             currentVersion = increment(currentVersion);
             Project state = Project.getDefaultInstance();
-            Event event = eventFactory.createEvent(state, currentVersion);
+            Event event = eventFactory.createEvent(event(state), currentVersion);
             storage.writeEvent(id, event);
         }
 
@@ -542,67 +538,54 @@ public abstract class AggregateStorageTest
         @Test
         @DisplayName("for EventContext")
         void forEventContext() {
-            EventContext enrichedContext = EventContext.newBuilder()
-                                                       .setEnrichment(withOneAttribute())
-                                                       .build();
-            Event event = Event.newBuilder()
-                               .setId(newEventId())
-                               .setContext(enrichedContext)
-                               .setMessage(Any.getDefaultInstance())
-                               .build();
+            EventContext enrichedContext = EventContext
+                    .newBuilder()
+                    .setEnrichment(withOneAttribute())
+                    .build();
+            Event event = Event
+                    .newBuilder()
+                    .setId(newEventId())
+                    .setContext(enrichedContext)
+                    .setMessage(Any.getDefaultInstance())
+                    .build();
             storage.writeEvent(id, event);
-            EventContext loadedContext = storage.read(newReadRequest(id))
-                                                .get()
-                                                .getEvent(0)
-                                                .getContext();
-            assertTrue(isDefault(loadedContext.getEnrichment()));
-        }
 
-        @Test
-        @DisplayName("for origin of RejectionContext type")
-        void forRejectionContextOrigin() {
-            RejectionContext origin = RejectionContext.newBuilder()
-                                                      .setEnrichment(withOneAttribute())
-                                                      .build();
-            EventContext context = EventContext.newBuilder()
-                                               .setRejectionContext(origin)
-                                               .build();
-            Event event = Event.newBuilder()
-                               .setId(newEventId())
-                               .setContext(context)
-                               .setMessage(Any.getDefaultInstance())
-                               .build();
-            storage.writeEvent(id, event);
-            RejectionContext loadedOrigin = storage.read(newReadRequest(id))
-                                                   .get()
-                                                   .getEvent(0)
-                                                   .getContext()
-                                                   .getRejectionContext();
-            assertTrue(isDefault(loadedOrigin.getEnrichment()));
+            AggregateStateRecord record = readRecord(id);
+            EventContext loadedContext = record.getEvent(0)
+                                               .getContext();
+            assertTrue(isDefault(loadedContext.getEnrichment()));
         }
 
         @Test
         @DisplayName("for origin of EventContext type")
         void forEventContextOrigin() {
-            EventContext origin = EventContext.newBuilder()
-                                              .setEnrichment(withOneAttribute())
-                                              .build();
-            EventContext context = EventContext.newBuilder()
-                                               .setEventContext(origin)
-                                               .build();
-            Event event = Event.newBuilder()
-                               .setId(newEventId())
-                               .setContext(context)
-                               .setMessage(Any.getDefaultInstance())
-                               .build();
+            EventContext origin = EventContext
+                    .newBuilder()
+                    .setEnrichment(withOneAttribute())
+                    .build();
+            EventContext context = EventContext
+                    .newBuilder()
+                    .setEventContext(origin)
+                    .build();
+            Event event = Event
+                    .newBuilder()
+                    .setId(newEventId())
+                    .setContext(context)
+                    .setMessage(Any.getDefaultInstance())
+                    .build();
             storage.writeEvent(id, event);
-            EventContext loadedOrigin = storage.read(newReadRequest(id))
-                                               .get()
-                                               .getEvent(0)
-                                               .getContext()
-                                               .getEventContext();
+            AggregateStateRecord record = readRecord(id);
+            EventContext loadedOrigin = record.getEvent(0)
+                                              .getContext()
+                                              .getEventContext();
             assertTrue(isDefault(loadedOrigin.getEnrichment()));
         }
+    }
+
+    private AggregateStateRecord readRecord(ProjectId id) {
+        Optional<AggregateStateRecord> optional = storage.read(newReadRequest(id));
+        assertTrue(optional.isPresent());
+        return optional.get();
     }
 
     @Nested
@@ -628,15 +611,15 @@ public abstract class AggregateStorageTest
         }
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
-        Event expectedEvent = eventFactory.createEvent(Time.getCurrentTime());
+        Event expectedEvent = eventFactory.createEvent(event(Time.getCurrentTime()));
 
         storage.writeEvent(id, expectedEvent);
 
         AggregateReadRequest<I> readRequest = new AggregateReadRequest<>(id, MAX_VALUE);
-        AggregateStateRecord events = storage.read(readRequest)
-                                             .get();
+        Optional<AggregateStateRecord> optional = storage.read(readRequest);
+        assertTrue(optional.isPresent());
+        AggregateStateRecord events = optional.get();
         assertEquals(1, events.getEventCount());
         Event actualEvent = events.getEvent(0);
         assertEquals(expectedEvent, actualEvent);
@@ -644,16 +627,15 @@ public abstract class AggregateStorageTest
         close(storage);
     }
 
-    @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
-    // OK as we write right before we get.
-    protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
+    void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
         List<AggregateEventRecord> records = sequenceFor(id, firstRecordTime);
 
         writeAll(id, records);
 
-        AggregateStateRecord events = storage.read(newReadRequest(id))
-                                             .get();
-        List<Event> expectedEvents = transform(records, TO_EVENT);
+        AggregateStateRecord events = readRecord(id);
+        List<Event> expectedEvents = records.stream()
+                                            .map(TO_EVENT)
+                                            .collect(Collectors.toList());
         List<Event> actualEvents = events.getEventList();
         assertEquals(expectedEvents, actualEvents);
     }
@@ -694,5 +676,12 @@ public abstract class AggregateStorageTest
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }
+    }
+
+    private static EventMessage event(Message entityState) {
+        return StateImported
+                .newBuilder()
+                .setState(pack(entityState))
+                .build();
     }
 }

@@ -22,24 +22,21 @@ package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * A {@link EventDispatcher} which delegates the responsibilities to an aggregated {@link
  * EventDispatcherDelegate delegate instance}.
  *
- * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  * @see EventDispatcherDelegate
  */
@@ -73,6 +70,11 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     }
 
     @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return delegate.getExternalEventClasses();
+    }
+
+    @Override
     public Set<I> dispatch(EventEnvelope envelope) {
         return delegate.dispatchEvent(envelope);
     }
@@ -87,33 +89,11 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
      *
      * @return the external rejection dispatcher proxying calls to the underlying instance
      */
-    public ExternalMessageDispatcher<I> getExternalDispatcher() {
-        return new ExternalMessageDispatcher<I>() {
-            @Override
-            public Set<ExternalMessageClass> getMessageClasses() {
-                final Set<EventClass> eventClasses = delegate.getExternalEventClasses();
-                return ExternalMessageClass.fromEventClasses(eventClasses);
-            }
-
-            @Override
-            public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-                final EventEnvelope eventEnvelope = asEventEnvelope(envelope);
-                final Set<I> ids = delegate.dispatchEvent(eventEnvelope);
-                return ids;
-            }
-
-            @Override
-            public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-                final EventEnvelope eventEnvelope = asEventEnvelope(envelope);
-                delegate.onError(eventEnvelope, exception);
-            }
-        };
-    }
-
-    private static EventEnvelope asEventEnvelope(ExternalMessageEnvelope envelope) {
-        final ExternalMessage externalMessage = envelope.getOuterObject();
-        final Event event = unpack(externalMessage.getOriginalMessage());
-        return EventEnvelope.of(event);
+    @Override
+    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+        return dispatchesExternalEvents()
+               ? Optional.of(new ExternalDispatcher<>(delegate))
+               : Optional.empty();
     }
 
     /**
@@ -127,5 +107,40 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
         return MoreObjects.toStringHelper(this)
                           .add("eventDelegate", delegate.getClass())
                           .toString();
+    }
+
+    /**
+     * An implementation of {@link ExternalMessageDispatcher} which delegates all its calls to
+     * a given {@link EventDispatcherDelegate}.
+     *
+     * @param <I> the type of the dispatcher ID
+     */
+    private static final class ExternalDispatcher<I>
+            implements ExternalMessageDispatcher<I> {
+
+        private final EventDispatcherDelegate<I> delegate;
+
+        private ExternalDispatcher(EventDispatcherDelegate<I> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public Set<ExternalMessageClass> getMessageClasses() {
+            Set<EventClass> eventClasses = delegate.getExternalEventClasses();
+            return ExternalMessageClass.fromEventClasses(eventClasses);
+        }
+
+        @Override
+        public Set<I> dispatch(ExternalMessageEnvelope envelope) {
+            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
+            Set<I> ids = delegate.dispatchEvent(eventEnvelope);
+            return ids;
+        }
+
+        @Override
+        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
+            delegate.onError(eventEnvelope, exception);
+        }
     }
 }

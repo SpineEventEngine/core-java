@@ -20,7 +20,13 @@
 
 package io.spine.server.model.given;
 
+import io.spine.base.RejectionMessage;
+import io.spine.base.ThrowableMessage;
+import io.spine.test.model.Rejections.ProjectAlreadyExists;
+
 import java.io.IOException;
+
+import static io.spine.base.Identifier.newUuid;
 
 /**
  * @author Dmytro Kuzmin
@@ -49,8 +55,21 @@ public class MethodExceptionCheckerTestEnv {
             throw new IOException("Test custom exception");
         }
 
-        private static void methodDescendantException() throws IllegalStateException {
-            throw new IllegalStateException("Test descendant exception");
+        private static void methodDescendantException() throws DescendantThrowableMessage {
+            ProjectAlreadyExists rejection = ProjectAlreadyExists
+                    .newBuilder()
+                    .setId(newUuid())
+                    .build();
+            throw new DescendantThrowableMessage(rejection);
+        }
+    }
+
+    private static class DescendantThrowableMessage extends ThrowableMessage {
+
+        private static final long serialVersionUID = 0L;
+
+        DescendantThrowableMessage(RejectionMessage message) {
+            super(message);
         }
     }
 }

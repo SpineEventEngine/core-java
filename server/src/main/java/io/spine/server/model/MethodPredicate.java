@@ -20,10 +20,10 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,11 +35,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class MethodPredicate implements Predicate<Method> {
 
     @Override
-    public boolean apply(@Nullable Method method) {
+    public boolean test(@Nullable Method method) {
         checkNotNull(method);
-        final boolean result = verifyAnnotation(method)
-                               && verifyParams(method)
-                               && verifyReturnType(method);
+        boolean result = verifyAnnotation(method)
+                && verifyParams(method)
+                && verifyReturnType(method);
         return result;
     }
 

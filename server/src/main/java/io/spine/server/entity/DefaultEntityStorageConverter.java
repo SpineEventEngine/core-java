@@ -30,40 +30,39 @@ import io.spine.type.TypeUrl;
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <S> the type of entity states
- * @author Alexander Yevsyukov
  */
 class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
 
-    private DefaultEntityStorageConverter(TypeUrl entityStateType,
+    private DefaultEntityStorageConverter(TypeUrl stateType,
                                           EntityFactory<I, E> factory,
                                           FieldMask fieldMask) {
-        super(entityStateType, factory, fieldMask);
+        super(stateType, factory, fieldMask);
     }
 
     static <I, E extends AbstractEntity<I, S>, S extends Message>
-    EntityStorageConverter<I, E, S> forAllFields(TypeUrl entityStateType,
-                                                 EntityFactory<I, E> factory) {
-        return new DefaultEntityStorageConverter<>(entityStateType,
-                                                   factory,
-                                                   FieldMask.getDefaultInstance());
+    EntityStorageConverter<I, E, S> forAllFields(TypeUrl stateType, EntityFactory<I, E> factory) {
+        FieldMask allFields = FieldMask.getDefaultInstance();
+        return new DefaultEntityStorageConverter<>(stateType, factory, allFields);
     }
 
     @Override
     public EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
-        return new DefaultEntityStorageConverter<>(getEntityStateType(),
-                                                   getEntityFactory(),
-                                                   fieldMask);
+        TypeUrl stateType = getEntityStateType();
+        EntityFactory<I, E> factory = getEntityFactory();
+        return new DefaultEntityStorageConverter<>(stateType, factory, fieldMask);
     }
 
     /**
      * Sets lifecycle flags in the builder from the entity, if the entity is
      * {@linkplain AbstractVersionableEntity versionable}.
      *
-     * @param builder the entity builder to update
-     * @param entity  the entity which data is passed to the {@link EntityRecord} we are building
+     * @param builder
+     *         the entity builder to update
+     * @param entity
+     *         the entity which data is passed to the {@link EntityRecord} we are building
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
@@ -83,21 +82,18 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
      * <p>If not, {@code IllegalStateException} is thrown suggesting to provide a custom
      * {@link EntityStorageConverter} in the repository which manages entities of this class.
      *
-     * @param entity       the entity to inject the state
-     * @param state        the state message to inject
-     * @param entityRecord the {@link EntityRecord} which contains additional attributes that may be
-     *                     injected
+     * @param entity
+     *         the entity to inject the state
+     * @param state
+     *         the state message to inject
+     * @param entityRecord
+     *         the {@link EntityRecord} which contains additional attributes that may be injected
      */
-    @SuppressWarnings({
-            "ChainOfInstanceofChecks" /* `DefaultEntityStorageConverter` supports conversion of
-                entities derived from standard abstract classes. A custom `Entity` class needs a
-                custom state injection. We do not want to expose state injection in the `Entity`
-                interface.*/,
-            "unchecked" /* The state type is the same as the parameter of this class. */})
+    @SuppressWarnings("unchecked" /* The state type is the same as the parameter of this class. */)
     @Override
     protected void injectState(E entity, S state, EntityRecord entityRecord) {
         if (entity instanceof AbstractVersionableEntity) {
-            final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+            AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             versionable.updateState(state, entityRecord.getVersion());
             versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
         } else {

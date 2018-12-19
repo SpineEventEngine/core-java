@@ -21,26 +21,20 @@
 package io.spine.server.aggregate.given;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.FloatValue;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.React;
-import io.spine.core.RejectionContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -48,10 +42,11 @@ import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.event.React;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
-import io.spine.server.route.RejectionRoute;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -68,6 +63,11 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.aggregate.number.DoNothing;
+import io.spine.test.aggregate.number.FloatEncountered;
+import io.spine.test.aggregate.number.NumberPassed;
+import io.spine.test.aggregate.number.RejectNegativeInt;
+import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.test.aggregate.rejection.AggCannotStartArchivedProject;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.testdata.Sample;
@@ -78,24 +78,25 @@ import io.spine.validate.StringValueVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import static io.spine.core.Events.nothing;
+import static com.google.common.collect.ImmutableSet.copyOf;
+import static io.spine.testdata.Sample.builderForType;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored"})
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class AggregateRepositoryTestEnv {
 
     private static final TestActorRequestFactory requestFactory = newRequestFactory();
     private static BoundedContext boundedContext = newBoundedContext();
     private static ProjectAggregateRepository repository = newRepository();
 
+    /** Prevent instantiation of this utility class. */
     private AggregateRepositoryTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     public static TestActorRequestFactory requestFactory() {
@@ -146,14 +147,14 @@ public class AggregateRepositoryTestEnv {
     }
 
     private static TestActorRequestFactory newRequestFactory() {
-        final TestActorRequestFactory requestFactory =
+        TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(AggregateRepositoryTest.class);
         return requestFactory;
     }
 
     private static BoundedContext newBoundedContext() {
-        final BoundedContext context = BoundedContext.newBuilder()
-                                                     .build();
+        BoundedContext context = BoundedContext.newBuilder()
+                                               .build();
         return context;
     }
 
@@ -161,11 +162,6 @@ public class AggregateRepositoryTestEnv {
         return new ProjectAggregateRepository();
     }
 
-    /** Generates a command for the passed message and wraps it into the envelope. */
-    private static CommandEnvelope env(Message commandMessage) {
-        return CommandEnvelope.of(requestFactory.command()
-                                                .create(commandMessage));
-    }
 
     /** Utility factory for test aggregates. */
     public static class GivenAggregate {
@@ -179,28 +175,28 @@ public class AggregateRepositoryTestEnv {
         }
 
         public static ProjectAggregate withUncommittedEvents(ProjectId id) {
-            final ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
-                                                    .withId(id)
-                                                    .build();
+            ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
+                                              .withId(id)
+                                              .build();
 
-            final AggCreateProject createProject =
-                    ((AggCreateProject.Builder) Sample.builderForType(AggCreateProject.class))
-                            .setProjectId(id)
-                            .build();
-            final AggAddTask addTask =
-                    ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
-                            .setProjectId(id)
-                            .build();
-            final AggStartProject startProject =
-                    ((AggStartProject.Builder) Sample.builderForType(AggStartProject.class))
-                            .setProjectId(id)
-                            .build();
+            AggCreateProject.Builder createProject = builderForType(AggCreateProject.class);
+            createProject.setProjectId(id);
+            AggAddTask.Builder addTask = builderForType(AggAddTask.class);
+            addTask.setProjectId(id);
+            AggStartProject.Builder startProject = builderForType(AggStartProject.class);
+            startProject.setProjectId(id);
 
-            dispatchCommand(aggregate, env(createProject));
-            dispatchCommand(aggregate, env(addTask));
-            dispatchCommand(aggregate, env(startProject));
+            dispatchCommand(aggregate, env(createProject.build()));
+            dispatchCommand(aggregate, env(addTask.build()));
+            dispatchCommand(aggregate, env(startProject.build()));
 
             return aggregate;
+        }
+
+        /** Generates a command for the passed message and wraps it into the envelope. */
+        private static CommandEnvelope env(CommandMessage commandMessage) {
+            return CommandEnvelope.of(requestFactory.command()
+                                                    .create(commandMessage));
         }
     }
 
@@ -212,11 +208,6 @@ public class AggregateRepositoryTestEnv {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
-        }
-
-        @Override
-        public int uncommittedEventsCount() {
-            return super.uncommittedEventsCount();
         }
 
         @Assign
@@ -264,14 +255,16 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
+        Optional<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(AggProjectArchived.newBuilder()
-                                                          .setProjectId(getId())
-                                                          .build());
+                AggProjectArchived reaction = AggProjectArchived.newBuilder()
+                                                             .setProjectId(getId())
+                                                             .build();
+                return of(reaction);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         @Apply
@@ -284,14 +277,16 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+        Optional<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(AggProjectDeleted.newBuilder()
-                                                         .setProjectId(getId())
-                                                         .build());
+                AggProjectDeleted reaction = AggProjectDeleted.newBuilder()
+                                                           .setProjectId(getId())
+                                                           .build();
+                return of(reaction);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         /**
@@ -341,7 +336,7 @@ public class AggregateRepositoryTestEnv {
                                @Override
                                public Set<ProjectId> apply(AggProjectArchived msg,
                                                            EventContext ctx) {
-                                   return ImmutableSet.copyOf(msg.getChildProjectIdList());
+                                   return copyOf(msg.getChildProjectIdList());
                                }
                            })
                     .route(AggProjectDeleted.class,
@@ -351,7 +346,7 @@ public class AggregateRepositoryTestEnv {
                                @Override
                                public Set<ProjectId> apply(AggProjectDeleted msg,
                                                            EventContext ctx) {
-                                   return ImmutableSet.copyOf(msg.getChildProjectIdList());
+                                   return copyOf(msg.getChildProjectIdList());
                                }
                            });
         }
@@ -359,7 +354,7 @@ public class AggregateRepositoryTestEnv {
         @Override
         public Optional<ProjectAggregate> find(ProjectId id) {
             if (id.equals(troublesome)) {
-                return Optional.absent();
+                return empty();
             }
             return super.find(id);
         }
@@ -372,6 +367,20 @@ public class AggregateRepositoryTestEnv {
         @Override
         public AggregateStorage<ProjectId> aggregateStorage() {
             return super.aggregateStorage();
+        }
+    }
+
+    /**
+     * A repository for {@link ProjectAggregate}s which never posts any events, domain or system.
+     */
+    public static class EventDiscardingAggregateRepository
+            extends ProjectAggregateRepository {
+
+        private static final EventFilter discardAll = anyEvent -> empty();
+
+        @Override
+        protected EventFilter eventFilter() {
+            return discardAll;
         }
     }
 
@@ -392,54 +401,65 @@ public class AggregateRepositoryTestEnv {
         }
 
         @SuppressWarnings("NumericCastThatLosesPrecision") // Int. part as ID.
-        static long toId(FloatValue message) {
-            final float floatValue = message.getValue();
+        static long toId(FloatEncountered message) {
+            float floatValue = message.getNumber();
             return (long) Math.abs(floatValue);
         }
 
         /** Rejects a negative value via command rejection. */
         @Assign
-        Timestamp on(UInt32Value value) {
-            if (value.getValue() < 0) {
+        NumberPassed on(RejectNegativeInt value) {
+            if (value.getNumber() < 0) {
                 throw new IllegalArgumentException("Negative value passed");
             }
-            return Time.getCurrentTime();
+            return now();
         }
 
         /** Rejects a negative value via command rejection. */
         @Assign
-        Timestamp on(UInt64Value value) throws CannotModifyArchivedEntity {
-            if (value.getValue() < 0) {
-                throw new CannotModifyArchivedEntity(Identifier.pack(getId()));
+        NumberPassed on(RejectNegativeLong value) throws CannotModifyArchivedEntity {
+            if (value.getNumber() < 0L) {
+                throw CannotModifyArchivedEntity
+                        .newBuilder()
+                        .setEntityId(Identifier.pack(getId()))
+                        .build();
             }
-            return Time.getCurrentTime();
+            return now();
         }
 
         /** Invalid command handler, which does not produce events. */
         @Assign
-        List<Message> on(Int32Value value) {
+        List<Message> on(DoNothing value) {
             return emptyList();
         }
 
-        @Apply
-        void apply(Timestamp timestamp) {
-            getBuilder().setValue(getState().getValue()
-                                          + System.lineSeparator()
-                                          + Timestamps.toString(timestamp));
-        }
-
         @React
-        Timestamp on(FloatValue value) {
-            final float floatValue = value.getValue();
+        NumberPassed on(FloatEncountered value) {
+            float floatValue = value.getNumber();
             if (floatValue < 0) {
-                final long longValue = toId(value);
+                long longValue = toId(value);
                 // Complain only if the passed value represents ID of this aggregate.
                 // This would allow other aggregates react on this message.
                 if (longValue == getId()) {
                     throw new IllegalArgumentException("Negative floating point value passed");
                 }
             }
-            return Time.getCurrentTime();
+            return now();
+        }
+
+        @Apply
+        void apply(NumberPassed event) {
+            getBuilder().setValue(getState().getValue()
+                                          + System.lineSeparator()
+                                          + Timestamps.toString(event.getWhen()));
+        }
+
+        private static NumberPassed now() {
+            Timestamp time = Time.getCurrentTime();
+            return NumberPassed
+                    .newBuilder()
+                    .setWhen(time)
+                    .build();
         }
     }
 
@@ -458,14 +478,14 @@ public class AggregateRepositoryTestEnv {
             super();
             getCommandRouting().replaceDefault(
                     // Simplistic routing function that takes absolute value as ID.
-                    new CommandRoute<Long, Message>() {
+                    new CommandRoute<Long, CommandMessage>() {
                         private static final long serialVersionUID = 0L;
 
                         @Override
-                        public Long apply(Message message, CommandContext context) {
-                            if (message instanceof UInt32Value) {
-                                UInt32Value uInt32Value = (UInt32Value) message;
-                                return (long) Math.abs(uInt32Value.getValue());
+                        public Long apply(CommandMessage message, CommandContext context) {
+                            if (message instanceof RejectNegativeInt) {
+                                RejectNegativeInt event = (RejectNegativeInt) message;
+                                return (long) Math.abs(event.getNumber());
                             }
                             return 0L;
                         }
@@ -473,17 +493,17 @@ public class AggregateRepositoryTestEnv {
             );
 
             getEventRouting().replaceDefault(
-                    new EventRoute<Long, Message>() {
+                    new EventRoute<Long, EventMessage>() {
                         private static final long serialVersionUID = 0L;
 
                         /**
                          * Returns several entity identifiers to check error isolation.
-                         * @see FailingAggregate#on(FloatValue)
+                         * @see FailingAggregate#on(FloatEncountered)
                          */
                         @Override
-                        public Set<Long> apply(Message message, EventContext context) {
-                            if (message instanceof FloatValue) {
-                                final long absValue = FailingAggregate.toId((FloatValue) message);
+                        public Set<Long> apply(EventMessage message, EventContext context) {
+                            if (message instanceof FloatEncountered) {
+                                long absValue = FailingAggregate.toId((FloatEncountered) message);
                                 return ImmutableSet.of(absValue, absValue + 100, absValue + 200);
                             }
                             return ImmutableSet.of(1L, 2L);
@@ -548,14 +568,17 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
+        Optional<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(AggProjectArchived.newBuilder()
-                                                          .setProjectId(getId())
-                                                          .build());
+                AggProjectArchived reaction = AggProjectArchived
+                        .newBuilder()
+                        .setProjectId(getId())
+                        .build();
+                return of(reaction);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         /**
@@ -563,14 +586,17 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+        Optional<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
-                return ImmutableList.of(AggProjectDeleted.newBuilder()
-                                                         .setProjectId(getId())
-                                                         .build());
+                AggProjectDeleted reaction = AggProjectDeleted
+                        .newBuilder()
+                        .setProjectId(getId())
+                        .build();
+                return of(reaction);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         @Apply
@@ -601,7 +627,7 @@ public class AggregateRepositoryTestEnv {
                                @Override
                                public Set<ProjectId> apply(AggProjectArchived message,
                                                            EventContext context) {
-                                   return ImmutableSet.copyOf(message.getChildProjectIdList());
+                                   return copyOf(message.getChildProjectIdList());
                                }
                            });
         }
@@ -638,7 +664,10 @@ public class AggregateRepositoryTestEnv {
 
         @Assign
         AggProjectStarted on(AggStartProjectWithChildren cmd) throws AggCannotStartArchivedProject {
-            throw new AggCannotStartArchivedProject(getId(), getState().getItemList());
+            throw AggCannotStartArchivedProject.newBuilder()
+                    .setProjectId(getId())
+                    .addAllChildProjectId(getState().getItemList())
+                    .build();
         }
     }
 
@@ -660,15 +689,16 @@ public class AggregateRepositoryTestEnv {
         }
 
         @React
-        private Iterable<AggProjectArchived> on(
-                Rejections.AggCannotStartArchivedProject rejection) {
-            final List<ProjectId> childIdList = rejection.getChildProjectIdList();
+        Optional<AggProjectArchived> on(Rejections.AggCannotStartArchivedProject rejection) {
+            List<ProjectId> childIdList = rejection.getChildProjectIdList();
             if (childIdList.contains(getId())) {
-                return ImmutableList.of(AggProjectArchived.newBuilder()
-                                                          .setProjectId(getId())
-                                                          .build());
+                AggProjectArchived event = AggProjectArchived.newBuilder()
+                                                             .setProjectId(getId())
+                                                             .build();
+                return of(event);
+            } else {
+                return empty();
             }
-            return nothing();
         }
 
         @Apply
@@ -683,17 +713,17 @@ public class AggregateRepositoryTestEnv {
 
         public RejectionReactingRepository() {
             super();
-            getRejectionRouting()
+            getEventRouting()
                     .route(Rejections.AggCannotStartArchivedProject.class,
-                           new RejectionRoute<ProjectId,
+                           new EventRoute<ProjectId,
                                    Rejections.AggCannotStartArchivedProject>() {
                                private static final long serialVersionUID = 0L;
 
                                @Override
                                public Set<ProjectId> apply(
                                        Rejections.AggCannotStartArchivedProject message,
-                                       RejectionContext context) {
-                                   return ImmutableSet.copyOf(message.getChildProjectIdList());
+                                       EventContext context) {
+                                   return copyOf(message.getChildProjectIdList());
                                }
                            });
         }

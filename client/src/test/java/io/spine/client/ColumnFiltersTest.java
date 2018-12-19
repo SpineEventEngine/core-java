@@ -25,7 +25,6 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter.Operator;
-import io.spine.protobuf.AnyPacker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
@@ -48,19 +48,15 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertContainsAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
-@SuppressWarnings("InnerClassMayBeStatic") // JUnit nested classes cannot be static.
 @DisplayName("ColumnFilters utility should")
 class ColumnFiltersTest {
 
@@ -121,7 +117,7 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("`equals` for enumerated types")
         void equalsForEnum() {
-            final ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
+            ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
             assertEquals(ENUM_COLUMN_NAME, filter.getColumnName());
             assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
             assertEquals(EQUAL, filter.getOperator());
@@ -142,7 +138,7 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("`all`")
         void all() {
-            final ColumnFilter[] filters = {
+            ColumnFilter[] filters = {
                     le(COLUMN_NAME, COLUMN_VALUE),
                     ge(COLUMN_NAME, COLUMN_VALUE)
             };
@@ -152,7 +148,7 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("`either`")
         void either() {
-            final ColumnFilter[] filters = {
+            ColumnFilter[] filters = {
                     lt(COLUMN_NAME, COLUMN_VALUE),
                     gt(COLUMN_NAME, COLUMN_VALUE)
             };
@@ -163,7 +159,7 @@ class ColumnFiltersTest {
                                           CompositeOperator operator,
                                           ColumnFilter[] groupedFilters) {
             assertEquals(operator, filter.getOperator());
-            assertContainsAll(filter.getFilterList(), groupedFilters);
+            assertThat(filter.getFilterList()).containsAllIn(groupedFilters);
         }
     }
 
@@ -174,22 +170,22 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("for numbers")
         void forNumbers() {
-            final double number = 3.14;
-            final ColumnFilter filter = le("doubleColumn", number);
+            double number = 3.14;
+            ColumnFilter filter = le("doubleColumn", number);
             assertNotNull(filter);
             assertEquals(LESS_OR_EQUAL, filter.getOperator());
-            final DoubleValue value = AnyPacker.unpack(filter.getValue());
+            DoubleValue value = unpack(filter.getValue(), DoubleValue.class);
             assertEquals(number, value.getValue());
         }
 
         @Test
         @DisplayName("for strings")
         void forStrings() {
-            final String theString = "abc";
-            final ColumnFilter filter = gt("stringColumn", theString);
+            String theString = "abc";
+            ColumnFilter filter = gt("stringColumn", theString);
             assertNotNull(filter);
             assertEquals(GREATER_THAN, filter.getOperator());
-            final StringValue value = AnyPacker.unpack(filter.getValue());
+            StringValue value = unpack(filter.getValue(), StringValue.class);
             assertEquals(theString, value.getValue());
         }
     }
@@ -208,14 +204,14 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("for non primitive number types")
         void forNonPrimitiveNumbers() {
-            final AtomicInteger number = new AtomicInteger(42);
+            AtomicInteger number = new AtomicInteger(42);
             assertThrows(IllegalArgumentException.class, () -> ge("atomicColumn", number));
         }
 
         @Test
         @DisplayName("for not supported types")
         void forUnsupportedTypes() {
-            final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
+            Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
             assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
         }
     }

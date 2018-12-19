@@ -20,9 +20,10 @@
 
 package io.spine.server.entity;
 
+import io.spine.core.Version;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
-import io.spine.testing.server.entity.given.Given;
+import io.spine.testing.server.entity.EntityBuilder;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -34,32 +35,40 @@ import static io.spine.base.Identifier.newUuid;
 public class TestEntity extends AbstractVersionableEntity<String, Project> {
 
     static TestEntity newInstance(String id) {
-        final TestEntity result = Given.entityOfClass(TestEntity.class)
-                                       .withId(id)
-                                       .build();
+        TestEntity result = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                   .withId(id)
+                                                   .build();
         return result;
     }
 
     static TestEntity withState() {
-        final TestEntity result = Given.entityOfClass(TestEntity.class)
-                                       .withId(newUuid())
-                                       .withState(Sample.messageOfType(Project.class))
-                                       .withVersion(3)
-                                       .build();
+        TestEntity result = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                   .withId(newUuid())
+                                                   .withState(Sample.messageOfType(Project.class))
+                                                   .withVersion(3)
+                                                   .build();
         return result;
     }
 
     static TestEntity withStateOf(TestEntity entity) {
-        final TestEntity result = Given.entityOfClass(TestEntity.class)
-                                       .withId(entity.getId())
-                                       .withState(entity.getState())
-                                       .withVersion(entity.getVersion()
-                                                          .getNumber())
-                                       .build();
+        TestEntity result = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                   .withId(entity.getId())
+                                                   .withState(entity.getState())
+                                                   .withVersion(entity.getVersion()
+                                                   .getNumber())
+                                                   .build();
         return result;
     }
 
     private TestEntity(String id) {
         super(id);
+    }
+
+    public static class TestEntityBuilder extends EntityBuilder<TestEntity, String, Project> {
+
+        @Override
+        protected void setState(TestEntity result, Project state, Version version) {
+            // NoOp.
+        }
     }
 }

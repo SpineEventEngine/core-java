@@ -21,13 +21,16 @@
 package io.spine.server.entity.storage.given;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.StringValue;
 import io.spine.core.Version;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.Enumerated;
+import io.spine.validate.StringValueVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -37,9 +40,6 @@ import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCC
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Grankin
- */
 public class ColumnTestEnv {
 
     public static final String CUSTOM_COLUMN_NAME = " customColumnName ";
@@ -60,19 +60,39 @@ public class ColumnTestEnv {
     @SuppressWarnings("unused") // Reflective access
     public static class TestEntity extends AbstractVersionableEntity<String, Any> {
 
-        private int mutableState = 0;
+        private @Nullable Integer mutableState = 0;
 
         public TestEntity(String id) {
             super(id);
         }
+        
+        public TestEntity(String id, @Nullable Integer state) {
+            super(id);
+            this.mutableState = state;
+        }
 
         @Column
-        public int getMutableState() {
+        public @Nullable Integer getMutableState() {
             return mutableState;
         }
 
-        public void setMutableState(int mutableState) {
+        public void setMutableState(@Nullable Integer mutableState) {
             this.mutableState = mutableState;
+        }
+
+        @Column
+        public boolean isBoolean() {
+            return true;
+        }
+
+        @Column
+        public @Nullable Boolean isBooleanWrapper() {
+            return true;
+        }
+
+        @Column
+        public int isNonBoolean() {
+            return 1;
         }
 
         @Column
@@ -120,6 +140,13 @@ public class ColumnTestEnv {
         @Column
         public static String getStatic() {
             return "";
+        }
+    }
+
+    public static class TestAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
+
+        protected TestAggregate(Long id) {
+            super(id);
         }
     }
 

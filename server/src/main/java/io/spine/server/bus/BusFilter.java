@@ -20,19 +20,19 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
+
+import java.util.Optional;
 
 /**
  * The filter for the messages posted to a bus.
  *
  * <p>A bus may have several filters which can prevent a message from being posted.
- *
- * @author Dmytro Dashenkov
  */
 @SPI
+@FunctionalInterface
 public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoCloseable {
 
     /**
@@ -40,7 +40,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *
      * <p>A filter can:
      * <ul>
-     *     <li>accept the message (by returning {@code Optional.absent()};
+     *     <li>accept the message (by returning {@code Optional.empty()};
      *     <li>reject the message with {@link io.spine.base.Error Error} status e.g. if it fails
      *         to pass the validation;
      *     <li>reject the message with {@code OK} status. For example, a scheduled command may not
@@ -48,8 +48,18 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * </ul>
      *
      * @param envelope the envelope with the message to filter
-     * @return {@code Optional.absent()} if the message passes the filter,
+     * @return {@code Optional.empty()} if the message passes the filter,
      *         {@linkplain Ack posting result} with either status otherwise
      */
     Optional<Ack> accept(E envelope);
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>By default, performs no action.
+     */
+    @Override
+    default void close() throws Exception {
+        // NoOp by default.
+    }
 }
