@@ -65,12 +65,9 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
                 checkNotNull(tenantId);
                 lock.lock();
                 try {
-                    S storage = tenantSlices.get(tenantId);
-                    if (storage == null) {
-                        storage = createSlice();
-                        tenantSlices.put(tenantId, storage);
-                    }
-                    return storage;
+                    return tenantSlices.computeIfAbsent(tenantId,
+                                                        id -> tenantSlices.put(id, createSlice())
+                    );
                 } finally {
                     lock.unlock();
                 }
