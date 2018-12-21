@@ -18,22 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package io.spine.server.bc.given;
 
-def final SPINE_VERSION = '1.0.0-pre2'
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.test.bc.Project;
+import io.spine.test.bc.ProjectId;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.0-SNAPSHOT'
-
-    // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.0-SNAPSHOT'
+public class FinishedProjectProjectionRepo extends ProjectionRepository<ProjectId,
+                                                                        FinishedProjectProjection,
+                                                                        Project> {
 }

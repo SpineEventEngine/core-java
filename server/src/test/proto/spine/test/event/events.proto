@@ -162,3 +162,8 @@ message EBTaskAdded {
 
     Task task = 2 [(required) = true];
 }
+
+message ProjectFinished {
+
+    ProjectId project_id = 1;
+}

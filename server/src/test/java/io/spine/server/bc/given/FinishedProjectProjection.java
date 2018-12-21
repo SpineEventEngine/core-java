@@ -18,22 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package io.spine.server.bc.given;
 
-def final SPINE_VERSION = '1.0.0-pre2'
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.test.bc.Project;
+import io.spine.test.bc.ProjectId;
+import io.spine.test.bc.ProjectVBuilder;
+import io.spine.test.event.ProjectFinished;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+public class FinishedProjectProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.0-SNAPSHOT'
+    protected FinishedProjectProjection(ProjectId id) {
+        super(id);
+    }
 
-    // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.0-SNAPSHOT'
+    @Subscribe
+    public void on(ProjectFinished finished) {
+        // For testing purposes ignoring the event is fine.
+    }
 }

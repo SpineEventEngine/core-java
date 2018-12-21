@@ -20,11 +20,17 @@
 
 package io.spine.server;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption;
 import io.spine.server.bc.given.AnotherProjectAggregateRepository;
+import io.spine.server.bc.given.FinishedProjectProjectionRepo;
 import io.spine.server.bc.given.ProjectAggregateRepository;
+import io.spine.server.bc.given.ProjectCreationRepository;
 import io.spine.server.bc.given.ProjectPmRepo;
+import io.spine.server.bc.given.ProjectProjectionRepo;
+import io.spine.server.bc.given.ProjectRemovalRepository;
 import io.spine.server.bc.given.ProjectReportRepository;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
@@ -43,6 +49,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -181,15 +194,51 @@ class BoundedContextTest {
         assertThat(stand.getExposedTypes(), contains(repository.getEntityStateType()));
     }
 
-    @Test
-    @DisplayName("not allow two aggregate repositories with aggregates of same state")
-    void throwOnSameAggregateState() {
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        boundedContext.register(repository);
+    @ParameterizedTest
+    @MethodSource("sameStateRepositories")
+    @DisplayName("not allow two entity repositories with entities of same state")
+    void throwOnSameEntityState(Repository<?, ?> firstRepo, Repository<?, ?> secondRepo) {
+        boundedContext.register(firstRepo);
+        assertThrows(IllegalStateException.class, () -> boundedContext.register(secondRepo));
+    }
 
-        AnotherProjectAggregateRepository anotherRepo = new AnotherProjectAggregateRepository();
+    /**
+     * Returns all combinations of repositories that manage entities of the same state.
+     *
+     * <p>To check whether a {@link io.spine.server.BoundedContext} really throws
+     * an {@code IllegalStateException} upon an attempt to register a repository that manages an
+     * entity of a state that a registered entity repository is already managing, all combinations
+     * of entities that take state as a type parameter need to be checked.
+     *
+     * <p>This method returns a stream of pairs of all such combinations, which is a Cartesian
+     * product of:
+     * <ul>
+     *     <li>{@linkplain io.spine.server.procman.ProcessManagerRepository process manager};
+     *     <li>{@linkplain io.spine.server.aggregate.AggregateRepository aggregate};
+     *     <li>{@linkplain io.spine.server.projection.ProjectionRepository projection}.
+     * </ul>
+     * All of the returned repositories manage entities of the same state type.
+     */
+    @SuppressWarnings("unchecked")
+        // Entities managed by created repositories are all of state type `Project`.
+    private static Stream<Arguments> sameStateRepositories() {
+        Set<Repository<?, ?>> repositories =
+                ImmutableSet.of(new ProjectAggregateRepository(),
+                                new ProjectProjectionRepo(),
+                                new ProjectCreationRepository());
 
-        assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepo));
+        Set<Repository<?, ?>> sameStateRepositories =
+                ImmutableSet.of(new AnotherProjectAggregateRepository(),
+                                new FinishedProjectProjectionRepo(),
+                                new ProjectRemovalRepository());
+
+        Set<List<Repository<?, ?>>> cartesianProduct = Sets.cartesianProduct(repositories,
+                                                                             sameStateRepositories);
+        Stream<Arguments> result = cartesianProduct.stream()
+                                                   .map(repos -> Arguments.of(repos.get(0),
+                                                                              repos.get(1)));
+
+        return result;
     }
 
     @Test
