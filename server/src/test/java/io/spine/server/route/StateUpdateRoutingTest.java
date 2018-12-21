@@ -23,7 +23,7 @@ package io.spine.server.route;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
-import io.spine.server.rout.given.switchman.LogState;
+import io.spine.server.route.given.switchman.LogState;
 import io.spine.system.server.EntityStateChanged;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

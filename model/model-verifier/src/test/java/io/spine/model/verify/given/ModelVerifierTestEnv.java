@@ -20,7 +20,10 @@
 
 package io.spine.model.verify.given;
 
-import com.google.protobuf.Any;
+import io.spine.core.EventContext;
+import io.spine.core.Events;
+import io.spine.core.UserId;
+import io.spine.core.UserIdVBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.AbstractCommandHandler;
@@ -33,15 +36,9 @@ import io.spine.test.model.verify.PhotoEdited;
 import io.spine.test.model.verify.PhotoUploaded;
 import io.spine.test.model.verify.TitleChanged;
 import io.spine.test.model.verify.UploadPhoto;
-import io.spine.validate.AnyVBuilder;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 
-import static com.google.protobuf.Any.pack;
-
-/**
- * @author Dmytro Dashenkov
- */
 public final class ModelVerifierTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -69,7 +66,7 @@ public final class ModelVerifierTestEnv {
         }
     }
 
-    public static class EditAggregate extends Aggregate<String, Any, AnyVBuilder> {
+    public static class EditAggregate extends Aggregate<String, UserId, UserIdVBuilder> {
 
         protected EditAggregate(String id) {
             super(id);
@@ -83,13 +80,14 @@ public final class ModelVerifierTestEnv {
                     .build();
         }
 
+        @SuppressWarnings("unused") // Just an event context is used to fetch the editor.
         @Apply
-        private void on(PhotoEdited event) {
-            getBuilder().setOriginalState(pack(event));
+        private void on(PhotoEdited event, EventContext context) {
+            getBuilder().mergeFrom(Events.getActor(context));
         }
     }
 
-    public static class RenameProcMan extends ProcessManager<String, Any, AnyVBuilder> {
+    public static class RenameProcMan extends ProcessManager<String, UserId, UserIdVBuilder> {
 
         protected RenameProcMan(String id) {
             super(id);
@@ -103,9 +101,10 @@ public final class ModelVerifierTestEnv {
                     .build();
         }
 
+        @SuppressWarnings("unused") // Just an event context is used to fetch the editor.
         @Apply
-        private void on(TitleChanged event) {
-            getBuilder().setOriginalState(pack(event));
+        private void on(TitleChanged event, EventContext context) {
+            getBuilder().mergeFrom(Events.getActor(context));
         }
     }
 

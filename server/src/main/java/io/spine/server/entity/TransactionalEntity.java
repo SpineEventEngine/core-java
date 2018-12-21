@@ -26,7 +26,6 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
-import io.spine.validate.ValidatingBuilders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -247,7 +246,7 @@ public abstract class TransactionalEntity<I,
         Class<? extends TransactionalEntity<I, S, B>> cls =
                 (Class<? extends TransactionalEntity<I, S, B>>) getClass();
         Class<B> builderClass = getBuilderClass(cls);
-        B builder = ValidatingBuilders.newInstance(builderClass);
+        B builder = ValidatingBuilder.newInstance(builderClass);
         return builder;
     }
 
