@@ -20,15 +20,10 @@
 
 package io.spine.server.entity.given;
 
-import com.google.protobuf.StringValue;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.test.shared.EmptyEntity;
+import io.spine.server.test.shared.EmptyEntityVBuilder;
 
-/**
- * @author Alex Tymchenko
- * @author Dmytro Kuzmin
- */
 public class TransactionalEntityTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -36,15 +31,8 @@ public class TransactionalEntityTestEnv {
     }
 
     public static class TeEntity
-            extends TransactionalEntity<Long, StringValue, StringValueVBuilder> {
+            extends TransactionalEntity<Long, EmptyEntity, EmptyEntityVBuilder> {
 
-        /**
-         * Creates a new instance.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the
-         *                                  {@linkplain Entity supported types}
-         */
         public TeEntity(Long id) {
             super(id);
         }

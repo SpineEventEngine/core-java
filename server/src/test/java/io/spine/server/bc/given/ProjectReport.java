@@ -20,16 +20,16 @@
 
 package io.spine.server.bc.given;
 
-import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
+import io.spine.server.test.shared.EmptyProjection;
+import io.spine.server.test.shared.EmptyProjectionVBuilder;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.event.BcProjectCreated;
-import io.spine.validate.EmptyVBuilder;
 
 public class ProjectReport
-        extends Projection<ProjectId, Empty, EmptyVBuilder> {
+        extends Projection<ProjectId, EmptyProjection, EmptyProjectionVBuilder> {
 
     public ProjectReport(ProjectId id) {
         super(id);

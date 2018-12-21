@@ -73,8 +73,6 @@ import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.entity.given.Given;
-import io.spine.validate.BoolValueVBuilder;
-import io.spine.validate.StringValueVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;

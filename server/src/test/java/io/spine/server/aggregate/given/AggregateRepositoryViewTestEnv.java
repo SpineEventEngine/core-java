@@ -39,13 +39,11 @@ import static java.lang.String.format;
 
 /**
  * Test environment for {@link io.spine.server.aggregate.AggregateRepositoryTest}.
- *
- * @author Alexander Yevsyukov
  */
 public class AggregateRepositoryViewTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private AggregateRepositoryViewTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

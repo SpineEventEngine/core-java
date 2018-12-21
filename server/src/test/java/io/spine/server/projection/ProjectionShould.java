@@ -38,6 +38,7 @@ import io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.MalformedProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
+import io.spine.server.projection.given.SavedString;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.DispatchedMessageId;
@@ -102,10 +103,14 @@ class ProjectionShould {
 
     @BeforeEach
     void setUp() {
+        String id = newUuid();
         projection = Given.projectionOfClass(TestProjection.class)
-                          .withId(newUuid())
+                          .withId(id)
                           .withVersion(1)
-                          .withState(StringValue.of("Initial state"))
+                          .withState(SavedString.newBuilder()
+                                                .setId(id)
+                                                .setValue("Initial state")
+                                                .build())
                           .build();
     }
 
@@ -170,12 +175,13 @@ class ProjectionShould {
                 .build();
         EntitySubscriberProjection projection = new EntitySubscriberProjection(id);
         dispatch(projection, withMessage(systemEvent));
-        assertThat(projection.getState()).isEqualTo(ProjectTaskNames
-                                                            .newBuilder()
-                                                            .setProjectId(id)
-                                                            .setProjectName(projectName)
-                                                            .addTaskName(task.getTitle())
-                                                            .build());
+        assertThat(projection.getState())
+                .isEqualTo(ProjectTaskNames
+                                   .newBuilder()
+                                   .setProjectId(id)
+                                   .setProjectName(projectName)
+                                   .addTaskName(task.getTitle())
+                                   .build());
     }
 
     @Test
@@ -241,7 +247,7 @@ class ProjectionShould {
                 Given.projectionOfClass(FilteringProjection.class)
                      .withId(id.getId())
                      .withVersion(42)
-                     .withState(StringValue.getDefaultInstance())
+                     .withState(SavedString.getDefaultInstance())
                      .build();
         dispatch(projection, eventFactory.createEvent(setB));
         assertThat(projection.getState().getValue()).isEqualTo("B");

@@ -25,7 +25,8 @@ import com.google.protobuf.StringValue;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.test.shared.EmptyEntity;
+import io.spine.server.test.shared.EmptyEntityVBuilder;
 
 import java.util.List;
 
@@ -38,23 +39,22 @@ public class CommandHandlingEntityTestEnv {
     }
 
     /**
-     * @return generated {@code StringValue} based on generated UUID
+     * Generates {@code StringValue} based on generated UUID.
      */
     public static StringValue msg() {
         return newUuidValue();
     }
 
     /**
-     * @return generated {@code String} based on generated UUID
+     * Generate {@code String} based on UUID.
      */
     public static String str() {
         return msg().getValue();
     }
 
-    public static class HandlingEntity extends CommandHandlingEntity<Long,
-                                                                     StringValue,
-                                                                     StringValueVBuilder> {
-        public HandlingEntity(Long id) {
+    public static class HandlingEntity
+            extends CommandHandlingEntity<String, EmptyEntity, EmptyEntityVBuilder> {
+        public HandlingEntity(String id) {
             super(id);
         }
 
