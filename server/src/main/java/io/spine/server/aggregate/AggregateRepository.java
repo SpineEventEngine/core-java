@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
@@ -40,7 +41,6 @@ import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
@@ -266,7 +266,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         CaughtError error = commandErrorHandler.handleError(envelope, exception);
         error.asRejection()
              .map(RejectionEnvelope::getOuterObject)
-             .ifPresent(event -> postEvents(of(event)));
+             .ifPresent(event -> postEvents(ImmutableList.of(event)));
         error.rethrowOnce();
     }
 
@@ -409,8 +409,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Posts passed events to {@link EventBus}.
      */
     void postEvents(Collection<Event> events) {
-        EventFilter filter = eventFilter();
-        Iterable<Event> filteredEvents = filter.filter(events);
+        Iterable<Event> filteredEvents = eventFilter().filter(events);
         EventBus bus = getBoundedContext().getEventBus();
         bus.post(filteredEvents);
     }

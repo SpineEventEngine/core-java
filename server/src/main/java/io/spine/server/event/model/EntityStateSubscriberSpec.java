@@ -37,7 +37,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static io.spine.option.EntityOption.Visibility.FULL;
 import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
@@ -52,14 +51,14 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 @Immutable
 enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(of(Message.class)) {
+    MESSAGE(ImmutableList.of(Message.class)) {
         @Override
         protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
             return new Object[]{entityState};
         }
     },
 
-    MESSAGE_AND_EVENT_CONTEXT(of(Message.class, EventContext.class)) {
+    MESSAGE_AND_EVENT_CONTEXT(ImmutableList.of(Message.class, EventContext.class)) {
         @Override
         protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
             return new Object[]{entityState, event.getEventContext()};

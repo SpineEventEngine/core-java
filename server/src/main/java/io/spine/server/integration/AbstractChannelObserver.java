@@ -86,7 +86,7 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof AbstractChannelObserver)) {
             return false;
         }
         AbstractChannelObserver that = (AbstractChannelObserver) o;

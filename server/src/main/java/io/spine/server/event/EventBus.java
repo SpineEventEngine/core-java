@@ -20,6 +20,7 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -49,7 +50,6 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableSet.of;
 import static java.lang.String.format;
 
 /**
@@ -453,7 +453,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         public UnsupportedEventException handle(EventEnvelope envelope) {
 
             Event event = envelope.getOuterObject();
-            store(of(event));
+            store(ImmutableSet.of(event));
 
             EventMessage message = envelope.getMessage();
             UnsupportedEventException exception = new UnsupportedEventException(message);

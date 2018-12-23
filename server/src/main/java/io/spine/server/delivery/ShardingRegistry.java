@@ -32,13 +32,11 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
  * The registry of sharded message streams.
- *
- * @author Alex Tymchenko
  */
 final class ShardingRegistry {
 
     private final Multimap<DeliveryTag, Entry> entries =
-            synchronizedMultimap(HashMultimap.<DeliveryTag, Entry>create());
+            synchronizedMultimap(HashMultimap.create());
 
     void register(ShardingStrategy strategy, Set<ShardedStream<?, ?, ?>> streams) {
         for (ShardedStream<?, ?, ?> stream : streams) {
@@ -66,8 +64,12 @@ final class ShardingRegistry {
         for (Entry entry : entriesForTag) {
 
             ShardIndex shardIndex = entry.strategy.indexForTarget(targetId);
-            if(shardIndex.equals(entry.stream.getKey().getIndex())) {
-                builder.add(((ShardedStream<I, ?, E>)entry.stream));
+            ShardIndex entryIndex = entry.stream.getKey()
+                                                .getIndex();
+            if(shardIndex.equals(entryIndex)) {
+                @SuppressWarnings("unchecked") //TODO:2018-12-23:alexander.yevsyukov: Document
+                ShardedStream<I, ?, E> stream = (ShardedStream<I, ?, E>) entry.stream;
+                builder.add(stream);
             }
         }
 

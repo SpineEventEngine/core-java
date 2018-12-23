@@ -173,7 +173,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ShardedStream)) {
             return false;
         }
         ShardedStream<?, ?, ?> that = (ShardedStream<?, ?, ?>) o;

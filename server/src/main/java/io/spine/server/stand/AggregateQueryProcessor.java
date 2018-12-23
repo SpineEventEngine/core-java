@@ -31,7 +31,6 @@ import io.spine.system.server.SystemReadSide;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.copyOf;
 import static io.spine.system.server.ReadSideFunction.delegatingTo;
 
 /**
@@ -50,7 +49,7 @@ class AggregateQueryProcessor implements QueryProcessor {
         TenantId tenant = tenantOf(query);
         SystemReadSide readSide = delegatingTo(systemReadSide).get(tenant);
         Iterator<Any> read = readSide.readDomainAggregate(query);
-        ImmutableList<Any> result = copyOf(read);
+        ImmutableList<Any> result = ImmutableList.copyOf(read);
         return result;
     }
 

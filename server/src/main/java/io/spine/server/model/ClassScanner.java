@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMultimap.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.validate.Validate.isNotDefault;
 
@@ -117,11 +116,10 @@ public final class ClassScanner {
             for (Method method : declaredMethods) {
                 scanMethod(method);
             }
-            return copyOf(handlers);
+            return ImmutableMultimap.copyOf(handlers);
         }
 
         private void scanMethod(Method method) {
-            @SuppressWarnings("unchecked") // Logically checked.
             Optional<H> handlerMethod = signature.create(method);
             if (handlerMethod.isPresent()) {
                 H handler = handlerMethod.get();

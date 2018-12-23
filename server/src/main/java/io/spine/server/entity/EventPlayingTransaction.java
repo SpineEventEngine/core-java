@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import com.google.protobuf.Message.Builder;
 import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
@@ -43,10 +42,11 @@ import io.spine.validate.ValidatingBuilder;
  *         the type of a {@code ValidatingBuilder} for the entity state
  */
 @Internal
-public abstract class EventPlayingTransaction<I,
-                                              E extends TransactionalEntity<I, S, B>,
-                                              S extends Message,
-                                              B extends ValidatingBuilder<S, ? extends Builder>>
+public abstract
+class EventPlayingTransaction<I,
+                              E extends TransactionalEntity<I, S, B>,
+                              S extends Message,
+                              B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, E, S, B> {
 
     protected EventPlayingTransaction(E entity) {

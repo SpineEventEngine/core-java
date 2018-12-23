@@ -28,6 +28,8 @@ option java_package="io.spine.server.test.shared";
 option java_outer_classname = "SharedTypesProto";
 option java_multiple_files = true;
 
+import "google/protobuf/any.proto";
+
 // This file defines messages that can be safely re-used in tests environments that do
 // not require domain-specific data.
 
@@ -62,4 +64,14 @@ message EmptyEntity {
     option (entity).kind = ENTITY;
 
     string id = 1 [(required) = true];
+}
+
+// A process which can hold `Any` as its data.
+message AnyProcess {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    string id = 1 [(required) = true];
+
+    google.protobuf.Any any = 2;
 }

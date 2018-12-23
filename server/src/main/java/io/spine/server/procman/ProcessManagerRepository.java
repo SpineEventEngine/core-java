@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
@@ -64,7 +65,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.entity.EventBlackList.discardEvents;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
@@ -291,7 +291,7 @@ public abstract class ProcessManagerRepository<I,
         CaughtError error = commandErrorHandler.handleError(envelope, exception);
         error.asRejection()
              .map(RejectionEnvelope::getOuterObject)
-             .ifPresent(event -> postEvents(of(event)));
+             .ifPresent(event -> postEvents(ImmutableList.of(event)));
         error.rethrowOnce();
     }
 
@@ -395,11 +395,10 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        Iterable<ShardedStreamConsumer<?, ?>> result =
-                of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
-                );
+        Iterable<ShardedStreamConsumer<?, ?>> result = ImmutableList.of(
+                getCommandEndpointDelivery().getConsumer(),
+                getEventEndpointDelivery().getConsumer()
+        );
         return result;
     }
 
