@@ -31,9 +31,6 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 
 import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 /**
  * An aggregate class that reacts only on events and does not handle commands.
  */
@@ -77,9 +74,9 @@ public class ReactingAggregate
                     .newBuilder()
                     .setProjectId(getId())
                     .build();
-            return of(reaction);
+            return Optional.of(reaction);
         } else {
-            return empty();
+            return Optional.empty();
         }
     }
 

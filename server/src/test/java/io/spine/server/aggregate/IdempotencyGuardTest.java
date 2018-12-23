@@ -41,7 +41,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.CommandEnvelope.of;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.command;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProject;
@@ -114,7 +113,7 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = new IgTestAggregate(projectId);
 
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            guard.check(of(createCommand));
+            guard.check(CommandEnvelope.of(createCommand));
         }
 
         @Test
@@ -138,7 +137,7 @@ class IdempotencyGuardTest {
         }
 
         private void check(IdempotencyGuard guard, Command command) {
-            CommandEnvelope envelope = of(command);
+            CommandEnvelope envelope = CommandEnvelope.of(command);
             guard.check(envelope);
         }
     }

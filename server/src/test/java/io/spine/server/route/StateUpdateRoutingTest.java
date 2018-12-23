@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 
@@ -83,7 +82,8 @@ class StateUpdateRoutingTest {
         String counterKey = "test_key";
         StateUpdateRouting<Integer> routing = StateUpdateRouting
                 .<Integer>newInstance()
-                .route(LogState.class, (log, context) -> of(log.getCountersOrThrow(counterKey)));
+                .route(LogState.class,
+                       (log, context) -> ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
         LogState log = LogState
                 .newBuilder()

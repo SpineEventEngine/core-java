@@ -40,9 +40,6 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 
 import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 /**
  * The main aggregate class for positive scenarios tests.
  */
@@ -128,9 +125,9 @@ public class ProjectAggregate
                     .newBuilder()
                     .setProjectId(getId())
                     .build();
-            return of(reaction);
+            return Optional.of(reaction);
         } else {
-            return empty();
+            return Optional.empty();
         }
     }
 

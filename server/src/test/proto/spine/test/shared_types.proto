@@ -32,7 +32,10 @@ import "google/protobuf/any.proto";
 
 // This file defines messages that can be safely re-used in tests environments that do
 // not require domain-specific data.
-
+//
+// ID fields of the entity states are marked as not required to preserve the behaviour of
+// test environment entities that used to rely on standard Protobuf types for their state.
+//
 
 // A process without state data (having only ID).
 message EmptyProcess {
@@ -47,7 +50,7 @@ message EmptyAggregate {
 
     option (entity).kind = PROCESS_MANAGER;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 }
 
 // A rudimentary projection which has only ID.
@@ -55,7 +58,7 @@ message EmptyProjection {
 
     option (entity).kind = PROJECTION;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 }
 
 // A rudimentary entity without state data.
@@ -63,7 +66,7 @@ message EmptyEntity {
 
     option (entity).kind = ENTITY;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 }
 
 // An entity holding optional string value.
@@ -71,7 +74,7 @@ message StringEntity {
 
     option (entity).kind = ENTITY;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 
     string value = 2;
 }
@@ -81,7 +84,7 @@ message AnyProcess {
 
     option (entity).kind = PROCESS_MANAGER;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 
     google.protobuf.Any any = 2;
 }
@@ -91,7 +94,7 @@ message AnyAggregate {
 
     option (entity).kind = AGGREGATE;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 
     google.protobuf.Any any = 2;
 }
@@ -101,7 +104,7 @@ message StringAggregate {
 
     option (entity).kind = AGGREGATE;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 
     string value = 2;
 }
@@ -111,7 +114,7 @@ message StringProjection {
 
     option (entity).kind = PROJECTION;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 
     string value = 2;
 }
@@ -121,7 +124,7 @@ message Int32Aggregate {
 
     option (entity).kind = AGGREGATE;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 
     int32 value = 2;
 }
@@ -131,7 +134,7 @@ message Int64Projection {
 
     option (entity).kind = PROJECTION;
 
-    string id = 1;
+    string id = 1 [(required)=false];
 
     int64 value = 2;
 }

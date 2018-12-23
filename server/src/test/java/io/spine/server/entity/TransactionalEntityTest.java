@@ -20,9 +20,9 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.Version;
-import io.spine.server.entity.given.TransactionalEntityTestEnv.TeEntity;
+import io.spine.server.entity.given.TeEntity;
+import io.spine.server.test.shared.EmptyEntity;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -220,7 +220,9 @@ class TransactionalEntityTest {
             Message originalState = entity.builderFromState()
                                           .build();
 
-            StringValue newState = newUuidValue();
+            EmptyEntity newState = EmptyEntity.newBuilder()
+                                              .setId(newUuidValue().getValue())
+                                              .build();
             assertNotEquals(originalState, newState);
 
             TestTransaction.injectState(entity, newState, Version.getDefaultInstance());

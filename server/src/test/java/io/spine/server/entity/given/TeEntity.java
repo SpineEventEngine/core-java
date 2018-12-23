@@ -24,17 +24,10 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.test.shared.EmptyEntity;
 import io.spine.server.test.shared.EmptyEntityVBuilder;
 
-public class TransactionalEntityTestEnv {
+public class TeEntity
+        extends TransactionalEntity<Long, EmptyEntity, EmptyEntityVBuilder> {
 
-    /** Prevents instantiation of this utility class. */
-    private TransactionalEntityTestEnv() {
-    }
-
-    public static class TeEntity
-            extends TransactionalEntity<Long, EmptyEntity, EmptyEntityVBuilder> {
-
-        public TeEntity(Long id) {
-            super(id);
-        }
+    public TeEntity(Long id) {
+        super(id);
     }
 }

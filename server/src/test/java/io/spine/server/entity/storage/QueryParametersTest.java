@@ -142,7 +142,7 @@ class QueryParametersTest {
                 ImmutableMultimap.of(mockColumn(), filters[0],
                                      mockColumn(), filters[1],
                                      mockColumn(), filters[2]);
-        CompositeQueryParameter parameter = from(columnFilters, ALL);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
         Collection<ColumnFilter> results = newLinkedList();
@@ -161,10 +161,11 @@ class QueryParametersTest {
                 eq("$2st", "entityColumnValue"),
                 gt("$3d", getCurrentTime())};
         EntityColumn[] columns = {mockColumn(), mockColumn(), mockColumn()};
-        Multimap<EntityColumn, ColumnFilter> columnFilters = of(columns[0], filters[0],
-                                                                columns[1], filters[1],
-                                                                columns[2], filters[2]);
-        CompositeQueryParameter parameter = from(columnFilters, ALL);
+        Multimap<EntityColumn, ColumnFilter> columnFilters =
+                ImmutableMultimap.of(columns[0], filters[0],
+                                     columns[1], filters[1],
+                                     columns[2], filters[2]);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
         CompositeQueryParameter singleParameter = parameters.iterator()
