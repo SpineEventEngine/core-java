@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
 import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * A builder for the {@link Query} instances.
@@ -55,7 +53,6 @@ import static java.util.Optional.of;
  *     }
  * </pre>
  *
- * @author Dmytro Dashenkov
  * @see QueryFactory#select(Class) to start query building
  * @see io.spine.client.ColumnFilters for filter creation shortcuts
  * @see AbstractTargetBuilder for more details on this builders API
@@ -139,23 +136,23 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
 
     private Optional<Pagination> pagination() {
         if (limit == 0) {
-            return empty();
+            return Optional.empty();
         }
         Pagination result = PaginationVBuilder.newBuilder()
                                               .setPageSize(limit)
                                               .build();
-        return of(result);
+        return Optional.of(result);
     }
 
     private Optional<OrderBy> orderBy() {
         if (orderingColumn == null) {
-            return empty();
+            return Optional.empty();
         }
         OrderBy result = OrderByVBuilder.newBuilder()
                                         .setColumn(orderingColumn)
                                         .setDirection(direction)
                                         .build();
-        return of(result);
+        return Optional.of(result);
     }
 
     @Override
