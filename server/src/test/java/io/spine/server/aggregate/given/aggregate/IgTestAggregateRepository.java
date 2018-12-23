@@ -20,11 +20,10 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggTaskStarted;
-
-import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
@@ -38,8 +37,8 @@ public class IgTestAggregateRepository
         super.onRegistered();
 
         getEventRouting().route(AggTaskStarted.class,
-                                (message, context) -> of(message.getProjectId()))
+                                (message, context) -> ImmutableSet.of(message.getProjectId()))
                          .route(AggProjectPaused.class,
-                                (message, context) -> of(message.getProjectId()));
+                                (message, context) -> ImmutableSet.of(message.getProjectId()));
     }
 }

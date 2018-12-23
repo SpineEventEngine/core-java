@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate.given.repo;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateStorage;
@@ -30,9 +31,6 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 
 import java.util.Optional;
 import java.util.Set;
-
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static java.util.Optional.empty;
 
 /**
  * The repository of positive scenarios
@@ -61,7 +59,7 @@ public class ProjectAggregateRepository
 
                            @Override
                            public Set<ProjectId> apply(AggProjectArchived msg, EventContext ctx) {
-                               return copyOf(msg.getChildProjectIdList());
+                               return ImmutableSet.copyOf(msg.getChildProjectIdList());
                            }
                        })
                 .route(AggProjectDeleted.class,
@@ -70,7 +68,7 @@ public class ProjectAggregateRepository
 
                            @Override
                            public Set<ProjectId> apply(AggProjectDeleted msg, EventContext ctx) {
-                               return copyOf(msg.getChildProjectIdList());
+                               return ImmutableSet.copyOf(msg.getChildProjectIdList());
                            }
                        });
     }
@@ -78,7 +76,7 @@ public class ProjectAggregateRepository
     @Override
     public Optional<ProjectAggregate> find(ProjectId id) {
         if (id.equals(troublesome)) {
-            return empty();
+            return Optional.empty();
         }
         return super.find(id);
     }

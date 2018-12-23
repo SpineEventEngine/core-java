@@ -76,10 +76,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -452,8 +450,12 @@ public class AggregateTest {
                                        command(addTask),
                                        command(startProject));
             aggregate().commitEvents();
-            assertEventClasses(getEventClasses(copyOf(aggregate().historyBackward())),
-                               AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
+            ImmutableList<Event> historyBackward =
+                    ImmutableList.copyOf(aggregate().historyBackward());
+            assertEventClasses(
+                    getEventClasses(historyBackward),
+                    AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class
+            );
         }
 
         private Collection<EventClass> getEventClasses(Collection<Event> events) {
@@ -702,7 +704,7 @@ public class AggregateTest {
     void acknowledgeExceptionForDuplicateCommand() {
         TenantId tenantId = newTenantId();
         Command createCommand = command(createProject, tenantId);
-        CommandEnvelope envelope = of(createCommand);
+        CommandEnvelope envelope = CommandEnvelope.of(createCommand);
         repository.dispatch(envelope);
 
         RuntimeException exception = assertThrows(RuntimeException.class,

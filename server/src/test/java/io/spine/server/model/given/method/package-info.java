@@ -18,30 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.verify;
-
-import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.Assign;
-
-import java.util.Collections;
-import java.util.List;
-
 /**
- * An Aggregate with invalid command handler method.
- *
- * <p>{@link #handle()} method has no arguments and is marked with {@link Assign}, which makes it
- * an invalid command handler method.
+ * Test environment for testing handler methods.
  */
-public class MalformedAggregate extends Aggregate<String, VoidState, VoidStateVBuilder> {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given.method;
 
-    protected MalformedAggregate(String id) {
-        super(id);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Assign
-    public List<UInt64Value> handle() {
-        return Collections.emptyList();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

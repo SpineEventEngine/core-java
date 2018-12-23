@@ -18,40 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.verify;
+package io.spine.model.verify.given;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
-import io.spine.server.aggregate.Aggregate;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
+import io.spine.server.event.EventBus;
+import io.spine.test.model.verify.command.UploadPhoto;
+import io.spine.test.model.verify.event.PhotoUploaded;
 
-import java.util.List;
+public class DuplicateCommandHandler extends AbstractCommandHandler {
 
-import static java.util.Collections.singletonList;
-
-public class DuplicateAggregate extends Aggregate<String, CallState, CallStateVBuilder> {
-
-    protected DuplicateAggregate(String id) {
-        super(id);
+    protected DuplicateCommandHandler(EventBus eventBus) {
+        super(eventBus);
     }
 
     @Assign
-    public MessageSent handle(SendMessage command) {
-        return MessageSentVBuilder.newBuilder()
-                                  .setMessage(command.getMessage())
-                                  .build();
-    }
-
-    @Assign
-    public List<VideoCallStarted> on(StartVideoCall command) {
-        return singletonList(VideoCallStarted.newBuilder()
-                                             .setIp(command.getIp())
-                                             .build());
-    }
-
-    @Assign
-    public VideoCallStarted oneMore(StartVideoCall cmd) {
-        // NoOp for test
-        return VideoCallStarted.getDefaultInstance();
+    PhotoUploaded handle(UploadPhoto command) {
+        return PhotoUploaded
+                .newBuilder()
+                .setPhoto(command.getPhoto())
+                .build();
     }
 }

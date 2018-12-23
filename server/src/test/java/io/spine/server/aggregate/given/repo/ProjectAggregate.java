@@ -101,12 +101,13 @@ public class ProjectAggregate
     Optional<AggProjectArchived> on(AggProjectArchived event) {
         if (event.getChildProjectIdList()
                  .contains(getId())) {
-            AggProjectArchived reaction = AggProjectArchived.newBuilder()
-                                                         .setProjectId(getId())
-                                                         .build();
-            return of(reaction);
+            AggProjectArchived reaction = AggProjectArchived
+                    .newBuilder()
+                    .setProjectId(getId())
+                    .build();
+            return Optional.of(reaction);
         } else {
-            return empty();
+            return Optional.empty();
         }
     }
 
@@ -123,9 +124,10 @@ public class ProjectAggregate
     Optional<AggProjectDeleted> on(AggProjectDeleted event) {
         if (event.getChildProjectIdList()
                  .contains(getId())) {
-            AggProjectDeleted reaction = AggProjectDeleted.newBuilder()
-                                                       .setProjectId(getId())
-                                                       .build();
+            AggProjectDeleted reaction = AggProjectDeleted
+                    .newBuilder()
+                    .setProjectId(getId())
+                    .build();
             return of(reaction);
         } else {
             return empty();

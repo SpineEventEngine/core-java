@@ -18,40 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.verify;
+package io.spine.model.verify.given;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
+import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.test.model.verify.command.EditPhoto;
+import io.spine.test.model.verify.event.PhotoEdited;
+import io.spine.test.model.verify.given.EditState;
+import io.spine.test.model.verify.given.EditStateVBuilder;
 
-import java.util.List;
+public class EditAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
 
-import static java.util.Collections.singletonList;
-
-public class DuplicateAggregate extends Aggregate<String, CallState, CallStateVBuilder> {
-
-    protected DuplicateAggregate(String id) {
+    protected EditAggregate(String id) {
         super(id);
     }
 
     @Assign
-    public MessageSent handle(SendMessage command) {
-        return MessageSentVBuilder.newBuilder()
-                                  .setMessage(command.getMessage())
-                                  .build();
+    PhotoEdited handle(EditPhoto command, CommandContext ctx) {
+        return PhotoEdited
+                .newBuilder()
+                .setNewPhoto(command.getNewPhoto())
+                .setEditor(ctx.getActorContext().getActor().getValue())
+                .build();
     }
 
-    @Assign
-    public List<VideoCallStarted> on(StartVideoCall command) {
-        return singletonList(VideoCallStarted.newBuilder()
-                                             .setIp(command.getIp())
-                                             .build());
-    }
-
-    @Assign
-    public VideoCallStarted oneMore(StartVideoCall cmd) {
-        // NoOp for test
-        return VideoCallStarted.getDefaultInstance();
+    @Apply
+    void on(PhotoEdited event) {
+        getBuilder().setEditor(event.getEditor());
     }
 }

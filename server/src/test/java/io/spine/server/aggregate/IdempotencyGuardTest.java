@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.core.CommandEnvelope.of;
-import static io.spine.core.EventEnvelope.of;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.command;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProject;
@@ -53,9 +52,6 @@ import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProje
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.taskStarted;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Mykhailo Drachuk
- */
 @DisplayName("IdempotencyGuard should")
 class IdempotencyGuardTest {
 
@@ -78,13 +74,13 @@ class IdempotencyGuardTest {
         boundedContext.close();
     }
 
-    private IgTestAggregate aggregate() {
-        return repository.loadAggregate(projectId);
-    }
-
     @Nested
     @DisplayName("check commands and")
+
     class Commands {
+        private IgTestAggregate aggregate() {
+            return repository.loadAggregate(projectId);
+        }
 
         @Test
         @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
@@ -195,7 +191,7 @@ class IdempotencyGuardTest {
         @DisplayName("not throw exception if another event was handled")
         void notThrowIfAnotherCommandHandled() {
             Event taskEvent = event(taskStarted(projectId));
-            Event projectEvent = event(projectPaused(projectId));;
+            Event projectEvent = event(projectPaused(projectId));
 
             EventBus eventBus = boundedContext.getEventBus();
             eventBus.post(taskEvent);
@@ -212,7 +208,7 @@ class IdempotencyGuardTest {
         }
 
         private void check(IdempotencyGuard guard, Event event) {
-            EventEnvelope envelope = of(event);
+            EventEnvelope envelope = EventEnvelope.of(event);
             guard.check(envelope);
         }
     }

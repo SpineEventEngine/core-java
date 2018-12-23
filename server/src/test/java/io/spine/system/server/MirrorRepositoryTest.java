@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -50,7 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -71,9 +71,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
 @ExtendWith(ShardingReset.class)
 @DisplayName("MirrorRepository should")
 class MirrorRepositoryTest {
@@ -178,7 +175,7 @@ class MirrorRepositoryTest {
 
             private void readAndCheck(Photo target) {
                 PhotoId targetId = target.getId();
-                Query query = queries.byIds(Photo.class, of(targetId));
+                Query query = queries.byIds(Photo.class, ImmutableSet.of(targetId));
                 checkRead(query, target);
             }
 

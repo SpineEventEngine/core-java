@@ -18,40 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.verify;
+package io.spine.model.verify.given;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
-import io.spine.server.aggregate.Aggregate;
+import io.spine.core.EventContext;
+import io.spine.core.Events;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.procman.ProcessManager;
+import io.spine.test.model.verify.command.ChangeTitle;
+import io.spine.test.model.verify.event.TitleChanged;
+import io.spine.test.model.verify.given.RenameState;
+import io.spine.test.model.verify.given.RenameStateVBuilder;
 
-import java.util.List;
+public class RenameProcMan extends ProcessManager<String, RenameState, RenameStateVBuilder> {
 
-import static java.util.Collections.singletonList;
-
-public class DuplicateAggregate extends Aggregate<String, CallState, CallStateVBuilder> {
-
-    protected DuplicateAggregate(String id) {
+    protected RenameProcMan(String id) {
         super(id);
     }
 
     @Assign
-    public MessageSent handle(SendMessage command) {
-        return MessageSentVBuilder.newBuilder()
-                                  .setMessage(command.getMessage())
-                                  .build();
+    TitleChanged handle(ChangeTitle command) {
+        return TitleChanged
+                .newBuilder()
+                .setNewTitle(command.getNewTitle())
+                .build();
     }
 
-    @Assign
-    public List<VideoCallStarted> on(StartVideoCall command) {
-        return singletonList(VideoCallStarted.newBuilder()
-                                             .setIp(command.getIp())
-                                             .build());
-    }
-
-    @Assign
-    public VideoCallStarted oneMore(StartVideoCall cmd) {
-        // NoOp for test
-        return VideoCallStarted.getDefaultInstance();
+    @Apply
+    private void on(TitleChanged event, EventContext context) {
+        getBuilder().setEditor(Events.getActor(context)
+                                     .getValue());
     }
 }

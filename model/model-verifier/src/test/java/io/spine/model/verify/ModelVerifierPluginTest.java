@@ -50,6 +50,7 @@ class ModelVerifierPluginTest {
     private static final String VALID_AGGREGATE_JAVA =
             "io/spine/model/verify/ValidAggregate.java";
     private static final ImmutableCollection<String> PROTO_FILES = ImmutableList.of(
+            "spine/model/verify/call_entity.proto",
             "spine/model/verify/commands.proto",
             "spine/model/verify/events.proto"
     );
@@ -57,7 +58,9 @@ class ModelVerifierPluginTest {
     private Path tempDir;
 
     @BeforeEach
-    void setUp(@TempDir Path junitCreatedDir) {
+    void setUp(
+            @TempDir Path junitCreatedDir
+    ) {
         tempDir = junitCreatedDir;
         ModelTests.dropAllModels();
     }

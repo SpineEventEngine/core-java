@@ -32,9 +32,6 @@ import io.spine.test.aggregate.rejection.Rejections;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 /**
  * An aggregate class that reacts only on rejections, and neither handles commands, nor
  * reacts on events.
@@ -55,9 +52,9 @@ public class RejectionReactingAggregate
             AggProjectArchived event = AggProjectArchived.newBuilder()
                                                          .setProjectId(getId())
                                                          .build();
-            return of(event);
+            return Optional.of(event);
         } else {
-            return empty();
+            return Optional.empty();
         }
     }
 

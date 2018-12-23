@@ -26,12 +26,6 @@ import io.spine.test.projection.ProjectId;
 import io.spine.testdata.Sample;
 import io.spine.type.TypeUrl;
 
-import static io.spine.server.stand.AggregateStateId.of;
-
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
 public class AggregateStateIdStringifierTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -39,18 +33,18 @@ public class AggregateStateIdStringifierTestEnv {
     }
 
     public static AggregateStateId newStringId() {
-        return of("some-aggregate-ID", TypeUrl.of(Any.class));
+        return AggregateStateId.of("some-aggregate-ID", TypeUrl.of(Any.class));
     }
 
     public static AggregateStateId newIntId() {
-        return of(42, TypeUrl.of(Any.class));
+        return AggregateStateId.of(42, TypeUrl.of(Any.class));
     }
 
     public static AggregateStateId newLongId() {
-        return of(42L, TypeUrl.of(Any.class));
+        return AggregateStateId.of(100500L, TypeUrl.of(Any.class));
     }
 
     public static AggregateStateId newMessageId() {
-        return of(Sample.messageOfType(ProjectId.class), TypeUrl.of(Any.class));
+        return AggregateStateId.of(Sample.messageOfType(ProjectId.class), TypeUrl.of(Any.class));
     }
 }

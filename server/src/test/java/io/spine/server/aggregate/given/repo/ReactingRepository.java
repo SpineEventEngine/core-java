@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate.given.repo;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
@@ -27,8 +28,6 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 
 import java.util.Set;
-
-import static com.google.common.collect.ImmutableSet.copyOf;
 
 /**
  * The repository of {@link io.spine.server.aggregate.given.repo.ReactingAggregate}.
@@ -47,7 +46,7 @@ public class ReactingRepository
                            @Override
                            public Set<ProjectId> apply(AggProjectArchived message,
                                                        EventContext context) {
-                               return copyOf(message.getChildProjectIdList());
+                               return ImmutableSet.copyOf(message.getChildProjectIdList());
                            }
                        });
     }

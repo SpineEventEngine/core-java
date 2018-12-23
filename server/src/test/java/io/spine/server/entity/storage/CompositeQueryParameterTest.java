@@ -62,7 +62,7 @@ class CompositeQueryParameterTest {
     @DisplayName("be serializable")
     void beSerializable() {
         ImmutableMultimap<EntityColumn, ColumnFilter> filters = ImmutableMultimap.of();
-        CompositeQueryParameter parameter = from(filters, ALL);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         SerializableTester.reserializeAndAssert(parameter);
     }
 
@@ -70,7 +70,7 @@ class CompositeQueryParameterTest {
     @DisplayName("fail to construct for invalid operator")
     void rejectInvalidOperator() {
         assertThrows(IllegalArgumentException.class,
-                     () -> from(ImmutableMultimap.of(), CCF_CO_UNDEFINED));
+                     () -> CompositeQueryParameter.from(ImmutableMultimap.of(), CCF_CO_UNDEFINED));
     }
 
     @Test
@@ -92,11 +92,20 @@ class CompositeQueryParameterTest {
         ColumnFilter versionUpper = lt(archivedColumnName, 10);
 
         CompositeQueryParameter lifecycle =
-                from(of(archivedColumn, archived, deletedColumn, deleted), ALL);
+                CompositeQueryParameter.from(
+                        ImmutableMultimap.of(archivedColumn, archived, deletedColumn, deleted),
+                        ALL
+                );
         CompositeQueryParameter versionLowerBound =
-                from(of(versionColumn, versionLower), ALL);
+                CompositeQueryParameter.from(
+                        ImmutableMultimap.of(versionColumn, versionLower),
+                        ALL
+                );
         CompositeQueryParameter versionUpperBound =
-                from(of(versionColumn, versionUpper), ALL);
+                CompositeQueryParameter.from(
+                        ImmutableMultimap.of(versionColumn, versionUpper),
+                        ALL
+                );
         // Merge the instances
         CompositeQueryParameter all =
                 lifecycle.conjunct(newArrayList(versionLowerBound, versionUpperBound));

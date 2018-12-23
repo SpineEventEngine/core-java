@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine.test.entity;
+package spine.test.shared;
 
 import "spine/options.proto";
 

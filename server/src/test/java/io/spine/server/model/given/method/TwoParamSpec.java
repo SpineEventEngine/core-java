@@ -18,30 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.verify;
+package io.spine.server.model.given.method;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.Assign;
+import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.server.model.declare.ParameterSpec;
 
-import java.util.Collections;
-import java.util.List;
+import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
-/**
- * An Aggregate with invalid command handler method.
- *
- * <p>{@link #handle()} method has no arguments and is marked with {@link Assign}, which makes it
- * an invalid command handler method.
- */
-public class MalformedAggregate extends Aggregate<String, VoidState, VoidStateVBuilder> {
+@Immutable
+public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
 
-    protected MalformedAggregate(String id) {
-        super(id);
+    INSTANCE;
+
+    @Override
+    public boolean matches(Class<?>[] methodParams) {
+        return consistsOfTwo(methodParams, Message.class, EventContext.class);
     }
 
-    @Assign
-    public List<UInt64Value> handle() {
-        return Collections.emptyList();
+    @Override
+    public Object[] extractArguments(EventEnvelope envelope) {
+        return new Object[]{envelope.getMessage(), envelope.getEventContext()};
     }
 }

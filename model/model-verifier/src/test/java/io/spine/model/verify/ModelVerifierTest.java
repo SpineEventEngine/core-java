@@ -23,10 +23,10 @@ package io.spine.model.verify;
 import com.google.common.io.Files;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
-import io.spine.model.verify.given.ModelVerifierTestEnv.DuplicateCommandHandler;
-import io.spine.model.verify.given.ModelVerifierTestEnv.EditAggregate;
-import io.spine.model.verify.given.ModelVerifierTestEnv.RenameProcMan;
-import io.spine.model.verify.given.ModelVerifierTestEnv.UploadCommandHandler;
+import io.spine.model.verify.given.DuplicateCommandHandler;
+import io.spine.model.verify.given.EditAggregate;
+import io.spine.model.verify.given.RenameProcMan;
+import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
@@ -35,6 +35,7 @@ import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.internal.impldep.com.google.common.collect.Iterators;
+import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.function.Function;
 
-import static io.spine.model.verify.given.ModelVerifierTestEnv.actualProject;
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,6 +61,12 @@ class ModelVerifierTest {
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
     private Project project = null;
+
+    static Project actualProject() {
+        Project result = ProjectBuilder.builder().build();
+        result.getPluginManager().apply("java");
+        return result;
+    }
 
     @SuppressWarnings("unchecked") // OK for test mocks.
     @BeforeEach
@@ -90,11 +96,12 @@ class ModelVerifierTest {
         String commandHandlerTypeName = UploadCommandHandler.class.getName();
         String aggregateTypeName = EditAggregate.class.getName();
         String procManTypeName = RenameProcMan.class.getName();
-        CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                    .addCommandHandlingTypes(commandHandlerTypeName)
-                                                    .addCommandHandlingTypes(aggregateTypeName)
-                                                    .addCommandHandlingTypes(procManTypeName)
-                                                    .build();
+        CommandHandlers spineModel = CommandHandlers
+                .newBuilder()
+                .addCommandHandlingTypes(commandHandlerTypeName)
+                .addCommandHandlingTypes(aggregateTypeName)
+                .addCommandHandlingTypes(procManTypeName)
+                .build();
         verifier.verify(spineModel);
     }
 
@@ -105,10 +112,11 @@ class ModelVerifierTest {
         String firstType = UploadCommandHandler.class.getName();
         String secondType = DuplicateCommandHandler.class.getName();
 
-        CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                    .addCommandHandlingTypes(firstType)
-                                                    .addCommandHandlingTypes(secondType)
-                                                    .build();
+        CommandHandlers spineModel = CommandHandlers
+                .newBuilder()
+                .addCommandHandlingTypes(firstType)
+                .addCommandHandlingTypes(secondType)
+                .build();
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
 
@@ -117,9 +125,10 @@ class ModelVerifierTest {
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
         String invalidClassname = "non.existing.class.Name";
-        CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                    .addCommandHandlingTypes(invalidClassname)
-                                                    .build();
+        CommandHandlers spineModel = CommandHandlers
+                .newBuilder()
+                .addCommandHandlingTypes(invalidClassname)
+                .build();
         new ModelVerifier(project).verify(spineModel);
     }
 
@@ -127,9 +136,10 @@ class ModelVerifierTest {
     @DisplayName("not accept non-CommandHandler types")
     void rejectNonHandlerTypes() {
         String invalidClassname = ModelVerifierTest.class.getName();
-        CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                    .addCommandHandlingTypes(invalidClassname)
-                                                    .build();
+        CommandHandlers spineModel = CommandHandlers
+                .newBuilder()
+                .addCommandHandlingTypes(invalidClassname)
+                .build();
         assertThrows(IllegalArgumentException.class,
                      () -> new ModelVerifier(project).verify(spineModel));
     }
