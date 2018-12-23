@@ -39,7 +39,7 @@ message EmptyProcess {
 
     option (entity).kind = PROCESS_MANAGER;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 }
 
 // A rudimentary aggregate without state data.
@@ -47,7 +47,7 @@ message EmptyAggregate {
 
     option (entity).kind = PROCESS_MANAGER;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 }
 
 // A rudimentary projection which has only ID.
@@ -55,7 +55,7 @@ message EmptyProjection {
 
     option (entity).kind = PROJECTION;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 }
 
 // A rudimentary entity without state data.
@@ -63,7 +63,7 @@ message EmptyEntity {
 
     option (entity).kind = ENTITY;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 }
 
 // An entity holding optional string value.
@@ -71,7 +71,7 @@ message StringEntity {
 
     option (entity).kind = ENTITY;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 
     string value = 2;
 }
@@ -81,7 +81,7 @@ message AnyProcess {
 
     option (entity).kind = PROCESS_MANAGER;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 
     google.protobuf.Any any = 2;
 }
@@ -91,7 +91,7 @@ message AnyAggregate {
 
     option (entity).kind = AGGREGATE;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 
     google.protobuf.Any any = 2;
 }
@@ -101,7 +101,7 @@ message StringAggregate {
 
     option (entity).kind = AGGREGATE;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 
     string value = 2;
 }
@@ -111,7 +111,7 @@ message StringProjection {
 
     option (entity).kind = PROJECTION;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 
     string value = 2;
 }
@@ -121,7 +121,7 @@ message Int32Aggregate {
 
     option (entity).kind = AGGREGATE;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 
     int32 value = 2;
 }
@@ -131,7 +131,7 @@ message Int64Projection {
 
     option (entity).kind = PROJECTION;
 
-    string id = 1 [(required) = true];
+    string id = 1;
 
     int64 value = 2;
 }
