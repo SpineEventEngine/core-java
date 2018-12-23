@@ -24,16 +24,14 @@ import com.google.protobuf.Any;
 import com.google.protobuf.UInt64Value;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
-import io.spine.validate.AnyVBuilder;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 
 import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-/**
- * @author Dmytro Dashenkov
- */
-public class DuplicateAggregate extends Aggregate<String, Any, AnyVBuilder> {
+public class DuplicateAggregate extends Aggregate<String, EmptyAggregate, EmptyAggregateVBuilder> {
 
     protected DuplicateAggregate(String id) {
         super(id);

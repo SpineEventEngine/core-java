@@ -23,7 +23,8 @@ package io.spine.model.verify;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
-import io.spine.validate.AnyVBuilder;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 
 import com.google.protobuf.Any;
 
@@ -34,10 +35,8 @@ import java.util.List;
  * An Aggregate with a valid command handler method.
  *
  * <p>The command handler method handles command of type {@code SendMessage}.
- *
- * @author Dmytro Dashenkov
  */
-class ValidAggregate extends Aggregate<String, Any, AnyVBuilder> {
+class ValidAggregate extends Aggregate<String, EmptyAggregate, EmptyAggregateVBuilder> {
 
     public ValidAggregate(String id) {
         super(id);

@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine.test.projection.event;
+package spine.test.entity;
 
 import "spine/options.proto";
 
@@ -80,6 +80,16 @@ message StringEntity {
 message AnyProcess {
 
     option (entity).kind = PROCESS_MANAGER;
+
+    string id = 1 [(required) = true];
+
+    google.protobuf.Any any = 2;
+}
+
+// An aggregate holding `Any` as its data.
+message AnyAggregate {
+
+    option (entity).kind = AGGREGATE;
 
     string id = 1 [(required) = true];
 

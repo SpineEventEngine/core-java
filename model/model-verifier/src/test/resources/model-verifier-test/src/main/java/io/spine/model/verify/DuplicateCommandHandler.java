@@ -23,14 +23,13 @@ package io.spine.model.verify;
 import com.google.protobuf.Any;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
-import io.spine.validate.AnyVBuilder;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 
 import static java.util.Collections.singletonList;
 
-/**
- * @author Dmytro Dashenkov
- */
-public class DuplicateCommandHandler extends Aggregate<String, Any, AnyVBuilder> {
+public class DuplicateCommandHandler
+        extends Aggregate<String, EmptyAggregate, EmptyAggregateVBuilder> {
 
     protected DuplicateCommandHandler(String id) {
         super(id);

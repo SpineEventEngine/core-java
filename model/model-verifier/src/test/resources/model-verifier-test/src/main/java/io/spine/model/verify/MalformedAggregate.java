@@ -24,7 +24,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.UInt64Value;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
-import io.spine.validate.AnyVBuilder;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,10 +35,8 @@ import java.util.List;
  *
  * <p>{@link #handle()} method has no arguments and is marked with {@link Assign}, which makes it
  * an invalid command handler method.
- *
- * @author Dmytro Dashenkov
  */
-public class MalformedAggregate extends Aggregate<String, Any, AnyVBuilder> {
+public class MalformedAggregate extends Aggregate<String, EmptyAggregate, EmptyAggregateVBuilder> {
 
     protected MalformedAggregate(String id) {
         super(id);
