@@ -25,7 +25,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
+import io.spine.server.aggregate.given.delivery.AggregateMessageDeliveryTestEnv;
 import io.spine.server.command.Assign;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.event.React;

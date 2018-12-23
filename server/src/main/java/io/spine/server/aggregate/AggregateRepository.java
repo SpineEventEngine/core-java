@@ -29,7 +29,6 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregateClass;
@@ -61,7 +60,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
-import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -354,7 +352,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         I id = ids.stream()
                   .findFirst()
                   .get();
-        onImportTargetSet(id, envelope.getId());
         return id;
     }
 
@@ -623,10 +620,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
-    private void onImportTargetSet(I id, EventId eventId) {
-        lifecycleOf(id).onImportTargetSet(eventId);
-    }
-
     void onEventImported(I id, Event event) {
         lifecycleOf(id).onEventImported(event);
     }
@@ -646,11 +639,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        Iterable<ShardedStreamConsumer<?, ?>> result =
-                of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
-                );
+        Iterable<ShardedStreamConsumer<?, ?>> result = ImmutableList.of(
+                getCommandEndpointDelivery().getConsumer(),
+                getEventEndpointDelivery().getConsumer()
+        );
         return result;
     }
 

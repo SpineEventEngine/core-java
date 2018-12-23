@@ -26,8 +26,6 @@ import io.spine.base.EventMessage;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * An {@link EventFilter} which composes several other filters.
@@ -36,8 +34,6 @@ import static java.util.Optional.of;
  * {@linkplain Builder#add(EventFilter) addition}. The next filter is applied to the result of
  * the previous filter. If a filter returns an empty result, the whole composite filter returns
  * an empty result at once.
- *
- * @author Dmytro Dashenkov
  */
 public final class CompositeEventFilter implements EventFilter {
 
@@ -49,11 +45,11 @@ public final class CompositeEventFilter implements EventFilter {
 
     @Override
     public Optional<? extends EventMessage> filter(EventMessage event) {
-        Optional<? extends EventMessage> result = of(event);
+        Optional<? extends EventMessage> result = Optional.of(event);
         for (EventFilter filter : filters) {
             result = filter.filter(result.get());
             if (!result.isPresent()) {
-                return empty();
+                return Optional.empty();
             }
         }
         return result;

@@ -67,7 +67,7 @@ final class ShardingRegistry {
             ShardIndex entryIndex = entry.stream.getKey()
                                                 .getIndex();
             if(shardIndex.equals(entryIndex)) {
-                @SuppressWarnings("unchecked") //TODO:2018-12-23:alexander.yevsyukov: Document
+                @SuppressWarnings("unchecked") //TODO:2018-12-23:alexander.yevsyukov: Document why the cast is safe.
                 ShardedStream<I, ?, E> stream = (ShardedStream<I, ?, E>) entry.stream;
                 builder.add(stream);
             }
@@ -90,7 +90,7 @@ final class ShardingRegistry {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (!(o instanceof Entry)) {
                 return false;
             }
             Entry entry = (Entry) o;

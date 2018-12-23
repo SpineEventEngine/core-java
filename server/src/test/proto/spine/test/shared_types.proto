@@ -66,6 +66,16 @@ message EmptyEntity {
     string id = 1 [(required) = true];
 }
 
+// An entity holding optional string value.
+message StringEntity {
+
+    option (entity).kind = ENTITY;
+
+    string id = 1 [(required) = true];
+
+    string value = 2;
+}
+
 // A process which can hold `Any` as its data.
 message AnyProcess {
 
@@ -74,4 +84,44 @@ message AnyProcess {
     string id = 1 [(required) = true];
 
     google.protobuf.Any any = 2;
+}
+
+// A simple aggregate that holds a string value.
+message StringAggregate {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = true];
+
+    string value = 2;
+}
+
+// A projection holding a string value.
+message StringProjection {
+
+    option (entity).kind = PROJECTION;
+
+    string id = 1 [(required) = true];
+
+    string value = 2;
+}
+
+// An aggregate holding integer value.
+message Int32Aggregate {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = true];
+
+    int32 value = 2;
+}
+
+// A projection holding long value.
+message Int64Projection {
+
+    option (entity).kind = PROJECTION;
+
+    string id = 1 [(required) = true];
+
+    int64 value = 2;
 }

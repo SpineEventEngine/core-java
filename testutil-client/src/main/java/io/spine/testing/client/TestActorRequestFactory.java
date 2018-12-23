@@ -32,14 +32,13 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.testing.TestValues;
 import io.spine.testing.client.command.TestCommandMessage;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
 import java.time.ZonedDateTime;
-
-import static io.spine.testing.core.given.GivenUserId.of;
 
 /**
  * An {@code ActorRequestFactory} for running tests.
@@ -71,7 +70,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     public static
     TestActorRequestFactory newInstance(String actor, ZoneId zoneId) {
-        return newInstance(of(actor), zoneId);
+        return newInstance(GivenUserId.of(actor), zoneId);
     }
 
     public static
@@ -95,7 +94,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
         return new TestActorRequestFactory(tenantId,
-                                           of(testClass.getName()),
+                                           GivenUserId.of(testClass.getName()),
                                            ZoneOffsets.getDefault(),
                                            ZoneIds.systemDefault());
     }

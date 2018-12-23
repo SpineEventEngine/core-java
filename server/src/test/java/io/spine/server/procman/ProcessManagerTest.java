@@ -42,6 +42,7 @@ import io.spine.server.procman.given.pm.TestProcessManagerDispatcher;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.test.shared.AnyProcess;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
@@ -148,7 +149,7 @@ class ProcessManagerTest {
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
-                              .withState(Any.getDefaultInstance())
+                              .withState(AnyProcess.getDefaultInstance())
                               .build();
         commandBus.register(new TestProcessManagerDispatcher());
         InjectCommandBus.of(commandBus)
@@ -164,7 +165,8 @@ class ProcessManagerTest {
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
-        Any pmState = processManager.getState();
+        Any pmState = processManager.getState()
+                                    .getAny();
         Any expected = pack(eventMessage);
         assertEquals(expected, pmState);
         return result;
@@ -175,7 +177,8 @@ class ProcessManagerTest {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
-        assertEquals(pack(commandMsg), processManager.getState());
+        assertEquals(pack(commandMsg), processManager.getState()
+                                                     .getAny());
         return events;
     }
 

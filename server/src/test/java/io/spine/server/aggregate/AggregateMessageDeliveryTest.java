@@ -23,9 +23,9 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.SingleShardProjectRepository;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleShardProjectRepository;
+import io.spine.server.aggregate.given.delivery.DeliveryProject;
+import io.spine.server.aggregate.given.delivery.SingleShardProjectRepository;
+import io.spine.server.aggregate.given.delivery.TripleShardProjectRepository;
 import io.spine.server.delivery.AbstractMessageDeliveryTest;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
@@ -35,8 +35,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.startProject;
+import static io.spine.server.aggregate.given.delivery.AggregateMessageDeliveryTestEnv.projectCancelled;
+import static io.spine.server.aggregate.given.delivery.AggregateMessageDeliveryTestEnv.startProject;
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
 
 /**

@@ -37,7 +37,6 @@ import java.util.Comparator;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.gson.internal.Primitives.wrap;
-import static io.spine.server.entity.storage.ColumnValueConverters.of;
 import static io.spine.server.entity.storage.Methods.checkGetter;
 import static io.spine.server.entity.storage.Methods.mayReturnNull;
 import static io.spine.server.entity.storage.Methods.nameFromAnnotation;
@@ -229,7 +228,7 @@ public class EntityColumn implements Serializable {
         this.name = name;
         this.storedName = storedName;
         this.nullable = nullable;
-        this.valueConverter = of(getter);
+        this.valueConverter = ColumnValueConverters.of(getter);
     }
 
     /**
@@ -381,7 +380,7 @@ public class EntityColumn implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof EntityColumn)) {
             return false;
         }
         EntityColumn column = (EntityColumn) o;
@@ -453,7 +452,7 @@ public class EntityColumn implements Serializable {
         if (valueConverter != null) {
             return valueConverter;
         }
-        ColumnValueConverter converter = of(getter);
+        ColumnValueConverter converter = ColumnValueConverters.of(getter);
         return converter;
     }
 
@@ -500,7 +499,7 @@ public class EntityColumn implements Serializable {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (!(o instanceof MemoizedValue)) {
                 return false;
             }
             MemoizedValue value1 = (MemoizedValue) o;
@@ -541,8 +540,9 @@ public class EntityColumn implements Serializable {
                     return +1;
                 }
                 if (aValue instanceof Comparable) {
-                    //noinspection unchecked the values are chhecked to be of the same column
-                    return ((Comparable) aValue).compareTo(bValue);
+                    @SuppressWarnings("unchecked") // values are checked to be of the same column
+                    int result = ((Comparable) aValue).compareTo(bValue);
+                    return result;
                 }
                 throw newIllegalStateException("Memoized value is not a Comparable");
             };

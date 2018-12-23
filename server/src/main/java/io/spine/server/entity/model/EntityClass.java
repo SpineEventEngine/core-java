@@ -204,8 +204,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * 
      * @throws IllegalStateException if the entity class does not have the required constructor
     */
-    @SuppressWarnings({"JavaReflectionMemberAccess" /* Entity ctor must accept ID parameter */,
-                       "unchecked" /* The cast is protected by generic params of this class. */})
+    @SuppressWarnings("unchecked" /* The cast is protected by generic params of this class. */)
     protected Constructor<E> findConstructor() {
         Class<? extends E> entityClass = value();
         Class<?> idClass = getIdClass();
@@ -245,7 +244,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof EntityClass)) {
             return false;
         }
         if (!super.equals(o)) {
