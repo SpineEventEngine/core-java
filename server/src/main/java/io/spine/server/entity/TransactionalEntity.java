@@ -38,8 +38,6 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <p>Exposes {@linkplain #getBuilder()} validating builder} for the state as the only way
  * to modify the state from the descendants.
- *
- * @author Alex Tymchenko
  */
 public abstract class TransactionalEntity<I,
                                           S extends Message,

@@ -20,6 +20,7 @@
 
 package io.spine.server.route;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
@@ -33,7 +34,6 @@ import java.util.Set;
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.protobuf.AnyPacker.pack;
 
 @DisplayName("StateUpdateRouting should")
 class StateUpdateRoutingTest {
@@ -65,7 +65,8 @@ class StateUpdateRoutingTest {
         String counterKey = "sample_key";
         StateUpdateRouting<Integer> routing = StateUpdateRouting
                 .<Integer>newInstance()
-                .route(LogState.class, (log, context) -> of(log.getCountersOrThrow(counterKey)));
+                .route(LogState.class, (log, context) ->
+                        ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
         LogState log = LogState
                 .newBuilder()

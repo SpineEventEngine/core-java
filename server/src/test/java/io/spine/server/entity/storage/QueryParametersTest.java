@@ -54,13 +54,10 @@ import static io.spine.client.ColumnFilters.le;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.CompositeQueryParameter.from;
-import static io.spine.server.entity.storage.QueryParameters.newBuilder;
 import static io.spine.server.entity.storage.given.QueryParametersTestEnv.mockColumn;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -81,6 +78,15 @@ class QueryParametersTest {
                                                     .add(parameter)
                                                     .build();
         reserializeAndAssert(parameters);
+    }
+
+    /**
+     * Creates new {@code QueryParameters.Builder} instance.
+     *
+     * @apiNote Provided for brevity of tests while avoiding {@code BadImport} ErrorProne warning.
+     */
+    static QueryParameters.Builder newBuilder() {
+        return QueryParameters.newBuilder();
     }
 
     @Test
@@ -130,9 +136,10 @@ class QueryParametersTest {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
                 gt("thirdFilter", getCurrentTime())};
-        Multimap<EntityColumn, ColumnFilter> columnFilters = of(mockColumn(), filters[0],
-                                                                mockColumn(), filters[1],
-                                                                mockColumn(), filters[2]);
+        Multimap<EntityColumn, ColumnFilter> columnFilters =
+                ImmutableMultimap.of(mockColumn(), filters[0],
+                                     mockColumn(), filters[1],
+                                     mockColumn(), filters[2]);
         CompositeQueryParameter parameter = from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();

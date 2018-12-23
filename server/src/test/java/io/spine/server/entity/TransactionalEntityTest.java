@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 @DisplayName("TransactionalEntity should")
 class TransactionalEntityTest {
 
-    protected TransactionalEntity newEntity() {
+    TransactionalEntity newEntity() {
         return new TeEntity(1L);
     }
 

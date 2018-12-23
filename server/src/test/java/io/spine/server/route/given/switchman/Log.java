@@ -31,8 +31,6 @@ import io.spine.server.route.given.switchman.event.SwitchWorkRecorded;
 import io.spine.server.route.given.switchman.event.SwitchmanAbsenceRecorded;
 import io.spine.server.route.given.switchman.rejection.Rejections;
 
-import static com.google.common.collect.ImmutableSet.of;
-
 /**
  * The aggregate that accumulates information about switchman work and absence.
  *
@@ -84,7 +82,7 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
      */
     public static final class Repository extends AggregateRepository<Long, Log> {
 
-        private static final ImmutableSet<Long> SINGLETON_ID_SET = of(ID);
+        private static final ImmutableSet<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
 
         public Repository() {
             super();

@@ -56,12 +56,12 @@ import static org.mockito.Mockito.mock;
 class EntityRecordWithColumnsTest {
 
     private static EntityRecordWithColumns newRecord() {
-        return of(Sample.messageOfType(EntityRecord.class),
+        return EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
                   Collections.emptyMap());
     }
 
     private static EntityRecordWithColumns newEmptyRecord() {
-        return of(EntityRecord.getDefaultInstance());
+        return EntityRecordWithColumns.of(EntityRecord.getDefaultInstance());
     }
 
     @Test
