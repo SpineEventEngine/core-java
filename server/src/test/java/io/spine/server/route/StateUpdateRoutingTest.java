@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.route.given.switchman.LogState;
 import io.spine.system.server.EntityStateChanged;
 import org.junit.jupiter.api.DisplayName;
@@ -90,7 +91,7 @@ class StateUpdateRoutingTest {
                 .build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
-                .setNewState(pack(log))
+                .setNewState(AnyPacker.pack(log))
                 .setWhen(getCurrentTime())
                 .build();
         EventRoute<Integer, EntityStateChanged> eventRoute = routing.eventRoute();
