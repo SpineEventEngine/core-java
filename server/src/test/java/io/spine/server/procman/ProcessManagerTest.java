@@ -111,7 +111,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-@SuppressWarnings({"OverlyCoupledClass",
+@SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @ExtendWith(ShardingReset.class)
@@ -281,8 +281,8 @@ class ProcessManagerTest {
         void rejectionMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
             dispatch(processManager, rejection.getEvent());
-            assertEquals(rejection.getOuterObject().getMessage(),
-                         processManager.getState());
+            assertReceived(rejection.getOuterObject()
+                                    .getMessage());
         }
 
         @Test
@@ -290,8 +290,13 @@ class ProcessManagerTest {
         void rejectionAndCommandMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
             dispatch(processManager, rejection.getEvent());
-            assertEquals(rejection.getOrigin().getMessage(),
-                         processManager.getState());
+            assertReceived(rejection.getOrigin()
+                                    .getMessage());
+        }
+
+        private void assertReceived(Any expected) {
+            assertEquals(expected, processManager.getState()
+                                                 .getAny());
         }
     }
 

@@ -55,10 +55,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
- */
 @Disabled //TODO:2017-05-03:alexander.yevsyukov: Enable back when Stand becomes a Bus.
 @DisplayName("Stand `post` should")
 class StandPostTest {
