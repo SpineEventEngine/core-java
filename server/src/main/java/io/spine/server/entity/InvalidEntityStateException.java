@@ -76,8 +76,8 @@ public final class InvalidEntityStateException extends RuntimeException {
      */
     public static InvalidEntityStateException onConstraintViolations(
             Message entityState, Iterable<ConstraintViolation> violations) {
-        Factory helper = new Factory(entityState, violations);
-        return helper.newException();
+        Factory factory = new Factory(entityState, violations);
+        return factory.newException();
     }
 
     /**
