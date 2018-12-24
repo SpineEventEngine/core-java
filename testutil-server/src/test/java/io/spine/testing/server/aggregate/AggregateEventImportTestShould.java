@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * A unit test for {@link io.spine.testing.server.aggregate.AggregateEventImportTest}.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("AggregateEventImportTest should")
 class AggregateEventImportTestShould {
 
@@ -110,7 +109,7 @@ class AggregateEventImportTestShould {
             TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
             TuAggregatePart part = TuAggregatePart.newInstance(root);
             EventApplierExpected<TuComments> expected = partImportEventTest.expectThat(part);
-            expected.hasState(state -> assertEquals(1, state.getCommentsRecievedByEmail()));
+            expected.hasState(state -> assertEquals(1, state.getCommentsReceivedByEmail()));
         }
     }
 }

@@ -20,14 +20,14 @@
 
 package io.spine.server.procman.given.delivery;
 
-import com.google.protobuf.StringValue;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.test.shared.EmptyProcess;
 import io.spine.test.procman.ProjectId;
 
 public class QuadrupleShardPmRepository
-        extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
+        extends ProcessManagerRepository<ProjectId, DeliveryPm, EmptyProcess> {
 
     public QuadrupleShardPmRepository() {
     }

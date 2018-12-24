@@ -20,18 +20,18 @@
 package io.spine.server.procman.given.delivery;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
+import io.spine.server.aggregate.given.delivery.AggregateMessageDeliveryTestEnv;
 import io.spine.server.command.Assign;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.test.shared.EmptyProcess;
+import io.spine.server.test.shared.EmptyProcessVBuilder;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.event.PmProjectCreated;
@@ -39,15 +39,11 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;
 
 import static java.util.Collections.emptyList;
 
-/**
- * @author Alex Tymchenko
- */
 public class GivenMessage {
 
     /** Prevents instantiation of this test environment class. */
@@ -101,7 +97,7 @@ public class GivenMessage {
      */
     @SuppressWarnings("unused")
     public static class DeliveryPm
-            extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
+            extends ProcessManager<ProjectId, EmptyProcess, EmptyProcessVBuilder> {
 
         private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
 
@@ -132,13 +128,5 @@ public class GivenMessage {
         public static ThreadStats<ProjectId> getStats() {
             return stats;
         }
-    }
-
-    public static class SingleShardPmRepository
-            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
-    }
-
-    public static class QuadrupleShardPmRepository
-            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
     }
 }

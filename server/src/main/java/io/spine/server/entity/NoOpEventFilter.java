@@ -21,18 +21,15 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 
 import java.util.Collection;
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableList.copyOf;
-
 /**
  * An {@link EventFilter} which allows any event to be posted unchanged.
- *
- * @author Dmytro Dashenkov
  */
 enum NoOpEventFilter implements EventFilter {
 
@@ -50,6 +47,6 @@ enum NoOpEventFilter implements EventFilter {
      */
     @Override
     public ImmutableCollection<Event> filter(Collection<Event> events) {
-        return copyOf(events);
+        return ImmutableList.copyOf(events);
     }
 }

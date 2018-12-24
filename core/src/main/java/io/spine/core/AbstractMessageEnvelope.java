@@ -20,7 +20,6 @@
 
 package io.spine.core;
 
-import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 
 import java.util.Objects;
@@ -62,7 +61,7 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof AbstractMessageEnvelope)) {
             return false;
         }
         AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;

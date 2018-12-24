@@ -20,7 +20,6 @@
 package io.spine.server.stand;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import io.spine.base.Identifier;
 import io.spine.core.CommandEnvelope;
@@ -33,6 +32,7 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestAggregate;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.Disabled;
@@ -55,10 +55,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
- */
 @Disabled //TODO:2017-05-03:alexander.yevsyukov: Enable back when Stand becomes a Bus.
 @DisplayName("Stand `post` should")
 class StandPostTest {
@@ -168,7 +164,7 @@ class StandPostTest {
                 .setId("PRJ-001")
                 .build();
         StandTestAggregate entity = repository.create(entityId);
-        StringValue state = entity.getState();
+        EmptyAggregate state = entity.getState();
         Version version = entity.getVersion();
 
         Stand innerStand = Stand.newBuilder()

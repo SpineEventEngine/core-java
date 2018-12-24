@@ -32,17 +32,12 @@ import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
  * The signature of the {@link EventApplier} method.
- *
- * @author Alex Tymchenko
  */
-class EventApplierSignature
-        extends MethodSignature<EventApplier, EventEnvelope> {
+class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope> {
 
     EventApplierSignature() {
         super(Apply.class);
@@ -50,7 +45,7 @@ class EventApplierSignature
 
     @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(void.class);
+        return ImmutableSet.of(void.class);
     }
 
     @Override
@@ -60,12 +55,12 @@ class EventApplierSignature
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE);
+        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
-        return copyOf(EventApplierParams.values());
+        return ImmutableSet.copyOf(EventApplierParams.values());
     }
 
     /**

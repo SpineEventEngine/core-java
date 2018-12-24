@@ -24,8 +24,8 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
-import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
+import io.spine.server.aggregate.given.repo.AggregateWithLifecycle;
+import io.spine.server.aggregate.given.repo.RepoOfAggregateWithLifecycle;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,13 +36,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("AggregateRepository views should")
 class AggregateRepositoryViewsTest {
 
-    /** The Aggregate ID used in all tests */
+    /** The Aggregate ID used in all tests. */
     private static final Long id = 100L;
     private final ActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());

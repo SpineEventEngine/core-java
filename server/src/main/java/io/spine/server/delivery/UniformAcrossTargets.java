@@ -102,7 +102,7 @@ public class UniformAcrossTargets implements ShardingStrategy {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof UniformAcrossTargets)) {
             return false;
         }
         UniformAcrossTargets that = (UniformAcrossTargets) o;

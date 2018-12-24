@@ -140,7 +140,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof EntityStorageConverter)) {
             return false;
         }
         EntityStorageConverter other = (EntityStorageConverter) obj;

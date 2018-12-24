@@ -19,7 +19,6 @@
  */
 package io.spine.server.delivery.given;
 
-import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandEnvelope;
@@ -36,6 +35,8 @@ import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingKey;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemorySubscriber;
@@ -46,7 +47,6 @@ import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
-import io.spine.validate.StringValueVBuilder;
 
 import java.util.function.Function;
 
@@ -255,7 +255,7 @@ public class ShardedStreamTestEnv {
     }
 
     public static class ProjectAggregate
-            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+            extends Aggregate<ProjectId, EmptyAggregate, EmptyAggregateVBuilder> {
 
         protected ProjectAggregate(ProjectId id) {
             super(id);
@@ -282,7 +282,7 @@ public class ShardedStreamTestEnv {
     }
 
     public static class TaskAggregate
-            extends Aggregate<TaskId, StringValue, StringValueVBuilder> {
+            extends Aggregate<TaskId, EmptyAggregate, EmptyAggregateVBuilder> {
 
         protected TaskAggregate(TaskId id) {
             super(id);

@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -46,7 +47,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -164,7 +164,7 @@ class DefaultSystemReadSideTest {
         @DisplayName("by the given query")
         void query() {
             Query query = actorRequestFactory.query()
-                                             .byIds(ShoppingList.class, of(aggregateId));
+                                             .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
             Message foundMessage = unpack(systemReadSide.readDomainAggregate(query).next());
             assertEquals(aggregate(), foundMessage);
         }

@@ -37,5 +37,5 @@ message CreateOrder {
 
 message AddItem {
     OrderId id = 1;
-    Order.Item item = 2 [(required) = true];
+    Item item = 2 [(required) = true];
 }

@@ -1,0 +1,140 @@
+//
+// Copyright 2018, TeamDev. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.test.shared;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.test.shared";
+option java_outer_classname = "SharedTypesProto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+// This file defines messages that can be safely re-used in tests environments that do
+// not require domain-specific data.
+//
+// ID fields of the entity states are marked as not required to preserve the behaviour of
+// test environment entities that used to rely on standard Protobuf types for their state.
+//
+
+// A process without state data (having only ID).
+message EmptyProcess {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    string id = 1 [(required) = false];
+}
+
+// A rudimentary aggregate without state data.
+message EmptyAggregate {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    string id = 1 [(required) = false];
+}
+
+// A rudimentary projection which has only ID.
+message EmptyProjection {
+
+    option (entity).kind = PROJECTION;
+
+    string id = 1 [(required) = false];
+}
+
+// A rudimentary entity without state data.
+message EmptyEntity {
+
+    option (entity).kind = ENTITY;
+
+    string id = 1 [(required) = false];
+}
+
+// An entity holding optional string value.
+message StringEntity {
+
+    option (entity).kind = ENTITY;
+
+    string id = 1 [(required) = false];
+
+    string value = 2;
+}
+
+// A process which can hold `Any` as its data.
+message AnyProcess {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    string id = 1 [(required) = false];
+
+    google.protobuf.Any any = 2;
+}
+
+// An aggregate holding `Any` as its data.
+message AnyAggregate {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = false];
+
+    google.protobuf.Any any = 2;
+}
+
+// A simple aggregate that holds a string value.
+message StringAggregate {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = false];
+
+    string value = 2;
+}
+
+// A projection holding a string value.
+message StringProjection {
+
+    option (entity).kind = PROJECTION;
+
+    string id = 1 [(required) = false];
+
+    string value = 2;
+}
+
+// An aggregate holding integer value.
+message Int32Aggregate {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = false];
+
+    int32 value = 2;
+}
+
+// A projection holding long value.
+message Int64Projection {
+
+    option (entity).kind = PROJECTION;
+
+    string id = 1 [(required) = false];
+
+    int64 value = 2;
+}

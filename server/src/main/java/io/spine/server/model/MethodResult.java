@@ -32,9 +32,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableList.copyOf;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -74,7 +71,7 @@ public abstract class MethodResult<V extends Message> {
     protected final void setMessages(List<V> messages) {
         checkState(this.messages == null, "Method result messages are already assigned");
         checkNotNull(messages);
-        this.messages = copyOf(messages);
+        this.messages = ImmutableList.copyOf(messages);
     }
 
     protected @Nullable Object getRawMethodOutput() {
@@ -118,8 +115,9 @@ public abstract class MethodResult<V extends Message> {
      */
     @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
     protected static <V extends Message> List<V> toMessages(@Nullable Object output) {
+        ImmutableList<V> emptyList = ImmutableList.of();
         if (output == null) {
-            return emptyList();
+            return emptyList;
         }
 
         // Allow reacting methods to return `Empty` instead of empty `List`. Do not store such
@@ -127,7 +125,7 @@ public abstract class MethodResult<V extends Message> {
         // use this trick because we check for non-empty result of such methods. `ProcessManager`
         // command handlers are allowed to return `Empty` but not empty event `List`.
         if (output instanceof Empty) {
-            return emptyList();
+            return emptyList;
         }
 
         // Allow `Optional` for event reactions and command generation in response to events.
@@ -137,27 +135,24 @@ public abstract class MethodResult<V extends Message> {
                 V message = (V) optional.get();
                 return ImmutableList.of(message);
             } else {
-                return emptyList();
+                return emptyList;
             }
         }
 
         if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
-            List<V> result = (List<V>) output;
-            return result;
+            return ImmutableList.copyOf((List<V>) output);
         }
 
         // If it's not a list it could be another `Iterable`.
         if (output instanceof Iterable) {
-            Iterable<V> iterable = (Iterable<V>) output;
-            return copyOf(iterable);
+            return ImmutableList.copyOf((Iterable<V>) output);
         }
 
         // Another type of result is single event message (as Message).
         V singleMessage = (V) output;
-        List<V> result = singletonList(singleMessage);
-        return result;
+        return ImmutableList.of(singleMessage);
     }
 
     /**

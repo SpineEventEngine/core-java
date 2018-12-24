@@ -56,6 +56,14 @@ message TuProject {
 }
 
 // A state of an aggregate part.
+message TuProjectPart {
+
+    TuProjectId id = 1;
+
+    string value = 2;
+}
+
+// A state of an aggregate part.
 message TuComments {
 
     TuTaskId id = 1;
@@ -64,7 +72,7 @@ message TuComments {
 
     bool comment_limit_reached = 3;
 
-    int32 comments_recieved_by_email = 4;
+    int32 comments_received_by_email = 4;
 }
 
 // A state of a process manager.
@@ -85,4 +93,12 @@ message TuEventLog {
     TuProjectId id = 1;
 
     repeated google.protobuf.Any event = 2;
+}
+
+// A state for `TuProjection`.
+message TuString {
+
+    uint64 id = 1;
+
+    string value = 2;
 }

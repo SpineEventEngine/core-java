@@ -81,13 +81,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("CommandHandlerMethod should")
 class CommandHandlerMethodTest {
 
@@ -199,8 +192,9 @@ class CommandHandlerMethodTest {
     @DisplayName("allow `ProcessManager` methods producing `Empty`")
     void allowEmptyInProcman() {
         RefCreateProject commandMessage = createProject();
-        ProcessManager<ProjectId, ?, ?> entity =
-                new ProcessManagerDoingNothing(commandMessage.getProjectId());
+        ProcessManager<String, ?, ?> entity =
+                new ProcessManagerDoingNothing(commandMessage.getProjectId()
+                                                             .getId());
         CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
         List<Event> events = PmDispatcher.dispatch(entity, cmd);
         assertEmpty(events);

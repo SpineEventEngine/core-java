@@ -67,7 +67,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.testing.core.given.GivenUserId.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -184,7 +183,7 @@ public class Given {
                     .setCustomerId(customerId)
                     .setCustomer(customer)
                     .build();
-            UserId userId = of(Identifier.newUuid());
+            UserId userId = GivenUserId.of(Identifier.newUuid());
             Command result = create(msg, userId, getCurrentTime());
             return result;
         }

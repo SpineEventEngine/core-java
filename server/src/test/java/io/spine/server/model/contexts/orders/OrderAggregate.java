@@ -31,9 +31,6 @@ import io.spine.test.model.contexts.orders.command.CreateOrder;
 import io.spine.test.model.contexts.orders.event.ItemAdded;
 import io.spine.test.model.contexts.orders.event.OrderCreated;
 
-/**
- * @author Alexander Yevsyukov
- */
 class OrderAggregate extends Aggregate<OrderId, Order, OrderVBuilder> {
 
     private OrderAggregate(OrderId id) {

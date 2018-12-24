@@ -20,18 +20,15 @@
 
 package io.spine.testing.server.projection.given.prj;
 
-import com.google.protobuf.StringValue;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.testing.server.given.entity.TuString;
+import io.spine.testing.server.given.entity.TuStringVBuilder;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
-import io.spine.validate.StringValueVBuilder;
 
-/**
- * A dummy projection that is subscribed to a {@code StringValue} event.
- */
 public final class TuProjection
-        extends Projection<Long, StringValue, StringValueVBuilder> {
+        extends Projection<Long, TuString, TuStringVBuilder> {
 
     public static final long ID = 1L;
 

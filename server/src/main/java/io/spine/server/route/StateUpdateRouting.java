@@ -20,6 +20,7 @@
 
 package io.spine.server.route;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
@@ -28,8 +29,6 @@ import io.spine.server.entity.model.EntityStateClass;
 import io.spine.system.server.EntityStateChanged;
 
 import java.util.Set;
-
-import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * A routing schema used to deliver entity state updates.
@@ -48,7 +47,7 @@ public class StateUpdateRouting<I>
     private static final long serialVersionUID = 0L;
 
     private StateUpdateRouting() {
-        super(((message, context) -> of()));
+        super((message, context) -> ImmutableSet.of());
     }
 
     /**

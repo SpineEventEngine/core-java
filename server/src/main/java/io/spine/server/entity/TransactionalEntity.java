@@ -26,7 +26,6 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
-import io.spine.validate.ValidatingBuilders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -39,8 +38,6 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <p>Exposes {@linkplain #getBuilder()} validating builder} for the state as the only way
  * to modify the state from the descendants.
- *
- * @author Alex Tymchenko
  */
 public abstract class TransactionalEntity<I,
                                           S extends Message,
@@ -126,7 +123,6 @@ public abstract class TransactionalEntity<I,
      *
      * @throws IllegalStateException if the transaction is null or not active
      */
-    @SuppressWarnings("ConstantConditions") // see Javadoc
     private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(getMissingTxMessage());
@@ -247,7 +243,7 @@ public abstract class TransactionalEntity<I,
         Class<? extends TransactionalEntity<I, S, B>> cls =
                 (Class<? extends TransactionalEntity<I, S, B>>) getClass();
         Class<B> builderClass = getBuilderClass(cls);
-        B builder = ValidatingBuilders.newInstance(builderClass);
+        B builder = ValidatingBuilder.newInstance(builderClass);
         return builder;
     }
 

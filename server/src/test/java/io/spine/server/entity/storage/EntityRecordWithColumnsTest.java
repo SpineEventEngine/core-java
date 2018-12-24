@@ -42,7 +42,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,12 +55,12 @@ import static org.mockito.Mockito.mock;
 class EntityRecordWithColumnsTest {
 
     private static EntityRecordWithColumns newRecord() {
-        return of(Sample.messageOfType(EntityRecord.class),
+        return EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
                   Collections.emptyMap());
     }
 
     private static EntityRecordWithColumns newEmptyRecord() {
-        return of(EntityRecord.getDefaultInstance());
+        return EntityRecordWithColumns.of(EntityRecord.getDefaultInstance());
     }
 
     @Test
@@ -84,7 +83,7 @@ class EntityRecordWithColumnsTest {
         MemoizedValue value = column.memoizeFor(entity);
 
         Map<String, MemoizedValue> columns = singletonMap(columnName, value);
-        EntityRecordWithColumns recordWithColumns = of(record, columns);
+        EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record, columns);
         reserializeAndAssert(recordWithColumns);
     }
 
@@ -93,12 +92,12 @@ class EntityRecordWithColumnsTest {
     void supportEquality() {
         MemoizedValue mockValue = mock(MemoizedValue.class);
         EntityRecordWithColumns noFieldsEnvelope = newEmptyRecord();
-        EntityRecordWithColumns emptyFieldsEnvelope = of(
+        EntityRecordWithColumns emptyFieldsEnvelope = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(),
                 Collections.emptyMap()
         );
         EntityRecordWithColumns notEmptyFieldsEnvelope =
-                of(
+                EntityRecordWithColumns.of(
                         EntityRecord.getDefaultInstance(),
                         singletonMap("key", mockValue)
                 );
@@ -116,8 +115,10 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("record and storage fields")
         void recordAndColumns() {
-            EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(),
-                                                Collections.emptyMap());
+            EntityRecordWithColumns record = EntityRecordWithColumns.of(
+                    EntityRecord.getDefaultInstance(),
+                    Collections.emptyMap()
+            );
             assertNotNull(record);
         }
 
@@ -147,8 +148,10 @@ class EntityRecordWithColumnsTest {
             MemoizedValue mockValue = mock(MemoizedValue.class);
             String columnName = "some-key";
             Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, mockValue);
-            EntityRecordWithColumns record = of(Sample.messageOfType(EntityRecord.class),
-                                                columnsExpected);
+            EntityRecordWithColumns record = EntityRecordWithColumns.of(
+                    Sample.messageOfType(EntityRecord.class),
+                    columnsExpected
+            );
             Collection<String> columnNames = record.getColumnNames();
             assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
@@ -182,7 +185,10 @@ class EntityRecordWithColumnsTest {
         Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
         assertTrue(columnValues.isEmpty());
 
-        EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(), columnValues);
+        EntityRecordWithColumns record = EntityRecordWithColumns.of(
+                EntityRecord.getDefaultInstance(),
+                columnValues
+        );
         assertFalse(record.hasColumns());
     }
 }

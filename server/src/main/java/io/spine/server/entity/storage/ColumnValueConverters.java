@@ -30,12 +30,8 @@ import static io.spine.server.entity.storage.EnumType.ORDINAL;
 /**
  * A utility which creates {@link ColumnValueConverter} instances for {@linkplain EntityColumn
  * entity columns}.
- *
- * @author Dmytro Kuzmin
- * @see Column
- * @see Enumerated
  */
-class ColumnValueConverters {
+final class ColumnValueConverters {
 
     /**
      * Prevents instantiation of this utility class.

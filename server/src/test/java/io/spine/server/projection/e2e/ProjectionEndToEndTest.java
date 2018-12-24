@@ -21,7 +21,6 @@
 package io.spine.server.projection.e2e;
 
 import com.google.common.truth.IterableSubject;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
@@ -34,6 +33,7 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.groups.Group;
 import io.spine.server.groups.GroupId;
+import io.spine.server.groups.GroupName;
 import io.spine.server.groups.GroupNameProjection;
 import io.spine.server.groups.GroupProjection;
 import io.spine.server.organizations.Organization;
@@ -117,7 +117,12 @@ class ProjectionEndToEndTest {
         sender.receivesEventsProducedBy(producerId,
                                         established);
         receiver.assertThat(exactlyOne(
-                StringValue.of(established.getName())
+                GroupName.newBuilder()
+                         .setId(GroupId.newBuilder()
+                                       .setUuid(producerId.getUuid())
+                                       .build())
+                         .setName(established.getName())
+                         .build()
         ));
     }
 

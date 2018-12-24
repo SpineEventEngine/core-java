@@ -20,7 +20,6 @@
 package io.spine.server.delivery.given;
 
 import com.google.common.collect.Lists;
-import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -33,13 +32,14 @@ import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.React;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
-import io.spine.validate.StringValueVBuilder;
 
 import java.util.Optional;
 
@@ -48,8 +48,6 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 
 /**
  * An abstract base for environments, which are created to ease the message delivery testing.
- *
- * @author Alex Tymchenko
  */
 public class MessageDeliveryTestEnv {
 
@@ -81,7 +79,7 @@ public class MessageDeliveryTestEnv {
      * features.
      */
     public static class DeliveryEqualityProject
-            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+            extends Aggregate<ProjectId, EmptyAggregate, EmptyAggregateVBuilder> {
 
         protected DeliveryEqualityProject(ProjectId id) {
             super(id);

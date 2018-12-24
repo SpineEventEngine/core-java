@@ -26,9 +26,6 @@ import io.spine.core.EventClass;
 
 import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 /**
  * An {@link EventFilter} which allows only events of given types.
  *
@@ -37,7 +34,6 @@ import static java.util.Optional.of;
  * <p><b>Caution:</b> when using this filter, make sure you're aware of consequences of discarding
  * system events posted by a repository.
  *
- * @author Dmytro Dashenkov
  * @see EventBlackList
  */
 public final class EventWhiteList implements EventFilter {
@@ -66,7 +62,7 @@ public final class EventWhiteList implements EventFilter {
     public Optional<? extends EventMessage> filter(EventMessage event) {
         EventClass type = EventClass.of(event);
         return allowedEvents.contains(type)
-               ? of(event)
-               : empty();
+               ? Optional.of(event)
+               : Optional.empty();
     }
 }

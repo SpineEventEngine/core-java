@@ -21,6 +21,7 @@ package io.spine.server.delivery;
 
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
+import io.spine.server.delivery.given.ShardedStreamTestEnv;
 import io.spine.server.delivery.given.ShardedStreamTestEnv.TaskAggregateRepository;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testing.Tests;
@@ -30,14 +31,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.delivery.given.ShardedStreamTestEnv.builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Alex Tymchenko
- */
 @SuppressWarnings({"DuplicateStringLiteralInspection", /* Common test display names. */
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "unchecked" /* The numerous generic parameters are omitted to simplify tests. */})
@@ -48,6 +45,11 @@ class ShardedStreamBuilderTest {
     void setUp() {
         // As long as we refer to the Model in delivery tag initialization.
         ModelTests.dropAllModels();
+    }
+
+    /** Provides brevity in tests. */
+    private static ShardedStream.AbstractBuilder builder() {
+        return ShardedStreamTestEnv.builder();
     }
 
     @Nested
@@ -66,6 +68,7 @@ class ShardedStreamBuilderTest {
         void key() {
             assertThrows(NullPointerException.class, () -> builder().setKey(Tests.nullRef()));
         }
+
 
         @Test
         @DisplayName("tag")
