@@ -53,7 +53,6 @@ import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.server.entity.storage.Columns.findColumn;
-import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.entity.storage.given.QueryParametersTestEnv.mockColumn;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -197,7 +196,7 @@ class QueryParametersTest {
                         .put(column, startTimeFilter)
                         .put(column, deadlineFilter)
                         .build();
-        CompositeQueryParameter parameter = from(columnFilters, ALL);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
         List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
@@ -255,7 +254,7 @@ class QueryParametersTest {
     private static CompositeQueryParameter aggregatingParameter(EntityColumn column,
                                                                 ColumnFilter columnFilter) {
         Multimap<EntityColumn, ColumnFilter> filter = of(column, columnFilter);
-        CompositeQueryParameter result = from(filter, ALL);
+        CompositeQueryParameter result = CompositeQueryParameter.from(filter, ALL);
         return result;
     }
 }

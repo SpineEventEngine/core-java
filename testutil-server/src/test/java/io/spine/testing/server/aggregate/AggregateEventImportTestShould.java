@@ -35,13 +35,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.validate.Validate.isNotDefault;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * A unit test for {@link io.spine.testing.server.aggregate.AggregateEventImportTest}.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("AggregateEventImportTest should")
 class AggregateEventImportTestShould {
 
