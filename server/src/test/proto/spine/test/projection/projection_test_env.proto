@@ -39,7 +39,7 @@ message SavedString {
     option (entity).kind = PROJECTION;
 
     // The ID of the projection.
-    string id = 1 [(required) = true];
+    string id = 1 [(required) = false];
 
     // The stored value. Initially is empty.
     string value = 2;

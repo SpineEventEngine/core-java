@@ -21,7 +21,6 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.StringValue;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -277,7 +276,7 @@ class ProjectionShould {
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
-        assertThat(projection.getState()).isEqualTo(StringValue.getDefaultInstance());
+        assertThat(projection.getState()).isEqualTo(SavedString.getDefaultInstance());
 
         StringImported dispatched = StringImported
                 .newBuilder()

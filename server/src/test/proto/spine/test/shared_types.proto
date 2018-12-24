@@ -42,7 +42,7 @@ message EmptyProcess {
 
     option (entity).kind = PROCESS_MANAGER;
 
-    string id = 1;
+    string id = 1 [(required) = false];
 }
 
 // A rudimentary aggregate without state data.

@@ -39,12 +39,6 @@ import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWait
 import static io.spine.server.procman.given.delivery.GivenMessage.createProject;
 import static io.spine.server.procman.given.delivery.GivenMessage.projectStarted;
 
-/**
- * @author Alex Tymchenko
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("ProcessManager message delivery in multithreaded env should")
 class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
