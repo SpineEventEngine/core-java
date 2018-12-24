@@ -58,9 +58,7 @@ class ModelVerifierPluginTest {
     private Path tempDir;
 
     @BeforeEach
-    void setUp(
-            @TempDir Path junitCreatedDir
-    ) {
+    void setUp(@TempDir Path junitCreatedDir) {
         tempDir = junitCreatedDir;
         ModelTests.dropAllModels();
     }

@@ -41,7 +41,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -253,7 +252,7 @@ class QueryParametersTest {
 
     private static CompositeQueryParameter aggregatingParameter(EntityColumn column,
                                                                 ColumnFilter columnFilter) {
-        Multimap<EntityColumn, ColumnFilter> filter = of(column, columnFilter);
+        Multimap<EntityColumn, ColumnFilter> filter = ImmutableMultimap.of(column, columnFilter);
         CompositeQueryParameter result = CompositeQueryParameter.from(filter, ALL);
         return result;
     }
