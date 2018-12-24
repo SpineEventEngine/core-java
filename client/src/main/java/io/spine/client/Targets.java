@@ -38,15 +38,12 @@ import static java.util.stream.Collectors.toList;
 /**
  * Client-side utilities for working with {@link Query} and
  * {@link Topic Topic} targets.
- *
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
  */
 @Internal
 public final class Targets {
 
+    /** Prevent instantiation of this utility class. */
     private Targets() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

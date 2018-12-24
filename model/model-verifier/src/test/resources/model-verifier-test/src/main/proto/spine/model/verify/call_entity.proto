@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package spine.model.verify;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.model.verify";
+option java_outer_classname = "CallEntityProto";
+option java_multiple_files = true;
+
+message CallState {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = true];
+}
+
+message ChatState {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = true];
+}
+
+message VoidState {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = true];
+}
+
+message ValidState {
+
+    option (entity).kind = AGGREGATE;
+
+    string id = 1 [(required) = true];
+}
+
+message ValidProcess {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    string id = 1 [(required) = true];
+}

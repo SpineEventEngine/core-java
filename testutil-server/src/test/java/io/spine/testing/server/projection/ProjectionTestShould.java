@@ -20,8 +20,8 @@
 
 package io.spine.testing.server.projection;
 
-import com.google.protobuf.StringValue;
 import io.spine.testing.server.expected.EventSubscriberExpected;
+import io.spine.testing.server.given.entity.TuString;
 import io.spine.testing.server.projection.given.SampleProjectionTest;
 import io.spine.testing.server.projection.given.prj.TuProjection;
 import org.junit.jupiter.api.AfterEach;
@@ -33,10 +33,6 @@ import static io.spine.testing.server.projection.given.SampleProjectionTest.TEST
 import static io.spine.testing.server.projection.given.prj.TuProjection.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Vladyslav Lubenskyi
- */
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProjectionTest should")
 class ProjectionTestShould {
 
@@ -64,7 +60,7 @@ class ProjectionTestShould {
     @SuppressWarnings("CheckReturnValue")
     void shouldDispatchCommand() {
         TuProjection aggregate = newInstance();
-        EventSubscriberExpected<StringValue> expected = projectionTest.expectThat(aggregate);
+        EventSubscriberExpected<TuString> expected = projectionTest.expectThat(aggregate);
         expected.hasState(state -> assertEquals(state.getValue(), TEST_EVENT.getId().getValue()));
     }
 }

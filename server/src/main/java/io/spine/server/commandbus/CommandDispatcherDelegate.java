@@ -54,7 +54,6 @@ import java.util.Set;
  * {@code MessageDispatcher} API.
  *
  * @param <I> the type of IDs of entities that handle the commands dispatched by the delegate
- * @author Alex Tymchenko
  * @see DelegatingCommandDispatcher
  */
 @Internal

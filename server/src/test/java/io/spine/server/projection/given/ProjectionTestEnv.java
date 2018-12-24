@@ -20,7 +20,6 @@
 
 package io.spine.server.projection.given;
 
-import com.google.protobuf.StringValue;
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
@@ -28,7 +27,6 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.event.Int32Imported;
 import io.spine.test.projection.event.PairImported;
 import io.spine.test.projection.event.StringImported;
-import io.spine.validate.StringValueVBuilder;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -41,7 +39,7 @@ public class ProjectionTestEnv {
     }
 
     public static final class TestProjection
-            extends Projection<String, StringValue, StringValueVBuilder> {
+            extends Projection<String, SavedString, SavedStringVBuilder> {
 
         /** The number of events this class handles. */
         public static final int HANDLING_EVENT_COUNT = 2;
@@ -52,29 +50,31 @@ public class ProjectionTestEnv {
 
         @Subscribe
         public void on(StringImported event) {
-            StringValue newState = createNewState("stringState", event.getValue());
+            SavedString newState = createNewState("stringState", event.getValue());
             getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
         public void on(Int32Imported event) {
-            StringValue newState = createNewState("integerState",
+            SavedString newState = createNewState("integerState",
                                                   String.valueOf(event.getValue()));
             getBuilder().mergeFrom(newState);
         }
 
-        private StringValue createNewState(String type, String value) {
+        private SavedString createNewState(String type, String value) {
             // Get the current state within the transaction.
             String currentState = getBuilder().internalBuild()
                                               .getValue();
             String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
-            return StringValue.of(result);
+            return SavedString.newBuilder()
+                              .setValue(result)
+                              .build();
         }
     }
 
     public static final class FilteringProjection
-            extends Projection<String, StringValue, StringValueVBuilder> {
+            extends Projection<String, SavedString, SavedStringVBuilder> {
 
         public static final String SET_A = "SET A";
 
@@ -101,7 +101,7 @@ public class ProjectionTestEnv {
     }
 
     public static final class NoDefaultOptionProjection
-            extends Projection<String, StringValue, StringValueVBuilder> {
+            extends Projection<String, SavedString, SavedStringVBuilder> {
 
         public static final String ACCEPTED_VALUE = "AAA";
 
@@ -116,7 +116,7 @@ public class ProjectionTestEnv {
     }
 
     public static final class MalformedProjection
-            extends Projection<String, StringValue, StringValueVBuilder> {
+            extends Projection<String, SavedString, SavedStringVBuilder> {
 
         private MalformedProjection(String id) {
             super(id);
@@ -133,12 +133,12 @@ public class ProjectionTestEnv {
         }
 
         public static final class Repository
-                extends ProjectionRepository<String, MalformedProjection, StringValue> {
+                extends ProjectionRepository<String, MalformedProjection, SavedString> {
         }
     }
 
     public static final class DuplicateFilterProjection
-            extends Projection<String, StringValue, StringValueVBuilder> {
+            extends Projection<String, SavedString, SavedStringVBuilder> {
 
         private DuplicateFilterProjection(String id) {
             super(id);
@@ -155,7 +155,7 @@ public class ProjectionTestEnv {
         }
 
         public static final class Repository
-                extends ProjectionRepository<String, DuplicateFilterProjection, StringValue> {
+                extends ProjectionRepository<String, DuplicateFilterProjection, SavedString> {
         }
     }
 

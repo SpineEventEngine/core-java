@@ -76,9 +76,8 @@ public final class InvalidEntityStateException extends RuntimeException {
      */
     public static InvalidEntityStateException onConstraintViolations(
             Message entityState, Iterable<ConstraintViolation> violations) {
-        ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
-                entityState, violations);
-        return helper.newException();
+        Factory factory = new Factory(entityState, violations);
+        return factory.newException();
     }
 
     /**
@@ -104,7 +103,7 @@ public final class InvalidEntityStateException extends RuntimeException {
      * A helper utility aimed to create an {@code InvalidEntityStateException} to report the
      * entity state which field values violate validation constraint(s).
      */
-    private static class ConstraintViolationExceptionFactory
+    private static final class Factory
             extends ExceptionFactory<InvalidEntityStateException,
                                      Message,
                                      EntityStateClass,
@@ -120,8 +119,8 @@ public final class InvalidEntityStateException extends RuntimeException {
 
         private final EntityStateClass entityStateClass;
 
-        private ConstraintViolationExceptionFactory(Message entityState,
-                                                    Iterable<ConstraintViolation> violations) {
+        private Factory(Message entityState,
+                        Iterable<ConstraintViolation> violations) {
             super(entityState, violations);
             this.entityStateClass = EntityStateClass.of(entityState);
         }

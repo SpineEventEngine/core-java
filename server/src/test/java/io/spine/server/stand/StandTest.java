@@ -63,6 +63,7 @@ import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.core.given.GivenVersion;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
@@ -107,7 +108,6 @@ import static io.spine.test.projection.Project.Status.CANCELLED;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.test.projection.Project.Status.UNDEFINED;
 import static io.spine.testing.Tests.assertMatchesMask;
-import static io.spine.testing.core.given.GivenUserId.of;
 import static io.spine.testing.server.entity.given.Given.projectionOfClass;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
@@ -171,7 +171,7 @@ class StandTest extends TenantAwareTest {
     protected static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
         ActorRequestFactory.Builder builder = ActorRequestFactory
                 .newBuilder()
-                .setActor(of(newUuid()));
+                .setActor(GivenUserId.of(newUuid()));
         if (tenant != null) {
             builder.setTenantId(tenant);
         }

@@ -107,7 +107,6 @@ public class CommandBus extends UnicastBus<Command,
     /**
      * Creates new instance according to the passed {@link Builder}.
      */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
         super(builder);
         this.multitenant = builder.multitenant != null

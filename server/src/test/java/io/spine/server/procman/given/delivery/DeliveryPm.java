@@ -21,17 +21,17 @@
 package io.spine.server.procman.given.delivery;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.server.command.Assign;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.test.shared.EmptyProcess;
+import io.spine.server.test.shared.EmptyProcessVBuilder;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections;
-import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;
 
@@ -47,9 +47,8 @@ import static java.util.Collections.emptyList;
  * They are still present, as long as they are required according to the handler
  * declaration rules.
  */
-@SuppressWarnings("unused")
 public class DeliveryPm
-        extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
+        extends ProcessManager<ProjectId, EmptyProcess, EmptyProcessVBuilder> {
 
     private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
 

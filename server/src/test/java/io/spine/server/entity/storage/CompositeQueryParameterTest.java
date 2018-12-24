@@ -30,7 +30,6 @@ import io.spine.server.entity.Entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.Truth.assertThat;
@@ -40,7 +39,6 @@ import static io.spine.client.ColumnFilters.lt;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.CCF_CO_UNDEFINED;
 import static io.spine.server.entity.storage.Columns.findColumn;
-import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
@@ -62,7 +60,7 @@ class CompositeQueryParameterTest {
     @DisplayName("be serializable")
     void beSerializable() {
         ImmutableMultimap<EntityColumn, ColumnFilter> filters = ImmutableMultimap.of();
-        CompositeQueryParameter parameter = from(filters, ALL);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         SerializableTester.reserializeAndAssert(parameter);
     }
 
@@ -70,7 +68,7 @@ class CompositeQueryParameterTest {
     @DisplayName("fail to construct for invalid operator")
     void rejectInvalidOperator() {
         assertThrows(IllegalArgumentException.class,
-                     () -> from(ImmutableMultimap.of(), CCF_CO_UNDEFINED));
+                     () -> CompositeQueryParameter.from(ImmutableMultimap.of(), CCF_CO_UNDEFINED));
     }
 
     @Test
@@ -92,11 +90,20 @@ class CompositeQueryParameterTest {
         ColumnFilter versionUpper = lt(archivedColumnName, 10);
 
         CompositeQueryParameter lifecycle =
-                from(of(archivedColumn, archived, deletedColumn, deleted), ALL);
+                CompositeQueryParameter.from(
+                        ImmutableMultimap.of(archivedColumn, archived, deletedColumn, deleted),
+                        ALL
+                );
         CompositeQueryParameter versionLowerBound =
-                from(of(versionColumn, versionLower), ALL);
+                CompositeQueryParameter.from(
+                        ImmutableMultimap.of(versionColumn, versionLower),
+                        ALL
+                );
         CompositeQueryParameter versionUpperBound =
-                from(of(versionColumn, versionUpper), ALL);
+                CompositeQueryParameter.from(
+                        ImmutableMultimap.of(versionColumn, versionUpper),
+                        ALL
+                );
         // Merge the instances
         CompositeQueryParameter all =
                 lifecycle.conjunct(newArrayList(versionLowerBound, versionUpperBound));
@@ -129,7 +136,10 @@ class CompositeQueryParameterTest {
         ColumnFilter version = ge(archivedColumnName, 4);
 
         CompositeQueryParameter lifecycle =
-                from(of(archivedColumn, archived, deletedColumn, deleted), ALL);
+                CompositeQueryParameter.from(
+                        ImmutableMultimap.of(archivedColumn, archived, deletedColumn, deleted),
+                        ALL
+                );
         // Merge the instances
         CompositeQueryParameter all = lifecycle.and(versionColumn, version);
 

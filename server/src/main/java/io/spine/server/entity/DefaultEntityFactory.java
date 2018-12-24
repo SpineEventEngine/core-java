@@ -32,7 +32,6 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
  *
  * @param <I> the type of entity identifiers
  * @param <E> the type of entities to create
- * @author Alexander Yevsyukov
  */
 class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityFactory<I, E> {
 
@@ -59,7 +58,7 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof DefaultEntityFactory)) {
             return false;
         }
         DefaultEntityFactory other = (DefaultEntityFactory) obj;

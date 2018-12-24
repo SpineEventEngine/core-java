@@ -22,20 +22,17 @@ package io.spine.client.given;
 
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.UserId;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.testing.core.given.GivenUserId.of;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class ActorRequestFactoryTestEnv {
 
-    public static final UserId ACTOR = of(newUuid());
+    public static final UserId ACTOR = GivenUserId.of(newUuid());
     public static final ZoneOffset ZONE_OFFSET = ZoneOffsets.getDefault();
     public static final ZoneId ZONE_ID = ZoneIds.systemDefault();
 

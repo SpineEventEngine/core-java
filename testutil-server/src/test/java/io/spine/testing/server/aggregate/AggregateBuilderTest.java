@@ -20,42 +20,46 @@
 
 package io.spine.testing.server.aggregate;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.testing.server.given.entity.TuProject;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.TuProjectVBuilder;
 import io.spine.time.testing.TimeTests;
-import io.spine.validate.TimestampVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("AggregateBuilder should create an aggregate with requested...")
 class AggregateBuilderTest {
 
-    private int id;
+    private TuProjectId id;
     private int version;
-    private Message state;
+    private TuProject state;
     private Timestamp whenModified;
 
     private Aggregate aggregate;
 
     @BeforeEach
     void setUp() {
-        id = 2048;
-        version = 2017;
+        id = TuProjectId.newBuilder()
+                        .setValue(Identifier.newUuid())
+                        .build();
+        version = 2019;
         whenModified = Time.getCurrentTime();
-        state = TimeTests.Past.minutesAgo(60);
+        state = TuProject.newBuilder()
+                         .setId(id)
+                         .setTimestamp(TimeTests.Past.minutesAgo(60))
+                         .build();
 
         aggregate = givenAggregate()
                 .withId(id)
                 .withVersion(version)
-                .withState((Timestamp) state)
+                .withState(state)
                 .modifiedOn(whenModified)
                 .build();
     }
@@ -94,14 +98,15 @@ class AggregateBuilderTest {
      * Test Environment
      ************************/
 
-    private static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
-        AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
+    private static AggregateBuilder<TestAggregate, TuProjectId, TuProject> givenAggregate() {
+        AggregateBuilder<TestAggregate, TuProjectId, TuProject> result = new AggregateBuilder<>();
         result.setResultClass(TestAggregate.class);
         return result;
     }
 
-    private static class TestAggregate extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
-        protected TestAggregate(Integer id) {
+    private static class TestAggregate
+            extends Aggregate<TuProjectId, TuProject, TuProjectVBuilder> {
+        protected TestAggregate(TuProjectId id) {
             super(id);
         }
     }

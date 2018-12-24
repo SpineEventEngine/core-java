@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
+import io.spine.code.java.ClassName;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
@@ -36,7 +37,6 @@ import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.string.Stringifiers;
-import io.spine.type.ClassName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -173,7 +173,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ShardedStream)) {
             return false;
         }
         ShardedStream<?, ?, ?> that = (ShardedStream<?, ?, ?>) o;

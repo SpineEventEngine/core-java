@@ -28,10 +28,10 @@ import org.junit.jupiter.api.Test;
 import static io.spine.change.ChangePreconditions.checkNewValueNotEmpty;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Preconditions2 utility should")
+@DisplayName("ChangePreconditions utility should")
 class ChangePreconditionsTest extends UtilityClassTest<ChangePreconditions> {
 
-    protected ChangePreconditionsTest() {
+    ChangePreconditionsTest() {
         super(ChangePreconditions.class);
     }
 

@@ -17,40 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.aggregate.given;
+package io.spine.server.aggregate.given.delivery;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.Apply;
-import io.spine.server.command.Assign;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.delivery.given.ThreadStats;
-import io.spine.server.event.React;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.validate.StringValueVBuilder;
 
-import java.util.List;
-
-import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.protobuf.AnyPacker.pack;
-import static java.util.Collections.emptyList;
 
-/**
- * @author Alex Tymchenko
- */
 public class AggregateMessageDeliveryTestEnv {
 
     /** Prevents instantiation of this test environment class. */
@@ -106,81 +87,5 @@ public class AggregateMessageDeliveryTestEnv {
         Command result = TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
                                                 .createCommand(cmdMessage);
         return result;
-    }
-
-    /**
-     * An aggregate class, which remembers the threads in which its handler methods were invoked.
-     *
-     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
-     *
-     * <p>Some handler parameters are not used, as they aren't needed for tests. They are still
-     * present, as long as they are required according to the handler declaration rules.
-     */
-    @SuppressWarnings({"AssignmentToStaticFieldFromInstanceMethod", "unused"})
-    public static class DeliveryProject
-            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
-
-        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
-
-        protected DeliveryProject(ProjectId id) {
-            super(id);
-        }
-
-        @Assign
-        AggProjectStarted on(AggStartProject cmd) {
-            stats.recordCallingThread(getId());
-            AggProjectStarted event = AggProjectStarted.newBuilder()
-                                                       .setProjectId(cmd.getProjectId())
-                                                       .build();
-            return event;
-        }
-
-        @SuppressWarnings("unused")     // an applier is required by the framework.
-        @Apply
-        void the(AggProjectStarted event) {
-            // do nothing.
-        }
-
-        @React
-        List<Message> onEvent(AggProjectCancelled event) {
-            stats.recordCallingThread(getId());
-            return emptyList();
-        }
-
-        @React
-        List<Message> onRejection(AggCannotStartArchivedProject rejection) {
-            stats.recordCallingThread(getId());
-            return emptyList();
-        }
-
-        public static ThreadStats<ProjectId> getStats() {
-            return stats;
-        }
-    }
-
-    public static class SingleShardProjectRepository
-            extends AggregateRepository<ProjectId, DeliveryProject> {
-        public SingleShardProjectRepository() {
-            super();
-            getEventRouting().route(AggCannotStartArchivedProject.class,
-                                    (message, context) -> of(message.getProjectId()));
-        }
-
-    }
-
-    public static class TripleShardProjectRepository
-            extends AggregateRepository<ProjectId, DeliveryProject> {
-
-        public TripleShardProjectRepository() {
-            super();
-            getEventRouting().route(AggCannotStartArchivedProject.class,
-                                    (message, context) -> of(message.getProjectId()));
-
-        }
-
-        @Override
-        public ShardingStrategy getShardingStrategy() {
-            return UniformAcrossTargets.forNumber(3);
-        }
     }
 }

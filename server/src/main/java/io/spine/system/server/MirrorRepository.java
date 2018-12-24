@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -34,7 +35,6 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
@@ -55,8 +55,6 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  * </ul>
  *
  * <p>In other cases, an entity won't have a {@link Mirror}.
- *
- * @author Dmytro Dashenkov
  */
 final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
@@ -88,8 +86,8 @@ final class MirrorRepository
         TypeUrl type = TypeUrl.parse(historyId.getTypeUrl());
         boolean shouldMirror = shouldMirror(type);
         return shouldMirror
-               ? of(idFrom(historyId))
-               : of();
+               ? ImmutableSet.of(idFrom(historyId))
+               : ImmutableSet.of();
     }
 
     private static boolean shouldMirror(TypeUrl type) {

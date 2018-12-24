@@ -20,19 +20,19 @@
 
 package io.spine.server.bc.given;
 
-import com.google.protobuf.Empty;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.test.shared.EmptyProcess;
+import io.spine.server.test.shared.EmptyProcessVBuilder;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.command.BcCreateProject;
 import io.spine.test.bc.event.BcProjectCreated;
-import io.spine.validate.EmptyVBuilder;
 
 public class ProjectProcessManager
-        extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
+        extends ProcessManager<ProjectId, EmptyProcess, EmptyProcessVBuilder> {
 
     public ProjectProcessManager(ProjectId id) {
         super(id);

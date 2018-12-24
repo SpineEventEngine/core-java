@@ -25,8 +25,6 @@ import java.util.Set;
 
 /**
  * The strategy of splitting the message targets into shards.
- *
- * @author Alex Tymchenko
  */
 public interface ShardingStrategy extends Serializable {
 

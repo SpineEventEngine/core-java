@@ -47,8 +47,6 @@ import static java.nio.file.Files.newInputStream;
 
 /**
  * The plugin performing the Spine type model verification.
- *
- * @author Dmytro Dashenkov
  */
 @Experimental
 public final class ModelVerifierPlugin extends SpinePlugin {
@@ -83,15 +81,6 @@ public final class ModelVerifierPlugin extends SpinePlugin {
 
     private Action<Task> action(Path path) {
         return new VerifierAction(this, path);
-    }
-
-    /**
-     * Opens the method to the helper class.
-     */
-    @SuppressWarnings("RedundantMethodOverride") // See Javadoc.
-    @Override
-    protected Logger log() {
-        return super.log();
     }
 
     /**

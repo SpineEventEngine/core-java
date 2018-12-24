@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
+import io.spine.server.entity.storage.given.column.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

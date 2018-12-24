@@ -54,7 +54,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
-import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.order;
 import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.pagination;
 import static io.spine.server.storage.EntityField.version;
@@ -98,7 +97,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
                                                     Pagination pagination,
                                                     Class<? extends Entity> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return from(filters, orderBy, pagination, entityColumns);
+        return EntityQueries.from(filters, orderBy, pagination, entityColumns);
     }
 
     @Test

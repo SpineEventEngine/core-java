@@ -44,7 +44,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
@@ -80,7 +79,7 @@ class EntityQueryTest {
         String columnName = deleted.name();
         EntityColumn column = findColumn(EntityWithLifecycle.class, columnName);
         ColumnFilter filter = ColumnFilters.eq(columnName, false);
-        Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
+        Multimap<EntityColumn, ColumnFilter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         QueryParameters parameters = QueryParameters
                 .newBuilder()
