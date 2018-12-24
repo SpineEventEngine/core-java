@@ -125,6 +125,8 @@ public abstract class ProcessManager<I,
      *          It does not affect the visibility for inheritors, which stays {@code protected}
      *          {@linkplain io.spine.server.entity.TransactionalEntity#getBuilder() as originally 
      *          defined in parents}.
+     *          See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
+     *          for reason behind the warning.
      */
     @Override
     @VisibleForTesting
