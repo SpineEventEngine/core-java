@@ -20,9 +20,9 @@
 
 package io.spine.testing.server.projection.given.prj;
 
-import com.google.protobuf.StringValue;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.testing.server.given.entity.TuString;
 
 public class TuProjectionRepository
-        extends ProjectionRepository<Long, TuProjection, StringValue> {
+        extends ProjectionRepository<Long, TuProjection, TuString> {
 }
