@@ -84,6 +84,9 @@ final class ModelVerifier implements Logging {
                              .check(classSet.elements());
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    // `matches` either produces an exception, in which case return value can be ignored,
+    // or doesn't, in which case the execution continues
     private static void handlersMatchContract(ClassSet handlers) {
         MethodSignature signature = new CommandHandlerSignature();
         handlers.elements()
