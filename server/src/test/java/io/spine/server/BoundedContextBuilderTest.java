@@ -24,9 +24,10 @@ import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.integration.IntegrationBus;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -73,10 +74,10 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("IntegrationBus")
-        void integrationBus() {
+        @DisplayName("TransportFactory")
+        void transportFactory() {
             assertThrows(NullPointerException.class,
-                         () -> builder.setIntegrationBus(Tests.nullRef()));
+                         () -> builder.setTransportFactory(Tests.nullRef()));
         }
     }
 
@@ -104,15 +105,6 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("IntegrationBus Builder")
-        void integrationBusBuilder() {
-            IntegrationBus.Builder expected = IntegrationBus.newBuilder();
-            builder.setIntegrationBus(expected);
-            assertEquals(expected, builder.getIntegrationBus()
-                                          .get());
-        }
-
-        @Test
         @DisplayName("name if it was set")
         void name() {
             String nameString = getClass().getName();
@@ -131,6 +123,16 @@ class BoundedContextBuilderTest {
             assertEquals(mock, builder.setStorageFactorySupplier(mock)
                                       .getStorageFactorySupplier()
                                       .get());
+        }
+
+        @Test
+        @DisplayName("TransportFactory if it was set")
+        void transportFactory() {
+            TransportFactory factory = InMemoryTransportFactory.newInstance();
+
+            assertEquals(factory, builder.setTransportFactory(factory)
+                                         .getTransportFactory()
+                                         .get());
         }
     }
 

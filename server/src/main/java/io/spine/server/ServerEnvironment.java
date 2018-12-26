@@ -21,15 +21,9 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.annotation.Internal;
-import io.spine.server.delivery.InProcessSharding;
-import io.spine.server.delivery.Sharding;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 @SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
 public class ServerEnvironment {
@@ -42,14 +36,8 @@ public class ServerEnvironment {
     private static final @Nullable String appEngineRuntimeVersion =
             System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
-    /** A sharding strategy for this server environment. */
-    private Sharding sharding;
-
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
-        //TODO:2018-04-17:alex.tymchenko: instead of factories use ServerEnvironment.Builder().
-        // See https://github.com/SpineEventEngine/core-java/issues/690.
-        this.sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
     }
 
     /**
@@ -75,25 +63,6 @@ public class ServerEnvironment {
      */
     public Optional<String> appEngineVersion() {
         return Optional.ofNullable(appEngineRuntimeVersion);
-    }
-
-    public Sharding getSharding() {
-        return sharding;
-    }
-
-    /**
-     * Replaces the current sharding service with the given value.
-     *
-     * <p>This method is used internally by the framework, and should not be called from outside.
-     *
-     * @param sharding the new sharding service to set for this server environment
-     */
-    @Internal
-    public void replaceSharding(Sharding sharding) {
-        //TODO:2018-04-17:alex.tymchenko: migrate to ServerEnvironment.Builder().
-        // See https://github.com/SpineEventEngine/core-java/issues/690.
-        checkNotNull(sharding);
-        this.sharding = sharding;
     }
 
     /**

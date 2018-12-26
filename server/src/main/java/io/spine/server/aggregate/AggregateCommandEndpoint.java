@@ -34,7 +34,6 @@ import static io.spine.server.command.DispatchCommand.operationFor;
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates managed by the parent repository
- * @author Alexander Yevsyukov
  */
 final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, CommandEnvelope> {
@@ -48,11 +47,6 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.getId());
         DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();
-    }
-
-    @Override
-    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getCommandEndpointDelivery();
     }
 
     @Override

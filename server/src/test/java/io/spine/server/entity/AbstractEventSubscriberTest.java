@@ -36,7 +36,6 @@ import io.spine.server.groups.HiddenEntitySubscriber;
 import io.spine.server.groups.TestSubscriber;
 import io.spine.server.groups.WronglyDomesticSubscriber;
 import io.spine.server.groups.WronglyExternalSubscriber;
-import io.spine.server.integration.IntegrationBus;
 import io.spine.server.organizations.Organization;
 import io.spine.server.organizations.OrganizationId;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -68,12 +67,12 @@ class AbstractEventSubscriberTest {
         groupsContext = BoundedContext
                 .newBuilder()
                 .setName("Groups")
-                .setIntegrationBus(IntegrationBus.newBuilder().setTransportFactory(transport))
+                .setTransportFactory(transport)
                 .build();
         organizationsContext = BoundedContext
                 .newBuilder()
                 .setName("Organizations")
-                .setIntegrationBus(IntegrationBus.newBuilder().setTransportFactory(transport))
+                .setTransportFactory(transport)
                 .build();
         subscriber = new TestSubscriber();
         groupsContext.registerEventDispatcher(subscriber);

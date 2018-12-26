@@ -27,7 +27,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
@@ -71,11 +70,6 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         tx.setListener(listener);
         doDispatch(projection, envelope());
         tx.commit();
-    }
-
-    @Override
-    protected Delivery<I, P, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEndpointDelivery();
     }
 
     @CanIgnoreReturnValue
