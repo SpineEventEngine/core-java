@@ -39,6 +39,8 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
@@ -83,9 +85,16 @@ import static java.util.stream.Collectors.toList;
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
+    /**
+     * Use the same {@code TransportFactory} instance across all instances of black box bounded
+     * context in order to allow them to communicate via external events.
+     */
+    private static final TransportFactory transportFactory = InMemoryTransportFactory.newInstance();
+
     private final BoundedContext boundedContext;
     private final CommandMemoizingTap commandTap;
     private final MemoizingObserver<Ack> observer;
+
 
     /**
      * Events received by {@code BlackBoxBoundedContext} and posted to the event bus.
@@ -109,6 +118,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                 .newBuilder()
                 .setMultitenant(multitenant)
                 .setCommandBus(commandBus)
+                .setTransportFactory(transportFactory)
                 .setEventBus(eventBus)
                 .build();
         this.observer = memoizingObserver();
