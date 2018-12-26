@@ -95,7 +95,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     private final CommandMemoizingTap commandTap;
     private final MemoizingObserver<Ack> observer;
 
-
     /**
      * Events received by {@code BlackBoxBoundedContext} and posted to the event bus.
      *
