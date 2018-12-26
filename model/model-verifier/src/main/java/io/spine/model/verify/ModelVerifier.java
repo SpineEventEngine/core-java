@@ -23,8 +23,11 @@ package io.spine.model.verify;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
+import io.spine.server.command.Assign;
+import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.command.model.DuplicateHandlerCheck;
 import io.spine.server.model.Model;
+import io.spine.server.model.declare.MethodSignature;
 import io.spine.tools.gradle.ProjectHierarchy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
@@ -35,6 +38,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -48,7 +52,7 @@ import static java.util.stream.Collectors.toList;
  * A utility for verifying Spine model.
  *
  * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
- *           string literal for security check.
+ *         string literal for security check.
  */
 final class ModelVerifier implements Logging {
 
@@ -59,7 +63,8 @@ final class ModelVerifier implements Logging {
     /**
      * Creates a new instance of the {@code ModelVerifier}.
      *
-     * @param project the Gradle project to verify the model upon
+     * @param project
+     *         the Gradle project to verify the model upon
      */
     ModelVerifier(Project project) {
         this.projectClassLoader = createClassLoader(project);
@@ -74,8 +79,19 @@ final class ModelVerifier implements Logging {
         ClassSet classSet = new ClassSet(projectClassLoader,
                                          handlers.getCommandHandlingTypesList());
         classSet.reportNotFoundIfAny(log());
+        handlersMatchContract(classSet);
         DuplicateHandlerCheck.newInstance()
                              .check(classSet.elements());
+    }
+
+    private static void handlersMatchContract(ClassSet handlers) {
+        MethodSignature signature = new CommandHandlerSignature();
+        handlers.elements()
+                .stream()
+                .map(Class::getDeclaredMethods)
+                .flatMap(Arrays::stream)
+                .filter(method -> method.isAnnotationPresent(Assign.class))
+                .forEach(signature::matches);
     }
 
     /**
@@ -96,7 +112,6 @@ final class ModelVerifier implements Logging {
             throw new IllegalStateException(msg, e);
         }
     }
-
 
     private static Collection<JavaCompile> allJavaCompile(Project project) {
         Collection<JavaCompile> tasks = newArrayList();
