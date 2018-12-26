@@ -52,9 +52,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -563,9 +563,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         boundedContext.getEventBus()
                       .getEventStore()
                       .read(allEventsQuery(), queryObserver);
+        Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         List<Event> responses = queryObserver.responses()
                                              .stream()
-                                             .filter(not(postedEvents::contains))
+                                             .filter(wasNotReceived)
                                              .collect(toList());
         return new EmittedEvents(responses);
     }
