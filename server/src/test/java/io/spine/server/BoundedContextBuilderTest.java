@@ -128,8 +128,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("TransportFactory if it was set")
         void transportFactory() {
-            @SuppressWarnings("unchecked") // OK for this mock.
-                    TransportFactory factory = InMemoryTransportFactory.newInstance();
+            TransportFactory factory = InMemoryTransportFactory.newInstance();
 
             assertEquals(factory, builder.setTransportFactory(factory)
                                          .getTransportFactory()
