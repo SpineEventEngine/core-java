@@ -23,11 +23,8 @@ package io.spine.model.verify;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
-import io.spine.server.command.Assign;
-import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.command.model.DuplicateHandlerCheck;
 import io.spine.server.model.Model;
-import io.spine.server.model.declare.MethodSignature;
 import io.spine.tools.gradle.ProjectHierarchy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
@@ -38,7 +35,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -79,22 +75,8 @@ final class ModelVerifier implements Logging {
         ClassSet classSet = new ClassSet(projectClassLoader,
                                          handlers.getCommandHandlingTypesList());
         classSet.reportNotFoundIfAny(log());
-        handlersMatchContract(classSet);
         DuplicateHandlerCheck.newInstance()
                              .check(classSet.elements());
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    // `matches` either produces an exception, in which case return value can be ignored,
-    // or doesn't, in which case the execution continues
-    private static void handlersMatchContract(ClassSet handlers) {
-        MethodSignature signature = new CommandHandlerSignature();
-        handlers.elements()
-                .stream()
-                .map(Class::getDeclaredMethods)
-                .flatMap(Arrays::stream)
-                .filter(method -> method.isAnnotationPresent(Assign.class))
-                .forEach(signature::matches);
     }
 
     /**
