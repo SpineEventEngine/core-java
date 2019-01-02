@@ -20,10 +20,10 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.test.shared.StringEntity;
+import io.spine.server.test.shared.StringEntityVBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -79,7 +79,7 @@ class TransactionalEventPlayerTest {
     }
 
     private static class TxPlayingEntity
-            extends TransactionalEntity<Long, StringValue, StringValueVBuilder>
+            extends TransactionalEntity<Long, StringEntity, StringEntityVBuilder>
             implements EventPlayer {
 
         private TxPlayingEntity() {

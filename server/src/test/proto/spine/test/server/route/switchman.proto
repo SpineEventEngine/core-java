@@ -24,7 +24,8 @@ package spine.test.server.route;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.rout.given.switchman";
+option java_package="io.spine.server.route.given.switchman";
+option java_outer_classname = "SwitchmanProto";
 option java_multiple_files = true;
 
 // A switch identifier.
@@ -43,4 +44,14 @@ enum SwitchPosition {
 message LogState {
     map<string, int32> counters = 1;
     repeated string missing_switchman = 2;
+}
+
+// A simple counter of turned switches.
+message SwitchmanLog {
+
+    // The name of the switchman, which serves as the ID.
+    string name = 1 [(required) = true];
+
+    // The number of turned switches.
+    int32 switch_count = 2;
 }

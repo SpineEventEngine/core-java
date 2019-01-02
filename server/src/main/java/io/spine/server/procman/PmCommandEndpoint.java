@@ -35,7 +35,6 @@ import static io.spine.server.command.DispatchCommand.operationFor;
  *
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
@@ -50,11 +49,6 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     PmCommandEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository,
                                CommandEnvelope event) {
         return new PmCommandEndpoint<>(repository, event);
-    }
-
-    @Override
-    protected PmCommandDelivery<I, P> getEndpointDelivery() {
-        return repository().getCommandEndpointDelivery();
     }
 
     @Override

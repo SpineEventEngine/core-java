@@ -51,8 +51,6 @@ import static java.lang.String.format;
  * @param <C> the type of the message class
  * @param <E> the type of message envelopes, in which the messages to handle are wrapped
  * @param <R> the type of the method invocation result
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
  */
 @Immutable
 public abstract class AbstractHandlerMethod<T,
@@ -277,7 +275,7 @@ public abstract class AbstractHandlerMethod<T,
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof AbstractHandlerMethod)) {
             return false;
         }
         AbstractHandlerMethod other = (AbstractHandlerMethod) obj;

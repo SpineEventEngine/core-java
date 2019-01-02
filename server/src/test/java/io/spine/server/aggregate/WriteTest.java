@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
-import io.spine.validate.AnyVBuilder;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +36,8 @@ class WriteTest {
     @DisplayName("not accept nulls on construction")
     void nonNull() {
         new NullPointerTester()
-                .setDefault(Aggregate.class, new Aggregate<String, Any, AnyVBuilder>("") {})
+                .setDefault(Aggregate.class,
+                            new Aggregate<String, EmptyAggregate, EmptyAggregateVBuilder>("") {})
                 .setDefault(AggregateRepository.class, new AggregateRepository() {})
                 .testStaticMethods(Write.class, PACKAGE);
     }

@@ -33,17 +33,17 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.EventDiscardingAggregateRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregateRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ReactingAggregate;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ReactingRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectingRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingAggregate;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
+import io.spine.server.aggregate.given.repo.AnemicAggregateRepository;
+import io.spine.server.aggregate.given.repo.EventDiscardingAggregateRepository;
+import io.spine.server.aggregate.given.repo.FailingAggregateRepository;
+import io.spine.server.aggregate.given.repo.GivenAggregate;
+import io.spine.server.aggregate.given.repo.ProjectAggregate;
+import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
+import io.spine.server.aggregate.given.repo.ReactingAggregate;
+import io.spine.server.aggregate.given.repo.ReactingRepository;
+import io.spine.server.aggregate.given.repo.RejectingRepository;
+import io.spine.server.aggregate.given.repo.RejectionReactingAggregate;
+import io.spine.server.aggregate.given.repo.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -60,7 +60,6 @@ import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
@@ -69,7 +68,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
@@ -77,14 +75,14 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
-import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.boundedContext;
-import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.givenAggregateId;
-import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.givenStoredAggregate;
-import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.givenStoredAggregateWithId;
-import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.repository;
-import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.requestFactory;
-import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBoundedContext;
-import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.boundedContext;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenStoredAggregate;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenStoredAggregateWithId;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.repository;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.requestFactory;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.resetBoundedContext;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.thrice;
@@ -507,7 +505,6 @@ public class AggregateRepositoryTest {
     }
 
     @Nested
-    @ExtendWith(ShardingReset.class)
     @MuteLogging
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {

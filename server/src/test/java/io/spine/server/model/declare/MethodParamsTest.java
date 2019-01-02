@@ -20,6 +20,7 @@
 
 package io.spine.server.model.declare;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
@@ -33,8 +34,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableList.copyOf;
-import static com.google.common.collect.ImmutableList.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
@@ -47,12 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alex Tymchenko
- */
-@SuppressWarnings("WeakerAccess")   // JUnit test methods are `public` as per the library contract
 @DisplayName("`MethodParams` utility should ")
-public class MethodParamsTest extends UtilityClassTest<MethodParams> {
+class MethodParamsTest extends UtilityClassTest<MethodParams> {
 
     private MethodParamsTest() {
         super(MethodParams.class);
@@ -60,7 +55,7 @@ public class MethodParamsTest extends UtilityClassTest<MethodParams> {
 
     @Test
     @DisplayName("detect that a method has exactly one parameter of an expected type")
-    public void detectSingleParam() {
+    void detectSingleParam() {
         assertTrue(consistsOfSingle(singleParamCommand().getParameterTypes(),
                                     ScheduleCommand.class));
         assertFalse(consistsOfSingle(twoParamCommandAndCtx().getParameterTypes(),
@@ -72,7 +67,7 @@ public class MethodParamsTest extends UtilityClassTest<MethodParams> {
 
     @Test
     @DisplayName("detect that a method has exactly two parameters of expected types")
-    public void detectTwoParams() {
+    void detectTwoParams() {
         assertTrue(consistsOfTwo(twoParamCommandAndCtx().getParameterTypes(),
                                  ScheduleCommand.class, CommandContext.class));
         assertFalse(consistsOfTwo(singleParamCommand().getParameterTypes(),
@@ -84,39 +79,41 @@ public class MethodParamsTest extends UtilityClassTest<MethodParams> {
 
     @Test
     @DisplayName("detect that a method has lots of parameters of expected types")
-    public void detectLotsOfParams() {
+    void detectLotsOfParams() {
         assertTrue(consistsOfTypes(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
-                                   of(String.class, Any.class,
-                                      Empty.class, Int32Value.class, UserId.class)));
+                                   ImmutableList.of(String.class, Any.class,
+                                                    Empty.class, Int32Value.class, UserId.class)));
         assertFalse(consistsOfTypes(singleParamCommand().getParameterTypes(),
-                                    of(String.class, Any.class,
+                                    ImmutableList.of(String.class, Any.class,
                                        Empty.class, Int32Value.class, UserId.class)));
         assertFalse(consistsOfTypes(twoParamCommandAndCtx().getParameterTypes(),
-                                    of(String.class, Any.class,
+                                    ImmutableList.of(String.class, Any.class,
                                        Empty.class, Int32Value.class, UserId.class)));
 
     }
 
     @Test
     @DisplayName("find a matching signature for the method among the predefined set of values")
-    public void findMatchingSignature() {
+    void findMatchingSignature() {
         Optional<ScheduleCommandParamSpec> matching =
-                findMatching(twoParamCommandAndCtx(), copyOf(ScheduleCommandParamSpec.values()));
+                findMatching(twoParamCommandAndCtx(),
+                             ImmutableList.copyOf(ScheduleCommandParamSpec.values()));
         assertTrue(matching.isPresent());
         assertEquals(ScheduleCommandParamSpec.MESSAGE_AND_CONTEXT, matching.get());
     }
 
     @Test
     @DisplayName("return `Optional.empty()` if there is no matching signature")
-    public void returnOptionalEmptyIfNoSignatureMatch() {
+    void returnOptionalEmptyIfNoSignatureMatch() {
         Optional<ScheduleCommandParamSpec> matching =
-                findMatching(singleParamCommand(), copyOf(ScheduleCommandParamSpec.values()));
+                findMatching(singleParamCommand(),
+                             ImmutableList.copyOf(ScheduleCommandParamSpec.values()));
         assertTrue(!matching.isPresent());
     }
 
     @Test
     @DisplayName("detect if the first method parameter is a Command message")
-    public void detectFirstCommandParameter() {
+    void detectFirstCommandParameter() {
         assertTrue(isFirstParamCommand(singleParamCommand()));
         assertTrue(isFirstParamCommand(twoParamCommandAndCtx()));
         assertFalse(isFirstParamCommand(fiveParamMethodStringAnyEmptyInt32UserId()));

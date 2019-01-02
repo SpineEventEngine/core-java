@@ -63,14 +63,14 @@ public interface CaughtError {
     }
 
     /**
-     * Obtains a {@link CaughtError} for a previously handled error.
+     * Obtains an instance for a previously handled error.
      */
     static CaughtError handled() {
         return HandledError.INSTANCE;
     }
 
     /**
-     * Obtains a {@link CaughtError} for the given {@link RuntimeException}.
+     * Obtains an instance for the given {@link RuntimeException}.
      *
      * @param exception the caught error
      * @return wrapped error
@@ -80,8 +80,7 @@ public interface CaughtError {
     }
 
     /**
-     * Obtains a {@link CaughtError} for the given {@linkplain io.spine.base.ThrowableMessage
-     * rejection}.
+     * Obtains an instance for the given {@linkplain io.spine.base.ThrowableMessage rejection}.
      *
      * @param rejection the {@link RuntimeException} caused by
      *                  a {@linkplain io.spine.base.ThrowableMessage ThrowableMessage}

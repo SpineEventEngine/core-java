@@ -24,11 +24,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import io.spine.testing.server.entity.given.Given;
-import io.spine.validate.StringValueVBuilder;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -37,10 +38,6 @@ import static io.spine.base.Identifier.newUuid;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
-/**
- * @author Alexander Litus
- * @author Dmytro Kuzmin
- */
 public class EntityTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -107,32 +104,37 @@ public class EntityTestEnv {
 
     // TODO:2018-07-25:vladyslav.lubenskyi: https://github.com/SpineEventEngine/core-java/issues/788
     // Figure out a way not to use Aggregate here.
-    public static class TestAggregate extends Aggregate<String, StringValue, StringValueVBuilder> {
+    public static class TestAggregate
+            extends Aggregate<String, EmptyAggregate, EmptyAggregateVBuilder> {
 
         protected TestAggregate(String id) {
             super(id);
         }
 
         public static TestAggregate copyOf(TestAggregate entity) {
-            TestAggregate result = Given.aggregateOfClass(TestAggregate.class)
-                                        .withId(entity.getId())
-                                        .withState(entity.getState())
-                                        .modifiedOn(entity.whenModified())
-                                        .withVersion(entity.getVersion()
-                                                           .getNumber())
-                                        .build();
+            TestAggregate result =
+                    Given.aggregateOfClass(TestAggregate.class)
+                         .withId(entity.getId())
+                         .withState(entity.getState())
+                         .modifiedOn(entity.whenModified())
+                         .withVersion(entity.getVersion()
+                                            .getNumber())
+                         .build();
             return result;
         }
 
         public static TestAggregate withState() {
-            StringValue state = StringValue.newBuilder()
-                                           .setValue("state")
-                                           .build();
-            TestAggregate result = Given.aggregateOfClass(TestAggregate.class)
-                                        .withId(newUuid())
-                                        .withState(state)
-                                        .withVersion(3)
-                                        .build();
+            String id = newUuid();
+            EmptyAggregate state = EmptyAggregate
+                    .newBuilder()
+                    .setId(id)
+                    .build();
+            TestAggregate result =
+                    Given.aggregateOfClass(TestAggregate.class)
+                         .withId(id)
+                         .withState(state)
+                         .withVersion(3)
+                         .build();
             return result;
         }
     }

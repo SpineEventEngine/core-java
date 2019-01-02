@@ -39,6 +39,8 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
@@ -50,9 +52,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -83,6 +85,12 @@ import static java.util.stream.Collectors.toList;
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
+    /**
+     * Use the same {@code TransportFactory} instance across all instances of black box bounded
+     * context in order to allow them to communicate via external events.
+     */
+    private static final TransportFactory transportFactory = InMemoryTransportFactory.newInstance();
+
     private final BoundedContext boundedContext;
     private final CommandMemoizingTap commandTap;
     private final MemoizingObserver<Ack> observer;
@@ -109,6 +117,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                 .newBuilder()
                 .setMultitenant(multitenant)
                 .setCommandBus(commandBus)
+                .setTransportFactory(transportFactory)
                 .setEventBus(eventBus)
                 .build();
         this.observer = memoizingObserver();
@@ -554,9 +563,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         boundedContext.getEventBus()
                       .getEventStore()
                       .read(allEventsQuery(), queryObserver);
+        Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         List<Event> responses = queryObserver.responses()
                                              .stream()
-                                             .filter(not(postedEvents::contains))
+                                             .filter(wasNotReceived)
                                              .collect(toList());
         return new EmittedEvents(responses);
     }

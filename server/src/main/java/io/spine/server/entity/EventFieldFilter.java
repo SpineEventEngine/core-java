@@ -34,7 +34,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.ImmutableMap.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.FieldMasks.applyMask;
@@ -49,15 +48,13 @@ import static io.spine.validate.Validate.isDefault;
  *
  * <p>Note that the mask should contain all the {@code (required) = true} fields. Otherwise,
  * the event will not be acknowledged by the bus.
- *
- * @author Dmytro Dashenkov
  */
 public final class EventFieldFilter implements EventFilter {
 
     private final ImmutableMap<EventClass, FieldMask> fieldMasks;
 
     private EventFieldFilter(Builder builder) {
-        this.fieldMasks = copyOf(builder.masks);
+        this.fieldMasks = ImmutableMap.copyOf(builder.masks);
     }
 
     @Override

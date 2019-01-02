@@ -19,35 +19,17 @@
  */
 package io.spine.server.procman.given.delivery;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
-import io.spine.server.command.Assign;
-import io.spine.server.delivery.given.ThreadStats;
-import io.spine.server.event.React;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
-import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.validate.StringValueVBuilder;
 
-import java.util.List;
-
-import static java.util.Collections.emptyList;
-
-/**
- * @author Alex Tymchenko
- */
 public class GivenMessage {
 
     /** Prevents instantiation of this test environment class. */
@@ -84,61 +66,8 @@ public class GivenMessage {
     }
 
     private static Command createCommand(CommandMessage cmdMessage) {
-        Command result = TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
+        Command result = TestActorRequestFactory.newInstance(GivenMessage.class)
                                                 .createCommand(cmdMessage);
         return result;
-    }
-
-    /**
-     * A process manager class, which remembers the threads in which its handler methods
-     * were invoked.
-     *
-     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
-     *
-     * <p>The handler method parameters are not used, as they aren't needed for tests.
-     * They are still present, as long as they are required according to the handler
-     * declaration rules.
-     */
-    @SuppressWarnings("unused")
-    public static class DeliveryPm
-            extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
-
-        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
-
-        protected DeliveryPm(ProjectId id) {
-            super(id);
-        }
-
-        @Assign
-        PmProjectCreated on(PmCreateProject command) {
-            stats.recordCallingThread(command.getProjectId());
-            return PmProjectCreated.newBuilder()
-                                   .setProjectId(command.getProjectId())
-                                   .build();
-        }
-
-        @React
-        List<Message> on(PmProjectStarted event) {
-            stats.recordCallingThread(getId());
-            return emptyList();
-        }
-
-        @React
-        List<Message> on(PmCannotStartArchivedProject rejection) {
-            stats.recordCallingThread(getId());
-            return emptyList();
-        }
-
-        public static ThreadStats<ProjectId> getStats() {
-            return stats;
-        }
-    }
-
-    public static class SingleShardPmRepository
-            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
-    }
-
-    public static class QuadrupleShardPmRepository
-            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
     }
 }

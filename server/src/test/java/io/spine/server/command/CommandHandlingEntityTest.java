@@ -29,9 +29,6 @@ import static io.spine.server.command.given.CommandHandlingEntityTestEnv.msg;
 import static io.spine.server.command.given.CommandHandlingEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("CommandHandlingEntity should")
 class CommandHandlingEntityTest {
 
@@ -40,7 +37,7 @@ class CommandHandlingEntityTest {
 
     @BeforeEach
     void setUp() {
-        entity = new HandlingEntity(1L);
+        entity = new HandlingEntity(getClass().getName());
     }
 
     @Test

@@ -24,11 +24,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
+import io.spine.code.java.ClassName;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageRejection;
-import io.spine.type.ClassName;
 import io.spine.type.TypeName;
 
 import java.util.Map;
@@ -37,8 +37,6 @@ import static java.lang.String.format;
 
 /**
  * Abstract base for exceptions related to commands.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class CommandException extends RuntimeException implements MessageRejection {
 

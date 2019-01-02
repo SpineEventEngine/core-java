@@ -132,7 +132,7 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof EnrichmentFunction)) {
             return false;
         }
         EnrichmentFunction other = (EnrichmentFunction) obj;

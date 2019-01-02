@@ -39,13 +39,14 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.command.PrjCreateProject;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,9 +55,6 @@ import java.util.Set;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.Tests.nullRef;
 
-/**
- * @author Dmytro Dashenkov
- */
 public class Given {
 
     public static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
@@ -131,7 +129,7 @@ public class Given {
     }
 
     public static class StandTestAggregate
-            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
+            extends Aggregate<ProjectId, EmptyAggregate, EmptyAggregateVBuilder> {
 
         /**
          * Creates a new aggregate instance.

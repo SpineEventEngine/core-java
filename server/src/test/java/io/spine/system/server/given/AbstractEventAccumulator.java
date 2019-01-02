@@ -20,6 +20,7 @@
 
 package io.spine.system.server.given;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -34,7 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -109,7 +109,7 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
     @CanIgnoreReturnValue
     public <E extends Message> E assertNextEventIs(Class<E> eventType) {
         if (eventIterator == null) {
-            eventIterator = copyOf(events).iterator();
+            eventIterator = ImmutableList.copyOf(events).iterator();
         }
         assertTrue(eventIterator.hasNext(), errorMessage());
         Message next = eventIterator.next();

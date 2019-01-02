@@ -26,21 +26,15 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
-import io.spine.server.rout.given.switchman.LogState;
-import io.spine.server.rout.given.switchman.LogStateVBuilder;
 import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 import io.spine.server.route.given.switchman.event.SwitchWorkRecorded;
 import io.spine.server.route.given.switchman.event.SwitchmanAbsenceRecorded;
 import io.spine.server.route.given.switchman.rejection.Rejections;
 
-import static com.google.common.collect.ImmutableSet.of;
-
 /**
  * The aggregate that accumulates information about switchman work and absence.
  *
  * <p>There's only one log per system.
- *
- * @author Alexander Yevsyukov
  */
 public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
 
@@ -53,10 +47,11 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
 
     @React
     SwitchmanAbsenceRecorded on(Rejections.SwitchmanUnavailable rejection) {
-        return SwitchmanAbsenceRecorded.newBuilder()
-                                       .setSwitchmanName(rejection.getSwitchmanName())
-                                       .setTimestamp(Time.getCurrentTime())
-                                       .build();
+        return SwitchmanAbsenceRecorded
+                .newBuilder()
+                .setSwitchmanName(rejection.getSwitchmanName())
+                .setTimestamp(Time.getCurrentTime())
+                .build();
     }
 
     @Apply
@@ -66,10 +61,11 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
 
     @React
     SwitchWorkRecorded on(SwitchPositionConfirmed event) {
-        return SwitchWorkRecorded.newBuilder()
-                                 .setSwitchId(event.getSwitchId())
-                                 .setSwitchmanName(event.getSwitchmanName())
-                                 .build();
+        return SwitchWorkRecorded
+                .newBuilder()
+                .setSwitchId(event.getSwitchId())
+                .setSwitchmanName(event.getSwitchmanName())
+                .build();
     }
 
     @Apply
@@ -84,13 +80,9 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     /**
      * The repository with default routing functions that route to the singleton aggregate.
      */
-    @SuppressWarnings({
-            "SerializableInnerClassWithNonSerializableOuterClass",
-            "AssignmentOrReturnOfFieldWithMutableType" // Returning immutable impl.
-    })
     public static final class Repository extends AggregateRepository<Long, Log> {
 
-        private static final ImmutableSet<Long> SINGLETON_ID_SET = of(ID);
+        private static final ImmutableSet<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
 
         public Repository() {
             super();

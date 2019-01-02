@@ -19,12 +19,13 @@
  */
 package io.spine.client;
 
-import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import io.spine.test.client.TestEntity;
 import io.spine.test.queries.TaskId;
+import io.spine.testing.UtilityClassTest;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -32,32 +33,16 @@ import static io.spine.client.Targets.allOf;
 import static io.spine.client.Targets.someOf;
 import static io.spine.client.given.TargetsTestEnv.filtersForIds;
 import static io.spine.client.given.TargetsTestEnv.newTaskId;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.type.TypeUrl.of;
 import static io.spine.type.TypeUrl.parse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.internal.util.collections.Sets.newSet;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("Targets utility should")
-class TargetsTest {
+class TargetsTest extends UtilityClassTest<Targets> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Targets.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Targets.class);
+    TargetsTest() {
+        super(Targets.class);
     }
 
     @Test
@@ -65,7 +50,11 @@ class TargetsTest {
     void composeForAllOfType() {
         Target target = allOf(TestEntity.class);
 
-        assertEquals(of(TestEntity.class), parse(target.getType()));
+        assertUrl(target);
+    }
+
+    private static void assertUrl(Target target) {
+        assertEquals(TypeUrl.of(TestEntity.class), parse(target.getType()));
     }
 
     @Test
@@ -74,10 +63,10 @@ class TargetsTest {
         TaskId taskId = newTaskId();
         Target target = someOf(TestEntity.class, newSet(taskId));
 
-        assertEquals(of(TestEntity.class), parse(target.getType()));
+        assertUrl(target);
 
-        EntityFilters filters = filtersForIds(taskId);
-        assertEquals(filters, target.getFilters());
+        EntityFilters expected = filtersForIds(taskId);
+        assertEquals(expected, target.getFilters());
     }
 
     @Test
@@ -89,12 +78,12 @@ class TargetsTest {
 
         Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
 
-        assertEquals(of(TestEntity.class), parse(target.getType()));
+        assertUrl(target);
 
-        EntityFilters filters = filtersForIds(StringValue.of(firstId),
-                                              StringValue.of(secondId),
-                                              StringValue.of(thirdId));
-        assertEquals(filters, target.getFilters());
+        EntityFilters expected = filtersForIds(StringValue.of(firstId),
+                                               StringValue.of(secondId),
+                                               StringValue.of(thirdId));
+        assertEquals(expected, target.getFilters());
     }
 
     @Test
@@ -106,12 +95,12 @@ class TargetsTest {
 
         Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
 
-        assertEquals(of(TestEntity.class), parse(target.getType()));
+        assertUrl(target);
 
-        EntityFilters filters = filtersForIds(Int32Value.of(firstId),
-                                              Int32Value.of(secondId),
-                                              Int32Value.of(thirdId));
-        assertEquals(filters, target.getFilters());
+        EntityFilters expected = filtersForIds(Int32Value.of(firstId),
+                                               Int32Value.of(secondId),
+                                               Int32Value.of(thirdId));
+        assertEquals(expected, target.getFilters());
     }
 
     @Test
@@ -123,12 +112,12 @@ class TargetsTest {
 
         Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
 
-        assertEquals(of(TestEntity.class), parse(target.getType()));
+        assertUrl(target);
 
-        EntityFilters filters = filtersForIds(Int64Value.of(firstId),
-                                              Int64Value.of(secondId),
-                                              Int64Value.of(thirdId));
-        assertEquals(filters, target.getFilters());
+        EntityFilters expected = filtersForIds(Int64Value.of(firstId),
+                                               Int64Value.of(secondId),
+                                               Int64Value.of(thirdId));
+        assertEquals(expected, target.getFilters());
     }
 
     @Test

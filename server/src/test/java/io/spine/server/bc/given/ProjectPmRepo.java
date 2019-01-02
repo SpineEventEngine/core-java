@@ -20,10 +20,10 @@
 
 package io.spine.server.bc.given;
 
-import com.google.protobuf.Empty;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.test.shared.EmptyProcess;
 import io.spine.test.bc.ProjectId;
 
 public class ProjectPmRepo
-        extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+        extends ProcessManagerRepository<ProjectId, ProjectProcessManager, EmptyProcess> {
 }

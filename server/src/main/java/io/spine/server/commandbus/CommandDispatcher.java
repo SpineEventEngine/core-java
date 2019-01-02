@@ -28,8 +28,6 @@ import io.spine.server.bus.UnicastDispatcher;
  * Delivers commands to their handlers.
  *
  * <p>A dispatcher can deliver more than one class of commands.
- *
- * @author Alexander Yevsyukov
  */
 public interface CommandDispatcher<I> extends UnicastDispatcher<CommandClass, CommandEnvelope, I> {
 

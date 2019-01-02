@@ -27,10 +27,10 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.rout.given.switchman.LogState;
-import io.spine.server.rout.given.switchman.SwitchId;
-import io.spine.server.rout.given.switchman.SwitchPosition;
 import io.spine.server.route.given.switchman.Log;
+import io.spine.server.route.given.switchman.LogState;
+import io.spine.server.route.given.switchman.SwitchId;
+import io.spine.server.route.given.switchman.SwitchPosition;
 import io.spine.server.route.given.switchman.Switchman;
 import io.spine.server.route.given.switchman.SwitchmanBureau;
 import io.spine.server.route.given.switchman.command.SetSwitch;
@@ -52,8 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests that a command can be rejected within a {@linkplain CommandRoute routing function}.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("CommandRouting rejection should")
 class CommandRoutingRejectionTest {

@@ -21,13 +21,13 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus;
+import io.spine.server.entity.storage.given.column.TaskStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
-import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
+import static io.spine.server.entity.storage.given.column.TaskStatus.SUCCESS;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

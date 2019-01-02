@@ -37,8 +37,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 /**
  * The abstract base for non-aggregate classes that dispatch commands to their methods
  * and post resulting events to to {@link EventBus}.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class AbstractCommandDispatcher implements CommandDispatcher<String>, Logging {
 
@@ -105,15 +103,14 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
      * @see #getMessageClasses()
      */
     @Override
-    public boolean equals(Object otherObj) {
-        if (this == otherObj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (otherObj == null ||
-                getClass() != otherObj.getClass()) {
+        if (!(o instanceof AbstractCommandDispatcher)) {
             return false;
         }
-        AbstractCommandDispatcher otherHandler = (AbstractCommandDispatcher) otherObj;
+        AbstractCommandDispatcher otherHandler = (AbstractCommandDispatcher) o;
         boolean equals = getId().equals(otherHandler.getId());
         return equals;
     }

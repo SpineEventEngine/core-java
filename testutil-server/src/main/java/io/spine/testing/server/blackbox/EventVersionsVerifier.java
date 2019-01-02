@@ -20,7 +20,8 @@
 
 package io.spine.testing.server.blackbox;
 
-import static java.util.Arrays.copyOf;
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -31,7 +32,7 @@ public final class EventVersionsVerifier implements Verify<EmittedEvents> {
     private final int[] versions;
 
     public EventVersionsVerifier(int[] versions) {
-        this.versions = copyOf(versions, versions.length);
+        this.versions = Arrays.copyOf(versions, versions.length);
     }
 
     @Override
