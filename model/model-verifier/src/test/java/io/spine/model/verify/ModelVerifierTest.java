@@ -21,14 +21,12 @@
 package io.spine.model.verify;
 
 import com.google.common.io.Files;
-import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
 import io.spine.model.verify.given.DuplicateCommandHandler;
 import io.spine.model.verify.given.EditAggregate;
 import io.spine.model.verify.given.InvalidDeleteAggregate;
 import io.spine.model.verify.given.InvalidEnhanceAggregate;
-import io.spine.model.verify.given.InvalidRestoreAggregate;
 import io.spine.model.verify.given.RenameProcMan;
 import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.model.DuplicateCommandHandlerError;
@@ -47,22 +45,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.slf4j.event.Level;
-import org.slf4j.event.SubstituteLoggingEvent;
-import org.slf4j.helpers.SubstituteLogger;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayDeque;
-import java.util.Queue;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -132,21 +124,6 @@ class ModelVerifierTest {
                 .addCommandHandlingTypes(badHandlerName)
                 .build();
         assertThrows(SignatureMismatchException.class, () -> verifier.verify(model));
-    }
-
-    @DisplayName("produce a warning upon finding a `private` command handler method")
-    @Test
-    void warnOnPrivateHandler(){
-        ModelVerifier verifier = new ModelVerifier(project);
-        CommandHandlers model = CommandHandlers
-                .newBuilder()
-                .addCommandHandlingTypes(InvalidRestoreAggregate.class.getName())
-                .build();
-        Queue<SubstituteLoggingEvent> loggedMessages =  new ArrayDeque<>();
-        Logging.redirect((SubstituteLogger) Logging.get(verifier.getClass()), loggedMessages);
-        verifier.verify(model);
-        assertFalse(loggedMessages.isEmpty());
-        assertEquals(Level.WARN, loggedMessages.peek().getLevel());
     }
 
     private static Stream<Arguments> getBadHandlers() {
