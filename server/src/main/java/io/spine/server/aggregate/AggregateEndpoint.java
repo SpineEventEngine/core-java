@@ -48,11 +48,11 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected final void deliverNowTo(I aggregateId) {
+    protected final void dispatchInTx(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        List<Event> produced = dispatchInTx(aggregate);
+        List<Event> produced = runTransactionWith(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
         LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
@@ -69,8 +69,8 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    final List<Event> dispatchInTx(A aggregate) {
-        List<Event> events = doDispatch(aggregate, envelope());
+    final List<Event> runTransactionWith(A aggregate) {
+        List<Event> events = invokeDispatcher(aggregate, envelope());
         AggregateTransaction tx = startTransaction(aggregate);
         List<Event> producedEvents = aggregate.apply(events);
         tx.commit();
