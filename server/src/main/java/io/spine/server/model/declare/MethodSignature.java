@@ -22,17 +22,22 @@ package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.MessageEnvelope;
+import io.spine.logging.Logging;
 import io.spine.server.model.HandlerMethod;
+import org.slf4j.Logger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.declare.MethodParams.findMatching;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
+import static io.spine.server.model.declare.SignatureMismatch.Severity.WARN;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -119,8 +124,16 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         Collection<SignatureMismatch> mismatches = match(method);
         boolean hasErrors = mismatches.stream()
                                       .anyMatch(mismatch -> ERROR == mismatch.getSeverity());
+        List<SignatureMismatch> warnings = mismatches.stream()
+                                                     .filter(mismatch -> WARN ==
+                                                             mismatch.getSeverity())
+                                                     .collect(Collectors.toList());
         if (hasErrors) {
             throw new SignatureMismatchException(mismatches);
+        }
+        if (!warnings.isEmpty()) {
+            Logger logger = Logging.get(MethodSignature.class);
+            warnings.forEach(warning -> logger.warn(warning.toString()));
         }
         return true;
     }
