@@ -48,7 +48,7 @@ import static java.util.stream.Collectors.toList;
  * A utility for verifying Spine model.
  *
  * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
- *         string literal for security check.
+ *           string literal for security check.
  */
 final class ModelVerifier implements Logging {
 
@@ -59,8 +59,7 @@ final class ModelVerifier implements Logging {
     /**
      * Creates a new instance of the {@code ModelVerifier}.
      *
-     * @param project
-     *         the Gradle project to verify the model upon
+     * @param project the Gradle project to verify the model upon
      */
     ModelVerifier(Project project) {
         this.projectClassLoader = createClassLoader(project);
