@@ -180,8 +180,7 @@ class ModelVerifierTest {
         File dest = Files.createTempDir();
         compileTask.setDestinationDir(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
-        URL destUrl = dest.toURI()
-                          .toURL();
+        URL destUrl = dest.toURI().toURL();
         assertEquals(destUrl, func.apply(compileTask));
     }
 
