@@ -74,6 +74,8 @@ public final class BoundedContextBuilder implements Logging {
     private EventBus.Builder eventBus;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
+    private TransportFactory transportFactory;
+
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final List<Repository<?, ?>> repositories = new ArrayList<>();
@@ -169,6 +171,10 @@ public final class BoundedContextBuilder implements Logging {
         return this;
     }
 
+    Optional<IntegrationBus.Builder> getIntegrationBus() {
+        return Optional.ofNullable(integrationBus);
+    }
+
     public Optional<CommandBus.Builder> getCommandBus() {
         return Optional.ofNullable(commandBus);
     }
@@ -213,13 +219,13 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     @CanIgnoreReturnValue
-    public BoundedContextBuilder setIntegrationBus(IntegrationBus.Builder integrationBus) {
-        this.integrationBus = checkNotNull(integrationBus);
+    public BoundedContextBuilder setTransportFactory(TransportFactory transportFactory) {
+        this.transportFactory = checkNotNull(transportFactory);
         return this;
     }
 
-    public Optional<IntegrationBus.Builder> getIntegrationBus() {
-        return Optional.ofNullable(integrationBus);
+    public Optional<TransportFactory> getTransportFactory() {
+        return Optional.ofNullable(transportFactory);
     }
 
     @CanIgnoreReturnValue
@@ -370,11 +376,6 @@ public final class BoundedContextBuilder implements Logging {
         return storageFactory;
     }
 
-    private Optional<TransportFactory> getTransportFactory() {
-        return Optional.ofNullable(integrationBus)
-                       .flatMap(IntegrationBus.Builder::getTransportFactory);
-    }
-
     private void initTenantIndex(StorageFactory factory) {
         if (tenantIndex == null) {
             tenantIndex = multitenant
@@ -432,12 +433,8 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private void initIntegrationBus(TransportFactory factory) {
-        if (integrationBus == null) {
-            integrationBus = IntegrationBus.newBuilder();
-        }
-        if (!integrationBus.getTransportFactory().isPresent()) {
-            integrationBus.setTransportFactory(factory);
-        }
+        integrationBus = IntegrationBus.newBuilder();
+        integrationBus.setTransportFactory(factory);
     }
 
     /**

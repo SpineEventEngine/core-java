@@ -23,7 +23,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.integration.IntegrationBus;
 import io.spine.server.transport.TransportFactory;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
@@ -67,12 +66,10 @@ public class IntegrationBusTestEnv {
     }
 
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
-        IntegrationBus.Builder builder = IntegrationBus.newBuilder()
-                                                       .setTransportFactory(transportFactory);
         BoundedContext result = BoundedContext
                 .newBuilder()
                 .setName(newUuid())
-                .setIntegrationBus(builder)
+                .setTransportFactory(transportFactory)
                 .build();
         return result;
     }

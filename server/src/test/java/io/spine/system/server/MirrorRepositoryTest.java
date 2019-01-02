@@ -38,13 +38,11 @@ import io.spine.test.system.server.PhotoId;
 import io.spine.test.system.server.Video;
 import io.spine.test.system.server.VideoId;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.ShardingReset;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -71,7 +69,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("MirrorRepository should")
 class MirrorRepositoryTest {
 

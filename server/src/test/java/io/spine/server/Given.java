@@ -25,8 +25,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
-import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -71,14 +69,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-/**
- * @author Alexander Yevsyukov
- * @author Alexander Litus
- * @author Andrey Lavrov
- * @author Alexander Aleksandrov
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
- */
 public class Given {
 
     private Given() {
@@ -307,21 +297,6 @@ public class Given {
             extends ProjectionRepository<io.spine.test.commandservice.ProjectId,
                                          ProjectDetails,
                                          io.spine.test.projection.Project> {
-
-        /**
-         * {@inheritDoc}
-         *
-         * This method is overridden to overcome the Mockito restrictions, since Mockit does not
-         * propagate all the changes into the spied object (and {@code ProjectDetailsRepository}
-         * instance is spied within this test suite). In turn that leads to the failures in
-         * delivery initialization, since it requires non-{@code null} bounded context name.
-         *
-         * @return the name of the bounded context for this repository
-         */
-        @Override
-        public BoundedContextName getBoundedContextName() {
-            return BoundedContextNames.newName(PROJECTS_CONTEXT_NAME);
-        }
     }
 
     static class ProjectDetails

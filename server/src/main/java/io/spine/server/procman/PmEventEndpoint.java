@@ -31,7 +31,6 @@ import java.util.List;
  *
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
@@ -46,11 +45,6 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     static <I, P extends ProcessManager<I, ?, ?>>
     PmEventEndpoint<I, P> of(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
         return new PmEventEndpoint<>(repository, event);
-    }
-
-    @Override
-    protected PmEventDelivery<I, P> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
     }
 
     @Override

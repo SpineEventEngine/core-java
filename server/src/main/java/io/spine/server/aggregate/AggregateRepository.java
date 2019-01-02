@@ -21,8 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.annotation.SPI;
-import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
@@ -35,10 +33,6 @@ import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.delivery.Shardable;
-import io.spine.server.delivery.ShardedStreamConsumer;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -54,12 +48,10 @@ import io.spine.server.storage.StorageFactory;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -79,8 +71,7 @@ import static java.lang.Math.max;
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher<I>,
-                   EventDispatcherDelegate<I>,
-                   Shardable {
+                   EventDispatcherDelegate<I> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -98,12 +89,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private final EventRouting<I> eventImportRoute =
             EventRouting.withDefault(EventRoute.byProducerId());
-
-    private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
-            memoize(this::createCommandDelivery);
-
-    private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
-            memoize(this::createEventDelivery);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -128,11 +113,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <ul>
      *     <li>{@link io.spine.server.commandbus.CommandBus CommandBus},
-     *         {@link io.spine.server.event.EventBus EventBus}, and
-     *         {@link io.spine.server.aggregate.ImportBus ImportBus} of
+     *     <li>{@link io.spine.server.event.EventBus EventBus},
+     *     <li>{@link io.spine.server.aggregate.ImportBus ImportBus} of
      *         the parent {@code BoundedContext} for dispatching messages to its aggregates;
-     *     <li>{@link io.spine.server.delivery.Sharding#register(io.spine.server.delivery.Shardable)
-     *     Sharding} for grouping of messages sent to its aggregates.
      * </ul>
      */
     @Override
@@ -149,7 +132,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                           .register(EventImportDispatcher.of(this));
         }
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
-        registerWithSharding();
     }
 
     /**
@@ -180,11 +162,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected AggregateClass<A> getModelClass(Class<A> cls) {
         return asAggregateClass(cls);
-    }
-
-    @Override
-    public AggregateClass<A> getShardedModelClass() {
-        return aggregateClass();
     }
 
     /**
@@ -314,17 +291,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         endpoint.dispatchTo(id);
     }
 
-    boolean importsEvent(EventClass eventClass) {
-        boolean result = aggregateClass().getImportableEventClasses()
-                                         .contains(eventClass);
-        return result;
-    }
-
     /**
      * Imports the passed event into one of the aggregates.
      */
     I importEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
+        I target = with(envelope.getTenantId()).evaluate(() -> doImport(envelope));
+        return target;
+    }
+
+    private I doImport(EventEnvelope envelope) {
         I target = routeImport(envelope);
         EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, envelope);
         endpoint.dispatchTo(target);
@@ -571,38 +547,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Defines a strategy of event delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain event to a particular aggregate
-     * instance at runtime.
-     *
-     * @return delivery strategy for events applied to the instances managed by this repository
-     */
-    @SPI
-    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
-        return eventDeliverySupplier.get();
-    }
-
-    /**
-     * Defines a strategy of command delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain command to a particular aggregate
-     * instance at runtime.
-     *
-     * @return delivery strategy for rejections
-     */
-    @SPI
-    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
-        return commandDeliverySupplier.get();
-    }
-
-    /**
      * {@inheritDoc}
      *
      * <p>Overridden to expose the method into current package.
@@ -622,39 +566,5 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     void onEventImported(I id, Event event) {
         lifecycleOf(id).onEventImported(event);
-    }
-
-    private AggregateEventDelivery<I, A> createEventDelivery() {
-        return new AggregateEventDelivery<>(this);
-    }
-
-    private AggregateCommandDelivery<I, A> createCommandDelivery() {
-        return new AggregateCommandDelivery<>(this);
-    }
-
-    @Override
-    public ShardingStrategy getShardingStrategy() {
-        return UniformAcrossTargets.singleShard();
-    }
-
-    @Override
-    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        Iterable<ShardedStreamConsumer<?, ?>> result = ImmutableList.of(
-                getCommandEndpointDelivery().getConsumer(),
-                getEventEndpointDelivery().getConsumer()
-        );
-        return result;
-    }
-
-    @Override
-    public BoundedContextName getBoundedContextName() {
-        BoundedContextName name = getBoundedContext().getName();
-        return name;
-    }
-
-    @Override
-    public void close() {
-        unregisterWithSharding();
-        super.close();
     }
 }
