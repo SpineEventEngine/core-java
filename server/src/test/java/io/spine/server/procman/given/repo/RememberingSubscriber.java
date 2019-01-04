@@ -33,7 +33,7 @@ public class RememberingSubscriber extends AbstractEventSubscriber {
     private @Nullable PmTaskAdded remembered;
 
     @Subscribe
-    void on(PmTaskAdded msg) {
+    public void on(PmTaskAdded msg) {
         remembered = msg;
     }
 

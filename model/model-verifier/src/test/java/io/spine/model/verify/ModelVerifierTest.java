@@ -49,13 +49,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.event.Level;
 import org.slf4j.event.SubstituteLoggingEvent;
 import org.slf4j.helpers.SubstituteLogger;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -155,8 +156,8 @@ class ModelVerifierTest {
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
 
-    @Disabled
-    //TODO:1/4/2019:Serhii Lekariev:disabled until https://github.com/SpineEventEngine/core-java/issues/932 is resolved
+    @Disabled("until Gradle wrapper version is updated to at least 5.0")
+    ///TODO:2018-01-04:serhii.lekariev: enable when https://github.com/SpineEventEngine/core-java/issues/932 is resolved
     @Test
     @DisplayName("produce a warning on private command handling methods")
     void warnOnPrivateHandlers(){
@@ -168,11 +169,13 @@ class ModelVerifierTest {
                 .build();
         verifier.verify(model);
         assertEquals(1, loggedMessages.size());
+        SubstituteLoggingEvent event = loggedMessages.poll();
+        assertEquals(event.getLevel(), Level.WARN);
     }
 
     /** Redirects logging produced by model verifier to a {@code Queue} that is returned. */
     private static Queue<SubstituteLoggingEvent> redirectLogging() {
-        Queue<SubstituteLoggingEvent> loggedMessages = new LinkedList<>();
+        Queue<SubstituteLoggingEvent> loggedMessages = new ArrayDeque<>();
         Logging.redirect((SubstituteLogger) Logging.get(MethodSignature.class), loggedMessages);
         return loggedMessages;
     }

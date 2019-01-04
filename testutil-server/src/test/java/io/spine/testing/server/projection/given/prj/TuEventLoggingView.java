@@ -28,8 +28,6 @@ import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.event.TuProjectAssigned;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
-import static io.spine.protobuf.AnyPacker.pack;
-
 /**
  * A sample projection for being used as the subject of tests under tests.
  */
@@ -41,12 +39,12 @@ public class TuEventLoggingView
     }
 
     @Subscribe
-    void on(TuProjectAssigned event) {
+    public void on(TuProjectAssigned event) {
         getBuilder().addEvent(pack(event));
     }
 
     @Subscribe
-    void on(TuProjectCreated event) {
+    public void on(TuProjectCreated event) {
         getBuilder().addEvent(pack(event));
     }
 }

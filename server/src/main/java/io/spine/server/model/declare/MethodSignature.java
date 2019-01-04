@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.model.HandlerMethod;
-import org.slf4j.Logger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -47,16 +46,12 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
- *     <li>{@linkplain #MethodSignature(Class) the method annotation},</li>
- *
- *      <li>{@linkplain #getParamSpecs() the specification of method parameters},</li>
- *
- *      <li>{@linkplain #getAllowedModifiers() the set of allowed access modifiers},</li>
- *
- *      <li>{@linkplain #getValidReturnTypes() the set of valid return types},</li>
- *
- *      <li>{@linkplain #getAllowedExceptions() the set of allowed exceptions}, that the method
- *      declares to throw (empty by default),</li>
+ *     <li>{@linkplain #MethodSignature(Class) the method annotation},
+ *     <li>{@linkplain #getParamSpecs() the specification of method parameters},
+ *     <li>{@linkplain #getAllowedModifiers() the set of allowed access modifiers},
+ *     <li>{@linkplain #getValidReturnTypes() the set of valid return types},
+ *     <li>{@linkplain #getAllowedExceptions() the set of allowed exceptions}, that the method
+ * declares to throw (empty by default),
  * </ul>
  *
  * @param <H> the type of the handler method
@@ -65,7 +60,7 @@ import static java.util.stream.Collectors.toList;
  * @author Alex Tymchenko
  */
 public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
-                                      E extends MessageEnvelope<?, ?, ?>> {
+                                      E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
     private final Class<? extends Annotation> annotation;
 
@@ -123,18 +118,20 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         Collection<SignatureMismatch> mismatches = match(method);
         boolean hasErrors = mismatches.stream()
                                       .anyMatch(mismatch -> ERROR == mismatch.getSeverity());
-        List<SignatureMismatch> warnings = mismatches.stream()
-                                                     .filter(mismatch -> WARN ==
-                                                             mismatch.getSeverity())
-                                                     .collect(toList());
+        List<SignatureMismatch> warnings =  mismatches.stream()
+                                                      .filter(MethodSignature::isWarning)
+                                                      .collect(toList());
         if (hasErrors) {
             throw new SignatureMismatchException(mismatches);
         }
         if (!warnings.isEmpty()) {
-            Logger logger = Logging.get(MethodSignature.class);
-            warnings.forEach(warning -> logger.warn(warning.toString()));
+            warnings.stream().map(SignatureMismatch::toString).forEach(this::_warn);
         }
         return true;
+    }
+
+    private static boolean isWarning(SignatureMismatch mismatch){
+        return mismatch.getSeverity() == WARN;
     }
 
     /**

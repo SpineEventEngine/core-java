@@ -29,7 +29,9 @@ import io.spine.test.model.verify.given.EditStateVBuilder;
 
 /**
  * This aggregate declares a command handling method that breaks the contract imposed by
- * {@link Assign}, by having a {@code private} access modifier. This should design in a warning.
+ * {@link Assign}, by having a {@code private} access modifier.
+ *
+ * <p>This should result in a warning.
  */
 public class InvalidRestoreAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
 
