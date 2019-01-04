@@ -28,6 +28,8 @@ import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.event.TuProjectAssigned;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
+import static io.spine.protobuf.AnyPacker.pack;
+
 /**
  * A sample projection for being used as the subject of tests under tests.
  */
