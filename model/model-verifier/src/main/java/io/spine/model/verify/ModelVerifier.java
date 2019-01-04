@@ -97,7 +97,6 @@ final class ModelVerifier implements Logging {
         }
     }
 
-
     private static Collection<JavaCompile> allJavaCompile(Project project) {
         Collection<JavaCompile> tasks = newArrayList();
         ProjectHierarchy.applyToAll(project.getRootProject(),

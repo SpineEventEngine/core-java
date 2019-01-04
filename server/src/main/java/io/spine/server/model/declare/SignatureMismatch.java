@@ -61,11 +61,14 @@ public final class SignatureMismatch {
         message = criterion.formatMsg(values);
     }
 
-    /**
-     * Returns the severity of the mismatch.
-     */
-    Severity getSeverity() {
-        return severity;
+    /** Returns whether this mismatch is of {@code ERROR} severity. */
+    boolean isError() {
+        return severity == Severity.ERROR;
+    }
+
+    /** Returns whether this mismatch is of {@code WARN} severity. */
+    boolean isWarning() {
+        return severity == Severity.WARN;
     }
 
     /**
