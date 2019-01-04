@@ -41,9 +41,6 @@ import static io.spine.server.commandbus.InvalidCommandException.inapplicableTen
 import static io.spine.server.commandbus.InvalidCommandException.missingTenantId;
 import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
 import static io.spine.validate.Validate.isDefault;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
 
 /**
  * Validates a command.
@@ -57,9 +54,6 @@ import static java.util.Optional.ofNullable;
  *     <li>The command ID is populated.
  *     <li>The command context is not blank.
  * </ol>
- *
- * @author Dmytro Dashenkov
- * @author Alexander Yevsyukov
  */
 final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
 
@@ -86,15 +80,15 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
                 MessageInvalid report = missingTenantId(command);
-                return of(report);
+                return Optional.of(report);
             }
         } else {
             if (tenantSpecified) {
                 MessageInvalid report = inapplicableTenantId(command);
-                return of(report);
+                return Optional.of(report);
             }
         }
-        return empty();
+        return Optional.empty();
     }
 
     private static Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
@@ -104,7 +98,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         if (!violations.isEmpty()) {
             exception = onConstraintViolations(command, violations);
         }
-        return ofNullable(exception);
+        return Optional.ofNullable(exception);
     }
 
     /**
@@ -152,8 +146,8 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             if (isDefault(message)) {
                 addViolation("Non-default command message must be set.");
             }
-            List<ConstraintViolation> messageViolations = MessageValidator.newInstance()
-                                                                          .validate(message);
+            List<ConstraintViolation> messageViolations = MessageValidator.newInstance(message)
+                                                                          .validate();
             result.addAll(messageViolations);
         }
 

@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
-import io.spine.server.delivery.Delivery;
 
 import java.util.List;
 
@@ -35,7 +34,6 @@ import java.util.List;
  * aggregates. But unlike for event reaction, only one aggregate can be a target for event
  * being imported.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.aggregate.Apply#allowImport()
  */
 class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
@@ -43,11 +41,6 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     EventImportEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
         super(repository, envelope);
-    }
-
-    @Override
-    protected Delivery<I, A, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
     }
 
     /**

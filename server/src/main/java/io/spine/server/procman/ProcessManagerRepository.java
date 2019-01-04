@@ -20,10 +20,10 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -36,10 +36,6 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
-import io.spine.server.delivery.Shardable;
-import io.spine.server.delivery.ShardedStreamConsumer;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -60,11 +56,8 @@ import org.checkerframework.dataflow.qual.Pure;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Suppliers.memoize;
-import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.entity.EventBlackList.discardEvents;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
@@ -84,17 +77,10 @@ public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
-                implements CommandDispatcherDelegate<I>,
-                           Shardable {
+                implements CommandDispatcherDelegate<I> {
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
-
-    private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
-            memoize(this::createCommandDelivery);
-
-    private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
-            memoize(this::createEventDelivery);
 
     private final EventFilter entityStateChangedFilter = discardEvents(EntityStateChanged.class);
 
@@ -124,11 +110,6 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected final ProcessManagerClass<P> getModelClass(Class<P> cls) {
         return asProcessManagerClass(cls);
-    }
-
-    @Override
-    public ProcessManagerClass<P> getShardedModelClass() {
-        return processManagerClass();
     }
 
     /**
@@ -163,8 +144,6 @@ public abstract class ProcessManagerRepository<I,
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
         systemSubscriber.registerIn(boundedContext);
-
-        registerWithSharding();
     }
 
     /**
@@ -291,7 +270,7 @@ public abstract class ProcessManagerRepository<I,
         CaughtError error = commandErrorHandler.handleError(envelope, exception);
         error.asRejection()
              .map(RejectionEnvelope::getOuterObject)
-             .ifPresent(event -> postEvents(of(event)));
+             .ifPresent(event -> postEvents(ImmutableList.of(event)));
         error.rethrowOnce();
     }
 
@@ -348,65 +327,12 @@ public abstract class ProcessManagerRepository<I,
         return procman;
     }
 
-    /**
-     * Defines a strategy of event delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain event to a particular process manager
-     * instance at runtime.
-     *
-     * @return delivery strategy for events applied to the instances managed by this repository
-     */
-    @SPI
-    protected PmEventDelivery<I, P> getEventEndpointDelivery() {
-        return eventDeliverySupplier.get();
-    }
-
-    /**
-     * Defines a strategy of command delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain command to a particular process manager
-     * instance at runtime.
-     *
-     * @return delivery strategy for rejections
-     */
-    @SPI
-    protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
-        return commandDeliverySupplier.get();
-    }
-
     @Override
     public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
         if (!dispatchesExternalEvents()) {
             return Optional.empty();
         }
         return Optional.of(new PmExternalEventDispatcher());
-    }
-
-    @Override
-    public ShardingStrategy getShardingStrategy() {
-        return UniformAcrossTargets.singleShard();
-    }
-
-    @Override
-    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        Iterable<ShardedStreamConsumer<?, ?>> result =
-                of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
-                );
-        return result;
-    }
-
-    @Override
-    public BoundedContextName getBoundedContextName() {
-        BoundedContextName name = getBoundedContext().getName();
-        return name;
     }
 
     /**
@@ -423,20 +349,6 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected EventFilter eventFilter() {
         return entityStateChangedFilter;
-    }
-
-    @Override
-    public void close() {
-        unregisterWithSharding();
-        super.close();
-    }
-
-    private PmCommandDelivery<I, P> createCommandDelivery() {
-        return new PmCommandDelivery<>(this);
-    }
-
-    private PmEventDelivery<I, P> createEventDelivery() {
-        return new PmEventDelivery<>(this);
     }
 
     /**

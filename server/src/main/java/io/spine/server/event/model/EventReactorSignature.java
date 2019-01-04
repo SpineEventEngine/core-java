@@ -30,12 +30,8 @@ import io.spine.server.model.declare.ParameterSpec;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableSet.of;
-
 /**
  * The signature of {@link EventReactorMethod}.
- *
- * @author Alex Tymchenko
  */
 class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
 
@@ -45,12 +41,12 @@ class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> 
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE);
+        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(EventMessage.class, Iterable.class, Optional.class);
+        return ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
     }
 
     @Override

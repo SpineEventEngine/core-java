@@ -21,6 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
@@ -33,7 +34,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
@@ -135,7 +135,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     protected Set<D> getDispatchersForType(C messageClass) {
         checkNotNull(messageClass);
         Collection<D> dispatchersForType = dispatchers.get(messageClass);
-        return copyOf(dispatchersForType);
+        return ImmutableSet.copyOf(dispatchersForType);
     }
 
     /**

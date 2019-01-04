@@ -29,7 +29,6 @@ import java.util.List;
 /**
  * Dispatches an event to aggregates of the associated {@code AggregateRepository}.
  *
- * @author Alexander Yevsyukov
  * @see React
  */
 final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
@@ -37,11 +36,6 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     AggregateEventReactionEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
         super(repo, event);
-    }
-
-    @Override
-    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
     }
 
     @Override

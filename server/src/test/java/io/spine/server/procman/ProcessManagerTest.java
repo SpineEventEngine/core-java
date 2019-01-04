@@ -42,6 +42,7 @@ import io.spine.server.procman.given.pm.TestProcessManagerDispatcher;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.test.shared.AnyProcess;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
@@ -63,7 +64,6 @@ import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
@@ -76,7 +76,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -110,10 +109,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-@SuppressWarnings({"OverlyCoupledClass",
+@SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
-@ExtendWith(ShardingReset.class)
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
 
@@ -148,7 +146,7 @@ class ProcessManagerTest {
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
-                              .withState(Any.getDefaultInstance())
+                              .withState(AnyProcess.getDefaultInstance())
                               .build();
         commandBus.register(new TestProcessManagerDispatcher());
         InjectCommandBus.of(commandBus)
@@ -164,7 +162,8 @@ class ProcessManagerTest {
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
-        Any pmState = processManager.getState();
+        Any pmState = processManager.getState()
+                                    .getAny();
         Any expected = pack(eventMessage);
         assertEquals(expected, pmState);
         return result;
@@ -175,7 +174,8 @@ class ProcessManagerTest {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
-        assertEquals(pack(commandMsg), processManager.getState());
+        assertEquals(pack(commandMsg), processManager.getState()
+                                                     .getAny());
         return events;
     }
 
@@ -278,8 +278,8 @@ class ProcessManagerTest {
         void rejectionMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
             dispatch(processManager, rejection.getEvent());
-            assertEquals(rejection.getOuterObject().getMessage(),
-                         processManager.getState());
+            assertReceived(rejection.getOuterObject()
+                                    .getMessage());
         }
 
         @Test
@@ -287,8 +287,13 @@ class ProcessManagerTest {
         void rejectionAndCommandMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
             dispatch(processManager, rejection.getEvent());
-            assertEquals(rejection.getOrigin().getMessage(),
-                         processManager.getState());
+            assertReceived(rejection.getOrigin()
+                                    .getMessage());
+        }
+
+        private void assertReceived(Any expected) {
+            assertEquals(expected, processManager.getState()
+                                                 .getAny());
         }
     }
 

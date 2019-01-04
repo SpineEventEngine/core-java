@@ -28,7 +28,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
@@ -37,9 +37,6 @@ import java.util.Map;
  *
  * <p>An event is invalid if it's supported (there's a handler for the event), but it's
  * attributes are not populated according to framework conventions or validation constraints.
- *
- * @author Alexander Litus
- * @author Alex Tymchenko
  */
 public class InvalidEventException extends EventException implements MessageInvalid {
 
@@ -62,26 +59,23 @@ public class InvalidEventException extends EventException implements MessageInva
     public static
     InvalidEventException onConstraintViolations(EventMessage eventMsg,
                                                  Iterable<ConstraintViolation> violations) {
-
-        ConstraintViolationExceptionFactory helper =
-                new ConstraintViolationExceptionFactory(eventMsg, violations);
-        return helper.newException();
+        Factory factory = new Factory(eventMsg, violations);
+        return factory.newException();
     }
 
     /**
      * A helper utility aimed to create an {@code InvalidEventException} to report the
      * event which field values violate validation constraint(s).
      */
-    private static class ConstraintViolationExceptionFactory
-                                extends ExceptionFactory<InvalidEventException,
-                                                         EventMessage,
-                                                         EventClass,
-                                                         EventValidationError> {
+    private static final class Factory
+            extends ExceptionFactory<InvalidEventException,
+                                     EventMessage,
+                                     EventClass,
+                                     EventValidationError> {
 
         private final EventClass eventClass;
 
-        private ConstraintViolationExceptionFactory(EventMessage eventMsg,
-                                                    Iterable<ConstraintViolation> violations) {
+        private Factory(EventMessage eventMsg, Iterable<ConstraintViolation> violations) {
             super(eventMsg, violations);
             this.eventClass = EventClass.of(eventMsg);
         }

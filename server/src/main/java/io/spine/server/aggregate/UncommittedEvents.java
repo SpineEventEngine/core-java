@@ -24,20 +24,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.Event;
 
-import java.util.List;
-
-import static com.google.common.collect.ImmutableList.copyOf;
-
 /**
  * The list of uncommitted events of an {@link Aggregate}.
- *
- * @author Dmytro Dashenkov
  */
 @Immutable
 final class UncommittedEvents {
 
-    private static final UncommittedEvents EMPTY =
-            new UncommittedEvents(ImmutableList.of());
+    private static final UncommittedEvents EMPTY = new UncommittedEvents(ImmutableList.of());
 
     private final ImmutableList<Event> events;
 
@@ -66,8 +59,8 @@ final class UncommittedEvents {
      *
      * @return the list of uncommitted events
      */
-    List<Event> list() {
-        return copyOf(events);
+    ImmutableList<Event> list() {
+        return events;
     }
 
     /**
@@ -77,14 +70,13 @@ final class UncommittedEvents {
      * <p>If this {@code UncommittedEvents} list is {@link #nonEmpty()} or the given
      * {@code Iterable} is not empty, then the resulting instance is {@link #nonEmpty()} as well.
      *
-     * @param events the events to append
+     * @param newEvents the events to append
      * @return new {@code UncommittedEvents} instance
      */
-    UncommittedEvents append(Iterable<Event> events) {
-        ImmutableList<Event> newEvents = copyOf(events);
+    UncommittedEvents append(Iterable<Event> newEvents) {
         ImmutableList<Event> newList = ImmutableList
                 .<Event>builder()
-                .addAll(list())
+                .addAll(events)
                 .addAll(newEvents)
                 .build();
         return new UncommittedEvents(newList);

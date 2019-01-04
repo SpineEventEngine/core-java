@@ -84,7 +84,7 @@ public final class TuAggregatePart
     @Apply(allowImport = true)
     void on(TuCommentReceivedByEmail event) {
         getBuilder().setId(event.getId())
-                    .setCommentsRecievedByEmail(getState().getCommentsRecievedByEmail() + 1)
+                    .setCommentsReceivedByEmail(getState().getCommentsReceivedByEmail() + 1)
                     .setTimestamp(fromMillis(1234567));
     }
 }

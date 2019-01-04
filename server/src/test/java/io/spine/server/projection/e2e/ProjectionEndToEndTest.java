@@ -21,10 +21,10 @@
 package io.spine.server.projection.e2e;
 
 import com.google.common.truth.IterableSubject;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
+import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -33,6 +33,7 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.groups.Group;
 import io.spine.server.groups.GroupId;
+import io.spine.server.groups.GroupName;
 import io.spine.server.groups.GroupNameProjection;
 import io.spine.server.groups.GroupProjection;
 import io.spine.server.organizations.Organization;
@@ -49,13 +50,11 @@ import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -69,7 +68,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Projection should")
-@ExtendWith(ShardingReset.class)
 class ProjectionEndToEndTest {
 
     @Test
@@ -116,7 +114,12 @@ class ProjectionEndToEndTest {
         sender.receivesEventsProducedBy(producerId,
                                         established);
         receiver.assertThat(exactlyOne(
-                StringValue.of(established.getName())
+                GroupName.newBuilder()
+                         .setId(GroupId.newBuilder()
+                                       .setUuid(producerId.getUuid())
+                                       .build())
+                         .setName(established.getName())
+                         .build()
         ));
     }
 
@@ -152,6 +155,7 @@ class ProjectionEndToEndTest {
                 .newBuilder()
                 .setTimestamp(producedAt)
                 .setExternal(true)
+                .setImportContext(ActorContext.getDefaultInstance())
                 .build();
         Event event = Event
                 .newBuilder()

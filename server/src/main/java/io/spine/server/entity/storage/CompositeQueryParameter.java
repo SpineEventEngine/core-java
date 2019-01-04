@@ -35,7 +35,6 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMultimap.copyOf;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
@@ -87,7 +86,7 @@ public final class CompositeQueryParameter implements Serializable {
     private CompositeQueryParameter(CompositeOperator operator,
                                     Multimap<EntityColumn, ColumnFilter> filters) {
         this.operator = operator;
-        this.filters = copyOf(filters);
+        this.filters = ImmutableMultimap.copyOf(filters);
         this.hasLifecycle = containsLifecycle(filters.keySet());
     }
 
@@ -98,14 +97,14 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     /**
-     * @return the composite operator
+     * Obtains the composite operator.
      */
     public CompositeOperator getOperator() {
         return operator;
     }
 
     /**
-     * @return the joined entity column {@linkplain ColumnFilter filters}
+     * Returns the joined entity column {@linkplain ColumnFilter filters}.
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public ImmutableMultimap<EntityColumn, ColumnFilter> getFilters() {
@@ -155,9 +154,9 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     /**
-     * @return {@code true} if this parameter contains filters by
+     * Returns {@code true} if this parameter contains filters by
      * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle columns},
-     * {@code false} otherwise
+     * {@code false} otherwise.
      */
     public boolean hasLifecycle() {
         return hasLifecycle;
@@ -181,6 +180,7 @@ public final class CompositeQueryParameter implements Serializable {
         return Objects.hashCode(getOperator(), getFilters());
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // similar field names.
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

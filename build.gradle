@@ -266,6 +266,8 @@ subprojects {
     }
 }
 
+apply from: publishPlugin
+
 // IDEA project configuration.
 idea {
     project {
@@ -284,5 +286,3 @@ idea {
 
 // Aggregated coverage report across all subprojects.
 apply from: spineJacocoScript
-
-apply from: publishPlugin

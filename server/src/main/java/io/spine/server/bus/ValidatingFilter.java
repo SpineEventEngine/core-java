@@ -32,14 +32,10 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * A filter validating the {@linkplain MessageEnvelope envelopes} with the given
  * {@link EnvelopeValidator}.
- *
- * @author Dmytro Dashenkov
  */
 final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Message>
         implements BusFilter<E> {
@@ -60,9 +56,9 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
                                    .asError();
             Any packedId = Identifier.pack(envelope.getId());
             Ack result = reject(packedId, error);
-            return of(result);
+            return Optional.of(result);
         } else {
-            return empty();
+            return Optional.empty();
         }
     }
 }

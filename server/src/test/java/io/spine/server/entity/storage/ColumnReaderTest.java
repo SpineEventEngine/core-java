@@ -20,8 +20,11 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithASetterButNoGetter;
+import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithBooleanColumns;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
@@ -32,21 +35,25 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.function.Predicate;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.server.entity.storage.ColumnReader.forClass;
+import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertContainsColumns;
+import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertNotContainsColumns;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("DuplicateStringLiteralInspection") // Lots of literals for column names.
 @DisplayName("ColumnReader should")
 class ColumnReaderTest {
 
@@ -56,6 +63,8 @@ class ColumnReaderTest {
         new NullPointerTester().testStaticMethods(ColumnReader.class, Visibility.PACKAGE);
     }
 
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Call the method to throw exception.
     @Test
     @DisplayName("throw ISE on invalid column definitions")
     void throwOnInvalidColumns() {
@@ -73,10 +82,10 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithManyGetters.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
-            assertThat(entityColumns).hasSize(3);
-            assertTrue(containsColumn(entityColumns, "someMessage"));
-            assertTrue(containsColumn(entityColumns, "integerFieldValue"));
-            assertTrue(containsColumn(entityColumns, "floatNull"));
+            assertContainsColumns(
+                    entityColumns,
+                    "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
+            );
         }
 
         @Test
@@ -95,12 +104,10 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(RealLifeEntity.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
-            assertThat(entityColumns).hasSize(5);
-            assertTrue(containsColumn(entityColumns, archived.name()));
-            assertTrue(containsColumn(entityColumns, deleted.name()));
-            assertTrue(containsColumn(entityColumns, "visible"));
-            assertTrue(containsColumn(entityColumns, version.name()));
-            assertTrue(containsColumn(entityColumns, "someTime"));
+            assertContainsColumns(
+                    entityColumns,
+                    archived.name(), deleted.name(), "visible", version.name(), "someTime"
+            );
         }
 
         @Test
@@ -108,10 +115,16 @@ class ColumnReaderTest {
         void fromImplementedInterface() {
             ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-
-            assertThat(entityColumns).hasSize(1);
-            assertTrue(containsColumn(entityColumns, "integerFieldValue"));
+            assertContainsColumns(entityColumns, "integerFieldValue");
         }
+    }
+
+    @Test
+    @DisplayName("not confuse a setter method with a property mutator")
+    void testSetterDeclaringEntity() {
+        ColumnReader columnReader = forClass(EntityWithASetterButNoGetter.class);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        assertNotContainsColumns(entityColumns, "secretNumber");
     }
 
     @Nested
@@ -123,7 +136,7 @@ class ColumnReaderTest {
         void inheritedNonPublicColumns() {
             ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-            assertThat(entityColumns).hasSize(3);
+            assertNotContainsColumns(entityColumns, "someNonPublicMethod");
         }
 
         @Test
@@ -131,20 +144,75 @@ class ColumnReaderTest {
         void staticMembers() {
             ColumnReader columnReader = forClass(EntityWithManyGetters.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-            assertFalse(containsColumn(entityColumns, "staticMember"));
+            assertNotContainsColumns(entityColumns, "staticMember");
         }
-
     }
 
-    private static boolean containsColumn(Iterable<EntityColumn> entityColumns, String columnName) {
-        checkNotNull(entityColumns);
-        checkNotEmptyOrBlank(columnName, "column name");
+    @Nested
+    @DisplayName("look for `Boolean` columns via predicate which returns")
+    class InBooleanLookupPredicate {
 
-        for (EntityColumn column : entityColumns) {
-            if (columnName.equals(column.getName())) {
-                return true;
-            }
+        private final Predicate<Method> predicate = ColumnReader.isBooleanWrapperProperty;
+
+        @Test
+        @DisplayName("`true` for correct `Boolean` column")
+        void findCorrect() throws NoSuchMethodException {
+            boolean result = predicate.test(method("isBooleanWrapperColumn"));
+            assertTrue(result);
         }
-        return false;
+
+        @Test
+        @DisplayName("`false` for column starting with `get`")
+        void notFindStartingWithGet() throws NoSuchMethodException {
+            boolean result = predicate.test(method("getBooleanWrapperColumn"));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for non-`Boolean` column")
+        void notFindNonBoolean() throws NoSuchMethodException {
+            boolean result = predicate.test(method("isNonBoolean"));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for non-`Boolean` column starting with `get`")
+        void notFindNonBooleanStartingWithGet() throws NoSuchMethodException {
+            boolean result = predicate.test(method("getNonBoolean"));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for `Boolean` column with params")
+        void notFindBooleanWithParams() throws NoSuchMethodException {
+            boolean result = predicate.test(method("isBooleanWithParam", int.class));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for `Boolean` column with params starting with `get`")
+        void notFindBooleanWithParamsStartingWithGet() throws NoSuchMethodException {
+            boolean result = predicate.test(method("getBooleanWithParam", int.class));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for non-`Boolean` column with params")
+        void notFindNonBooleanWithParams() throws NoSuchMethodException {
+            boolean result = predicate.test(method("isNonBooleanWithParam", int.class));
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("`false` for non-`Boolean` column with params starting with `get`")
+        void notFindNonBooleanWithParamsStartingWithGet() throws NoSuchMethodException {
+            boolean result = predicate.test(method("getNonBooleanWithParam", int.class));
+            assertFalse(result);
+        }
+
+        private Method method(String name, Class<?>... parameterTypes)
+                throws NoSuchMethodException {
+            return EntityWithBooleanColumns.class.getDeclaredMethod(name, parameterTypes);
+        }
     }
 }

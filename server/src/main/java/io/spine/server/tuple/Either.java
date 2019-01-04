@@ -93,7 +93,7 @@ public abstract class Either implements Iterable<Message>, Serializable {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof Either)) {
             return false;
         }
         Either other = (Either) obj;

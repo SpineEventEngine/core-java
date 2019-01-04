@@ -31,7 +31,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
@@ -42,8 +42,6 @@ import static java.lang.String.format;
  *
  * <p>A command is invalid if it's supported (there's a handler for the command), but it's
  * attributes are not populated according to framework conventions or validation constraints.
- *
- * @author Alexander Yevsyukov
  */
 public class InvalidCommandException extends CommandException implements MessageInvalid {
 
@@ -66,8 +64,8 @@ public class InvalidCommandException extends CommandException implements Message
     public static InvalidCommandException onConstraintViolations(
             Command command, Iterable<ConstraintViolation> violations) {
 
-        ConstraintViolationExceptionFactory helper =
-                new ConstraintViolationExceptionFactory(command, violations);
+        Factory helper =
+                new Factory(command, violations);
         return helper.newException();
     }
 
@@ -133,15 +131,15 @@ public class InvalidCommandException extends CommandException implements Message
      * A helper utility aimed to create an {@code InvalidCommandException} to report the
      * command which field values violate validation constraint(s).
      */
-    private static class ConstraintViolationExceptionFactory
-                                 extends ExceptionFactory<InvalidCommandException,
-                                                          Command,
-                                                          CommandClass,
-                                                          CommandValidationError> {
+    private static final class Factory
+            extends ExceptionFactory<InvalidCommandException,
+                                     Command,
+                                     CommandClass,
+                                     CommandValidationError> {
+
         private final CommandClass commandClass;
 
-        protected ConstraintViolationExceptionFactory(Command command,
-                                                      Iterable<ConstraintViolation> violations) {
+        private Factory(Command command, Iterable<ConstraintViolation> violations) {
             super(command, violations);
             this.commandClass = CommandClass.of(command);
         }

@@ -35,8 +35,12 @@ message Order {
     OrderId id = 1;
     string name = 2 [(required) = true];
     repeated Item item = 3;
-    message Item {
-        string name = 1 [(required) = true];
-        string description = 2;
-    }
 }
+
+//TODO:2018-12-24:alexander.yevsyukov: Move this message back under the Order once generation of
+// Validating Builders for nested messages is suppported.
+message Item {
+    string name = 1 [(required) = true];
+    string description = 2;
+}
+

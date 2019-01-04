@@ -27,12 +27,12 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import io.spine.server.entity.storage.given.ColumnTestEnv.BrokenTestEntity;
-import io.spine.server.entity.storage.given.ColumnTestEnv.EntityRedefiningColumnAnnotation;
-import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithCustomColumnNameForStoring;
-import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColumnNameForStoring;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TestAggregate;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
+import io.spine.server.entity.storage.given.column.BrokenTestEntity;
+import io.spine.server.entity.storage.given.column.EntityRedefiningColumnAnnotation;
+import io.spine.server.entity.storage.given.column.EntityWithCustomColumnNameForStoring;
+import io.spine.server.entity.storage.given.column.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.column.TestAggregate;
+import io.spine.server.entity.storage.given.column.TestEntity;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,9 +41,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.CUSTOM_COLUMN_NAME;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.forMethod;
+import static io.spine.server.entity.storage.given.column.EntityWithCustomColumnNameForStoring.CUSTOM_COLUMN_NAME;
+import static io.spine.server.entity.storage.given.column.TaskStatus.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,14 +51,20 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Many string literals for method names. */})
 @DisplayName("Column should")
 class ColumnTest {
+
+    static EntityColumn forMethod(String name, Class<?> enclosingClass) {
+        try {
+            Method result = enclosingClass.getDeclaredMethod(name);
+            return EntityColumn.from(result);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     @DisplayName("be serializable")
@@ -141,6 +146,25 @@ class ColumnTest {
         assertEquals(changedState, extractedState);
     }
 
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Just check that column is constructed without an exception.
+    @Nested
+    @DisplayName("allow `is` prefix")
+    class AllowIsPrefix {
+
+        @Test
+        @DisplayName("for `boolean` properties")
+        void forBooleanProperties() {
+            forMethod("isBoolean", TestEntity.class);
+        }
+
+        @Test
+        @DisplayName("for `Boolean` properties")
+        void forBooleanWrapperProperties() {
+            forMethod("isBooleanWrapper", TestEntity.class);
+        }
+    }
+
     @Nested
     @DisplayName("not be constructed from")
     class NotBeConstructedFrom {
@@ -185,6 +209,13 @@ class ColumnTest {
         void getterWithParams() throws NoSuchMethodException {
             Method method = TestEntity.class.getDeclaredMethod("getParameter", String.class);
             assertThrows(IllegalArgumentException.class, () -> EntityColumn.from(method));
+        }
+
+        @Test
+        @DisplayName("getter with `is` prefix and non-boolean return type")
+        void nonBooleanIsGetter() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> forMethod("isNonBoolean", TestEntity.class));
         }
     }
 

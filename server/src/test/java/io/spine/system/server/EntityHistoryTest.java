@@ -41,13 +41,11 @@ import io.spine.system.server.given.entity.PersonProjection;
 import io.spine.system.server.given.entity.PersonProjectionRepository;
 import io.spine.system.server.given.entity.PersonRepository;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.ShardingReset;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getMessage;
@@ -62,7 +60,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("EntityHistory should")
 @SuppressWarnings("InnerClassMayBeStatic")
 class EntityHistoryTest {

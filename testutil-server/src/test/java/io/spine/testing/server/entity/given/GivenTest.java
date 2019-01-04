@@ -33,10 +33,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- * @author Illia Shepilov
- */
 @DisplayName("Given should")
 class GivenTest {
 

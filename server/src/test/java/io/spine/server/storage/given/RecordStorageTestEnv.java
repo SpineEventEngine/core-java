@@ -39,6 +39,7 @@ import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.Enumerated;
@@ -56,7 +57,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
-import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -148,7 +148,7 @@ public class RecordStorageTestEnv {
 
     public static <T> EntityQuery<T> newEntityQuery(EntityFilters filters,
                                                     RecordStorage<T> storage) {
-        return from(filters, emptyOrderBy(), emptyPagination(), storage);
+        return EntityQueries.from(filters, emptyOrderBy(), emptyPagination(), storage);
     }
 
     public static OrderBy emptyOrderBy() {
@@ -184,7 +184,6 @@ public class RecordStorageTestEnv {
         @CanIgnoreReturnValue
         @Column
         public int getCounter() {
-            counter++;
             return counter;
         }
 
@@ -245,6 +244,10 @@ public class RecordStorageTestEnv {
                     .setStatus(status)
                     .build();
             injectState(this, newState, getCounterVersion());
+        }
+
+        public void assignCounter(int counter) {
+            this.counter = counter;
         }
     }
 

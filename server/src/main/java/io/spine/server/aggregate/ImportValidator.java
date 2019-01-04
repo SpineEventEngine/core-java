@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageInvalid;
@@ -33,27 +32,23 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.InvalidEventException.onConstraintViolations;
-import static java.util.Optional.ofNullable;
 
 /**
- * Checks if a message of the event to import is
- * {@linkplain MessageValidator#validate(Message) valid}
- *
- * @author Alexander Yevsyukov
+ * Checks if a message of the event to import is {@linkplain MessageValidator#validate() valid}.
  */
 final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
-
-    private final MessageValidator messageValidator = MessageValidator.newInstance();
 
     @Override
     public Optional<MessageInvalid> validate(EventEnvelope envelope) {
         checkNotNull(envelope);
-        MessageInvalid result = null;
         EventMessage eventMessage = envelope.getMessage();
-        List<ConstraintViolation> violations = messageValidator.validate(eventMessage);
-        if (!violations.isEmpty()) {
-            result = onConstraintViolations(eventMessage, violations);
+        MessageValidator validator = MessageValidator.newInstance(eventMessage);
+        List<ConstraintViolation> violations = validator.validate();
+        if (violations.isEmpty()) {
+            return Optional.empty();
+        } else {
+            MessageInvalid result = onConstraintViolations(eventMessage, violations);
+            return Optional.of(result);
         }
-        return ofNullable(result);
     }
 }

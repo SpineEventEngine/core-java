@@ -37,15 +37,11 @@ import io.spine.server.model.declare.ParameterSpec;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
 /**
  * A signature of {@link CommandReactionMethod}.
- *
- * @author Alex Tymchenko
  */
 public class CommandReactionSignature
         extends MethodSignature<CommandReactionMethod, EventEnvelope> {
@@ -56,17 +52,17 @@ public class CommandReactionSignature
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
-        return copyOf(CommandReactionParams.values());
+        return ImmutableSet.copyOf(CommandReactionParams.values());
     }
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE);
+        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(CommandMessage.class, Iterable.class, Optional.class);
+        return ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
     }
 
     @Override
@@ -77,7 +73,7 @@ public class CommandReactionSignature
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * @implNote This method distinguishes {@linkplain Command Commander} methods one from another,
      * as they use the same annotation, but have different parameter list. It skips the methods
      * which first parameter {@linkplain MethodParams#isFirstParamCommand(Method) is }

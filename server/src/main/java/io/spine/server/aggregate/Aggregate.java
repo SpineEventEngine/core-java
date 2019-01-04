@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -119,6 +120,16 @@ public abstract class Aggregate<I,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends CommandHandlingEntity<I, S, B>
         implements EventPlayer, EventReactor {
+
+    /**
+     * The count of events stored to the {@linkplain AggregateStorage storage} since the last
+     * snapshot.
+     *
+     * <p>This field is set in {@link #play(AggregateStateRecord)} and is effectively final.
+     *
+     * @see AggregateStorage#readEventCountAfterLastSnapshot(Object)
+     */
+    private int eventCountAfterLastSnapshot = 0;
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -256,7 +267,7 @@ public abstract class Aggregate<I,
             restore(snapshot);
         }
         List<Event> events = aggregateStateRecord.getEventList();
-
+        eventCountAfterLastSnapshot = events.size();
         play(events);
         remember(events);
     }
@@ -400,5 +411,20 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
+    }
+
+    /**
+     * Obtains the number of events stored in the associated storage since last snapshot.
+     */
+    int getEventCountAfterLastSnapshot() {
+        return eventCountAfterLastSnapshot;
+    }
+
+    /**
+     * Updates the number of events stores in the associated storage since last snapshot.
+     */
+    void setEventCountAfterLastSnapshot(int count) {
+        checkArgument(count >= 0, "Event count cannot be negative.");
+        this.eventCountAfterLastSnapshot = count;
     }
 }

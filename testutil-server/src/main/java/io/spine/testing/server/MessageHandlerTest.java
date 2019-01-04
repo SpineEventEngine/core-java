@@ -44,13 +44,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -198,14 +196,14 @@ public abstract class MessageHandlerTest<I,
             @SuppressWarnings("unchecked")
             Class<? extends CommandMessage> messageType = (Class<? extends CommandMessage>) cls;
             CommandClass commandClass = CommandClass.from(messageType);
-            return of(commandClass);
+            return Optional.of(commandClass);
         } else {
-            return empty();
+            return Optional.empty();
         }
     }
 
     protected final ImmutableList<Message> interceptedCommands() {
-        return copyOf(interceptedCommands);
+        return ImmutableList.copyOf(interceptedCommands);
     }
 
     /**

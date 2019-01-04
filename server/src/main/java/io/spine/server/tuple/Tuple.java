@@ -146,7 +146,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof Tuple)) {
             return false;
         }
         Tuple other = (Tuple) obj;

@@ -20,19 +20,29 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.Entity;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.entity.storage.Methods.IS_PREFIX;
 import static io.spine.server.entity.storage.Methods.getAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.stream.Stream.concat;
 
 /**
  * A class whose purpose is to obtain {@linkplain EntityColumn entity columns} from the given
@@ -45,31 +55,55 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * correct. If column definitions are incorrect, the exception is thrown upon
  * {@linkplain EntityColumn entity columns} reading.
  *
- * @author Dmytro Kuzmin
  * @see Columns
  * @see EntityColumn
  */
 class ColumnReader {
 
-    private final Class<? extends Entity> entityClass;
+    /**
+     * A predicate to check if the given method or one of its predecessors are annotated with
+     * {@link Column}.
+     */
+    private static final Predicate<Method> hasAnnotatedVersion = hasAnnotatedVersion();
 
-    private ColumnReader(Class<? extends Entity> entityClass) {
-        this.entityClass = entityClass;
+    /**
+     * A predicate to check whether the given method represents an entity property with the
+     * {@code Boolean} return type and the name starting with {@code is-}.
+     */
+    @VisibleForTesting
+    static final Predicate<Method> isBooleanWrapperProperty = isBooleanWrapperProperty();
+
+    private final BeanInfo entityDescriptor;
+    private final String className;
+
+    /**
+     * Creates a new {@code ColumnReader} instance.
+     *
+     * @param entityDescriptor
+     *         a descriptor of the entity as a Java Bean
+     * @param className
+     *         an entity class name for logging purposes
+     */
+    private ColumnReader(BeanInfo entityDescriptor, String className) {
+        this.entityDescriptor = entityDescriptor;
+        this.className = className;
     }
 
     /**
-     * Creates an instance of {@link ColumnReader} for the given {@link Entity} class.
+     * Creates an instance of {@code ColumnReader} for the given {@link Entity} class.
      *
-     * <p>The reader can be further used to {@linkplain ColumnReader#readColumns() obtain}
-     * {@linkplain EntityColumn entity columns} for the given class.
-     *
-     * @param entityClass {@link Entity} class for which to create the instance
-     * @return new instance of {@code ColumnReader} for the specified class
+     * @param entityClass
+     *         the {@link Entity} class for which to create the instance
+     * @return a new instance of {@code ColumnReader} for the specified class
      */
     static ColumnReader forClass(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
-
-        return new ColumnReader(entityClass);
+        try {
+            BeanInfo entityDescriptor = Introspector.getBeanInfo(entityClass);
+            return new ColumnReader(entityDescriptor, entityClass.getName());
+        } catch (IntrospectionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -83,35 +117,51 @@ class ColumnReader {
      * @throws IllegalStateException if entity column definitions are incorrect
      */
     Collection<EntityColumn> readColumns() {
-        BeanInfo entityDescriptor;
-        try {
-            entityDescriptor = Introspector.getBeanInfo(entityClass);
-        } catch (IntrospectionException e) {
-            throw new IllegalStateException(e);
-        }
-
-        Collection<EntityColumn> entityColumns = newLinkedList();
-        for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
-            Method getter = property.getReadMethod();
-            boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
-            if (isEntityColumn) {
-                EntityColumn column = EntityColumn.from(getter);
-                entityColumns.add(column);
-            }
-        }
-
-        checkRepeatedColumnNames(entityColumns);
-        return entityColumns;
+        ImmutableSet<EntityColumn> columns = scanColumns();
+        checkRepeatedColumnNames(columns);
+        return columns;
     }
 
+    /**
+     * Scans the entity methods for entity columns.
+     *
+     * <p>The column search is based on the Java Bean
+     * <a href="https://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
+     * specification</a>.
+     *
+     * <p>The only exception are the {@code Boolean} properties starting with {@code is-}
+     * which are not covered by the specification and have to be looked up manually.
+     */
+    private ImmutableSet<EntityColumn> scanColumns() {
+        PropertyDescriptor[] properties = entityDescriptor.getPropertyDescriptors();
+        Stream<Method> propertyAccessors = Arrays
+                .stream(properties)
+                .map(PropertyDescriptor::getReadMethod)
+                .filter(Objects::nonNull);
+
+        MethodDescriptor[] methodDescriptors = entityDescriptor.getMethodDescriptors();
+        Stream<Method> booleanWrapperGetters = Arrays
+                .stream(methodDescriptors)
+                .map(MethodDescriptor::getMethod)
+                .filter(isBooleanWrapperProperty);
+
+        Stream<Method> candidates = concat(propertyAccessors, booleanWrapperGetters);
+        ImmutableSet<EntityColumn> columns = candidates
+                .filter(hasAnnotatedVersion)
+                .map(EntityColumn::from)
+                .collect(toImmutableSet());
+        return columns;
+    }
 
     /**
      * Ensures that the specified columns have no repeated names.
      *
      * <p>If the check fails, throws {@link IllegalStateException}.
      *
-     * @param columns     the columns to check
-     * @throws IllegalStateException if columns contain repeated names
+     * @param columns
+     *         the columns to check
+     * @throws IllegalStateException
+     *         if columns contain repeated names
      */
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
         Collection<String> checkedNames = newLinkedList();
@@ -120,10 +170,27 @@ class ColumnReader {
             if (checkedNames.contains(columnName)) {
                 throw newIllegalStateException(
                         "The entity `%s` has columns with the same name for storing `%s`.",
-                        entityClass.getName(),
+                        className,
                         columnName);
             }
             checkedNames.add(columnName);
         }
+    }
+
+    private static Predicate<Method> hasAnnotatedVersion() {
+        return method -> getAnnotatedVersion(method).isPresent();
+    }
+
+    private static Predicate<Method> isBooleanWrapperProperty() {
+        return method -> {
+            Class<?> returnType = method.getReturnType();
+            boolean returnsBoolean = Boolean.class.isAssignableFrom(returnType);
+            boolean noParameters = method.getParameterCount() == 0;
+            boolean startsWithIs = method.getName()
+                                         .startsWith(IS_PREFIX);
+            return returnsBoolean
+                    && noParameters
+                    && startsWithIs;
+        };
     }
 }

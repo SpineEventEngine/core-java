@@ -45,7 +45,6 @@ import static java.lang.String.format;
  * the {@linkplain CommandDispatcher#onError error handling} to an instance of
  * {@code CommandErrorHandler}.
  *
- * @author Dmytro Dashenkov
  * @see #handleError(CommandEnvelope, RuntimeException)
  */
 @Internal

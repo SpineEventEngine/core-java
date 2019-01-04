@@ -20,10 +20,10 @@
 
 package io.spine.server.bc.given;
 
-import com.google.protobuf.Empty;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.test.shared.EmptyProjection;
 import io.spine.test.bc.ProjectId;
 
 public class ProjectReportRepository
-        extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
+        extends ProjectionRepository<ProjectId, ProjectReport, EmptyProjection> {
 }

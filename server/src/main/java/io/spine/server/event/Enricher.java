@@ -40,8 +40,6 @@ import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMultimap.copyOf;
-import static com.google.common.collect.LinkedListMultimap.create;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -70,13 +68,14 @@ public class Enricher {
      * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
     private Enricher(Builder builder) {
-        LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap = create();
+        LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap =
+                LinkedListMultimap.create();
         for (EnrichmentFunction<?, ?, ?> function : builder.getFunctions()) {
             funcMap.put(function.getSourceClass(), function);
         }
         putMsgEnrichers(funcMap);
 
-        this.functions = copyOf(funcMap);
+        this.functions = ImmutableMultimap.copyOf(funcMap);
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
@@ -89,7 +88,8 @@ public class Enricher {
             for (String srcType : srcMessageTypes) {
                 Class<Message> messageClass = TypeName.of(srcType)
                                                       .getMessageClass();
-                MessageEnrichment msgEnricher = MessageEnrichment.create(this, messageClass, enrichmentClass);
+                MessageEnrichment msgEnricher =
+                        MessageEnrichment.create(this, messageClass, enrichmentClass);
                 functionsMap.put(messageClass, msgEnricher);
             }
         }

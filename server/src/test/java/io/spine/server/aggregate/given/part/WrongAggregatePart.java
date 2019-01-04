@@ -20,20 +20,15 @@
 
 package io.spine.server.aggregate.given.part;
 
-import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.AggregatePart;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.test.shared.StringAggregate;
+import io.spine.server.test.shared.StringAggregateVBuilder;
 
 /**
  * A class which extends {@link AggregatePart} but does not provide suitable constructor.
- *
- * @author Alexander Yevsyukov
  */
 public class WrongAggregatePart
-        extends AggregatePart<String,
-                              StringValue,
-                              StringValueVBuilder,
-                              AnAggregateRoot> {
+        extends AggregatePart<String, StringAggregate, StringAggregateVBuilder, AnAggregateRoot> {
 
     @SuppressWarnings("ConstantConditions")
     // Supply a "wrong" parameters on purpose to cause the validation failure

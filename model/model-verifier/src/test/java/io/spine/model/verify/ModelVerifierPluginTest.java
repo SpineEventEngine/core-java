@@ -50,6 +50,7 @@ class ModelVerifierPluginTest {
     private static final String VALID_AGGREGATE_JAVA =
             "io/spine/model/verify/ValidAggregate.java";
     private static final ImmutableCollection<String> PROTO_FILES = ImmutableList.of(
+            "spine/model/verify/call_entity.proto",
             "spine/model/verify/commands.proto",
             "spine/model/verify/events.proto"
     );

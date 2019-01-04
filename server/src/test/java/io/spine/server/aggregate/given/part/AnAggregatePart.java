@@ -20,21 +20,15 @@
 
 package io.spine.server.aggregate.given.part;
 
-import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.AggregatePart;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.test.shared.StringAggregate;
+import io.spine.server.test.shared.StringAggregateVBuilder;
 
 /**
- * An aggregate part which belongs to the aggregate represented by
- * {@link AnAggregateRoot}.
- *
- * @author Alexander Yevsyukov
+ * An aggregate part which belongs to the aggregate represented by {@link AnAggregateRoot}.
  */
 public class AnAggregatePart
-        extends AggregatePart<String,
-                              StringValue,
-                              StringValueVBuilder,
-                              AnAggregateRoot> {
+        extends AggregatePart<String, StringAggregate, StringAggregateVBuilder, AnAggregateRoot> {
 
     public AnAggregatePart(AnAggregateRoot root) {
         super(root);

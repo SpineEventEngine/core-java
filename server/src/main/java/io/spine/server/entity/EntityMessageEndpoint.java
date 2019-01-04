@@ -25,7 +25,6 @@ import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.server.delivery.Delivery;
 
 import java.util.List;
 
@@ -42,7 +41,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <M> the type of message envelopes
- * @author Alexander Yevsyukov
  */
 @Internal
 public abstract class EntityMessageEndpoint<I,
@@ -75,10 +73,7 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     private void doDispatchTo(I entityId) {
-        M envelope = envelope();
-        Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
-        delivery.getSender()
-                .send(entityId, envelope);
+        deliverNowTo(entityId);
     }
 
     /**
@@ -91,13 +86,6 @@ public abstract class EntityMessageEndpoint<I,
      * @param entityId the ID of the entity which to dispatch the message to
      */
     protected abstract void deliverNowTo(I entityId);
-
-    /**
-     * Obtains an instance of endpoint delivery.
-     *
-     * @return the instance of endpoint delivery
-     */
-    protected abstract Delivery<I, E, M, ?, ?> getEndpointDelivery();
 
     /**
      * Invokes entity-specific method for dispatching the message.

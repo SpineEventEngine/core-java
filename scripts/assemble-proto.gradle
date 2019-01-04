@@ -56,6 +56,8 @@ buildscript {
     }
 }
 
+println "Assembling Protobuf definitions in ${project.name}."
+
 /**
  * Collects all the directories from current project and its dependencies (including zip tree
  * directories) which contain {@code .proto} definitions.

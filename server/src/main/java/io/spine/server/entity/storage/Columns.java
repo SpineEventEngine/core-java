@@ -38,8 +38,20 @@ import static java.lang.String.format;
  *
  * <p>The methods of all {@link Entity entities} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec and annotated with {@link Column}
- * are considered {@linkplain EntityColumn columns}.
+ * the Java Bean</a> getter spec and annotated with {@link Column} are considered
+ * {@linkplain EntityColumn columns}.
+ *
+ * <p>Additionally, the {@code Boolean} getters starting with {@code is-} are allowed (contrary to
+ * the Java Bean spec), to enable situations like
+ * <pre>
+ *     {@code
+ *             \@Nullable
+ *             \@Column
+ *             public Boolean isMale() {
+ *                 return null;
+ *             }
+ *     }
+ * </pre>
  *
  * <p>Inherited columns are taken into account too, but building entity hierarchies is strongly
  * discouraged.
@@ -48,7 +60,6 @@ import static java.lang.String.format;
  * serializable, otherwise a runtime exception is thrown when trying to get an instance of
  * {@link EntityColumn}.
  *
- * @author Dmytro Dashenkov
  * @see EntityColumn
  */
 @Internal

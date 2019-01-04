@@ -55,7 +55,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.core.EventClass.from;
 import static io.spine.util.Exceptions.unsupported;
 
 public class CommandHandlerTestEnv {
@@ -70,10 +69,10 @@ public class CommandHandlerTestEnv {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(
-                    from(CmdProjectStarted.class),
-                    from(CmdTaskAssigned.class),
-                    from(CmdTaskStarted.class)
+            return EventClass.setOf(
+                    CmdProjectStarted.class,
+                    CmdTaskAssigned.class,
+                    CmdTaskStarted.class
             );
         }
 
@@ -104,8 +103,6 @@ public class CommandHandlerTestEnv {
         }
     }
 
-    @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters",
-                       "ReturnOfCollectionOrArrayField"})
     public static class TestCommandHandler extends AbstractCommandHandler {
 
         private final ImmutableList<EventMessage> eventsOnStartProjectCmd =

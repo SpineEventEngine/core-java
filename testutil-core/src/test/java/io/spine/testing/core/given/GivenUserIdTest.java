@@ -25,7 +25,6 @@ import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.core.given.GivenUserId.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -40,7 +39,7 @@ class GivenUserIdTest extends UtilityClassTest<GivenUserId> {
     @DisplayName("create UserId by string")
     void createByString() {
         String testIdString = "12345";
-        UserId userId = of(testIdString);
+        UserId userId = GivenUserId.of(testIdString);
 
         UserId expected = UserId
                 .newBuilder()

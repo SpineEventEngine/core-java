@@ -34,10 +34,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
+import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertContainsColumns;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SuppressWarnings("DuplicateStringLiteralInspection") // Lots of literals for column names.
 @DisplayName("Columns utility should")
 class ColumnsTest {
 
@@ -63,7 +64,6 @@ class ColumnsTest {
     private
     static void checkFields(EntityWithManyGetters entity, Map<String, MemoizedValue> fields) {
         assertNotNull(fields);
-        assertThat(fields).hasSize(3);
 
         String floatNullKey = "floatNull";
         MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
@@ -95,10 +95,13 @@ class ColumnsTest {
     @Test
     @DisplayName("get all valid columns for entity class")
     void getAllColumns() {
-        Collection<EntityColumn> entityColumns = Columns.getAllColumns(EntityWithManyGetters.class);
+        Collection<EntityColumn> entityColumns =
+                Columns.getAllColumns(EntityWithManyGetters.class);
 
-        assertNotNull(entityColumns);
-        assertThat(entityColumns).hasSize(3);
+        assertContainsColumns(
+                entityColumns,
+                "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
+        );
     }
 
     @Test
@@ -126,6 +129,13 @@ class ColumnsTest {
 
         assertThrows(IllegalArgumentException.class,
                      () -> findColumn(entityClass, nonExistingColumnName));
+    }
+
+    @Test
+    @DisplayName("not count method with `is` prefix and non-boolean return type as column")
+    void requireBooleanTypeForIs() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> findColumn(EntityWithManyGetters.class, "isNonBoolean"));
     }
 
     @Test
