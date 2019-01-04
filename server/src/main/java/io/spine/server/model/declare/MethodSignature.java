@@ -34,8 +34,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.declare.MethodParams.findMatching;
-import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
-import static io.spine.server.model.declare.SignatureMismatch.Severity.WARN;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -117,9 +115,9 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         }
         Collection<SignatureMismatch> mismatches = match(method);
         boolean hasErrors = mismatches.stream()
-                                      .anyMatch(mismatch -> ERROR == mismatch.getSeverity());
+                                      .anyMatch(SignatureMismatch::isError);
         List<SignatureMismatch> warnings =  mismatches.stream()
-                                                      .filter(MethodSignature::isWarning)
+                                                      .filter(SignatureMismatch::isWarning)
                                                       .collect(toList());
         if (hasErrors) {
             throw new SignatureMismatchException(mismatches);
@@ -130,10 +128,6 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                     .forEach(this::_warn);
         }
         return true;
-    }
-
-    private static boolean isWarning(SignatureMismatch mismatch){
-        return mismatch.getSeverity() == WARN;
     }
 
     /**
