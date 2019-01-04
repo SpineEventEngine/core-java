@@ -21,3 +21,15 @@ message EditPhoto {
 message ChangeTitle {
     string new_title = 1;
 }
+
+message DeletePhoto {
+    string title = 1;
+}
+
+message RestorePhoto {
+    string title = 1;
+}
+
+message EnhancePhoto {
+    string title = 1;
+}

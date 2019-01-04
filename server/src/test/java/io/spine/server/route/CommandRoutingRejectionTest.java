@@ -139,7 +139,7 @@ class CommandRoutingRejectionTest {
         private final List<SwitchPositionConfirmed> events = newLinkedList();
 
         @Subscribe
-        void to(SwitchPositionConfirmed event) {
+        public void to(SwitchPositionConfirmed event) {
             events.add(event);
         }
     }

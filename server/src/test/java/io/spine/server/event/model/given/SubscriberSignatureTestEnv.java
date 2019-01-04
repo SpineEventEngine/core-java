@@ -141,8 +141,8 @@ public class SubscriberSignatureTestEnv {
         }
 
         @Subscribe
-        void messageAndCommand(ProjectAlreadyExists rejection,
-                               CreateProject command) {
+        public void messageAndCommand(ProjectAlreadyExists rejection,
+                                      CreateProject command) {
             this.event = rejection;
             this.command = command;
         }

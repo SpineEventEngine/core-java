@@ -18,34 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc.given;
+package io.spine.model.verify.given;
 
-import com.google.protobuf.Message;
-import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.bc.event.BcProjectCreated;
-import io.spine.test.bc.event.BcProjectStarted;
-import io.spine.test.bc.event.BcTaskAdded;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.command.Assign;
+import io.spine.test.model.verify.command.EnhancePhoto;
+import io.spine.test.model.verify.given.EditState;
+import io.spine.test.model.verify.given.EditStateVBuilder;
 
-public class TestEventSubscriber extends AbstractEventSubscriber {
+/**
+ * This aggregate declares a command handling method that breaks the contract imposed by
+ * {@link Assign}, by having a return value that cannot be derived from
+ * {@link io.spine.base.EventMessage}.
+ */
+public class InvalidEnhanceAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
 
-    private Message handledEvent;
-
-    @Subscribe
-    public void on(BcProjectCreated event, EventContext context) {
-        this.handledEvent = event;
+    protected InvalidEnhanceAggregate(String id) {
+        super(id);
     }
 
-    @Subscribe
-    public void on(BcTaskAdded event, EventContext context) {
-    }
-
-    @Subscribe
-    public void on(BcProjectStarted event, EventContext context) {
-    }
-
-    public Message getHandledEvent() {
-        return handledEvent;
+    @Assign
+    String handle(EnhancePhoto delete) {
+        return delete.getTitle();
     }
 }
