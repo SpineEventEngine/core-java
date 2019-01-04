@@ -22,23 +22,25 @@ package io.spine.model.verify.given;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
-import io.spine.test.model.verify.command.EnhancePhoto;
+import io.spine.test.model.verify.command.RestorePhoto;
+import io.spine.test.model.verify.event.PhotoRestored;
 import io.spine.test.model.verify.given.EditState;
 import io.spine.test.model.verify.given.EditStateVBuilder;
 
 /**
  * This aggregate declares a command handling method that breaks the contract imposed by
- * {@link Assign}, by having a return value that cannot be derived from
- * {@link io.spine.base.EventMessage}.
+ * {@link Assign}, by having a {@code private} access modifier. This should design in a warning.
  */
-public class InvalidEnhanceAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
+public class InvalidRestoreAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
 
-    protected InvalidEnhanceAggregate(String id) {
+    protected InvalidRestoreAggregate(String id) {
         super(id);
     }
 
     @Assign
-    String handle(EnhancePhoto delete) {
-        return delete.getTitle();
+    private PhotoRestored handle(RestorePhoto restore){
+        return PhotoRestored.newBuilder()
+                .setTitle(restore.getTitle())
+                .build();
     }
 }

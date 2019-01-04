@@ -21,15 +21,18 @@
 package io.spine.model.verify;
 
 import com.google.common.io.Files;
+import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
 import io.spine.model.verify.given.DuplicateCommandHandler;
 import io.spine.model.verify.given.EditAggregate;
 import io.spine.model.verify.given.InvalidDeleteAggregate;
 import io.spine.model.verify.given.InvalidEnhanceAggregate;
+import io.spine.model.verify.given.InvalidRestoreAggregate;
 import io.spine.model.verify.given.RenameProcMan;
 import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.model.DuplicateCommandHandlerError;
+import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
@@ -40,15 +43,20 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.internal.impldep.com.google.common.collect.Iterators;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.event.SubstituteLoggingEvent;
+import org.slf4j.helpers.SubstituteLogger;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -145,6 +153,28 @@ class ModelVerifierTest {
                 .addCommandHandlingTypes(secondType)
                 .build();
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
+    }
+
+    @Disabled
+    //TODO:1/4/2019:Serhii Lekariev:disabled until https://github.com/SpineEventEngine/core-java/issues/932 is resolved
+    @Test
+    @DisplayName("produce a warning on private command handling methods")
+    void warnOnPrivateHandlers(){
+        ModelVerifier verifier = new ModelVerifier(project);
+        Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging();
+        CommandHandlers model = CommandHandlers
+                .newBuilder()
+                .addCommandHandlingTypes(InvalidRestoreAggregate.class.getName())
+                .build();
+        verifier.verify(model);
+        assertEquals(1, loggedMessages.size());
+    }
+
+    /** Redirects logging produced by model verifier to a {@code Queue} that is returned. */
+    private static Queue<SubstituteLoggingEvent> redirectLogging() {
+        Queue<SubstituteLoggingEvent> loggedMessages = new LinkedList<>();
+        Logging.redirect((SubstituteLogger) Logging.get(MethodSignature.class), loggedMessages);
+        return loggedMessages;
     }
 
     @Test
