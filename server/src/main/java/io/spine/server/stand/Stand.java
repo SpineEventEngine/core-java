@@ -28,11 +28,13 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.EventMessage;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -137,6 +139,63 @@ public class Stand implements AutoCloseable {
     }
 
     /**
+     * Notifies all subscriptions that a new event occurred in the system.
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // Subscriptions work with events exclusively.
+    public void notifySubscriptions(EventEnvelope event) {
+        EventMessage eventMessage = event.getMessage();
+        TypeUrl typeUrl = TypeUrl.of(eventMessage);
+        if (!subscriptionRegistry.hasType(typeUrl)) {
+            return;
+        }
+        Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
+        for (SubscriptionRecord record : allRecords) {
+            boolean subscriptionIsActive = record.isActive();
+            boolean stateMatches = record.matches(typeUrl, eventMessage);
+            if (subscriptionIsActive && stateMatches) {
+                Runnable action = notifySubscriptionAction(record, eventMessage);
+                callbackExecutor.execute(action);
+            }
+        }
+    }
+
+    private void notifyMatchingSubscriptions(Object id, Any entityState, TypeUrl typeUrl) {
+        if (subscriptionRegistry.hasType(typeUrl)) {
+            Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
+
+            for (SubscriptionRecord subscriptionRecord : allRecords) {
+
+                boolean subscriptionIsActive = subscriptionRecord.isActive();
+                boolean stateMatches = subscriptionRecord.matches(typeUrl, id);
+                if (subscriptionIsActive && stateMatches) {
+                    Runnable action = notifySubscriptionAction(subscriptionRecord, id);
+                    callbackExecutor.execute(action);
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates the subscribers notification action.
+     *
+     * <p>The resulting action retrieves the {@linkplain OnEventCallback subscriber callback}
+     * and invokes it with the given Entity ID and state.
+     *
+     * @param subscriptionRecord the attributes of the target subscription
+     * @param event              the event
+     * @return a routine delivering the subscription update to the target subscriber
+     */
+    private static Runnable
+    notifySubscriptionAction(SubscriptionRecord subscriptionRecord, EventMessage event) {
+        Runnable result = () -> {
+            OnEventCallback callback = subscriptionRecord.getCallback();
+            checkNotNull(callback, "Notifying by a non-activated subscription.");
+            callback.onEvent(event);
+        };
+        return result;
+    }
+
+    /**
      * Updates the state of an entity inside of the current instance of {@code Stand}.
      *
      * <p>The state update is then propagated to the callbacks. The set of matched callbacks is
@@ -198,15 +257,15 @@ public class Stand implements AutoCloseable {
      * subscribe() method call}.
      *
      * <p>After the activation, the clients will start receiving the updates via
-     * {@code EntityUpdateCallback} upon the changes in the entities, defined by
+     * {@code OnEventCallback} upon the changes in the entities, defined by
      * the {@code Target} attribute used for this subscription.
      *
      * @param subscription the subscription to activate.
-     * @param callback     an instance of {@link EntityUpdateCallback} executed upon entity update.
+     * @param callback     an instance of {@link OnEventCallback} executed upon entity update.
      * @see #subscribe(Topic, StreamObserver)
      */
     public void activate(Subscription subscription,
-                         EntityUpdateCallback callback,
+                         OnEventCallback callback,
                          StreamObserver<Response> responseObserver) {
         checkNotNull(subscription);
         checkNotNull(callback);
@@ -228,7 +287,7 @@ public class Stand implements AutoCloseable {
      * Cancels the {@link Subscription}.
      *
      * <p>Typically invoked to cancel the previous
-     * {@link #activate(Subscription, EntityUpdateCallback, StreamObserver) activate()} call.
+     * {@link #activate(Subscription, OnEventCallback, StreamObserver) activate()} call.
      *
      * <p>After this method is called, the subscribers stop receiving the updates,
      * related to the given {@code Subscription}.
@@ -310,22 +369,6 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
-    private void notifyMatchingSubscriptions(Object id, Any entityState, TypeUrl typeUrl) {
-        if (subscriptionRegistry.hasType(typeUrl)) {
-            Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
-
-            for (SubscriptionRecord subscriptionRecord : allRecords) {
-
-                boolean subscriptionIsActive = subscriptionRecord.isActive();
-                boolean stateMatches = subscriptionRecord.matches(typeUrl, id, entityState);
-                if (subscriptionIsActive && stateMatches) {
-                    Runnable action = notifySubscriptionAction(subscriptionRecord, id, entityState);
-                    callbackExecutor.execute(action);
-                }
-            }
-        }
-    }
-
     /**
      * Registers a supplier for the objects of a certain {@link TypeUrl} to be able
      * to read them in response to a {@link Query Query}.
@@ -353,19 +396,20 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * A contract for the callbacks to be executed upon entity state change.
+     * A contract for the callbacks to be executed once a new event occurs in the system.
      *
-     * @see #activate(Subscription, EntityUpdateCallback, StreamObserver)
+     * @see #activate(Subscription, OnEventCallback, StreamObserver)
      * @see #cancel(Subscription, StreamObserver)
      */
-    public interface EntityUpdateCallback {
+    public interface OnEventCallback {
 
         /**
-         * Called when a certain entity state is updated.
+         * Called when a certain event occurs in the system.
          *
-         * @param newEntityState new state of the entity
+         * @param event
+         *         the event
          */
-        void onStateChanged(EntityStateUpdate newEntityState);
+        void onEvent(EventMessage event);
     }
 
     /**
@@ -395,32 +439,6 @@ public class Stand implements AutoCloseable {
 
     private QueryProcessor aggregateProcessor() {
         return aggregateQueryProcessor;
-    }
-
-    /**
-     * Creates the subscribers notification action.
-     *
-     * <p>The resulting action retrieves the {@linkplain EntityUpdateCallback subscriber callback}
-     * and invokes it with the given Entity ID and state.
-     *
-     * @param subscriptionRecord the attributes of the target subscription
-     * @param id                 the ID of the updated Entity
-     * @param entityState        the new state of the updated Entity
-     * @return a routine delivering the subscription update to the target subscriber
-     */
-    private static Runnable notifySubscriptionAction(SubscriptionRecord subscriptionRecord,
-                                                     Object id, Any entityState) {
-        Runnable result = () -> {
-            EntityUpdateCallback callback = subscriptionRecord.getCallback();
-            checkNotNull(callback, "Notifying by a non-activated subscription.");
-            Any entityId = toAny(id);
-            EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
-                                                             .setId(entityId)
-                                                             .setState(entityState)
-                                                             .build();
-            callback.onStateChanged(stateUpdate);
-        };
-        return result;
     }
 
     @CanIgnoreReturnValue

@@ -19,6 +19,7 @@
  */
 package io.spine.server;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -46,8 +47,6 @@ import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
  * from the server.
  *
  * <p> For synchronous read-side updates please see {@link QueryService}.
- *
- * @author Alex Tymchenko
  */
 @SuppressWarnings("MethodDoesntCallSuperMethod")
 // as we override default implementation with `unimplemented` status.
@@ -60,6 +59,13 @@ public class SubscriptionService
     private SubscriptionService(Map<TypeUrl, BoundedContext> map) {
         super();
         this.typeToContextMap = ImmutableMap.copyOf(map);
+    }
+
+    private static SubscriptionService create(ImmutableMap<TypeUrl, BoundedContext> map) {
+        ImmutableCollection<BoundedContext> boundedContexts = map.values();
+        boundedContexts.forEach(bc -> bc.getEventBus()
+                                        .setDispatchCallback(bc.getStand()::notifySubscriptions));
+        return new SubscriptionService(map);
     }
 
     public static Builder newBuilder() {
@@ -90,7 +96,7 @@ public class SubscriptionService
         try {
             BoundedContext boundedContext = selectBoundedContext(subscription);
 
-            Stand.EntityUpdateCallback updateCallback = stateUpdate -> {
+            Stand.OnEventCallback updateCallback = event -> {
                 checkNotNull(subscription);
                 SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
                                                               .setSubscription(subscription)
@@ -163,7 +169,7 @@ public class SubscriptionService
                         "Subscription service must have at least one bounded context.");
             }
             ImmutableMap<TypeUrl, BoundedContext> map = createMap();
-            SubscriptionService result = new SubscriptionService(map);
+            SubscriptionService result = create(map);
             return result;
         }
 

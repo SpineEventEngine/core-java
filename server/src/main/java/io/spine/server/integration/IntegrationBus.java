@@ -195,7 +195,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected void dispatch(ExternalMessageEnvelope envelope) {
+    protected void doDispatch(ExternalMessageEnvelope envelope) {
         ExternalMessageEnvelope markedEnvelope = markExternal(envelope);
         int dispatchersCalled = callDispatchers(markedEnvelope);
 

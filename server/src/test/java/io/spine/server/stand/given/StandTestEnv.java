@@ -105,12 +105,12 @@ public class StandTestEnv {
         }
     }
 
-    public static class MemoizeEntityUpdateCallback implements Stand.EntityUpdateCallback {
+    public static class MemoizeOnEventCallback implements Stand.OnEventCallback {
 
         private Any newEntityState = null;
 
         @Override
-        public void onStateChanged(EntityStateUpdate newEntityState) {
+        public void onEvent(EntityStateUpdate newEntityState) {
             this.newEntityState = newEntityState.getState();
         }
 

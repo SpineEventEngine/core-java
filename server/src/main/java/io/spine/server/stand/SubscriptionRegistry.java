@@ -32,10 +32,9 @@ import java.util.Set;
  * <p>Provides a quick access to the subscription records by {@link TypeUrl}.
  *
  * <p>Responsible for {@link Subscription} object instantiation.
- *
- * @author Alex Tymchenko
  */
 interface SubscriptionRegistry {
+
     /**
      * Activate the subscription with the passed callback.
      *
@@ -44,7 +43,7 @@ interface SubscriptionRegistry {
      * @param subscription the subscription to activate
      * @param callback     the callback to make active
      */
-    void activate(Subscription subscription, Stand.EntityUpdateCallback callback);
+    void activate(Subscription subscription, Stand.OnEventCallback callback);
 
     /**
      * Creates a subscription for the passed {@link Topic} and adds it to the registry.

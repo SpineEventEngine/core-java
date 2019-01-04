@@ -55,7 +55,8 @@ import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
-import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
+import io.spine.server.stand.given.StandTestEnv;
+import io.spine.server.stand.given.StandTestEnv.MemoizeOnEventCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.system.server.MemoizingReadSide;
 import io.spine.system.server.NoOpSystemReadSide;
@@ -397,7 +398,7 @@ class StandTest extends TenantAwareTest {
             Topic allCustomers = requestFactory.topic()
                                                .allOf(Customer.class);
 
-            MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
+            MemoizeOnEventCallback memoizeCallback = new MemoizeOnEventCallback();
 
             subscribeAndActivate(stand, allCustomers, memoizeCallback);
             assertNull(memoizeCallback.newEntityState());
@@ -420,7 +421,7 @@ class StandTest extends TenantAwareTest {
             Topic allProjects = requestFactory.topic()
                                               .allOf(Project.class);
 
-            MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
+            MemoizeOnEventCallback memoizeCallback = new MemoizeOnEventCallback();
             subscribeAndActivate(stand, allProjects, memoizeCallback);
             assertNull(memoizeCallback.newEntityState());
 
@@ -448,10 +449,10 @@ class StandTest extends TenantAwareTest {
                                             .byId(ids(sampleCustomers))
                                             .build();
         Collection<Customer> callbackStates = newHashSet();
-        MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
+        MemoizeOnEventCallback callback = new MemoizeOnEventCallback() {
             @Override
-            public void onStateChanged(EntityStateUpdate update) {
-                super.onStateChanged(update);
+            public void onEvent(EntityStateUpdate update) {
+                super.onEvent(update);
                 Customer customerInCallback = unpack(update.getState(), Customer.class);
                 callbackStates.add(customerInCallback);
             }
@@ -474,7 +475,7 @@ class StandTest extends TenantAwareTest {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(Customer.class);
 
-        MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
+        MemoizeOnEventCallback memoizeCallback = new MemoizeOnEventCallback();
         Subscription subscription =
                 subscribeAndActivate(stand, allCustomers, memoizeCallback);
 
@@ -508,11 +509,11 @@ class StandTest extends TenantAwareTest {
         Stand stand = createStand();
         Target allCustomers = Targets.allOf(Customer.class);
 
-        Set<MemoizeEntityUpdateCallback> callbacks = newHashSet();
+        Set<MemoizeOnEventCallback> callbacks = newHashSet();
         int totalCallbacks = 100;
 
         for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
-            MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allCustomers);
+            MemoizeOnEventCallback callback = subscribeWithCallback(stand, allCustomers);
             callbacks.add(callback);
         }
 
@@ -524,9 +525,9 @@ class StandTest extends TenantAwareTest {
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
         Any packedState = pack(customer);
-        for (MemoizeEntityUpdateCallback callback : callbacks) {
+        for (StandTestEnv.MemoizeOnEventCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState());
-            verify(callback, times(1)).onStateChanged(any(EntityStateUpdate.class));
+            verify(callback, times(1)).onEvent(any(EntityStateUpdate.class));
         }
     }
 
@@ -535,7 +536,7 @@ class StandTest extends TenantAwareTest {
     void notTriggerOnTypeMismatch() {
         Stand stand = createStand();
         Target allProjects = Targets.allOf(Project.class);
-        MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
+        MemoizeOnEventCallback callback = subscribeWithCallback(stand, allProjects);
         Customer customer = fillSampleCustomers(1)
                 .iterator()
                 .next();
@@ -543,12 +544,12 @@ class StandTest extends TenantAwareTest {
         Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
-        verify(callback, never()).onStateChanged(any(EntityStateUpdate.class));
+        verify(callback, never()).onEvent(any(EntityStateUpdate.class));
     }
 
-    private MemoizeEntityUpdateCallback
+    private MemoizeOnEventCallback
     subscribeWithCallback(Stand stand, Target subscriptionTarget) {
-        MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
+        MemoizeOnEventCallback callback = spy(new StandTestEnv.MemoizeOnEventCallback());
         Topic topic = requestFactory.topic()
                                     .forTarget(subscriptionTarget);
         subscribeAndActivate(stand, topic, callback);
@@ -914,7 +915,7 @@ class StandTest extends TenantAwareTest {
     @CanIgnoreReturnValue
     protected static Subscription subscribeAndActivate(Stand stand,
                                                        Topic topic,
-                                                       Stand.EntityUpdateCallback callback) {
+                                                       Stand.OnEventCallback callback) {
         MemoizingObserver<Subscription> observer = memoizingObserver();
         stand.subscribe(topic, observer);
         Subscription subscription = observer.firstResponse();
@@ -1108,7 +1109,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(expectedTypeUrl, actualTypeUrl, "Type was registered incorrectly");
     }
 
-    private static Stand.EntityUpdateCallback emptyUpdateCallback() {
+    private static Stand.OnEventCallback emptyUpdateCallback() {
         return newEntityState -> {
             //do nothing
         };

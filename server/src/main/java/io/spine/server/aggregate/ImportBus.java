@@ -114,7 +114,7 @@ public final class ImportBus
     }
 
     @Override
-    protected void dispatch(EventEnvelope envelope) {
+    protected void doDispatch(EventEnvelope envelope) {
         EventDispatcher<?> dispatcher = getDispatcher(envelope);
         dispatcher.dispatch(envelope);
     }

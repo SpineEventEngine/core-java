@@ -60,7 +60,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     @Override
     public synchronized void activate(Subscription subscription,
-                                      Stand.EntityUpdateCallback callback) {
+                                      Stand.OnEventCallback callback) {
         registrySlice().activate(subscription, callback);
     }
 
@@ -118,7 +118,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
         @Override
         public synchronized void activate(Subscription subscription,
-                                          Stand.EntityUpdateCallback callback) {
+                                          Stand.OnEventCallback callback) {
             checkState(subscriptionToAttrs.containsKey(subscription),
                        "Cannot find the subscription in the registry.");
             SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
@@ -138,7 +138,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
 
             if (!typeToRecord.containsKey(type)) {
-                typeToRecord.put(type, new HashSet<SubscriptionRecord>());
+                typeToRecord.put(type, new HashSet<>());
             }
             typeToRecord.get(type)
                         .add(record);

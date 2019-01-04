@@ -200,7 +200,7 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     @Override
-    protected void dispatch(CommandEnvelope envelope) {
+    protected void doDispatch(CommandEnvelope envelope) {
         CommandDispatcher<?> dispatcher = getDispatcher(envelope);
         flowWatcher.onDispatchCommand(envelope);
         try {
@@ -246,7 +246,7 @@ public class CommandBus extends UnicastBus<Command,
      */
     void postPreviouslyScheduled(Command command) {
         CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        dispatch(commandEnvelope);
+        doDispatch(commandEnvelope);
     }
 
     @Override

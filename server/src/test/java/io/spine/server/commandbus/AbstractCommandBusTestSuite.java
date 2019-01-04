@@ -221,7 +221,7 @@ abstract class AbstractCommandBusTestSuite {
         assertStoringArgs.containsExactly(first, second);
 
         ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
-        verify(spy, times(2)).dispatch(postingCaptor.capture());
+        verify(spy, times(2)).doDispatch(postingCaptor.capture());
         List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
         assertThat(postingArgs).hasSize(commands.size());
         assertEquals(commands.get(0), postingArgs.get(0).getCommand());

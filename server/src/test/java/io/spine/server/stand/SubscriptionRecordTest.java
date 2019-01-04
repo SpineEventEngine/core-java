@@ -53,7 +53,7 @@ class SubscriptionRecordTest {
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        boolean matchResult = matchingRecord.matches(TYPE, redundantId, wrappedState);
+        boolean matchResult = matchingRecord.matches(TYPE, redundantId);
         assertTrue(matchResult);
     }
 
@@ -67,7 +67,7 @@ class SubscriptionRecordTest {
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        boolean matchResult = notMatchingRecord.matches(OTHER_TYPE, redundantId, wrappedState);
+        boolean matchResult = notMatchingRecord.matches(OTHER_TYPE, redundantId);
         assertFalse(matchResult);
     }
 
@@ -84,7 +84,7 @@ class SubscriptionRecordTest {
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        boolean matchResult = notMatchingRecord.matches(TYPE, redundantId, wrappedState);
+        boolean matchResult = notMatchingRecord.matches(TYPE, redundantId);
         assertFalse(matchResult);
     }
 

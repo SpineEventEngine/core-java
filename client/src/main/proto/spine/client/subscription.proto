@@ -81,7 +81,7 @@ message SubscriptionUpdate {
     Subscription subscription = 1 [(required) = true];
 
     // Represents the base part of the response,
-    //   i.e. whether the Topic subscription has been acked or not.
+    // i.e. whether the Topic subscription has been acked or not.
     core.Response response = 2 [(required) = true];
 
     // Reserved for more subscription update attributes.

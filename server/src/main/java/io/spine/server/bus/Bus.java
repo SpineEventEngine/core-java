@@ -71,6 +71,8 @@ public abstract class Bus<T extends Message,
 
     private final ChainBuilder<E> chainBuilder;
 
+    private DispatchCallback<E> dispatchCallback = new DispatchCallback.NoOp<>();
+
     protected Bus(BusBuilder<E, T, ?> builder) {
         super();
         this.chainBuilder = builder.chainBuilderCopy();
@@ -279,6 +281,10 @@ public abstract class Bus<T extends Message,
         return emptyList();
     }
 
+    public void setDispatchCallback(DispatchCallback<E> dispatchCallback) {
+        this.dispatchCallback = dispatchCallback;
+    }
+
     /**
      * Obtains the queue of the envelopes.
      *
@@ -351,13 +357,14 @@ public abstract class Bus<T extends Message,
         return filterOutput;
     }
 
-    /**
-     * Packs the given message of type {@code T} into an envelope of type {@code E}.
-     *
-     * @param message the message to pack
-     * @return new envelope with the given message inside
-     */
-    protected abstract E toEnvelope(T message);
+    private void dispatch(E envelope) {
+        doDispatch(envelope);
+        afterDispatch(envelope);
+    }
+
+    private void afterDispatch(E envelope) {
+        dispatchCallback.accept(envelope);
+    }
 
     /**
      * Passes the given envelope for dispatching.
@@ -369,14 +376,22 @@ public abstract class Bus<T extends Message,
      *
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract void dispatch(E envelope);
+    protected abstract void doDispatch(E envelope);
+
+    /**
+     * Packs the given message of type {@code T} into an envelope of type {@code E}.
+     *
+     * @param message the message to pack
+     * @return new envelope with the given message inside
+     */
+    protected abstract E toEnvelope(T message);
 
     /**
      * Posts each of the given envelopes into the bus and notifies the given observer.
      *
      * @param envelopes the envelopes to post
      * @param observer  the observer to be notified of the operation result
-     * @see #dispatch(MessageEnvelope)
+     * @see #doDispatch(MessageEnvelope)
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E message : envelopes) {
