@@ -79,10 +79,8 @@ class ModelVerifierTest {
     private Project project = null;
 
     static Project actualProject() {
-        Project result = ProjectBuilder.builder()
-                                       .build();
-        result.getPluginManager()
-              .apply("java");
+        Project result = ProjectBuilder.builder().build();
+        result.getPluginManager().apply("java");
         return result;
     }
 
