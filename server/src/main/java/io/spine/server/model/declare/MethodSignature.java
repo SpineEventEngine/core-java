@@ -31,7 +31,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -127,7 +126,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         List<SignatureMismatch> warnings = mismatches.stream()
                                                      .filter(mismatch -> WARN ==
                                                              mismatch.getSeverity())
-                                                     .collect(Collectors.toList());
+                                                     .collect(toList());
         if (hasErrors) {
             throw new SignatureMismatchException(mismatches);
         }
