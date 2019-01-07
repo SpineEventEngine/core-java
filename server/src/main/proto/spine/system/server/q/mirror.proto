@@ -18,7 +18,7 @@ import "spine/server/entity/entity.proto";
 message Mirror {
     option (entity).kind = PROJECTION;
 
-    MirrorId id = 1 [(required) = true, (valid) = true], (set_once) = false;
+    MirrorId id = 1 [(required) = true, (valid) = true], (set_once) = false];
 
     // The state of the aggregate.
     google.protobuf.Any state = 2 [(required) = false, (valid) = true];
