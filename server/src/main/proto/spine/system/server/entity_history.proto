@@ -44,7 +44,7 @@ import "spine/server/entity/entity.proto";
 message EntityHistoryId {
 
     // The ID of the entity.
-    spine.client.EntityId entity_id = 1 [(set_once) = false];
+    spine.client.EntityId entity_id = 1;
 
     // The type URL of the entity state.
     string type_url = 2;
