@@ -49,7 +49,7 @@ message Company {
 message CompanyEstablishing {
     option (entity).kind = PROCESS_MANAGER;
 
-    CompanyId id = 1;
+    CompanyId id = 1 [(set_once) = false];
 
     string proposed_name = 2;
 }
