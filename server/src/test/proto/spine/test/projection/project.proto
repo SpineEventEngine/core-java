@@ -67,7 +67,7 @@ message Task {
 message ProjectTaskNames {
     option (entity).kind = PROJECTION;
 
-    ProjectId project_id = 1 [(required) = false];
+    ProjectId project_id = 1 [(required) = false, (set_once) = false];
 
     string project_name = 2;
 
