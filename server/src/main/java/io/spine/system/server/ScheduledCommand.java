@@ -43,7 +43,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    void on(CommandScheduled event, EventContext context) {
+    public void on(CommandScheduled event, EventContext context) {
         CommandEnrichment enrichment =
                 getEnrichment(CommandEnrichment.class, context)
                 .orElseThrow(() -> newIllegalStateException("Command enrichment must be present."));
@@ -68,7 +68,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
+    public void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
         setDeleted(true);
     }
 }

@@ -46,7 +46,7 @@ public final class TuProjection
     }
 
     @Subscribe
-    void on(TuProjectCreated event) {
+    public void on(TuProjectCreated event) {
         getBuilder().setValue(event.getId().getValue());
     }
 }

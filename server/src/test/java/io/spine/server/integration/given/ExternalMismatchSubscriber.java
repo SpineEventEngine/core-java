@@ -40,7 +40,7 @@ public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
     }
 
     @Subscribe
-    void on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
+    public void on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
         // do nothing.
     }
 
