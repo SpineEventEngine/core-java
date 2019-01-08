@@ -50,6 +50,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.client.blackbox.Count.count;
@@ -134,7 +135,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbProject expectedProject2 = createdProjectState(createProject2);
             context.receivesCommands(createProject1, createProject2)
                    .assertThat(exactly(BbProject.class,
-                                       ImmutableSet.of(expectedProject1, expectedProject2)));
+                                       of(expectedProject1, expectedProject2)));
         }
 
         @Test
@@ -155,7 +156,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbProjectView expectedProject2 = createProjectView(createProject2);
             context.receivesCommands(createProject1, createProject2)
                    .assertThat(exactly(BbProjectView.class,
-                                       ImmutableSet.of(expectedProject1, expectedProject2)));
+                                       of(expectedProject1, expectedProject2)));
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {
