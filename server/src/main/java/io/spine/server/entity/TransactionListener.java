@@ -33,7 +33,6 @@ import io.spine.validate.ValidatingBuilder;
  * @param <E> type of entity under transaction
  * @param <S> state type of the entity under transaction
  * @param <B> type of {@link ValidatingBuilder} of {@code S}
- * @author Alex Tymchenko
  */
 @Internal
 public interface TransactionListener<I,
