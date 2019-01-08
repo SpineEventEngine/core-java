@@ -310,7 +310,7 @@ public class Given {
 
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
-        void on(BcProjectCreated event, EventContext context) {
+        public void on(BcProjectCreated event, EventContext context) {
             // Do nothing.
         }
     }

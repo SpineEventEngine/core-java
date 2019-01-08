@@ -187,6 +187,7 @@ public class EventBusTestEnv {
 
     public static class ProjectRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
+
     }
 
     static class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
@@ -286,7 +287,7 @@ public class EventBusTestEnv {
     public static class EBProjectCreatedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
-        void on(EBProjectCreated message, EventContext context) {
+        public void on(EBProjectCreated message, EventContext context) {
             // Do nothing.
         }
     }
@@ -296,7 +297,7 @@ public class EventBusTestEnv {
         private Message eventMessage;
 
         @Subscribe
-        void on(EBProjectArchived message, EventContext ignored) {
+        public void on(EBProjectArchived message, EventContext ignored) {
             this.eventMessage = message;
         }
 
@@ -311,7 +312,7 @@ public class EventBusTestEnv {
         private EventContext eventContext;
 
         @Subscribe
-        void on(ProjectCreated eventMsg, EventContext context) {
+        public void on(ProjectCreated eventMsg, EventContext context) {
             this.eventMessage = eventMsg;
             this.eventContext = context;
         }
@@ -332,7 +333,7 @@ public class EventBusTestEnv {
     public static class EBTaskAddedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
-        void on(EBTaskAdded message, EventContext context) {
+        public void on(EBTaskAdded message, EventContext context) {
             // Do nothing.
         }
     }
@@ -357,7 +358,7 @@ public class EventBusTestEnv {
          * @param event ignored
          */
         @Subscribe
-        void on(ProjectCreated event) {
+        public void on(ProjectCreated event) {
             fail("Unexpected event " + Json.toJson(event));
         }
     }

@@ -22,3 +22,15 @@ message PhotoEdited {
 message TitleChanged {
     string new_title = 1;
 }
+
+message PhotoDeleted {
+    string title = 1;
+}
+
+message PhotoEnhanced {
+    string title = 1;
+}
+
+message PhotoRestored {
+    string title = 1;
+}

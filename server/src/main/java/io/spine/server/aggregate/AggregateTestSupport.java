@@ -99,13 +99,13 @@ public final class AggregateTestSupport {
         checkArguments(repository, aggregate, event);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
         EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(repository, event);
-        endpoint.dispatchInTx(aggregate);
+        endpoint.runTransactionWith(aggregate);
     }
 
     private static <I, A extends Aggregate<I, ?, ?>> List<Message>
     dispatchAndCollect(AggregateEndpoint<I, A, ?> endpoint, A aggregate) {
         List<Message> result =
-                endpoint.dispatchInTx(aggregate)
+                endpoint.runTransactionWith(aggregate)
                         .stream()
                         .map(Events::getMessage)
                         .collect(toList());

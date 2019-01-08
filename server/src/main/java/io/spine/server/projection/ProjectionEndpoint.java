@@ -56,25 +56,25 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected void deliverNowTo(I entityId) {
+    protected void dispatchInTx(I entityId) {
         ProjectionRepository<I, P, ?> repository = repository();
         P projection = repository.findOrCreate(entityId);
-        dispatchInTx(projection);
+        runTransactionFor(projection);
         store(projection);
     }
 
-    protected void dispatchInTx(P projection) {
+    protected void runTransactionFor(P projection) {
         ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
-        doDispatch(projection, envelope());
+        invokeDispatcher(projection, envelope());
         tx.commit();
     }
 
     @CanIgnoreReturnValue
     @Override
-    protected List<Event> doDispatch(P projection, EventEnvelope event) {
+    protected List<Event> invokeDispatcher(P projection, EventEnvelope event) {
         projection.play(event.getOuterObject());
         return ImmutableList.of();
     }

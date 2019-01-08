@@ -387,10 +387,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         bus.post(filteredEvents);
     }
 
-    private void updateStand(TenantId tenantId, A aggregate) {
-        getStand().post(tenantId, aggregate);
-    }
-
     /**
      * Returns the number of events until a next {@code Snapshot} is made.
      *
@@ -520,7 +516,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     void onModifiedAggregate(TenantId tenantId, A aggregate) {
         store(aggregate);
-        updateStand(tenantId, aggregate);
+        Stand stand = getBoundedContext().getStand();
+        stand.post(tenantId, aggregate);
     }
 
     /**
@@ -539,11 +536,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Optional<A> find(I id) throws IllegalStateException {
         Optional<A> result = load(id);
         return result;
-    }
-
-    /** The Stand instance for sending updated aggregate states. */
-    private Stand getStand() {
-        return getBoundedContext().getStand();
     }
 
     /**

@@ -109,7 +109,7 @@ public final class PmDispatcher {
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, CommandEnvelope envelope) {
             TestPmCommandEndpoint<I, P, S> endpoint = new TestPmCommandEndpoint<>(envelope);
-            List<Event> events = endpoint.dispatchInTx(manager);
+            List<Event> events = endpoint.runTransactionFor(manager);
             return events;
         }
     }
@@ -134,7 +134,7 @@ public final class PmDispatcher {
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, EventEnvelope envelope) {
             TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(envelope);
-            List<Event> events = endpoint.dispatchInTx(manager);
+            List<Event> events = endpoint.runTransactionFor(manager);
             return events;
         }
     }

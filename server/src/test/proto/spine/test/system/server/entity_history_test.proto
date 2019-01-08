@@ -51,7 +51,7 @@ message Person {
 message PersonCreation {
     option (entity).kind = PROCESS_MANAGER;
 
-    PersonId id = 1 [(required) = false];
+    PersonId id = 1 [(required) = false, (set_once) = false];
 
     bool created = 2;
 }
@@ -71,7 +71,7 @@ message PersonFirstName {
 message PersonDetails {
     option (entity).kind = PROJECTION;
 
-    PersonId id = 1 [(required) = false];
+    PersonId id = 1 [(required) = false, (set_once) = false];
 
     spine.people.PersonName name = 2;
 }
