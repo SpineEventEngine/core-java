@@ -66,10 +66,10 @@ import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.QueryBuilderTestEnv.newMessageId;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.client.given.QueryBuilderTestEnv.orderBy;
 import static io.spine.client.given.QueryBuilderTestEnv.pagination;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
@@ -104,7 +104,7 @@ class QueryBuilderTest {
 
         @Test
         @DisplayName(NOT_ACCEPT_NULLS)
-        void notAcceptNulls() throws NoSuchMethodException {
+        void notAcceptNulls() {
             NullPointerTester tester = new NullPointerTester();
             tester.testAllPublicStaticMethods(QueryBuilder.class);
             tester.testAllPublicInstanceMethods(factory.select(TEST_ENTITY_TYPE));

@@ -19,13 +19,11 @@
  */
 package io.spine.server.stand;
 
+import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
 import io.spine.client.Query;
 import io.spine.client.QueryValidationError;
-import io.spine.client.Target;
 import io.spine.type.TypeUrl;
-
-import java.util.Optional;
 
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
@@ -41,39 +39,36 @@ class QueryValidator extends AbstractTargetValidator<Query> {
     }
 
     @Override
-    protected QueryValidationError getInvalidMessageErrorCode() {
+    protected QueryValidationError invalidMessageErrorCode() {
         return INVALID_QUERY;
     }
 
     @Override
-    protected InvalidQueryException onInvalidMessage(String exceptionMsg, Query request,
-                                                     Error error) {
+    protected ProtocolMessageEnum unsupportedTargetErrorCode() {
+        return UNSUPPORTED_QUERY_TARGET;
+    }
+
+    @Override
+    protected InvalidQueryException invalidMessageException(String exceptionMsg,
+                                                            Query request,
+                                                            Error error) {
         return new InvalidQueryException(exceptionMsg, request, error);
     }
 
     @Override
-    protected Optional<RequestNotSupported<Query>> isSupported(Query request) {
-        Target target = request.getTarget();
-        boolean targetSupported = checkTargetSupported(target);
-
-        if (targetSupported) {
-            return Optional.empty();
-        }
-
-        return Optional.of(missingInRegistry(getTypeOf(target)));
+    protected boolean isSupported(Query request) {
+        return targetSupported(request.getTarget());
     }
 
-    private static RequestNotSupported<Query> missingInRegistry(TypeUrl topicTargetType) {
-        String errorMessage = format("The query target type is not supported: %s",
-                                     topicTargetType.getTypeName());
-        return new RequestNotSupported<Query>(UNSUPPORTED_QUERY_TARGET, errorMessage) {
+    @Override
+    protected InvalidRequestException unsupportedException(Query request, Error error) {
+        String message = errorMessage(request);
+        return new InvalidQueryException(message, request, error);
+    }
 
-            @Override
-            protected InvalidRequestException createException(String message,
-                                                              Query request,
-                                                              Error error) {
-                return new InvalidQueryException(message, request, error);
-            }
-        };
+    @Override
+    protected String errorMessage(Query request) {
+        TypeUrl targetType = getTypeOf(request.getTarget());
+        return format("The query target type is not supported: %s", targetType.getTypeName());
     }
 }

@@ -36,7 +36,7 @@ abstract class AbstractTargetValidator<M extends Message> extends RequestValidat
         this.typeRegistry = typeRegistry;
     }
 
-    boolean checkTargetSupported(Target target) {
+    boolean targetSupported(Target target) {
         TypeUrl typeUrl = getTypeOf(target);
         boolean result = typeRegistry.getTypes()
                                      .contains(typeUrl);
