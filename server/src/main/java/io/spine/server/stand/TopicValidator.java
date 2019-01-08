@@ -32,7 +32,7 @@ import static java.lang.String.format;
 /**
  * Validates the {@linkplain Topic} instances submitted to {@linkplain Stand}.
  */
-class TopicValidator extends AbstractTargetValidator<Topic> {
+final class TopicValidator extends AbstractTargetValidator<Topic> {
 
     TopicValidator(TypeRegistry typeRegistry) {
         super(typeRegistry);

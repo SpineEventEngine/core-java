@@ -32,7 +32,7 @@ import static java.lang.String.format;
 /**
  * Validates the {@linkplain Query} instances submitted to {@linkplain Stand}.
  */
-class QueryValidator extends AbstractTargetValidator<Query> {
+final class QueryValidator extends AbstractTargetValidator<Query> {
 
     QueryValidator(TypeRegistry typeRegistry) {
         super(typeRegistry);

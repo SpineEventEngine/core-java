@@ -31,10 +31,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Validates the {@linkplain Subscription} instances submitted to {@linkplain Stand}.
- *
- * @author Alex Tymchenko
  */
-class SubscriptionValidator extends RequestValidator<Subscription> {
+final class SubscriptionValidator extends RequestValidator<Subscription> {
 
     private final SubscriptionRegistry registry;
 
