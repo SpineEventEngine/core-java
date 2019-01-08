@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -99,13 +99,13 @@ public final class AggregateTestSupport {
         checkArguments(repository, aggregate, event);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
         EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(repository, event);
-        endpoint.dispatchInTx(aggregate);
+        endpoint.runTransactionWith(aggregate);
     }
 
     private static <I, A extends Aggregate<I, ?, ?>> List<Message>
     dispatchAndCollect(AggregateEndpoint<I, A, ?> endpoint, A aggregate) {
         List<Message> result =
-                endpoint.dispatchInTx(aggregate)
+                endpoint.runTransactionWith(aggregate)
                         .stream()
                         .map(Events::getMessage)
                         .collect(toList());

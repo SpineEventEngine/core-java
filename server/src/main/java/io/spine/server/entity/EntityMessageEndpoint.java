@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,14 +22,11 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for endpoints handling messages sent to entities.
@@ -50,7 +47,7 @@ public abstract class EntityMessageEndpoint<I,
     /** The repository which created this endpoint. */
     private final Repository<I, E> repository;
 
-    /** The message which needs to handled. */
+    /** The message which needs to dispatched. */
     private final M envelope;
 
     protected EntityMessageEndpoint(Repository<I, E> repository, M envelope) {
@@ -59,21 +56,22 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
-     * Dispatches the message to the entity with the passed ID according to the delivery strategy.
+     * Dispatches the message to the entity with the passed ID and takes care of errors
+     * during dispatching.
+     *
+     * <p>Error handling is delegated to
+     * {@link #onError(io.spine.core.ActorMessageEnvelope, RuntimeException)
+     * onError(envelope, exception)} method.
      *
      * @param entityId the ID of the entity which to dispatch the message to
      */
-    public void dispatchTo(I entityId) {
+    public final void dispatchTo(I entityId) {
         checkNotNull(entityId);
         try {
-            doDispatchTo(entityId);
+            dispatchInTx(entityId);
         } catch (RuntimeException exception) {
             onError(envelope(), exception);
         }
-    }
-
-    private void doDispatchTo(I entityId) {
-        deliverNowTo(entityId);
     }
 
     /**
@@ -85,12 +83,12 @@ public abstract class EntityMessageEndpoint<I,
      *
      * @param entityId the ID of the entity which to dispatch the message to
      */
-    protected abstract void deliverNowTo(I entityId);
+    protected abstract void dispatchInTx(I entityId);
 
     /**
      * Invokes entity-specific method for dispatching the message.
      */
-    protected abstract List<Event> doDispatch(E entity, M envelope);
+    protected abstract List<Event> invokeDispatcher(E entity, M envelope);
 
     /**
      * Stores the entity if it was modified during message dispatching.
@@ -139,28 +137,5 @@ public abstract class EntityMessageEndpoint<I,
      */
     protected Repository<I, E> repository() {
         return repository;
-    }
-
-    /**
-     * Throws {@link IllegalStateException} with the diagnostics message on the unhandled command.
-     *
-     * @param  entity the entity which failed to handle the command
-     * @param  cmd    the envelope with the command
-     * @param  format the format string with the following parameters
-     *                <ol>
-     *                   <li>the name of the entity class
-     *                   <li>the ID of the entity
-     *                   <li>the name of the command class
-     *                   <li>the ID of the command
-     *                </ol>
-     * @throws IllegalStateException always
-     */
-    protected void onUnhandledCommand(Entity<I, ?> entity, CommandEnvelope cmd, String format) {
-        String entityId = entity.idAsString();
-        String entityClass = entity.getClass()
-                                   .getName();
-        String commandId = cmd.idAsString();
-        CommandClass commandClass = cmd.getMessageClass();
-        throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
     }
 }
