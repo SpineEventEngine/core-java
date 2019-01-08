@@ -19,13 +19,11 @@
  */
 package io.spine.server.stand;
 
+import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
-import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.TopicValidationError;
 import io.spine.type.TypeUrl;
-
-import java.util.Optional;
 
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
@@ -33,49 +31,45 @@ import static java.lang.String.format;
 
 /**
  * Validates the {@linkplain Topic} instances submitted to {@linkplain Stand}.
- *
- * @author Alex Tymchenko
  */
-class TopicValidator extends AbstractTargetValidator<Topic> {
+final class TopicValidator extends AbstractTargetValidator<Topic> {
 
     TopicValidator(TypeRegistry typeRegistry) {
         super(typeRegistry);
     }
 
     @Override
-    protected TopicValidationError getInvalidMessageErrorCode() {
+    protected TopicValidationError invalidMessageErrorCode() {
         return INVALID_TOPIC;
     }
 
     @Override
-    protected InvalidTopicException onInvalidMessage(String exceptionMsg,
-                                                     Topic topic,
-                                                     Error error) {
+    protected ProtocolMessageEnum unsupportedTargetErrorCode() {
+        return UNSUPPORTED_TOPIC_TARGET;
+    }
+
+    @Override
+    protected InvalidTopicException invalidMessageException(String exceptionMsg,
+                                                            Topic topic,
+                                                            Error error) {
         return new InvalidTopicException(exceptionMsg, topic, error);
     }
 
     @Override
-    protected Optional<RequestNotSupported<Topic>> isSupported(Topic request) {
-        Target target = request.getTarget();
-        boolean targetSupported = checkTargetSupported(target);
-        if (targetSupported) {
-            return Optional.empty();
-        }
-
-        return Optional.of(missingInRegistry(getTypeOf(target)));
+    protected boolean isSupported(Topic request) {
+        return targetSupported(request.getTarget());
     }
 
-    private static RequestNotSupported<Topic> missingInRegistry(TypeUrl topicTargetType) {
-        String errorMessage = format("The topic target type is not supported: %s",
-                                     topicTargetType.getTypeName());
-        return new RequestNotSupported<Topic>(UNSUPPORTED_TOPIC_TARGET, errorMessage) {
+    @Override
+    protected InvalidRequestException unsupportedException(Topic request,
+                                                           Error error) {
+        String messageText = errorMessage(request);
+        return new InvalidTopicException(messageText, request, error);
+    }
 
-            @Override
-            protected InvalidRequestException createException(String messageText,
-                                                              Topic request,
-                                                              Error error) {
-                return new InvalidTopicException(messageText, request, error);
-            }
-        };
+    @Override
+    protected String errorMessage(Topic request) {
+        TypeUrl targetType = getTypeOf(request.getTarget());
+        return format("The topic target type is not supported: %s", targetType.getTypeName());
     }
 }

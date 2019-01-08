@@ -31,7 +31,6 @@ import java.util.function.BiFunction;
  * @param <M> the type of messages to get IDs from
  * @param <C> the type of message context
  * @param <R> the type of the route function result
- * @author Alexander Yevsyukov
  */
 @FunctionalInterface
 public interface Route<M extends Message, C extends Message, R>

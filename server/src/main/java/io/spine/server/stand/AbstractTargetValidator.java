@@ -26,8 +26,6 @@ import io.spine.type.TypeUrl;
 /**
  * An abstract base for {@code RequestValidator}s, that check
  * whether the {@link Target target} is supported.
- *
- * @author Alex Tymchenko
  */
 abstract class AbstractTargetValidator<M extends Message> extends RequestValidator<M> {
 
@@ -38,7 +36,7 @@ abstract class AbstractTargetValidator<M extends Message> extends RequestValidat
         this.typeRegistry = typeRegistry;
     }
 
-    boolean checkTargetSupported(Target target) {
+    boolean targetSupported(Target target) {
         TypeUrl typeUrl = getTypeOf(target);
         boolean result = typeRegistry.getTypes()
                                      .contains(typeUrl);
