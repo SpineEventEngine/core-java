@@ -88,8 +88,8 @@ abstract class RequestValidator<M extends Message> {
      * @throws IllegalArgumentException if the passed request is not valid
      */
     void validate(M request, StreamObserver<?> responseObserver) throws IllegalArgumentException {
-        handleValidationResult(validateMessage(request).orElse(null), responseObserver);
-        handleValidationResult(checkSupported(request).orElse(null), responseObserver);
+        handleValidationResult(validateMessage(request), responseObserver);
+        handleValidationResult(checkSupported(request), responseObserver);
     }
 
     /**
@@ -112,12 +112,12 @@ abstract class RequestValidator<M extends Message> {
      * and packs it into an exception.
      *
      * @param request the request to check for support
-     * @return an instance of exception or {@code Optional.empty()} if the request is supported.
+     * @return an instance of exception or null if the request is supported.
      */
-    private Optional<InvalidRequestException> checkSupported(M request) {
+    private @Nullable InvalidRequestException checkSupported(M request) {
         Optional<RequestNotSupported<M>> supported = isSupported(request);
         if (!supported.isPresent()) {
-            return Optional.empty();
+            return null;
         }
 
         RequestNotSupported<M> result = supported.get();
@@ -134,21 +134,20 @@ abstract class RequestValidator<M extends Message> {
                 .build();
 
         InvalidRequestException exception = result.createException(errorMessage, request, error);
-        return Optional.of(exception);
+        return exception;
     }
 
     /**
      * Checks whether the {@code Message} of the given request conforms the constraints.
      *
-     * @param request the request message to validate.
-     * @return an instance of exception,
-     * or {@code Optional.empty()} if the request message is valid.
+     * @param request the request message to validate
+     * @return an instance of exception or null if the request message is valid.
      */
-    private Optional<InvalidRequestException> validateMessage(M request) {
+    private @Nullable InvalidRequestException validateMessage(M request) {
         List<ConstraintViolation> violations = MessageValidator.newInstance(request)
                                                                .validate();
         if (violations.isEmpty()) {
-            return Optional.empty();
+            return null;
         }
 
         ValidationError validationError = ValidationError
@@ -171,7 +170,7 @@ abstract class RequestValidator<M extends Message> {
 
         String exceptionMsg = formatExceptionMessage(request, error);
         InvalidRequestException exception = onInvalidMessage(exceptionMsg, request, error);
-        return Optional.of(exception);
+        return exception;
     }
 
     private String formatExceptionMessage(M request, Error error) {
