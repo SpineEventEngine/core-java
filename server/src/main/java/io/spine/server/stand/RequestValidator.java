@@ -28,6 +28,7 @@ import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 import io.spine.validate.ValidationError;
+import io.spine.validate.diags.ViolationText;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -35,14 +36,12 @@ import java.util.Optional;
 
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.validate.ConstraintViolations.toText;
 import static java.lang.String.format;
 
 /**
  * An abstract base of validators for the incoming requests to {@linkplain Stand}.
  *
  * @param <M> the type of request
- * @author Alex Tymchenko
  */
 abstract class RequestValidator<M extends Message> {
 
@@ -85,7 +84,7 @@ abstract class RequestValidator<M extends Message> {
      * Also, an {@code IllegalArgumentException} is thrown exposing the validation failure.
      *
      * @param request          the request {@code Message} to validate
-     * @param responseObserver the observer to notify of a potenital validation error.
+     * @param responseObserver the observer to notify of a potenital validation error
      * @throws IllegalArgumentException if the passed request is not valid
      */
     void validate(M request, StreamObserver<?> responseObserver) throws IllegalArgumentException {
@@ -127,15 +126,14 @@ abstract class RequestValidator<M extends Message> {
         String errorMessage = result.getErrorMessage();
         String errorTypeName = unsupportedErrorCode.getDescriptorForType()
                                                    .getFullName();
-        Error.Builder errorBuilder = Error.newBuilder()
-                                          .setType(errorTypeName)
-                                          .setCode(unsupportedErrorCode.getNumber())
-                                          .setMessage(errorMessage);
-        Error error = errorBuilder.build();
+        Error error = Error
+                .newBuilder()
+                .setType(errorTypeName)
+                .setCode(unsupportedErrorCode.getNumber())
+                .setMessage(errorMessage)
+                .build();
 
-        InvalidRequestException exception = result.createException(errorMessage,
-                                                                   request,
-                                                                   error);
+        InvalidRequestException exception = result.createException(errorMessage, request, error);
         return Optional.of(exception);
     }
 
@@ -153,42 +151,42 @@ abstract class RequestValidator<M extends Message> {
             return Optional.empty();
         }
 
-        ValidationError validationError = ValidationError.newBuilder()
-                                                         .addAllConstraintViolation(violations)
-                                                         .build();
+        ValidationError validationError = ValidationError
+                .newBuilder()
+                .addAllConstraintViolation(violations)
+                .build();
         ProtocolMessageEnum errorCode = getInvalidMessageErrorCode();
         String typeName = errorCode.getDescriptorForType()
                                    .getFullName();
-        String errorTextTemplate = getErrorText(request);
-        String errorText = format("%s %s",
-                                  errorTextTemplate,
-                                  toText(violations));
+        String errorMessage = errorConstraintsViolated(request);
+        String violationsText = ViolationText.ofAll(violations);
+        String errorText = format("%s %s", errorMessage, violationsText);
+        Error error = Error
+                .newBuilder()
+                .setType(typeName)
+                .setCode(errorCode.getNumber())
+                .setValidationError(validationError)
+                .setMessage(errorText)
+                .build();
 
-        Error.Builder errorBuilder = Error.newBuilder()
-                                          .setType(typeName)
-                                          .setCode(errorCode.getNumber())
-                                          .setValidationError(validationError)
-                                          .setMessage(errorText);
-        Error error = errorBuilder.build();
-        return Optional.of(
-                onInvalidMessage(formatExceptionMessage(request, error), request, error));
+        String exceptionMsg = formatExceptionMessage(request, error);
+        InvalidRequestException exception = onInvalidMessage(exceptionMsg, request, error);
+        return Optional.of(exception);
     }
 
     private String formatExceptionMessage(M request, Error error) {
         return format("%s. Validation error: %s.",
-                      getErrorText(request), error.getValidationError());
+                      errorConstraintsViolated(request), error.getValidationError());
     }
 
-    protected String getErrorText(M request) {
-        return format("%s message does not satisfy the validation constraints.",
-                      TypeName.of(request)
-                              .getSimpleName());
+    private String errorConstraintsViolated(M request) {
+        return format("`%s` message does not satisfy the validation constraints.",
+                      TypeName.of(request));
     }
 
-    private static void feedToResponse(InvalidRequestException cause,
-                                       StreamObserver<?> responseObserver) {
+    private static void feedToResponse(InvalidRequestException cause, StreamObserver<?> observer) {
         StatusRuntimeException validationException = invalidArgumentWithCause(cause);
-        responseObserver.onError(validationException);
+        observer.onError(validationException);
     }
 
     /**

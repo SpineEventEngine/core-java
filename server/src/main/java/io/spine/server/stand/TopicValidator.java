@@ -33,8 +33,6 @@ import static java.lang.String.format;
 
 /**
  * Validates the {@linkplain Topic} instances submitted to {@linkplain Stand}.
- *
- * @author Alex Tymchenko
  */
 class TopicValidator extends AbstractTargetValidator<Topic> {
 
