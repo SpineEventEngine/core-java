@@ -205,8 +205,8 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * @param predicate
      *         the {@link io.spine.client.Filter}s to filter the requested entities by
      * @return self for method chaining
-     * @see io.spine.client.Filters for a convenient way to create {@link
-     *         io.spine.client.Filter} instances
+     * @see io.spine.client.Filters for a convenient way to create {@link io.spine.client.Filter}
+     *      instances
      * @see #where(io.spine.client.CompositeFilter...)
      */
     public B where(Filter... predicate) {
