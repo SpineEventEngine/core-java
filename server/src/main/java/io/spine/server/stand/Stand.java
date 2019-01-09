@@ -336,6 +336,11 @@ public class Stand implements AutoCloseable {
         typeRegistry.close();
     }
 
+    @Deprecated
+    public void post(TenantId tenantId, VersionableEntity entity) {
+
+    }
+
     /**
      * A contract for the callbacks to be executed once a new event is emitted by the monitored
      * entity.
