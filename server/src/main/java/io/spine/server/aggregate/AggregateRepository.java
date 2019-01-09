@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -335,7 +335,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        logError("Error reacting on event (class: %s id: %s) in aggregate of type %s.",
+        logError("Error reacting on event (class: `%s` id: `%s`) in aggregate of type `%s.`",
                  envelope, exception);
     }
 

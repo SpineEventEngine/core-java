@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,7 +31,6 @@ import java.util.function.BiFunction;
  * @param <M> the type of messages to get IDs from
  * @param <C> the type of message context
  * @param <R> the type of the route function result
- * @author Alexander Yevsyukov
  */
 @FunctionalInterface
 public interface Route<M extends Message, C extends Message, R>

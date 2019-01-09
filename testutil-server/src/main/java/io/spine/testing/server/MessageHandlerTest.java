@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -43,6 +43,7 @@ import org.junit.jupiter.api.BeforeEach;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -179,26 +180,24 @@ public abstract class MessageHandlerTest<I,
         }
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // checked when filtering
     private static Set<CommandClass> getAllCommandClasses() {
         return KnownTypes
                 .instance()
                 .getAllUrls()
                 .stream()
-                .filter(typeUrl -> commandOfType(typeUrl).isPresent())
-                .map(typeUrl -> commandOfType(typeUrl).get())
+                .flatMap(MessageHandlerTest::commandOfType)
                 .collect(toSet());
     }
 
-    private static Optional<CommandClass> commandOfType(TypeUrl type) {
+    private static Stream<CommandClass> commandOfType(TypeUrl type) {
         Class<?> cls = type.getJavaClass();
-        if (Message.class.isAssignableFrom(cls)) {
+        if (CommandMessage.class.isAssignableFrom(cls)) {
             @SuppressWarnings("unchecked")
             Class<? extends CommandMessage> messageType = (Class<? extends CommandMessage>) cls;
             CommandClass commandClass = CommandClass.from(messageType);
-            return Optional.of(commandClass);
+            return Stream.of(commandClass);
         } else {
-            return Optional.empty();
+            return Stream.empty();
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -50,7 +50,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.client.blackbox.Count.count;
@@ -134,7 +133,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbProject expectedProject1 = createdProjectState(createProject1);
             BbProject expectedProject2 = createdProjectState(createProject2);
             context.receivesCommands(createProject1, createProject2)
-                   .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
+                   .assertThat(exactly(BbProject.class,
+                                       ImmutableSet.of(expectedProject1, expectedProject2)));
         }
 
         @Test
@@ -155,7 +155,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbProjectView expectedProject2 = createProjectView(createProject2);
             context.receivesCommands(createProject1, createProject2)
                    .assertThat(exactly(BbProjectView.class,
-                                       of(expectedProject1, expectedProject2)));
+                                       ImmutableSet.of(expectedProject1, expectedProject2)));
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {
