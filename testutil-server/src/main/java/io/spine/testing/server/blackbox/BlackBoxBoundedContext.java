@@ -39,12 +39,15 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
+import io.spine.testing.server.procman.PmSubject;
 import io.spine.type.TypeName;
 
 import java.util.Collection;
@@ -56,9 +59,12 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
+import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
@@ -582,5 +588,29 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     private static Enricher emptyEnricher() {
         return Enricher.newBuilder()
                        .build();
+    }
+
+    /**
+     * Obtains the Subject for the Process Manager of the passed class with the given ID.
+     */
+    public <I, P extends ProcessManager<I, ?, ?>>
+    PmSubject<P> assertThat(Class<? extends P> pmClass, I id) {
+        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).getStateClass();
+        Repository repo = repositoryOf(stateClass);
+        @SuppressWarnings("unchecked")
+        ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;
+        Optional<P> found = pmRepo.find(id);
+        PmSubject<P> result = assertAbout(PmSubject.<P>processManagers()).that(found.orElse(null));
+        return result;
+    }
+
+    private Repository repositoryOf(Class<? extends Message> stateClass) {
+        return boundedContext.findRepository(stateClass)
+                             .orElseThrow(
+                                     () -> newIllegalStateException(
+                                         "Unable to find repository for entities with state `%s`.",
+                                         stateClass.getCanonicalName()
+                                     )
+                             );
     }
 }
