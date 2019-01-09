@@ -21,6 +21,7 @@ package io.spine.server.stand;
 
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
+import io.spine.client.SubscriptionVBuilder;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Topic;
@@ -131,10 +132,11 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             Target target = topic.getTarget();
             String typeAsString = target.getType();
             TypeUrl type = TypeUrl.parse(typeAsString);
-            Subscription subscription = Subscription.newBuilder()
-                                                    .setId(subscriptionId)
-                                                    .setTopic(topic)
-                                                    .build();
+            Subscription subscription = SubscriptionVBuilder
+                    .newBuilder()
+                    .setId(subscriptionId)
+                    .setTopic(topic)
+                    .build();
             SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
 
             if (!typeToRecord.containsKey(type)) {
