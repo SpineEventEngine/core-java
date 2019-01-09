@@ -21,14 +21,13 @@ package io.spine.server.stand;
 
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
-import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
+import io.spine.client.Filters;
+import io.spine.client.IdFilter;
 import io.spine.client.Subscription;
 import io.spine.client.Target;
 import io.spine.client.Topic;
+import io.spine.core.EventEnvelope;
 import io.spine.server.stand.Stand.OnEventCallback;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -85,28 +84,26 @@ final class SubscriptionRecord {
      * @return {@code true} if this record matches all the given parameters,
      * {@code false} otherwise.
      */
-    boolean matches(TypeUrl type, EventMessage event) {
+    boolean matches(TypeUrl type, EventEnvelope event) {
         boolean typeMatches = this.type.equals(type);
         if (typeMatches) {
             boolean includeAll = target.getIncludeAll();
-            EntityFilters filters = target.getFilters();
+            Filters filters = target.getFilters();
             return includeAll || matchByFilters(event, filters);
         }
         return false;
     }
 
-    private static boolean matchByFilters(EventMessage event, EntityFilters filters) {
+    @SuppressWarnings("TypeMayBeWeakened") // Subscriptions work with events exclusively.
+    private static boolean matchByFilters(EventEnvelope event, Filters filters) {
         boolean result;
-        EntityIdFilter givenIdFilter = filters.getIdFilter();
-        boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
-                                             .equals(givenIdFilter);
+        IdFilter givenIdFilter = filters.getIdFilter();
+        boolean idFilterSet = !IdFilter.getDefaultInstance()
+                                       .equals(givenIdFilter);
         if (idFilterSet) {
-            Any idAsAny = Identifier.pack(event);
-            EntityId givenEntityId = EntityId.newBuilder()
-                                             .setId(idAsAny)
-                                             .build();
-            List<EntityId> idsList = givenIdFilter.getIdsList();
-            result = idsList.contains(givenEntityId);
+            Any idAsAny = Identifier.pack(event.getId());
+            List<Any> idsList = givenIdFilter.getIdsList();
+            result = idsList.contains(idAsAny);
         } else {
             result = false;
         }

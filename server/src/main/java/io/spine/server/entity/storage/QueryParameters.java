@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
-import io.spine.client.ColumnFilter;
+import io.spine.client.Filter;
 import io.spine.client.OrderBy;
 import io.spine.server.storage.RecordStorage;
 
@@ -36,8 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.FilterFactory.eq;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
@@ -109,7 +109,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
     }
 
     /**
-     * Returns an iterator over the {@linkplain ColumnFilter column filters}.
+     * Returns an iterator over the {@linkplain Filter column filters}.
      *
      * <p>The resulting {@code Iterator} throws {@link UnsupportedOperationException} on call
      * to {@link Iterator#remove() Iterator.remove()}.

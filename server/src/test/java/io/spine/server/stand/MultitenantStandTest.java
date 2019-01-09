@@ -24,6 +24,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Topic;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -40,7 +42,6 @@ import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -84,7 +85,7 @@ class MultitenantStandTest extends StandTest {
         Customer customer = fillSampleCustomers(1).iterator().next();
         CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(customerId, customer, stateVersion));
+        stand.notifySubscriptions(EventEnvelope.of(Event.getDefaultInstance()));
 
         Any packedState = AnyPacker.pack(customer);
         // Verify that Default Tenant callback has got the update.

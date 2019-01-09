@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.client.ColumnFilter.Operator;
+import io.spine.client.Filter.Operator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,19 +34,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.client.ColumnFilter.Operator.EQUAL;
-import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
-import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
-import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
-import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.ColumnFilters.ge;
-import static io.spine.client.ColumnFilters.gt;
-import static io.spine.client.ColumnFilters.le;
-import static io.spine.client.ColumnFilters.lt;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.client.CompositeFilter.CompositeOperator;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+import static io.spine.client.Filter.Operator.EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_THAN;
+import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.Filter.Operator.LESS_THAN;
+import static io.spine.client.FilterFactory.eq;
+import static io.spine.client.FilterFactory.ge;
+import static io.spine.client.FilterFactory.gt;
+import static io.spine.client.FilterFactory.le;
+import static io.spine.client.FilterFactory.lt;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toAny;
@@ -57,8 +57,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("ColumnFilters utility should")
-class ColumnFiltersTest {
+@DisplayName("FilterFactory should")
+class FilterFactoryTest {
 
     private static final String COLUMN_NAME = "preciseColumn";
     private static final Timestamp COLUMN_VALUE = getCurrentTime();
@@ -68,7 +68,7 @@ class ColumnFiltersTest {
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(ColumnFilters.class);
+        assertHasPrivateParameterlessCtor(Filters.class);
     }
 
     @Test
@@ -76,8 +76,8 @@ class ColumnFiltersTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
-                .setDefault(ColumnFilter.class, ColumnFilter.getDefaultInstance())
-                .testAllPublicStaticMethods(ColumnFilters.class);
+                .setDefault(Filter.class, Filter.getDefaultInstance())
+                .testAllPublicStaticMethods(FilterFactory.class);
     }
 
     @Nested
@@ -117,15 +117,15 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("`equals` for enumerated types")
         void equalsForEnum() {
-            ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
-            assertEquals(ENUM_COLUMN_NAME, filter.getColumnName());
+            Filter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
+            assertEquals(ENUM_COLUMN_NAME, filter.getFieldName());
             assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
             assertEquals(EQUAL, filter.getOperator());
         }
 
-        private void checkCreatesInstance(ColumnFilter filter,
+        private void checkCreatesInstance(Filter filter,
                                           Operator operator) {
-            assertEquals(COLUMN_NAME, filter.getColumnName());
+            assertEquals(COLUMN_NAME, filter.getFieldName());
             assertEquals(pack(COLUMN_VALUE), filter.getValue());
             assertEquals(operator, filter.getOperator());
         }
@@ -138,26 +138,26 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("`all`")
         void all() {
-            ColumnFilter[] filters = {
+            Filter[] filters = {
                     le(COLUMN_NAME, COLUMN_VALUE),
                     ge(COLUMN_NAME, COLUMN_VALUE)
             };
-            checkCreatesInstance(ColumnFilters.all(filters[0], filters[1]), ALL, filters);
+            checkCreatesInstance(FilterFactory.all(filters[0], filters[1]), ALL, filters);
         }
 
         @Test
         @DisplayName("`either`")
         void either() {
-            ColumnFilter[] filters = {
+            Filter[] filters = {
                     lt(COLUMN_NAME, COLUMN_VALUE),
                     gt(COLUMN_NAME, COLUMN_VALUE)
             };
-            checkCreatesInstance(ColumnFilters.either(filters[0], filters[1]), EITHER, filters);
+            checkCreatesInstance(FilterFactory.either(filters[0], filters[1]), EITHER, filters);
         }
 
-        private void checkCreatesInstance(CompositeColumnFilter filter,
+        private void checkCreatesInstance(CompositeFilter filter,
                                           CompositeOperator operator,
-                                          ColumnFilter[] groupedFilters) {
+                                          Filter[] groupedFilters) {
             assertEquals(operator, filter.getOperator());
             assertThat(filter.getFilterList()).containsAllIn(groupedFilters);
         }
@@ -171,7 +171,7 @@ class ColumnFiltersTest {
         @DisplayName("for numbers")
         void forNumbers() {
             double number = 3.14;
-            ColumnFilter filter = le("doubleColumn", number);
+            Filter filter = le("doubleColumn", number);
             assertNotNull(filter);
             assertEquals(LESS_OR_EQUAL, filter.getOperator());
             DoubleValue value = unpack(filter.getValue(), DoubleValue.class);
@@ -182,7 +182,7 @@ class ColumnFiltersTest {
         @DisplayName("for strings")
         void forStrings() {
             String theString = "abc";
-            ColumnFilter filter = gt("stringColumn", theString);
+            Filter filter = gt("stringColumn", theString);
             assertNotNull(filter);
             assertEquals(GREATER_THAN, filter.getOperator());
             StringValue value = unpack(filter.getValue(), StringValue.class);

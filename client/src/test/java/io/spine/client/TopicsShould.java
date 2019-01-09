@@ -28,9 +28,6 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-/**
- * @author Alexander Yeveyukov
- */
 @DisplayName("Topics utility should")
 class TopicsShould {
 

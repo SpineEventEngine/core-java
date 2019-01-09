@@ -65,7 +65,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        EntityFilters expected = filtersForIds(taskId);
+        Filters expected = filtersForIds(taskId);
         assertEquals(expected, target.getFilters());
     }
 
@@ -80,9 +80,9 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        EntityFilters expected = filtersForIds(StringValue.of(firstId),
-                                               StringValue.of(secondId),
-                                               StringValue.of(thirdId));
+        Filters expected = filtersForIds(StringValue.of(firstId),
+                                         StringValue.of(secondId),
+                                         StringValue.of(thirdId));
         assertEquals(expected, target.getFilters());
     }
 
@@ -97,9 +97,9 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        EntityFilters expected = filtersForIds(Int32Value.of(firstId),
-                                               Int32Value.of(secondId),
-                                               Int32Value.of(thirdId));
+        Filters expected = filtersForIds(Int32Value.of(firstId),
+                                         Int32Value.of(secondId),
+                                         Int32Value.of(thirdId));
         assertEquals(expected, target.getFilters());
     }
 
@@ -114,9 +114,9 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        EntityFilters expected = filtersForIds(Int64Value.of(firstId),
-                                               Int64Value.of(secondId),
-                                               Int64Value.of(thirdId));
+        Filters expected = filtersForIds(Int64Value.of(firstId),
+                                         Int64Value.of(secondId),
+                                         Int64Value.of(thirdId));
         assertEquals(expected, target.getFilters());
     }
 

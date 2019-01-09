@@ -19,8 +19,10 @@
  */
 package io.spine.client;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -31,7 +33,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.checkSupported;
-import static io.spine.base.Identifier.pack;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
@@ -89,15 +90,15 @@ public final class Targets {
      * @param ids
      *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
      *         which is supported as identifier}
-     * @param columnFilters
+     * @param filters
      *         a set of entity column predicates each target entity must match
      * @return a {@code Target} instance formed according to the provided parameters
      */
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<?> ids,
-                                @Nullable Set<CompositeColumnFilter> columnFilters) {
+                                @Nullable Set<CompositeFilter> filters) {
 
-        boolean includeAll = (ids == null && columnFilters == null);
+        boolean includeAll = (ids == null && filters == null);
 
         TypeUrl typeUrl = TypeUrl.of(entityClass);
         TargetVBuilder builder = TargetVBuilder.newBuilder()
@@ -106,43 +107,29 @@ public final class Targets {
             builder.setIncludeAll(true);
         } else {
             List<?> idsList = notNullList(ids);
-            EntityIdFilter idFilter = composeIdFilter(idsList);
+            IdFilter idFilter = composeIdFilter(idsList);
 
-            List<CompositeColumnFilter> columnFiltersList = notNullList(columnFilters);
-            EntityFilters filters = entityFilters(columnFiltersList, idFilter);
-            builder.setFilters(filters);
+            List<CompositeFilter> filterList = notNullList(filters);
+            Filters targetFilters = filters(filterList, idFilter);
+            builder.setFilters(targetFilters);
         }
 
         return builder.build();
     }
 
-    private static EntityIdFilter composeIdFilter(Collection<?> items) {
-        List<EntityId> ids = items.stream()
-                                  .distinct()
-                                  .map(Targets::entityId)
-                                  .collect(toList());
-        EntityIdFilter filter = idFilter(ids);
+    private static IdFilter composeIdFilter(Collection<?> items) {
+        List<Any> ids = items.stream()
+                             .distinct()
+                             .map(Targets::checkId)
+                             .map(Identifier::pack)
+                             .collect(toList());
+        IdFilter filter = idFilter(ids);
         return filter;
     }
 
-    private static EntityIdFilter idFilter(List<EntityId> ids) {
-        return EntityIdFilterVBuilder.newBuilder()
-                                     .addAllIds(ids)
-                                     .build();
-    }
-
-    /**
-     * Creates an Entity ID from a provided object.
-     *
-     * @param value
-     *         a value to set as {@link EntityId#getId() id} attribute of {@code EntityId}
-     * @return an {@link EntityId} with provided value
-     * @throws IllegalArgumentException
-     *         if the object cannot be an {@link io.spine.base.Identifier} or is {@code null}
-     */
-    private static EntityId entityId(Object value) {
-        return EntityIdVBuilder.newBuilder()
-                               .setId(pack(checkId(value)))
+    private static IdFilter idFilter(List<Any> ids) {
+        return IdFilterVBuilder.newBuilder()
+                               .addAllIds(ids)
                                .build();
     }
 
@@ -163,12 +150,11 @@ public final class Targets {
         return item;
     }
 
-    private static EntityFilters entityFilters(List<CompositeColumnFilter> entityColumnValues,
-                                               EntityIdFilter idFilter) {
-        return EntityFiltersVBuilder.newBuilder()
-                                    .setIdFilter(idFilter)
-                                    .addAllFilter(entityColumnValues)
-                                    .build();
+    private static Filters filters(List<CompositeFilter> entityColumnValues, IdFilter idFilter) {
+        return FiltersVBuilder.newBuilder()
+                              .setIdFilter(idFilter)
+                              .addAllFilter(entityColumnValues)
+                              .build();
     }
 
     /**

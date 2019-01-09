@@ -27,20 +27,20 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter.CompositeOperator;
+import io.spine.client.Filter;
+import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.io.Serializable;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
- * A set of {@link ColumnFilter} instances joined by a logical
+ * A set of {@link Filter} instances joined by a logical
  * {@link CompositeOperator composite operator}.
  *
  * @author Dmytro Dashenkov
@@ -58,7 +58,7 @@ public final class CompositeQueryParameter implements Serializable {
 
     private final CompositeOperator operator;
 
-    private final ImmutableMultimap<EntityColumn, ColumnFilter> filters;
+    private final ImmutableMultimap<EntityColumn, Filter> filters;
 
     /**
      * A flag that shows if current instance of {@code CompositeQueryParameter} has
@@ -74,7 +74,7 @@ public final class CompositeQueryParameter implements Serializable {
      * @param operator the operator to apply to the given filters
      * @return new instance of {@code CompositeQueryParameter}
      */
-    static CompositeQueryParameter from(Multimap<EntityColumn, ColumnFilter> filters,
+    static CompositeQueryParameter from(Multimap<EntityColumn, Filter> filters,
                                         CompositeOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
@@ -84,7 +84,7 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     private CompositeQueryParameter(CompositeOperator operator,
-                                    Multimap<EntityColumn, ColumnFilter> filters) {
+                                    Multimap<EntityColumn, Filter> filters) {
         this.operator = operator;
         this.filters = ImmutableMultimap.copyOf(filters);
         this.hasLifecycle = containsLifecycle(filters.keySet());
@@ -104,10 +104,10 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     /**
-     * Returns the joined entity column {@linkplain ColumnFilter filters}.
+     * Returns the joined entity column {@linkplain Filter filters}.
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public ImmutableMultimap<EntityColumn, ColumnFilter> getFilters() {
+    public ImmutableMultimap<EntityColumn, Filter> getFilters() {
         return filters;
     }
 
@@ -123,7 +123,7 @@ public final class CompositeQueryParameter implements Serializable {
     public CompositeQueryParameter conjunct(Iterable<CompositeQueryParameter> other) {
         checkNotNull(other);
 
-        Multimap<EntityColumn, ColumnFilter> mergedFilters = LinkedListMultimap.create();
+        Multimap<EntityColumn, Filter> mergedFilters = LinkedListMultimap.create();
         mergedFilters.putAll(filters);
         for (CompositeQueryParameter parameter : other) {
             mergedFilters.putAll(parameter.getFilters());
@@ -139,16 +139,16 @@ public final class CompositeQueryParameter implements Serializable {
      * the {@link CompositeOperator#ALL ALL} operator.
      *
      * @param column the {@link EntityColumn} to add the filter to
-     * @param columnFilter the value of the filter to add
+     * @param filter the value of the filter to add
      * @return new instance of {@code CompositeQueryParameter} merged from current instance and
      * the given filter
      */
-    public CompositeQueryParameter and(EntityColumn column, ColumnFilter columnFilter) {
+    public CompositeQueryParameter and(EntityColumn column, Filter filter) {
         checkNotNull(column);
-        checkNotNull(columnFilter);
+        checkNotNull(filter);
 
-        Multimap<EntityColumn, ColumnFilter> newFilters = HashMultimap.create(filters);
-        newFilters.put(column, columnFilter);
+        Multimap<EntityColumn, Filter> newFilters = HashMultimap.create(filters);
+        newFilters.put(column, filter);
         CompositeQueryParameter parameter = from(newFilters, ALL);
         return parameter;
     }

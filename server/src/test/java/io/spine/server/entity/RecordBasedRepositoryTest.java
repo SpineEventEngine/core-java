@@ -23,15 +23,16 @@ package io.spine.server.entity;
 import com.google.common.collect.Lists;
 import com.google.common.truth.IterableSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
+import io.spine.client.CompositeFilter;
+import io.spine.client.Filter;
+import io.spine.client.Filters;
+import io.spine.client.FiltersVBuilder;
+import io.spine.client.IdFilter;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.storage.RecordStorage;
 import io.spine.testing.server.entity.given.GivenLifecycleFlags;
@@ -53,9 +54,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
-import static io.spine.client.ColumnFilters.all;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.FilterFactory.all;
+import static io.spine.client.FilterFactory.eq;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -81,7 +82,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @param <E>
  *         the type of the {@link Entity} of this repository; the type is checked to implement
  *         {@link TestEntityWithStringColumn} at runtime
- * @author Dmytro Dashenkov
  */
 public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
         I,
@@ -176,7 +176,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     }
 
     @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
-    private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
+    private Iterator<E> find(Filters filters, FieldMask firstFieldOnly) {
         return repository.find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
     }
 
@@ -245,13 +245,13 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             StringValue fieldValue = StringValue.newBuilder()
                                                 .setValue(id1.toString())
                                                 .build();
-            ColumnFilter filter = eq(fieldPath, fieldValue);
-            CompositeColumnFilter aggregatingFilter = CompositeColumnFilter
+            Filter filter = eq(fieldPath, fieldValue);
+            CompositeFilter aggregatingFilter = CompositeFilter
                     .newBuilder()
                     .addFilter(filter)
                     .setOperator(ALL)
                     .build();
-            EntityFilters filters = EntityFilters
+            Filters filters = FiltersVBuilder
                     .newBuilder()
                     .addFilter(aggregatingFilter)
                     .build();
@@ -273,9 +273,9 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             // Find some of the entities (half of them in this case).
             int idsToObtain = count / 2;
-            List<EntityId> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
+            List<Any> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
 
-            EntityFilters filters = createEntityIdFilters(ids);
+            Filters filters = createIdFilters(ids);
             FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
             Iterator<E> readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
@@ -356,7 +356,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertThat(found).isEmpty();
         }
 
-        private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
+        private Iterator<E> find(Filters filters, FieldMask firstFieldOnly) {
             return repository.find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
         }
 
@@ -367,25 +367,23 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             return entities;
         }
 
-        private List<EntityId> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
-            List<EntityId> ids = Lists.newLinkedList();
+        private List<Any> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
+            List<Any> ids = Lists.newLinkedList();
             for (int i = 0; i < count; i++) {
                 Message entityId = (Message) entities.get(i)
                                                      .getId();
-                EntityId id = EntityId.newBuilder()
-                                      .setId(pack(entityId))
-                                      .build();
+                Any id = pack(entityId);
                 ids.add(id);
             }
             return ids;
         }
 
-        private EntityFilters createEntityIdFilters(List<EntityId> ids) {
-            EntityIdFilter filter = EntityIdFilter
+        private Filters createIdFilters(List<Any> ids) {
+            IdFilter filter = IdFilter
                     .newBuilder()
                     .addAllIds(ids)
                     .build();
-            EntityFilters filters = EntityFilters
+            Filters filters = FiltersVBuilder
                     .newBuilder()
                     .setIdFilter(filter)
                     .build();
@@ -510,10 +508,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         storeEntity(archivedEntity);
         storeEntity(deletedEntity);
 
-        CompositeColumnFilter columnFilter = all(eq(archived.name(), false));
-        EntityFilters filters = EntityFilters
+        CompositeFilter filter = all(eq(archived.name(), false));
+        Filters filters = FiltersVBuilder
                 .newBuilder()
-                .addFilter(columnFilter)
+                .addFilter(filter)
                 .build();
 
         Iterator<E> found = repository.find(filters, emptyOrder(), emptyPagination(),

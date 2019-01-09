@@ -1,0 +1,142 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+syntax = "proto3";
+
+package spine.client;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_multiple_files = true;
+option java_outer_classname = "FiltersProto";
+option java_package = "io.spine.client";
+
+import "google/protobuf/any.proto";
+
+// Defines the entity type and filters.
+//
+// Use Target to specify and narrow down the source for Topic and Query by an entity type and
+// various criteria.
+message Target {
+
+    // Represents TypeUrl for the entity of interest.
+    string type = 1;
+
+    // Modifies the entity collection of a specified type.
+    // Allows either to narrow it down by filtering out the entity objects or include all entity
+    // instances into the target.
+    oneof criterion {
+
+        // The instruction to include all objects of a given type.
+        bool include_all = 2;
+
+        // Filter the objects of a given type by certain criteria.
+        Filters filters = 3;
+    }
+}
+
+// Set of filters used to modify the entity collection.
+//
+// To be used in scope of read-side API for specifying the target of query and subscription
+// operations.
+message Filters {
+
+    // Match entities by IDs.
+    IdFilter id_filter = 1;
+
+    // Match the entities by the value of the Entity Columns.
+    repeated CompositeFilter filter = 2;
+
+    // Reserved for more filter types
+    reserved 3 to 40;
+}
+
+// The filter grouping a number of Entity Column filters with a specified logical operator.
+message CompositeFilter {
+
+    // The composite Entity Column filters.
+    //
+    // If the list is empty, any record is considered matching this filter.
+    repeated Filter filter = 1;
+
+    // The value of the composite operator which determines the behavior of the filter matching.
+    CompositeOperator operator = 2 [(required) = true];
+
+    // An enumeration of all supported composite operators upon the Entity Column filters.
+    enum CompositeOperator {
+
+        // Error value.
+        CCF_CO_UNDEFINED = 0;
+
+        // The conjunctive operator. The SQL equivalent is `AND`.
+        ALL = 1;
+
+        // The disjunctive operator. The SQL equivalent is `OR`.
+        EITHER = 2;
+    }
+}
+
+// A filter matching the Entity Columns.
+message Filter {
+
+    // The name of the field to be matched.
+    //
+    // For entities, this will be the name of entity column.
+    string field_name = 1 [(required) = true];
+
+    // The value to compare upon.
+    google.protobuf.Any value = 2 [(required) = true];
+
+    // The comparison operator.
+    Operator operator = 3 [(required) = true];
+
+    // An enumeration of all supported comparison operators applicable to the Entity Columns.
+    enum Operator {
+
+        // Error value
+        CFO_UNDEFINED = 0;
+
+        // The stored value is equal (`=`) to the passed value.
+        EQUAL = 1;
+
+        // The stored value is greater then (`>`) the passed value.
+        GREATER_THAN = 2;
+
+        // The stored value is less then (`<`) the passed value.
+        LESS_THAN = 4;
+
+        // The stored value is greater then or equal to (`>=`) the passed value.
+        GREATER_OR_EQUAL = 5;
+
+        // The stored value is less then or equal to (`<=`) the passed value.
+        LESS_OR_EQUAL = 6;
+    }
+}
+
+// Allows to add an ID filter for the read operations.
+//
+// Used to modify the collection of interest by filtering out the objects with identifiers not
+// included into the filter. SQL equivalent is "... where row.id IN (...)".
+message IdFilter {
+
+    // The collection of IDs.
+    repeated google.protobuf.Any ids = 1;
+}
+

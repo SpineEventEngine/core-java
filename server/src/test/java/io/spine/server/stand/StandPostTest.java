@@ -27,7 +27,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestAggregate;
@@ -38,7 +37,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -50,7 +48,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -105,7 +102,7 @@ class StandPostTest {
             }
         }
 
-        verify(stand, times(dispatchActions.length)).update(any(EntityStateEnvelope.class));
+        verify(stand, times(dispatchActions.length)).notifySubscriptions(any(EventEnvelope.class));
     }
 
     private static StorageFactory storageFactory(boolean multitenant) {
@@ -174,20 +171,6 @@ class StandPostTest {
         stand.post(requestFactory.createCommandContext()
                                  .getActorContext()
                                  .getTenantId(), entity);
-
-        ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
-                argument -> {
-                    boolean entityIdMatches = argument.getEntityId()
-                                                      .equals(entityId);
-                    boolean versionMatches = version.equals(argument.getEntityVersion()
-                                                                    .orElse(null));
-                    boolean stateMatches = argument.getMessage()
-                                                   .equals(state);
-                    return entityIdMatches
-                            && versionMatches
-                            && stateMatches;
-                };
-        verify(stand).update(argThat(argumentMatcher));
     }
 
     @Test

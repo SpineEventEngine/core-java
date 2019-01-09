@@ -23,10 +23,9 @@ package io.spine.system.server;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
+import io.spine.client.CompositeFilter;
+import io.spine.client.Filters;
+import io.spine.client.IdFilter;
 import io.spine.client.Target;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.LifecycleFlags;
@@ -37,8 +36,8 @@ import io.spine.type.TypeUrl;
 import java.util.Collection;
 import java.util.List;
 
-import static io.spine.client.ColumnFilters.all;
-import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.FilterFactory.all;
+import static io.spine.client.FilterFactory.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
@@ -121,60 +120,55 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     /**
-     * Builds the {@link EntityFilters} for the {@link Mirror} projection based on the domain
-     * aggregate {@link Target}.
+     * Builds the {@link Filters} for the {@link Mirror} projection based on the domain aggregate 
+     * {@link Target}.
      *
      * @param target
      *         domain aggregate query target
      * @return entity filters for this projection
      */
-    static EntityFilters buildFilters(Target target) {
-        EntityIdFilter idFilter = buildIdFilter(target);
-        EntityFilters filters = target.getFilters();
-        CompositeColumnFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
-        EntityFilters appendedFilters = filters.toBuilder()
-                                               .setIdFilter(idFilter)
-                                               .addFilter(typeFilter)
-                                               .build();
+    static Filters buildFilters(Target target) {
+        IdFilter idFilter = buildIdFilter(target);
+        Filters filters = target.getFilters();
+        CompositeFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
+        Filters appendedFilters = filters.toBuilder()
+                                         .setIdFilter(idFilter)
+                                         .addFilter(typeFilter)
+                                         .build();
         return appendedFilters;
     }
 
-    private static EntityIdFilter buildIdFilter(Target target) {
+    private static IdFilter buildIdFilter(Target target) {
         if (target.getIncludeAll()) {
-            return EntityIdFilter.getDefaultInstance();
+            return IdFilter.getDefaultInstance();
         }
-        List<EntityId> domainIds = target.getFilters()
-                                         .getIdFilter()
-                                         .getIdsList();
+        List<Any> domainIds = target.getFilters()
+                                    .getIdFilter()
+                                    .getIdsList();
         if (domainIds.isEmpty()) {
-            return EntityIdFilter.getDefaultInstance();
+            return IdFilter.getDefaultInstance();
         }
-        EntityIdFilter result = assembleSystemIdFilter(domainIds);
+        IdFilter result = assembleSystemIdFilter(domainIds);
         return result;
     }
 
-    private static EntityIdFilter assembleSystemIdFilter(Collection<EntityId> domainIds) {
-        List<EntityId> mirrorIds = domainIds.stream()
-                                            .map(MirrorProjection::domainToSystemId)
-                                            .collect(toList());
-        EntityIdFilter idFilter = EntityIdFilter
+    private static IdFilter assembleSystemIdFilter(Collection<Any> domainIds) {
+        List<Any> mirrorIds = domainIds.stream()
+                                       .map(MirrorProjection::domainToSystemId)
+                                       .collect(toList());
+        IdFilter idFilter = IdFilter
                 .newBuilder()
                 .addAllIds(mirrorIds)
                 .build();
         return idFilter;
     }
 
-    private static EntityId domainToSystemId(EntityId domainId) {
-        Any aggregateId = domainId.getId();
+    private static Any domainToSystemId(Any domainId) {
         MirrorId mirrorId = MirrorId
                 .newBuilder()
-                .setValue(aggregateId)
+                .setValue(domainId)
                 .build();
-        Any anyId = pack(mirrorId);
-        EntityId systemId = EntityId
-                .newBuilder()
-                .setId(anyId)
-                .build();
+        Any systemId = pack(mirrorId);
         return systemId;
     }
 

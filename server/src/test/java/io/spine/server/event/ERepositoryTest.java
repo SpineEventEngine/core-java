@@ -22,10 +22,10 @@ package io.spine.server.event;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.util.Timestamps;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.CompositeColumnFilter.CompositeOperator;
-import io.spine.client.EntityFilters;
+import io.spine.client.CompositeFilter;
+import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.client.Filter;
+import io.spine.client.Filters;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -36,9 +36,6 @@ import static io.spine.server.event.ERepository.toEntityFilters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Grankin
- */
 @DisplayName("ERepository should")
 class ERepositoryTest {
 
@@ -47,7 +44,7 @@ class ERepositoryTest {
     void convertEmptyToFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        Filters entityFilters = toEntityFilters(query);
         assertTrue(entityFilters.getFilterList()
                                 .isEmpty());
     }
@@ -60,13 +57,13 @@ class ERepositoryTest {
                 .setAfter(Timestamps.MIN_VALUE)
                 .setBefore(Timestamps.MAX_VALUE)
                 .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        Filters entityFilters = toEntityFilters(query);
         assertEquals(1, entityFilters.getFilterCount());
 
-        CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
-        List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
+        CompositeFilter compositeFilter = entityFilters.getFilter(0);
+        List<Filter> Filters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.ALL, compositeFilter.getOperator());
-        assertEquals(2, columnFilters.size());
+        assertEquals(2, Filters.size());
     }
 
     @Test
@@ -80,14 +77,14 @@ class ERepositoryTest {
                 .addFilter(validFilter)
                 .addFilter(invalidFilter)
                 .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        Filters entityFilters = toEntityFilters(query);
         assertEquals(1, entityFilters.getFilterCount());
 
-        CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
-        List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
+        CompositeFilter compositeFilter = entityFilters.getFilter(0);
+        List<Filter> Filters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.EITHER, compositeFilter.getOperator());
-        assertEquals(1, columnFilters.size());
-        Any typeNameAsAny = columnFilters.get(0)
+        assertEquals(1, Filters.size());
+        Any typeNameAsAny = Filters.get(0)
                                          .getValue();
         assertEquals(typeName.trim(), toObject(typeNameAsAny, String.class));
     }

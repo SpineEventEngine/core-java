@@ -22,7 +22,7 @@ package io.spine.server.entity.given;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.EntityFilters;
+import io.spine.client.Filters;
 import io.spine.client.OrderBy;
 import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
@@ -31,9 +31,6 @@ import io.spine.server.entity.AbstractVersionableEntity;
 
 import static io.spine.testing.Tests.assertMatchesMask;
 
-/**
- * @author Mykhailo Drachuk
- */
 public final class RecordBasedRepositoryTestEnv {
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Specific to this tests.
@@ -73,8 +70,8 @@ public final class RecordBasedRepositoryTestEnv {
                               .build();
     }
 
-    public static EntityFilters emptyFilters() {
-        return EntityFilters.getDefaultInstance();
+    public static Filters emptyFilters() {
+        return Filters.getDefaultInstance();
     }
 
     public static FieldMask emptyFieldMask() {

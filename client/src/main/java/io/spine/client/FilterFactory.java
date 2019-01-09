@@ -23,28 +23,28 @@ package io.spine.client;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import io.spine.client.CompositeColumnFilter.CompositeOperator;
+import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static io.spine.client.ColumnFilter.Operator;
-import static io.spine.client.ColumnFilter.Operator.EQUAL;
-import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
-import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
-import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
-import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+import static io.spine.client.Filter.Operator;
+import static io.spine.client.Filter.Operator.EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_THAN;
+import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
- * A factory of {@link ColumnFilter} instances.
+ * A factory of {@link Filter} instances.
  *
  * <p>The public methods of this class represent the recommended way to create
- * a {@link ColumnFilter}.
+ * a {@link Filter}.
  *
  * <a name="types"></a>
  * <h1>Comparision types</h1>
@@ -67,37 +67,37 @@ import static io.spine.protobuf.TypeConverter.toAny;
  *
  * @see QueryBuilder for the application
  */
-public final class ColumnFilters {
+public final class FilterFactory {
 
     /** Prevents this utility class instantiation. */
-    private ColumnFilters() {
+    private FilterFactory() {
     }
 
     /**
-     * Creates new equality {@link ColumnFilter}.
+     * Creates new equality {@link Filter}.
      *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of ColumnFilter
+     * @return new instance of Filter
      */
-    public static ColumnFilter eq(String columnName, Object value) {
+    public static Filter eq(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
         return createFilter(columnName, value, EQUAL);
     }
 
     /**
-     * Creates new "greater than" {@link ColumnFilter}.
+     * Creates new "greater than" {@link Filter}.
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of ColumnFilter
+     * @return new instance of Filter
      */
-    public static ColumnFilter gt(String columnName, Object value) {
+    public static Filter gt(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
@@ -105,16 +105,16 @@ public final class ColumnFilters {
     }
 
     /**
-     * Creates new "less than" {@link ColumnFilter}.
+     * Creates new "less than" {@link Filter}.
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of ColumnFilter
+     * @return new instance of Filter
      */
-    public static ColumnFilter lt(String columnName, Object value) {
+    public static Filter lt(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
@@ -122,16 +122,16 @@ public final class ColumnFilters {
     }
 
     /**
-     * Creates new "greater or equal" {@link ColumnFilter}.
+     * Creates new "greater or equal" {@link Filter}.
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of ColumnFilter
+     * @return new instance of Filter
      */
-    public static ColumnFilter ge(String columnName, Object value) {
+    public static Filter ge(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
@@ -139,16 +139,16 @@ public final class ColumnFilters {
     }
 
     /**
-     * Creates new "less or equal" {@link ColumnFilter}.
+     * Creates new "less or equal" {@link Filter}.
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of ColumnFilter
+     * @return new instance of Filter
      */
-    public static ColumnFilter le(String columnName, Object value) {
+    public static Filter le(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
@@ -161,11 +161,11 @@ public final class ColumnFilters {
      * <p>A record is considered matching this filter if and only if it matches all of
      * the aggregated Column filters.
      *
-     * @param first the first {@link ColumnFilter}
-     * @param rest  the array of additional {@linkplain ColumnFilter filters}, possibly empty
-     * @return new instance of {@link CompositeColumnFilter}
+     * @param first the first {@link Filter}
+     * @param rest  the array of additional {@linkplain Filter filters}, possibly empty
+     * @return new instance of {@link CompositeFilter}
      */
-    public static CompositeColumnFilter all(ColumnFilter first, ColumnFilter... rest) {
+    public static CompositeFilter all(Filter first, Filter... rest) {
         return composeFilters(asList(first, rest), ALL);
     }
 
@@ -175,11 +175,11 @@ public final class ColumnFilters {
      * <p>A record is considered matching this filter if it matches at least one of the composite
      * Column filters.
      *
-     * @param first the first {@link ColumnFilter}
-     * @param rest  the array of additional {@linkplain ColumnFilter filters}, possibly empty
-     * @return new instance of {@link CompositeColumnFilter}
+     * @param first the first {@link Filter}
+     * @param rest  the array of additional {@linkplain Filter filters}, possibly empty
+     * @return new instance of {@link CompositeFilter}
      */
-    public static CompositeColumnFilter either(ColumnFilter first, ColumnFilter... rest) {
+    public static CompositeFilter either(Filter first, Filter... rest) {
         return composeFilters(asList(first, rest), EITHER);
     }
 
@@ -190,32 +190,34 @@ public final class ColumnFilters {
      * the composite Column filters.
      *
      * <p>This method is used to create the default {@code ALL} filter if the user chooses to pass
-     * instances of {@link ColumnFilter} directly to the {@link QueryBuilder}.
+     * instances of {@link Filter} directly to the {@link QueryBuilder}.
      *
      * @param filters the aggregated Column filters
-     * @return new instance of {@link CompositeColumnFilter}
-     * @see #all(ColumnFilter, ColumnFilter...) for the public API equivalent
+     * @return new instance of {@link CompositeFilter}
+     * @see #all(Filter, Filter...) for the public API equivalent
      */
-    static CompositeColumnFilter all(Collection<ColumnFilter> filters) {
+    static CompositeFilter all(Collection<Filter> filters) {
         return composeFilters(filters, ALL);
     }
 
-    private static ColumnFilter createFilter(String columnName, Object value, Operator operator) {
+    private static Filter createFilter(String columnName, Object value, Operator operator) {
         Any wrappedValue = toAny(value);
-        ColumnFilter filter = ColumnFilter.newBuilder()
-                                          .setColumnName(columnName)
-                                          .setValue(wrappedValue)
-                                          .setOperator(operator)
-                                          .build();
+        Filter filter = FilterVBuilder
+                .newBuilder()
+                .setFieldName(columnName)
+                .setValue(wrappedValue)
+                .setOperator(operator)
+                .build();
         return filter;
     }
 
-    private static CompositeColumnFilter composeFilters(Collection<ColumnFilter> filters,
+    private static CompositeFilter composeFilters(Collection<Filter> filters,
                                                         CompositeOperator operator) {
-        CompositeColumnFilter result = CompositeColumnFilter.newBuilder()
-                                                            .addAllFilter(filters)
-                                                            .setOperator(operator)
-                                                            .build();
+        CompositeFilter result = CompositeFilter
+                .newBuilder()
+                .addAllFilter(filters)
+                .setOperator(operator)
+                .build();
         return result;
     }
 

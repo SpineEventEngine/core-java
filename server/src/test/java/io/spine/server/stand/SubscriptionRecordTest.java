@@ -24,6 +24,8 @@ import com.google.protobuf.Any;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -39,9 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("SubscriptionRecord should")
 class SubscriptionRecordTest {
 
@@ -52,8 +51,8 @@ class SubscriptionRecordTest {
         Project entityState = Project.getDefaultInstance();
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
-
-        boolean matchResult = matchingRecord.matches(TYPE, redundantId);
+        boolean matchResult = matchingRecord.matches(TYPE,
+                                                     EventEnvelope.of(Event.getDefaultInstance()));
         assertTrue(matchResult);
     }
 
@@ -67,7 +66,8 @@ class SubscriptionRecordTest {
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        boolean matchResult = notMatchingRecord.matches(OTHER_TYPE, redundantId);
+        boolean matchResult = notMatchingRecord.matches(OTHER_TYPE,
+                                                        EventEnvelope.of(Event.getDefaultInstance()));
         assertFalse(matchResult);
     }
 
@@ -84,7 +84,8 @@ class SubscriptionRecordTest {
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        boolean matchResult = notMatchingRecord.matches(TYPE, redundantId);
+        boolean matchResult =
+                notMatchingRecord.matches(TYPE, EventEnvelope.of(Event.getDefaultInstance()));
         assertFalse(matchResult);
     }
 

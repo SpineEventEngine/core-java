@@ -21,11 +21,11 @@
 package io.spine.client.given;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.ProtocolStringList;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
+import io.spine.client.Filters;
+import io.spine.client.IdFilter;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.protobuf.AnyPacker;
@@ -82,20 +82,18 @@ public class QueryFactoryTestEnv {
 
     public static void checkFiltersEmpty(Query query) {
         Target entityTarget = query.getTarget();
-        EntityFilters filters = entityTarget.getFilters();
+        Filters filters = entityTarget.getFilters();
         assertNotNull(filters);
-        assertEquals(EntityFilters.getDefaultInstance(), filters);
+        assertEquals(Filters.getDefaultInstance(), filters);
     }
 
-    public static void verifyIdFilter(Set<TestEntityId> expectedIds, EntityFilters filters) {
+    public static void verifyIdFilter(Set<TestEntityId> expectedIds, Filters filters) {
         assertNotNull(filters);
-        EntityIdFilter idFilter = filters.getIdFilter();
+        IdFilter idFilter = filters.getIdFilter();
         assertNotNull(idFilter);
-        List<EntityId> actualListOfIds = idFilter.getIdsList();
+        List<Any> actualListOfIds = idFilter.getIdsList();
         for (TestEntityId testEntityId : expectedIds) {
-            EntityId expectedEntityId = EntityId.newBuilder()
-                                                .setId(AnyPacker.pack(testEntityId))
-                                                .build();
+            Any expectedEntityId = AnyPacker.pack(testEntityId);
             assertTrue(actualListOfIds.contains(expectedEntityId));
         }
     }
@@ -134,7 +132,7 @@ public class QueryFactoryTestEnv {
         }
     }
 
-    public static EntityFilters stripIdFilter(EntityFilters filters) {
+    public static Filters stripIdFilter(Filters filters) {
         return filters.toBuilder()
                       .clearIdFilter()
                       .build();
@@ -152,20 +150,20 @@ public class QueryFactoryTestEnv {
         Target factoryTarget = query1.getTarget();
         Target builderTarget = query2.getTarget();
 
-        EntityFilters factoryFilters = factoryTarget.getFilters();
-        EntityFilters builderFilters = builderTarget.getFilters();
+        Filters factoryFilters = factoryTarget.getFilters();
+        Filters builderFilters = builderTarget.getFilters();
 
         // Everything except filters is the same
         assertEquals(stripFilters(factoryTarget), stripFilters(builderTarget));
 
-        EntityIdFilter factoryIdFilter = factoryFilters.getIdFilter();
-        EntityIdFilter builderIdFilter = builderFilters.getIdFilter();
+        IdFilter factoryIdFilter = factoryFilters.getIdFilter();
+        IdFilter builderIdFilter = builderFilters.getIdFilter();
 
         // Everything except ID filter is the same
         assertEquals(stripIdFilter(factoryFilters), stripIdFilter(builderFilters));
 
-        Collection<EntityId> factoryEntityIds = factoryIdFilter.getIdsList();
-        Collection<EntityId> builderEntityIds = builderIdFilter.getIdsList();
+        Collection<Any> factoryEntityIds = factoryIdFilter.getIdsList();
+        Collection<Any> builderEntityIds = builderIdFilter.getIdsList();
 
         // Order may differ but all the elements are the same
         assertThat(builderEntityIds).hasSize(factoryEntityIds.size());

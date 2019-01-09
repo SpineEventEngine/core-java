@@ -87,14 +87,13 @@ class TopicFactoryTest {
 
             verifyTargetAndContext(topic);
 
-            List<EntityId> actualIds = topic.getTarget()
-                                            .getFilters()
-                                            .getIdFilter()
-                                            .getIdsList();
+            List<Any> actualIds = topic.getTarget()
+                                       .getFilters()
+                                       .getIdFilter()
+                                       .getIdsList();
             assertEquals(ids.size(), actualIds.size());
-            for (EntityId actualId : actualIds) {
-                Any rawId = actualId.getId();
-                TestEntityId unpackedId = unpack(rawId, TestEntityId.class);
+            for (Any actualId : actualIds) {
+                TestEntityId unpackedId = unpack(actualId, TestEntityId.class);
                 assertTrue(ids.contains(unpackedId));
             }
         }

@@ -30,10 +30,9 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.EventMessage;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityStateUpdate;
+import io.spine.client.Filters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.Query;
@@ -58,6 +57,7 @@ import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv;
 import io.spine.server.stand.given.StandTestEnv.MemoizeOnEventCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.MemoizingReadSide;
 import io.spine.system.server.NoOpSystemReadSide;
 import io.spine.test.commandservice.customer.Customer;
@@ -132,7 +132,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-//It's OK for this test.
+// It's OK for this test.
 @SuppressWarnings({
         "OverlyCoupledClass",
         "ClassWithTooManyMethods",
@@ -263,7 +263,6 @@ class StandTest extends TenantAwareTest {
 
         ProjectId someId = ProjectId.getDefaultInstance();
         Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(someId, Project.getDefaultInstance(), stateVersion));
 
         verify(executor, times(1)).execute(any(Runnable.class));
     }
@@ -408,7 +407,6 @@ class StandTest extends TenantAwareTest {
                     .next();
             CustomerId customerId = customer.getId();
             Version stateVersion = GivenVersion.withNumber(1);
-            stand.update(asEnvelope(customerId, customer, stateVersion));
 
             Any packedState = pack(customer);
             assertEquals(packedState, memoizeCallback.newEntityState());
@@ -430,7 +428,6 @@ class StandTest extends TenantAwareTest {
                     .next();
             ProjectId projectId = project.getId();
             Version stateVersion = GivenVersion.withNumber(1);
-            stand.update(asEnvelope(projectId, project, stateVersion));
 
             Any packedState = pack(project);
             assertEquals(packedState, memoizeCallback.newEntityState());
@@ -451,9 +448,11 @@ class StandTest extends TenantAwareTest {
         Collection<Customer> callbackStates = newHashSet();
         MemoizeOnEventCallback callback = new MemoizeOnEventCallback() {
             @Override
-            public void onEvent(EntityStateUpdate update) {
-                super.onEvent(update);
-                Customer customerInCallback = unpack(update.getState(), Customer.class);
+            public void onEvent(EventMessage event) {
+                super.onEvent(event);
+                EntityStateChanged theEvent = (EntityStateChanged) event;
+                Any newState = theEvent.getNewState();
+                Customer customerInCallback = unpack(newState, Customer.class);
                 callbackStates.add(customerInCallback);
             }
         };
@@ -462,7 +461,6 @@ class StandTest extends TenantAwareTest {
         for (Customer customer : sampleCustomers) {
             CustomerId customerId = customer.getId();
             Version stateVersion = GivenVersion.withNumber(1);
-            stand.update(asEnvelope(customerId, customer, stateVersion));
         }
 
         assertEquals(newHashSet(sampleCustomers), callbackStates);
@@ -486,7 +484,6 @@ class StandTest extends TenantAwareTest {
                 .next();
         CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(customerId, customer, stateVersion));
 
         assertNull(memoizeCallback.newEntityState());
     }
@@ -522,12 +519,11 @@ class StandTest extends TenantAwareTest {
                 .next();
         CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(customerId, customer, stateVersion));
 
         Any packedState = pack(customer);
         for (StandTestEnv.MemoizeOnEventCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState());
-            verify(callback, times(1)).onEvent(any(EntityStateUpdate.class));
+            verify(callback, times(1)).onEvent(any(EventMessage.class));
         }
     }
 
@@ -542,9 +538,8 @@ class StandTest extends TenantAwareTest {
                 .next();
         CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(customerId, customer, stateVersion));
 
-        verify(callback, never()).onEvent(any(EntityStateUpdate.class));
+        verify(callback, never()).onEvent(any(EventMessage.class));
     }
 
     private MemoizeOnEventCallback
@@ -996,16 +991,15 @@ class StandTest extends TenantAwareTest {
     }
 
     private static
-    ArgumentMatcher<EntityFilters> entityFilterMatcher(Collection<ProjectId> projectIds) {
+    ArgumentMatcher<Filters> entityFilterMatcher(Collection<ProjectId> projectIds) {
         // This argument matcher does NOT mimic the exact repository behavior.
-        // Instead, it only matches the EntityFilters instance in case it has EntityIdFilter with
+        // Instead, it only matches the EntityFilters instance in case it has IdFilter with
         // ALL the expected IDs.
         return argument -> {
             boolean everyElementPresent = true;
-            for (EntityId entityId : argument.getIdFilter()
-                                             .getIdsList()) {
-                Any idAsAny = entityId.getId();
-                Message rawId = unpack(idAsAny);
+            for (Any entityId : argument.getIdFilter()
+                                        .getIdsList()) {
+                Message rawId = unpack(entityId);
                 if (rawId instanceof ProjectId) {
                     ProjectId convertedProjectId = (ProjectId) rawId;
                     everyElementPresent = everyElementPresent

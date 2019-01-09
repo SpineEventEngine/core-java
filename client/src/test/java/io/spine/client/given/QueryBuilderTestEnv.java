@@ -38,9 +38,6 @@ import static io.spine.protobuf.TypeConverter.toObject;
 import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class QueryBuilderTestEnv {
 
     public static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;

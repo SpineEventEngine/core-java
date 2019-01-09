@@ -26,11 +26,10 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
+import io.spine.client.CompositeFilter;
+import io.spine.client.Filter;
+import io.spine.client.Filters;
+import io.spine.client.IdFilter;
 import io.spine.core.Version;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
@@ -54,9 +53,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.client.ColumnFilters.all;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.base.Identifier.pack;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.FilterFactory.all;
+import static io.spine.client.FilterFactory.eq;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -67,7 +67,6 @@ import static io.spine.server.storage.given.RecordStorageTestEnv.delete;
 import static io.spine.server.storage.given.RecordStorageTestEnv.emptyFilters;
 import static io.spine.server.storage.given.RecordStorageTestEnv.newEntity;
 import static io.spine.server.storage.given.RecordStorageTestEnv.newEntityQuery;
-import static io.spine.server.storage.given.RecordStorageTestEnv.toEntityId;
 import static io.spine.test.storage.Project.Status.CANCELLED;
 import static io.spine.test.storage.Project.Status.DONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -121,15 +120,15 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setNumber(0)
                 .build();
 
-        ColumnFilter status = eq("projectStatusValue", wrappedValue);
-        ColumnFilter version = eq("counterVersion", versionValue);
-        CompositeColumnFilter aggregatingFilter = CompositeColumnFilter
+        Filter status = eq("projectStatusValue", wrappedValue);
+        Filter version = eq("counterVersion", versionValue);
+        CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL)
                 .addFilter(status)
                 .addFilter(version)
                 .build();
-        EntityFilters filters = EntityFilters
+        Filters filters = Filters
                 .newBuilder()
                 .addFilter(aggregatingFilter)
                 .build();
@@ -176,14 +175,14 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
     @DisplayName("filter records by ordinal enum columns")
     protected void filterByOrdinalEnumColumns() {
         String columnPath = "projectStatusOrdinal";
-        checkEnumColumnFilter(columnPath);
+        checkEnumFilter(columnPath);
     }
 
     @Test
     @DisplayName("filter records by string enum columns")
     protected void filterByStringEnumColumns() {
         String columnPath = "projectStatusString";
-        checkEnumColumnFilter(columnPath);
+        checkEnumFilter(columnPath);
     }
 
     @Test
@@ -214,16 +213,12 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(idWrong2, recordWrong2);
 
         // Prepare the query
-        Any matchingIdPacked = TypeConverter.toAny(idMatching);
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(matchingIdPacked)
-                .build();
-        EntityIdFilter idFilter = EntityIdFilter
+        Any entityId = TypeConverter.toAny(idMatching);
+        IdFilter idFilter = IdFilter
                 .newBuilder()
                 .addIds(entityId)
                 .build();
-        EntityFilters filters = EntityFilters
+        Filters filters = Filters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
@@ -254,7 +249,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(activeRecordId, create(activeRecord, activeEntity, storage));
         storage.write(archivedRecordId, create(archivedRecord, archivedEntity, storage));
 
-        EntityFilters filters = EntityFilters
+        Filters filters = Filters
                 .newBuilder()
                 .addFilter(all(eq(archived.toString(), true)))
                 .build();
@@ -288,13 +283,13 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
 
-        EntityIdFilter idFilter = EntityIdFilter
+        IdFilter idFilter = IdFilter
                 .newBuilder()
-                .addIds(toEntityId(activeId))
-                .addIds(toEntityId(archivedId))
-                .addIds(toEntityId(deletedId))
+                .addIds(pack(activeId))
+                .addIds(pack(archivedId))
+                .addIds(pack(deletedId))
                 .build();
-        EntityFilters filters = EntityFilters
+        Filters filters = Filters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
@@ -329,13 +324,13 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
 
-        EntityIdFilter idFilter = EntityIdFilter
+        IdFilter idFilter = IdFilter
                 .newBuilder()
-                .addIds(toEntityId(activeId))
-                .addIds(toEntityId(archivedId))
-                .addIds(toEntityId(deletedId))
+                .addIds(pack(activeId))
+                .addIds(pack(archivedId))
+                .addIds(pack(deletedId))
                 .build();
-        EntityFilters filters = EntityFilters
+        Filters filters = Filters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
@@ -371,13 +366,13 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
 
-        EntityIdFilter idFilter = EntityIdFilter
+        IdFilter idFilter = IdFilter
                 .newBuilder()
-                .addIds(toEntityId(activeId))
-                .addIds(toEntityId(archivedId))
-                .addIds(toEntityId(deletedId))
+                .addIds(pack(activeId))
+                .addIds(pack(archivedId))
+                .addIds(pack(deletedId))
                 .build();
-        EntityFilters filters = EntityFilters
+        Filters filters = Filters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
@@ -440,13 +435,13 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setValue(initialStatus.getNumber())
                 .build();
-        ColumnFilter status = eq("projectStatusValue", initialStatusValue);
-        CompositeColumnFilter aggregatingFilter = CompositeColumnFilter
+        Filter status = eq("projectStatusValue", initialStatusValue);
+        CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL)
                 .addFilter(status)
                 .build();
-        EntityFilters filters = EntityFilters
+        Filters filters = Filters
                 .newBuilder()
                 .addFilter(aggregatingFilter)
                 .build();
@@ -503,15 +498,15 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         write(noMatchIdEntity);
         write(deletedEntity);
 
-        EntityIdFilter idFilter = EntityIdFilter
+        IdFilter idFilter = IdFilter
                 .newBuilder()
-                .addIds(toEntityId(targetId))
+                .addIds(pack(targetId))
                 .build();
-        CompositeColumnFilter columnFilter = all(eq("projectStatusValue", CANCELLED.getNumber()));
-        EntityFilters filters = EntityFilters
+        CompositeFilter filter = all(eq("projectStatusValue", CANCELLED.getNumber()));
+        Filters filters = Filters
                 .newBuilder()
                 .setIdFilter(idFilter)
-                .addFilter(columnFilter)
+                .addFilter(filter)
                 .build();
         RecordStorage<ProjectId> storage = getStorage();
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
@@ -544,16 +539,16 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
      * A complex test case to check the correct {@link TestCounterEntity} filtering by the
      * enumerated column returning {@link Project.Status}.
      */
-    private void checkEnumColumnFilter(String columnPath) {
+    private void checkEnumFilter(String columnPath) {
         Project.Status requiredValue = DONE;
         Project.Status value = Enum.valueOf(Project.Status.class, requiredValue.name());
-        ColumnFilter status = eq(columnPath, value);
-        CompositeColumnFilter aggregatingFilter = CompositeColumnFilter
+        Filter status = eq(columnPath, value);
+        CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL)
                 .addFilter(status)
                 .build();
-        EntityFilters filters = EntityFilters
+        Filters filters = Filters
                 .newBuilder()
                 .addFilter(aggregatingFilter)
                 .build();

@@ -35,7 +35,7 @@ import "spine/core/user_id.proto";
 import "spine/core/tenant_id.proto";
 import "spine/core/actor_context.proto";
 import "spine/core/response.proto";
-import "spine/client/entities.proto";
+import "spine/client/filters.proto";
 
 // Topic identifier.
 message TopicId {

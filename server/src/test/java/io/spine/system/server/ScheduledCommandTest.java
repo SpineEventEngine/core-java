@@ -26,7 +26,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.util.Durations;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.client.EntityFilters;
+import io.spine.client.Filters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.core.Command;
@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.FilterFactory.eq;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
@@ -138,14 +138,14 @@ class ScheduledCommandTest {
     }
 
     private Iterator<ScheduledCommand> findAllDeleted(CommandId id) {
-        EntityFilters filters = requestFactory.query()
-                                              .select(ScheduledCommandRecord.class)
-                                              .byId(id)
-                                              .where(eq(deleted.name(), true))
-                                              .build()
-                                              .getTarget()
-                                              .getFilters();
-        Iterator<ScheduledCommand> commands = repository.find(filters, 
+        Filters filters = requestFactory.query()
+                                        .select(ScheduledCommandRecord.class)
+                                        .byId(id)
+                                        .where(eq(deleted.name(), true))
+                                        .build()
+                                        .getTarget()
+                                        .getFilters();
+        Iterator<ScheduledCommand> commands = repository.find(filters,
                                                               OrderBy.getDefaultInstance(),
                                                               Pagination.getDefaultInstance(),
                                                               FieldMask.getDefaultInstance());

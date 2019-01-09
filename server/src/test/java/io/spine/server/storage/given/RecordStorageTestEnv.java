@@ -25,10 +25,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
 import io.spine.base.Time;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
+import io.spine.client.Filters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.core.Version;
@@ -137,17 +135,7 @@ public class RecordStorageTestEnv {
         assertEquals(expected, singleRecord);
     }
 
-    public static EntityId toEntityId(ProjectId id) {
-        Any packed = Identifier.pack(id);
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(packed)
-                .build();
-        return entityId;
-    }
-
-    public static <T> EntityQuery<T> newEntityQuery(EntityFilters filters,
-                                                    RecordStorage<T> storage) {
+    public static <T> EntityQuery<T> newEntityQuery(Filters filters, RecordStorage<T> storage) {
         return EntityQueries.from(filters, emptyOrderBy(), emptyPagination(), storage);
     }
 
@@ -159,8 +147,8 @@ public class RecordStorageTestEnv {
         return Pagination.getDefaultInstance();
     }
 
-    public static EntityFilters emptyFilters() {
-        return EntityFilters.getDefaultInstance();
+    public static Filters emptyFilters() {
+        return Filters.getDefaultInstance();
     }
 
     public static <E> void assertIteratorsEqual(Iterator<? extends E> first,

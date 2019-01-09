@@ -47,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Mykhailo Drachuk
  * @see io.spine.client.TopicFactory#select(Class) to start topic building
- * @see io.spine.client.ColumnFilters for filter creation shortcuts
+ * @see io.spine.client.Filters for filter creation shortcuts
  * @see AbstractTargetBuilder for more details on this builders API
  */
 public final class TopicBuilder extends AbstractTargetBuilder<Topic, TopicBuilder> {
