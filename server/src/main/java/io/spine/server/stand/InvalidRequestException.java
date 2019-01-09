@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,8 +27,6 @@ import io.spine.core.MessageRejection;
 /**
  * A base class for exceptions fired in case an invalid request
  * has been submitted to {@linkplain Stand}.
- *
- * @author Alex Tymchenko
  */
 public class InvalidRequestException extends RuntimeException implements MessageRejection {
 

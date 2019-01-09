@@ -1,7 +1,7 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
- * Redistribution and use in origin and/or binary forms, with or without
+ * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
  *
@@ -23,12 +23,12 @@
 buildscript {
 
     // Apply the script created by `GradleProject.createTestEnvExt()` which defines
-    // `enclosingRootDir` variable that we use below. 
+    // `enclosingRootDir` variable that we use below.
     apply from: "$rootDir/testEnv.gradle"
 
     // Apply shared dependencies.
     apply from: "$enclosingRootDir/config/gradle/dependencies.gradle"
-    
+
     // Applying from `version.gradle` inside the `buildscript` section to reuse the properties.
     //
     // As long as `buildscript` section is always evaluated first, we need to apply

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,6 +34,8 @@ import io.spine.server.entity.TransactionListener;
 
 import java.util.List;
 
+import static io.spine.server.projection.ProjectionTransaction.start;
+
 /**
  * Dispatches an event to projections.
  */
@@ -56,25 +58,25 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected void deliverNowTo(I entityId) {
+    protected void dispatchInTx(I entityId) {
         ProjectionRepository<I, P, ?> repository = repository();
         P projection = repository.findOrCreate(entityId);
-        dispatchInTx(projection);
+        runTransactionFor(projection);
         store(projection);
     }
 
-    protected void dispatchInTx(P projection) {
-        ProjectionTransaction<I, ?, ?> tx =
-                ProjectionTransaction.start((Projection<I, ?, ?>) projection);
+    @SuppressWarnings("unchecked") // Simplify massive generic args.
+    protected void runTransactionFor(P projection) {
+        ProjectionTransaction<I, ?, ?> tx = start((Projection<I, ?, ?>) projection);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
-        doDispatch(projection, envelope());
+        invokeDispatcher(projection, envelope());
         tx.commit();
     }
 
     @CanIgnoreReturnValue
     @Override
-    protected List<Event> doDispatch(P projection, EventEnvelope event) {
+    protected List<Event> invokeDispatcher(P projection, EventEnvelope event) {
         projection.play(event.getOuterObject());
         return ImmutableList.of();
     }

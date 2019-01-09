@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -310,7 +310,7 @@ public class Given {
 
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
-        void on(BcProjectCreated event, EventContext context) {
+        public void on(BcProjectCreated event, EventContext context) {
             // Do nothing.
         }
     }

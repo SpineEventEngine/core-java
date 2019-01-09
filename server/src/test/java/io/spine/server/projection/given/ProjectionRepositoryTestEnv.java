@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -66,12 +66,12 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        void on(PrjProjectCreated event) {
+        public void on(PrjProjectCreated event) {
             // do nothing.
         }
 
         @Subscribe
-        void on(PrjTaskAdded event) {
+        public void on(PrjTaskAdded event) {
             // do nothing
         }
     }
@@ -84,7 +84,7 @@ public class ProjectionRepositoryTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        void apply(PrjProjectCreated event, EventContext eventContext) {
+        public void apply(PrjProjectCreated event, EventContext eventContext) {
             // NOP
         }
 

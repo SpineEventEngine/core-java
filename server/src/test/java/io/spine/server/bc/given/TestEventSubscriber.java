@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,16 +33,16 @@ public class TestEventSubscriber extends AbstractEventSubscriber {
     private Message handledEvent;
 
     @Subscribe
-    void on(BcProjectCreated event, EventContext context) {
+    public void on(BcProjectCreated event, EventContext context) {
         this.handledEvent = event;
     }
 
     @Subscribe
-    void on(BcTaskAdded event, EventContext context) {
+    public void on(BcTaskAdded event, EventContext context) {
     }
 
     @Subscribe
-    void on(BcProjectStarted event, EventContext context) {
+    public void on(BcProjectStarted event, EventContext context) {
     }
 
     public Message getHandledEvent() {

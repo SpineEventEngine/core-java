@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -134,7 +134,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbProject expectedProject1 = createdProjectState(createProject1);
             BbProject expectedProject2 = createdProjectState(createProject2);
             context.receivesCommands(createProject1, createProject2)
-                   .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
+                   .assertThat(exactly(BbProject.class,
+                                       of(expectedProject1, expectedProject2)));
         }
 
         @Test

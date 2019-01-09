@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -61,17 +61,17 @@ abstract class PmEndpoint<I,
     }
 
     @Override
-    protected void deliverNowTo(I id) {
+    protected void dispatchInTx(I id) {
         ProcessManagerRepository<I, P, ?> repository = repository();
         P manager = repository.findOrCreate(id);
-        List<Event> events = dispatchInTx(manager);
+        List<Event> events = runTransactionFor(manager);
         store(manager);
         repository.postEvents(events);
     }
 
-    protected List<Event> dispatchInTx(P processManager) {
+    protected List<Event> runTransactionFor(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        List<Event> events = doDispatch(processManager, envelope());
+        List<Event> events = invokeDispatcher(processManager, envelope());
         tx.commit();
         return events;
     }
