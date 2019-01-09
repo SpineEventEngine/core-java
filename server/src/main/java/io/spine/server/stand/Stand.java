@@ -396,7 +396,8 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * A contract for the callbacks to be executed once a new event occurs in the system.
+     * A contract for the callbacks to be executed once a new event is emitted by the monitored
+     * entity.
      *
      * @see #activate(Subscription, OnEventCallback, StreamObserver)
      * @see #cancel(Subscription, StreamObserver)
