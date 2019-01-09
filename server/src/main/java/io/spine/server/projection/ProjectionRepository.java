@@ -36,6 +36,10 @@ import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
+import io.spine.server.inbox.Inbox;
+import io.spine.server.inbox.InboxId;
+import io.spine.server.inbox.InboxIds;
+import io.spine.server.inbox.MessageDestination;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -252,6 +256,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     protected void dispatchTo(I id, Event event) {
         lifecycleOf(id).onDispatchEventToSubscriber(event);
+        //TODO:2019-01-09:alex.tymchenko: move `inbox.put` here and kill `dispatchNowTo(I id, EventEnvelope envelope)`
     }
 
     /**
@@ -264,8 +269,18 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Internal
     protected void dispatchNowTo(I id, EventEnvelope envelope) {
-        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
-        endpoint.dispatchTo(id);
+        Inbox inbox = getInbox(id);
+        inbox.put(envelope)
+             .forSubscriber();
+    }
+
+    private Inbox getInbox(I id) {
+        InboxId inboxId = InboxIds.wrap(id, getEntityStateType());
+        return Inbox.newBuilder(inboxId)
+                    .add(MessageDestination.UPDATE_SUBSCRIBER,
+                         envelope -> ProjectionEndpoint.of(this, (EventEnvelope) envelope)
+                                                       .dispatchTo(id))
+                    .build();
     }
 
     @Internal
