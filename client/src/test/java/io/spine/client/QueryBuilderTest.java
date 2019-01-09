@@ -104,7 +104,7 @@ class QueryBuilderTest {
 
         @Test
         @DisplayName(NOT_ACCEPT_NULLS)
-        void notAcceptNulls() throws NoSuchMethodException {
+        void notAcceptNulls() {
             NullPointerTester tester = new NullPointerTester();
             tester.testAllPublicStaticMethods(QueryBuilder.class);
             tester.testAllPublicInstanceMethods(factory.select(TEST_ENTITY_TYPE));

@@ -40,14 +40,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <K> the type of message class objects such as {@link io.spine.core.EventClass EventClass}
  *            or {@link io.spine.core.CommandClass CommandClass}
  * @param <R> the type returned by the {@linkplain Route#apply(Message, Message) routing function}
- * @author Alexander Yevsyukov
  */
 abstract class MessageRouting<M extends Message, C extends Message, K extends MessageClass, R>
         implements Route<M, C, R> {
 
     private static final long serialVersionUID = 0L;
 
-    @SuppressWarnings("CollectionDeclaredAsConcreteClass") // We need a serializable field.
     private final HashMap<K, Route<M, C, R>> routes = Maps.newHashMap();
 
     /** The default route to be used if there is no matching entry set in {@link #routes}. */

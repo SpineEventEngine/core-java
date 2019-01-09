@@ -19,6 +19,7 @@
  */
 package io.spine.server.stand;
 
+import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionValidationError;
@@ -26,16 +27,12 @@ import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Validates the {@linkplain Subscription} instances submitted to {@linkplain Stand}.
- *
- * @author Alex Tymchenko
  */
-class SubscriptionValidator extends RequestValidator<Subscription> {
+final class SubscriptionValidator extends RequestValidator<Subscription> {
 
     private final SubscriptionRegistry registry;
 
@@ -50,40 +47,36 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
     }
 
     @Override
-    protected SubscriptionValidationError getInvalidMessageErrorCode() {
+    protected SubscriptionValidationError invalidMessageErrorCode() {
         return SubscriptionValidationError.INVALID_SUBSCRIPTION;
     }
 
     @Override
-    protected InvalidSubscriptionException onInvalidMessage(String exceptionMsg,
-                                                            Subscription subscription,
-                                                            Error error) {
+    protected ProtocolMessageEnum unsupportedTargetErrorCode() {
+        return SubscriptionValidationError.UNKNOWN_SUBSCRIPTION;
+    }
+
+    @Override
+    protected InvalidSubscriptionException invalidMessageException(String exceptionMsg,
+                                                                   Subscription subscription,
+                                                                   Error error) {
         return new InvalidSubscriptionException(exceptionMsg, subscription, error);
     }
 
     @Override
-    protected Optional<RequestNotSupported<Subscription>> isSupported(Subscription request) {
-        boolean includedInRegistry = checkInRegistry(request);
-
-        if (includedInRegistry) {
-            return Optional.empty();
-        }
-
-        return Optional.of(missingInRegistry());
+    protected boolean isSupported(Subscription request) {
+        return checkInRegistry(request);
     }
 
-    private static RequestNotSupported<Subscription> missingInRegistry() {
-        return new RequestNotSupported<Subscription>(
-                SubscriptionValidationError.UNKNOWN_SUBSCRIPTION,
-                "Cannot find the subscription in the registry") {
+    @Override
+    protected String errorMessage(Subscription request) {
+        return "Cannot find the subscription in the registry";
+    }
 
-            @Override
-            protected InvalidRequestException createException(String errorMessage,
-                                                              Subscription request,
-                                                              Error error) {
-                return new InvalidSubscriptionException(errorMessage, request, error);
-            }
-        };
+    @Override
+    protected InvalidRequestException unsupportedException(Subscription request,
+                                                           Error error) {
+        return new InvalidSubscriptionException(errorMessage(request), request, error);
     }
 
     private boolean checkInRegistry(Subscription request) {

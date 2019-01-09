@@ -134,7 +134,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbProject expectedProject1 = createdProjectState(createProject1);
             BbProject expectedProject2 = createdProjectState(createProject2);
             context.receivesCommands(createProject1, createProject2)
-                   .assertThat(exactly(BbProject.class, of(expectedProject1, expectedProject2)));
+                   .assertThat(exactly(BbProject.class,
+                                       of(expectedProject1, expectedProject2)));
         }
 
         @Test
