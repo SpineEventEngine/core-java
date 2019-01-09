@@ -33,9 +33,12 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
@@ -72,7 +75,7 @@ public abstract class Bus<T extends Message,
     private final ChainBuilder<E> chainBuilder;
 
     /** The dispatch callback, NO-OP by default. */
-    private DispatchCallback<E> dispatchCallback = new DispatchCallback.NoOp<>();
+    private final Set<DispatchCallback<E>> dispatchCallbacks = newHashSet();
 
     protected Bus(BusBuilder<E, T, ?> builder) {
         super();
@@ -282,8 +285,8 @@ public abstract class Bus<T extends Message,
         return emptyList();
     }
 
-    public void setDispatchCallback(DispatchCallback<E> dispatchCallback) {
-        this.dispatchCallback = dispatchCallback;
+    public void addDispatchCallback(DispatchCallback<E> callback) {
+        dispatchCallbacks.add(callback);
     }
 
     /**
@@ -364,7 +367,7 @@ public abstract class Bus<T extends Message,
     }
 
     private void afterDispatch(E envelope) {
-        dispatchCallback.accept(envelope);
+        dispatchCallbacks.forEach(callback -> callback.accept(envelope));
     }
 
     /**
@@ -406,4 +409,7 @@ public abstract class Bus<T extends Message,
      * @param messages the messages to store
      */
     protected abstract void store(Iterable<T> messages);
+
+    public interface DispatchCallback<E extends MessageEnvelope<?, ?, ?>> extends Consumer<E> {
+    }
 }
