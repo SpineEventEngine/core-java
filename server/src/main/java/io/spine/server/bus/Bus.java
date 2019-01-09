@@ -71,6 +71,7 @@ public abstract class Bus<T extends Message,
 
     private final ChainBuilder<E> chainBuilder;
 
+    /** The dispatch callback, NO-OP by default. */
     private DispatchCallback<E> dispatchCallback = new DispatchCallback.NoOp<>();
 
     protected Bus(BusBuilder<E, T, ?> builder) {

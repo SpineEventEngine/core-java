@@ -25,11 +25,9 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
-import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
@@ -38,14 +36,11 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
-import io.spine.server.tenant.EntityUpdateOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -62,7 +57,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.ack;
-import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * A container for storing the latest {@link io.spine.server.aggregate.Aggregate Aggregate}
@@ -124,16 +118,6 @@ public class Stand implements AutoCloseable {
         this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.getSystemReadSide());
     }
 
-    /**
-     * Posts the state of an {@link VersionableEntity} to this {@code Stand}.
-     *
-     * @param entity the entity which state should be delivered to the {@code Stand}
-     */
-    public void post(TenantId tenantId, VersionableEntity<?, ?> entity) {
-        EntityStateEnvelope<?, ?> envelope = EntityStateEnvelope.of(entity, tenantId);
-        update(envelope);
-    }
-
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -159,22 +143,6 @@ public class Stand implements AutoCloseable {
         }
     }
 
-    private void notifyMatchingSubscriptions(Object id, Any entityState, TypeUrl typeUrl) {
-        if (subscriptionRegistry.hasType(typeUrl)) {
-            Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
-
-            for (SubscriptionRecord subscriptionRecord : allRecords) {
-
-                boolean subscriptionIsActive = subscriptionRecord.isActive();
-                boolean stateMatches = subscriptionRecord.matches(typeUrl, id);
-                if (subscriptionIsActive && stateMatches) {
-                    Runnable action = notifySubscriptionAction(subscriptionRecord, id);
-                    callbackExecutor.execute(action);
-                }
-            }
-        }
-    }
-
     /**
      * Creates the subscribers notification action.
      *
@@ -193,31 +161,6 @@ public class Stand implements AutoCloseable {
             callback.onEvent(event);
         };
         return result;
-    }
-
-    /**
-     * Updates the state of an entity inside of the current instance of {@code Stand}.
-     *
-     * <p>The state update is then propagated to the callbacks. The set of matched callbacks is
-     * determined by filtering all the registered callbacks by the entity {@link TypeUrl}.
-     *
-     * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
-     *
-     * @param envelope the updated entity state,
-     *                 packed as {@linkplain EntityStateEnvelope envelope}
-     */
-    void update(EntityStateEnvelope<?, ?> envelope) {
-        EntityUpdateOperation op = new EntityUpdateOperation(envelope) {
-            @Override
-            public void run() {
-                Object id = envelope.getEntityId();
-                Message entityState = envelope.getMessage();
-                Any packedState = AnyPacker.pack(entityState);
-                TypeUrl entityTypeUrl = TypeUrl.of(entityState);
-                notifyMatchingSubscriptions(id, packedState, entityTypeUrl);
-            }
-        };
-        op.execute();
     }
 
     @Internal
@@ -379,8 +322,6 @@ public class Stand implements AutoCloseable {
      *
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
-     *
-     * @see #update(EntityStateEnvelope)
      */
     public <I, E extends VersionableEntity<I, ?>>
            void registerTypeSupplier(Repository<I, E> repository) {

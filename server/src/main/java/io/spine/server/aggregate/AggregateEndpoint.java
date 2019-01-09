@@ -106,7 +106,7 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected final void onModified(A entity) {
-        repository().onModifiedAggregate(envelope().getTenantId(), entity);
+        repository().store(entity);
     }
 
     @Override

@@ -24,16 +24,23 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
+import io.spine.client.EntityId;
+import io.spine.client.EntityStateUpdate;
+import io.spine.client.EntityStateUpdateVBuilder;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
+import io.spine.client.SubscriptionUpdateVBuilder;
 import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.logging.Logging;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.stand.Stand;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;
@@ -88,6 +95,12 @@ public class SubscriptionService
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Currently the method assumes that every event is an {@link EntityStateChanged} event as
+     * subscribing to other event types is not supported.
+     */
     @Override
     public void activate(Subscription subscription,
                          StreamObserver<SubscriptionUpdate> responseObserver) {
@@ -98,11 +111,14 @@ public class SubscriptionService
 
             Stand.OnEventCallback updateCallback = event -> {
                 checkNotNull(subscription);
-                SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
-                                                              .setSubscription(subscription)
-                                                              .setResponse(Responses.ok())
-                                                              .addEntityStateUpdates(stateUpdate)
-                                                              .build();
+                EntityStateChanged theEvent = (EntityStateChanged) event;
+                EntityStateUpdate stateUpdate = toStateUpdate(theEvent);
+                SubscriptionUpdate update = SubscriptionUpdateVBuilder
+                        .newBuilder()
+                        .setSubscription(subscription)
+                        .setResponse(Responses.ok())
+                        .addEntityStateUpdates(stateUpdate)
+                        .build();
                 responseObserver.onNext(update);
             };
             Stand targetStand = boundedContext.getStand();
@@ -136,6 +152,19 @@ public class SubscriptionService
     private BoundedContext selectBoundedContext(Target target) {
         TypeUrl type = TypeUrl.parse(target.getType());
         BoundedContext result = typeToContextMap.get(type);
+        return result;
+    }
+
+    private static EntityStateUpdate toStateUpdate(EntityStateChanged event) {
+        EntityId entityId = event.getId()
+                                 .getEntityId();
+        Any packedEntityId = AnyPacker.pack(entityId);
+        Any packedEntityState = event.getNewState();
+        EntityStateUpdate result = EntityStateUpdateVBuilder
+                .newBuilder()
+                .setId(packedEntityId)
+                .setState(packedEntityState)
+                .build();
         return result;
     }
 
