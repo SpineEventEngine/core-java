@@ -162,16 +162,19 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @Override
     public Optional<E> find(I id) {
-        Optional<EntityRecord> optional = findRecord(id);
-        if (!optional.isPresent()) {
-            return Optional.empty();
-        }
-        EntityRecord record = optional.get();
-        if (!record.isActive()) {
-            return Optional.empty();
-        }
-        E entity = toEntity(record);
-        return Optional.of(entity);
+        Optional<EntityRecord> record = findRecord(id);
+        Optional<E> result = record.filter(WithLifecycle::isActive)
+                                   .map(this::toEntity);
+        return result;
+    }
+
+    /**
+     * Finds an entity with the passed ID even if the entity is not
+     * {@linkplain WithLifecycle#isActive() active}.
+     */
+    public Optional<E> doFind(I id) {
+        Optional<EntityRecord> record = findRecord(id);
+        return record.map(this::toEntity);
     }
 
     /**

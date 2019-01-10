@@ -244,7 +244,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T receivesCommand(Message domainCommand) {
-        return this.receivesCommands(singletonList(domainCommand));
+        return receivesCommands(singletonList(domainCommand));
     }
 
     /**
@@ -262,7 +262,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     @CanIgnoreReturnValue
     public T receivesCommands(Message firstCommand, Message secondCommand,
                               Message... otherCommands) {
-        return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
+        return receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
     /**
@@ -290,7 +290,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T receivesEvent(Message messageOrEvent) {
-        return this.receivesEvents(singletonList(messageOrEvent));
+        return receivesEvents(singletonList(messageOrEvent));
     }
 
     /**
@@ -312,7 +312,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
-        return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
+        return receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
     /**
@@ -331,7 +331,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T receivesExternalEvent(BoundedContextName sourceContext, Message messageOrEvent) {
-        return this.receivesExternalEvents(sourceContext, singletonList(messageOrEvent));
+        return receivesExternalEvents(sourceContext, singletonList(messageOrEvent));
     }
 
     /**
@@ -360,8 +360,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                     Message firstEvent,
                                     Message secondEvent,
                                     Message... otherEvents) {
-        return this.receivesExternalEvents(sourceContext,
-                                           asList(firstEvent, secondEvent, otherEvents));
+        return receivesExternalEvents(sourceContext, asList(firstEvent, secondEvent, otherEvents));
     }
 
     /**
@@ -396,7 +395,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                       EventMessage firstEvent,
                                       EventMessage... otherEvents) {
         List<Event> sentEvents = setup().postEvents(producerId, firstEvent, otherEvents);
-        this.postedEvents.addAll(sentEvents);
+        postedEvents.addAll(sentEvents);
         return thisRef();
     }
 
@@ -415,12 +414,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     @CanIgnoreReturnValue
     public T importsEvent(Message eventOrMessage) {
-        return this.importAll(singletonList(eventOrMessage));
+        return importAll(singletonList(eventOrMessage));
     }
 
     @CanIgnoreReturnValue
     public T importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
-        return this.importAll(asList(firstEvent, secondEvent, otherEvents));
+        return importAll(asList(firstEvent, secondEvent, otherEvents));
     }
 
     private T importAll(Collection<Message> domainEvents) {
@@ -593,15 +592,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Obtains the Subject for the Process Manager of the passed class with the given ID.
      */
-    public <I, P extends ProcessManager<I, ?, ?>>
-    PmSubject<P> assertThat(Class<? extends P> pmClass, I id) {
+    public <I, S extends Message, P extends ProcessManager<I, S, ?>>
+    PmSubject<S, P> assertThat(Class<? extends P> pmClass, I id) {
         Class<? extends Message> stateClass = asProcessManagerClass(pmClass).getStateClass();
         Repository repo = repositoryOf(stateClass);
         @SuppressWarnings("unchecked")
         ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;
-        Optional<P> found = pmRepo.find(id);
-        PmSubject<P> result = assertAbout(PmSubject.<P>processManagers()).that(found.orElse(null));
-        return result;
+        P found = pmRepo.doFind(id).orElse(null);
+        return assertAbout(PmSubject.<S, P>processManagers()).that(found);
     }
 
     private Repository repositoryOf(Class<? extends Message> stateClass) {
