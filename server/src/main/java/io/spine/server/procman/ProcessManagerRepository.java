@@ -100,7 +100,7 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Obtains class information of process managers managed by this repository.
      */
-    ProcessManagerClass<P> processManagerClass() {
+    private ProcessManagerClass<P> processManagerClass() {
         return (ProcessManagerClass<P>) entityClass();
     }
 

@@ -67,7 +67,7 @@ import static java.lang.Math.max;
  * This class is made {@code abstract} for preserving type information of aggregate ID and
  * aggregate classes used by implementations.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher<I>,
