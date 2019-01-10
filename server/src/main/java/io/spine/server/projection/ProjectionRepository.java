@@ -39,7 +39,7 @@ import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.inbox.Inbox;
 import io.spine.server.inbox.InboxId;
 import io.spine.server.inbox.InboxIds;
-import io.spine.server.inbox.MessageDestination;
+import io.spine.server.inbox.InboxLabel;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -274,10 +274,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
              .forSubscriber();
     }
 
+    //TODO:2019-01-10:alex.tymchenko: cache the `Inbox` instances.
     private Inbox getInbox(I id) {
         InboxId inboxId = InboxIds.wrap(id, getEntityStateType());
         return Inbox.newBuilder(inboxId)
-                    .add(MessageDestination.UPDATE_SUBSCRIBER,
+                    .add(InboxLabel.UPDATE_SUBSCRIBER,
                          envelope -> ProjectionEndpoint.of(this, (EventEnvelope) envelope)
                                                        .dispatchTo(id))
                     .build();

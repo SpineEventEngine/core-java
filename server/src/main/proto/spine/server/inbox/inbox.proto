@@ -44,10 +44,12 @@ message InboxId {
     string type_url = 2;
 }
 
-// What to do with the message dispatched to an `Inbox` once it's time to dispatch it to its
-// target.
+// A label applied to the message in `Inbox`.
 //
-enum MessageDestination {
+// Determines what to do with the message once it's time to dispatch it to its target, whether
+// it's an entity or a standalone message handler.
+//
+enum InboxLabel {
 
     MD_UNKNOWN = 0;
 

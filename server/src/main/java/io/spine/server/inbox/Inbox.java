@@ -30,6 +30,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * A container for the messages dispatched to a certain consumer, such as an event subscriber
@@ -41,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Inbox {
 
     private final InboxId id;
-    private final ImmutableMap<MessageDestination, DispatchOperation> operations;
+    private final ImmutableMap<InboxLabel, DispatchOperation> operations;
 
     private Inbox(Builder builder) {
         this.id = builder.inboxId;
@@ -66,8 +67,8 @@ public class Inbox {
     public static class Builder {
 
         private final InboxId inboxId;
-        private final Map<MessageDestination, DispatchOperation> operations =
-                new EnumMap<>(MessageDestination.class);
+        private final Map<InboxLabel, DispatchOperation> operations =
+                new EnumMap<>(InboxLabel.class);
 
         /**
          * Creates an instance of {@code Builder} with the given consumer identifier.
@@ -76,10 +77,10 @@ public class Inbox {
             inboxId = id;
         }
 
-        public Builder add(MessageDestination destination, DispatchOperation operation) {
-            checkNotNull(destination);
+        public Builder add(InboxLabel label, DispatchOperation operation) {
+            checkNotNull(label);
             checkNotNull(operation);
-            operations.put(destination, operation);
+            operations.put(label, operation);
             return this;
         }
 
@@ -88,91 +89,141 @@ public class Inbox {
         }
     }
 
-    public EventDestinations put(EventEnvelope envelope) {
+    /**
+     * Puts an event envelope to the {@code Inbox} and allows to set a label for this message,
+     * determining its processing destiny.
+     *
+     * @param envelope
+     *         the event to put to {@code Inbox}
+     * @return the choice of labels for an event message available in this {@code Inbox}
+     */
+    public EventLabels put(EventEnvelope envelope) {
         checkNotNull(envelope);
-        return new EventDestinations(envelope);
+        return new EventLabels(envelope);
     }
 
-    public CommandDestinations put(CommandEnvelope envelope) {
+    /**
+     * Puts a command envelope to the {@code Inbox} and allows to set a label for this message,
+     * determining its processing destiny.
+     *
+     * @param envelope
+     *         the event to put to {@code Inbox}
+     * @return the choice of labels for a command message available in this {@code Inbox}
+     */
+    public CommandLabels put(CommandEnvelope envelope) {
         checkNotNull(envelope);
-        return new CommandDestinations(envelope);
+        return new CommandLabels(envelope);
     }
 
-    private void storeOrDeliver(MessageDestination destination,
-                                ActorMessageEnvelope<?, ?, ?> envelope) {
-        ensureHasDestination(destination);
+    private void storeOrDeliver(InboxLabel label, ActorMessageEnvelope<?, ?, ?> envelope) {
+        ensureHasDestination(label);
 
         //TODO:2019-01-09:alex.tymchenko: store if windowing is enabled.
         // Deliver right away for now.
 
-        operations.get(destination)
+        operations.get(label)
                   .dispatch(envelope);
     }
 
-    private void ensureHasDestination(MessageDestination destination) {
-        if (!operations.containsKey(destination)) {
-            throw new DestinationNotAvailableException(id, destination);
+    private void ensureHasDestination(InboxLabel label) {
+        if (!operations.containsKey(label)) {
+            throw new LabelNotFoundException(id, label);
         }
     }
 
-    public class EventDestinations {
+    /**
+     * Labels to put to the event in {@code Inbox}.
+     *
+     * <p>Determines how the event is going to be processed.
+     */
+    public class EventLabels {
 
         private final EventEnvelope envelope;
 
-        private EventDestinations(EventEnvelope envelope) {
+        private EventLabels(EventEnvelope envelope) {
             this.envelope = envelope;
         }
 
+        /**
+         * Marks the event envelope with a label for passing to an event reactor method.
+         */
         public void toReact() {
-            storeOrDeliver(MessageDestination.REACT_UPON_EVENT, envelope);
+            storeOrDeliver(InboxLabel.REACT_UPON_EVENT, envelope);
         }
 
+        /**
+         * Marks the event envelope with a label for passing to an event importer method.
+         */
         public void toImport() {
-            storeOrDeliver(MessageDestination.IMPORT_EVENT, envelope);
+            storeOrDeliver(InboxLabel.IMPORT_EVENT, envelope);
         }
 
+        /**
+         * Marks the event envelope with a label for passing to a method emitting commands in
+         * response.
+         */
         public void toCommand() {
-            storeOrDeliver(MessageDestination.COMMAND_UPON_EVENT, envelope);
+            storeOrDeliver(InboxLabel.COMMAND_UPON_EVENT, envelope);
         }
 
+        /**
+         * Marks the event envelope with a label for passing to an event subscriber method.
+         */
         public void forSubscriber() {
-            storeOrDeliver(MessageDestination.UPDATE_SUBSCRIBER, envelope);
+            storeOrDeliver(InboxLabel.UPDATE_SUBSCRIBER, envelope);
         }
     }
 
-    public class CommandDestinations {
+    /**
+     * Labels to put to the command in {@code Inbox}.
+     *
+     * <p>Determines how the command is going to be processed.
+     */
+    public class CommandLabels {
 
         private final CommandEnvelope envelope;
 
-        private CommandDestinations(CommandEnvelope envelope) {
+        private CommandLabels(CommandEnvelope envelope) {
             this.envelope = envelope;
         }
 
+        /**
+         * Marks the command envelope with a label for passing to a command handler method.
+         */
         public void toHandle() {
-            storeOrDeliver(MessageDestination.HANDLE_COMMAND, envelope);
+            storeOrDeliver(InboxLabel.HANDLE_COMMAND, envelope);
         }
 
+        /**
+         * Marks the command envelope with a label for passing to a method emitting commands in
+         * response.
+         */
         public void toTransform() {
-            storeOrDeliver(MessageDestination.TRANSFORM_COMMAND, envelope);
+            storeOrDeliver(InboxLabel.TRANSFORM_COMMAND, envelope);
         }
     }
 
-    public static class DestinationNotAvailableException extends RuntimeException {
+    /**
+     * Thrown if there is an attempt to mark a message put to {@code Inbox} with a label, which was
+     * not {@linkplain io.spine.server.inbox.Inbox.Builder#add(InboxLabel,
+     * io.spine.server.inbox.Inbox.DispatchOperation) added} for the {@code Inbox} instance.
+     */
+    public static class LabelNotFoundException extends RuntimeException {
 
         private static final long serialVersionUID = 1L;
 
-        private final MessageDestination destination;
+        private final InboxLabel label;
         private final InboxId inboxId;
 
-        public DestinationNotAvailableException(InboxId id, MessageDestination destination) {
-            this.destination = destination;
+        public LabelNotFoundException(InboxId id, InboxLabel label) {
+            this.label = label;
             inboxId = id;
         }
 
         @Override
         public String getMessage() {
-            return String.format("Inbox %s has no available destination %s",
-                                 Stringifiers.toString(inboxId), destination);
+            return format("Inbox %s has no available label %s",
+                          Stringifiers.toString(inboxId), label);
         }
     }
 }
