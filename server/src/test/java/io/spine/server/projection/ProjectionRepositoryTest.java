@@ -29,6 +29,7 @@ import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -75,6 +76,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertEventClasses;
@@ -90,7 +92,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("ProjectionRepository should")
 class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
@@ -105,9 +106,7 @@ class ProjectionRepositoryTest
         return newInstance(producerId, requestFactory);
     }
 
-    private static Event createEvent(TenantId tenantId,
-                                     EventMessage eventMessage,
-                                     Timestamp when) {
+    private static Event createEvent(TenantId tenantId, EventMessage eventMessage, Timestamp when) {
         Version version = Versions.increment(Versions.zero());
         return newEventFactory(tenantId, PRODUCER_ID).createEvent(eventMessage, version, when);
     }
@@ -442,17 +441,21 @@ class ProjectionRepositoryTest
 
         dispatchEvent(event);
 
-        TestProjectionRepository testRepo = repository();
+        TestProjectionRepository repo = repository();
+        MessageEnvelope lastMessage = repo.getLastErrorEnvelope();
 
-        assertTrue(testRepo.getLastErrorEnvelope() instanceof EventEnvelope);
-        assertEquals(getMessage(event), testRepo.getLastErrorEnvelope()
-                                                .getMessage());
-        assertEquals(event, testRepo.getLastErrorEnvelope()
-                                    .getOuterObject());
+        assertThat(lastMessage)
+                .isInstanceOf(EventEnvelope.class);
+        assertThat(lastMessage.getMessage())
+                .isEqualTo(getMessage(event));
+        assertThat(lastMessage.getOuterObject())
+                .isEqualTo(event);
 
         // It must be "illegal argument type" since projections of this repository
         // do not handle such events.
-        assertTrue(testRepo.getLastException() instanceof IllegalArgumentException);
+        RuntimeException lastException = repo.getLastException();
+        assertThat(lastException)
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Nested
@@ -481,8 +484,8 @@ class ProjectionRepositoryTest
     @DisplayName("convert null timestamp to default")
     void convertNullTimestamp() {
         Timestamp timestamp = getCurrentTime();
-        assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
-        assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
+        assertThat(nullToDefault(timestamp)).isEqualTo(timestamp);
+        assertThat(nullToDefault(null)).isEqualTo(Timestamp.getDefaultInstance());
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore dispatch() result in this test
@@ -510,8 +513,11 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("expose read and write methods for the timestamp of the last handled event")
     void getSetLastHandled() {
-        assertNotNull(repository().readLastHandledEventTime());
-        repository().writeLastHandledEventTime(getCurrentTime());
+        TestProjectionRepository repository = repository();
+        assertThat(repository.readLastHandledEventTime()).isNotNull();
+        Timestamp time = getCurrentTime();
+        repository.writeLastHandledEventTime(time);
+        assertThat(repository.readLastHandledEventTime()).isEqualTo(time);
     }
 
     /**
