@@ -31,7 +31,12 @@ option java_package = "io.spine.server.inbox";
 option java_outer_classname = "InboxProto";
 option java_multiple_files = true;
 
+import "google/protobuf/timestamp.proto";
+
 import "spine/client/entities.proto";
+import "spine/core/event.proto";
+import "spine/core/command.proto";
+
 
 // An identifier of an entity inbox.
 //
@@ -70,4 +75,34 @@ enum InboxLabel {
 
     // Pass an event message to a `@Command`-annotated commander method.
     COMMAND_UPON_EVENT = 6;
+}
+
+// A UUID-generated identifier of an `Inbox` message.
+//
+message InboxMessageId {
+
+    string uuid = 1 [(required) = true];
+}
+
+// A message put into `Inbox` and stored in the `InboxStorage`.
+//
+message InboxMessageRecord {
+
+    InboxMessageId id = 1 [(required) = true];
+
+    // The identifier of the `Inbox` in which this message is stored.
+    InboxId inbox_id = 2 [(required) = true];
+
+    // What the message is.
+    oneof payload {
+
+        core.Event event = 3;
+
+        core.Command command = 4;
+    }
+
+    InboxLabel label = 5 [(required) = true];
+
+    // A point in time when the message was received by the `Inbox` instance.
+    google.protobuf.Timestamp when_received = 6 [(required) = true];
 }
