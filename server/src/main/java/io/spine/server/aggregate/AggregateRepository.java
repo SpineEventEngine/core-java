@@ -437,7 +437,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>This method defines the basic flow of an {@code Aggregate} loading. First,
      * the {@linkplain AggregateStateRecord Aggregate history} is
-     * {@linkplain #fetchHistory fetched} from the storage. Then the {@code Aggregate} is
+     * {@linkplain #loadHistory fetched} from the storage. Then the {@code Aggregate} is
      * {@linkplain #play restored} from its state history.
      *
      * @param id the ID of the aggregate
@@ -445,7 +445,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         with the ID
      */
     private Optional<A> load(I id) {
-        Optional<AggregateStateRecord> found = fetchHistory(id);
+        Optional<AggregateStateRecord> found = loadHistory(id);
         Optional<A> result = found.map(history -> play(id, history));
         return result;
     }
@@ -470,7 +470,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return the {@link AggregateStateRecord} for the {@code Aggregate} or
      *         {@code Optional.empty()} if there is no record with the ID
      */
-    protected Optional<AggregateStateRecord> fetchHistory(I id) {
+    private Optional<AggregateStateRecord> loadHistory(I id) {
         AggregateStorage<I> storage = aggregateStorage();
 
         int eventsAfterLastSnapshot = storage.readEventCountAfterLastSnapshot(id);
