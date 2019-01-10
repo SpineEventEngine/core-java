@@ -89,12 +89,43 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
+     * Create a new entity instance with its default state.
+     *
+     * @param id the id of the entity
+     * @return new entity instance
+     */
+    public abstract E create(I id);
+
+    /**
+     * Stores the passed object.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
+     *
+     * @param obj an instance to store
+     */
+    protected abstract void store(E obj);
+
+    /**
      * Finds an entity with the passed ID.
      *
      * @param id the ID of the entity to load
      * @return the entity or {@link Optional#empty()} if there's no entity with such ID
      */
     public abstract Optional<E> find(I id);
+
+    /**
+     * Returns an iterator over the entities managed by the repository that match the passed filter.
+     *
+     * <p>The returned iterator does not support removal.
+     *
+     * <p>Iteration through entities is performed by {@linkplain #find(Object) loading}
+     * them one by one.
+     */
+    public Iterator<E> iterator(Predicate<E> filter) {
+        Iterator<E> unfiltered = new EntityIterator<>(this);
+        Iterator<E> filtered = Iterators.filter(unfiltered, filter::test);
+        return filtered;
+    }
 
     /**
      * Obtains model class for the entities managed by this repository.
@@ -213,37 +244,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     private static <I, E extends Entity<I, ?>>
     Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
         return (Repository<I, VersionableEntity<I, ?>>) repository;
-    }
-
-    /**
-     * Create a new entity instance with its default state.
-     *
-     * @param id the id of the entity
-     * @return new entity instance
-     */
-    public abstract E create(I id);
-
-    /**
-     * Stores the passed object.
-     *
-     * <p>NOTE: The storage must be assigned before calling this method.
-     *
-     * @param obj an instance to store
-     */
-    protected abstract void store(E obj);
-
-    /**
-     * Returns an iterator over the entities managed by the repository that match the passed filter.
-     *
-     * <p>The returned iterator does not support removal.
-     *
-     * <p>Iteration through entities is performed by {@linkplain #find(Object) loading}
-     * them one by one.
-     */
-    public Iterator<E> iterator(Predicate<E> filter) {
-        Iterator<E> unfiltered = new EntityIterator<>(this);
-        Iterator<E> filtered = Iterators.filter(unfiltered, filter::test);
-        return filtered;
     }
 
     /**
