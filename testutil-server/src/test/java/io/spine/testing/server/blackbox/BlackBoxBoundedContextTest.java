@@ -36,11 +36,14 @@ import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
+import io.spine.testing.server.blackbox.given.BbInitProcess;
+import io.spine.testing.server.blackbox.given.BbInitRepository;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
+import io.spine.testing.server.procman.PmSubject;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +67,7 @@ import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
+import static io.spine.testing.server.blackbox.given.Given.initProject;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
@@ -85,7 +89,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @BeforeEach
     void setUp() {
         context = newInstance().with(new BbProjectRepository(),
-                                     new BbProjectViewRepository());
+                                     new BbProjectViewRepository(),
+                                     new BbInitRepository());
     }
 
     @AfterEach
@@ -103,7 +108,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
     
     @Test
-    @DisplayName("ignore events sent events in emitted")
+    @DisplayName("ignore sent events in emitted")
     void ignoreSentEvents() {
         BbProjectId id = newProjectId();
         context.receivesCommand(createProject(id))
@@ -128,11 +133,11 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         @Test
         @DisplayName("several aggregates")
         void aggregates() {
-            BbCreateProject createProject1 = createProject();
-            BbCreateProject createProject2 = createProject();
-            BbProject expectedProject1 = createdProjectState(createProject1);
-            BbProject expectedProject2 = createdProjectState(createProject2);
-            context.receivesCommands(createProject1, createProject2)
+            BbCreateProject cmd1 = createProject();
+            BbCreateProject cmd2 = createProject();
+            BbProject expectedProject1 = createdProjectState(cmd1);
+            BbProject expectedProject2 = createdProjectState(cmd2);
+            context.receivesCommands(cmd1, cmd2)
                    .assertThat(exactly(BbProject.class,
                                        ImmutableSet.of(expectedProject1, expectedProject2)));
         }
@@ -149,11 +154,11 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         @Test
         @DisplayName("several projections")
         void projections() {
-            BbCreateProject createProject1 = createProject();
-            BbCreateProject createProject2 = createProject();
-            BbProjectView expectedProject1 = createProjectView(createProject1);
-            BbProjectView expectedProject2 = createProjectView(createProject2);
-            context.receivesCommands(createProject1, createProject2)
+            BbCreateProject cmd1 = createProject();
+            BbCreateProject cmd2 = createProject();
+            BbProjectView expectedProject1 = createProjectView(cmd1);
+            BbProjectView expectedProject2 = createProjectView(cmd2);
+            context.receivesCommands(cmd1, cmd2)
                    .assertThat(exactly(BbProjectView.class,
                                        ImmutableSet.of(expectedProject1, expectedProject2)));
         }
@@ -350,6 +355,47 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
             assertEntityTypes();
             assertEnricher();
+        }
+    }
+
+    @Nested
+    @DisplayName("obtain PmSubject with")
+    class ObtainPmSubject {
+
+        private BbProjectId id;
+        private PmSubject<BbInit, BbInitProcess> assertProcessManager;
+
+        @BeforeEach
+        void getSubject() {
+            id = newProjectId();
+            assertProcessManager = context.receivesCommand(initProject(id))
+                                          .assertThat(BbInitProcess.class, id);
+        }
+
+        @Test
+        @DisplayName("archived flag subject")
+        void archivedFlag() {
+            assertProcessManager.archivedFlag()
+                                .isFalse();
+        }
+
+        @Test
+        @DisplayName("deleted flag subject")
+        void deletedFlag() {
+            assertProcessManager.deletedFlag()
+                                .isTrue();
+        }
+
+        @Test
+        @DisplayName("state subject")
+        void stateSubject() {
+            BbInit expectedState = BbInit
+                    .newBuilder()
+                    .setId(id)
+                    .setInitialized(true)
+                    .build();
+            assertProcessManager.hasStateThat()
+                                .isEqualTo(expectedState);
         }
     }
 }

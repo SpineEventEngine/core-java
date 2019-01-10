@@ -32,9 +32,7 @@ import java.util.List;
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
  * @param <M> the type of message envelopes processed by the endpoint
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("unchecked") // Operations on repository are logically checked.
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
                           M extends ActorMessageEnvelope<?, ?, ?>>

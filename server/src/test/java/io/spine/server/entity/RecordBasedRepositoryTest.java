@@ -22,6 +22,8 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.truth.IterableSubject;
+import com.google.common.truth.OptionalSubject;
+import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -34,6 +36,7 @@ import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.storage.RecordStorage;
+import io.spine.testing.TestValues;
 import io.spine.testing.server.entity.given.GivenLifecycleFlags;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.tenant.TenantAwareTest;
@@ -81,7 +84,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @param <E>
  *         the type of the {@link Entity} of this repository; the type is checked to implement
  *         {@link TestEntityWithStringColumn} at runtime
- * @author Dmytro Dashenkov
  */
 public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
         I,
@@ -166,18 +168,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         return repository.loadAll(ids);
     }
 
-    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
-    private Iterator<E> loadAll() {
-        return repository.loadAll();
-    }
-
     private E loadOrCreate(I id) {
         return repository.findOrCreate(id);
-    }
-
-    @SuppressWarnings("MethodOnlyUsedFromInnerClass") // Uses generic param <E> of the top class.
-    private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
-        return repository.find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
     }
 
     /*
@@ -194,25 +186,61 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     }
 
     @Nested
-    @DisplayName("find")
-    class Find {
+    @DisplayName("find one entity")
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    class FineOne {
 
-        @Test
-        @DisplayName("single entity by ID")
-        void singleEntityById() {
-            E entity = createEntity(985);
+        private E entity;
 
-            storeEntity(entity);
-
-            Optional<E> optional = findById(entity.getId());
-            assertTrue(optional.isPresent());
-
-            Entity<?, ?> found = optional.get();
-            assertEquals(found, entity);
+        @BeforeEach
+        void createTheEntity() {
+            entity = createEntity(TestValues.random(1000));
         }
 
         @Test
-        @DisplayName("multiple entities by IDs")
+        @DisplayName("by ID")
+        void byId() {
+            storeEntity(entity);
+            assertFound();
+        }
+
+        @Test
+        @DisplayName("by ID if archived")
+        void byIdArchived() {
+            archive((TransactionalEntity) entity);
+            storeEntity(entity);
+            assertDidFound();
+        }
+
+        @Test
+        @DisplayName("by ID if deleted")
+        void byIdDeleted() {
+            delete((TransactionalEntity) entity);
+            storeEntity(entity);
+            assertDidFound();
+        }
+
+        private void assertFound() {
+            assertResult(findById(entity.getId()));
+        }
+
+        private void assertDidFound() {
+            assertResult(repository.findRaw(entity.getId()));
+        }
+
+        private void assertResult(Optional<E> optional) {
+            OptionalSubject assertResult = Truth8.assertThat(optional);
+            assertResult.isPresent();
+            assertResult.hasValue(entity);
+        }
+    }
+
+    @Nested
+    @DisplayName("find multiple entities")
+    class FindMultiple {
+
+        @Test
+        @DisplayName("by IDs")
         void multipleEntitiesByIds() {
             int count = 10;
             List<E> entities = createAndStoreEntities(repository, count);
@@ -232,7 +260,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         @Test
-        @DisplayName("entities by query")
+        @DisplayName("by query")
         void entitiesByQuery() {
             I id1 = createId(271);
             I id2 = createId(314);
@@ -266,7 +294,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         @Test
-        @DisplayName("entities by query and field mask")
+        @DisplayName("by query and field mask")
         void entitiesByQueryAndFields() {
             int count = 10;
             List<E> entities = createAndStoreEntities(repository, count);
@@ -287,7 +315,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         @Test
-        @DisplayName("entities in ascending order")
+        @DisplayName("in ascending order")
         void entitiesInAscendingOrder() {
             int count = 10;
             // UUIDs are guaranteed to produced a collection with unordered names. 
@@ -303,7 +331,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         @Test
-        @DisplayName("entities in descending order")
+        @DisplayName("in descending order")
         void entitiesInDescendingOrder() {
             int count = 10;
             // UUIDs are guaranteed to produced a collection with unordered names. 
@@ -335,7 +363,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertEquals(expectedList, foundList);
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("all entities")
         void allEntities() {
