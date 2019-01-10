@@ -49,6 +49,7 @@ import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.testing.server.procman.PmSubject;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -56,6 +57,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
@@ -590,6 +592,13 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     }
 
     /**
+     * Performs data reading operation in a tenant context.
+     */
+    protected <@Nullable D> D readOperation(Supplier<D> supplier) {
+        return supplier.get();
+    }
+
+    /**
      * Obtains the Subject for the Process Manager of the passed class with the given ID.
      */
     public <I, S extends Message, P extends ProcessManager<I, S, ?>>
@@ -598,7 +607,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         Repository repo = repositoryOf(stateClass);
         @SuppressWarnings("unchecked")
         ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;
-        P found = pmRepo.doFind(id).orElse(null);
+        P found = readOperation(() -> pmRepo.doFind(id)
+                                            .orElse(null));
         return assertAbout(PmSubject.<S, P>processManagers()).that(found);
     }
 
