@@ -76,13 +76,11 @@ public final class CommandErrorHandler implements Logging {
     public CaughtError handleError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-
         boolean rejection = causedByRejection(exception);
-        if (rejection) {
-            return handleRejection(envelope, exception);
-        } else {
-            return handleRuntimeError(envelope, exception);
-        }
+        CaughtError result = rejection
+                             ? handleRejection(envelope, exception)
+                             : handleRuntimeError(envelope, exception);
+        return result;
     }
 
     private CaughtError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
@@ -92,11 +90,10 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private CaughtError handleRuntimeError(CommandEnvelope envelope, RuntimeException exception) {
-        if (isHandled(exception)) {
-            return CaughtError.handled();
-        } else {
-            return handleNewRuntimeError(envelope, exception);
-        }
+        CaughtError result = isHandled(exception)
+                             ? CaughtError.handled()
+                             : handleNewRuntimeError(envelope, exception);
+        return result;
     }
 
     private CaughtError handleNewRuntimeError(CommandEnvelope envelope,
