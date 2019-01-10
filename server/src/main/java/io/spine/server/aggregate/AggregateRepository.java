@@ -424,13 +424,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return loaded or created aggregate instance
      */
     A loadOrCreate(I id) {
-        Optional<A> optional = load(id);
-
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-
-        A result = create(id);
+        A result = load(id).orElseGet(() -> {
+            A created = create(id);
+            lifecycleOf(id).onEntityCreated(AGGREGATE);
+            return created;
+        });
         return result;
     }
 
@@ -447,14 +445,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         with the ID
      */
     private Optional<A> load(I id) {
-        Optional<AggregateStateRecord> eventsFromStorage = fetchHistory(id);
-        if (eventsFromStorage.isPresent()) {
-            A result = play(id, eventsFromStorage.get());
-            return Optional.of(result);
-        } else {
-            lifecycleOf(id).onEntityCreated(AGGREGATE);
-            return Optional.empty();
-        }
+        Optional<AggregateStateRecord> found = fetchHistory(id);
+        Optional<A> result = found.map(history -> play(id, history));
+        return result;
     }
 
     /**
@@ -484,8 +477,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         int batchSize = max(snapshotTrigger, eventsAfterLastSnapshot) + 1;
 
         AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
-        Optional<AggregateStateRecord> eventsFromStorage = storage.read(request);
-        return eventsFromStorage;
+        Optional<AggregateStateRecord> result = storage.read(request);
+        return result;
     }
 
     /**
@@ -530,8 +523,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Optional<A> find(I id) throws IllegalStateException {
-        Optional<A> result = load(id);
-        return result;
+        return load(id);
     }
 
     /**
