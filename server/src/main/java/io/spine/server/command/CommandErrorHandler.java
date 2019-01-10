@@ -27,6 +27,7 @@ import io.spine.base.Errors;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
+import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.RejectionEnvelope;
@@ -34,9 +35,10 @@ import io.spine.system.server.CommandErrored;
 import io.spine.system.server.CommandRejected;
 import io.spine.system.server.SystemWriteSide;
 
+import java.util.function.Consumer;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.command.Rejections.causedByRejection;
-import static java.lang.String.format;
 
 /**
  * The handler of the errors thrown while command dispatching.
@@ -45,7 +47,7 @@ import static java.lang.String.format;
  * the {@linkplain CommandDispatcher#onError error handling} to an instance of
  * {@code CommandErrorHandler}.
  *
- * @see #handleError(CommandEnvelope, RuntimeException)
+ * @see #handle(CommandEnvelope, RuntimeException)
  */
 @Internal
 public final class CommandErrorHandler implements Logging {
@@ -73,20 +75,20 @@ public final class CommandErrorHandler implements Logging {
      * @return the result of the error handing
      */
     @CanIgnoreReturnValue
-    public CaughtError handleError(CommandEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
+    public CaughtError handle(CommandEnvelope command, RuntimeException exception) {
+        checkNotNull(command);
         checkNotNull(exception);
         boolean rejection = causedByRejection(exception);
         CaughtError result = rejection
-                             ? handleRejection(envelope, exception)
-                             : handleRuntimeError(envelope, exception);
+                             ? handleRejection(command, exception)
+                             : handleRuntimeError(command, exception);
         return result;
     }
 
-    private CaughtError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
-        RejectionEnvelope rejection = RejectionEnvelope.from(envelope, exception);
-        markRejected(envelope, rejection);
-        return CaughtError.ofRejection(exception, envelope);
+    private CaughtError handleRejection(CommandEnvelope command, RuntimeException exception) {
+        RejectionEnvelope rejection = RejectionEnvelope.from(command, exception);
+        markRejected(command, rejection);
+        return CaughtError.ofRejection(command, exception);
     }
 
     private CaughtError handleRuntimeError(CommandEnvelope envelope, RuntimeException exception) {
@@ -96,18 +98,36 @@ public final class CommandErrorHandler implements Logging {
         return result;
     }
 
-    private CaughtError handleNewRuntimeError(CommandEnvelope envelope,
-                                              RuntimeException exception) {
-        String commandTypeName = envelope.getMessage()
-                                         .getClass()
-                                         .getName();
-        String commandId = envelope.idAsString();
-        log().error(format("Error dispatching command (class: %s id: %s).",
-                           commandTypeName, commandId),
-                    exception);
+    private CaughtError handleNewRuntimeError(CommandEnvelope cmd, RuntimeException exception) {
+        String commandTypeName = cmd.getMessage()
+                                    .getClass()
+                                    .getName();
+        String commandId = cmd.idAsString();
+        _error(exception, "Error dispatching command (class: `{}` id: {}).",
+               commandTypeName, commandId);
         Error error = Errors.causeOf(exception);
-        markErrored(envelope, error);
+        markErrored(cmd, error);
         return CaughtError.ofRuntime(exception);
+    }
+
+    /**
+     * Handles the passed exception, and if it represents a rejection event it is passed to
+     * the consumer. If the exception was not caused by a rejection, or rethrown earlier, it
+     * will be rethrown.
+     *
+     * @param cmd
+     *         the command which caused the exception
+     * @param exception
+     *         the thrown exception
+     * @param consumer
+     *         the consumer of the rejection event
+     */
+    public void handle(CommandEnvelope cmd, RuntimeException exception, Consumer<Event> consumer) {
+        CaughtError error = handle(cmd, exception);
+        error.asRejection()
+             .map(RejectionEnvelope::getOuterObject)
+             .ifPresent(consumer);
+        error.rethrowOnce();
     }
 
     /**

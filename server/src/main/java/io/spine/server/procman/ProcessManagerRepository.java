@@ -30,7 +30,6 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -41,7 +40,6 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -263,12 +261,8 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        CaughtError error = commandErrorHandler.handleError(envelope, exception);
-        error.asRejection()
-             .map(RejectionEnvelope::getOuterObject)
-             .ifPresent(event -> postEvents(ImmutableList.of(event)));
-        error.rethrowOnce();
+    public void onError(CommandEnvelope cmd, RuntimeException exception) {
+        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.

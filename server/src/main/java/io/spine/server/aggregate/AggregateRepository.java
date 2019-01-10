@@ -30,14 +30,12 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
@@ -233,16 +231,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>If the given error is a rejection, posts the rejection event into
      * the {@link EventBus}. Otherwise, logs the error.
      *
-     * @param envelope  the command which caused the error
-     * @param exception the error occurred during processing of the command
+     * @param cmd
+     *         the command which caused the error
+     * @param exception
+     *         the error occurred during processing of the command
      */
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        CaughtError error = commandErrorHandler.handleError(envelope, exception);
-        error.asRejection()
-             .map(RejectionEnvelope::getOuterObject)
-             .ifPresent(event -> postEvents(ImmutableList.of(event)));
-        error.rethrowOnce();
+    public void onError(CommandEnvelope cmd, RuntimeException exception) {
+        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
     }
 
     @Override
