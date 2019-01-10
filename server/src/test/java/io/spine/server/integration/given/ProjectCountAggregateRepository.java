@@ -36,7 +36,7 @@ class ProjectCountAggregateRepository
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         throw illegalStateWithCauseOf(exception);
     }
 }

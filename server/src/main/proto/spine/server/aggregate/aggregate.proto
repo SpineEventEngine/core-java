@@ -56,6 +56,9 @@ message Snapshot {
 }
 
 // A record with information about an event or a snapshot of an aggregate.
+//
+// This message is used by storage implementations.
+//
 message AggregateEventRecord {
 
     // A timestamp of the event or snapshot in this record.
@@ -70,8 +73,8 @@ message AggregateEventRecord {
     }
 }
 
-// The message for restoring an aggregate state.
-message AggregateStateRecord {
+// The message for restoring an aggregate state from a storage.
+message AggregateHistory {
 
     // If the `snapshot` field is populated, it contains the last snapshot in
     // the history of the aggregate.

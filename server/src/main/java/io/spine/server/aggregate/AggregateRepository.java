@@ -196,32 +196,32 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The repository loads the aggregate by this ID, or creates a new aggregate
      * if there is no aggregate with such ID.
      *
-     * @param envelope the envelope of the command to dispatch
+     * @param cmd the command to dispatch
      */
     @Override
-    public I dispatch(CommandEnvelope envelope) {
-        checkNotNull(envelope);
-        I target = with(envelope.getTenantId())
-                .evaluate(() -> doDispatch(envelope));
+    public I dispatch(CommandEnvelope cmd) {
+        checkNotNull(cmd);
+        I target = with(cmd.getTenantId())
+                .evaluate(() -> doDispatch(cmd));
         return target;
     }
 
-    private I doDispatch(CommandEnvelope envelope) {
-        I target = route(envelope);
-        lifecycleOf(target).onDispatchCommand(envelope.getCommand());
-        dispatchTo(target, envelope);
+    private I doDispatch(CommandEnvelope cmd) {
+        I target = route(cmd);
+        lifecycleOf(target).onDispatchCommand(cmd.getCommand());
+        dispatchTo(target, cmd);
         return target;
     }
 
-    private I route(CommandEnvelope envelope) {
+    private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = getCommandRouting();
-        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
-        onCommandTargetSet(target, envelope.getId());
+        I target = routing.apply(cmd.getMessage(), cmd.getCommandContext());
+        onCommandTargetSet(target, cmd.getId());
         return target;
     }
 
-    private void dispatchTo(I id, CommandEnvelope envelope) {
-        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, envelope);
+    private void dispatchTo(I id, CommandEnvelope cmd) {
+        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, cmd);
         endpoint.dispatchTo(id);
     }
 
@@ -251,6 +251,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return aggregateClass().getExternalEventClasses();
     }
 
+    /**
+     * Obtains classes of events that can be imported by aggregates of this repository.
+     */
     public Set<EventClass> getImportableEventClasses() {
         return aggregateClass().getImportableEventClasses();
     }
@@ -258,68 +261,66 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Dispatches event to one or more aggregates reacting on the event.
      *
-     * @param envelope the event
+     * @param event the event to dispatch
      * @return identifiers of aggregates that reacted on the event
      */
     @Override
-    public Set<I> dispatchEvent(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        Set<I> targets = with(envelope.getTenantId())
-                .evaluate(() -> doDispatch(envelope));
+    public Set<I> dispatchEvent(EventEnvelope event) {
+        checkNotNull(event);
+        Set<I> targets = with(event.getTenantId())
+                .evaluate(() -> doDispatch(event));
         return targets;
     }
 
-    private Set<I> doDispatch(EventEnvelope envelope) {
-        Set<I> targets = route(envelope);
-        targets.forEach(id -> dispatchTo(id, envelope));
+    private Set<I> doDispatch(EventEnvelope event) {
+        Set<I> targets = route(event);
+        targets.forEach(id -> dispatchTo(id, event));
         return targets;
     }
 
-    private Set<I> route(EventEnvelope envelope) {
+    private Set<I> route(EventEnvelope event) {
         EventRouting<I> routing = getEventRouting();
-        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        Set<I> targets = routing.apply(event.getMessage(), event.getEventContext());
         return targets;
     }
 
-    private void dispatchTo(I id, EventEnvelope envelope) {
-        AggregateEventEndpoint<I, A> endpoint =
-                new AggregateEventReactionEndpoint<>(this, envelope);
+    private void dispatchTo(I id, EventEnvelope event) {
+        AggregateEventEndpoint<I, A> endpoint = new AggregateEventReactionEndpoint<>(this, event);
         endpoint.dispatchTo(id);
     }
 
     /**
      * Imports the passed event into one of the aggregates.
      */
-    I importEvent(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        I target = with(envelope.getTenantId()).evaluate(() -> doImport(envelope));
+    I importEvent(EventEnvelope event) {
+        checkNotNull(event);
+        I target = with(event.getTenantId()).evaluate(() -> doImport(event));
         return target;
     }
 
-    private I doImport(EventEnvelope envelope) {
-        I target = routeImport(envelope);
-        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, envelope);
+    private I doImport(EventEnvelope event) {
+        I target = routeImport(event);
+        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, event);
         endpoint.dispatchTo(target);
         return target;
     }
 
-    private I routeImport(EventEnvelope envelope) {
-        Set<I> ids = getEventImportRouting().apply(envelope.getMessage(),
-                                                   envelope.getEventContext());
+    private I routeImport(EventEnvelope event) {
+        Set<I> ids = getEventImportRouting().apply(event.getMessage(), event.getEventContext());
         int numberOfTargets = ids.size();
         checkState(
                 numberOfTargets > 0,
                 "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
-                envelope.getEventContext(),
-                envelope.getMessageClass()
+                event.getEventContext(),
+                event.getMessageClass()
         );
         checkState(
                 numberOfTargets == 1,
                 "Expected one aggregate ID, but got %s (`%s`). Event class: `%s`, context: `%s`.",
                 String.valueOf(numberOfTargets),
                 ids,
-                envelope.getMessageClass(),
-                envelope.getEventContext()
+                event.getMessageClass(),
+                event.getEventContext()
         );
         I id = ids.stream()
                   .findFirst()
@@ -328,11 +329,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        checkNotNull(event);
         checkNotNull(exception);
         logError("Error reacting on event (class: `%s` id: `%s`) in aggregate of type `%s.`",
-                 envelope, exception);
+                 event, exception);
     }
 
     /**
@@ -436,7 +437,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Loads an aggregate by the passed ID.
      *
      * <p>This method defines the basic flow of an {@code Aggregate} loading. First,
-     * the {@linkplain AggregateStateRecord Aggregate history} is
+     * the {@linkplain AggregateHistory Aggregate history} is
      * {@linkplain #loadHistory fetched} from the storage. Then the {@code Aggregate} is
      * {@linkplain #play restored} from its state history.
      *
@@ -445,18 +446,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         with the ID
      */
     private Optional<A> load(I id) {
-        Optional<AggregateStateRecord> found = loadHistory(id);
+        Optional<AggregateHistory> found = loadHistory(id);
         Optional<A> result = found.map(history -> play(id, history));
         return result;
     }
 
     /**
-     * Fetches the history of the {@code Aggregate} with the given ID.
+     * Loads the history of the {@code Aggregate} with the given ID.
      *
-     * <p>The method fetches only the recent history of the aggregate. The maximum depth of the read
-     * operation is defined as the greater number between
+     * <p>The method loads only the recent history of the aggregate.
+     * The maximum depth of the read operation is defined as the greater number between
      * the {@linkplain AggregateStorage#readEventCountAfterLastSnapshot(Object) event count after
-     * last snapshot} and the {@linkplain #getSnapshotTrigger() snapshot trigger}, plus one.
+     * the last snapshot} and the {@linkplain #getSnapshotTrigger() snapshot trigger}, plus one.
      * This way, we secure the read operation from:
      * <ol>
      *     <li>snapshot trigger decrease;
@@ -467,29 +468,29 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * itself.
      *
      * @param id the ID of the {@code Aggregate} to fetch
-     * @return the {@link AggregateStateRecord} for the {@code Aggregate} or
+     * @return the {@link AggregateHistory} for the {@code Aggregate} or
      *         {@code Optional.empty()} if there is no record with the ID
      */
-    private Optional<AggregateStateRecord> loadHistory(I id) {
+    private Optional<AggregateHistory> loadHistory(I id) {
         AggregateStorage<I> storage = aggregateStorage();
 
         int eventsAfterLastSnapshot = storage.readEventCountAfterLastSnapshot(id);
         int batchSize = max(snapshotTrigger, eventsAfterLastSnapshot) + 1;
 
         AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
-        Optional<AggregateStateRecord> result = storage.read(request);
+        Optional<AggregateHistory> result = storage.read(request);
         return result;
     }
 
     /**
-     * Plays the given {@linkplain AggregateStateRecord Aggregate history} for an instance
+     * Plays the given {@linkplain AggregateHistory Aggregate history} for an instance
      * of {@link Aggregate} with the given ID.
      *
      * @param id      the ID of the {@code Aggregate} to load
      * @param history the state record of the {@code Aggregate} to load
      * @return an instance of {@link Aggregate}
      */
-    protected A play(I id, AggregateStateRecord history) {
+    protected A play(I id, AggregateHistory history) {
         A result = create(id);
         AggregateTransaction tx = AggregateTransaction.start(result);
         result.play(history);
