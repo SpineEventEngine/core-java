@@ -27,6 +27,7 @@ import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -47,24 +48,36 @@ public class EntitySubject<T extends EntitySubject<T, S, E>,
         super(metadata, actual);
     }
 
+    /**
+     * Verifies if the entity exists.
+     */
     public void exists() {
         isNotNull();
     }
 
+    /**
+     * Obtains the subject for the {@code archived} flag.
+     */
     public BooleanSubject archivedFlag() {
         exists();
-        return assertThat(actual().getLifecycleFlags()
-                                  .getArchived());
+        return assertThat(flags().getArchived());
 
-    }
-    public BooleanSubject deletedFlag() {
-        exists();
-        return assertThat(actual().getLifecycleFlags()
-                                  .getDeleted());
     }
 
     /**
-     * Obtains subject for the state of the process manager.
+     * Obtains the subject for the {@code deleted} flag.
+     */
+    public BooleanSubject deletedFlag() {
+        exists();
+        return assertThat(flags().getDeleted());
+    }
+
+    private LifecycleFlags flags() {
+        return actual().getLifecycleFlags();
+    }
+
+    /**
+     * Obtains the subject for the state of the entity.
      */
     public ProtoSubject<?, Message> hasStateThat() {
         exists();
