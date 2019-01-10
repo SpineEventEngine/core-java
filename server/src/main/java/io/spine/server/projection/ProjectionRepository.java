@@ -90,9 +90,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /** Obtains class information of projection managed by this repository. */
-    @SuppressWarnings("unchecked")
-        // The cast is ensured by generic parameters of the repository.
-    ProjectionClass<P> projectionClass() {
+    private ProjectionClass<P> projectionClass() {
         return (ProjectionClass<P>) entityClass();
     }
 
