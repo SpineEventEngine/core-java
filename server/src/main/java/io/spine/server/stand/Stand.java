@@ -135,7 +135,7 @@ public class Stand implements AutoCloseable {
         Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
         for (SubscriptionRecord record : allRecords) {
             boolean subscriptionIsActive = record.isActive();
-            boolean stateMatches = record.matches(typeUrl, event);
+            boolean stateMatches = record.matches(event);
             if (subscriptionIsActive && stateMatches) {
                 Runnable action = notifySubscriptionAction(record, eventMessage);
                 callbackExecutor.execute(action);
@@ -146,8 +146,8 @@ public class Stand implements AutoCloseable {
     /**
      * Creates the subscribers notification action.
      *
-     * <p>The resulting action retrieves the {@linkplain OnEventCallback subscriber callback}
-     * and invokes it with the given Entity ID and state.
+     * <p>The resulting action retrieves the {@linkplain SubscriptionUpdateCallback subscriber
+     * callback} and invokes it with the given Entity ID and state.
      *
      * @param subscriptionRecord the attributes of the target subscription
      * @param event              the event
@@ -156,9 +156,9 @@ public class Stand implements AutoCloseable {
     private static Runnable
     notifySubscriptionAction(SubscriptionRecord subscriptionRecord, EventMessage event) {
         Runnable result = () -> {
-            OnEventCallback callback = subscriptionRecord.getCallback();
+            SubscriptionUpdateCallback callback = subscriptionRecord.getCallback();
             checkNotNull(callback, "Notifying by a non-activated subscription.");
-            callback.onEvent(event);
+            callback.updateWith(event);
         };
         return result;
     }
@@ -200,15 +200,17 @@ public class Stand implements AutoCloseable {
      * subscribe() method call}.
      *
      * <p>After the activation, the clients will start receiving the updates via
-     * {@code OnEventCallback} upon the changes in the entities, defined by
+     * {@code SubscriptionUpdateCallback} upon the changes in the entities, defined by
      * the {@code Target} attribute used for this subscription.
      *
-     * @param subscription the subscription to activate.
-     * @param callback     an instance of {@link OnEventCallback} executed upon entity update.
+     * @param subscription
+     *         the subscription to activate.
+     * @param callback
+     *         an instance of {@link SubscriptionUpdateCallback} executed upon entity update.
      * @see #subscribe(Topic, StreamObserver)
      */
     public void activate(Subscription subscription,
-                         OnEventCallback callback,
+                         SubscriptionUpdateCallback callback,
                          StreamObserver<Response> responseObserver) {
         checkNotNull(subscription);
         checkNotNull(callback);
@@ -230,7 +232,7 @@ public class Stand implements AutoCloseable {
      * Cancels the {@link Subscription}.
      *
      * <p>Typically invoked to cancel the previous
-     * {@link #activate(Subscription, OnEventCallback, StreamObserver) activate()} call.
+     * {@link #activate(Subscription, SubscriptionUpdateCallback, StreamObserver) activate()} call.
      *
      * <p>After this method is called, the subscribers stop receiving the updates,
      * related to the given {@code Subscription}.
@@ -338,25 +340,23 @@ public class Stand implements AutoCloseable {
 
     @Deprecated
     public void post(TenantId tenantId, VersionableEntity entity) {
-
     }
 
     /**
-     * A contract for the callbacks to be executed once a new event is emitted by the monitored
-     * entity.
+     * A callback which updates the subscription with a given event.
      *
-     * @see #activate(Subscription, OnEventCallback, StreamObserver)
+     * @see #activate(Subscription, SubscriptionUpdateCallback, StreamObserver)
      * @see #cancel(Subscription, StreamObserver)
      */
-    public interface OnEventCallback {
+    public interface SubscriptionUpdateCallback {
 
         /**
-         * Called when a certain event occurs in the system.
+         * Called to update a subscription with a given {@code EventMessage}.
          *
          * @param event
-         *         the event
+         *         the event message
          */
-        void onEvent(EventMessage event);
+        void updateWith(EventMessage event);
     }
 
     /**

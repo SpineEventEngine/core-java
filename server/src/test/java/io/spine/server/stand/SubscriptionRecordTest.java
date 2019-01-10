@@ -47,7 +47,8 @@ class SubscriptionRecordTest {
     @Test
     @DisplayName("match record to given parameters")
     void matchRecordToParams() {
-        SubscriptionRecord matchingRecord = new SubscriptionRecord(subscription(), target(), TYPE);
+        SubscriptionRecord matchingRecord = new SubscriptionRecord(subscription(), target(), TYPE,
+                                                                   matcher);
         Project entityState = Project.getDefaultInstance();
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
@@ -61,7 +62,7 @@ class SubscriptionRecordTest {
     void notMatchImproperType() {
         SubscriptionRecord notMatchingRecord = new SubscriptionRecord(subscription(),
                                                                       target(),
-                                                                      TYPE);
+                                                                      TYPE, matcher);
         Project entityState = Project.getDefaultInstance();
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
@@ -79,7 +80,7 @@ class SubscriptionRecordTest {
                                            .build();
         SubscriptionRecord notMatchingRecord = new SubscriptionRecord(subscription(),
                                                                       target(nonExistingId),
-                                                                      TYPE);
+                                                                      TYPE, matcher);
         Project entityState = Project.getDefaultInstance();
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
@@ -98,9 +99,10 @@ class SubscriptionRecordTest {
                                                      .setId(breakingId)
                                                      .build();
         @SuppressWarnings("QuestionableName")
-        SubscriptionRecord one = new SubscriptionRecord(oneSubscription, target(), TYPE);
-        SubscriptionRecord similar = new SubscriptionRecord(otherSubscription, target(), TYPE);
-        SubscriptionRecord same = new SubscriptionRecord(oneSubscription, target(), TYPE);
+        SubscriptionRecord one = new SubscriptionRecord(oneSubscription, target(), TYPE, matcher);
+        SubscriptionRecord similar = new SubscriptionRecord(otherSubscription, target(), TYPE,
+                                                            matcher);
+        SubscriptionRecord same = new SubscriptionRecord(oneSubscription, target(), TYPE, matcher);
         assertNotEquals(one, similar);
         assertEquals(one, same);
     }

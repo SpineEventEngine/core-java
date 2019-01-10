@@ -40,6 +40,7 @@ import io.spine.core.Responses;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.stand.Stand;
+import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
@@ -109,7 +110,7 @@ public class SubscriptionService
         try {
             BoundedContext boundedContext = selectBoundedContext(subscription);
 
-            Stand.OnEventCallback updateCallback = event -> {
+            SubscriptionUpdateCallback updateCallback = event -> {
                 checkNotNull(subscription);
                 EntityStateChanged theEvent = (EntityStateChanged) event;
                 EntityStateUpdate stateUpdate = toStateUpdate(theEvent);

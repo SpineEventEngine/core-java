@@ -20,19 +20,14 @@
 package io.spine.server.stand;
 
 import com.google.common.base.Objects;
-import com.google.protobuf.Any;
-import io.spine.base.Identifier;
-import io.spine.client.Filters;
-import io.spine.client.IdFilter;
+import io.spine.base.EventMessage;
 import io.spine.client.Subscription;
-import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.core.EventEnvelope;
-import io.spine.server.stand.Stand.OnEventCallback;
+import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.List;
 
 /**
  * Represents the attributes of a single subscription.
@@ -42,21 +37,36 @@ import java.util.List;
 final class SubscriptionRecord {
 
     private final Subscription subscription;
-    private final Target target;
     private final TypeUrl type;
+    private final SubscriptionMatcher matcher;
 
     /**
      * The {@code callback} is null after the creation and until the subscription is activated.
      *
      * @see SubscriptionRegistry#add(Topic)
-     * @see SubscriptionRegistry#activate(Subscription, OnEventCallback)
+     * @see SubscriptionRegistry#activate(Subscription, SubscriptionUpdateCallback)
      */
-    private @Nullable OnEventCallback callback = null;
+    private @Nullable SubscriptionUpdateCallback callback = null;
 
-    SubscriptionRecord(Subscription subscription, Target target, TypeUrl type) {
+    private SubscriptionRecord(Subscription subscription,
+                               TypeUrl type,
+                               SubscriptionMatcher matcher) {
         this.subscription = subscription;
-        this.target = target;
         this.type = type;
+        this.matcher = matcher;
+    }
+
+    static SubscriptionRecord of(Subscription subscription) {
+        Topic topic = subscription.getTopic();
+        String typeAsString = topic.getTarget()
+                                   .getType();
+        TypeUrl type = TypeUrl.parse(typeAsString);
+        Class<?> javaClass = type.getJavaClass();
+        if (EventMessage.class.isAssignableFrom(javaClass)) {
+            type = TypeUrl.of(EntityStateChanged.class);
+        }
+        SubscriptionMatcher matcher = SubscriptionMatcher.of(subscription);
+        return new SubscriptionRecord(subscription, type, matcher);
     }
 
     /**
@@ -64,7 +74,7 @@ final class SubscriptionRecord {
      *
      * @param callback the callback to attach
      */
-    void activate(OnEventCallback callback) {
+    void activate(SubscriptionUpdateCallback callback) {
         this.callback = callback;
     }
 
@@ -79,35 +89,12 @@ final class SubscriptionRecord {
     /**
      * Checks whether this record matches the given parameters.
      *
-     * @param type        the type to match
      * @param event       the event to match
      * @return {@code true} if this record matches all the given parameters,
      * {@code false} otherwise.
      */
-    boolean matches(TypeUrl type, EventEnvelope event) {
-        boolean typeMatches = this.type.equals(type);
-        if (typeMatches) {
-            boolean includeAll = target.getIncludeAll();
-            Filters filters = target.getFilters();
-            return includeAll || matchByFilters(event, filters);
-        }
-        return false;
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened") // Subscriptions work with events exclusively.
-    private static boolean matchByFilters(EventEnvelope event, Filters filters) {
-        boolean result;
-        IdFilter givenIdFilter = filters.getIdFilter();
-        boolean idFilterSet = !IdFilter.getDefaultInstance()
-                                       .equals(givenIdFilter);
-        if (idFilterSet) {
-            Any idAsAny = Identifier.pack(event.getId());
-            List<Any> idsList = givenIdFilter.getIdsList();
-            result = idsList.contains(idAsAny);
-        } else {
-            result = false;
-        }
-        return result;
+    boolean matches(EventEnvelope event) {
+        return matcher.test(event);
     }
 
     TypeUrl getType() {
@@ -115,7 +102,7 @@ final class SubscriptionRecord {
     }
 
     @Nullable
-    OnEventCallback getCallback() {
+    SubscriptionUpdateCallback getCallback() {
         return callback;
     }
 

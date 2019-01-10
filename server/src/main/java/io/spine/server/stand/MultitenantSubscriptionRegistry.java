@@ -23,9 +23,9 @@ import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.SubscriptionVBuilder;
 import io.spine.client.Subscriptions;
-import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
+import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,7 +61,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     @Override
     public synchronized void activate(Subscription subscription,
-                                      Stand.OnEventCallback callback) {
+                                      SubscriptionUpdateCallback callback) {
         registrySlice().activate(subscription, callback);
     }
 
@@ -119,7 +119,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
         @Override
         public synchronized void activate(Subscription subscription,
-                                          Stand.OnEventCallback callback) {
+                                          SubscriptionUpdateCallback callback) {
             checkState(subscriptionToAttrs.containsKey(subscription),
                        "Cannot find the subscription in the registry.");
             SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
@@ -129,15 +129,13 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         @Override
         public synchronized Subscription add(Topic topic) {
             SubscriptionId subscriptionId = Subscriptions.generateId();
-            Target target = topic.getTarget();
-            String typeAsString = target.getType();
-            TypeUrl type = TypeUrl.parse(typeAsString);
             Subscription subscription = SubscriptionVBuilder
                     .newBuilder()
                     .setId(subscriptionId)
                     .setTopic(topic)
                     .build();
-            SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
+            SubscriptionRecord record = SubscriptionRecord.of(subscription);
+            TypeUrl type = record.getType();
 
             if (!typeToRecord.containsKey(type)) {
                 typeToRecord.put(type, new HashSet<>());

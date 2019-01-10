@@ -29,7 +29,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.stand.given.StandTestEnv.MemoizeOnEventCallback;
+import io.spine.server.stand.given.StandTestEnv.MemoizeUpdateCallback;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.testing.core.given.GivenVersion;
@@ -72,13 +72,13 @@ class MultitenantStandTest extends StandTest {
 
         // --- Default Tenant
         ActorRequestFactory requestFactory = getRequestFactory();
-        MemoizeOnEventCallback defaultTenantCallback =
+        MemoizeUpdateCallback defaultTenantCallback =
                 subscribeToAllOf(stand, requestFactory, Customer.class);
 
         // --- Another Tenant
         TenantId anotherTenant = newUuid();
         ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
-        MemoizeOnEventCallback anotherCallback =
+        MemoizeUpdateCallback anotherCallback =
                 subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
@@ -95,12 +95,13 @@ class MultitenantStandTest extends StandTest {
         assertNull(anotherCallback.newEntityState());
     }
 
-    protected MemoizeOnEventCallback subscribeToAllOf(Stand stand,
-                                                      ActorRequestFactory requestFactory,
-                                                      Class<? extends Message> entityClass) {
+    protected MemoizeUpdateCallback
+    subscribeToAllOf(Stand stand,
+                     ActorRequestFactory requestFactory,
+                     Class<? extends Message> entityClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(entityClass);
-        MemoizeOnEventCallback callback = new MemoizeOnEventCallback();
+        MemoizeUpdateCallback callback = new MemoizeUpdateCallback();
         subscribeAndActivate(stand, allCustomers, callback);
 
         assertNull(callback.newEntityState());
