@@ -91,11 +91,11 @@ public class RepositoryTestEnv {
                                                               .build();
 
         @Override
-        public Optional<ProjectEntity> findActive(ProjectId id) {
+        public Optional<ProjectEntity> find(ProjectId id) {
             if (id.equals(troublesome)) {
                 return Optional.empty();
             }
-            return super.findActive(id);
+            return super.find(id);
         }
     }
 }

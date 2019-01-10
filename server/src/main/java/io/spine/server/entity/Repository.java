@@ -55,8 +55,7 @@ import static java.lang.String.format;
  * Abstract base class for repositories.
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
-public abstract class Repository<I, E extends Entity<I, ?>>
-        implements RepositoryView<I, E>, AutoCloseable, Logging {
+public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable, Logging {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -88,6 +87,14 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     protected Repository() {
     }
+
+    /**
+     * Finds an entity with the passed ID.
+     *
+     * @param id the ID of the entity to load
+     * @return the entity or {@link Optional#empty()} if there's no entity with such ID
+     */
+    public abstract Optional<E> find(I id);
 
     /**
      * Obtains model class for the entities managed by this repository.
@@ -226,14 +233,13 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected abstract void store(E obj);
 
     /**
-     * {@inheritDoc}
+     * Returns an iterator over the entities managed by the repository that match the passed filter.
      *
      * <p>The returned iterator does not support removal.
      *
      * <p>Iteration through entities is performed by {@linkplain #find(Object) loading}
      * them one by one.
      */
-    @Override
     public Iterator<E> iterator(Predicate<E> filter) {
         Iterator<E> unfiltered = new EntityIterator<>(this);
         Iterator<E> filtered = Iterators.filter(unfiltered, filter::test);

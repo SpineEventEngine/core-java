@@ -42,7 +42,7 @@ final class ScheduledCommandRepository
 
     private Set<CommandId> routeToExisting(CommandDispatched event) {
         CommandId id = event.getId();
-        Optional<ScheduledCommand> existing = findActive(id);
+        Optional<ScheduledCommand> existing = find(id);
         return existing.isPresent()
                ? ImmutableSet.of(id)
                : ImmutableSet.of();

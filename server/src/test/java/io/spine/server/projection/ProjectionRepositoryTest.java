@@ -363,7 +363,7 @@ class ProjectionRepositoryTest
                     .setProjectName(projectCreated.getName())
                     .addTaskName(taskAdded.getTask().getTitle())
                     .build();
-            Optional<EntitySubscriberProjection> projection = repository.findActive(id);
+            Optional<EntitySubscriberProjection> projection = repository.find(id);
             assertTrue(projection.isPresent());
             assertEquals(expectedValue, projection.get().getState());
 

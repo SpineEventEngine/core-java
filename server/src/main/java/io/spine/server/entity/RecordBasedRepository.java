@@ -160,7 +160,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID
      *         or this entity is not active
      */
-    public Optional<E> findActive(I id) {
+    @Override
+    public Optional<E> find(I id) {
         Optional<EntityRecord> record = findRecord(id);
         Optional<E> result = record.filter(WithLifecycle::isActive)
                                    .map(this::toEntity);
@@ -171,7 +172,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds an entity with the passed ID even if the entity is not
      * {@linkplain WithLifecycle#isActive() active}.
      */
-    public Optional<E> find(I id) {
+    public Optional<E> findRaw(I id) {
         Optional<EntityRecord> record = findRecord(id);
         return record.map(this::toEntity);
     }
@@ -217,7 +218,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * contained within the passed {@code ids} values.
      *
      * <p>Provides a convenience wrapper around multiple invocations of
-     * {@link #findActive(Object)}. Descendants may optimize the execution of this
+     * {@link #find(Object)}. Descendants may optimize the execution of this
      * method, choosing the most suitable way for the particular storage engine used.
      *
      * <p>The result only contains those entities which IDs are contained inside

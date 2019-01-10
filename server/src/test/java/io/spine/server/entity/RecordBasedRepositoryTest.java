@@ -161,7 +161,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     }
 
     private Optional<E> findById(I id) {
-        return repository.findActive(id);
+        return repository.find(id);
     }
 
     private Iterator<E> loadMany(List<I> ids) {
@@ -225,7 +225,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         private void assertDidFound() {
-            assertResult(repository.find(entity.getId()));
+            assertResult(repository.findRaw(entity.getId()));
         }
 
         private void assertResult(Optional<E> optional) {

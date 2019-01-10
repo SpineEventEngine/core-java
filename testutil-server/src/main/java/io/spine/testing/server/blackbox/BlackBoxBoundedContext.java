@@ -607,7 +607,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         Repository repo = repositoryOf(stateClass);
         @SuppressWarnings("unchecked")
         ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;
-        P found = readOperation(() -> pmRepo.find(id)
+        P found = readOperation(() -> pmRepo.findRaw(id)
                                             .orElse(null));
         return assertAbout(PmSubject.<S, P>processManagers()).that(found);
     }

@@ -58,7 +58,7 @@ class TenantRepositoryTest {
         repository.keep(tenantId);
         repository.keep(tenantId);
 
-        verify(repository, times(1)).findActive(tenantId);
+        verify(repository, times(1)).find(tenantId);
     }
 
     @Test
