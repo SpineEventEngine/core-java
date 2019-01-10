@@ -20,16 +20,22 @@
 
 package io.spine.server;
 
+import io.spine.server.ServerEnvironment.AppEngineEnvironment;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("ServerEnvironment utility should")
 class ServerEnvironmentTest {
 
@@ -47,10 +53,100 @@ class ServerEnvironmentTest {
     }
 
     @Test
+    @DisplayName("tell when not running on AppEngine cloud infrastructure")
+    void tellIfNotInProductionAppEngine() {
+        // Tests are not run by AppEngine by default.
+        assertFalse(ServerEnvironment.getInstance()
+                                     .isProductionAppEngine());
+    }
+
+    @Test
     @DisplayName("obtain AppEngine version as optional string")
     void getAppEngineVersion() {
         // By default we're not running under AppEngine.
-        assertFalse(ServerEnvironment.getInstance().appEngineVersion()
+        assertFalse(ServerEnvironment.getInstance()
+                                     .appEngineVersion()
                                      .isPresent());
+    }
+
+    @Test
+    @DisplayName("obtain AppEngine environment as optional string")
+    void getAppEngineEnvironment() {
+        // By default we're not running under AppEngine.
+        assertFalse(ServerEnvironment.getInstance()
+                                     .appEngineEnvironment()
+                                     .isPresent());
+    }
+
+    @Nested
+    @DisplayName("when running on App Engine cloud infrastructure")
+    class OnProdAppEngine extends WithAppEngineEnvironment {
+
+        OnProdAppEngine() {
+            super(AppEngineEnvironment.PRODUCTION);
+        }
+
+        @Test
+        @DisplayName("tell that running on production GAE")
+        void tellIfInProductionAppEngine() {
+            assertTrue(ServerEnvironment.getInstance()
+                                        .isProductionAppEngine());
+        }
+    }
+
+    @Nested
+    @DisplayName("when running on App Engine local server")
+    class OnDevAppEngine extends WithAppEngineEnvironment {
+
+        OnDevAppEngine() {
+            super(AppEngineEnvironment.DEVELOPMENT);
+        }
+
+        @Test
+        @DisplayName("tell that not running on production GAE")
+        void tellIfInProductionAppEngine() {
+            assertFalse(ServerEnvironment.getInstance()
+                                         .isProductionAppEngine());
+        }
+    }
+
+    @SuppressWarnings({
+            "AccessOfSystemProperties" /* Testing the configuration loaded from System properties. */,
+            "AbstractClassWithoutAbstractMethods" /* A test base with setUp and tearDown. */
+    })
+    abstract class WithAppEngineEnvironment {
+
+        private final AppEngineEnvironment targetEnvironment;
+
+        private String initialValue;
+
+        WithAppEngineEnvironment(AppEngineEnvironment targetEnvironment) {
+            this.targetEnvironment = targetEnvironment;
+        }
+
+        @BeforeEach
+        void setUp() {
+            initialValue = System.getProperty(APP_ENGINE_ENVIRONMENT.path());
+            System.setProperty(APP_ENGINE_ENVIRONMENT.path(), targetEnvironment.propertyValue());
+        }
+
+        @AfterEach
+        void tearDown() {
+            if (initialValue == null) {
+                System.clearProperty(APP_ENGINE_ENVIRONMENT.path());
+            } else {
+                System.setProperty(APP_ENGINE_ENVIRONMENT.path(), initialValue);
+            }
+        }
+
+        @SuppressWarnings("unused" /* Executed by JUnit. */)
+        @Test
+        @DisplayName("obtain AppEngine environment")
+        void getAppEngineEnvironment() {
+            ServerEnvironment serverEnvironment = ServerEnvironment.getInstance();
+            Optional<AppEngineEnvironment> environment = serverEnvironment.appEngineEnvironment();
+            assertTrue(environment.isPresent());
+            assertEquals(targetEnvironment, environment.get());
+        }
     }
 }

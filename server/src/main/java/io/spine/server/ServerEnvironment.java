@@ -21,20 +21,20 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
-@SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
+import static com.google.common.base.Strings.emptyToNull;
+import static io.spine.server.ServerEnvironment.AppEngineEnvironment.PRODUCTION;
+import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
+import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_VERSION;
+import static java.util.Arrays.stream;
+import static java.util.Optional.ofNullable;
+
+/**
+ * The server conditions and configuration under which the application operates.
+ */
 public class ServerEnvironment {
-
-    /** The key of the Google AppEngine runtime version system property. */
-    @VisibleForTesting
-    static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
-
-    /** If set, contains the version of AppEngine obtained from the system property. */
-    private static final @Nullable String appEngineRuntimeVersion =
-            System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -52,17 +52,32 @@ public class ServerEnvironment {
      * {@code false} otherwise.
      */
     public boolean isAppEngine() {
-        boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
-                !appEngineRuntimeVersion.isEmpty();
-        return isVersionPresent;
+        Optional<String> version = APP_ENGINE_VERSION.value();
+        return version.isPresent();
     }
 
     /**
-     * Returns the current Google AppEngine version
-     * or {@code null} if the program is running not on the AppEngine.
+     * Returns {@code true} if the code is running on the Google AppEngine cloud infrastructure,
+     * {@code false} otherwise.
+     */
+    public boolean isProductionAppEngine() {
+        Optional<String> environment = APP_ENGINE_ENVIRONMENT.value();
+        return environment.map(PRODUCTION::matches)
+                          .orElse(false);
+    }
+
+    /**
+     * Returns an optional with current Google AppEngine version
+     * or {@linkplain Optional#empty() empty} if running outside of AppEngine.
      */
     public Optional<String> appEngineVersion() {
-        return Optional.ofNullable(appEngineRuntimeVersion);
+        return APP_ENGINE_VERSION.value();
+    }
+
+    public Optional<AppEngineEnvironment> appEngineEnvironment() {
+        return APP_ENGINE_ENVIRONMENT
+                .value()
+                .flatMap(AppEngineEnvironment::match);
     }
 
     /**
@@ -72,5 +87,70 @@ public class ServerEnvironment {
      */
     private static final class Singleton {
         private static final ServerEnvironment INSTANCE = new ServerEnvironment();
+    }
+
+    /**
+     * Type of an App Engine Environment if applicable.
+     *
+     * <p>Either {@linkplain #PRODUCTION Production} when running on cloud infrastructure or
+     * {@linkplain #DEVELOPMENT Development} when running local development server.
+     */
+    public enum AppEngineEnvironment {
+        PRODUCTION("Production"),
+        DEVELOPMENT("Development");
+
+        private final String propertyValue;
+
+        AppEngineEnvironment(String propertyValue) {
+            this.propertyValue = propertyValue;
+        }
+
+        static Optional<AppEngineEnvironment> match(String value) {
+            return stream(values())
+                    .filter(environment -> environment.matches(value))
+                    .findFirst();
+        }
+
+        boolean matches(String value) {
+            return propertyValue().equals(value);
+        }
+
+        @VisibleForTesting
+        String propertyValue() {
+            return propertyValue;
+        }
+    }
+
+    /**
+     * The {@linkplain System#getProperties() System Properties} defining the Server Environment.
+     */
+    @VisibleForTesting
+    @SuppressWarnings("AccessOfSystemProperties")// OK as we need system properties for this class.
+    enum SystemProperty {
+        APP_ENGINE_VERSION("com.google.appengine.runtime.version"),
+        APP_ENGINE_ENVIRONMENT("com.google.appengine.runtime.environment");
+
+        private final String path;
+
+        SystemProperty(String path) {
+            this.path = path;
+        }
+
+        /**
+         * An optional value of {@linkplain System#getProperty(String) the property}.
+         *
+         * @return optional with string if property exists and is not an empty string,
+         *         {@code empty} otherwise
+         */
+        Optional<String> value() {
+            String systemValue = System.getProperty(path());
+            String nonEmptyValue = emptyToNull(systemValue);
+            return ofNullable(nonEmptyValue);
+        }
+
+        @VisibleForTesting
+        String path() {
+            return path;
+        }
     }
 }
