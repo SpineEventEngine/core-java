@@ -127,8 +127,9 @@ class ProjectionRepositoryTest
         }
     }
 
-    private TestProjectionRepository repository() {
-        return (TestProjectionRepository) repository;
+    @Override
+    protected TestProjectionRepository repository() {
+        return (TestProjectionRepository) super.repository();
     }
 
     @Override
@@ -223,7 +224,7 @@ class ProjectionRepositoryTest
                 .build();
         super.setUp();
 
-        boundedContext.register(repository);
+        boundedContext.register(this.repository());
 
         TestProjection.clearMessageDeliveryHistory();
     }
