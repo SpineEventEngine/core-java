@@ -61,7 +61,6 @@ public class EntitySubject<T extends EntitySubject<T, S, E>,
     public BooleanSubject archivedFlag() {
         exists();
         return assertThat(flags().getArchived());
-
     }
 
     /**
