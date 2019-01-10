@@ -976,7 +976,7 @@ class StandTest extends TenantAwareTest {
                 toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.find(eq(projectId)))
+            when(projectionRepository.findActive(eq(projectId)))
                     .thenReturn(Optional.of(new StandTestProjection(projectId)));
         }
 

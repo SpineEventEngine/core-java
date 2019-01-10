@@ -106,7 +106,7 @@ class ScheduledCommandTest {
 
         scheduler.postScheduled();
 
-        Optional<ScheduledCommand> command = repository.find(scheduled.getId());
+        Optional<ScheduledCommand> command = repository.findActive(scheduled.getId());
         assertFalse(command.isPresent());
 
         ScheduledCommand deletedCommand = findDeleted(scheduled.getId());
@@ -122,7 +122,7 @@ class ScheduledCommandTest {
 
         CommandId commandId = command.getId();
 
-        Optional<ScheduledCommand> found = repository.find(commandId);
+        Optional<ScheduledCommand> found = repository.findActive(commandId);
         assertFalse(found.isPresent());
 
         Iterator<ScheduledCommand> foundDeleted = findAllDeleted(commandId);
@@ -153,7 +153,7 @@ class ScheduledCommandTest {
     }
 
     private void checkScheduled(Command scheduled) {
-        Optional<ScheduledCommand> found = repository.find(scheduled.getId());
+        Optional<ScheduledCommand> found = repository.findActive(scheduled.getId());
         assertTrue(found.isPresent());
         ScheduledCommandRecord scheduledCommand = found.get().getState();
 

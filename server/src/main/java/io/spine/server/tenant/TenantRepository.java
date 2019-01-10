@@ -66,7 +66,7 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
             return;
         }
 
-        Optional<E> optional = find(id);
+        Optional<E> optional = findActive(id);
         if (!optional.isPresent()) {
             E newEntity = create(id);
             store(newEntity);

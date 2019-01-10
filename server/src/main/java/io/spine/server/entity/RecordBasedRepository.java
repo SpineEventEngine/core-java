@@ -160,8 +160,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID
      *         or this entity is not active
      */
-    @Override
-    public Optional<E> find(I id) {
+    public Optional<E> findActive(I id) {
         Optional<EntityRecord> record = findRecord(id);
         Optional<E> result = record.filter(WithLifecycle::isActive)
                                    .map(this::toEntity);
@@ -172,7 +171,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds an entity with the passed ID even if the entity is not
      * {@linkplain WithLifecycle#isActive() active}.
      */
-    public Optional<E> doFind(I id) {
+    public Optional<E> find(I id) {
         Optional<EntityRecord> record = findRecord(id);
         return record.map(this::toEntity);
     }
@@ -207,13 +206,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return the entity with the specified ID
      */
     protected E findOrCreate(I id) {
-        Optional<EntityRecord> optional = findRecord(id);
-        if (!optional.isPresent()) {
-            return create(id);
-        }
-        EntityRecord record = optional.get();
-        E entity = toEntity(record);
-        return entity;
+        Optional<EntityRecord> record = findRecord(id);
+        E result = record.map(this::toEntity)
+                         .orElseGet(() -> create(id));
+        return result;
     }
 
     /**
@@ -221,7 +217,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * contained within the passed {@code ids} values.
      *
      * <p>Provides a convenience wrapper around multiple invocations of
-     * {@link #find(Object)}. Descendants may optimize the execution of this
+     * {@link #findActive(Object)}. Descendants may optimize the execution of this
      * method, choosing the most suitable way for the particular storage engine used.
      *
      * <p>The result only contains those entities which IDs are contained inside
