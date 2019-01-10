@@ -27,8 +27,6 @@ import io.spine.core.MessageRejection;
 /**
  * A base class for exceptions fired in case an invalid request
  * has been submitted to {@linkplain Stand}.
- *
- * @author Alex Tymchenko
  */
 public class InvalidRequestException extends RuntimeException implements MessageRejection {
 

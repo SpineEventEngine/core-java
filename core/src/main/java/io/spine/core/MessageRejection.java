@@ -32,8 +32,6 @@ import io.spine.base.Error;
  *     <li>a command;
  *     <li>an actor request (query, topic or subscription).
  * </ul>
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface MessageRejection {

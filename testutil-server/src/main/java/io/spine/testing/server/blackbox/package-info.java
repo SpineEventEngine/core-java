@@ -28,7 +28,6 @@
  * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
  * inside of the Bounded Context.
  * 
- * @see io.spine.testing.client.blackbox
  * @see io.spine.testing.server.blackbox.BlackBoxBoundedContext
  */
 @CheckReturnValue
