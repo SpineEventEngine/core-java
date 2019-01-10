@@ -90,9 +90,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /** Obtains class information of projection managed by this repository. */
-    @SuppressWarnings("unchecked")
-        // The cast is ensured by generic parameters of the repository.
-    ProjectionClass<P> projectionClass() {
+    private ProjectionClass<P> projectionClass() {
         return (ProjectionClass<P>) entityClass();
     }
 
@@ -189,15 +187,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @throws IllegalStateException if the storage is null
      */
     @Override
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
     protected RecordStorage<I> recordStorage() {
         return checkStorage(recordStorage);
     }
 
     @Override
-    @SuppressWarnings("MethodDoesntCallSuperMethod" /* We do not call super.createStorage() because
-                       we create a specific type of a storage, not a regular entity storage created
-                       in the parent. */)
     protected RecordStorage<I> createStorage(StorageFactory factory) {
         Class<P> projectionClass = getEntityClass();
         ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);

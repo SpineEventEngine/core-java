@@ -18,22 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.server.blackbox.given;
+
+import io.spine.server.command.Assign;
+import io.spine.server.model.Nothing;
+import io.spine.server.procman.ProcessManager;
+import io.spine.testing.server.blackbox.BbInit;
+import io.spine.testing.server.blackbox.BbInitVBuilder;
+import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.command.BbInitProject;
+
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.server.blackbox.BlackBoxBoundedContext
+ * Test environment process manager for testing
+ * {@link io.spine.testing.server.procman.PmSubject}.
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox;
+public class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbInitVBuilder> {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    protected BbInitProcess(BbProjectId id) {
+        super(id);
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Assign
+    Nothing on(BbInitProject cmd) {
+        getBuilder().setId(cmd.getProjectId())
+                    .setInitialized(true);
+        setDeleted(true);
+        return nothing();
+    }
+}

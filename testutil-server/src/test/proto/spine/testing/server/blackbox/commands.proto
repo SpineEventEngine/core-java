@@ -36,6 +36,10 @@ message BbCreateProject {
     BbProjectId project_id = 1;
 }
 
+message BbInitProject {
+    BbProjectId project_id = 1;
+}
+
 message BbAddTask {
     BbProjectId project_id = 1;
     BbTask task = 2;

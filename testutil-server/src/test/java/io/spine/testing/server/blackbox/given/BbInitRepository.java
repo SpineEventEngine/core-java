@@ -18,22 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.server.blackbox.BlackBoxBoundedContext
- */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.given;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.testing.server.blackbox.BbInit;
+import io.spine.testing.server.blackbox.BbProjectId;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+public class BbInitRepository extends ProcessManagerRepository<BbProjectId, BbInitProcess, BbInit> {
+}

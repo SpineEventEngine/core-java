@@ -18,22 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.server.procman;
+
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Subject;
+import com.google.protobuf.Message;
+import io.spine.server.procman.ProcessManager;
+import io.spine.testing.server.entity.EntitySubject;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.server.blackbox.BlackBoxBoundedContext
+ * Assertions for process managers.
+ *
+ * @param <S> the type of the process manager state
+ * @param <P> the type of the process manager
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox;
+public final class PmSubject<S extends Message, P extends ProcessManager<?, S, ?>>
+        extends EntitySubject<PmSubject<S, P>, S, P> {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    private PmSubject(FailureMetadata metadata, @NullableDecl P actual) {
+        super(metadata, actual);
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    public static <S extends Message, P extends ProcessManager<?, S, ?>>
+    Subject.Factory<PmSubject<S, P>, P> processManagers() {
+        return PmSubject::new;
+    }
+}
