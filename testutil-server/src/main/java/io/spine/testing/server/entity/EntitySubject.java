@@ -35,7 +35,7 @@ import static com.google.common.truth.Truth.assertThat;
 /**
  * Assertions for entities.
  *
- * @param <T> the type of entity subject for covariance
+ * @param <T> the type of entity subject for parameter covariance in {@link Subject.Factory}
  * @param <S> the type of the entity state message
  * @param <E> the type of the entity
  */
