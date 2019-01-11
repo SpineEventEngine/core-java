@@ -48,6 +48,7 @@ import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
+import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -133,7 +134,7 @@ public class Stand implements AutoCloseable {
      * Notifies subscriptions that a new event occurred in the system.
      */
     public void notifySubscriptions(EventEnvelope event) {
-        TenantAwareOperation op = new TenantAwareOperation(event.getTenantId()) {
+        EventOperation op = new EventOperation(event.getOuterObject()) {
             @Override
             public void run() {
                 notifyMatchingSubscriptions(event);
