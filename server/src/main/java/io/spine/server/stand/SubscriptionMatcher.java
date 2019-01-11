@@ -92,12 +92,6 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
         return result;
     }
 
-    protected abstract TypeUrl getCheckedType(EventEnvelope event);
-
-    protected abstract Any getCheckedId(EventEnvelope event);
-
-    protected abstract Message getCheckedMessage(EventEnvelope event);
-
     protected Target target() {
         return target;
     }
@@ -139,4 +133,10 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
             );
         }
     }
+
+    protected abstract TypeUrl getCheckedType(EventEnvelope event);
+
+    protected abstract Any getCheckedId(EventEnvelope event);
+
+    protected abstract Message getCheckedMessage(EventEnvelope event);
 }
