@@ -27,7 +27,6 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.EventMessage;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
@@ -124,10 +123,20 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Notifies all subscriptions that a new event occurred in the system.
+     * Notifies subscriptions that a new event occurred in the system.
      */
-    @SuppressWarnings("TypeMayBeWeakened") // Subscriptions work with events exclusively.
     public void notifySubscriptions(EventEnvelope event) {
+        TenantAwareOperation op = new TenantAwareOperation(event.getTenantId()) {
+            @Override
+            public void run() {
+                notifyMatchingSubscriptions(event);
+            }
+        };
+        op.execute();
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened") // Subscriptions work with events exclusively.
+    private void notifyMatchingSubscriptions(EventEnvelope event) {
         TypeUrl typeUrl = TypeUrl.of(event.getMessage());
         if (!subscriptionRegistry.hasType(typeUrl)) {
             return;
