@@ -17,44 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.testing.server.blackbox;
+package io.spine.testing.server.procman;
 
-import "spine/options.proto";
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Subject;
+import com.google.protobuf.Message;
+import io.spine.server.procman.ProcessManager;
+import io.spine.testing.server.entity.EntitySubject;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.server.blackbox.command";
-option java_outer_classname = "TestIntCommandsProto";
-option java_multiple_files = true;
+/**
+ * Assertions for process managers.
+ *
+ * @param <S> the type of the process manager state
+ * @param <P> the type of the process manager
+ */
+public final class PmSubject<S extends Message, P extends ProcessManager<?, S, ?>>
+        extends EntitySubject<PmSubject<S, P>, S, P> {
 
-import "spine/testing/server/blackbox/entities.proto";
-import "spine/testing/server/blackbox/report.proto";
-import "spine/core/user_id.proto";
+    private PmSubject(FailureMetadata metadata, @NullableDecl P actual) {
+        super(metadata, actual);
+    }
 
-message BbCreateProject {
-    BbProjectId project_id = 1;
-}
-
-message BbInitProject {
-    BbProjectId project_id = 1;
-}
-
-message BbAddTask {
-    BbProjectId project_id = 1;
-    BbTask task = 2;
-}
-
-message BbStartProject {
-    BbProjectId project_id = 1;
-}
-
-message BbCreateReport {
-    BbReportId report_id = 1;
-    repeated BbProjectId project_id = 2;
-}
-
-message BbAssignProject {
-    BbProjectId id = 1;
-    spine.core.UserId user_id = 2;
+    public static <S extends Message, P extends ProcessManager<?, S, ?>>
+    Subject.Factory<PmSubject<S, P>, P> processManagers() {
+        return PmSubject::new;
+    }
 }

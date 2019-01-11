@@ -74,3 +74,11 @@ message BbTask {
     string title = 2;
     string description = 3;
 }
+
+message BbInit {
+    option (entity).kind = PROCESS_MANAGER;
+
+    BbProjectId id = 1;
+
+    bool initialized = 2;
+}

@@ -43,7 +43,6 @@ import static com.google.common.collect.Sets.union;
  * Provides message handling information on a process manager class.
  *
  * @param <P> the type of process managers
- * @author Alexander Yevsyukov
  */
 public final class ProcessManagerClass<P extends ProcessManager>
         extends CommandHandlingEntityClass<P>

@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A convenience API for {@code TenantAware} operations.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public final class TenantAwareRunner {
