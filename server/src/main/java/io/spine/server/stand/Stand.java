@@ -27,6 +27,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
@@ -36,8 +37,14 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.EntityRecordChange;
+import io.spine.server.entity.EntityRecordChangeVBuilder;
+import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
@@ -327,8 +334,34 @@ public class Stand implements AutoCloseable {
         typeRegistry.close();
     }
 
+    /**
+     * Posts the state of a versionable entity to this stand.
+     *
+     * @implNote
+     * The only purpose of this method is to deliver the new entity state to the subscribers
+     * through the artificially created {@link io.spine.system.server.EntityStateChanged} event. It
+     * doesn't do any proper lifecycle handling, ignoring lifecycle flags, applied messages IDs,
+     * etc.
+     *
+     * @param entity
+     *         the entity whose state needs to be posted
+     * @param lifecycle
+     *         the lifecycle of the entity
+     */
     @Deprecated
-    public void post(TenantId tenantId, VersionableEntity entity) {
+    public void post(VersionableEntity entity, EntityLifecycle lifecycle) {
+        Any id = Identifier.pack(entity.getId());
+        Any state = AnyPacker.pack(entity.getState());
+        EntityRecord record = EntityRecordVBuilder
+                .newBuilder()
+                .setEntityId(id)
+                .setState(state)
+                .build();
+        EntityRecordChange change = EntityRecordChangeVBuilder
+                .newBuilder()
+                .setNewValue(record)
+                .build();
+        lifecycle.onStateChanged(change, ImmutableSet.of());
     }
 
     /**
