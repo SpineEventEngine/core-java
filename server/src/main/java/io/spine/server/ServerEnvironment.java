@@ -74,6 +74,10 @@ public class ServerEnvironment {
         return APP_ENGINE_VERSION.value();
     }
 
+    /**
+     * Returns an optional with {@link AppEngineEnvironment} (either Production or Development),
+     * or {@linkplain Optional#empty() empty} if running outside of AppEngine.
+     */
     public Optional<AppEngineEnvironment> appEngineEnvironment() {
         return APP_ENGINE_ENVIRONMENT
                 .value()
