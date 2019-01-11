@@ -74,9 +74,7 @@ import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.paginati
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
@@ -158,10 +156,6 @@ class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>, I, S 
         }
     }
 
-    private Optional<E> findById(I id) {
-        return repository().find(id);
-    }
-
     private Iterator<E> loadMany(List<I> ids) {
         return repository().loadAll(ids);
     }
@@ -211,7 +205,7 @@ class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>, I, S 
         void byIdArchived() {
             archive((TransactionalEntity) entity);
             storeEntity(entity);
-            assertDidFound();
+            assertFound();
         }
 
         @Test
@@ -219,21 +213,21 @@ class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>, I, S 
         void byIdDeleted() {
             delete((TransactionalEntity) entity);
             storeEntity(entity);
-            assertDidFound();
+            assertFound();
         }
 
         private void assertFound() {
-            assertResult(findById(entity.getId()));
-        }
-
-        private void assertDidFound() {
-            assertResult(repository().findRaw(entity.getId()));
+            assertResult(find(entity.getId()));
         }
 
         private void assertResult(Optional<E> optional) {
             OptionalSubject assertResult = Truth8.assertThat(optional);
             assertResult.isPresent();
             assertResult.hasValue(entity);
+        }
+
+        private Optional<E> find(I id) {
+            return repository().find(id);
         }
     }
 
@@ -477,12 +471,12 @@ class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>, I, S 
 
             storeEntity(entity);
 
-            assertTrue(findById(id).isPresent());
+            assertFound(id).isPresent();
 
             entity.setLifecycleFlags(GivenLifecycleFlags.archived());
             storeEntity(entity);
 
-            assertFalse(findById(id).isPresent());
+            assertFound(id).isEmpty();
         }
 
         @Test
@@ -493,12 +487,17 @@ class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>, I, S 
 
             storeEntity(entity);
 
-            assertTrue(findById(id).isPresent());
+            assertFound(id).isPresent();
 
             entity.setLifecycleFlags(GivenLifecycleFlags.deleted());
             storeEntity(entity);
 
-            assertFalse(findById(id).isPresent());
+            assertFound(id).isEmpty();
+        }
+
+        private OptionalSubject assertFound(I id) {
+            Optional<E> entity = repository().findActive(id);
+            return Truth8.assertThat(entity);
         }
     }
 
