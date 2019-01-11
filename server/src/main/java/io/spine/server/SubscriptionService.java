@@ -109,20 +109,12 @@ public class SubscriptionService
 
         try {
             BoundedContext boundedContext = selectBoundedContext(subscription);
-
-            SubscriptionUpdateCallback updateCallback = event -> {
-                checkNotNull(subscription);
-                EntityStateChanged theEvent = (EntityStateChanged) event;
-                EntityStateUpdate stateUpdate = toStateUpdate(theEvent);
-                SubscriptionUpdate update = SubscriptionUpdateVBuilder
-                        .newBuilder()
-                        .setSubscription(subscription)
-                        .setResponse(Responses.ok())
-                        .addEntityStateUpdates(stateUpdate)
-                        .build();
+            SubscriptionUpdateCallback updateCallback = update -> {
+                checkNotNull(update);
                 responseObserver.onNext(update);
             };
             Stand targetStand = boundedContext.getStand();
+
             targetStand.activate(subscription, updateCallback, forwardErrorsOnly(responseObserver));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error activating the subscription", e);
@@ -153,19 +145,6 @@ public class SubscriptionService
     private BoundedContext selectBoundedContext(Target target) {
         TypeUrl type = TypeUrl.parse(target.getType());
         BoundedContext result = typeToContextMap.get(type);
-        return result;
-    }
-
-    private static EntityStateUpdate toStateUpdate(EntityStateChanged event) {
-        EntityId entityId = event.getId()
-                                 .getEntityId();
-        Any packedEntityId = AnyPacker.pack(entityId);
-        Any packedEntityState = event.getNewState();
-        EntityStateUpdate result = EntityStateUpdateVBuilder
-                .newBuilder()
-                .setId(packedEntityId)
-                .setState(packedEntityState)
-                .build();
         return result;
     }
 

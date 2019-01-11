@@ -46,29 +46,8 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 
     private final Target target;
 
-    protected SubscriptionMatcher(Target target) {
+    SubscriptionMatcher(Target target) {
         this.target = target;
-    }
-
-    /**
-     * ...
-     *
-     * <p>By default assumes that all non-event subscriptions are entity subscriptions.
-     *
-     * @param subscription
-     * @return
-     */
-    static SubscriptionMatcher of(Subscription subscription) {
-        String targetType = subscription.getTopic()
-                                        .getTarget()
-                                        .getType();
-        TypeUrl typeUrl = TypeUrl.parse(targetType);
-        Class<?> javaClass = typeUrl.getJavaClass();
-        boolean isEvent = EventMessage.class.isAssignableFrom(javaClass);
-        if (isEvent) {
-            return EventSubscriptionMatcher.createFor(subscription);
-        }
-        return EntitySubscriptionMatcher.createFor(subscription);
     }
 
     @Override
@@ -87,7 +66,7 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
     }
 
     private boolean matchByFilters(EventEnvelope event) {
-        return  checkIdMatches(event) && checkMessageMatches(event);
+        return checkIdMatches(event) && checkMessageMatches(event);
     }
 
     private boolean checkIdMatches(EventEnvelope event) {

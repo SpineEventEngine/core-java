@@ -448,8 +448,8 @@ class StandTest extends TenantAwareTest {
         Collection<Customer> callbackStates = newHashSet();
         MemoizeUpdateCallback callback = new MemoizeUpdateCallback() {
             @Override
-            public void updateWith(EventMessage event) {
-                super.updateWith(event);
+            public void update(EventMessage event) {
+                super.update(event);
                 EntityStateChanged theEvent = (EntityStateChanged) event;
                 Any newState = theEvent.getNewState();
                 Customer customerInCallback = unpack(newState, Customer.class);
@@ -523,7 +523,7 @@ class StandTest extends TenantAwareTest {
         Any packedState = pack(customer);
         for (MemoizeUpdateCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState());
-            verify(callback, times(1)).updateWith(any(EventMessage.class));
+            verify(callback, times(1)).update(any(EventMessage.class));
         }
     }
 
@@ -539,7 +539,7 @@ class StandTest extends TenantAwareTest {
         CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
 
-        verify(callback, never()).updateWith(any(EventMessage.class));
+        verify(callback, never()).update(any(EventMessage.class));
     }
 
     private MemoizeUpdateCallback

@@ -20,53 +20,29 @@
 package io.spine.server.stand;
 
 import com.google.common.base.Objects;
-import io.spine.base.EventMessage;
 import io.spine.client.Subscription;
-import io.spine.client.Topic;
 import io.spine.core.EventEnvelope;
 import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
-import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Represents the attributes of a single subscription.
- *
- * @see SubscriptionRegistry
+ * A {@link SubscriptionRegistry} entry that manages a single {@link Subscription}.
  */
 final class SubscriptionRecord {
 
     private final Subscription subscription;
     private final TypeUrl type;
     private final SubscriptionMatcher matcher;
+    private final SubscriptionCallbackRunner callbackRunner;
 
-    /**
-     * The {@code callback} is null after the creation and until the subscription is activated.
-     *
-     * @see SubscriptionRegistry#add(Topic)
-     * @see SubscriptionRegistry#activate(Subscription, SubscriptionUpdateCallback)
-     */
-    private @Nullable SubscriptionUpdateCallback callback = null;
-
-    private SubscriptionRecord(Subscription subscription,
+    SubscriptionRecord(Subscription subscription,
                                TypeUrl type,
-                               SubscriptionMatcher matcher) {
+                               SubscriptionMatcher matcher,
+                               SubscriptionCallbackRunner callbackRunner) {
         this.subscription = subscription;
         this.type = type;
         this.matcher = matcher;
-    }
-
-    static SubscriptionRecord of(Subscription subscription) {
-        Topic topic = subscription.getTopic();
-        String typeAsString = topic.getTarget()
-                                   .getType();
-        TypeUrl type = TypeUrl.parse(typeAsString);
-        Class<?> javaClass = type.getJavaClass();
-        if (EventMessage.class.isAssignableFrom(javaClass)) {
-            type = TypeUrl.of(EntityStateChanged.class);
-        }
-        SubscriptionMatcher matcher = SubscriptionMatcher.of(subscription);
-        return new SubscriptionRecord(subscription, type, matcher);
+        this.callbackRunner = callbackRunner;
     }
 
     /**
@@ -75,15 +51,25 @@ final class SubscriptionRecord {
      * @param callback the callback to attach
      */
     void activate(SubscriptionUpdateCallback callback) {
-        this.callback = callback;
+        callbackRunner.setCallback(callback);
+    }
+
+    /**
+     *
+     * @param event
+     * @throws IllegalStateException
+     *         if the subscription is not activated
+     * @see #activate(SubscriptionUpdateCallback)
+     */
+    void runUpdate(EventEnvelope event) {
+        callbackRunner.run(event);
     }
 
     /**
      * Checks whether this record has a callback attached.
      */
     boolean isActive() {
-        boolean result = this.callback != null;
-        return result;
+        return callbackRunner.isActive();
     }
 
     /**
@@ -99,11 +85,6 @@ final class SubscriptionRecord {
 
     TypeUrl getType() {
         return type;
-    }
-
-    @Nullable
-    SubscriptionUpdateCallback getCallback() {
-        return callback;
     }
 
     @Override

@@ -38,6 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 
 /**
  * Registry for subscription management in a multi-tenant context.
@@ -134,7 +135,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
                     .setId(subscriptionId)
                     .setTopic(topic)
                     .build();
-            SubscriptionRecord record = SubscriptionRecord.of(subscription);
+            SubscriptionRecord record = newRecordFor(subscription);
             TypeUrl type = record.getType();
 
             if (!typeToRecord.containsKey(type)) {

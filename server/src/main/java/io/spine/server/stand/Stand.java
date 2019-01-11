@@ -31,6 +31,7 @@ import io.spine.base.EventMessage;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
+import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Response;
@@ -127,8 +128,7 @@ public class Stand implements AutoCloseable {
      */
     @SuppressWarnings("TypeMayBeWeakened") // Subscriptions work with events exclusively.
     public void notifySubscriptions(EventEnvelope event) {
-        EventMessage eventMessage = event.getMessage();
-        TypeUrl typeUrl = TypeUrl.of(eventMessage);
+        TypeUrl typeUrl = TypeUrl.of(event.getMessage());
         if (!subscriptionRegistry.hasType(typeUrl)) {
             return;
         }
@@ -137,30 +137,10 @@ public class Stand implements AutoCloseable {
             boolean subscriptionIsActive = record.isActive();
             boolean stateMatches = record.matches(event);
             if (subscriptionIsActive && stateMatches) {
-                Runnable action = notifySubscriptionAction(record, eventMessage);
+                Runnable action = () -> record.runUpdate(event);
                 callbackExecutor.execute(action);
             }
         }
-    }
-
-    /**
-     * Creates the subscribers notification action.
-     *
-     * <p>The resulting action retrieves the {@linkplain SubscriptionUpdateCallback subscriber
-     * callback} and invokes it with the given Entity ID and state.
-     *
-     * @param subscriptionRecord the attributes of the target subscription
-     * @param event              the event
-     * @return a routine delivering the subscription update to the target subscriber
-     */
-    private static Runnable
-    notifySubscriptionAction(SubscriptionRecord subscriptionRecord, EventMessage event) {
-        Runnable result = () -> {
-            SubscriptionUpdateCallback callback = subscriptionRecord.getCallback();
-            checkNotNull(callback, "Notifying by a non-activated subscription.");
-            callback.updateWith(event);
-        };
-        return result;
     }
 
     @Internal
@@ -350,13 +330,7 @@ public class Stand implements AutoCloseable {
      */
     public interface SubscriptionUpdateCallback {
 
-        /**
-         * Called to update a subscription with a given {@code EventMessage}.
-         *
-         * @param event
-         *         the event message
-         */
-        void updateWith(EventMessage event);
+        void run(SubscriptionUpdate update);
     }
 
     /**

@@ -111,7 +111,7 @@ public class StandTestEnv {
         private Any newEntityState = null;
 
         @Override
-        public void updateWith(EventMessage event) {
+        public void update(EventMessage event) {
             EntityStateChanged theEvent = (EntityStateChanged) event;
             newEntityState = theEvent.getNewState();
         }
