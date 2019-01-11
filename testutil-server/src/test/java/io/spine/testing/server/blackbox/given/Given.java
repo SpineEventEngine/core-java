@@ -20,17 +20,17 @@
 
 package io.spine.testing.server.blackbox.given;
 
-import com.google.common.collect.Lists;
 import io.spine.core.UserId;
 import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectVBuilder;
 import io.spine.testing.server.blackbox.BbReportId;
 import io.spine.testing.server.blackbox.BbTask;
-import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbAddTask;
+import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
+import io.spine.testing.server.blackbox.command.BbInitProject;
 import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
@@ -87,15 +87,21 @@ public class Given {
         return createProject(newProjectId());
     }
 
-    public static BbCreateProject createProject(BbProjectId projectId) {
+    public static BbCreateProject createProject(BbProjectId id) {
         return BbCreateProject.newBuilder()
-                               .setProjectId(projectId)
+                               .setProjectId(id)
                                .build();
     }
 
-    public static BbStartProject startProject(BbProjectId projectId) {
+    public static BbInitProject initProject(BbProjectId id) {
+        return BbInitProject.newBuilder()
+                            .setProjectId(id)
+                            .build();
+    }
+
+    public static BbStartProject startProject(BbProjectId id) {
         return BbStartProject.newBuilder()
-                             .setProjectId(projectId)
+                             .setProjectId(id)
                              .build();
     }
 

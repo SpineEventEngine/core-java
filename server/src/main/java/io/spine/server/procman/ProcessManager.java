@@ -74,10 +74,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <I> the type of the process manager IDs
  * @param <S> the type of the process manager state
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for this central class.
 public abstract class ProcessManager<I,
                                      S extends Message,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>>
