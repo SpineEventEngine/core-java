@@ -32,7 +32,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
-public class EntitySubscriptionMatcher extends SubscriptionMatcher {
+final class EntitySubscriptionMatcher extends SubscriptionMatcher {
 
     private EntitySubscriptionMatcher(Target target) {
         super(target);

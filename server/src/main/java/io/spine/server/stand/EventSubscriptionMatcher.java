@@ -30,9 +30,9 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.type.TypeUrl;
 
-public class EventSubscriptionMatcher extends SubscriptionMatcher {
+final class EventSubscriptionMatcher extends SubscriptionMatcher {
 
-    public EventSubscriptionMatcher(Target target) {
+    private EventSubscriptionMatcher(Target target) {
         super(target);
     }
 
