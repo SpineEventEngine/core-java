@@ -40,7 +40,6 @@ import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.internal.impldep.com.google.common.collect.Iterators;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -62,6 +61,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
+import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -96,7 +96,7 @@ class ModelVerifierTest {
 
         TaskContainer tasks = mock(TaskContainer.class);
         TaskCollection emptyTaskCollection = mock(TaskCollection.class);
-        when(emptyTaskCollection.iterator()).thenReturn(Iterators.emptyIterator());
+        when(emptyTaskCollection.iterator()).thenReturn(emptyIterator());
         when(emptyTaskCollection.toArray()).thenReturn(EMPTY_ARRAY);
         when(tasks.withType(any(Class.class))).thenReturn(emptyTaskCollection);
         when(project.getTasks()).thenReturn(tasks);
