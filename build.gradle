@@ -32,7 +32,7 @@ buildscript {
         maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
-        google()
+        jcenter()
         maven { url = repos.gradlePlugins }
         mavenLocal()
     }
@@ -162,7 +162,7 @@ subprojects {
     // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/
 
     repositories {
-        google()
+        jcenter()
         maven { url = repos.gradlePlugins }
         mavenLocal()
         maven { url = repos.oldSpine }
