@@ -152,9 +152,9 @@ class SubscriptionServiceTest {
     }
 
     /*
-    * Subscription tests
-    * ------------------
-    */
+     * Subscription tests
+     * ------------------
+     */
 
     @Test
     @DisplayName("subscribe to topic")
