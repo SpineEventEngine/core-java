@@ -44,8 +44,8 @@ class ServerEnvironmentTest {
         assertHasPrivateParameterlessCtor(ServerEnvironment.class);
     }
 
-    @Test	    
-    @DisplayName("tell when not running under AppEngine")	
+    @Test
+    @DisplayName("tell when not running under AppEngine")
     void tellIfNotInAppEngine() {
         // Tests are not run by AppEngine by default.
         assertFalse(ServerEnvironment.getInstance().isAppEngine());
