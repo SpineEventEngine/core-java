@@ -25,16 +25,18 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.emptyToNull;
-import static io.spine.server.ServerEnvironment.AppEngineEnvironment.PRODUCTION;
 import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
-import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_VERSION;
+import static io.spine.server.ServerEnvironmentKind.APP_ENGINE_CLOUD;
+import static io.spine.server.ServerEnvironmentKind.APP_ENGINE_DEV;
 import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 
 /**
  * The server conditions and configuration under which the application operates.
  */
-public class ServerEnvironment {
+public final class ServerEnvironment {
+
+    private static final ServerEnvironment INSTANCE = new ServerEnvironment(); 
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -44,53 +46,17 @@ public class ServerEnvironment {
      * Returns a singleton instance.
      */
     public static ServerEnvironment getInstance() {
-        return Singleton.INSTANCE;
+        return INSTANCE;
     }
 
     /**
-     * Returns {@code true} if the code is running on the Google AppEngine,
-     * {@code false} otherwise.
+     * The kind of server environment application is running on.
      */
-    public boolean isAppEngine() {
-        Optional<String> version = APP_ENGINE_VERSION.value();
-        return version.isPresent();
-    }
-
-    /**
-     * Returns {@code true} if the code is running on the Google AppEngine cloud infrastructure,
-     * {@code false} otherwise.
-     */
-    public boolean isProductionAppEngine() {
-        Optional<String> environment = APP_ENGINE_ENVIRONMENT.value();
-        return environment.map(PRODUCTION::matches)
-                          .orElse(false);
-    }
-
-    /**
-     * Returns an optional with current Google AppEngine version
-     * or {@linkplain Optional#empty() empty} if running outside of AppEngine.
-     */
-    public Optional<String> appEngineVersion() {
-        return APP_ENGINE_VERSION.value();
-    }
-
-    /**
-     * Returns an optional with {@link AppEngineEnvironment} (either Production or Development),
-     * or {@linkplain Optional#empty() empty} if running outside of AppEngine.
-     */
-    public Optional<AppEngineEnvironment> appEngineEnvironment() {
+    public ServerEnvironmentKind getKind() {
         return APP_ENGINE_ENVIRONMENT
                 .value()
-                .flatMap(AppEngineEnvironment::match);
-    }
-
-    /**
-     * A singleton holder.
-     *
-     * <p>Server environment is a singleton in scope of JVM.
-     */
-    private static final class Singleton {
-        private static final ServerEnvironment INSTANCE = new ServerEnvironment();
+                .flatMap(AppEngineEnvironment::match)
+                .orElse(ServerEnvironmentKind.LOCAL);
     }
 
     /**
@@ -99,29 +65,29 @@ public class ServerEnvironment {
      * <p>Either {@linkplain #PRODUCTION Production} when running on cloud infrastructure or
      * {@linkplain #DEVELOPMENT Development} when running local development server.
      */
-    public enum AppEngineEnvironment {
-        PRODUCTION("Production"),
-        DEVELOPMENT("Development");
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    // Duplicates of GAE environment names in tests.
+    private enum AppEngineEnvironment {
+        PRODUCTION("Production", APP_ENGINE_CLOUD),
+        DEVELOPMENT("Development", APP_ENGINE_DEV);
 
         private final String propertyValue;
+        private final ServerEnvironmentKind serverEnvironment;
 
-        AppEngineEnvironment(String propertyValue) {
+        AppEngineEnvironment(String propertyValue, ServerEnvironmentKind serverEnvironment) {
             this.propertyValue = propertyValue;
+            this.serverEnvironment = serverEnvironment;
         }
 
-        static Optional<AppEngineEnvironment> match(String value) {
+        private static Optional<ServerEnvironmentKind> match(String value) {
             return stream(values())
                     .filter(environment -> environment.matches(value))
+                    .map(environment -> environment.serverEnvironment)
                     .findFirst();
         }
 
-        boolean matches(String value) {
-            return propertyValue().equals(value);
-        }
-
-        @VisibleForTesting
-        String propertyValue() {
-            return propertyValue;
+        private boolean matches(String value) {
+            return propertyValue.equals(value);
         }
     }
 
@@ -131,8 +97,7 @@ public class ServerEnvironment {
     @VisibleForTesting
     @SuppressWarnings("AccessOfSystemProperties")// OK as we need system properties for this class.
     enum SystemProperty {
-        APP_ENGINE_VERSION("com.google.appengine.runtime.version"),
-        APP_ENGINE_ENVIRONMENT("com.google.appengine.runtime.environment");
+        APP_ENGINE_ENVIRONMENT("com.google.appengine.runtime.serverEnvironment");
 
         private final String path;
 
@@ -146,13 +111,12 @@ public class ServerEnvironment {
          * @return optional with string if property exists and is not an empty string,
          *         {@code empty} otherwise
          */
-        Optional<String> value() {
+        private Optional<String> value() {
             String systemValue = System.getProperty(path());
             String nonEmptyValue = emptyToNull(systemValue);
             return ofNullable(nonEmptyValue);
         }
 
-        @VisibleForTesting
         String path() {
             return path;
         }

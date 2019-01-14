@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package spine.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server";
+option java_outer_classname = "ServerEnvironmentProto";
+option java_multiple_files = true;
+
+// A kind of the environment system is running on.
+//
+enum ServerEnvironmentKind {
+
+    SE_UNDEFINED = 0;
+
+    // Running locally without any kind of server, e.g. during unit testing.
+    LOCAL = 1;
+
+    // Running on a App Engine local development server.
+    APP_ENGINE_DEV = 2;
+
+    // Running on a App Engine cloud infrastructure.
+    APP_ENGINE_CLOUD = 3;
+}
