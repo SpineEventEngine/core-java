@@ -92,7 +92,7 @@ public final class ServerEnvironment {
     }
 
     /**
-     * Sets the default current time provider that obtains current time from system millis.
+     * Sets the default deployment type provider which utilizes system properties.
      */
     @VisibleForTesting
     static void resetProvider() {
