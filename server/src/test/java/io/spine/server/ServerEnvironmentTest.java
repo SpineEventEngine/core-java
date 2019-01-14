@@ -26,10 +26,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
 import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
 import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
+import static io.spine.server.ServerEnvironment.APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE;
+import static io.spine.server.ServerEnvironment.APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE;
+import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertFalse;
@@ -64,7 +66,7 @@ class ServerEnvironmentTest {
     class OnProdAppEngine extends WithAppEngineEnvironment {
 
         OnProdAppEngine() {
-            super("Production");
+            super(APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE);
         }
 
         @Test
@@ -80,7 +82,7 @@ class ServerEnvironmentTest {
     class OnDevAppEngine extends WithAppEngineEnvironment {
 
         OnDevAppEngine() {
-            super("Development");
+            super(APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE);
         }
 
         @Test

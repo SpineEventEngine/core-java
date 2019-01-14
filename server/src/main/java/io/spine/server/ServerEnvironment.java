@@ -30,7 +30,6 @@ import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
 import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
 import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_VERSION;
-import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -38,7 +37,12 @@ import static java.util.Optional.ofNullable;
  */
 public final class ServerEnvironment {
 
-    private static final ServerEnvironment INSTANCE = new ServerEnvironment(); 
+    private static final ServerEnvironment INSTANCE = new ServerEnvironment();
+
+    @VisibleForTesting
+    static final String APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE = "Production";
+    @VisibleForTesting
+    static final String APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE = "Development";
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -71,54 +75,16 @@ public final class ServerEnvironment {
      * The kind of server environment application is running on.
      */
     public DeploymentType getDeploymentType() {
-        Optional<DeploymentType> gaeKind = AppEngineEnvironment.get();
-        return gaeKind.orElse(STANDALONE);
-    }
-
-    /**
-     * Type of an App Engine Environment if applicable.
-     *
-     * <p>Either {@linkplain #PRODUCTION Production} when running on cloud infrastructure or
-     * {@linkplain #DEVELOPMENT Development} when running local development server.
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    // Duplicates of GAE environment names in tests.
-    private enum AppEngineEnvironment {
-        PRODUCTION("Production", APPENGINE_CLOUD),
-        DEVELOPMENT("Development", APPENGINE_EMULATOR);
-
-        private final String propertyValue;
-        private final DeploymentType serverEnvironment;
-
-        AppEngineEnvironment(String propertyValue, DeploymentType serverEnvironment) {
-            this.propertyValue = propertyValue;
-            this.serverEnvironment = serverEnvironment;
+        Optional<String> value = APP_ENGINE_ENVIRONMENT.value();
+        if (value.isPresent()) {
+            if (APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE.equals(value.get())) {
+                return APPENGINE_EMULATOR;
+            }
+            if (APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE.equals(value.get())) {
+                return APPENGINE_CLOUD;
+            }
         }
-
-        /**
-         * Checks the {@linkplain SystemProperty#APP_ENGINE_ENVIRONMENT App Engine environment} 
-         * system property value to match any of existing {@linkplain DeploymentType
-         * server environment kinds}.
-         */
-        private static Optional<DeploymentType> get() {
-            return APP_ENGINE_ENVIRONMENT
-                    .value()
-                    .flatMap(AppEngineEnvironment::match);
-        }
-
-        /**
-         * Matches the provided value to the corresponding App Engine {@link DeploymentType}.
-         */
-        private static Optional<DeploymentType> match(String value) {
-            return stream(values())
-                    .filter(environment -> environment.matches(value))
-                    .map(environment -> environment.serverEnvironment)
-                    .findFirst();
-        }
-
-        private boolean matches(String value) {
-            return propertyValue.equals(value);
-        }
+        return STANDALONE;
     }
 
     /**
