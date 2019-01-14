@@ -34,12 +34,12 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.Map;
 
-import static io.spine.server.entity.storage.ColumnTests.DEFAULT_COLUMNS;
 import static io.spine.server.entity.storage.ColumnTests.assertContainsColumns;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.column.EntityWithManyGetters.CUSTOM_COLUMN_NAME;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -101,7 +101,7 @@ class ColumnsTest {
 
         assertContainsColumns(
                 entityColumns,
-                DEFAULT_COLUMNS.get(0), DEFAULT_COLUMNS.get(1),
+                archived.name(), deleted.name(),
                 "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
         );
     }

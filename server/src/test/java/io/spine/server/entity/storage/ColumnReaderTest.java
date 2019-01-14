@@ -30,6 +30,7 @@ import io.spine.server.entity.storage.given.column.EntityWithManyGettersDescenda
 import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
 import io.spine.server.entity.storage.given.column.EntityWithRepeatedColumnNames;
 import io.spine.server.entity.storage.given.column.RealLifeEntity;
+import io.spine.server.storage.LifecycleFlagField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,6 @@ import java.util.function.Predicate;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.ColumnReader.forClass;
-import static io.spine.server.entity.storage.ColumnTests.DEFAULT_COLUMNS;
 import static io.spine.server.entity.storage.ColumnTests.assertContainsColumns;
 import static io.spine.server.entity.storage.ColumnTests.assertNotContainsColumns;
 import static io.spine.server.storage.EntityField.version;
@@ -83,7 +83,7 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
-                    DEFAULT_COLUMNS.get(0), DEFAULT_COLUMNS.get(1),
+                    archived.name(), deleted.name(),
                     "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
             );
         }
@@ -95,7 +95,7 @@ class ColumnReaderTest {
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
             assertNotNull(entityColumns);
-            assertThat(entityColumns).hasSize(DEFAULT_COLUMNS.size());
+            assertThat(entityColumns).hasSize(LifecycleFlagField.values().length);
         }
 
         @Test
@@ -116,7 +116,7 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
             assertContainsColumns(entityColumns,
-                                  DEFAULT_COLUMNS.get(0), DEFAULT_COLUMNS.get(1),
+                                  archived.name(), deleted.name(),
                                   "integerFieldValue");
         }
     }

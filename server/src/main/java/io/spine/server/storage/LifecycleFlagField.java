@@ -24,7 +24,6 @@ package io.spine.server.storage;
  * A container for the storage fields used to store the
  * {@linkplain io.spine.server.entity.LifecycleFlags LifecycleFlags}.
  *
- * @author Dmytro Dashenkov
  * @see StorageField
  */
 public enum LifecycleFlagField implements StorageField {
