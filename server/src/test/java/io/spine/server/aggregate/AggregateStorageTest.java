@@ -75,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class AggregateStorageTest
         extends AbstractStorageTest<ProjectId,
-        AggregateHistory,
+                                    AggregateHistory,
                                     AggregateReadRequest<ProjectId>,
                                     AggregateStorage<ProjectId>> {
 
