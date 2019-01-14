@@ -28,6 +28,7 @@ import static com.google.common.base.Strings.emptyToNull;
 import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
 import static io.spine.server.ServerEnvironmentKind.APP_ENGINE_CLOUD;
 import static io.spine.server.ServerEnvironmentKind.APP_ENGINE_DEV;
+import static io.spine.server.ServerEnvironmentKind.LOCAL;
 import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 
@@ -53,10 +54,8 @@ public final class ServerEnvironment {
      * The kind of server environment application is running on.
      */
     public ServerEnvironmentKind getKind() {
-        return APP_ENGINE_ENVIRONMENT
-                .value()
-                .flatMap(AppEngineEnvironment::match)
-                .orElse(ServerEnvironmentKind.LOCAL);
+        Optional<ServerEnvironmentKind> gaeKind = AppEngineEnvironment.get();
+        return gaeKind.orElse(LOCAL);
     }
 
     /**
@@ -79,6 +78,20 @@ public final class ServerEnvironment {
             this.serverEnvironment = serverEnvironment;
         }
 
+        /**
+         * Checks the {@linkplain SystemProperty#APP_ENGINE_ENVIRONMENT App Engine environment} 
+         * system property value to match any of existing {@linkplain ServerEnvironmentKind
+         * server environment kinds}.
+         */
+        private static Optional<ServerEnvironmentKind> get() {
+            return APP_ENGINE_ENVIRONMENT
+                    .value()
+                    .flatMap(AppEngineEnvironment::match);
+        }
+
+        /**
+         * Matches the provided value to the corresponding App Engine {@link ServerEnvironmentKind}.
+         */
         private static Optional<ServerEnvironmentKind> match(String value) {
             return stream(values())
                     .filter(environment -> environment.matches(value))
