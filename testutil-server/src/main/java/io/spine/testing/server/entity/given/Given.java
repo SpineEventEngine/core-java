@@ -36,8 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utility class for building test objects.
- *
- * @author Alexander Yevsyukov
  */
 public class Given {
 
