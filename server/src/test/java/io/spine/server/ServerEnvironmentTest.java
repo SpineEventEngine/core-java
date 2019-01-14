@@ -29,9 +29,9 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
 import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
-import static io.spine.server.ServerEnvironment.APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE;
-import static io.spine.server.ServerEnvironment.APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE;
-import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
+import static io.spine.server.SystemEnvironmentProvider.APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE;
+import static io.spine.server.SystemEnvironmentProvider.APP_ENGINE_ENVIRONMENT_PATH;
+import static io.spine.server.SystemEnvironmentProvider.APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertFalse;
@@ -66,8 +66,7 @@ class ServerEnvironmentTest {
     @DisplayName("tell when not running without any specific server environment")
     void tellIfStandalone() {
         // Tests are not run by AppEngine by default.
-        ServerEnvironment environment = ServerEnvironment.getInstance();
-        assertEquals(STANDALONE, environment.getDeploymentType());
+        assertEquals(STANDALONE, ServerEnvironment.getDeploymentType());
     }
 
     @Nested
@@ -81,8 +80,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("obtain AppEngine environment GAE cloud infrastructure server environment")
         void getAppEngineEnvironment() {
-            ServerEnvironment serverEnvironment = ServerEnvironment.getInstance();
-            assertEquals(APPENGINE_CLOUD, serverEnvironment.getDeploymentType());
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.getDeploymentType());
         }
     }
 
@@ -97,8 +95,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("obtain AppEngine environment GAE local dev server environment")
         void getAppEngineEnvironment() {
-            ServerEnvironment serverEnvironment = ServerEnvironment.getInstance();
-            assertEquals(APPENGINE_EMULATOR, serverEnvironment.getDeploymentType());
+            assertEquals(APPENGINE_EMULATOR, ServerEnvironment.getDeploymentType());
         }
     }
 
@@ -118,16 +115,17 @@ class ServerEnvironmentTest {
 
         @BeforeEach
         void setUp() {
-            initialValue = System.getProperty(APP_ENGINE_ENVIRONMENT.path());
-            System.setProperty(APP_ENGINE_ENVIRONMENT.path(), targetEnvironment);
+            initialValue = System.getProperty(APP_ENGINE_ENVIRONMENT_PATH);
+            System.setProperty(APP_ENGINE_ENVIRONMENT_PATH, targetEnvironment);
+            ServerEnvironment.resetProvider();
         }
 
         @AfterEach
         void tearDown() {
             if (initialValue == null) {
-                System.clearProperty(APP_ENGINE_ENVIRONMENT.path());
+                System.clearProperty(APP_ENGINE_ENVIRONMENT_PATH);
             } else {
-                System.setProperty(APP_ENGINE_ENVIRONMENT.path(), initialValue);
+                System.setProperty(APP_ENGINE_ENVIRONMENT_PATH, initialValue);
             }
         }
     }

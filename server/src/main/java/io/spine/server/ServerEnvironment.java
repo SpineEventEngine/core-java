@@ -21,16 +21,13 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.annotation.Internal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
 import static com.google.common.base.Strings.emptyToNull;
-import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
-import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
-import static io.spine.server.DeploymentType.STANDALONE;
-import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
-import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_VERSION;
-import static java.util.Optional.ofNullable;
+import static java.lang.ThreadLocal.withInitial;
 
 /**
  * The server conditions and configuration under which the application operates.
@@ -39,10 +36,15 @@ public final class ServerEnvironment {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
 
-    @VisibleForTesting
-    static final String APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE = "Production";
-    @VisibleForTesting
-    static final String APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE = "Development";
+    private static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION =
+            "com.google.appengine.runtime.version";
+
+    @SuppressWarnings("AccessOfSystemProperties") /*  Based on system property. */
+    private static final @Nullable String appEngineRuntimeVersion =
+            emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
+
+    private static final ThreadLocal<Provider> provider =
+            withInitial(SystemEnvironmentProvider::newInstance);
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -66,8 +68,7 @@ public final class ServerEnvironment {
      */
     @Deprecated
     public boolean isAppEngine() {
-        Optional<String> gaeVersion = APP_ENGINE_VERSION.value();
-        boolean isVersionPresent = gaeVersion.isPresent();
+        boolean isVersionPresent = appEngineRuntimeVersion != null;
         return isVersionPresent;
     }
 
@@ -79,54 +80,31 @@ public final class ServerEnvironment {
      */
     @Deprecated
     public Optional<String> appEngineVersion() {
-        return APP_ENGINE_VERSION.value();
+        return Optional.ofNullable(appEngineRuntimeVersion);
     }
 
     /**
      * The type of the environment application is deployed to.
      */
-    public DeploymentType getDeploymentType() {
-        Optional<String> value = APP_ENGINE_ENVIRONMENT.value();
-        if (value.isPresent()) {
-            if (APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE.equals(value.get())) {
-                return APPENGINE_EMULATOR;
-            }
-            if (APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE.equals(value.get())) {
-                return APPENGINE_CLOUD;
-            }
-        }
-        return STANDALONE;
+    public static DeploymentType getDeploymentType() {
+        return provider.get()
+                       .getDeploymentType();
     }
 
     /**
-     * The {@linkplain System#getProperties() System Properties} used by the Server Environment.
+     * Sets the default current time provider that obtains current time from system millis.
      */
     @VisibleForTesting
-    @SuppressWarnings("AccessOfSystemProperties")// OK as we need system properties for this class.
-    enum SystemProperty {
-        APP_ENGINE_VERSION("com.google.appengine.runtime.version"),
-        APP_ENGINE_ENVIRONMENT("com.google.appengine.runtime.environment");
+    static void resetProvider() {
+        provider.set(SystemEnvironmentProvider.newInstance());
+    }
 
-        private final String path;
+    /**
+     * The provider of the deployment type.
+     */
+    @Internal
+    public interface Provider {
 
-        SystemProperty(String path) {
-            this.path = path;
-        }
-
-        /**
-         * An optional value of {@linkplain System#getProperty(String) the property}.
-         *
-         * @return optional with string if property exists and is not an empty string,
-         *         {@code empty} otherwise
-         */
-        private Optional<String> value() {
-            String systemValue = System.getProperty(path());
-            String nonEmptyValue = emptyToNull(systemValue);
-            return ofNullable(nonEmptyValue);
-        }
-
-        String path() {
-            return path;
-        }
+        DeploymentType getDeploymentType();
     }
 }
