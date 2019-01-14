@@ -58,9 +58,6 @@ import static java.util.stream.Collectors.toList;
  * <p>This class allows to hide implementation details of storing events.
  * {@link EventStore} serves as a facade, hiding the fact that the {@code EventStorage}
  * is a {@code Repository}.
- *
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> {
 
