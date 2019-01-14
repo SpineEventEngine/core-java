@@ -73,7 +73,7 @@ public final class ServerEnvironment {
 
     /**
      * Returns an optional with current Google App Engine version
-     * or {@code empty} if the program is running not on the App Engine.
+     * or {@code empty} if the program is not running on the App Engine.
      *
      * @deprecated this method will be removed in 1.0.
      */
@@ -83,7 +83,7 @@ public final class ServerEnvironment {
     }
 
     /**
-     * The kind of server environment application is running on.
+     * The type of the environment application is deployed to.
      */
     public DeploymentType getDeploymentType() {
         Optional<String> value = APP_ENGINE_ENVIRONMENT.value();
@@ -99,7 +99,7 @@ public final class ServerEnvironment {
     }
 
     /**
-     * The {@linkplain System#getProperties() System Properties} defining the Server Environment.
+     * The {@linkplain System#getProperties() System Properties} used by the Server Environment.
      */
     @VisibleForTesting
     @SuppressWarnings("AccessOfSystemProperties")// OK as we need system properties for this class.
