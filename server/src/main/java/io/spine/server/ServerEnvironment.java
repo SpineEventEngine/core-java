@@ -26,9 +26,9 @@ import java.util.Optional;
 
 import static com.google.common.base.Strings.emptyToNull;
 import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
-import static io.spine.server.ServerEnvironmentKind.APP_ENGINE_CLOUD;
-import static io.spine.server.ServerEnvironmentKind.APP_ENGINE_DEV;
-import static io.spine.server.ServerEnvironmentKind.LOCAL;
+import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
+import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
+import static io.spine.server.DeploymentType.STANDALONE;
 import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 
@@ -53,9 +53,9 @@ public final class ServerEnvironment {
     /**
      * The kind of server environment application is running on.
      */
-    public ServerEnvironmentKind getKind() {
-        Optional<ServerEnvironmentKind> gaeKind = AppEngineEnvironment.get();
-        return gaeKind.orElse(LOCAL);
+    public DeploymentType getDeploymentType() {
+        Optional<DeploymentType> gaeKind = AppEngineEnvironment.get();
+        return gaeKind.orElse(STANDALONE);
     }
 
     /**
@@ -67,32 +67,32 @@ public final class ServerEnvironment {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     // Duplicates of GAE environment names in tests.
     private enum AppEngineEnvironment {
-        PRODUCTION("Production", APP_ENGINE_CLOUD),
-        DEVELOPMENT("Development", APP_ENGINE_DEV);
+        PRODUCTION("Production", APPENGINE_CLOUD),
+        DEVELOPMENT("Development", APPENGINE_EMULATOR);
 
         private final String propertyValue;
-        private final ServerEnvironmentKind serverEnvironment;
+        private final DeploymentType serverEnvironment;
 
-        AppEngineEnvironment(String propertyValue, ServerEnvironmentKind serverEnvironment) {
+        AppEngineEnvironment(String propertyValue, DeploymentType serverEnvironment) {
             this.propertyValue = propertyValue;
             this.serverEnvironment = serverEnvironment;
         }
 
         /**
          * Checks the {@linkplain SystemProperty#APP_ENGINE_ENVIRONMENT App Engine environment} 
-         * system property value to match any of existing {@linkplain ServerEnvironmentKind
+         * system property value to match any of existing {@linkplain DeploymentType
          * server environment kinds}.
          */
-        private static Optional<ServerEnvironmentKind> get() {
+        private static Optional<DeploymentType> get() {
             return APP_ENGINE_ENVIRONMENT
                     .value()
                     .flatMap(AppEngineEnvironment::match);
         }
 
         /**
-         * Matches the provided value to the corresponding App Engine {@link ServerEnvironmentKind}.
+         * Matches the provided value to the corresponding App Engine {@link DeploymentType}.
          */
-        private static Optional<ServerEnvironmentKind> match(String value) {
+        private static Optional<DeploymentType> match(String value) {
             return stream(values())
                     .filter(environment -> environment.matches(value))
                     .map(environment -> environment.serverEnvironment)

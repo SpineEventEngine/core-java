@@ -9,18 +9,16 @@ option java_package = "io.spine.server";
 option java_outer_classname = "ServerEnvironmentProto";
 option java_multiple_files = true;
 
-// A kind of the environment system is running on.
+// A type of the environment system is deployed to.
 //
-enum ServerEnvironmentKind {
+enum DeploymentType {
 
-    SE_UNDEFINED = 0;
+    // Running on a unrecognized environment.
+    STANDALONE = 0;
 
-    // Running locally without any kind of server, e.g. during unit testing.
-    LOCAL = 1;
+    // Running on an App Engine local development server.
+    APPENGINE_EMULATOR = 2;
 
-    // Running on a App Engine local development server.
-    APP_ENGINE_DEV = 2;
-
-    // Running on a App Engine cloud infrastructure.
-    APP_ENGINE_CLOUD = 3;
+    // Running on an App Engine cloud infrastructure.
+    APPENGINE_CLOUD = 3;
 }

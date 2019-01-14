@@ -27,9 +27,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
-import static io.spine.server.ServerEnvironmentKind.APP_ENGINE_CLOUD;
-import static io.spine.server.ServerEnvironmentKind.APP_ENGINE_DEV;
-import static io.spine.server.ServerEnvironmentKind.LOCAL;
+import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
+import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
+import static io.spine.server.DeploymentType.STANDALONE;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +48,7 @@ class ServerEnvironmentTest {
     void tellIfNotInAppEngine() {
         // Tests are not run by AppEngine by default.
         ServerEnvironment environment = ServerEnvironment.getInstance();
-        assertEquals(LOCAL, environment.getKind());
+        assertEquals(STANDALONE, environment.getDeploymentType());
     }
 
     @Nested
@@ -63,7 +63,7 @@ class ServerEnvironmentTest {
         @DisplayName("obtain AppEngine environment GAE cloud infrastructure server environment")
         void getAppEngineEnvironment() {
             ServerEnvironment serverEnvironment = ServerEnvironment.getInstance();
-            assertEquals(APP_ENGINE_CLOUD, serverEnvironment.getKind());
+            assertEquals(APPENGINE_CLOUD, serverEnvironment.getDeploymentType());
         }
     }
 
@@ -79,7 +79,7 @@ class ServerEnvironmentTest {
         @DisplayName("obtain AppEngine environment GAE local dev server environment")
         void getAppEngineEnvironment() {
             ServerEnvironment serverEnvironment = ServerEnvironment.getInstance();
-            assertEquals(APP_ENGINE_DEV, serverEnvironment.getKind());
+            assertEquals(APPENGINE_EMULATOR, serverEnvironment.getDeploymentType());
         }
     }
 
