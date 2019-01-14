@@ -36,9 +36,11 @@ public final class ServerEnvironment {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
 
+    /** The key of the Google AppEngine runtime version system property. */
     private static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION =
             "com.google.appengine.runtime.version";
 
+    /** If set, contains the version of AppEngine obtained from the system property. */
     @SuppressWarnings("AccessOfSystemProperties") /*  Based on system property. */
     private static final @Nullable String appEngineRuntimeVersion =
             emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
