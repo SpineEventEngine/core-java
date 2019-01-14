@@ -32,6 +32,7 @@ import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("ServerEnvironment should")
@@ -43,9 +44,16 @@ class ServerEnvironmentTest {
         assertHasPrivateParameterlessCtor(ServerEnvironment.class);
     }
 
+    @Test	    
+    @DisplayName("tell when not running under AppEngine")	
+    void tellIfNotInAppEngine() {
+        // Tests are not run by AppEngine by default.
+        assertFalse(ServerEnvironment.getInstance().isAppEngine());
+    }
+
     @Test
     @DisplayName("tell when not running without any specific server environment")
-    void tellIfNotInAppEngine() {
+    void tellIfStandalone() {
         // Tests are not run by AppEngine by default.
         ServerEnvironment environment = ServerEnvironment.getInstance();
         assertEquals(STANDALONE, environment.getDeploymentType());
