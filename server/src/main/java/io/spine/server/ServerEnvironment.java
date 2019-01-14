@@ -56,7 +56,7 @@ public final class ServerEnvironment {
     }
 
     /**
-     * Returns {@code true} if the code is running on the Google AppEngine,
+     * Returns {@code true} if the code is running on the Google App Engine,
      * {@code false} otherwise.
      *
      * @deprecated this method will be removed in 1.0, check {@linkplain #getDeploymentType()
@@ -69,6 +69,17 @@ public final class ServerEnvironment {
         Optional<String> gaeVersion = APP_ENGINE_VERSION.value();
         boolean isVersionPresent = gaeVersion.isPresent();
         return isVersionPresent;
+    }
+
+    /**
+     * Returns an optional with current Google App Engine version
+     * or {@code empty} if the program is running not on the App Engine.
+     *
+     * @deprecated this method will be removed in 1.0.
+     */
+    @Deprecated
+    public Optional<String> appEngineVersion() {
+        return APP_ENGINE_VERSION.value();
     }
 
     /**

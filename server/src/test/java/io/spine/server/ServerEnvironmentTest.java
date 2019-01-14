@@ -54,6 +54,15 @@ class ServerEnvironmentTest {
     }
 
     @Test
+    @DisplayName("obtain AppEngine version as optional string")
+    void getAppEngineVersion() {
+        // By default we're not running under AppEngine.
+        assertFalse(ServerEnvironment.getInstance()
+                                     .appEngineVersion()
+                                     .isPresent());
+    }
+
+    @Test
     @DisplayName("tell when not running without any specific server environment")
     void tellIfStandalone() {
         // Tests are not run by AppEngine by default.
