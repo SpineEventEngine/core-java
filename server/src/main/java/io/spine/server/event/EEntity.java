@@ -39,9 +39,6 @@ import static io.spine.core.Events.clearEnrichments;
  * An entity for storing an event.
  *
  * <p>An underlying event doesn't contain {@linkplain Events#clearEnrichments(Event) enrichments}.
- *
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 @Internal
 public class EEntity extends AbstractEntity<EventId, Event> {

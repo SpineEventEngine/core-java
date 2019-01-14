@@ -514,8 +514,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Loads an aggregate by the passed ID.
      *
      * <p>An aggregate will be loaded even if
-     * {@link io.spine.server.entity.EntityWithLifecycle#isArchived() archived}
-     * or {@link io.spine.server.entity.EntityWithLifecycle#isDeleted() deleted} lifecycle
+     * {@link io.spine.server.entity.Entity#isArchived() archived}
+     * or {@link io.spine.server.entity.Entity#isDeleted() deleted} lifecycle
      * attribute, or both of them, are set to {@code true}.
      *
      * @param  id the ID of the aggregate to load

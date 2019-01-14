@@ -27,7 +27,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TestEntity;
 import io.spine.server.entity.TestEntity.TestEntityBuilder;
 import io.spine.server.entity.VersionableEntity;
-import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.EntityWithoutColumns;
+import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,6 +39,7 @@ import java.util.Map;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.entity.storage.ColumnTests.DEFAULT_COLUMNS;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
@@ -177,18 +178,19 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("not have columns if value list is empty")
+    @DisplayName("not have only lifecycle columns if the entity does not define custom")
     void supportEmptyColumns() {
-        EntityWithoutColumns entity = new EntityWithoutColumns("ID");
+        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns("ID");
         Class<? extends Entity> entityClass = entity.getClass();
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
-        assertTrue(columnValues.isEmpty());
+
+        assertThat(columnValues).hasSize(2);
 
         EntityRecordWithColumns record = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(),
                 columnValues
         );
-        assertFalse(record.hasColumns());
+        assertThat(record.getColumnNames()).containsExactlyElementsIn(DEFAULT_COLUMNS);
     }
 }

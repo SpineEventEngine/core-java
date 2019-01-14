@@ -195,10 +195,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
      *
-     * <p>An entity will be loaded whether its active or not.
-     * I.e. the entity is loaded and returned even if its
-     * {@linkplain EntityWithLifecycle#isArchived()  archived} or
-     * {@linkplain EntityWithLifecycle#isDeleted() deleted}.
+     * <p>An entity will be loaded whether its {@linkplain WithLifecycle#isActive() active} or not.
      *
      * <p>The new entity is created if and only if there is no record with the corresponding ID.
      *

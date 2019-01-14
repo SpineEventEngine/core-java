@@ -21,14 +21,10 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
-import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 
 import java.util.Objects;
 
@@ -45,20 +41,9 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntity<I, S>
-        implements VersionableEntity<I, S>,
-                   EntityWithLifecycle<I, S> {
+        implements VersionableEntity<I, S> {
 
     private Version version;
-
-    private LifecycleFlags lifecycleFlags;
-
-    /**
-     * Indicates if the lifecycle flags of the entity were changed since initialization.
-     *
-     * <p>Changed lifecycle flags are should be updated when
-     * {@linkplain Repository#store(Entity) storing}.
-     */
-    private volatile boolean lifecycleFlagsChanged;
 
     /**
      * Creates a new instance.
@@ -76,48 +61,28 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected AbstractVersionableEntity(I id) {
         super(id);
         setVersion(Versions.zero());
-        clearLifecycleFlags();
-    }
-
-    private void clearLifecycleFlags() {
-        setLifecycleFlags(LifecycleFlags.getDefaultInstance());
-        lifecycleFlagsChanged = false;
     }
 
     /**
      * Updates the state and version of the entity.
      *
-     * <p>The new state must be {@linkplain #validate(Message) valid}.
+     * <p>The new state must be valid.
      *
      * <p>The passed version must have a number not less than the current version of the entity.
      *
-     * @param state   the state object to set
-     * @param version the entity version to set
+     * @param state
+     *         the state object to set
+     * @param version
+     *         the entity version to set
      * @throws IllegalStateException
-     *                if the passed state is not {@linkplain #validate(Message) valid}
+     *         if the passed state is not valid
      * @throws IllegalArgumentException
-     *                if the passed version has the number which is greater than the current
-     *                version of the entity
-     * @see #validate(Message)
+     *         if the passed version has the number which is greater than the current
+     *         version of the entity
      */
     void updateState(S state, Version version) {
         updateState(state);
         updateVersion(version);
-    }
-
-    /**
-     * Sets status for the entity.
-     */
-    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
-        if (!lifecycleFlags.equals(this.lifecycleFlags)) {
-            this.lifecycleFlags = lifecycleFlags;
-            this.lifecycleFlagsChanged = true;
-        }
-    }
-
-    @Override
-    public boolean lifecycleFlagsChanged() {
-        return lifecycleFlagsChanged;
     }
 
     /**
@@ -190,86 +155,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     public Timestamp whenModified() {
         return version.getTimestamp();
-    }
-
-    @Override
-    public LifecycleFlags getLifecycleFlags() {
-        LifecycleFlags result = this.lifecycleFlags == null
-                                ? LifecycleFlags.getDefaultInstance()
-                                : this.lifecycleFlags;
-        return result;
-    }
-
-    /**
-     * Tests whether the entity is marked as archived.
-     *
-     * @return {@code true} if the entity is archived, {@code false} otherwise
-     */
-    @Override
-    public final boolean isArchived() {
-        return getLifecycleFlags().getArchived();
-    }
-
-    /**
-     * Sets {@code archived} status flag to the passed value.
-     */
-    protected void setArchived(boolean archived) {
-        setLifecycleFlags(getLifecycleFlags().toBuilder()
-                                             .setArchived(archived)
-                                             .build());
-    }
-
-    /**
-     * Tests whether the entity is marked as deleted.
-     *
-     * @return {@code true} if the entity is deleted, {@code false} otherwise
-     */
-    @Override
-    public final boolean isDeleted() {
-        return getLifecycleFlags().getDeleted();
-    }
-
-    /**
-     * Sets {@code deleted} status flag to the passed value.
-     */
-    protected void setDeleted(boolean deleted) {
-        setLifecycleFlags(getLifecycleFlags().toBuilder()
-                                             .setDeleted(deleted)
-                                             .build());
-    }
-
-    /**
-     * Ensures that the entity is not marked as {@code archived}.
-     *
-     * @throws CannotModifyArchivedEntity if the entity in in the archived status
-     * @see #getLifecycleFlags()
-     * @see LifecycleFlags#getArchived()
-     */
-    protected void checkNotArchived() throws CannotModifyArchivedEntity {
-        if (getLifecycleFlags().getArchived()) {
-            Any packedId = Identifier.pack(getId());
-            throw CannotModifyArchivedEntity
-                    .newBuilder()
-                    .setEntityId(packedId)
-                    .build();
-        }
-    }
-
-    /**
-     * Ensures that the entity is not marked as {@code deleted}.
-     *
-     * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
-     * @see #getLifecycleFlags()
-     * @see LifecycleFlags#getDeleted()
-     */
-    protected void checkNotDeleted() throws CannotModifyDeletedEntity {
-        if (getLifecycleFlags().getDeleted()) {
-            Any packedId = Identifier.pack(getId());
-            throw CannotModifyDeletedEntity
-                    .newBuilder()
-                    .setEntityId(packedId)
-                    .build();
-        }
     }
 
     @Override

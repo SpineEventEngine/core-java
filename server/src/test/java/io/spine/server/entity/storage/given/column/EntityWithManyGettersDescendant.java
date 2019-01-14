@@ -18,41 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given.column;
 
-import com.google.protobuf.Message;
-import io.spine.server.entity.storage.Column;
+public class EntityWithManyGettersDescendant extends EntityWithManyGetters {
+    public EntityWithManyGettersDescendant(String id) {
+        super(id);
+    }
 
-/**
- * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
- *
- * <p>Lifecycle flags determine if an entity is active.
- * An entity is considered to be active if the lifecycle flags are missing.
- * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted}, 
- * then it’s regarded to be inactive.
- */
-public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S>, WithLifecycle {
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to add the {@code Column} annotation.
-     */
-    @Column
     @Override
-    boolean isArchived();
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to add {@code Column} annotation.
-     */
-    @Column
-    @Override
-    boolean isDeleted();
-
-    /**
-     * Tells whether lifecycle flags of the entity changed since its initialization.
-     */
-    boolean lifecycleFlagsChanged();
+    int getSomeNonPublicMethod() {
+        return super.getSomeNonPublicMethod();
+    }
 }

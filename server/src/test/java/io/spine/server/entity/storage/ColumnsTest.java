@@ -24,20 +24,21 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
+import io.spine.server.entity.storage.given.column.EntityWithManyGetters;
+import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
+import io.spine.server.entity.storage.given.column.EntityWithRepeatedColumnNames;
+import io.spine.server.entity.storage.given.column.RealLifeEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Map;
 
+import static io.spine.server.entity.storage.ColumnTests.DEFAULT_COLUMNS;
+import static io.spine.server.entity.storage.ColumnTests.assertContainsColumns;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
-import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
-import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertContainsColumns;
+import static io.spine.server.entity.storage.given.column.EntityWithManyGetters.CUSTOM_COLUMN_NAME;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -100,6 +101,7 @@ class ColumnsTest {
 
         assertContainsColumns(
                 entityColumns,
+                DEFAULT_COLUMNS.get(0), DEFAULT_COLUMNS.get(1),
                 "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
         );
     }

@@ -35,7 +35,6 @@ import io.spine.core.Version;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -583,7 +582,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         assertSingleRecord(fineRecord, readRecords);
     }
 
-    private void write(EntityWithLifecycle<ProjectId, ?> entity) {
+    private void write(Entity<ProjectId, ?> entity) {
         RecordStorage<ProjectId> storage = getStorage();
         EntityRecord record = buildStorageRecord(entity.getId(), entity.getState(),
                                                  entity.getLifecycleFlags());

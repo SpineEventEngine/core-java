@@ -18,24 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
 
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
-public class EntityRecordWithColumnsTestEnv {
-
-    /** Prevents instantiation of this utility class. */
-    private EntityRecordWithColumnsTestEnv() {
+public class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
+    public EntityWithNoStorageFields(String id) {
+        super(id);
     }
 
-    public static class EntityWithoutColumns extends AbstractEntity<String, Any> {
-        public EntityWithoutColumns(String id) {
-            super(id);
-        }
+    // A simple getter, which is not an entity column.
+    public int getValue() {
+        return 0;
     }
 }

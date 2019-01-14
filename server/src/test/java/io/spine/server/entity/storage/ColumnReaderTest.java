@@ -20,17 +20,16 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithASetterButNoGetter;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithBooleanColumns;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithColumnFromInterface;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGettersDescendant;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
+import io.spine.server.entity.storage.given.column.EntityWithASetterButNoGetter;
+import io.spine.server.entity.storage.given.column.EntityWithBooleanColumns;
+import io.spine.server.entity.storage.given.column.EntityWithColumnFromInterface;
+import io.spine.server.entity.storage.given.column.EntityWithManyGetters;
+import io.spine.server.entity.storage.given.column.EntityWithManyGettersDescendant;
+import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
+import io.spine.server.entity.storage.given.column.EntityWithRepeatedColumnNames;
+import io.spine.server.entity.storage.given.column.RealLifeEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,15 +38,15 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.ColumnReader.forClass;
-import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertContainsColumns;
-import static io.spine.server.entity.storage.given.ColumnsTestEnv.assertNotContainsColumns;
+import static io.spine.server.entity.storage.ColumnTests.DEFAULT_COLUMNS;
+import static io.spine.server.entity.storage.ColumnTests.assertContainsColumns;
+import static io.spine.server.entity.storage.ColumnTests.assertNotContainsColumns;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -84,6 +83,7 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
+                    DEFAULT_COLUMNS.get(0), DEFAULT_COLUMNS.get(1),
                     "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
             );
         }
@@ -95,7 +95,7 @@ class ColumnReaderTest {
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
             assertNotNull(entityColumns);
-            assertTrue(entityColumns.isEmpty());
+            assertThat(entityColumns).hasSize(DEFAULT_COLUMNS.size());
         }
 
         @Test
@@ -115,7 +115,9 @@ class ColumnReaderTest {
         void fromImplementedInterface() {
             ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
-            assertContainsColumns(entityColumns, "integerFieldValue");
+            assertContainsColumns(entityColumns,
+                                  DEFAULT_COLUMNS.get(0), DEFAULT_COLUMNS.get(1),
+                                  "integerFieldValue");
         }
     }
 

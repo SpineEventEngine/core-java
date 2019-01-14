@@ -24,7 +24,6 @@ import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.given.column.BrokenTestEntity;
@@ -121,7 +120,7 @@ class ColumnTest {
     void haveEqualsAndHashCode() {
         EntityColumn col1 = forMethod("getVersion", VersionableEntity.class);
         EntityColumn col2 = forMethod("getVersion", VersionableEntity.class);
-        EntityColumn col3 = forMethod("isDeleted", EntityWithLifecycle.class);
+        EntityColumn col3 = forMethod("isDeleted", Entity.class);
         new EqualsTester()
                 .addEqualityGroup(col1, col2)
                 .addEqualityGroup(col3)

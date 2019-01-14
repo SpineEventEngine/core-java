@@ -22,9 +22,13 @@ package io.spine.server.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
@@ -47,6 +51,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("SynchronizeOnThis") /* This class uses double-check idiom for lazy init of some
     fields. See Effective Java 2nd Ed. Item #71. */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
+
+    /**
+     * Indicates if the lifecycle flags of the entity were changed since initialization.
+     *
+     * <p>Changed lifecycle flags are should be updated when
+     * {@linkplain io.spine.server.entity.Repository#store(io.spine.server.entity.Entity) storing}.
+     */
+    private volatile boolean lifecycleFlagsChanged;
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -74,11 +86,14 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @LazyInit
     private volatile @MonotonicNonNull S state;
 
+    private LifecycleFlags lifecycleFlags;
+
     /**
      * Creates new instance with the passed ID.
      */
     protected AbstractEntity(I id) {
         this.id = checkNotNull(id);
+        clearLifecycleFlags();
     }
 
     /**
@@ -238,6 +253,106 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return MoreObjects.toStringHelper(this)
                           .add("id", idAsString())
                           .toString();
+    }
+
+    /**
+     * Sets status for the entity.
+     */
+    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
+        if (!lifecycleFlags.equals(this.lifecycleFlags)) {
+            this.lifecycleFlags = lifecycleFlags;
+            this.lifecycleFlagsChanged = true;
+        }
+    }
+
+    @Override
+    public LifecycleFlags getLifecycleFlags() {
+        LifecycleFlags result = this.lifecycleFlags == null
+                                ? LifecycleFlags.getDefaultInstance()
+                                : this.lifecycleFlags;
+        return result;
+    }
+
+    /**
+     * Tests whether the entity is marked as archived.
+     *
+     * @return {@code true} if the entity is archived, {@code false} otherwise
+     */
+    @Override
+    public final boolean isArchived() {
+        return getLifecycleFlags().getArchived();
+    }
+
+    /**
+     * Sets {@code archived} status flag to the passed value.
+     */
+    protected void setArchived(boolean archived) {
+        setLifecycleFlags(getLifecycleFlags().toBuilder()
+                                             .setArchived(archived)
+                                             .build());
+    }
+
+    /**
+     * Tests whether the entity is marked as deleted.
+     *
+     * @return {@code true} if the entity is deleted, {@code false} otherwise
+     */
+    @Override
+    public final boolean isDeleted() {
+        return getLifecycleFlags().getDeleted();
+    }
+
+    /**
+     * Sets {@code deleted} status flag to the passed value.
+     */
+    protected void setDeleted(boolean deleted) {
+        setLifecycleFlags(getLifecycleFlags().toBuilder()
+                                             .setDeleted(deleted)
+                                             .build());
+    }
+
+    /**
+     * Ensures that the entity is not marked as {@code archived}.
+     *
+     * @throws CannotModifyArchivedEntity if the entity in in the archived status
+     * @see #getLifecycleFlags()
+     * @see io.spine.server.entity.LifecycleFlags#getArchived()
+     */
+    protected void checkNotArchived() throws CannotModifyArchivedEntity {
+        if (getLifecycleFlags().getArchived()) {
+            Any packedId = Identifier.pack(getId());
+            throw CannotModifyArchivedEntity
+                    .newBuilder()
+                    .setEntityId(packedId)
+                    .build();
+        }
+    }
+
+    /**
+     * Ensures that the entity is not marked as {@code deleted}.
+     *
+     * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
+     * @see #getLifecycleFlags()
+     * @see io.spine.server.entity.LifecycleFlags#getDeleted()
+     */
+    protected void checkNotDeleted() throws CannotModifyDeletedEntity {
+        if (getLifecycleFlags().getDeleted()) {
+            Any packedId = Identifier.pack(getId());
+            throw CannotModifyDeletedEntity
+                    .newBuilder()
+                    .setEntityId(packedId)
+                    .build();
+        }
+    }
+
+    @Override
+    public boolean lifecycleFlagsChanged() {
+        return lifecycleFlagsChanged;
+    }
+
+    private void clearLifecycleFlags() {
+        setLifecycleFlags(LifecycleFlags.getDefaultInstance());
+        lifecycleFlagsChanged = false;
     }
 
     @Override

@@ -26,7 +26,7 @@ import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
-import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
@@ -41,7 +41,7 @@ import static com.google.common.truth.Truth.assertThat;
  */
 public class EntitySubject<T extends EntitySubject<T, S, E>,
                            S extends Message,
-                           E extends EntityWithLifecycle<?, S>>
+                           E extends Entity<?, S>>
         extends Subject<T, E> {
 
     protected EntitySubject(FailureMetadata metadata, @NullableDecl E actual) {
