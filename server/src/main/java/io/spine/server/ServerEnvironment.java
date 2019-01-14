@@ -25,10 +25,11 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.emptyToNull;
-import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
 import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
 import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
+import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_ENVIRONMENT;
+import static io.spine.server.ServerEnvironment.SystemProperty.APP_ENGINE_VERSION;
 import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 
@@ -48,6 +49,22 @@ public final class ServerEnvironment {
      */
     public static ServerEnvironment getInstance() {
         return INSTANCE;
+    }
+
+    /**
+     * Returns {@code true} if the code is running on the Google AppEngine,
+     * {@code false} otherwise.
+     *
+     * @deprecated this method will be removed in 1.0, check {@linkplain #getDeploymentType()
+     *         deployment type} to match any of
+     *         {@link DeploymentType#APPENGINE_EMULATOR APPENGINE_EMULATOR} or
+     *         {@link DeploymentType#APPENGINE_CLOUD APPENGINE_CLOUD} instead.
+     */
+    @Deprecated
+    public boolean isAppEngine() {
+        Optional<String> gaeVersion = APP_ENGINE_VERSION.value();
+        boolean isVersionPresent = gaeVersion.isPresent();
+        return isVersionPresent;
     }
 
     /**
@@ -110,7 +127,8 @@ public final class ServerEnvironment {
     @VisibleForTesting
     @SuppressWarnings("AccessOfSystemProperties")// OK as we need system properties for this class.
     enum SystemProperty {
-        APP_ENGINE_ENVIRONMENT("com.google.appengine.runtime.serverEnvironment");
+        APP_ENGINE_VERSION("com.google.appengine.runtime.version"),
+        APP_ENGINE_ENVIRONMENT("com.google.appengine.runtime.environment");
 
         private final String path;
 
