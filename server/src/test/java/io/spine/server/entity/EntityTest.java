@@ -390,7 +390,7 @@ class EntityTest {
         @DisplayName("entities with different status are not equal")
         void consideredForEquality() {
             // Create an entity with the same ID and the same (default) state.
-            AbstractVersionableEntity another = new TestEntityWithIdString(entityNew.getId());
+            AbstractEntity another = new TestEntityWithIdString(entityNew.getId());
 
             another.setArchived(true);
 

@@ -21,11 +21,11 @@
 package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.Column;
 
 public class EntityWithRepeatedColumnNames
-        extends AbstractVersionableEntity<String, Any> {
+        extends AbstractEntity<String, Any> {
     protected EntityWithRepeatedColumnNames(String id) {
         super(id);
     }

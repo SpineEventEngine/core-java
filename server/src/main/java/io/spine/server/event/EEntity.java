@@ -25,8 +25,10 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
+import io.spine.core.EventVBuilder;
 import io.spine.core.Events;
-import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.Transaction;
+import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,13 +43,14 @@ import static io.spine.core.Events.clearEnrichments;
  * <p>An underlying event doesn't contain {@linkplain Events#clearEnrichments(Event) enrichments}.
  */
 @Internal
-public class EEntity extends AbstractEntity<EventId, Event> {
+public final class EEntity extends TransactionalEntity<EventId, Event, EventVBuilder> {
 
     /**
      * The name of the entity column representing the time, when the event was fired.
      *
      * @see #getCreated()
      */
+    @SuppressWarnings("DuplicateStringLiteralInspection") // field name semantic
     static final String CREATED_TIME_COLUMN = "created";
 
     /**
@@ -75,14 +78,17 @@ public class EEntity extends AbstractEntity<EventId, Event> {
         return result;
     };
 
-    EEntity(EventId id) {
+    private EEntity(EventId id) {
         super(id);
     }
 
-    EEntity(Event event) {
-        this(event.getId());
-        Event eventWithoutEnrichments = clearEnrichments(event);
-        updateState(eventWithoutEnrichments);
+    /**
+     * Creates a new entity stripping enrichments from the passed event.
+     */
+    static EEntity create(Event event) {
+        Factory factory = new Factory(event);
+        EEntity result = factory.create();
+        return result;
     }
 
     /**
@@ -121,5 +127,26 @@ public class EEntity extends AbstractEntity<EventId, Event> {
                                     .getTypeName();
         }
         return typeName.value();
+    }
+
+    /**
+     * Creates a new entity stripping enrichments from the passed event.
+     */
+    private static class Factory extends Transaction<EventId, EEntity, Event, EventVBuilder> {
+
+        private final Event event;
+
+        private Factory(Event event) {
+            super(new EEntity(event.getId()));
+            this.event = event;
+        }
+
+        EEntity create() {
+            Event eventWithoutEnrichments = clearEnrichments(event);
+            EEntity entity = getEntity();
+            entity.getBuilder().mergeFrom(eventWithoutEnrichments);
+            commit();
+            return entity;
+        }
     }
 }

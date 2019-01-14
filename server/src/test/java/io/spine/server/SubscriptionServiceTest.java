@@ -29,8 +29,8 @@ import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.server.Given.MemoizeStreamObserver;
-import io.spine.server.entity.AbstractVersionableEntity;
-import io.spine.server.entity.VersionableEntity;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.Entity;
 import io.spine.server.stand.Stand;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -221,7 +221,7 @@ class SubscriptionServiceTest {
                                       .build();
         int version = 1;
 
-        VersionableEntity entity = mockEntity(projectId, projectState, version);
+        Entity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStand()
                       .post(requestFactory.createCommandContext()
                                           .getActorContext()
@@ -266,7 +266,7 @@ class SubscriptionServiceTest {
                                       .setId(projectId)
                                       .build();
         int version = 1;
-        VersionableEntity entity = mockEntity(projectId, projectState, version);
+        Entity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStand()
                       .post(requestFactory.createCommandContext()
                                           .getActorContext()
@@ -282,8 +282,6 @@ class SubscriptionServiceTest {
     @DisplayName("handle exceptions and call observer error callback for")
     class HandleExceptionsOf {
 
-        @SuppressWarnings("ConstantConditions")
-        // As `null` is intentionally passed as a method param.
         @Test
         @DisplayName("subscription process")
         void subscription() {
@@ -301,8 +299,6 @@ class SubscriptionServiceTest {
             assertThat(observer.throwable()).isInstanceOf(NullPointerException.class);
         }
 
-        @SuppressWarnings("ConstantConditions")
-        // As `null` is intentionally passed as a method param.
         @Test
         @DisplayName("activation process")
         void activation() {
@@ -353,9 +349,9 @@ class SubscriptionServiceTest {
         }
     }
 
-    private static VersionableEntity mockEntity(ProjectId projectId, Message projectState,
+    private static Entity mockEntity(ProjectId projectId, Message projectState,
                                                 int version) {
-        VersionableEntity entity = mock(AbstractVersionableEntity.class);
+        Entity entity = mock(AbstractEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
         when(entity.getVersion()).thenReturn(newVersion(version, Time.getCurrentTime()));

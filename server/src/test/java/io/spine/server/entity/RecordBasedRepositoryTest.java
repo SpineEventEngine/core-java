@@ -84,7 +84,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  *         {@link TestEntityWithStringColumn} at runtime
  */
 public abstract
-class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
+class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Message>
         extends TenantAwareTest {
 
     private RecordBasedRepository<I, E, S> repository;

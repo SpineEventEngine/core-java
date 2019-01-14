@@ -22,14 +22,14 @@ package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 
-// Most real-life (non-test) Entities are children of AbstractVersionableEntity,
+// Most real-life (non-test) Entities are children of AbstractEntity,
 // which brings 3 storage fields from the box.
-public class RealLifeEntity extends AbstractVersionableEntity<ProjectId, Project> {
+public class RealLifeEntity extends AbstractEntity<ProjectId, Project> {
 
     public RealLifeEntity(ProjectId id) {
         super(id);

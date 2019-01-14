@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.entity.storage.Column;
 import io.spine.string.Stringifiers;
@@ -40,7 +41,6 @@ import io.spine.string.Stringifiers;
  *
  * @param <I> the type of entity identifier
  * @param <S> the type of entity state
- * @see VersionableEntity
  */
 public interface Entity<I, S extends Message> extends WithLifecycle {
 
@@ -86,6 +86,12 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
      * Tells whether lifecycle flags of the entity changed since its initialization.
      */
     boolean lifecycleFlagsChanged();
+
+    /**
+     * Obtains the version of the entity.
+     */
+    @Column
+    Version getVersion();
 
     /**
      * Enumeration of generic type parameters of this interface.

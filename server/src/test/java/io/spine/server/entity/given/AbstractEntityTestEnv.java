@@ -24,10 +24,6 @@ import com.google.protobuf.StringValue;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.test.entity.number.NaturalNumber;
 
-/**
- * @author Illia Shepilov
- * @author Dmytro Kuzmin
- */
 public class AbstractEntityTestEnv {
 
     /** Prevents instantiation of this utility class. */

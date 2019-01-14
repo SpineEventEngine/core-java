@@ -98,7 +98,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     }
 
     void store(Event event) {
-        EEntity entity = new EEntity(event);
+        EEntity entity = EEntity.create(event);
         store(entity);
     }
 
@@ -226,7 +226,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         @Override
         public EEntity apply(@Nullable Event event) {
             checkNotNull(event);
-            return new EEntity(event);
+            return EEntity.create(event);
         }
     }
 }

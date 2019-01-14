@@ -20,12 +20,16 @@
 
 package io.spine.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
@@ -39,14 +43,13 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Abstract base for entities.
  *
  * @param <I> the type of entity identifiers
  * @param <S> the type of entity state objects
- * @author Alexander Yevsyukov
- * @author Dmitry Ganzha
  */
 @SuppressWarnings("SynchronizeOnThis") /* This class uses double-check idiom for lazy init of some
     fields. See Effective Java 2nd Ed. Item #71. */
@@ -87,12 +90,14 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     private volatile @MonotonicNonNull S state;
 
     private LifecycleFlags lifecycleFlags;
+    private Version version;
 
     /**
      * Creates new instance with the passed ID.
      */
     protected AbstractEntity(I id) {
         this.id = checkNotNull(id);
+        setVersion(Versions.zero());
         clearLifecycleFlags();
     }
 
@@ -188,7 +193,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @throws InvalidEntityStateException
      *         if the passed state is not {@linkplain #validate(Message) valid}
      */
-    protected final void updateState(S state) {
+    final void updateState(S state) {
         validate(state);
         setState(state);
     }
@@ -355,6 +360,99 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         lifecycleFlagsChanged = false;
     }
 
+    /**
+     * Updates the state and version of the entity.
+     *
+     * <p>The new state must be valid.
+     *
+     * <p>The passed version must have a number not less than the current version of the entity.
+     *
+     * @param state
+     *         the state object to set
+     * @param version
+     *         the entity version to set
+     * @throws IllegalStateException
+     *         if the passed state is not valid
+     * @throws IllegalArgumentException
+     *         if the passed version has the number which is greater than the current
+     *         version of the entity
+     */
+    void updateState(S state, Version version) {
+        updateState(state);
+        updateVersion(version);
+    }
+
+    /**
+     * Obtains the version number of the entity.
+     */
+    protected int versionNumber() {
+        int result = getVersion().getNumber();
+        return result;
+    }
+
+    private void updateVersion(Version newVersion) {
+        checkNotNull(newVersion);
+        if (version.equals(newVersion)) {
+            return;
+        }
+
+        int currentVersionNumber = versionNumber();
+        int newVersionNumber = newVersion.getNumber();
+        if (currentVersionNumber > newVersionNumber) {
+            throw newIllegalArgumentException(
+                    "A version with the lower number (%d) passed to `updateVersion()` " +
+                    "of the entity with the version number %d.",
+                    newVersionNumber, currentVersionNumber);
+        }
+
+        setVersion(newVersion);
+    }
+
+    /**
+     * Updates the state incrementing the version number and recording time of the modification.
+     *
+     * <p>This is a test-only convenience method. Calling this method is equivalent to calling
+     * {@link #updateState(com.google.protobuf.Message, io.spine.core.Version)} with the incremented by one version.
+     *
+     * <p>Please use {@link #updateState(com.google.protobuf.Message, io.spine.core.Version)} directly in the production code.
+     *
+     * @param newState a new state to set
+     */
+    @VisibleForTesting
+    void incrementState(S newState) {
+        updateState(newState, incrementedVersion());
+    }
+
+    @Override
+    public final Version getVersion() {
+        return version;
+    }
+
+    private void setVersion(Version version) {
+        this.version = version;
+    }
+
+    private Version incrementedVersion() {
+        return Versions.increment(getVersion());
+    }
+
+    /**
+     * Advances the current version by one and records the time of the modification.
+     *
+     * @return new version number
+     */
+    int incrementVersion() {
+        setVersion(incrementedVersion());
+        return version.getNumber();
+    }
+
+    /**
+     * Obtains timestamp of the entity version.
+     */
+    public Timestamp whenModified() {
+        return version.getTimestamp();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -365,11 +463,13 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         }
         AbstractEntity<?, ?> that = (AbstractEntity<?, ?>) o;
         return Objects.equals(getId(), that.getId()) &&
-               Objects.equals(getState(), that.getState());
+                Objects.equals(getState(), that.getState()) &&
+                Objects.equals(getVersion(), that.getVersion()) &&
+                Objects.equals(getLifecycleFlags(), that.getLifecycleFlags());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getState());
+        return Objects.hash(getId(), getState(), getVersion(), getLifecycleFlags());
     }
 }

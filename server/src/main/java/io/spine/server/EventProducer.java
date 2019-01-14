@@ -26,8 +26,6 @@ import io.spine.server.model.Nothing;
 
 /**
  * An object with identity which produces events.
- *
- * @author Alexander Yevsyukov
  */
 public interface EventProducer {
 

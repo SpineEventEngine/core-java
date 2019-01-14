@@ -30,7 +30,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
-import io.spine.server.entity.VersionableEntity;
+import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,7 +71,7 @@ class QueryParametersTest {
     @DisplayName("be serializable")
     void beSerializable() {
         String columnName = version.name();
-        EntityColumn column = findColumn(VersionableEntity.class, columnName);
+        EntityColumn column = findColumn(Entity.class, columnName);
         ColumnFilter filter = ColumnFilters.eq(columnName, 1);
         CompositeQueryParameter parameter = aggregatingParameter(column, filter);
         QueryParameters parameters = QueryParameters.newBuilder()

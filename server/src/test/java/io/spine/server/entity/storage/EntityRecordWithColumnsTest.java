@@ -26,7 +26,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TestEntity;
 import io.spine.server.entity.TestEntity.TestEntityBuilder;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.testdata.Sample;
@@ -79,11 +78,11 @@ class EntityRecordWithColumnsTest {
     @DisplayName("be serializable")
     void beSerializable() {
         EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        VersionableEntity<?, ?> entity = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                                .withVersion(1)
-                                                                .build();
+        Entity<?, ?> entity = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                     .withVersion(1)
+                                                     .build();
         String columnName = version.name();
-        EntityColumn column = findColumn(VersionableEntity.class, columnName);
+        EntityColumn column = findColumn(Entity.class, columnName);
         MemoizedValue value = column.memoizeFor(entity);
 
         Map<String, MemoizedValue> columns = singletonMap(columnName, value);

@@ -23,7 +23,7 @@ package io.spine.server.entity.given;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.test.entity.Project;
@@ -61,41 +61,41 @@ public class EntityTestEnv {
     }
 
     public static class TestEntityWithIdString
-            extends AbstractVersionableEntity<String, Project> {
+            extends AbstractEntity<String, Project> {
         public TestEntityWithIdString(String id) {
             super(id);
         }
     }
 
     public static class TestEntityWithIdMessage
-            extends AbstractVersionableEntity<Message, Project> {
+            extends AbstractEntity<Message, Project> {
         public TestEntityWithIdMessage(Message id) {
             super(id);
         }
     }
 
     public static class TestEntityWithIdInteger
-            extends AbstractVersionableEntity<Integer, Project> {
+            extends AbstractEntity<Integer, Project> {
         public TestEntityWithIdInteger(Integer id) {
             super(id);
         }
     }
 
     public static class TestEntityWithIdLong
-            extends AbstractVersionableEntity<Long, Project> {
+            extends AbstractEntity<Long, Project> {
         public TestEntityWithIdLong(Long id) {
             super(id);
         }
     }
 
-    public static class BareBonesEntity extends AbstractVersionableEntity<Long, StringValue> {
+    public static class BareBonesEntity extends AbstractEntity<Long, StringValue> {
         public BareBonesEntity(Long id) {
             super(id);
         }
     }
 
     public static class EntityWithMessageId
-            extends AbstractVersionableEntity<ProjectId, StringValue> {
+            extends AbstractEntity<ProjectId, StringValue> {
 
         public EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));

@@ -24,7 +24,6 @@ import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.given.column.BrokenTestEntity;
 import io.spine.server.entity.storage.given.column.EntityRedefiningColumnAnnotation;
@@ -68,7 +67,7 @@ class ColumnTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        EntityColumn column = forMethod("getVersion", Entity.class);
         reserializeAndAssert(column);
     }
 
@@ -81,7 +80,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null getter without errors")
         void getter() {
-            EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+            EntityColumn column = forMethod("getVersion", Entity.class);
             column.restoreGetter();
         }
 
@@ -90,7 +89,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null value converter without errors")
         void valueConverter() {
-            EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+            EntityColumn column = forMethod("getVersion", Entity.class);
             column.restoreValueConverter();
         }
     }
@@ -98,7 +97,7 @@ class ColumnTest {
     @Test
     @DisplayName("support `toString`")
     void supportToString() {
-        EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        EntityColumn column = forMethod("getVersion", Entity.class);
         assertEquals("VersionableEntity.version", column.toString());
     }
 
@@ -106,7 +105,7 @@ class ColumnTest {
     @DisplayName("invoke getter")
     void invokeGetter() {
         int version = 2;
-        EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        EntityColumn column = forMethod("getVersion", Entity.class);
         TestAggregate entity = Given.aggregateOfClass(TestAggregate.class)
                                     .withId(1L)
                                     .withVersion(version)
@@ -118,8 +117,8 @@ class ColumnTest {
     @Test
     @DisplayName("have `equals` and `hashCode`")
     void haveEqualsAndHashCode() {
-        EntityColumn col1 = forMethod("getVersion", VersionableEntity.class);
-        EntityColumn col2 = forMethod("getVersion", VersionableEntity.class);
+        EntityColumn col1 = forMethod("getVersion", Entity.class);
+        EntityColumn col2 = forMethod("getVersion", Entity.class);
         EntityColumn col3 = forMethod("isDeleted", Entity.class);
         new EqualsTester()
                 .addEqualityGroup(col1, col2)

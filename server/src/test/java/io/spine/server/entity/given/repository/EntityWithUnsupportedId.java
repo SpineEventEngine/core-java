@@ -20,10 +20,10 @@
 
 package io.spine.server.entity.given.repository;
 
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.test.entity.Project;
 
-class EntityWithUnsupportedId extends AbstractVersionableEntity<Exception, Project> {
+class EntityWithUnsupportedId extends AbstractEntity<Exception, Project> {
     protected EntityWithUnsupportedId(Exception id) {
         super(id);
     }

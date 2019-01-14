@@ -77,14 +77,12 @@ public enum EntityField implements StorageField {
     type_url,
 
     /**
-     * A field representing the
-     * {@link io.spine.server.entity.VersionableEntity#getVersion Entity version}.
+     * A field representing the {@link io.spine.server.entity.Entity#getVersion Entity version}.
      *
      * <p>All the Spine basic {@linkplain io.spine.server.entity.Entity Entities} (e.g.
      * {@linkplain io.spine.server.aggregate.Aggregate Aggregates},
      * {@linkplain io.spine.server.projection.Projection Projections}, etc.) do have this field.
      *
-     * @see io.spine.server.entity.VersionableEntity
      * @see io.spine.core.Version
      */
     version
