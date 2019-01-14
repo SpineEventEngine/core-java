@@ -24,8 +24,8 @@ import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.server.entity.given.AbstractEntityTestEnv.AnEntity;
-import io.spine.server.entity.given.AbstractEntityTestEnv.NaturalNumberEntity;
+import io.spine.server.entity.given.entity.AnEntity;
+import io.spine.server.entity.given.entity.NaturalNumberEntity;
 import io.spine.test.entity.number.NaturalNumber;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,7 +35,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.given.AbstractEntityTestEnv.newNaturalNumber;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -155,5 +154,11 @@ class AbstractEntityTest {
         private AvEntity(Long id) {
             super(id);
         }
+    }
+
+    static NaturalNumber newNaturalNumber(int value) {
+        return NaturalNumber.newBuilder()
+                            .setValue(value)
+                            .build();
     }
 }

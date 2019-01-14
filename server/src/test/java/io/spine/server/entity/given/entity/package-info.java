@@ -18,33 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.given;
+/**
+ * Test environment for testing entity classes.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.entity.given.entity;
 
-import com.google.protobuf.StringValue;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.test.entity.number.NaturalNumber;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-public class AbstractEntityTestEnv {
-
-    /** Prevents instantiation of this utility class. */
-    private AbstractEntityTestEnv() {
-    }
-
-    public static class AnEntity extends AbstractEntity<Long, StringValue> {
-        public AnEntity(Long id) {
-            super(id);
-        }
-    }
-
-    public static class NaturalNumberEntity extends AbstractEntity<Long, NaturalNumber> {
-        public NaturalNumberEntity(Long id) {
-            super(id);
-        }
-    }
-
-    public static NaturalNumber newNaturalNumber(int value) {
-        return NaturalNumber.newBuilder()
-                            .setValue(value)
-                            .build();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
