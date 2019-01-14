@@ -425,12 +425,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return loaded or created aggregate instance
      */
     A loadOrCreate(I id) {
-        A result = load(id).orElseGet(() -> {
-            A created = create(id);
-            lifecycleOf(id).onEntityCreated(AGGREGATE);
-            return created;
-        });
+        A result = load(id).orElseGet(() -> createNew(id));
         return result;
+    }
+
+    /** Creates a new entity with the passed ID. */
+    private A createNew(I id) {
+        A created = create(id);
+        lifecycleOf(id).onEntityCreated(AGGREGATE);
+        return created;
     }
 
     /**
