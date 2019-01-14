@@ -20,24 +20,18 @@
 
 package io.spine.server.entity.storage.given.column;
 
-import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractEntity;
+import com.google.protobuf.Message;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.Column;
 
-public class EntityRedefiningColumnAnnotation extends AbstractEntity<String, Any>
-        implements WithColumn<String, Any> {
+/**
+ * This interface attempts to re-define already defined column.
+ * @param <I>
+ * @param <S>
+ */
+public interface WithColumn<I, S extends Message> extends Entity<I, S> {
 
-    protected EntityRedefiningColumnAnnotation(String id) {
-        super(id);
-    }
-
-    /**
-     * This annotation {@code @Column} should not be used in the derived class,
-     * which is tested by {@code ColumnTest}.
-     */
+    @SuppressWarnings("unused")
     @Column
-    @Override
-    public String getCustomColumn() {
-        return getClass().getCanonicalName();
-    }
+    String getCustomColumn();
 }

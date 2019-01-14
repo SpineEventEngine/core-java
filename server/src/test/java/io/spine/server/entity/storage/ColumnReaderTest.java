@@ -31,6 +31,7 @@ import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
 import io.spine.server.entity.storage.given.column.EntityWithRepeatedColumnNames;
 import io.spine.server.entity.storage.given.column.RealLifeEntity;
 import io.spine.server.storage.LifecycleFlagField;
+import io.spine.server.storage.VersionField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -83,7 +84,7 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
-                    archived.name(), deleted.name(),
+                    version.name(), archived.name(), deleted.name(),
                     "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
             );
         }
@@ -95,7 +96,9 @@ class ColumnReaderTest {
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
             assertNotNull(entityColumns);
-            assertThat(entityColumns).hasSize(LifecycleFlagField.values().length);
+            assertThat(entityColumns)
+                    .hasSize(LifecycleFlagField.values().length +
+                                     VersionField.values().length);
         }
 
         @Test
@@ -116,7 +119,7 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
             assertContainsColumns(entityColumns,
-                                  archived.name(), deleted.name(),
+                                  version.name(), archived.name(), deleted.name(),
                                   "integerFieldValue");
         }
     }

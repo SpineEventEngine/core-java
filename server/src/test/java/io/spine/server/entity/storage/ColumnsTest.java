@@ -40,6 +40,7 @@ import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.column.EntityWithManyGetters.CUSTOM_COLUMN_NAME;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.storage.VersionField.version;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -101,7 +102,7 @@ class ColumnsTest {
 
         assertContainsColumns(
                 entityColumns,
-                archived.name(), deleted.name(),
+                version.name(), archived.name(), deleted.name(),
                 "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
         );
     }

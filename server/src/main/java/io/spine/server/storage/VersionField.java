@@ -18,26 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given.column;
+package io.spine.server.storage;
 
-import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.Column;
-
-public class EntityRedefiningColumnAnnotation extends AbstractEntity<String, Any>
-        implements WithColumn<String, Any> {
-
-    protected EntityRedefiningColumnAnnotation(String id) {
-        super(id);
-    }
+/**
+ * A container for storage fields used to store entity version information.
+ */
+public enum VersionField implements StorageField {
 
     /**
-     * This annotation {@code @Column} should not be used in the derived class,
-     * which is tested by {@code ColumnTest}.
+     * Version information of an entity.
      */
-    @Column
-    @Override
-    public String getCustomColumn() {
-        return getClass().getCanonicalName();
-    }
+    version
 }

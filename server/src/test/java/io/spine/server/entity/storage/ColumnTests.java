@@ -20,10 +20,12 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.storage.LifecycleFlagField;
+import io.spine.server.storage.VersionField;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -35,7 +37,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 final class ColumnTests {
 
-    static final ImmutableList<String> DEFAULT_COLUMNS = ImmutableList.of("archived", "deleted");
+    private static final ImmutableSet<String> lifecycleColumns =
+            Stream.of(LifecycleFlagField.values())
+                  .map(Enum::name)
+                  .collect(toImmutableSet());
+    private static final ImmutableSet<String> versionColumns =
+            Stream.of(VersionField.values())
+                  .map(Enum::name)
+                  .collect(toImmutableSet());
+
+    static final ImmutableSet<String> defaultColumns =
+            ImmutableSet.<String>builder().addAll(lifecycleColumns)
+                                          .addAll(versionColumns)
+                                          .build();
 
     /** Prevent instantiation of this utility class. */
     private ColumnTests() {

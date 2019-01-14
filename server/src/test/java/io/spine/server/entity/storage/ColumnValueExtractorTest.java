@@ -27,6 +27,8 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.given.column.EntityWithManyGetters;
 import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
+import io.spine.server.storage.LifecycleFlagField;
+import io.spine.server.storage.VersionField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -108,7 +110,8 @@ class ColumnValueExtractorTest {
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
         assertNotNull(columnValues);
-        assertThat(columnValues).hasSize(2); // archived + deleted
+        assertThat(columnValues)
+                .hasSize(VersionField.values().length + LifecycleFlagField.values().length);
     }
 
     private static <E extends Entity<?, ?>>

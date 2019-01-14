@@ -98,7 +98,7 @@ class ColumnTest {
     @DisplayName("support `toString`")
     void supportToString() {
         EntityColumn column = forMethod("getVersion", Entity.class);
-        assertEquals("VersionableEntity.version", column.toString());
+        assertEquals("Entity.version", column.toString());
     }
 
     @Test
@@ -331,7 +331,7 @@ class ColumnTest {
     @DisplayName("not allow to redefine column annotation")
     void rejectRedefinedAnnotation() {
         assertThrows(IllegalStateException.class,
-                     () -> forMethod("getVersion", EntityRedefiningColumnAnnotation.class));
+                     () -> forMethod("getCustomColumn", EntityRedefiningColumnAnnotation.class));
     }
 
     @Test

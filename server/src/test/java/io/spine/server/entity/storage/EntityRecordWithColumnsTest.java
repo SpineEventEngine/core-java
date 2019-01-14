@@ -27,7 +27,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TestEntity;
 import io.spine.server.entity.TestEntity.TestEntityBuilder;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
-import io.spine.server.storage.LifecycleFlagField;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,18 +34,16 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.storage.EntityField.version;
 import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -187,9 +184,6 @@ class EntityRecordWithColumnsTest {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
 
-        List<String> defaultColumns = Stream.of(LifecycleFlagField.values())
-                                            .map(Enum::name)
-                                            .collect(toList());
 
         assertThat(columnValues).hasSize(defaultColumns.size());
 
