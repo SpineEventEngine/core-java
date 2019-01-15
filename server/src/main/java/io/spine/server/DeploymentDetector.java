@@ -35,7 +35,7 @@ import static java.util.Optional.ofNullable;
  * The default implementation of {@linkplain DeploymentType deployment type} 
  * {@linkplain Supplier supplier}.
  */
-class SystemEnvironmentSupplier implements Supplier<DeploymentType> {
+class DeploymentDetector implements Supplier<DeploymentType> {
 
     @VisibleForTesting
     static final String APP_ENGINE_ENVIRONMENT_PATH = "com.google.appengine.runtime.environment";
@@ -46,11 +46,11 @@ class SystemEnvironmentSupplier implements Supplier<DeploymentType> {
 
 
     /** Prevent instantiation from outside. */
-    private SystemEnvironmentSupplier() {
+    private DeploymentDetector() {
     }
 
     public static Supplier<DeploymentType> newInstance() {
-        return new SystemEnvironmentSupplier();
+        return new DeploymentDetector();
     }
 
     @Override

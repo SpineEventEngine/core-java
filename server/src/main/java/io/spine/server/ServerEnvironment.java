@@ -46,8 +46,8 @@ public final class ServerEnvironment {
             emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
 
     private static @MonotonicNonNull DeploymentType deploymentType =
-            SystemEnvironmentSupplier.newInstance()
-                                     .get();
+            DeploymentDetector.newInstance()
+                              .get();
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -99,7 +99,7 @@ public final class ServerEnvironment {
      */
     @VisibleForTesting
     static void resetDeploymentType() {
-        Supplier<DeploymentType> supplier = SystemEnvironmentSupplier.newInstance();
+        Supplier<DeploymentType> supplier = DeploymentDetector.newInstance();
         deploymentType = supplier.get();
     }
 }
