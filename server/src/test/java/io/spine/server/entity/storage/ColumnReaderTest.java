@@ -31,7 +31,6 @@ import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
 import io.spine.server.entity.storage.given.column.EntityWithRepeatedColumnNames;
 import io.spine.server.entity.storage.given.column.RealLifeEntity;
 import io.spine.server.storage.LifecycleFlagField;
-import io.spine.server.storage.VersionField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -97,8 +96,7 @@ class ColumnReaderTest {
 
             assertNotNull(entityColumns);
             assertThat(entityColumns)
-                    .hasSize(LifecycleFlagField.values().length +
-                                     VersionField.values().length);
+                    .hasSize(LifecycleFlagField.values().length + 1 /* for `version` */);
         }
 
         @Test
