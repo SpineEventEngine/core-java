@@ -21,6 +21,7 @@
 package io.spine.server.event.store;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
@@ -43,6 +44,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
@@ -76,7 +78,8 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
         checkNotNull(query);
 
         EntityFilters filters = toEntityFilters(query);
-        Iterator<EEntity> entities = find(filters, OrderBy.getDefaultInstance(),
+        Iterator<EEntity> entities = find(filters,
+                                          OrderBy.getDefaultInstance(),
                                           Pagination.getDefaultInstance(),
                                           FieldMask.getDefaultInstance());
         // A predicate on the Event message and EventContext fields.
@@ -100,10 +103,10 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
     }
 
     void store(Iterable<Event> events) {
-        Iterable<EEntity> entities = Streams.stream(events)
-                                            .map(EventToEEntity.instance())
-                                            .collect(toList());
-        store(newArrayList(entities));
+        ImmutableList<EEntity> entities = Streams.stream(events)
+                                                 .map(EEntity::create)
+                                                 .collect(toImmutableList());
+        store(entities);
     }
 
     private static Function<EEntity, Event> getEvent() {
@@ -191,41 +194,5 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
         return filterIsEmpty
                ? Optional.empty()
                : Optional.of(builder.build());
-    }
-
-    private static class EEntityMatchesStreamQuery implements Predicate<EEntity> {
-
-        private final Predicate<Event> filter;
-
-        private EEntityMatchesStreamQuery(EventStreamQuery query) {
-            this.filter = new MatchesStreamQuery(query);
-        }
-
-        @Override
-        public boolean test(@Nullable EEntity input) {
-            if (input == null) {
-                return false;
-            }
-            Event event = input.getState();
-            boolean result = filter.test(event);
-            return result;
-        }
-    }
-
-    /**
-     * Transforms an {@link Event} to the {@linkplain EEntity Event Entity}.
-     */
-    private enum EventToEEntity implements Function<Event, EEntity> {
-        INSTANCE;
-
-        private static Function<Event, EEntity> instance() {
-            return INSTANCE;
-        }
-
-        @Override
-        public EEntity apply(@Nullable Event event) {
-            checkNotNull(event);
-            return EEntity.create(event);
-        }
     }
 }
