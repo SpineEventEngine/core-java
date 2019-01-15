@@ -79,7 +79,15 @@ class ServerEnvironmentTest {
 
         @Test
         @DisplayName("obtain AppEngine environment GAE cloud infrastructure server environment")
-        void getAppEngineEnvironment() {
+        void receivesCloudEnvironment() {
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.getDeploymentType());
+        }
+
+        @Test
+        @DisplayName("cache the property value")
+        void cachesValue() {
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.getDeploymentType());
+            setGaeEnvironment("Unrecognized Value");
             assertEquals(APPENGINE_CLOUD, ServerEnvironment.getDeploymentType());
         }
     }
@@ -94,8 +102,23 @@ class ServerEnvironmentTest {
 
         @Test
         @DisplayName("obtain AppEngine environment GAE local dev server environment")
-        void getAppEngineEnvironment() {
+        void receivesEmulatorEnvironment() {
             assertEquals(APPENGINE_EMULATOR, ServerEnvironment.getDeploymentType());
+        }
+    }
+
+    @Nested
+    @DisplayName("when running with invalid App Engine environment property")
+    class InvalidGaeEnvironment extends WithAppEngineEnvironment {
+
+        InvalidGaeEnvironment() {
+            super("InvalidGaeEnvironment");
+        }
+
+        @Test
+        @DisplayName("receive STANDALONE deployment type")
+        void receivesStandalone() {
+            assertEquals(STANDALONE, ServerEnvironment.getDeploymentType());
         }
     }
 
@@ -116,7 +139,7 @@ class ServerEnvironmentTest {
         @BeforeEach
         void setUp() {
             initialValue = System.getProperty(APP_ENGINE_ENVIRONMENT_PATH);
-            System.setProperty(APP_ENGINE_ENVIRONMENT_PATH, targetEnvironment);
+            setGaeEnvironment(targetEnvironment);
             ServerEnvironment.resetProvider();
         }
 
@@ -125,8 +148,12 @@ class ServerEnvironmentTest {
             if (initialValue == null) {
                 System.clearProperty(APP_ENGINE_ENVIRONMENT_PATH);
             } else {
-                System.setProperty(APP_ENGINE_ENVIRONMENT_PATH, initialValue);
+                setGaeEnvironment(initialValue);
             }
+        }
+
+        void setGaeEnvironment(String value) {
+            System.setProperty(APP_ENGINE_ENVIRONMENT_PATH, value);
         }
     }
 }
