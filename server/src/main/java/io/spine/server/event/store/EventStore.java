@@ -192,7 +192,6 @@ public final class EventStore implements AutoCloseable {
     /**
      * Tells if the store is open.
      */
-    @VisibleForTesting
     public boolean isOpen() {
         return storage.isOpen();
     }
