@@ -21,10 +21,10 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.annotation.Internal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Strings.emptyToNull;
 import static java.lang.ThreadLocal.withInitial;
@@ -45,8 +45,8 @@ public final class ServerEnvironment {
     private static final @Nullable String appEngineRuntimeVersion =
             emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
 
-    private static final ThreadLocal<Provider> provider =
-            withInitial(SystemEnvironmentProvider::newInstance);
+    private static final ThreadLocal<DeploymentType> provider =
+            withInitial(SystemEnvironmentSupplier.newInstance());
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -89,8 +89,7 @@ public final class ServerEnvironment {
      * The type of the environment application is deployed to.
      */
     public static DeploymentType getDeploymentType() {
-        return provider.get()
-                       .getDeploymentType();
+        return provider.get();
     }
 
     /**
@@ -98,15 +97,7 @@ public final class ServerEnvironment {
      */
     @VisibleForTesting
     static void resetProvider() {
-        provider.set(SystemEnvironmentProvider.newInstance());
-    }
-
-    /**
-     * The provider of the deployment type.
-     */
-    @Internal
-    public interface Provider {
-
-        DeploymentType getDeploymentType();
+        Supplier<DeploymentType> supplier = SystemEnvironmentSupplier.newInstance();
+        provider.set(supplier.get());
     }
 }

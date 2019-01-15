@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Strings.emptyToNull;
 import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
@@ -35,7 +36,7 @@ import static java.util.Optional.ofNullable;
  * The Default implementation of {@linkplain io.spine.server.ServerEnvironment.Provider
  * server environment provider}.
  */
-class SystemEnvironmentProvider implements ServerEnvironment.Provider {
+class SystemEnvironmentSupplier implements Supplier<DeploymentType> {
 
     @VisibleForTesting
     static final String APP_ENGINE_ENVIRONMENT_PATH =
@@ -48,15 +49,15 @@ class SystemEnvironmentProvider implements ServerEnvironment.Provider {
     private @MonotonicNonNull DeploymentType deploymentType = null;
 
     /** Prevent instantiation from outside. */
-    private SystemEnvironmentProvider() {
+    private SystemEnvironmentSupplier() {
     }
 
-    public static ServerEnvironment.Provider newInstance() {
-        return new SystemEnvironmentProvider();
+    public static Supplier<DeploymentType> newInstance() {
+        return new SystemEnvironmentSupplier();
     }
 
     @Override
-    public DeploymentType getDeploymentType() {
+    public DeploymentType get() {
         if (deploymentType == null) {
             deploymentType = readDeploymentType();
         }
