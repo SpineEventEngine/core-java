@@ -108,6 +108,7 @@ final class QueryToFilters {
         add(typeFilter);
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private void add(CompositeColumnFilter.Builder filter) {
         boolean filterIsEmpty = filter.getFilterList()
                                       .isEmpty();
