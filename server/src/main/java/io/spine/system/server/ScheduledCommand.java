@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -43,7 +43,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    void on(CommandScheduled event, EventContext context) {
+    public void on(CommandScheduled event, EventContext context) {
         CommandEnrichment enrichment =
                 getEnrichment(CommandEnrichment.class, context)
                 .orElseThrow(() -> newIllegalStateException("Command enrichment must be present."));
@@ -68,7 +68,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
+    public void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
         setDeleted(true);
     }
 }

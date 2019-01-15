@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,17 +22,18 @@ package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.MessageEnvelope;
+import io.spine.logging.Logging;
 import io.spine.server.model.HandlerMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.declare.MethodParams.findMatching;
-import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -43,16 +44,12 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
- *     <li>{@linkplain #MethodSignature(Class) the method annotation},</li>
- *
- *      <li>{@linkplain #getParamSpecs() the specification of method parameters},</li>
- *
- *      <li>{@linkplain #getAllowedModifiers() the set of allowed access modifiers},</li>
- *
- *      <li>{@linkplain #getValidReturnTypes() the set of valid return types},</li>
- *
- *      <li>{@linkplain #getAllowedExceptions() the set of allowed exceptions}, that the method
- *      declares to throw (empty by default),</li>
+ *     <li>{@linkplain #MethodSignature(Class) the method annotation},
+ *     <li>{@linkplain #getParamSpecs() the specification of method parameters},
+ *     <li>{@linkplain #getAllowedModifiers() the set of allowed access modifiers},
+ *     <li>{@linkplain #getValidReturnTypes() the set of valid return types},
+ *     <li>{@linkplain #getAllowedExceptions() the set of allowed exceptions}, that the method
+ * declares to throw (empty by default),
  * </ul>
  *
  * @param <H> the type of the handler method
@@ -61,7 +58,7 @@ import static java.util.stream.Collectors.toList;
  * @author Alex Tymchenko
  */
 public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
-                                      E extends MessageEnvelope<?, ?, ?>> {
+                                      E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
     private final Class<? extends Annotation> annotation;
 
@@ -118,9 +115,17 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         }
         Collection<SignatureMismatch> mismatches = match(method);
         boolean hasErrors = mismatches.stream()
-                                      .anyMatch(mismatch -> ERROR == mismatch.getSeverity());
+                                      .anyMatch(SignatureMismatch::isError);
+        List<SignatureMismatch> warnings =  mismatches.stream()
+                                                      .filter(SignatureMismatch::isWarning)
+                                                      .collect(toList());
         if (hasErrors) {
             throw new SignatureMismatchException(mismatches);
+        }
+        if (!warnings.isEmpty()) {
+            warnings.stream()
+                    .map(SignatureMismatch::toString)
+                    .forEach(this::_warn);
         }
         return true;
     }

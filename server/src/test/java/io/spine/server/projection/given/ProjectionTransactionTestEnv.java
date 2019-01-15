@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -71,7 +71,7 @@ public class ProjectionTransactionTestEnv {
         }
 
         @Subscribe
-        void event(PrjProjectCreated event) {
+        public void event(PrjProjectCreated event) {
             receivedEvents.add(event);
             Project newState = Project.newBuilder(getState())
                                       .setId(event.getProjectId())
@@ -80,7 +80,7 @@ public class ProjectionTransactionTestEnv {
         }
 
         @Subscribe
-        void event(PrjTaskAdded event) {
+        public void event(PrjTaskAdded event) {
             throw new RuntimeException("that tests the projection tx behaviour");
         }
 

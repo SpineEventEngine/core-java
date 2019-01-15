@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -44,7 +44,6 @@ import java.util.List;
  * @param <I> the type of process manager IDs
  * @param <S> the type of process manager state
  * @param <B> the type of a {@code ValidatingBuilder} for the process manager state
- * @author Alex Tymchenko
  */
 @Internal
 public class PmTransaction<I,

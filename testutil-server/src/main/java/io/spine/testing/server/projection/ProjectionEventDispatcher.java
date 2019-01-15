@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -89,7 +89,7 @@ public class ProjectionEventDispatcher {
         private static <I, P extends Projection<I, S, ?>, S extends Message> void
         dispatch(P projection, EventEnvelope envelope) {
             TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(envelope);
-            endpoint.dispatchInTx(projection);
+            endpoint.runTransactionFor(projection);
         }
     }
 

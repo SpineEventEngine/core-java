@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -219,8 +219,6 @@ class BoundedContextTest {
      * </ul>
      * All of the returned repositories manage entities of the same state type.
      */
-    @SuppressWarnings("unchecked")
-        // Entities managed by created repositories are all of state type `Project`.
     private static Stream<Arguments> sameStateRepositories() {
         Set<Repository<?, ?>> repositories =
                 ImmutableSet.of(new ProjectAggregateRepository(),

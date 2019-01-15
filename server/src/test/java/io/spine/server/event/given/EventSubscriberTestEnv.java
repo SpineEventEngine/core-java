@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -47,7 +47,7 @@ public class EventSubscriberTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        void on(FailRequested message, EventContext context) {
+        public void on(FailRequested message, EventContext context) {
             methodCalled = true;
             if (!message.getShouldFail()) {
                 throw new UnsupportedOperationException("Do not want false messages!");
@@ -55,12 +55,12 @@ public class EventSubscriberTestEnv {
         }
 
         @Subscribe
-        void on(ProjectCreated message) {
+        public void on(ProjectCreated message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe
-        void on(ProjectStarted message) {
+        public void on(ProjectStarted message) {
             // Do nothing. Just expose the method.
         }
 

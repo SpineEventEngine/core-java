@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,7 +28,6 @@
  * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
  * inside of the Bounded Context.
  * 
- * @see io.spine.testing.client.blackbox
  * @see io.spine.testing.server.blackbox.BlackBoxBoundedContext
  */
 @CheckReturnValue

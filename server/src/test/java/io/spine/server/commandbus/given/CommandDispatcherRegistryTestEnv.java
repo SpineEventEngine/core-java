@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -80,7 +80,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        void on(CmdProjectCreated event) {
+        public void on(CmdProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -96,7 +96,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        void on(CmdTaskAdded event) {
+        public void on(CmdTaskAdded event) {
             keep(event);
 
             Task task = event.getTask();
@@ -111,7 +111,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        void on(CmdProjectStarted event) {
+        public void on(CmdProjectStarted event) {
             keep(event);
 
             handleProjectStarted();
@@ -131,6 +131,7 @@ public class CommandDispatcherRegistryTestEnv {
     }
 
     public static class EmptyDispatcher implements CommandDispatcher<Message> {
+
         @Override
         public Set<CommandClass> getMessageClasses() {
             return Collections.emptySet();
@@ -149,9 +150,11 @@ public class CommandDispatcherRegistryTestEnv {
 
     public static class NoCommandsDispatcherRepo
             extends ProcessManagerRepository<ProjectId, NoCommandsProcessManager, Project> {
+
     }
 
     public static class AllCommandDispatcher implements CommandDispatcher<Message> {
+
         @Override
         public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CmdCreateProject.class,
@@ -171,6 +174,7 @@ public class CommandDispatcherRegistryTestEnv {
     }
 
     public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
+
         @Override
         public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CmdCreateProject.class);

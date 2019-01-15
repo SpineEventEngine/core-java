@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,7 +33,6 @@ import io.spine.validate.ValidatingBuilder;
  * @param <E> type of entity under transaction
  * @param <S> state type of the entity under transaction
  * @param <B> type of {@link ValidatingBuilder} of {@code S}
- * @author Alex Tymchenko
  */
 @Internal
 public interface TransactionListener<I,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -39,13 +39,17 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
+import io.spine.testing.server.procman.PmSubject;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,12 +57,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
+import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
@@ -238,7 +246,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T receivesCommand(Message domainCommand) {
-        return this.receivesCommands(singletonList(domainCommand));
+        return receivesCommands(singletonList(domainCommand));
     }
 
     /**
@@ -256,7 +264,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     @CanIgnoreReturnValue
     public T receivesCommands(Message firstCommand, Message secondCommand,
                               Message... otherCommands) {
-        return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
+        return receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
     /**
@@ -284,7 +292,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T receivesEvent(Message messageOrEvent) {
-        return this.receivesEvents(singletonList(messageOrEvent));
+        return receivesEvents(singletonList(messageOrEvent));
     }
 
     /**
@@ -306,7 +314,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
-        return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
+        return receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
     /**
@@ -325,7 +333,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T receivesExternalEvent(BoundedContextName sourceContext, Message messageOrEvent) {
-        return this.receivesExternalEvents(sourceContext, singletonList(messageOrEvent));
+        return receivesExternalEvents(sourceContext, singletonList(messageOrEvent));
     }
 
     /**
@@ -354,8 +362,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                     Message firstEvent,
                                     Message secondEvent,
                                     Message... otherEvents) {
-        return this.receivesExternalEvents(sourceContext,
-                                           asList(firstEvent, secondEvent, otherEvents));
+        return receivesExternalEvents(sourceContext, asList(firstEvent, secondEvent, otherEvents));
     }
 
     /**
@@ -390,7 +397,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                       EventMessage firstEvent,
                                       EventMessage... otherEvents) {
         List<Event> sentEvents = setup().postEvents(producerId, firstEvent, otherEvents);
-        this.postedEvents.addAll(sentEvents);
+        postedEvents.addAll(sentEvents);
         return thisRef();
     }
 
@@ -409,12 +416,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     @CanIgnoreReturnValue
     public T importsEvent(Message eventOrMessage) {
-        return this.importAll(singletonList(eventOrMessage));
+        return importAll(singletonList(eventOrMessage));
     }
 
     @CanIgnoreReturnValue
     public T importsEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
-        return this.importAll(asList(firstEvent, secondEvent, otherEvents));
+        return importAll(asList(firstEvent, secondEvent, otherEvents));
     }
 
     private T importAll(Collection<Message> domainEvents) {
@@ -582,5 +589,36 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     private static Enricher emptyEnricher() {
         return Enricher.newBuilder()
                        .build();
+    }
+
+    /**
+     * Performs data reading operation in a tenant context.
+     */
+    protected <@Nullable D> D readOperation(Supplier<D> supplier) {
+        return supplier.get();
+    }
+
+    /**
+     * Obtains the Subject for the Process Manager of the passed class with the given ID.
+     */
+    public <I, S extends Message, P extends ProcessManager<I, S, ?>>
+    PmSubject<S, P> assertThat(Class<? extends P> pmClass, I id) {
+        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).getStateClass();
+        Repository repo = repositoryOf(stateClass);
+        @SuppressWarnings("unchecked")
+        ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;
+        P found = readOperation(() -> pmRepo.findRaw(id)
+                                            .orElse(null));
+        return assertAbout(PmSubject.<S, P>processManagers()).that(found);
+    }
+
+    private Repository repositoryOf(Class<? extends Message> stateClass) {
+        return boundedContext.findRepository(stateClass)
+                             .orElseThrow(
+                                     () -> newIllegalStateException(
+                                         "Unable to find repository for entities with state `%s`.",
+                                         stateClass.getCanonicalName()
+                                     )
+                             );
     }
 }
