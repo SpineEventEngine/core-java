@@ -140,7 +140,7 @@ class ServerEnvironmentTest {
         void setUp() {
             initialValue = System.getProperty(APP_ENGINE_ENVIRONMENT_PATH);
             setGaeEnvironment(targetEnvironment);
-            ServerEnvironment.resetProvider();
+            ServerEnvironment.resetDeploymentType();
         }
 
         @AfterEach

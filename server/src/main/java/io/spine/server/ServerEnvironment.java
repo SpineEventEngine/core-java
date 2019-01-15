@@ -21,13 +21,13 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Strings.emptyToNull;
-import static java.lang.ThreadLocal.withInitial;
 
 /**
  * The server conditions and configuration under which the application operates.
@@ -45,8 +45,9 @@ public final class ServerEnvironment {
     private static final @Nullable String appEngineRuntimeVersion =
             emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
 
-    private static final ThreadLocal<DeploymentType> provider =
-            withInitial(SystemEnvironmentSupplier.newInstance());
+    private static @MonotonicNonNull DeploymentType deploymentType =
+            SystemEnvironmentSupplier.newInstance()
+                                     .get();
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -89,15 +90,16 @@ public final class ServerEnvironment {
      * The type of the environment application is deployed to.
      */
     public static DeploymentType getDeploymentType() {
-        return provider.get();
+        return deploymentType;
     }
 
     /**
-     * Sets the default deployment type provider which utilizes system properties.
+     * Sets the default {@linkplain DeploymentType deployment type}
+     *  * {@linkplain Supplier supplier} which utilizes system properties.
      */
     @VisibleForTesting
-    static void resetProvider() {
+    static void resetDeploymentType() {
         Supplier<DeploymentType> supplier = SystemEnvironmentSupplier.newInstance();
-        provider.set(supplier.get());
+        deploymentType = supplier.get();
     }
 }
