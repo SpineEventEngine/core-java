@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
@@ -28,6 +28,7 @@ import io.spine.core.Event;
 import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
+import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -172,8 +173,11 @@ public final class EventStore implements AutoCloseable {
         });
     }
 
+    /**
+     * Obtains stream executor used by the store.
+     */
     @VisibleForTesting
-    Executor getStreamExecutor() {
+    public Executor getStreamExecutor() {
         return streamExecutor;
     }
 
@@ -185,8 +189,11 @@ public final class EventStore implements AutoCloseable {
         storage.close();
     }
 
+    /**
+     * Tells if the store is open.
+     */
     @VisibleForTesting
-    boolean isOpen() {
+    public boolean isOpen() {
         return storage.isOpen();
     }
 
@@ -245,7 +252,7 @@ public final class EventStore implements AutoCloseable {
         /**
          * Sets default logger.
          *
-         * @see io.spine.server.event.EventStore#log()
+         * @see EventStore#log()
          */
         @CanIgnoreReturnValue
         public Builder withDefaultLogger() {

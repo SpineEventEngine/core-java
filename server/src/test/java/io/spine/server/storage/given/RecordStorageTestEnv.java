@@ -43,6 +43,7 @@ import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.Enumerated;
+import io.spine.server.event.store.EEntity;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
@@ -259,7 +260,7 @@ public class RecordStorageTestEnv {
      * with the entity records, even if an actual entity is missing.
      *
      * <p>Note that there are cases, when a {@code RecordStorage} stores entity records with no such
-     * columns, e.g. the {@linkplain io.spine.server.event.EEntity event entity}. Thus, do not rely
+     * columns, e.g. the {@linkplain EEntity event entity}. Thus, do not rely
      * on these columns being present in all the entities by default when implementing
      * a {@code RecordStorage}.
      */

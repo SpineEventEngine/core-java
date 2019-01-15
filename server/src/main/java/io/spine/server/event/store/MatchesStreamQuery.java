@@ -18,9 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import io.spine.core.Event;
+import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStreamQuery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;

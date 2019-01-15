@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -26,6 +26,7 @@ import io.spine.base.FieldFilter;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Events;
+import io.spine.server.event.EventFilter;
 import io.spine.server.reflect.Field;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;

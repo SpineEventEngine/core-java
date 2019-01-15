@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
@@ -32,7 +32,9 @@ import io.spine.client.Pagination;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
-import io.spine.server.event.EEntity.ColumnName;
+import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.store.EEntity.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -48,7 +50,7 @@ import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.lt;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static io.spine.server.event.EEntity.comparator;
+import static io.spine.server.event.store.EEntity.comparator;
 import static java.util.stream.Collectors.toList;
 
 /**
