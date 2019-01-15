@@ -20,15 +20,12 @@
 
 package io.spine.server.event.store;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
-
-import java.util.Optional;
 
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
@@ -37,14 +34,16 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 
 /**
- * Utilities for transforming {@link io.spine.server.event.EventStreamQuery} to
- * {@link io.spine.client.EntityFilters}.
+ * Converts {@link EventStreamQuery} to {@link EntityFilters}.
+ *
+ * <p>The resulting filters contain the filtering by {@code before} and {@code after} fields
+ * of the source query and by the {@code eventType} field of the underlying
+ * {@linkplain EventFilter EventFilters}.
  */
-final class Filters {
+final class QueryToFilters {
 
-    /** Prevents instantiation of this utility class. */
-    private Filters() {
-    }
+    private final EventStreamQuery query;
+    private final EntityFilters.Builder builder;
 
     /**
      * Creates an instance of {@link EntityFilters} from the given {@link EventStreamQuery}.
@@ -57,24 +56,27 @@ final class Filters {
      *         the source {@link EventStreamQuery} to get the info from
      * @return new instance of {@link EntityFilters} filtering the events
      */
-    @SuppressWarnings("CheckReturnValue") // calling builder
-    @VisibleForTesting
-    static EntityFilters toEntityFilters(EventStreamQuery query) {
-        EntityFilters.Builder builder = EntityFilters.newBuilder();
+    static EntityFilters convert(EventStreamQuery query) {
+        EntityFilters result = new QueryToFilters(query).convert();
+        return result;
+    }
 
-        Optional<CompositeColumnFilter> timeFilter = timeFilter(query);
-        timeFilter.ifPresent(builder::addFilter);
+    private QueryToFilters(EventStreamQuery query) {
+        this.query = query;
+        this.builder = EntityFilters.newBuilder();
+    }
 
-        Optional<CompositeColumnFilter> typeFilter = typeFilter(query);
-        typeFilter.ifPresent(builder::addFilter);
-
+    private EntityFilters convert() {
+        addTimeFilter();
+        addTypeFilter();
         return builder.build();
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    private static Optional<CompositeColumnFilter> timeFilter(EventStreamQuery query) {
-        CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter.newBuilder()
-                                                                        .setOperator(ALL);
+    private void addTimeFilter() {
+        CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter
+                .newBuilder()
+                .setOperator(ALL);
         String createdColumn = ColumnName.created.name();
         if (query.hasAfter()) {
             Timestamp timestamp = query.getAfter();
@@ -86,15 +88,14 @@ final class Filters {
             ColumnFilter filter = lt(createdColumn, timestamp);
             timeFilter.addFilter(filter);
         }
-
-        return buildFilter(timeFilter);
+        add(timeFilter);
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    private static Optional<CompositeColumnFilter> typeFilter(EventStreamQuery query) {
-        CompositeColumnFilter.Builder typeFilter =
-                CompositeColumnFilter.newBuilder()
-                                     .setOperator(EITHER);
+    private void addTypeFilter() {
+        CompositeColumnFilter.Builder typeFilter = CompositeColumnFilter
+                .newBuilder()
+                .setOperator(EITHER);
         String typeColumn = ColumnName.type.name();
         for (EventFilter eventFilter : query.getFilterList()) {
             String type = eventFilter.getEventType()
@@ -104,24 +105,14 @@ final class Filters {
                 typeFilter.addFilter(filter);
             }
         }
-
-        return buildFilter(typeFilter);
+        add(typeFilter);
     }
 
-    /**
-     * Obtains a {@code CompositeColumnFilter} from the specified builder.
-     *
-     * @param builder
-     *         the builder of the filter
-     * @return {@code Optional} of the {@code CompositeColumnFilter}, if there are column filters
-     *         in the builder; {@code Optional.empty()} otherwise
-     */
-    private static Optional<CompositeColumnFilter> buildFilter(
-            CompositeColumnFilter.Builder builder) {
-        boolean filterIsEmpty = builder.getFilterList()
-                                       .isEmpty();
-        return filterIsEmpty
-               ? Optional.empty()
-               : Optional.of(builder.build());
+    private void add(CompositeColumnFilter.Builder filter) {
+        boolean filterIsEmpty = filter.getFilterList()
+                                      .isEmpty();
+        if (!filterIsEmpty) {
+            builder.addFilter(filter.build());
+        }
     }
 }

@@ -37,7 +37,6 @@ import java.util.function.Predicate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.core.Events.eventComparator;
-import static io.spine.server.event.store.Filters.toEntityFilters;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -54,7 +53,6 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
      */
     Iterator<Event> iterator(EventStreamQuery query) {
         checkNotNull(query);
-
         Iterator<EEntity> entities = find(query);
         Predicate<Event> predicate = new MatchesStreamQuery(query);
         Iterator<Event> result =
@@ -70,7 +68,7 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
      * Obtains iteration over entities matching the passed query.
      */
     private Iterator<EEntity> find(EventStreamQuery query) {
-        EntityFilters filters = toEntityFilters(query);
+        EntityFilters filters = QueryToFilters.convert(query);
         return find(filters, OrderBy.getDefaultInstance(),
                     Pagination.getDefaultInstance(),
                     FieldMask.getDefaultInstance());

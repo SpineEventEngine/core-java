@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.event.store.Filters.toEntityFilters;
+import static io.spine.server.event.store.QueryToFilters.convert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -46,7 +46,7 @@ class ERepositoryTest {
     void convertEmptyToFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        EntityFilters entityFilters = convert(query);
         assertTrue(entityFilters.getFilterList()
                                 .isEmpty());
     }
@@ -59,7 +59,7 @@ class ERepositoryTest {
                 .setAfter(Timestamps.MIN_VALUE)
                 .setBefore(Timestamps.MAX_VALUE)
                 .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        EntityFilters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
@@ -79,7 +79,7 @@ class ERepositoryTest {
                 .addFilter(validFilter)
                 .addFilter(invalidFilter)
                 .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        EntityFilters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
