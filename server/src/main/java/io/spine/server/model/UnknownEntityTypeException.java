@@ -20,9 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Throwables;
-import io.spine.base.Error;
-import io.spine.base.ErrorVBuilder;
 import io.spine.type.TypeUrl;
 
 import static java.lang.String.format;
@@ -34,18 +31,5 @@ public final class UnknownEntityTypeException extends RuntimeException {
 
     public UnknownEntityTypeException(TypeUrl type) {
         super(format("Type `%s` does not belong to any known bounded context.", type));
-    }
-
-    /**
-     * Converts this exception into an {@link Error}.
-     */
-    public Error asError() {
-        String stackTrace = Throwables.getStackTraceAsString(this);
-        return ErrorVBuilder
-                .newBuilder()
-                .setMessage(getMessage())
-                .setStacktrace(stackTrace)
-                .setType(UnknownEntityTypeException.class.getName())
-                .build();
     }
 }
