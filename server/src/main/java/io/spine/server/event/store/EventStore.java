@@ -95,10 +95,6 @@ public final class EventStore implements AutoCloseable {
         this.logger = logger;
     }
 
-    ERepository getStorage() {
-        return storage;
-    }
-
     /**
      * Appends the passed event to the history of events.
      *
