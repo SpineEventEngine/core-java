@@ -58,7 +58,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Indicates if the lifecycle flags of the entity were changed since initialization.
      *
-     * <p>Changed lifecycle flags are should be updated when
+     * <p>Changed lifecycle flags should be updated when
      * {@linkplain io.spine.server.entity.Repository#store(io.spine.server.entity.Entity) storing}.
      */
     private volatile boolean lifecycleFlagsChanged;
@@ -89,7 +89,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @LazyInit
     private volatile @MonotonicNonNull S state;
 
-    private LifecycleFlags lifecycleFlags;
     private Version version;
 
     /**
