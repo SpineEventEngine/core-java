@@ -39,12 +39,12 @@ final class Log {
         this.logger = logger;
     }
 
-    void stored(Event request) {
+    void stored(Event event) {
         if (logger == null) {
             return;
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Stored: {}", TextFormat.shortDebugString(request));
+            logger.debug("Stored: {}", TextFormat.shortDebugString(event));
         }
     }
 
