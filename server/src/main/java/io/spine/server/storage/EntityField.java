@@ -56,7 +56,7 @@ public enum EntityField implements StorageField {
     timestamp_nanos,
 
     /**
-     * A field for storing the serialized {@link Message} bytes.
+     * A field for storing the serialized bytes of the entity state.
      *
      * <p>This is the way to store objects of custom types within a strongly-typed storage
      * (e.g. relational database) and make the read/write operations easy requiring no reflection.
