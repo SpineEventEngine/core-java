@@ -29,6 +29,8 @@ import static java.lang.String.format;
  */
 public final class UnknownEntityTypeException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     public UnknownEntityTypeException(TypeUrl type) {
         super(format("Type `%s` does not belong to any known bounded context.", type));
     }
