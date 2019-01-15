@@ -22,7 +22,6 @@ package io.spine.server.event.store;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.Events;
@@ -57,8 +56,7 @@ public final class EventStore implements AutoCloseable {
 
     private final ERepository storage;
     private final Executor streamExecutor;
-
-    private final @Nullable Logger logger;
+    private final Log log;
 
     /**
      * Creates a builder for locally running {@code EventStore}.
@@ -92,7 +90,7 @@ public final class EventStore implements AutoCloseable {
         eventRepository.initStorage(storageFactory);
         this.storage = eventRepository;
         this.streamExecutor = streamExecutor;
-        this.logger = logger;
+        this.log = new Log(logger);
     }
 
     /**
@@ -110,7 +108,7 @@ public final class EventStore implements AutoCloseable {
         };
         op.execute();
 
-        logStored(event);
+        log.stored(event);
     }
 
     /**
@@ -143,7 +141,7 @@ public final class EventStore implements AutoCloseable {
         };
         op.execute();
 
-        logStored(events);
+        log.stored(events);
     }
 
     /**
@@ -156,7 +154,7 @@ public final class EventStore implements AutoCloseable {
         checkNotNull(request);
         checkNotNull(responseObserver);
 
-        logReadingStart(request, responseObserver);
+        log.readingStart(request, responseObserver);
 
         streamExecutor.execute(() -> {
             Iterator<Event> eventRecords = storage.iterator(request);
@@ -165,7 +163,7 @@ public final class EventStore implements AutoCloseable {
                 responseObserver.onNext(event);
             }
             responseObserver.onCompleted();
-            logReadingComplete(responseObserver);
+            log.readingComplete(responseObserver);
         });
     }
 
@@ -247,11 +245,11 @@ public final class EventStore implements AutoCloseable {
         /**
          * Sets default logger.
          *
-         * @see EventStore#log()
+         * @see #defaultLogger()
          */
         @CanIgnoreReturnValue
         public Builder withDefaultLogger() {
-            setLogger(log());
+            setLogger(defaultLogger());
             return this;
         }
 
@@ -264,51 +262,10 @@ public final class EventStore implements AutoCloseable {
                     new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
             return result;
         }
-    }
 
-    /*
-     * Logging methods
-     *******************/
-
-    private void logStored(Event request) {
-        if (logger == null) {
-            return;
+        /** Returns default logger for this class. */
+        private static Logger defaultLogger() {
+            return Logging.get(EventStore.class);
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Stored: {}", TextFormat.shortDebugString(request));
-        }
-    }
-
-    private void logStored(Iterable<Event> events) {
-        for (Event event : events) {
-            logStored(event);
-        }
-    }
-
-    private void logReadingStart(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-        if (logger == null) {
-            return;
-        }
-
-        if (logger.isDebugEnabled()) {
-            String requestData = TextFormat.shortDebugString(request);
-            logger.debug("Creating stream on request: {} for observer: {}",
-                         requestData,
-                         responseObserver);
-        }
-    }
-
-    private void logReadingComplete(StreamObserver<Event> observer) {
-        if (logger == null) {
-            return;
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Observer {} got all queried events.", observer);
-        }
-    }
-
-    /** Returns default logger for this class. */
-    public static Logger log() {
-        return Logging.get(EventStore.class);
     }
 }

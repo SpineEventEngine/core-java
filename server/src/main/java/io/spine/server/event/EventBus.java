@@ -429,7 +429,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
                         .newBuilder()
                         .setStreamExecutor(eventStoreStreamExecutor)
                         .setStorageFactory(storageFactory)
-                        .setLogger(EventStore.log())
+                        .withDefaultLogger()
                         .build();
             }
             EventBus result = new EventBus(this);
