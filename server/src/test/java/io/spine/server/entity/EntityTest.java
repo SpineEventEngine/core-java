@@ -20,6 +20,8 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.Range;
+import com.google.common.truth.LongSubject;
 import com.google.protobuf.StringValue;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -36,19 +38,15 @@ import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 import io.spine.testing.Tests;
 import io.spine.time.testing.TimeTests;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.testing.Tests.nullRef;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -227,9 +225,9 @@ class EntityTest {
             long timeBeforeIncrement = TimeTests.currentTimeSeconds();
             entityNew.incrementVersion();
             long timeAfterIncrement = TimeTests.currentTimeSeconds();
-            assertThat(entityNew.whenModified()
-                                .getSeconds(),
-                       isBetween(timeBeforeIncrement, timeAfterIncrement));
+
+            assertModificationTime()
+                    .isIn(Range.closed(timeBeforeIncrement, timeAfterIncrement));
         }
 
         @Test
@@ -237,7 +235,13 @@ class EntityTest {
         void onStateUpdate() {
             entityNew.incrementState(state);
             long expectedTimeSec = TimeTests.currentTimeSeconds();
-            assertEquals(expectedTimeSec, entityNew.whenModified().getSeconds());
+            assertModificationTime()
+                    .isEqualTo(expectedTimeSec);
+        }
+
+        private LongSubject assertModificationTime() {
+            return assertThat(entityNew.whenModified()
+                                       .getSeconds());
         }
     }
 
@@ -430,21 +434,5 @@ class EntityTest {
 
             assertThrows(CannotModifyDeletedEntity.class, () -> entityNew.checkNotDeleted());
         }
-    }
-
-    private static Matcher<Long> isBetween(Long lower, Long higher) {
-        return new BaseMatcher<Long>() {
-            @Override
-            public boolean matches(Object o) {
-                assertThat(o, instanceOf(Long.class));
-                Long number = (Long) o;
-                return number >= lower && number <= higher;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText(" must be between " + lower + " and " + higher + ' ');
-            }
-        };
     }
 }

@@ -58,10 +58,16 @@ public final class SupportsFieldConversion implements Predicate<EnrichmentFuncti
         return eventClassMatches && enrichmentClassMatches;
     }
 
+    /**
+     * Obtains the class name of an enriched message field.
+     */
     public final String messageFieldClass() {
         return messageFieldClass.getName();
     }
 
+    /**
+     * Obtains the class name of the field enrichment.
+     */
     public final String enrichmentFieldClass() {
         return enrichmentFieldClass.getName();
     }
