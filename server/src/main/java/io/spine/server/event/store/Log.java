@@ -54,13 +54,13 @@ final class Log {
         }
     }
 
-    void readingStart(EventStreamQuery request, StreamObserver<Event> responseObserver) {
+    void readingStart(EventStreamQuery query, StreamObserver<Event> responseObserver) {
         if (logger == null) {
             return;
         }
 
         if (logger.isDebugEnabled()) {
-            String requestData = TextFormat.shortDebugString(request);
+            String requestData = TextFormat.shortDebugString(query);
             logger.debug("Creating stream on request: {} for observer: {}",
                          requestData,
                          responseObserver);
