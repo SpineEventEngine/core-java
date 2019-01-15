@@ -86,7 +86,6 @@ final class MatchFilter implements Predicate<Event> {
         return result;
     }
 
-    @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want traceability of exits.
     @Override
     public boolean test(@Nullable Event event) {
         if (event == null) {
