@@ -20,8 +20,8 @@ enum DeploymentType {
     STANDALONE = 0;
 
     // Running on an App Engine local development server.
-    APPENGINE_EMULATOR = 2;
+    APPENGINE_EMULATOR = 1;
 
     // Running on an App Engine cloud infrastructure.
-    APPENGINE_CLOUD = 3;
+    APPENGINE_CLOUD = 2;
 }
