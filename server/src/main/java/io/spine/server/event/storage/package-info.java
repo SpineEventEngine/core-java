@@ -19,15 +19,13 @@
  */
 
 /**
- * This package contains classes and interfaces for storing events.
+ * This package contains generated classes and interfaces for storing events.
  */
 
 @SPI
-@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.event.storage;
 
-import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.SPI;
 
 import javax.annotation.ParametersAreNonnullByDefault;

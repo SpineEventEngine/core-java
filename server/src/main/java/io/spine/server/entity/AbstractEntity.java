@@ -401,6 +401,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         if (version.equals(newVersion)) {
             return;
         }
+
         int currentVersionNumber = versionNumber();
         int newVersionNumber = newVersion.getNumber();
         if (currentVersionNumber > newVersionNumber) {
@@ -409,6 +410,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
                     "of the entity with the version number %d.",
                     newVersionNumber, currentVersionNumber);
         }
+
         setVersion(newVersion);
     }
 
