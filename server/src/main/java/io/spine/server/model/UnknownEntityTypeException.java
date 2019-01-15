@@ -18,17 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server.model;
 
-import io.spine.annotation.Internal;
-import io.spine.core.MessageRejection;
+import com.google.common.base.Throwables;
+import io.spine.base.Error;
+import io.spine.base.ErrorVBuilder;
+import io.spine.type.TypeUrl;
+
+import static java.lang.String.format;
 
 /**
- * An interface for the {@link MessageRejection} types which report an unhandled message being
- * posted into a {@link Bus}.
- *
- * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
+ * An exception thrown when a {@link io.spine.client.Query Query} targets an unknown entity type.
  */
-@Internal
-public interface MessageUnhandled extends MessageRejection {
+public final class UnknownEntityTypeException extends RuntimeException {
+
+    public UnknownEntityTypeException(TypeUrl type) {
+        super(format("Type `%s` does not belong to any known bounded context.", type));
+    }
+
+    /**
+     * Converts this exception into an {@link Error}.
+     */
+    public Error asError() {
+        String stackTrace = Throwables.getStackTraceAsString(this);
+        return ErrorVBuilder
+                .newBuilder()
+                .setMessage(getMessage())
+                .setStacktrace(stackTrace)
+                .setType(UnknownEntityTypeException.class.getName())
+                .build();
+    }
 }
