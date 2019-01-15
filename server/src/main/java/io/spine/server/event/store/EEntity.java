@@ -33,8 +33,6 @@ import io.spine.server.entity.storage.Column;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Comparator;
-
 import static io.spine.core.Events.clearEnrichments;
 
 /**
@@ -52,17 +50,6 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
     private @Nullable TypeName typeName;
 
     /**
-     * Compares event entities by timestamps of events.
-     */
-    private static final Comparator<EEntity> comparator = (e1, e2) -> {
-        Event event1 = e1.getState();
-        Event event2 = e2.getState();
-        int result = Events.eventComparator()
-                           .compare(event1, event2);
-        return result;
-    };
-
-    /**
      * Creates a new entity stripping enrichments from the passed event.
      */
     static EEntity create(Event event) {
@@ -73,13 +60,6 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
 
     private EEntity(EventId id) {
         super(id);
-    }
-
-    /**
-     * Returns comparator which sorts event entities chronologically.
-     */
-    static Comparator<EEntity> comparator() {
-        return comparator;
     }
 
     /**

@@ -1,0 +1,127 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.spine.server.event.store;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Timestamp;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.EntityFilters;
+import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStreamQuery;
+
+import java.util.Optional;
+
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.ColumnFilters.gt;
+import static io.spine.client.ColumnFilters.lt;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+
+/**
+ * Utilities for transforming {@link io.spine.server.event.EventStreamQuery} to
+ * {@link io.spine.client.EntityFilters}.
+ */
+final class Filters {
+
+    /** Prevents instantiation of this utility class. */
+    private Filters() {
+    }
+
+    /**
+     * Creates an instance of {@link EntityFilters} from the given {@link EventStreamQuery}.
+     *
+     * <p>The resulting filters contain the filtering by {@code before} and {@code after} fields
+     * of the source query and by the {@code eventType} field of the underlying
+     * {@linkplain EventFilter EventFilters}.
+     *
+     * @param query
+     *         the source {@link EventStreamQuery} to get the info from
+     * @return new instance of {@link EntityFilters} filtering the events
+     */
+    @SuppressWarnings("CheckReturnValue") // calling builder
+    @VisibleForTesting
+    static EntityFilters toEntityFilters(EventStreamQuery query) {
+        EntityFilters.Builder builder = EntityFilters.newBuilder();
+
+        Optional<CompositeColumnFilter> timeFilter = timeFilter(query);
+        timeFilter.ifPresent(builder::addFilter);
+
+        Optional<CompositeColumnFilter> typeFilter = typeFilter(query);
+        typeFilter.ifPresent(builder::addFilter);
+
+        return builder.build();
+    }
+
+    @SuppressWarnings("CheckReturnValue") // calling builder
+    private static Optional<CompositeColumnFilter> timeFilter(EventStreamQuery query) {
+        CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter.newBuilder()
+                                                                        .setOperator(ALL);
+        String createdColumn = ColumnName.created.name();
+        if (query.hasAfter()) {
+            Timestamp timestamp = query.getAfter();
+            ColumnFilter filter = gt(createdColumn, timestamp);
+            timeFilter.addFilter(filter);
+        }
+        if (query.hasBefore()) {
+            Timestamp timestamp = query.getBefore();
+            ColumnFilter filter = lt(createdColumn, timestamp);
+            timeFilter.addFilter(filter);
+        }
+
+        return buildFilter(timeFilter);
+    }
+
+    @SuppressWarnings("CheckReturnValue") // calling builder
+    private static Optional<CompositeColumnFilter> typeFilter(EventStreamQuery query) {
+        CompositeColumnFilter.Builder typeFilter =
+                CompositeColumnFilter.newBuilder()
+                                     .setOperator(EITHER);
+        String typeColumn = ColumnName.type.name();
+        for (EventFilter eventFilter : query.getFilterList()) {
+            String type = eventFilter.getEventType()
+                                     .trim();
+            if (!type.isEmpty()) {
+                ColumnFilter filter = eq(typeColumn, type);
+                typeFilter.addFilter(filter);
+            }
+        }
+
+        return buildFilter(typeFilter);
+    }
+
+    /**
+     * Obtains a {@code CompositeColumnFilter} from the specified builder.
+     *
+     * @param builder
+     *         the builder of the filter
+     * @return {@code Optional} of the {@code CompositeColumnFilter}, if there are column filters
+     *         in the builder; {@code Optional.empty()} otherwise
+     */
+    private static Optional<CompositeColumnFilter> buildFilter(
+            CompositeColumnFilter.Builder builder) {
+        boolean filterIsEmpty = builder.getFilterList()
+                                       .isEmpty();
+        return filterIsEmpty
+               ? Optional.empty()
+               : Optional.of(builder.build());
+    }
+}

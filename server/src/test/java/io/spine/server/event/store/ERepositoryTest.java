@@ -34,13 +34,10 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.event.store.ERepository.toEntityFilters;
+import static io.spine.server.event.store.Filters.toEntityFilters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Grankin
- */
 @DisplayName("ERepository should")
 class ERepositoryTest {
 
