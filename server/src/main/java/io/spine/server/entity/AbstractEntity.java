@@ -358,6 +358,9 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return lifecycleFlagsChanged;
     }
 
+    /**
+     * Clears the lifecycle flags and their {@linkplain #lifecycleFlags modification flag}.
+     */
     private void clearLifecycleFlags() {
         setLifecycleFlags(LifecycleFlags.getDefaultInstance());
         lifecycleFlagsChanged = false;
