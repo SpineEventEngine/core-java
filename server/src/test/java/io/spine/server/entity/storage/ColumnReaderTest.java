@@ -30,8 +30,6 @@ import io.spine.server.entity.storage.given.column.EntityWithManyGettersDescenda
 import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
 import io.spine.server.entity.storage.given.column.EntityWithRepeatedColumnNames;
 import io.spine.server.entity.storage.given.column.RealLifeEntity;
-import io.spine.server.storage.LifecycleFlagField;
-import io.spine.server.storage.VersionField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,10 +42,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.ColumnReader.forClass;
 import static io.spine.server.entity.storage.ColumnTests.assertContainsColumns;
 import static io.spine.server.entity.storage.ColumnTests.assertNotContainsColumns;
+import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.server.storage.VersionField.version;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -97,8 +97,14 @@ class ColumnReaderTest {
 
             assertNotNull(entityColumns);
             assertThat(entityColumns)
-                    .hasSize(LifecycleFlagField.values().length +
-                                     VersionField.values().length);
+                    .hasSize(defaultColumns.size());
+
+            Collection<String> columnNames =
+                    entityColumns.stream()
+                                 .map(EntityColumn::getName)
+                                 .collect(toList());
+            assertThat(columnNames)
+                    .containsAllIn(defaultColumns);
         }
 
         @Test
@@ -109,7 +115,7 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
-                    archived.name(), deleted.name(), "visible", version.name(), "someTime"
+                    version.name(), archived.name(), deleted.name(), "visible", "someTime"
             );
         }
 

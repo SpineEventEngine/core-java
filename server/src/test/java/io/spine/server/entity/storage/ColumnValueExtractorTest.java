@@ -27,8 +27,6 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.given.column.EntityWithManyGetters;
 import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
-import io.spine.server.storage.LifecycleFlagField;
-import io.spine.server.storage.VersionField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,6 +35,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.entity.storage.Columns.getAllColumns;
 import static io.spine.server.entity.storage.given.column.EntityWithManyGetters.CUSTOM_COLUMN_NAME;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -111,7 +110,9 @@ class ColumnValueExtractorTest {
 
         assertNotNull(columnValues);
         assertThat(columnValues)
-                .hasSize(VersionField.values().length + LifecycleFlagField.values().length);
+                .hasSize(defaultColumns.size());
+        assertThat(columnValues.keySet())
+                .containsExactlyElementsIn(defaultColumns);
     }
 
     private static <E extends Entity<?, ?>>

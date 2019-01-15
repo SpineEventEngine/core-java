@@ -43,9 +43,10 @@ final class ColumnTests {
                   .collect(toImmutableSet());
 
     static final ImmutableSet<String> defaultColumns =
-            ImmutableSet.<String>builder().addAll(lifecycleColumns)
-                                          .add(VersionField.version.name())
-                                          .build();
+            ImmutableSet.<String>builder()
+                    .addAll(lifecycleColumns)
+                    .add(VersionField.version.name())
+                    .build();
 
     /** Prevent instantiation of this utility class. */
     private ColumnTests() {
