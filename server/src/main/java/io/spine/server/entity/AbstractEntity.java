@@ -56,14 +56,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
     /**
-     * Indicates if the lifecycle flags of the entity were changed since initialization.
-     *
-     * <p>Changed lifecycle flags should be updated when
-     * {@linkplain io.spine.server.entity.Repository#store(io.spine.server.entity.Entity) storing}.
-     */
-    private volatile boolean lifecycleFlagsChanged;
-
-    /**
      * Lazily initialized reference to the model class of this entity.
      *
      * @see #thisClass()
@@ -89,7 +81,19 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @LazyInit
     private volatile @MonotonicNonNull S state;
 
-    private Version version;
+    /** The version of the entity. */
+    private volatile Version version;
+
+    /** The lifecycle flags of the entity. */
+    private volatile LifecycleFlags lifecycleFlags;
+
+    /**
+     * Indicates if the lifecycle flags of the entity were changed since initialization.
+     *
+     * <p>Changed lifecycle flags should be updated when
+     * {@linkplain io.spine.server.entity.Repository#store(io.spine.server.entity.Entity) storing}.
+     */
+    private volatile boolean lifecycleFlagsChanged;
 
     /**
      * Creates new instance with the passed ID.
