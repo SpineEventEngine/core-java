@@ -141,6 +141,13 @@ class QueryServiceTest {
         checkFailureResponse(responseObserver);
     }
 
+    @Test
+    @DisplayName("throw an IllegalStateException if the requested entity type is unknown")
+    void failOnUnknownType() {
+        assertThrows(IllegalStateException.class,
+                     () -> service.read(Given.AQuery.readUnknownType(), responseObserver));
+    }
+
     private static void checkOkResponse(MemoizingObserver<QueryResponse> responseObserver) {
         QueryResponse responseHandled = responseObserver.firstResponse();
         assertNotNull(responseHandled);
