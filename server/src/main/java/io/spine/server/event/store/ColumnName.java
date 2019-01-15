@@ -18,30 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static com.google.common.truth.Truth.assertThat;
+package io.spine.server.event.store;
 
 /**
- * Abstract base for storing enumerations of storage fields.
- *
- * @param <E> the type of the enumeration. Binding of this parameter ensures that the enum type
- *           implements {@link StorageField} interface.
+ * Event-specific column names.
  */
-public abstract class AbstractStorageFieldTest<E extends Enum & StorageField> {
+enum ColumnName {
 
-    private final Class<E> enumClass;
+    /**
+     * The name of the entity column representing the time, when the event was fired.
+     *
+     * @see EEntity#getCreated()
+     */
+    created,
 
-    protected AbstractStorageFieldTest(Class<E> enumClass) {
-        this.enumClass = enumClass;
-    }
-
-    @Test
-    @DisplayName("declare fields")
-    void declareFields() {
-        assertThat(enumClass.getEnumConstants()).isNotEmpty();
-    }
+    /**
+     * The name of the entity column representing the Protobuf type name of the event.
+     *
+     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
+     * is enclosed in the {@code spine.test} Protobuf package would have this entity column
+     * equal to {@code "spine.test.TaskAdded"}.
+     *
+     * @see EEntity#getType()
+     */
+    type
 }

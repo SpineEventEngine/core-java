@@ -34,7 +34,6 @@ import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.event.store.EEntity.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -60,7 +59,7 @@ import static java.util.stream.Collectors.toList;
  * {@link EventStore} serves as a facade, hiding the fact that the {@code EventStorage}
  * is a {@code Repository}.
  */
-class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> {
+final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> {
 
     private static final Function<EEntity, Event> GET_EVENT =
             new Function<EEntity, Event>() {
