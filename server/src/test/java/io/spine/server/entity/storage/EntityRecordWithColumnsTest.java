@@ -42,7 +42,7 @@ import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import static io.spine.server.storage.EntityField.version;
+import static io.spine.server.storage.VersionField.version;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

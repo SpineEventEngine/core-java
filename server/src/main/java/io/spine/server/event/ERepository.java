@@ -32,6 +32,7 @@ import io.spine.client.Pagination;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.server.event.EEntity.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -47,8 +48,6 @@ import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.lt;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static io.spine.server.event.EEntity.CREATED_TIME_COLUMN;
-import static io.spine.server.event.EEntity.TYPE_COLUMN;
 import static io.spine.server.event.EEntity.comparator;
 import static java.util.stream.Collectors.toList;
 
@@ -143,14 +142,15 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     private static Optional<CompositeColumnFilter> timeFilter(EventStreamQuery query) {
         CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter.newBuilder()
                                                                         .setOperator(ALL);
+        String createdColumn = ColumnName.created.name();
         if (query.hasAfter()) {
             Timestamp timestamp = query.getAfter();
-            ColumnFilter filter = gt(CREATED_TIME_COLUMN, timestamp);
+            ColumnFilter filter = gt(createdColumn, timestamp);
             timeFilter.addFilter(filter);
         }
         if (query.hasBefore()) {
             Timestamp timestamp = query.getBefore();
-            ColumnFilter filter = lt(CREATED_TIME_COLUMN, timestamp);
+            ColumnFilter filter = lt(createdColumn, timestamp);
             timeFilter.addFilter(filter);
         }
 
@@ -162,11 +162,12 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         CompositeColumnFilter.Builder typeFilter =
                 CompositeColumnFilter.newBuilder()
                                      .setOperator(EITHER);
+        String typeColumn = ColumnName.type.name();
         for (EventFilter eventFilter : query.getFilterList()) {
             String type = eventFilter.getEventType()
                                      .trim();
             if (!type.isEmpty()) {
-                ColumnFilter filter = eq(TYPE_COLUMN, type);
+                ColumnFilter filter = eq(typeColumn, type);
                 typeFilter.addFilter(filter);
             }
         }

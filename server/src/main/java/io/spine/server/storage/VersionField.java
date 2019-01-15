@@ -21,12 +21,29 @@
 package io.spine.server.storage;
 
 /**
- * A container for storage fields used to store entity version information.
+ * Fields used to store {@linkplain io.spine.server.entity.Entity#getVersion version}
+ * information of an entity.
+ *
+ * @see StorageField
  */
 public enum VersionField implements StorageField {
 
     /**
-     * Version information of an entity.
+     * Number part of the version.
      */
-    version
+    version,
+
+    /**
+     * A field representing a timestamp in seconds.
+     *
+     * @see com.google.protobuf.Timestamp#getSeconds()
+     */
+    timestamp,
+
+    /**
+     * A field for storing the part of a timestamp representing the amount of nanoseconds.
+     *
+     * @see com.google.protobuf.Timestamp#getNanos()
+     */
+    timestamp_nanos
 }

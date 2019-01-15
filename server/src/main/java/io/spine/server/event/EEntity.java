@@ -45,25 +45,6 @@ import static io.spine.core.Events.clearEnrichments;
 @Internal
 public final class EEntity extends TransactionalEntity<EventId, Event, EventVBuilder> {
 
-    /**
-     * The name of the entity column representing the time, when the event was fired.
-     *
-     * @see #getCreated()
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection") // field name semantic
-    static final String CREATED_TIME_COLUMN = "created";
-
-    /**
-     * The name of the entity column representing the Protobuf type name of the event.
-     *
-     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
-     * is enclosed in the {@code spine.test} Protobuf package would have this entity column
-     * equal to {@code "spine.test.TaskAdded"}.
-     *
-     * @see #getType()
-     */
-    static final String TYPE_COLUMN = "type";
-
     /** Cached value of the event message type name. */
     private @Nullable TypeName typeName;
 
@@ -104,7 +85,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
      * <p>This method represents an entity column {@code created}.
      *
      * @return the time when the underlying event was fired
-     * @see #CREATED_TIME_COLUMN
+     * @see ColumnName#created
      */
     @Column
     public Timestamp getCreated() {
@@ -118,7 +99,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
      * <p>This method represents an entity column {@link TypeName}.
      *
      * @return the {@link TypeName} value of the event represented by this entity
-     * @see #TYPE_COLUMN
+     * @see ColumnName#type
      */
     @Column
     public String getType() {
@@ -127,6 +108,30 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
                                     .getTypeName();
         }
         return typeName.value();
+    }
+
+    /**
+     * Event-specific column names.
+     */
+    public enum ColumnName {
+
+        /**
+         * The name of the entity column representing the time, when the event was fired.
+         *
+         * @see #getCreated()
+         */
+        created,
+
+        /**
+         * The name of the entity column representing the Protobuf type name of the event.
+         *
+         * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
+         * is enclosed in the {@code spine.test} Protobuf package would have this entity column
+         * equal to {@code "spine.test.TaskAdded"}.
+         *
+         * @see #getType()
+         */
+        type
     }
 
     /**

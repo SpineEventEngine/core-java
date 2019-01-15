@@ -22,32 +22,27 @@ package io.spine.server.storage;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.type.TypeUrl;
 
 /**
- * Enumerates storage fields used by {@link Storage} implementations for storing entities.
+ * Storage fields for persisting entity {@linkplain io.spine.server.entity.Entity#getState state}.
  *
  * @see StorageField
  */
-public enum EntityField implements StorageField {
+public enum StateField implements StorageField {
 
     /**
-     * A field representing a timestamp in seconds.
+     * The field to store {@link TypeUrl} of an entity state.
      *
-     * @see Timestamp#getSeconds()
-     */
-    timestamp,
-
-    /**
-     * A field for storing the part of a timestamp representing the amount of nanoseconds.
+     * <p>This type information is used to deserialize binary data stored in the
+     * {@link StateField#bytes} field.
      *
-     * @see Timestamp#getNanos()
+     * @see TypeUrl
      */
-    timestamp_nanos,
+    type_url,
 
     /**
-     * A field for storing the serialized bytes of the entity state.
+     * The field to store the serialized bytes of the entity state.
      *
      * <p>This is the way to store objects of custom types within a strongly-typed storage
      * (e.g. relational database) and make the read/write operations easy requiring no reflection.
@@ -55,22 +50,5 @@ public enum EntityField implements StorageField {
      * @see Message#toByteArray()
      * @see Any#getValue()
      */
-    bytes,
-
-    /**
-     * A field representing a {@link TypeUrl} of a certain {@link Message} type.
-     *
-     * <p>This field is commonly used in pair with {@link EntityField#bytes}
-     * to store the fully qualified type name with the type prefix.
-     *
-     * @see TypeUrl
-     */
-    type_url,
-
-    /**
-     * A field representing the {@link io.spine.server.entity.Entity#getVersion Entity version}.
-     *
-     * @see io.spine.core.Version
-     */
-    version
+    bytes
 }

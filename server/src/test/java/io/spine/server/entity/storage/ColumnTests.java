@@ -41,14 +41,10 @@ final class ColumnTests {
             Stream.of(LifecycleFlagField.values())
                   .map(Enum::name)
                   .collect(toImmutableSet());
-    private static final ImmutableSet<String> versionColumns =
-            Stream.of(VersionField.values())
-                  .map(Enum::name)
-                  .collect(toImmutableSet());
 
     static final ImmutableSet<String> defaultColumns =
             ImmutableSet.<String>builder().addAll(lifecycleColumns)
-                                          .addAll(versionColumns)
+                                          .add(VersionField.version.name())
                                           .build();
 
     /** Prevent instantiation of this utility class. */

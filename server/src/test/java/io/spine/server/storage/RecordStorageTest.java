@@ -106,7 +106,6 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         assertEquals(record, readRecord.get());
     }
 
-    @SuppressWarnings("OverlyLongMethod") // Complex test case (still tests a single operation)
     @Test
     @DisplayName("filter records by columns")
     void filterByColumns() {
