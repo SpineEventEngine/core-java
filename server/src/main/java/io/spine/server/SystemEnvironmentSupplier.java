@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -33,20 +32,18 @@ import static io.spine.server.DeploymentType.STANDALONE;
 import static java.util.Optional.ofNullable;
 
 /**
- * The Default implementation of {@linkplain io.spine.server.ServerEnvironment.Provider
- * server environment provider}.
+ * The Default implementation of {@linkplain DeploymentType deployment type} 
+ * {@linkplain Supplier supplier}.
  */
 class SystemEnvironmentSupplier implements Supplier<DeploymentType> {
 
     @VisibleForTesting
-    static final String APP_ENGINE_ENVIRONMENT_PATH =
-            "com.google.appengine.runtime.environment";
+    static final String APP_ENGINE_ENVIRONMENT_PATH = "com.google.appengine.runtime.environment";
     @VisibleForTesting
     static final String APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE = "Production";
     @VisibleForTesting
     static final String APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE = "Development";
 
-    private @MonotonicNonNull DeploymentType deploymentType = null;
 
     /** Prevent instantiation from outside. */
     private SystemEnvironmentSupplier() {
@@ -58,13 +55,6 @@ class SystemEnvironmentSupplier implements Supplier<DeploymentType> {
 
     @Override
     public DeploymentType get() {
-        if (deploymentType == null) {
-            deploymentType = readDeploymentType();
-        }
-        return deploymentType;
-    }
-
-    private static DeploymentType readDeploymentType() {
         Optional<String> gaeEnvironment = getProperty(APP_ENGINE_ENVIRONMENT_PATH);
         if (gaeEnvironment.isPresent()) {
             if (APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE.equals(gaeEnvironment.get())) {
