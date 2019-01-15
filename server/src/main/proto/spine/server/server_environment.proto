@@ -13,7 +13,10 @@ option java_multiple_files = true;
 //
 enum DeploymentType {
 
-    // Running on a unrecognized environment.
+    // Running in a standalone mode.
+    //
+    // Standalone mode is activated when no specific runtime deployment is recognized. 
+    //
     STANDALONE = 0;
 
     // Running on an App Engine local development server.
