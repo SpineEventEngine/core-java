@@ -31,8 +31,8 @@ import io.spine.model.verify.given.InvalidEnhanceAggregate;
 import io.spine.model.verify.given.InvalidRestoreAggregate;
 import io.spine.model.verify.given.RenameProcMan;
 import io.spine.model.verify.given.UploadCommandHandler;
+import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
-import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
@@ -40,10 +40,8 @@ import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.internal.impldep.com.google.common.collect.Iterators;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -62,6 +60,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
+import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -96,7 +95,7 @@ class ModelVerifierTest {
 
         TaskContainer tasks = mock(TaskContainer.class);
         TaskCollection emptyTaskCollection = mock(TaskCollection.class);
-        when(emptyTaskCollection.iterator()).thenReturn(Iterators.emptyIterator());
+        when(emptyTaskCollection.iterator()).thenReturn(emptyIterator());
         when(emptyTaskCollection.toArray()).thenReturn(EMPTY_ARRAY);
         when(tasks.withType(any(Class.class))).thenReturn(emptyTaskCollection);
         when(project.getTasks()).thenReturn(tasks);
@@ -154,8 +153,6 @@ class ModelVerifierTest {
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
 
-    @Disabled("until Gradle wrapper version is updated to at least 5.0")
-    ///TODO:2018-01-04:serhii.lekariev: enable when https://github.com/SpineEventEngine/core-java/issues/932 is resolved
     @Test
     @DisplayName("produce a warning on private command handling methods")
     void warnOnPrivateHandlers(){
@@ -174,7 +171,7 @@ class ModelVerifierTest {
     /** Redirects logging produced by model verifier to a {@code Queue} that is returned. */
     private static Queue<SubstituteLoggingEvent> redirectLogging() {
         Queue<SubstituteLoggingEvent> loggedMessages = new ArrayDeque<>();
-        Logging.redirect((SubstituteLogger) Logging.get(MethodSignature.class), loggedMessages);
+        Logging.redirect((SubstituteLogger) Logging.get(CommandHandlerSignature.class), loggedMessages);
         return loggedMessages;
     }
 
