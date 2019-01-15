@@ -32,7 +32,7 @@ import static io.spine.server.DeploymentType.STANDALONE;
 import static java.util.Optional.ofNullable;
 
 /**
- * The Default implementation of {@linkplain DeploymentType deployment type} 
+ * The default implementation of {@linkplain DeploymentType deployment type} 
  * {@linkplain Supplier supplier}.
  */
 class SystemEnvironmentSupplier implements Supplier<DeploymentType> {
