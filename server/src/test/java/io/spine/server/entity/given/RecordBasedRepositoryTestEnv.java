@@ -27,23 +27,19 @@ import io.spine.client.OrderBy;
 import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 
 import static io.spine.testing.Tests.assertMatchesMask;
 
-/**
- * @author Mykhailo Drachuk
- */
 public final class RecordBasedRepositoryTestEnv {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Specific to this tests.
     private static final String ENTITY_NAME_COLUMN = "name";
 
     /** Prevents instantiation of this test environment class. */
     private RecordBasedRepositoryTestEnv() {
     }
 
-    public static <E extends AbstractVersionableEntity<?, ?>>
+    public static <E extends AbstractEntity<?, ?>>
     void assertMatches(E entity, FieldMask fieldMask) {
         Message state = entity.getState();
         assertMatchesMask(state, fieldMask);

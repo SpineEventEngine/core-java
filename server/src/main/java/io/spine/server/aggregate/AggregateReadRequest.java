@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A request to read events for a particular {@code Aggregate} from {@link AggregateStorage}.
  *
- * <p>A result of processing this request is a {@linkplain AggregateStateRecord record},
+ * <p>A result of processing this request is a {@linkplain AggregateHistory record},
  * which satisfies the request criteria.
  *
  * <p>In addition to a record identifier, this request implementation requires

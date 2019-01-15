@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.protobuf.Message;
-import io.spine.base.Time;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
@@ -29,11 +28,12 @@ import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.server.Given.MemoizeStreamObserver;
-import io.spine.server.entity.AbstractVersionableEntity;
-import io.spine.server.entity.VersionableEntity;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.entity.Entity;
 import io.spine.server.stand.Stand;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.Versions.newVersion;
+import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -53,11 +53,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("SubscriptionService should")
 class SubscriptionServiceTest {
@@ -105,10 +103,11 @@ class SubscriptionServiceTest {
             BoundedContext secondBoundedContext = ctx("Second");
             BoundedContext thirdBoundedContext = ctx("Third");
 
-            SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                     .add(firstBoundedContext)
-                                                                     .add(secondBoundedContext)
-                                                                     .add(thirdBoundedContext);
+            SubscriptionService.Builder builder = SubscriptionService
+                    .newBuilder()
+                    .add(firstBoundedContext)
+                    .add(secondBoundedContext)
+                    .add(thirdBoundedContext);
             SubscriptionService service = builder.build();
             assertNotNull(service);
 
@@ -127,12 +126,13 @@ class SubscriptionServiceTest {
         BoundedContext secondBoundedContext = ctx("Also removed");
         BoundedContext thirdBoundedContext = ctx("The one to stay");
 
-        SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                 .add(firstBoundedContext)
-                                                                 .add(secondBoundedContext)
-                                                                 .add(thirdBoundedContext)
-                                                                 .remove(secondBoundedContext)
-                                                                 .remove(firstBoundedContext);
+        SubscriptionService.Builder builder = SubscriptionService
+                .newBuilder()
+                .add(firstBoundedContext)
+                .add(secondBoundedContext)
+                .add(thirdBoundedContext)
+                .remove(secondBoundedContext)
+                .remove(firstBoundedContext);
         SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
@@ -152,9 +152,9 @@ class SubscriptionServiceTest {
     }
 
     /*
-    * Subscription tests
-    * ------------------
-    */
+     * Subscription tests
+     * ------------------
+     */
 
     @Test
     @DisplayName("subscribe to topic")
@@ -221,7 +221,7 @@ class SubscriptionServiceTest {
                                       .build();
         int version = 1;
 
-        VersionableEntity entity = mockEntity(projectId, projectState, version);
+        Entity entity = newEntity(projectId, projectState, version);
         boundedContext.getStand()
                       .post(requestFactory.createCommandContext()
                                           .getActorContext()
@@ -266,7 +266,7 @@ class SubscriptionServiceTest {
                                       .setId(projectId)
                                       .build();
         int version = 1;
-        VersionableEntity entity = mockEntity(projectId, projectState, version);
+        Entity entity = newEntity(projectId, projectState, version);
         boundedContext.getStand()
                       .post(requestFactory.createCommandContext()
                                           .getActorContext()
@@ -282,8 +282,6 @@ class SubscriptionServiceTest {
     @DisplayName("handle exceptions and call observer error callback for")
     class HandleExceptionsOf {
 
-        @SuppressWarnings("ConstantConditions")
-        // As `null` is intentionally passed as a method param.
         @Test
         @DisplayName("subscription process")
         void subscription() {
@@ -301,8 +299,6 @@ class SubscriptionServiceTest {
             assertThat(observer.throwable()).isInstanceOf(NullPointerException.class);
         }
 
-        @SuppressWarnings("ConstantConditions")
-        // As `null` is intentionally passed as a method param.
         @Test
         @DisplayName("activation process")
         void activation() {
@@ -353,12 +349,12 @@ class SubscriptionServiceTest {
         }
     }
 
-    private static VersionableEntity mockEntity(ProjectId projectId, Message projectState,
-                                                int version) {
-        VersionableEntity entity = mock(AbstractVersionableEntity.class);
-        when(entity.getState()).thenReturn(projectState);
-        when(entity.getId()).thenReturn(projectId);
-        when(entity.getVersion()).thenReturn(newVersion(version, Time.getCurrentTime()));
+    private static Entity newEntity(ProjectId projectId, Message projectState, int version) {
+        Entity entity = aggregateOfClass(PAggregate.class)
+                .withId(projectId)
+                .withState((Project) projectState)
+                .withVersion(version)
+                .build();
         return entity;
     }
 
@@ -375,5 +371,12 @@ class SubscriptionServiceTest {
 
     private static Target getProjectQueryTarget() {
         return Targets.allOf(Project.class);
+    }
+
+    private static class PAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+
+        protected PAggregate(ProjectId id) {
+            super(id);
+        }
     }
 }

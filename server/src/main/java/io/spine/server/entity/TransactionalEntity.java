@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
 public abstract class TransactionalEntity<I,
                                           S extends Message,
                                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
-                      extends AbstractVersionableEntity<I, S> {
+                      extends AbstractEntity<I, S> {
 
     private final RecentHistory recentHistory = new RecentHistory();
 

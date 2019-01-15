@@ -24,8 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.InvalidEntityStateException;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.testing.server.User;
 import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntity;
 import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntityBuilder;
@@ -94,7 +94,7 @@ class EntityBuilderTest {
         StringValue state = StringValue.of(getClass().getName());
         Timestamp timestamp = Time.getCurrentTime();
 
-        VersionableEntity entity = givenEntity()
+        Entity entity = givenEntity()
                 .withId(id)
                 .withVersion(version)
                 .withState(state)
@@ -108,7 +108,7 @@ class EntityBuilderTest {
     @Test
     @DisplayName("create entity with default values")
     void createWithDefaultValues() {
-        VersionableEntity entity = givenEntity().build();
+        Entity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());

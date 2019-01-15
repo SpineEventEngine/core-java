@@ -22,9 +22,9 @@ package io.spine.server.entity;
 
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.entity.given.RepositoryTestEnv.ProjectEntity;
-import io.spine.server.entity.given.RepositoryTestEnv.RepoForEntityWithUnsupportedId;
-import io.spine.server.entity.given.RepositoryTestEnv.TestRepo;
+import io.spine.server.entity.given.repository.ProjectEntity;
+import io.spine.server.entity.given.repository.RepoForEntityWithUnsupportedId;
+import io.spine.server.entity.given.repository.TestRepo;
 import io.spine.server.model.ModelError;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;

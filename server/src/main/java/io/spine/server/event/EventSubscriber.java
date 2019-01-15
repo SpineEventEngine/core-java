@@ -24,7 +24,6 @@ package io.spine.server.event;
  * An event subscriber declares one or more methods {@linkplain io.spine.core.Subscribe subscribed}
  * to events.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.core.Subscribe @Subscribe
  */
 public interface EventSubscriber extends EventReceiver {

@@ -25,7 +25,6 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.model.ModelError;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
@@ -70,7 +69,7 @@ class EntityClassTest {
 
         // Create and init the entity.
         EntityClass<NanoEntity> entityClass = new EntityClass<>(NanoEntity.class);
-        AbstractVersionableEntity<Long, StringValue> entity = entityClass.createEntity(id);
+        AbstractEntity<Long, StringValue> entity = entityClass.createEntity(id);
 
         Timestamp after = Time.getCurrentTime();
 
@@ -94,7 +93,7 @@ class EntityClassTest {
     }
 
     /** A test entity which defines ID and state. */
-    private static class NanoEntity extends AbstractVersionableEntity<Long, StringValue> {
+    private static class NanoEntity extends AbstractEntity<Long, StringValue> {
         private NanoEntity(Long id) {
             super(id);
         }

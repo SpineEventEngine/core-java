@@ -33,7 +33,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Such functions are not necessarily equal because they may have different translators.
  *
  * @see EnrichmentFunction
- * @author Alexander Yevsyukov
  */
 final class SameTransition implements Predicate<EnrichmentFunction> {
 

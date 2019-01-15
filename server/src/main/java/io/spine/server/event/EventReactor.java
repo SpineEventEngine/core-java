@@ -28,7 +28,6 @@ import io.spine.server.EventProducer;
  *
  * <p>This means that a reactor does <em>not</em> have to <em>always</em> generate an event.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.event.React @React
  */
 public interface EventReactor extends EventReceiver, EventProducer {
