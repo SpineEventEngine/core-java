@@ -45,12 +45,8 @@ import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
  * from the server.
  *
- * <p> For synchronous read-side updates please see {@link QueryService}.
- *
- * @author Alex Tymchenko
+ * <p>For synchronous read-side updates please see {@link QueryService}.
  */
-@SuppressWarnings("MethodDoesntCallSuperMethod")
-// as we override default implementation with `unimplemented` status.
 public class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
         implements Logging {
