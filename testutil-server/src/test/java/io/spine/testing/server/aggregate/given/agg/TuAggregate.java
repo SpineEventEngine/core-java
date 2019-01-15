@@ -61,12 +61,12 @@ public final class TuAggregate
     }
 
     @Assign
-    public TuProjectCreated handle(TuCreateProject command) {
+    TuProjectCreated handle(TuCreateProject command) {
         return TuProjectCreated.getDefaultInstance();
     }
 
     @Assign
-    public TuProjectAssigned handle(TuAssignProject command) throws TuFailedToAssignProject {
+    TuProjectAssigned handle(TuAssignProject command) throws TuFailedToAssignProject {
         throw TuFailedToAssignProject
                 .newBuilder()
                 .setId(getId())
@@ -74,12 +74,12 @@ public final class TuAggregate
     }
 
     @Apply
-    void on(TuProjectCreated event) {
+    private void on(TuProjectCreated event) {
         getBuilder().setTimestamp(fromMillis(1234567));
     }
 
     @Apply(allowImport = true)
-    void on(TuTrelloProjectCreated event) {
+    private void on(TuTrelloProjectCreated event) {
         getBuilder().setTimestamp(fromMillis(1234567));
     }
 }
