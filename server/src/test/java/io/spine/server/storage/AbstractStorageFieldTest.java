@@ -18,31 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.storage;
+package io.spine.server.storage;
 
-import io.spine.annotation.SPI;
-import io.spine.server.storage.StorageField;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static com.google.common.truth.Truth.assertThat;
 
 /**
- * Enumeration of storage fields required for storing events.
+ * Abstract base for storing enumerations of storage fields.
  *
- * @see StorageField
+ * @param <E> the type of the enumeration. Binding of this parameter ensures that the enum type
+ *           implements {@link StorageField} interface.
  */
-@SPI
-public enum EventField implements StorageField {
+public class AbstractStorageFieldTest<E extends Enum & StorageField> {
 
-    /**
-     * A field a string value of an identifier of an entity produced the event.
-     */
-    producer_id,
+    private final Class<E> enumClass;
 
-    /**
-     * A field containing value of an event ID.
-     */
-    event_id,
+    protected AbstractStorageFieldTest(Class<E> enumClass) {
+        this.enumClass = enumClass;
+    }
 
-    /**
-     * A type of an event message.
-     */
-    event_type
+    @Test
+    @DisplayName("declare fields")
+    void declareFields() {
+        assertThat(enumClass.getEnumConstants()).isNotEmpty();
+    }
 }
