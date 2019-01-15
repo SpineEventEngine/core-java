@@ -282,8 +282,6 @@ class SubscriptionServiceTest {
     @DisplayName("handle exceptions and call observer error callback for")
     class HandleExceptionsOf {
 
-        @SuppressWarnings("ConstantConditions")
-        // As `null` is intentionally passed as a method param.
         @Test
         @DisplayName("subscription process")
         void subscription() {
@@ -301,8 +299,6 @@ class SubscriptionServiceTest {
             assertThat(observer.throwable()).isInstanceOf(NullPointerException.class);
         }
 
-        @SuppressWarnings("ConstantConditions")
-        // As `null` is intentionally passed as a method param.
         @Test
         @DisplayName("activation process")
         void activation() {
