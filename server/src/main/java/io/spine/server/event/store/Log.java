@@ -24,7 +24,6 @@ import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.server.event.EventStreamQuery;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
@@ -33,7 +32,7 @@ import org.slf4j.Logger;
  */
 final class Log {
 
-    private final @MonotonicNonNull Logger logger;
+    private final @Nullable Logger logger;
 
     Log(@Nullable Logger logger) {
         this.logger = logger;
