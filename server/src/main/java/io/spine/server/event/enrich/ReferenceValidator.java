@@ -24,12 +24,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
+import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -68,23 +69,21 @@ final class ReferenceValidator implements Logging {
     private static final String EMPTY_STRING = "";
     private static final Pattern SPACE_PATTERN = Pattern.compile(SPACE, Pattern.LITERAL);
 
-    /** The reference to the event context used in the `by` field option. */
-    @SuppressWarnings("DuplicateStringLiteralInspection") // refers to the proto field name,
-        // not a variable name as other strings that use the same value.
-    private static final String CONTEXT_REFERENCE = "context";
-
     private final Enricher enricher;
     private final Descriptor eventDescriptor;
     private final Descriptor enrichmentDescriptor;
 
     ReferenceValidator(Enricher enricher,
-                       Class<? extends Message> eventClass,
+                       Class<? extends EventMessage> eventClass,
                        Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
-        this.eventDescriptor = Internal.getDefaultInstance(eventClass)
-                                       .getDescriptorForType();
-        this.enrichmentDescriptor = Internal.getDefaultInstance(enrichmentClass)
-                                            .getDescriptorForType();
+        this.eventDescriptor = descriptorOf(eventClass);
+        this.enrichmentDescriptor = descriptorOf(enrichmentClass);
+    }
+
+    private static Descriptor descriptorOf(Class<? extends Message> cls) {
+        return TypeName.of(cls)
+                       .getMessageDescriptor();
     }
 
     /**
@@ -235,10 +234,10 @@ final class ReferenceValidator implements Logging {
 
     /**
      * Returns an event descriptor or context descriptor
-     * if the field name contains {@link ReferenceValidator#CONTEXT_REFERENCE}.
+     * if the field name contains {@link FieldReference#context#name()}.
      */
     private Descriptor getSrcMessage(String fieldName) {
-        Descriptor msg = fieldName.contains(CONTEXT_REFERENCE)
+        Descriptor msg = FieldReference.context.matches(fieldName)
                          ? EventContext.getDescriptor()
                          : eventDescriptor;
         return msg;

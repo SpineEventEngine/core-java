@@ -26,6 +26,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
+import io.spine.base.EventMessage;
 import io.spine.core.EventEnvelope;
 import io.spine.type.TypeName;
 
@@ -83,8 +84,8 @@ public final class Enricher {
                                                      .getMessageClass();
             ImmutableCollection<String> srcMessageTypes = enrichmentsMap.get(enrichmentType);
             for (String srcType : srcMessageTypes) {
-                Class<Message> messageClass = TypeName.of(srcType)
-                                                      .getMessageClass();
+                Class<EventMessage> messageClass = TypeName.of(srcType)
+                                                           .getMessageClass();
                 MessageEnrichment msgEnricher = create(this, messageClass, enrichmentClass);
                 functions.put(messageClass, msgEnricher);
             }

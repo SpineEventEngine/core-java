@@ -21,8 +21,8 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.server.reflect.Field;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -34,6 +34,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
+import static io.spine.protobuf.Messages.newInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -43,7 +44,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S> a type of the source message to enrich
  * @param <T> a type of the target enrichment message
  */
-final class MessageEnrichment<S extends Message, T extends Message, C extends Message>
+final class MessageEnrichment<S extends EventMessage, T extends Message, C extends Message>
         extends EnrichmentFunction<S, T, C> {
 
     /** A parent instance holding this instance and its siblings. */
@@ -59,7 +60,7 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
     private @Nullable ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
     /** Creates a new message enricher instance. */
-    static <S extends Message, T extends Message, C extends Message>
+    static <S extends EventMessage, T extends Message, C extends Message>
     MessageEnrichment<S, T, C> create(Enricher enricher,
                                       Class<S> messageClass,
                                       Class<T> enrichmentClass) {
@@ -73,8 +74,9 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
 
     @Override
     void activate() {
+        Class<? extends EventMessage> eventClass = getSourceClass();
         ReferenceValidator referenceValidator =
-                new ReferenceValidator(enricher, getSourceClass(), getEnrichmentClass());
+                new ReferenceValidator(enricher, eventClass, getEnrichmentClass());
         ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
                                                                       ImmutableMultimap.builder();
         ValidationResult validationResult = referenceValidator.validate();
@@ -100,7 +102,7 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
         ensureActive();
         verifyOwnState();
 
-        T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());
+        T defaultTarget = newInstance(getEnrichmentClass());
         Message.Builder builder = defaultTarget.toBuilder();
         setFields(builder, eventMsg, context);
         @SuppressWarnings("unchecked") // types are checked during the initialization and validation
