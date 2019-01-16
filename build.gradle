@@ -28,13 +28,29 @@ buildscript {
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
-        maven { url = repos.oldSpine }
-        maven { url = repos.oldSpineSnapshots }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
+        mavenLocal()
+        maven { 
+            url = repos.spine 
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                releasesOnly()
+            }
+        }
+        maven { 
+            url = repos.spineSnapshots
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
         jcenter()
         maven { url = repos.gradlePlugins }
-        mavenLocal()
     }
 
     dependencies {
@@ -162,13 +178,28 @@ subprojects {
     // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/
 
     repositories {
-        jcenter()
-        maven { url = repos.gradlePlugins }
         mavenLocal()
-        maven { url = repos.oldSpine }
-        maven { url = repos.oldSpineSnapshots }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
+        maven {
+            url = repos.spine
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                releasesOnly()
+            }
+        }
+        maven {
+            url = repos.spineSnapshots
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+        jcenter()
     }
 
     dependencies {

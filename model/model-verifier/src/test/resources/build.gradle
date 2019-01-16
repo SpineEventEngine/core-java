@@ -37,13 +37,28 @@ buildscript {
     apply from: "$enclosingRootDir/version.gradle"
 
     repositories {
-        jcenter()
         mavenLocal()
-
-        maven { url = repos.oldSpine }
-        maven { url = repos.oldSpineSnapshots }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
+        maven {
+            url = repos.spine
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                releasesOnly()
+            }
+        }
+        maven {
+            url = repos.spineSnapshots
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+        jcenter()
     }
 
     dependencies {
@@ -67,13 +82,28 @@ apply plugin: 'io.spine.tools.spine-model-verifier'
 apply from: "$enclosingRootDir/version.gradle"
 
 repositories {
-    jcenter()
     mavenLocal()
-
-    maven { url = repos.oldSpine }
-    maven { url = repos.oldSpineSnapshots }
-    maven { url = repos.spine }
-    maven { url = repos.spineSnapshots }
+    maven {
+        url = repos.spine
+        content {
+            includeGroup 'io.spine'
+            includeGroup 'io.spine.tools'
+        }
+        mavenContent {
+            releasesOnly()
+        }
+    }
+    maven {
+        url = repos.spineSnapshots
+        content {
+            includeGroup 'io.spine'
+            includeGroup 'io.spine.tools'
+        }
+        mavenContent {
+            snapshotsOnly()
+        }
+    }
+    jcenter()
 }
 
 compileJava {

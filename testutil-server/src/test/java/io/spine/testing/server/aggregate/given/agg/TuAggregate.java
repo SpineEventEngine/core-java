@@ -74,12 +74,12 @@ public final class TuAggregate
     }
 
     @Apply
-    void on(@SuppressWarnings("unused") TuProjectCreated event) {
+    private void on(@SuppressWarnings("unused") TuProjectCreated event) {
         getBuilder().setTimestamp(fromMillis(1234567));
     }
 
     @Apply(allowImport = true)
-    void on(@SuppressWarnings("unused") TuTrelloProjectCreated event) {
+    private void on(@SuppressWarnings("unused") TuTrelloProjectCreated event) {
         getBuilder().setTimestamp(fromMillis(1234567));
     }
 }
