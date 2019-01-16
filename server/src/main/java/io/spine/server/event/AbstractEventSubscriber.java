@@ -59,7 +59,7 @@ public abstract class AbstractEventSubscriber
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
 
     /**
-     * Dispatches event to the handling method.
+     * Dispatches event to the handling mechanism.
      *
      * @param envelope the envelope with the message
      * @return a one element set with the result of {@link #toString()}
@@ -80,6 +80,17 @@ public abstract class AbstractEventSubscriber
             return ImmutableSet.of();
         }
         return identity();
+    }
+
+    /**
+     * Handles an event dispatched to this subscriber.
+     *
+     * <p>By default passes the event to the corresponding {@linkplain io.spine.core.Subscribe
+     * subscriber} method of the entity.
+     */
+    protected void handle(EventEnvelope envelope) {
+        thisClass.getSubscriber(envelope)
+                 .ifPresent(method -> method.invoke(this, envelope));
     }
 
     /**
@@ -120,11 +131,6 @@ public abstract class AbstractEventSubscriber
     @Override
     public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
         return Optional.of(new ExternalDispatcher());
-    }
-
-    private void handle(EventEnvelope envelope) {
-        thisClass.getSubscriber(envelope)
-                 .ifPresent(method -> method.invoke(this, envelope));
     }
 
     /**

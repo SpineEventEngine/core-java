@@ -61,7 +61,7 @@ final class SubscriptionRecord {
      *         if the subscription is not activated
      * @see #activate(SubscriptionUpdateCallback)
      */
-    void runUpdate(EventEnvelope event) {
+    void update(EventEnvelope event) {
         callbackRunner.run(event);
     }
 

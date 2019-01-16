@@ -217,7 +217,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     @Override
-    protected void doDispatch(EventEnvelope envelope) {
+    protected void dispatch(EventEnvelope envelope) {
         EventEnvelope enrichedEnvelope = enrich(envelope);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,

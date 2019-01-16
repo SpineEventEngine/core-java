@@ -62,8 +62,8 @@ public class SubscriptionService
 
     private static SubscriptionService create(ImmutableMap<TypeUrl, BoundedContext> map) {
         ImmutableCollection<BoundedContext> boundedContexts = map.values();
-        boundedContexts.forEach(bc -> bc.getEventBus()
-                                        .addDispatchCallback(bc.getStand()::notifySubscriptions));
+        // todo think of a better place for this
+        boundedContexts.forEach(bc -> bc.registerEventDispatcher(bc.getStand()));
         return new SubscriptionService(map);
     }
 

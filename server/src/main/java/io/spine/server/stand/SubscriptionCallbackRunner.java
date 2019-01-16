@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.base.Preconditions.checkState;
 
+// todo this sounds like something related to multithreading
 abstract class SubscriptionCallbackRunner {
 
     private final Subscription subscription;

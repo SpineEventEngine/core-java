@@ -33,12 +33,10 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
@@ -73,9 +71,6 @@ public abstract class Bus<T extends Message,
     private @MonotonicNonNull FilterChain<E> filterChain;
 
     private final ChainBuilder<E> chainBuilder;
-
-    /** The dispatch callback, NO-OP by default. */
-    private final Set<DispatchCallback<E>> dispatchCallbacks = newHashSet();
 
     protected Bus(BusBuilder<E, T, ?> builder) {
         super();
@@ -285,10 +280,6 @@ public abstract class Bus<T extends Message,
         return emptyList();
     }
 
-    public void addDispatchCallback(DispatchCallback<E> callback) {
-        dispatchCallbacks.add(callback);
-    }
-
     /**
      * Obtains the queue of the envelopes.
      *
@@ -361,15 +352,6 @@ public abstract class Bus<T extends Message,
         return filterOutput;
     }
 
-    private void dispatch(E envelope) {
-        doDispatch(envelope);
-        afterDispatch(envelope);
-    }
-
-    private void afterDispatch(E envelope) {
-        dispatchCallbacks.forEach(callback -> callback.accept(envelope));
-    }
-
     /**
      * Passes the given envelope for dispatching.
      *
@@ -380,7 +362,7 @@ public abstract class Bus<T extends Message,
      *
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract void doDispatch(E envelope);
+    protected abstract void dispatch(E envelope);
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.
@@ -395,7 +377,7 @@ public abstract class Bus<T extends Message,
      *
      * @param envelopes the envelopes to post
      * @param observer  the observer to be notified of the operation result
-     * @see #doDispatch(MessageEnvelope)
+     * @see #dispatch(MessageEnvelope)
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E message : envelopes) {

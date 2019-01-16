@@ -19,6 +19,7 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.SubscriptionVBuilder;
@@ -36,6 +37,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
@@ -89,6 +91,11 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     @Override
     public synchronized boolean hasType(TypeUrl type) {
         return registrySlice().hasType(type);
+    }
+
+    @Override
+    public ImmutableSet<TypeUrl> typeSet() {
+        return registrySlice().typeSet();
     }
 
     boolean isMultitenant() {
@@ -172,6 +179,11 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         public synchronized boolean hasType(TypeUrl type) {
             boolean result = typeToRecord.containsKey(type);
             return result;
+        }
+
+        @Override
+        public ImmutableSet<TypeUrl> typeSet() {
+            return copyOf(typeToRecord.keySet());
         }
 
         @Override

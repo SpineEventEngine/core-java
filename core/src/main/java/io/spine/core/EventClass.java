@@ -25,9 +25,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
 
 import java.util.Arrays;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.ensureMessage;
 
@@ -52,6 +54,14 @@ public class EventClass extends MessageClass<EventMessage> {
      */
     public static EventClass from(Class<? extends EventMessage> value) {
         return new EventClass(checkNotNull(value));
+    }
+
+    @SuppressWarnings("unchecked") // Logically checked.
+    public static EventClass from(TypeUrl typeUrl) {
+        Class<? extends Message> messageClass = typeUrl.getMessageClass();
+        checkArgument(EventMessage.class.isAssignableFrom(messageClass),
+                      "Event class constructed from non-EventMessage type URL");
+        return from((Class<? extends EventMessage>) messageClass);
     }
 
     /**

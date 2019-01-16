@@ -19,6 +19,7 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Topic;
@@ -88,4 +89,6 @@ interface SubscriptionRegistry {
      * @return {@code true} if there are records with the given type, {@code false} otherwise
      */
     boolean hasType(TypeUrl type);
+
+    ImmutableSet<TypeUrl> typeSet();
 }

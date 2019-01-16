@@ -33,6 +33,7 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
+import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Response;
 import io.spine.core.Responses;
@@ -47,7 +48,7 @@ import io.spine.server.entity.EntityRecordChangeVBuilder;
 import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
-import io.spine.server.tenant.EventOperation;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -64,6 +65,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.ack;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * A container for storing the latest {@link io.spine.server.aggregate.Aggregate Aggregate}
@@ -82,7 +84,7 @@ import static io.spine.grpc.StreamObservers.ack;
  * instance of {@code Stand}.
  */
 @SuppressWarnings("OverlyCoupledClass")
-public class Stand implements AutoCloseable {
+public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     /**
      * Used to return an empty result collection for {@link Query}.
@@ -93,6 +95,8 @@ public class Stand implements AutoCloseable {
      * Manages the subscriptions for this instance of {@code Stand}.
      */
     private final SubscriptionRegistry subscriptionRegistry;
+
+    private final SubscriptionCache subscriptionCache;
 
     /**
      * Manages the {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
@@ -118,6 +122,7 @@ public class Stand implements AutoCloseable {
                            ? builder.multitenant
                            : false;
         this.subscriptionRegistry = builder.getSubscriptionRegistry();
+        this.subscriptionCache = builder.getSubscriptionCache();
         this.typeRegistry = builder.getTypeRegistry();
         this.topicValidator = builder.getTopicValidator();
         this.queryValidator = builder.getQueryValidator();
@@ -159,34 +164,55 @@ public class Stand implements AutoCloseable {
         lifecycle.onStateChanged(change, ImmutableSet.of());
     }
 
-    /**
-     * Notifies subscriptions that a new event occurred in the system.
-     */
-    public void notifySubscriptions(EventEnvelope event) {
-        EventOperation op = new EventOperation(event.getOuterObject()) {
-            @Override
-            public void run() {
-                notifyMatchingSubscriptions(event);
-            }
-        };
-        op.execute();
+    @Override
+    protected void handle(EventEnvelope envelope) {
+        Collection<SubscriptionRecord> subscriptionRecords = subscriptionCache.get(envelope);
+        checkState(!subscriptionRecords.isEmpty(),
+                   "Dispatched an event with no active subscriptions on it");
+        subscriptionRecords.forEach(
+                record -> {
+                    Runnable action = () -> record.update(envelope);
+                    callbackExecutor.execute(action);
+                }
+        );
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // Subscriptions work with events exclusively.
-    private void notifyMatchingSubscriptions(EventEnvelope event) {
-        TypeUrl typeUrl = TypeUrl.of(event.getMessage());
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        TypeUrl typeUrl = TypeUrl.of(envelope.getMessage());
         if (!subscriptionRegistry.hasType(typeUrl)) {
-            return;
+            return false;
         }
         Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
         for (SubscriptionRecord record : allRecords) {
             boolean subscriptionIsActive = record.isActive();
-            boolean stateMatches = record.matches(event);
+            boolean stateMatches = record.matches(envelope);
             if (subscriptionIsActive && stateMatches) {
-                Runnable action = () -> record.runUpdate(event);
-                callbackExecutor.execute(action);
+                subscriptionCache.put(envelope, record);
             }
         }
+        return !subscriptionCache.get(envelope)
+                                 .isEmpty();
+    }
+
+    @Override
+    public Set<EventClass> getMessageClasses() {
+        Set<EventClass> result = subscriptionRegistry
+                .typeSet()
+                .stream()
+                .map(EventClass::from)
+                .collect(toSet());
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Stand does not subscribe to the external events.
+     */
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return ImmutableSet.of();
     }
 
     @Internal
@@ -421,6 +447,7 @@ public class Stand implements AutoCloseable {
 
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
+        private SubscriptionCache subscriptionCache;
         private TypeRegistry typeRegistry;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
@@ -466,6 +493,10 @@ public class Stand implements AutoCloseable {
             return subscriptionRegistry;
         }
 
+        private SubscriptionCache getSubscriptionCache() {
+            return subscriptionCache;
+        }
+
         private TopicValidator getTopicValidator() {
             return topicValidator;
         }
@@ -509,6 +540,8 @@ public class Stand implements AutoCloseable {
 
             subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
 
+            subscriptionCache = new SubscriptionCache();
+
             typeRegistry = InMemoryTypeRegistry.newInstance();
 
             topicValidator = new TopicValidator(typeRegistry);
@@ -518,5 +551,10 @@ public class Stand implements AutoCloseable {
             Stand result = new Stand(this);
             return result;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Stand of Bounded Context...";
     }
 }

@@ -42,6 +42,7 @@ import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Alexander Yevsyukov
@@ -85,7 +86,8 @@ class MultitenantStandTest extends StandTest {
         Customer customer = fillSampleCustomers(1).iterator().next();
         CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
-        stand.notifySubscriptions(EventEnvelope.of(Event.getDefaultInstance()));
+
+        fail("Repair the test");
 
         Any packedState = AnyPacker.pack(customer);
         // Verify that Default Tenant callback has got the update.
