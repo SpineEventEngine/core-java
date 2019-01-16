@@ -20,21 +20,19 @@
 
 package io.spine.system.server;
 
+import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.util.Durations;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.client.Filters;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.CommandId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.system.server.given.command.CompanyRepository;
@@ -45,12 +43,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.Optional;
 
-import static io.spine.client.FilterFactory.eq;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,12 +102,16 @@ class ScheduledCommandTest {
 
         scheduler.postScheduled();
 
-        Optional<ScheduledCommand> command = repository.find(scheduled.getId());
-        assertFalse(command.isPresent());
+        Optional<ScheduledCommand> command = repository.findActive(scheduled.getId());
+        Truth8.assertThat(command).isEmpty();
 
-        ScheduledCommand deletedCommand = findDeleted(scheduled.getId());
-        assertTrue(deletedCommand.getLifecycleFlags().getDeleted());
-        assertFalse(deletedCommand.getLifecycleFlags().getArchived());
+        Optional<ScheduledCommand> optional = repository.find(scheduled.getId());
+        assertTrue(optional.isPresent());
+        ScheduledCommand deletedCommand = optional.get();
+        LifecycleFlags flags = deletedCommand.getLifecycleFlags();
+
+        assertThat(flags.getDeleted()).isTrue();
+        assertThat(flags.getArchived()).isFalse();
     }
 
     @Test
@@ -123,33 +123,8 @@ class ScheduledCommandTest {
         CommandId commandId = command.getId();
 
         Optional<ScheduledCommand> found = repository.find(commandId);
-        assertFalse(found.isPresent());
-
-        Iterator<ScheduledCommand> foundDeleted = findAllDeleted(commandId);
-        assertFalse(foundDeleted.hasNext());
-    }
-
-    private ScheduledCommand findDeleted(CommandId id) {
-        Iterator<ScheduledCommand> commands = findAllDeleted(id);
-        assertTrue(commands.hasNext());
-        ScheduledCommand result = commands.next();
-        assertFalse(commands.hasNext());
-        return result;
-    }
-
-    private Iterator<ScheduledCommand> findAllDeleted(CommandId id) {
-        Filters filters = requestFactory.query()
-                                        .select(ScheduledCommandRecord.class)
-                                        .byId(id)
-                                        .where(eq(deleted.name(), true))
-                                        .build()
-                                        .getTarget()
-                                        .getFilters();
-        Iterator<ScheduledCommand> commands = repository.find(filters,
-                                                              OrderBy.getDefaultInstance(),
-                                                              Pagination.getDefaultInstance(),
-                                                              FieldMask.getDefaultInstance());
-        return commands;
+        Truth8.assertThat(found)
+              .isEmpty();
     }
 
     private void checkScheduled(Command scheduled) {

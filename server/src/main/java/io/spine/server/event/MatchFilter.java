@@ -41,11 +41,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * The predicate for filtering events by {@link EventFilter}.
- *
- * @author Dmytro Dashenkov
- * @author Alexander Yevsyukov
  */
-class MatchFilter implements Predicate<Event> {
+final class MatchFilter implements Predicate<Event> {
 
     /**
      * The type URL of events to accept.

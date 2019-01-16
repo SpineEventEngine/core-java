@@ -91,7 +91,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-                RecordStorage<I> storage = (RecordStorage<I>) getStorage();
+        RecordStorage<I> storage = (RecordStorage<I>) getStorage();
         return storage;
     }
 
@@ -139,8 +139,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param entities
-     *         the {@linkplain Entity Entities} to store
+     * @param entities the {@linkplain Entity Entities} to store
      */
     public void store(Collection<E> entities) {
         Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
@@ -152,29 +151,30 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Finds an entity with the passed ID if this entity is
-     * {@linkplain WithLifecycle#isActive() active}.
+     * Finds an entity with the passed ID.
      *
-     * @param id
-     *         the ID of the entity to find
+     * @param id the ID of the entity to find
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID
-     *         or this entity is not active
      */
     @Override
     public Optional<E> find(I id) {
         Optional<EntityRecord> record = findRecord(id);
-        Optional<E> result = record.filter(WithLifecycle::isActive)
-                                   .map(this::toEntity);
-        return result;
+        return record.map(this::toEntity);
     }
 
     /**
-     * Finds an entity with the passed ID even if the entity is not
+     * Finds an entity with the passed ID even if the entity is
      * {@linkplain WithLifecycle#isActive() active}.
+     *
+     * @param id the ID of the entity to find
+     * @return the entity or {@link Optional#empty()} if there is no entity with such ID,
+     *         or the entity is not active
      */
-    public Optional<E> findRaw(I id) {
+    public Optional<E> findActive(I id) {
         Optional<EntityRecord> record = findRecord(id);
-        return record.map(this::toEntity);
+        Optional<E> result = record.filter(WithLifecycle::isActive)
+                                   .map(this::toEntity);
+        return result;
     }
 
     /**
@@ -195,15 +195,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
      *
-     * <p>An entity will be loaded whether its active or not.
-     * I.e. the entity is loaded and returned even if its
-     * {@linkplain EntityWithLifecycle#isArchived()  archived} or
-     * {@linkplain EntityWithLifecycle#isDeleted() deleted}.
+     * <p>An entity will be loaded whether its {@linkplain WithLifecycle#isActive() active} or not.
      *
      * <p>The new entity is created if and only if there is no record with the corresponding ID.
      *
-     * @param id
-     *         the ID of the entity to load
+     * @param id the ID of the entity to load
      * @return the entity with the specified ID
      */
     protected E findOrCreate(I id) {
@@ -261,8 +257,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         RecordStorage<I> storage = recordStorage();
-        Iterator<@Nullable EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
-        Iterator<EntityRecord> presentRecords = filter(entityStorageRecords, Objects::nonNull);
+        Iterator<@Nullable EntityRecord> records = storage.readMultiple(ids, fieldMask);
+        Iterator<EntityRecord> presentRecords = filter(records, Objects::nonNull);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(presentRecords, toEntity::apply);
         return result;
@@ -327,7 +323,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Converts the passed entity into the record.
      */
-    protected EntityRecordWithColumns toRecord(E entity) {
+    private EntityRecordWithColumns toRecord(E entity) {
         EntityRecord entityRecord = entityConverter().convert(entity);
         checkNotNull(entityRecord);
         EntityRecordWithColumns result =
@@ -382,7 +378,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         private final Class<I> expectedIdClass;
 
-        public EntityIdFunction(Class<I> expectedIdClass) {
+        EntityIdFunction(Class<I> expectedIdClass) {
             this.expectedIdClass = expectedIdClass;
         }
 
@@ -406,8 +402,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         private void checkIdClass(Class messageClass) {
             boolean classIsSame = expectedIdClass.equals(messageClass);
             if (!classIsSame) {
-                throw newIllegalStateException("Unexpected ID class encountered: %s. Expected: %s",
-                                               messageClass, expectedIdClass);
+                throw newIllegalStateException(
+                        "Unexpected ID class encountered: `%s`. Expected: `%s`",
+                        messageClass, expectedIdClass
+                );
             }
         }
     }

@@ -75,9 +75,7 @@ import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.paginati
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
@@ -86,13 +84,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *         the type of the {@link Entity} of this repository; the type is checked to implement
  *         {@link TestEntityWithStringColumn} at runtime
  */
-public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
-        I,
-        S extends Message>
+public abstract
+class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Message>
         extends TenantAwareTest {
 
-    @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
-    protected RecordBasedRepository<I, E, S> repository;
+    private RecordBasedRepository<I, E, S> repository;
 
     protected abstract RecordBasedRepository<I, E, S> createRepository();
 
@@ -145,7 +141,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
      **********************************************************************/
 
     private void storeEntity(E entity) {
-        repository.store(entity);
+        repository().store(entity);
     }
 
     @CanIgnoreReturnValue
@@ -161,16 +157,12 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
     }
 
-    private Optional<E> findById(I id) {
-        return repository.find(id);
-    }
-
     private Iterator<E> loadMany(List<I> ids) {
-        return repository.loadAll(ids);
+        return repository().loadAll(ids);
     }
 
     private E loadOrCreate(I id) {
-        return repository.findOrCreate(id);
+        return repository().findOrCreate(id);
     }
 
     /*
@@ -181,9 +173,13 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @DisplayName("create entities")
     void createEntities() {
         I id = createId(5);
-        E projectEntity = repository.create(id);
+        E projectEntity = repository().create(id);
         assertNotNull(projectEntity);
         assertEquals(id, projectEntity.getId());
+    }
+
+    protected RecordBasedRepository<I, E, S> repository() {
+        return repository;
     }
 
     @Nested
@@ -210,7 +206,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void byIdArchived() {
             archive((TransactionalEntity) entity);
             storeEntity(entity);
-            assertDidFound();
+            assertFound();
         }
 
         @Test
@@ -218,21 +214,21 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void byIdDeleted() {
             delete((TransactionalEntity) entity);
             storeEntity(entity);
-            assertDidFound();
+            assertFound();
         }
 
         private void assertFound() {
-            assertResult(findById(entity.getId()));
-        }
-
-        private void assertDidFound() {
-            assertResult(repository.findRaw(entity.getId()));
+            assertResult(find(entity.getId()));
         }
 
         private void assertResult(Optional<E> optional) {
             OptionalSubject assertResult = Truth8.assertThat(optional);
             assertResult.isPresent();
             assertResult.hasValue(entity);
+        }
+
+        private Optional<E> find(I id) {
+            return repository().find(id);
         }
     }
 
@@ -244,7 +240,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @DisplayName("by IDs")
         void multipleEntitiesByIds() {
             int count = 10;
-            List<E> entities = createAndStoreEntities(repository, count);
+            List<E> entities = createAndStoreEntities(repository(), count);
 
             List<I> ids = Lists.newLinkedList();
 
@@ -267,8 +263,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             I id2 = createId(314);
             E entity1 = createEntity(id1);
             E entity2 = createEntity(id2);
-            repository.store(entity1);
-            repository.store(entity2);
+            repository().store(entity1);
+            repository().store(entity2);
 
             String fieldPath = "idString";
             StringValue fieldValue = StringValue.newBuilder()
@@ -285,7 +281,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                     .addFilter(aggregatingFilter)
                     .build();
             Collection<E> found = newArrayList(
-                    repository.find(filters, emptyOrder(), emptyPagination(), emptyFieldMask())
+                    repository().find(filters, emptyOrder(), emptyPagination(), emptyFieldMask())
             );
 
             IterableSubject assertThatFound = assertThat(found);
@@ -298,7 +294,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @DisplayName("by query and field mask")
         void entitiesByQueryAndFields() {
             int count = 10;
-            List<E> entities = createAndStoreEntities(repository, count);
+            List<E> entities = createAndStoreEntities(repository(), count);
 
             // Find some of the entities (half of them in this case).
             int idsToObtain = count / 2;
@@ -320,10 +316,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void entitiesInAscendingOrder() {
             int count = 10;
             // UUIDs are guaranteed to produced a collection with unordered names. 
-            List<E> entities = createAndStoreNamed(repository, count, Identifier::newUuid);
+            List<E> entities = createAndStoreNamed(repository(), count, Identifier::newUuid);
 
-            Iterator<E> readEntities = repository.find(emptyFilters(), orderByName(ASCENDING),
-                                                       emptyPagination(), emptyFieldMask());
+            Iterator<E> readEntities = repository().find(emptyFilters(), orderByName(ASCENDING),
+                                                         emptyPagination(), emptyFieldMask());
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities);
@@ -336,10 +332,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void entitiesInDescendingOrder() {
             int count = 10;
             // UUIDs are guaranteed to produced a collection with unordered names. 
-            List<E> entities = createAndStoreNamed(repository, count, Identifier::newUuid);
+            List<E> entities = createAndStoreNamed(repository(), count, Identifier::newUuid);
 
-            Iterator<E> readEntities = repository.find(emptyFilters(), orderByName(DESCENDING),
-                                                       emptyPagination(), emptyFieldMask());
+            Iterator<E> readEntities = repository().find(emptyFilters(), orderByName(DESCENDING),
+                                                         emptyPagination(), emptyFieldMask());
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = reverse(orderedByName(entities));
@@ -353,10 +349,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             int totalCount = 10;
             int pageSize = 5;
             // UUIDs are guaranteed to produced a collection with unordered names. 
-            List<E> entities = createAndStoreNamed(repository, totalCount, Identifier::newUuid);
+            List<E> entities = createAndStoreNamed(repository(), totalCount, Identifier::newUuid);
 
-            Iterator<E> readEntities = repository.find(emptyFilters(), orderByName(ASCENDING),
-                                                       pagination(pageSize), emptyFieldMask());
+            Iterator<E> readEntities = repository().find(emptyFilters(), orderByName(ASCENDING),
+                                                         pagination(pageSize), emptyFieldMask());
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities).subList(0, pageSize);
@@ -367,7 +363,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("all entities")
         void allEntities() {
-            List<E> entities = createAndStoreEntities(repository, 150);
+            List<E> entities = createAndStoreEntities(repository(), 150);
             Collection<E> found = newArrayList(loadAll());
 
             IterableSubject assertFoundEntities = assertThat(found);
@@ -385,7 +381,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         private Iterator<E> find(Filters filters, FieldMask firstFieldOnly) {
-            return repository.find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
+            return repository().find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
         }
 
         private List<E> createAndStoreNamed(RecordBasedRepository<I, E, S> repo, int count,
@@ -426,7 +422,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         private Iterator<E> loadAll() {
-            return repository.loadAll();
+            return repository().loadAll();
         }
     }
 
@@ -434,7 +430,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @DisplayName("create entity on `loadOrCreate` if not found")
     void loadOrCreateEntity() {
         int count = 3;
-        createAndStoreEntities(repository, count);
+        createAndStoreEntities(repository(), count);
 
         I id = createId(count + 1);
         E entity = loadOrCreate(id);
@@ -447,7 +443,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @DisplayName("handle wrong passed IDs")
     void handleWrongPassedIds() {
         int count = 10;
-        List<E> entities = createAndStoreEntities(repository, count);
+        List<E> entities = createAndStoreEntities(repository(), count);
         List<I> ids = Lists.newLinkedList();
         for (int i = 0; i < count; i++) {
             ids.add(entities.get(i)
@@ -474,12 +470,12 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             storeEntity(entity);
 
-            assertTrue(findById(id).isPresent());
+            assertFound(id).isPresent();
 
             entity.setLifecycleFlags(GivenLifecycleFlags.archived());
             storeEntity(entity);
 
-            assertFalse(findById(id).isPresent());
+            assertFound(id).isEmpty();
         }
 
         @Test
@@ -490,12 +486,17 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             storeEntity(entity);
 
-            assertTrue(findById(id).isPresent());
+            assertFound(id).isPresent();
 
             entity.setLifecycleFlags(GivenLifecycleFlags.deleted());
             storeEntity(entity);
 
-            assertFalse(findById(id).isPresent());
+            assertFound(id).isEmpty();
+        }
+
+        private OptionalSubject assertFound(I id) {
+            Optional<E> entity = repository().findActive(id);
+            return Truth8.assertThat(entity);
         }
     }
 
@@ -513,8 +514,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         storeEntity(archivedEntity);
         storeEntity(deletedEntity);
 
-        Iterator<E> found = repository.find(emptyFilters(), emptyOrder(), emptyPagination(),
-                                            emptyFieldMask());
+        Iterator<E> found = repository().find(emptyFilters(), emptyOrder(), emptyPagination(),
+                                              emptyFieldMask());
         List<E> foundList = newArrayList(found);
         // Check results
         assertThat(foundList).hasSize(1);
@@ -542,8 +543,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                 .addFilter(filter)
                 .build();
 
-        Iterator<E> found = repository.find(filters, emptyOrder(), emptyPagination(),
-                                            emptyFieldMask());
+        Iterator<E> found = repository().find(filters, emptyOrder(), emptyPagination(),
+                                              emptyFieldMask());
         Collection<E> foundList = newArrayList(found);
         // Check result
         IterableSubject assertFoundList = assertThat(foundList);
@@ -554,11 +555,11 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     @Test
     @DisplayName("cache entity columns on registration")
     void cacheColumnsOnRegister() {
-        if (!repository.isRegistered()) {
-            repository.onRegistered();
+        if (!repository().isRegistered()) {
+            repository().onRegistered();
         }
 
-        RecordStorage<I> storage = repository.recordStorage();
+        RecordStorage<I> storage = repository().recordStorage();
         EntityColumnCache entityColumnCache = storage.entityColumnCache();
 
         // Verify that cache contains searched column

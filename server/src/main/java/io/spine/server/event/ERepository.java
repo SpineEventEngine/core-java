@@ -32,6 +32,7 @@ import io.spine.client.Pagination;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.server.event.EEntity.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -47,8 +48,6 @@ import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.FilterFactory.eq;
 import static io.spine.client.FilterFactory.gt;
 import static io.spine.client.FilterFactory.lt;
-import static io.spine.server.event.EEntity.CREATED_TIME_COLUMN;
-import static io.spine.server.event.EEntity.TYPE_COLUMN;
 import static io.spine.server.event.EEntity.comparator;
 import static java.util.stream.Collectors.toList;
 
@@ -58,9 +57,6 @@ import static java.util.stream.Collectors.toList;
  * <p>This class allows to hide implementation details of storing events.
  * {@link EventStore} serves as a facade, hiding the fact that the {@code EventStorage}
  * is a {@code Repository}.
- *
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> {
 
@@ -98,7 +94,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     }
 
     void store(Event event) {
-        EEntity entity = new EEntity(event);
+        EEntity entity = EEntity.create(event);
         store(entity);
     }
 
@@ -146,14 +142,15 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     private static Optional<CompositeFilter> timeFilter(EventStreamQuery query) {
         CompositeFilter.Builder timeFilter = CompositeFilter.newBuilder()
                                                                         .setOperator(ALL);
+        String createdColumn = ColumnName.created.name();
         if (query.hasAfter()) {
             Timestamp timestamp = query.getAfter();
-            Filter filter = gt(CREATED_TIME_COLUMN, timestamp);
+            Filter filter = gt(createdColumn, timestamp);
             timeFilter.addFilter(filter);
         }
         if (query.hasBefore()) {
             Timestamp timestamp = query.getBefore();
-            Filter filter = lt(CREATED_TIME_COLUMN, timestamp);
+            Filter filter = lt(createdColumn, timestamp);
             timeFilter.addFilter(filter);
         }
 
@@ -165,11 +162,12 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         CompositeFilter.Builder typeFilter =
                 CompositeFilter.newBuilder()
                                      .setOperator(EITHER);
+        String typeColumn = ColumnName.type.name();
         for (EventFilter eventFilter : query.getFilterList()) {
             String type = eventFilter.getEventType()
                                      .trim();
             if (!type.isEmpty()) {
-                Filter filter = eq(TYPE_COLUMN, type);
+                Filter filter = eq(typeColumn, type);
                 typeFilter.addFilter(filter);
             }
         }
@@ -226,7 +224,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         @Override
         public EEntity apply(@Nullable Event event) {
             checkNotNull(event);
-            return new EEntity(event);
+            return EEntity.create(event);
         }
     }
 }

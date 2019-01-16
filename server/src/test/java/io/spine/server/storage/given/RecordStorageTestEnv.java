@@ -30,8 +30,8 @@ import io.spine.client.Filters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.core.Version;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
@@ -242,7 +242,7 @@ public class RecordStorageTestEnv {
     /**
      * Entity columns representing lifecycle flags, {@code archived} and {@code deleted}.
      *
-     * <p>These columns are present in each {@link EntityWithLifecycle} entity. For the purpose of
+     * <p>These columns are present in each {@linkplain Entity entity}. For the purpose of
      * tests being as close to the real production environment as possible, these columns are stored
      * with the entity records, even if an actual entity is missing.
      *
@@ -260,9 +260,7 @@ public class RecordStorageTestEnv {
 
         LifecycleColumns(String getterName) {
             try {
-                this.column = EntityColumn.from(
-                        EntityWithLifecycle.class.getDeclaredMethod(getterName)
-                );
+                this.column = EntityColumn.from(Entity.class.getDeclaredMethod(getterName));
             } catch (NoSuchMethodException e) {
                 throw illegalStateWithCauseOf(e);
             }

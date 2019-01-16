@@ -36,8 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Performs enrichment operation of an enrichable message.
- *
- * @author Alexander Yevsyukov
  */
 final class Action {
 

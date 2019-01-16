@@ -25,7 +25,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.SerializableTester;
 import io.spine.client.Filter;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,9 +39,9 @@ import static io.spine.client.FilterFactory.eq;
 import static io.spine.client.FilterFactory.ge;
 import static io.spine.client.FilterFactory.lt;
 import static io.spine.server.entity.storage.Columns.findColumn;
-import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.storage.VersionField.version;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -74,7 +74,7 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with other instances")
     void mergeWithOtherInstances() {
-        Class<? extends Entity> cls = AbstractVersionableEntity.class;
+        Class<? extends Entity> cls = AbstractEntity.class;
 
         String archivedColumnName = archived.name();
         String deletedColumnName = deleted.name();
@@ -121,7 +121,7 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with single filter")
     void mergeWithSingleFilter() {
-        Class<? extends Entity> cls = AbstractVersionableEntity.class;
+        Class<? extends Entity> cls = AbstractEntity.class;
 
         String archivedColumnName = archived.name();
         String deletedColumnName = deleted.name();

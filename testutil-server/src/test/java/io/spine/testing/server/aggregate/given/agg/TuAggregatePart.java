@@ -61,14 +61,14 @@ public final class TuAggregatePart
     }
 
     @Assign
-    public TuCommentAdded handle(TuAddComment command) {
+    TuCommentAdded handle(TuAddComment command) {
         return TuCommentAdded.newBuilder()
                              .setId(command.getId())
                              .build();
     }
 
     @Assign
-    public TuCommentRemoved handle(TuRemoveComment command) throws TuFailedToRemoveComment {
+    TuCommentRemoved handle(TuRemoveComment command) throws TuFailedToRemoveComment {
         throw TuFailedToRemoveComment
                 .newBuilder()
                 .setId(getId())

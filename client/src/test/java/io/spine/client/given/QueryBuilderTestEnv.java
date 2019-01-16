@@ -20,9 +20,7 @@
 
 package io.spine.client.given;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
@@ -31,12 +29,7 @@ import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.Nullable;
-import java.util.function.Function;
-
-import static io.spine.protobuf.TypeConverter.toObject;
 import static java.util.concurrent.ThreadLocalRandom.current;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class QueryBuilderTestEnv {
 
@@ -68,22 +61,5 @@ public class QueryBuilderTestEnv {
                               .setColumn(column)
                               .setDirection(direction)
                               .build();
-    }
-
-    public static class EntityIdUnpacker<T> implements Function<EntityId, T> {
-
-        private final Class<T> targetClass;
-
-        public EntityIdUnpacker(Class<T> targetClass) {
-            this.targetClass = targetClass;
-        }
-
-        @Override
-        public T apply(@Nullable EntityId entityId) {
-            assertNotNull(entityId);
-            Any value = entityId.getId();
-            T actual = toObject(value, targetClass);
-            return actual;
-        }
     }
 }

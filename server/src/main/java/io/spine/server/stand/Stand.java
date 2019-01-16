@@ -47,7 +47,6 @@ import io.spine.server.entity.EntityRecordChangeVBuilder;
 import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
@@ -322,7 +321,7 @@ public class Stand implements AutoCloseable {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
      */
-    public <I, E extends VersionableEntity<I, ?>>
+    public <I, E extends Entity<I, ?>>
            void registerTypeSupplier(Repository<I, E> repository) {
         typeRegistry.register(repository);
     }

@@ -43,9 +43,9 @@ public class TestProcessManagerRepository
     }
 
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+    public void onError(CommandEnvelope cmd, RuntimeException exception) {
         this.latestException = exception;
-        super.onError(envelope, exception);
+        super.onError(cmd, exception);
     }
 
     public @Nullable RuntimeException getLatestException() {

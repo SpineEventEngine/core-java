@@ -30,7 +30,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.Filter;
 import io.spine.client.FilterFactory;
-import io.spine.server.entity.VersionableEntity;
+import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,9 +53,9 @@ import static io.spine.client.FilterFactory.gt;
 import static io.spine.client.FilterFactory.le;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.QueryParametersTestEnv.mockColumn;
-import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.storage.VersionField.version;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -71,7 +71,7 @@ class QueryParametersTest {
     @DisplayName("be serializable")
     void beSerializable() {
         String columnName = version.name();
-        EntityColumn column = findColumn(VersionableEntity.class, columnName);
+        EntityColumn column = findColumn(Entity.class, columnName);
         Filter filter = FilterFactory.eq(columnName, 1);
         CompositeQueryParameter parameter = aggregatingParameter(column, filter);
         QueryParameters parameters = QueryParameters.newBuilder()
