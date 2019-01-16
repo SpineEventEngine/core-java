@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.base.FieldFilter;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStreamQuery;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.testing.server.TestEventFactory;
@@ -37,9 +39,6 @@ import static io.spine.testing.server.TestEventFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("MatchesStreamQuery should")
 class MatchesStreamQueryTest {
 

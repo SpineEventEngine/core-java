@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
@@ -31,6 +31,8 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
 import io.spine.type.TypeName;
@@ -58,7 +60,6 @@ import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -187,16 +188,6 @@ public class EventStoreTest {
     @DisplayName("do nothing when appending empty iterable")
     void processEmptyIterable() {
         eventStore.appendAll(Collections.emptySet());
-    }
-
-    /**
-     * Checks that the event storage is exposed to Beam-based catch-up code which is in the same
-     * package but in a different module.
-     */
-    @Test
-    @DisplayName("expose event repository to package")
-    void exposeEventRepository() {
-        assertNotNull(eventStore.getStorage());
     }
 
     @Test

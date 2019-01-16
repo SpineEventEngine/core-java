@@ -493,6 +493,7 @@
         <extension name="JUnit4MethodNamingConvention" enabled="true">
           <option name="m_regex" value="[a-z][A-Za-z\d]*" />
           <option name="m_minLength" value="2" />
+          <option name="m_maxLength" value="64" />
         </extension>
       </scope>
       <scope name="Production" level="WARNING" enabled="true">
@@ -642,7 +643,6 @@
       <option name="ignoreCloneable" value="false" />
     </inspection_tool>
     <inspection_tool class="RedundantMethodOverride" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="RedundantSuppression" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ResultOfObjectAllocationIgnored" enabled="true" level="WARNING" enabled_by_default="true">
       <scope name="Tests" level="WARNING" enabled="false" />
     </inspection_tool>
@@ -712,9 +712,6 @@
     <inspection_tool class="SubtractionInCompareTo" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SuspiciousIndentAfterControlStatement" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SwitchStatementWithConfusingDeclaration" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="SwitchStatementWithTooFewBranches" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_limit" value="2" />
-    </inspection_tool>
     <inspection_tool class="SwitchStatementsWithoutDefault" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_ignoreFullyCoveredEnums" value="true" />
     </inspection_tool>
@@ -827,6 +824,17 @@
     <inspection_tool class="UnsecureRandomNumberGeneration" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UnstableApiUsage" enabled="true" level="WEAK WARNING" enabled_by_default="true">
       <scope name="Tests" level="WEAK WARNING" enabled="false" />
+      <option name="unstableApiAnnotations">
+        <set>
+          <option value="io.reactivex.annotations.Beta" />
+          <option value="io.reactivex.annotations.Experimental" />
+          <option value="org.apache.http.annotation.Beta" />
+          <option value="org.gradle.api.Incubating" />
+          <option value="org.jetbrains.annotations.ApiStatus.Experimental" />
+          <option value="rx.annotations.Beta" />
+          <option value="rx.annotations.Experimental" />
+        </set>
+      </option>
     </inspection_tool>
     <inspection_tool class="UnusedCatchParameter" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_ignoreCatchBlocksWithComments" value="true" />
