@@ -130,6 +130,36 @@ public class Stand implements AutoCloseable {
     }
 
     /**
+     * Posts the state of an entity to this stand.
+     *
+     * @implNote
+     * The only purpose of this method is to deliver the new entity state to the subscribers
+     * through the artificially created {@link io.spine.system.server.EntityStateChanged} event. It
+     * doesn't do any proper lifecycle management, ignoring "archived"/"deleted" flags, applied
+     * messages IDs, etc.
+     *
+     * @param entity
+     *         the entity whose state needs to be posted
+     * @param lifecycle
+     *         the lifecycle of the entity
+     */
+    @Deprecated
+    public void post(Entity entity, EntityLifecycle lifecycle) {
+        Any id = Identifier.pack(entity.getId());
+        Any state = AnyPacker.pack(entity.getState());
+        EntityRecord record = EntityRecordVBuilder
+                .newBuilder()
+                .setEntityId(id)
+                .setState(state)
+                .build();
+        EntityRecordChange change = EntityRecordChangeVBuilder
+                .newBuilder()
+                .setNewValue(record)
+                .build();
+        lifecycle.onStateChanged(change, ImmutableSet.of());
+    }
+
+    /**
      * Notifies subscriptions that a new event occurred in the system.
      */
     public void notifySubscriptions(EventEnvelope event) {
@@ -332,36 +362,6 @@ public class Stand implements AutoCloseable {
     @Override
     public void close() throws Exception {
         typeRegistry.close();
-    }
-
-    /**
-     * Posts the state of an entity to this stand.
-     *
-     * @implNote
-     * The only purpose of this method is to deliver the new entity state to the subscribers
-     * through the artificially created {@link io.spine.system.server.EntityStateChanged} event. It
-     * doesn't do any proper lifecycle management, ignoring "archived"/"deleted" flags, applied
-     * messages IDs, etc.
-     *
-     * @param entity
-     *         the entity whose state needs to be posted
-     * @param lifecycle
-     *         the lifecycle of the entity
-     */
-    @Deprecated
-    public void post(Entity entity, EntityLifecycle lifecycle) {
-        Any id = Identifier.pack(entity.getId());
-        Any state = AnyPacker.pack(entity.getState());
-        EntityRecord record = EntityRecordVBuilder
-                .newBuilder()
-                .setEntityId(id)
-                .setState(state)
-                .build();
-        EntityRecordChange change = EntityRecordChangeVBuilder
-                .newBuilder()
-                .setNewValue(record)
-                .build();
-        lifecycle.onStateChanged(change, ImmutableSet.of());
     }
 
     /**
