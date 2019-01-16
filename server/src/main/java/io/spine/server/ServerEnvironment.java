@@ -27,6 +27,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.emptyToNull;
 
 /**
@@ -45,9 +46,8 @@ public final class ServerEnvironment {
     private static final @Nullable String appEngineRuntimeVersion =
             emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
 
-    private static @MonotonicNonNull DeploymentType deploymentType =
-            DeploymentDetector.newInstance()
-                              .get();
+    private static @MonotonicNonNull Supplier<DeploymentType> deploymentTypeSupplier =
+            DeploymentDetector.newInstance();
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -90,16 +90,28 @@ public final class ServerEnvironment {
      * The type of the environment application is deployed to.
      */
     public static DeploymentType getDeploymentType() {
-        return deploymentType;
+        return deploymentTypeSupplier.get();
     }
 
     /**
      * Sets the default {@linkplain DeploymentType deployment type}
-     *  * {@linkplain Supplier supplier} which utilizes system properties.
+     * {@linkplain Supplier supplier} which utilizes system properties.
      */
     @VisibleForTesting
-    static void resetDeploymentType() {
+    public static void resetDeploymentType() {
         Supplier<DeploymentType> supplier = DeploymentDetector.newInstance();
-        deploymentType = supplier.get();
+        supplyDeploymentType(supplier);
+    }
+
+    /**
+     * Makes the {@link #getDeploymentType()} return the values from the provided supplier.
+     *
+     * <p>When supplying your own deployment type in tests, do not forget to
+     * {@linkplain #resetDeploymentType() reset it} during tear down.
+     */
+    @VisibleForTesting
+    public static void supplyDeploymentType(Supplier<DeploymentType> supplier) {
+        checkNotNull(supplier);
+        deploymentTypeSupplier = supplier;
     }
 }
