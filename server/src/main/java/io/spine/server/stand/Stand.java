@@ -335,13 +335,13 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Posts the state of a versionable entity to this stand.
+     * Posts the state of an entity to this stand.
      *
      * @implNote
      * The only purpose of this method is to deliver the new entity state to the subscribers
      * through the artificially created {@link io.spine.system.server.EntityStateChanged} event. It
-     * doesn't do any proper lifecycle handling, ignoring lifecycle flags, applied messages IDs,
-     * etc.
+     * doesn't do any proper lifecycle management, ignoring "archived"/"deleted" flags, applied
+     * messages IDs, etc.
      *
      * @param entity
      *         the entity whose state needs to be posted
@@ -349,7 +349,7 @@ public class Stand implements AutoCloseable {
      *         the lifecycle of the entity
      */
     @Deprecated
-    public void post(VersionableEntity entity, EntityLifecycle lifecycle) {
+    public void post(Entity entity, EntityLifecycle lifecycle) {
         Any id = Identifier.pack(entity.getId());
         Any state = AnyPacker.pack(entity.getState());
         EntityRecord record = EntityRecordVBuilder
