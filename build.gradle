@@ -28,13 +28,29 @@ buildscript {
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
-        maven { url = repos.oldSpine }
-        maven { url = repos.oldSpineSnapshots }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
-        google()
-        maven { url = repos.gradlePlugins }
         mavenLocal()
+        maven { 
+            url = repos.spine 
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                releasesOnly()
+            }
+        }
+        maven { 
+            url = repos.spineSnapshots
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+        jcenter()
+        maven { url = repos.gradlePlugins }
     }
 
     dependencies {
@@ -47,6 +63,7 @@ buildscript {
     configurations.all({
         resolutionStrategy {
             force deps.build.guava
+            force deps.build.protobuf
         }
     })
 }
@@ -105,6 +122,7 @@ subprojects {
         all {
             resolutionStrategy {
                 force deps.build.guava
+                force deps.build.protobuf
                 force deps.test.guavaTestlib
             }
         }
@@ -160,13 +178,28 @@ subprojects {
     // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/
 
     repositories {
-        google()
-        maven { url = repos.gradlePlugins }
         mavenLocal()
-        maven { url = repos.oldSpine }
-        maven { url = repos.oldSpineSnapshots }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
+        maven {
+            url = repos.spine
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                releasesOnly()
+            }
+        }
+        maven {
+            url = repos.spineSnapshots
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+        jcenter()
     }
 
     dependencies {

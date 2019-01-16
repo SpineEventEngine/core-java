@@ -43,7 +43,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S> a type of the source object to enrich
  * @param <T> a type of the target enrichment
  * @param <C> a type of the message context
- * @author Alexander Yevsyukov
  */
 abstract class EnrichmentFunction<S, T, C extends Message> {
 

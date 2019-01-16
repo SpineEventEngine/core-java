@@ -32,8 +32,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <S> the type of the field in the source event message
  * @param <T> the type of the field in the target enrichment message
  * @param <C> the type of the event context
- *
- * @author Alexander Yevsyukov
  */
 final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<S, T, C> {
 

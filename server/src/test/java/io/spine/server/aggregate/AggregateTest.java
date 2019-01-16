@@ -393,13 +393,13 @@ public class AggregateTest {
     @DisplayName("play events")
     void playEvents() {
         List<Event> events = generateProjectEvents();
-        AggregateStateRecord aggregateStateRecord =
-                AggregateStateRecord.newBuilder()
-                                    .addAllEvent(events)
-                                    .build();
+        AggregateHistory aggregateHistory =
+                AggregateHistory.newBuilder()
+                                .addAllEvent(events)
+                                .build();
 
         AggregateTransaction tx = AggregateTransaction.start(aggregate);
-        aggregate().play(aggregateStateRecord);
+        aggregate().play(aggregateHistory);
         tx.commit();
 
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -417,9 +417,9 @@ public class AggregateTest {
         Aggregate anotherAggregate = newAggregate(aggregate.getId());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
-        anotherAggregate.play(AggregateStateRecord.newBuilder()
-                                                  .setSnapshot(snapshot)
-                                                  .build());
+        anotherAggregate.play(AggregateHistory.newBuilder()
+                                              .setSnapshot(snapshot)
+                                              .build());
         tx.commit();
 
         assertEquals(aggregate, anotherAggregate);
@@ -615,9 +615,9 @@ public class AggregateTest {
                 Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
 
                 AggregateTransaction tx = AggregateTransaction.start(faultyAggregate);
-                ((Aggregate) faultyAggregate).play(AggregateStateRecord.newBuilder()
-                                                                       .addEvent(event)
-                                                                       .build());
+                ((Aggregate) faultyAggregate).play(AggregateHistory.newBuilder()
+                                                                   .addEvent(event)
+                                                                   .build());
                 tx.commit();
                 failNotThrows();
             } catch (RuntimeException e) {

@@ -37,11 +37,9 @@ import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class EventDispatchingRepository<I,
-                                                 E extends AbstractVersionableEntity<I, S>,
+                                                 E extends AbstractEntity<I, S>,
                                                  S extends Message>
         extends DefaultRecordBasedRepository<I, E, S>
         implements EventDispatcher<I> {

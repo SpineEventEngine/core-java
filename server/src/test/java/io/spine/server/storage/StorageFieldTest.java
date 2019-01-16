@@ -33,9 +33,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Dmytro Dashenkov.
- */
 @DisplayName("StorageField should")
 class StorageFieldTest {
 
@@ -80,10 +77,10 @@ class StorageFieldTest {
     @Test
     @DisplayName("enclose all entity fields")
     void encloseEntityFields() {
-        assertField(EntityField.timestamp);
-        assertField(EntityField.timestamp_nanos);
-        assertField(EntityField.type_url);
-        assertField(EntityField.bytes);
+        assertField(VersionField.timestamp);
+        assertField(VersionField.timestamp_nanos);
+        assertField(StateField.type_url);
+        assertField(StateField.bytes);
     }
 
     private static void assertField(Enum field) {

@@ -36,8 +36,6 @@ import java.util.Optional;
  *
  * <p>If the error represents a command rejection, the rejection can be
  * {@linkplain #asRejection() obtained} for further manipulations. A rejection cannot be rethrown.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface CaughtError {
@@ -82,12 +80,14 @@ public interface CaughtError {
     /**
      * Obtains an instance for the given {@linkplain io.spine.base.ThrowableMessage rejection}.
      *
-     * @param rejection the {@link RuntimeException} caused by
-     *                  a {@linkplain io.spine.base.ThrowableMessage ThrowableMessage}
-     * @param command   the rejected command
+     * @param command
+     *         the rejected command
+     * @param rejection
+     *         the {@link RuntimeException} caused by
+     *         a {@linkplain io.spine.base.ThrowableMessage ThrowableMessage}
      * @return wrapped rejection
      */
-    static CaughtError ofRejection(RuntimeException rejection, CommandEnvelope command) {
+    static CaughtError ofRejection(CommandEnvelope command, RuntimeException rejection) {
         return new CaughtRejection(command, rejection);
     }
 }

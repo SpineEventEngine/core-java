@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A {@link EventDispatcher} which delegates the responsibilities to an aggregated {@link
  * EventDispatcherDelegate delegate instance}.
  *
- * @author Alexander Yevsyukov
  * @see EventDispatcherDelegate
  */
 @Internal

@@ -37,7 +37,6 @@ import java.util.Set;
  * MessageDispatcher}), and dispatch events by implementing this interface.
  *
  * @param <I> the type of IDs of entities subscribed to events
- * @author Alexander Yevsyukov
  * @see DelegatingEventDispatcher
  */
 @Internal

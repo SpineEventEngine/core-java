@@ -42,7 +42,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.tenant.EntityUpdateOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
@@ -123,11 +122,11 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Posts the state of an {@link VersionableEntity} to this {@code Stand}.
+     * Posts the state of an {@link Entity} to this {@code Stand}.
      *
      * @param entity the entity which state should be delivered to the {@code Stand}
      */
-    public void post(TenantId tenantId, VersionableEntity<?, ?> entity) {
+    public void post(TenantId tenantId, Entity<?, ?> entity) {
         EntityStateEnvelope<?, ?> envelope = EntityStateEnvelope.of(entity, tenantId);
         update(envelope);
     }
@@ -339,7 +338,7 @@ public class Stand implements AutoCloseable {
      *
      * @see #update(EntityStateEnvelope)
      */
-    public <I, E extends VersionableEntity<I, ?>>
+    public <I, E extends Entity<I, ?>>
            void registerTypeSupplier(Repository<I, E> repository) {
         typeRegistry.register(repository);
     }

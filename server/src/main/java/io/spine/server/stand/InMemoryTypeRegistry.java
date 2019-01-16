@@ -23,9 +23,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
@@ -66,7 +66,7 @@ class InMemoryTypeRegistry implements TypeRegistry {
 
     @SuppressWarnings("ChainOfInstanceofChecks")
     @Override
-    public <I, E extends VersionableEntity<I, ?>> void register(Repository<I, E> repository) {
+    public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         TypeUrl entityType = repository.getEntityStateType();
 
         if (repository instanceof RecordBasedRepository) {
@@ -103,13 +103,7 @@ class InMemoryTypeRegistry implements TypeRegistry {
     }
 
     @Override
-    public boolean hasAggregateType(TypeUrl typeUrl) {
-        boolean result = knownAggregateTypes.contains(typeUrl);
-        return result;
-    }
-
-    @Override
-    public void close() throws Exception {
+    public void close() {
         typeToRepositoryMap.clear();
         knownAggregateTypes.clear();
     }

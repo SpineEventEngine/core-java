@@ -74,7 +74,7 @@ class EnrichmentsMapTest {
     @Test
     @DisplayName("return map instance")
     void returnMapInstance() {
-        ImmutableMultimap<String, String> map = EnrichmentsMap.getInstance();
+        ImmutableMultimap<String, String> map = EnrichmentsMap.instance();
 
         assertFalse(map.isEmpty());
     }
