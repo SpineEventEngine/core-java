@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -41,10 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @DisplayName("Enricher Builder should")
 class EnricherBuilderTest {

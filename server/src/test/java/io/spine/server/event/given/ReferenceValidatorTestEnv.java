@@ -27,7 +27,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
-import io.spine.server.event.Enricher;
+import io.spine.server.event.enrich.Enricher;
 import io.spine.test.event.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
@@ -35,9 +35,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.BiFunction;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class ReferenceValidatorTestEnv {
 
     /** Prevents instantiation of this utility class. */

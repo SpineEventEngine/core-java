@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
@@ -53,7 +53,7 @@ import static java.util.stream.Collectors.toList;
  * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.FirstEvent},
  * {@code proto.type.SecondEvent}
  */
-class EnrichmentsMap {
+final class EnrichmentsMap {
 
     /** A separator between event types in the `.properties` file. */
     private static final String EVENT_TYPE_SEPARATOR = ",";

@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.Command;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
-import io.spine.server.event.Enricher;
+import io.spine.server.event.enrich.Enricher;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;

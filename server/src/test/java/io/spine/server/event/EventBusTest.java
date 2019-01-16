@@ -31,6 +31,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.event.enrich.Enricher;
 import io.spine.server.event.given.EventBusTestEnv.BareDispatcher;
 import io.spine.server.event.given.EventBusTestEnv.EBExternalTaskAddedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.EBProjectArchivedSubscriber;

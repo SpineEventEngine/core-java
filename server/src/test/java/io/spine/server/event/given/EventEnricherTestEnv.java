@@ -29,8 +29,8 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
-import io.spine.server.event.Enricher;
-import io.spine.server.event.EnricherTest;
+import io.spine.server.event.enrich.Enricher;
+import io.spine.server.event.enrich.EnricherTest;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -51,9 +51,6 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class EventEnricherTestEnv {
 
     /** Prevents instantiation of this utility class. */

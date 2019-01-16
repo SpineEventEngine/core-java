@@ -18,11 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.server.event.ReferenceValidator.ValidationResult;
+import io.spine.server.event.enrich.ReferenceValidator.ValidationResult;
 import io.spine.server.event.given.ReferenceValidatorTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
@@ -116,7 +116,6 @@ class ReferenceValidatorTest {
     @Test
     @DisplayName("skip mapping if no mapping function is defined")
     void skipMappingIfNoFuncDefined() {
-        // TODO:2018-07-30:dmytro.dashenkov: Mock does not work.
         Enricher mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
                 .thenReturn(Optional.empty());

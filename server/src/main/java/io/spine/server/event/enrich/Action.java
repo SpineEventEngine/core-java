@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
@@ -78,7 +78,7 @@ final class Action {
      * <p>We suppress the {@code "unchecked"} because we ensure types when we...
      * <ol>
      *      <li>create enrichments,
-     *      <li>put them into {@linkplain Enricher#functions} by their message class.
+     *      <li>put them into {@link Enricher} by their message class.
      * </ol>
      */
     @SuppressWarnings("unchecked")

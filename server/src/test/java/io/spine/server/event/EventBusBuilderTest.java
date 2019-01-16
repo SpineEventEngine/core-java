@@ -25,6 +25,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderTest;
+import io.spine.server.event.enrich.Enricher;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.testing.Tests;

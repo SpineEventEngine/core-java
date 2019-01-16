@@ -18,37 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
-
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.Command;
-import io.spine.server.event.enrich.Enricher;
-import io.spine.testing.client.TestActorRequestFactory;
-
-import java.util.List;
-
 /**
- * Test fixture for single-tenant Bounded Contexts.
+ * This package contains classes and interfaces related to enrichment of events.
  */
-@VisibleForTesting
-public final class SingleTenantBlackBoxContext
-        extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
 
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(SingleTenantBlackBoxContext.class);
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.event.enrich;
 
-    SingleTenantBlackBoxContext(Enricher enricher) {
-        super(false, enricher);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Override
-    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
-        List<Command> commands = commandTap.commands();
-        return new EmittedCommands(commands);
-    }
-
-    @Override
-    protected TestActorRequestFactory requestFactory() {
-        return requestFactory;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
+import io.spine.server.event.EventBus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
