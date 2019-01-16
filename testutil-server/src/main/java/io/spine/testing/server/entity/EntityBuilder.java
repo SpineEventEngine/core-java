@@ -27,7 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.testing.ReflectiveBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -44,10 +44,9 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
  * @param <E> the type of the entity to build
  * @param <I> the type of the entity identifier
  * @param <S> the type of the entity state
- * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public abstract class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
+public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends Message>
         extends ReflectiveBuilder<E> {
 
     /**

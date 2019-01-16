@@ -25,8 +25,8 @@ import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
+import io.spine.server.entity.storage.given.column.EntityWithManyGetters;
+import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,9 +34,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.google.common.collect.testing.Helpers.assertEmpty;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.entity.storage.Columns.getAllColumns;
-import static io.spine.server.entity.storage.given.ColumnsTestEnv.CUSTOM_COLUMN_NAME;
+import static io.spine.server.entity.storage.given.column.EntityWithManyGetters.CUSTOM_COLUMN_NAME;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -102,13 +103,16 @@ class ColumnValueExtractorTest {
 
     @SuppressWarnings("unchecked") // Okay for test.
     @Test
-    @DisplayName("extract no fields if none defined")
+    @DisplayName("extract standard fields if no custom fields defined")
     void handleNoneDefined() {
         Entity entity = new EntityWithNoStorageFields(TEST_ENTITY_ID);
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
         assertNotNull(columnValues);
-        assertEmpty(columnValues);
+        assertThat(columnValues)
+                .hasSize(defaultColumns.size());
+        assertThat(columnValues.keySet())
+                .containsExactlyElementsIn(defaultColumns);
     }
 
     private static <E extends Entity<?, ?>>

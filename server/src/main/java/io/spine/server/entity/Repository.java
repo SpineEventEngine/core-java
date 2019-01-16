@@ -30,7 +30,6 @@ import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemWriteSide;
@@ -206,44 +205,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * The callback called by a {@link BoundedContext} during the {@linkplain
      * BoundedContext#register(Repository) registration} of the repository.
-     *
-     * <p>If entities managed by this repository are {@linkplain VersionableEntity versionable},
-     * registers itself as a type supplier with the {@link Stand} of the parent
-     * {@linkplain #getBoundedContext() parent} {@code BoundedContext}.
      */
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
-        if (managesVersionableEntities()) {
-            getBoundedContext().getStand()
-                               .registerTypeSupplier(cast(this));
-        }
-    }
-
-    /**
-     * Verifies if the repository manages instances of {@link VersionableEntity}.
-     */
-    private boolean managesVersionableEntities() {
-        Class entityClass = getEntityClass();
-        boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
-        return result;
-    }
-
-    /**
-     * Casts the passed repository to one that manages {@link VersionableEntity}
-     * instead of just {@link Entity}.
-     *
-     * <p>The cast is required for registering the repository as a type supplier
-     * in the {@link Stand}.
-     *
-     * <p>The cast is safe because the method is called after the
-     * {@linkplain #managesVersionableEntities() type check}.
-     *
-     * @see #onRegistered()
-     */
-    @SuppressWarnings("unchecked") // See Javadoc above.
-    private static <I, E extends Entity<I, ?>>
-    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
-        return (Repository<I, VersionableEntity<I, ?>>) repository;
+        getBoundedContext().getStand()
+                           .registerTypeSupplier(this);
     }
 
     /**

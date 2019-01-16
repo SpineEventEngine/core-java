@@ -26,7 +26,7 @@ import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
-import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
@@ -35,13 +35,13 @@ import static com.google.common.truth.Truth.assertThat;
 /**
  * Assertions for entities.
  *
- * @param <T> the type of entity subject for parameter covariance in {@link Subject.Factory}
+ * @param <T> the type of entity subject for parameter covariance in {@code Subject.Factory}
  * @param <S> the type of the entity state message
  * @param <E> the type of the entity
  */
 public class EntitySubject<T extends EntitySubject<T, S, E>,
                            S extends Message,
-                           E extends EntityWithLifecycle<?, S>>
+                           E extends Entity<?, S>>
         extends Subject<T, E> {
 
     protected EntitySubject(FailureMetadata metadata, @NullableDecl E actual) {

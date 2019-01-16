@@ -72,38 +72,29 @@ public final class EntityStateEnvelope<I, S extends Message>
 
     /**
      * The optional version of an entity.
-     *
-     * <p>The value is only present If the entity used for the envelope construction
-     * is a {@link VersionableEntity}. Otherwise, this field is {@code null}.
      */
-    private final @Nullable Version entityVersion;
+    private final Version entityVersion;
 
     private EntityStateEnvelope(Entity<I, S> entity, TenantId tenantId) {
-        this(entity.getId(), entity.getState(),
-             tenantId,
-             entity instanceof VersionableEntity
-                    ? ((VersionableEntity) entity).getVersion()
-                    : null);
+        this(entity.getId(), entity.getState(), tenantId, entity.getVersion());
     }
 
-    private EntityStateEnvelope(I entityId, S entityState,
-                                TenantId tenantId, @Nullable Version entityVersion) {
+    private EntityStateEnvelope(I entityId, S entityState, TenantId tenantId, Version version) {
         this.entityState = entityState;
         this.packedId = Identifier.pack(entityId);
         this.entityId = entityId;
         this.entityStateClass = EntityStateClass.of(entityState);
-        this.entityVersion = entityVersion;
+        this.entityVersion = version;
         this.tenantId = tenantId;
     }
 
-    public static <I, S extends Message> EntityStateEnvelope of(Entity<I, S> entity,
-                                                                TenantId tenantId) {
+    public static <I, S extends Message>
+    EntityStateEnvelope of(Entity<I, S> entity, TenantId tenantId) {
         return new EntityStateEnvelope<>(entity, tenantId);
     }
 
-    public static <I, S extends Message> EntityStateEnvelope of(I entityId, S entityState,
-                                                                @Nullable Version entityVersion,
-                                                                TenantId tenantId) {
+    public static <I, S extends Message>
+    EntityStateEnvelope of(I entityId, S entityState, Version entityVersion, TenantId tenantId) {
         return new EntityStateEnvelope<>(entityId, entityState, tenantId, entityVersion);
     }
 
@@ -122,7 +113,6 @@ public final class EntityStateEnvelope<I, S extends Message>
      * @return {@code null}
      */
     @Override
-    @SuppressWarnings("ReturnOfNull")
     public @Nullable Entity<I, S> getOuterObject() {
         return null;
     }
@@ -189,6 +179,7 @@ public final class EntityStateEnvelope<I, S extends Message>
     }
 
     @Override
+    @SuppressWarnings("DuplicateStringLiteralInspection") // field names
     public String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("entityState", Stringifiers.toString(entityState))

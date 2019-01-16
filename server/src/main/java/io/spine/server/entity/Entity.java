@@ -22,7 +22,9 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
+import io.spine.server.entity.storage.Column;
 import io.spine.string.Stringifiers;
 
 /**
@@ -32,11 +34,15 @@ import io.spine.string.Stringifiers;
  *
  * <p>Implementing classes must have single constructor which accepts the ID of the entity.
  *
+ * <p>Lifecycle flags determine if an entity is active.
+ * An entity is considered to be active if the lifecycle flags are missing.
+ * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted},
+ * then it’s regarded to be inactive.
+ *
  * @param <I> the type of entity identifier
  * @param <S> the type of entity state
- * @see VersionableEntity
  */
-public interface Entity<I, S extends Message> {
+public interface Entity<I, S extends Message> extends WithLifecycle {
 
     /**
      * Obtains the identifier of the entity.
@@ -57,6 +63,35 @@ public interface Entity<I, S extends Message> {
      * Obtains the state of the entity.
      */
     S getState();
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add the {@code Column} annotation.
+     */
+    @Column
+    @Override
+    boolean isArchived();
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add {@code Column} annotation.
+     */
+    @Column
+    @Override
+    boolean isDeleted();
+
+    /**
+     * Tells whether lifecycle flags of the entity changed since its initialization.
+     */
+    boolean lifecycleFlagsChanged();
+
+    /**
+     * Obtains the version of the entity.
+     */
+    @Column
+    Version getVersion();
 
     /**
      * Enumeration of generic type parameters of this interface.

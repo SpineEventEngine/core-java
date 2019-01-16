@@ -63,6 +63,7 @@ buildscript {
     configurations.all({
         resolutionStrategy {
             force deps.build.guava
+            force deps.build.protobuf
         }
     })
 }
@@ -121,6 +122,7 @@ subprojects {
         all {
             resolutionStrategy {
                 force deps.build.guava
+                force deps.build.protobuf
                 force deps.test.guavaTestlib
             }
         }

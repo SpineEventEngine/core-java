@@ -200,7 +200,7 @@ class ProcessManagerRepositoryTest
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
-        boundedContext.register(repository);
+        boundedContext.register(repository());
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
@@ -211,8 +211,9 @@ class ProcessManagerRepositoryTest
         super.tearDown();
     }
 
-    private TestProcessManagerRepository repository() {
-        return (TestProcessManagerRepository) repository;
+    @Override
+    protected TestProcessManagerRepository repository() {
+        return (TestProcessManagerRepository) super.repository();
     }
 
     @SuppressWarnings("CheckReturnValue")

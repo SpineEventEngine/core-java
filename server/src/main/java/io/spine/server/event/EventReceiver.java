@@ -22,8 +22,6 @@ package io.spine.server.event;
 
 /**
  * Common interface for objects receiving events.
- *
- * @author Alexander Yevsyukov
  */
 public interface EventReceiver {
 }

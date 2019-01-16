@@ -49,8 +49,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * The holder of a rejection {@code Event} which provides convenient access to its properties.
- *
- * @author Dmytro Dashenkov
  */
 public final class RejectionEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>

@@ -32,7 +32,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * into an enrichment field (of another given class).
  *
  * @see Enricher#functionFor(Class, Class)
- * @author Alexander Yevsyukov
  */
 @Internal
 @VisibleForTesting
@@ -57,5 +56,19 @@ public final class SupportsFieldConversion implements Predicate<EnrichmentFuncti
         boolean eventClassMatches = messageFieldClass.equals(input.getSourceClass());
         boolean enrichmentClassMatches = enrichmentFieldClass.equals(input.getEnrichmentClass());
         return eventClassMatches && enrichmentClassMatches;
+    }
+
+    /**
+     * Obtains the class name of an enriched message field.
+     */
+    public final String messageFieldClass() {
+        return messageFieldClass.getName();
+    }
+
+    /**
+     * Obtains the class name of the field enrichment.
+     */
+    public final String enrichmentFieldClass() {
+        return enrichmentFieldClass.getName();
     }
 }

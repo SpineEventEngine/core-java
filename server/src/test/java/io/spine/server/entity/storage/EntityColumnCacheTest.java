@@ -22,7 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
+import io.spine.server.entity.storage.given.column.EntityWithManyGetters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
