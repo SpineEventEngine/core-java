@@ -36,7 +36,6 @@ import io.spine.client.Pagination;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
@@ -56,8 +55,8 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.order;
 import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.pagination;
-import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.VersionField.version;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -112,7 +111,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
                              .build();
 
         assertThrows(IllegalArgumentException.class,
-                     () -> createEntityQuery(filters, AbstractVersionableEntity.class));
+                     () -> createEntityQuery(filters, AbstractEntity.class));
     }
 
     @Test
@@ -126,7 +125,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
                              .build();
 
         assertThrows(IllegalArgumentException.class,
-                     () -> createEntityQuery(filters, AbstractVersionableEntity.class));
+                     () -> createEntityQuery(filters, AbstractEntity.class));
     }
 
     @Test
@@ -180,7 +179,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
                 .setIdFilter(idFilter)
                 .addFilter(aggregatingFilter)
                 .build();
-        EntityQuery<?> query = createEntityQuery(filters, AbstractVersionableEntity.class);
+        EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
         assertNotNull(query);
 
         Collection<?> ids = query.getIds();

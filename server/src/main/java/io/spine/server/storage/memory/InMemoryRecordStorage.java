@@ -120,10 +120,6 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
      * contains the lifecycle attributes}, then it is returned without any changes. 
      * Otherwise, a new instance containing with active lifecycle attributes is returned.
      *
-     * <p>If the type of the Entity which this repository works with is not derived from
-     * the {@link io.spine.server.entity.EntityWithLifecycle}, then no lifecycle attributes are
-     * appended and the {@code query} is returned as is.
-     *
      * @param query
      *         the source {@link EntityQuery} to take the parameters from
      * @return an {@link EntityQuery} which includes
@@ -131,7 +127,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
      *         unless they are not supported
      */
     private EntityQuery<I> toCompleteQuery(EntityQuery<I> query) {
-        if (isLifecycleSupported() && !query.isLifecycleAttributesSet()) {
+        if (!query.isLifecycleAttributesSet()) {
             return query.withActiveLifecycle(this);
         }
         return query;

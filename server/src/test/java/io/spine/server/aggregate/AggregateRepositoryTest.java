@@ -207,7 +207,7 @@ public class AggregateRepositoryTest {
                                                   .size());
 
             repository().store(aggregate);
-            AggregateStateRecord record = readRecord(aggregate);
+            AggregateHistory record = readRecord(aggregate);
             assertTrue(record.hasSnapshot());
             assertEquals(0, record.getEventCount());
         }
@@ -218,15 +218,15 @@ public class AggregateRepositoryTest {
             ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
 
             repository().store(aggregate);
-            AggregateStateRecord record = readRecord(aggregate);
+            AggregateHistory record = readRecord(aggregate);
             assertFalse(record.hasSnapshot());
         }
 
-        private AggregateStateRecord readRecord(ProjectAggregate aggregate) {
+        private AggregateHistory readRecord(ProjectAggregate aggregate) {
             AggregateReadRequest<ProjectId> request =
                     new AggregateReadRequest<>(aggregate.getId(), DEFAULT_SNAPSHOT_TRIGGER);
-            Optional<AggregateStateRecord> optional = repository().aggregateStorage()
-                                                                  .read(request);
+            Optional<AggregateHistory> optional = repository().aggregateStorage()
+                                                              .read(request);
             assertTrue(optional.isPresent());
             return optional.get();
         }

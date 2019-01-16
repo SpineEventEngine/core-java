@@ -56,14 +56,14 @@ public final class TuReactingAggregate
     }
 
     @React
-    public TuProjectAssigned handle(TuProjectCreated event) {
+    TuProjectAssigned handle(TuProjectCreated event) {
         return TuProjectAssigned.newBuilder()
                                 .setId(event.getId())
                                 .build();
     }
 
     @Apply
-    void on(TuProjectAssigned event) {
+    void on(@SuppressWarnings("unused") TuProjectAssigned event) {
         getBuilder().setTimestamp(fromMillis(123456));
     }
 }

@@ -52,9 +52,6 @@ import static java.util.stream.Collectors.toList;
  * <p>Example:
  * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.FirstEvent},
  * {@code proto.type.SecondEvent}
- *
- * @author Alexander Litus
- * @author Dmytro Dashenkov
  */
 class EnrichmentsMap {
 
@@ -74,15 +71,14 @@ class EnrichmentsMap {
     private EnrichmentsMap() {}
 
     /** Obtains immutable map from enrichment class name to enriched message class name. */
-    @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType") // Impl. is immutable
-    static ImmutableMultimap<String, String> getInstance() {
+    static ImmutableMultimap<String, String> instance() {
         return enrichmentsMap;
     }
 
     static Collection<String> getEventTypes(Class<? extends Message> enrichmentClass) {
         String enrichmentType = TypeName.of(enrichmentClass)
                                         .value();
-        ImmutableCollection<String> result = getInstance().get(enrichmentType);
+        ImmutableCollection<String> result = instance().get(enrichmentType);
         return result;
     }
 
@@ -182,6 +178,7 @@ class EnrichmentsMap {
             return result;
         }
 
+        @SuppressWarnings("ConstantConditions")
         private static String getSimpleFieldName(String qualifier) {
             int startIndex = qualifier.lastIndexOf(PROTO_PACKAGE_SEPARATOR) + 1;
             startIndex = startIndex > 0 // 0 is an invalid value, see line above
@@ -211,8 +208,8 @@ class EnrichmentsMap {
         }
 
         /**
-         * @return {@code true} if the given qualifier is a package according to the contract
-         * of {@code "enrichment_for") option notation
+         * Returns {@code true} if the given qualifier is a package according to the contract
+         * of {@code "enrichment_for") option notation.
          */
         private static boolean isPackage(String qualifier) {
             checkNotNull(qualifier);

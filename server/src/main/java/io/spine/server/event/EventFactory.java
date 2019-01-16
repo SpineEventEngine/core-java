@@ -45,8 +45,6 @@ import static io.spine.validate.Validate.checkValid;
 
 /**
  * Produces events in response to a command.
- *
- * @author Alexander Yevsyukov
  */
 public class EventFactory {
 
