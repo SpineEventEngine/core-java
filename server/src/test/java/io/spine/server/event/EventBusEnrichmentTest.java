@@ -45,17 +45,15 @@ class EventBusEnrichmentTest {
 
     private void setUp(Enricher enricher) {
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
+        bc = BoundedContext
+                .newBuilder()
+                .setEventBus(eventBusBuilder)
+                .setMultitenant(true)
+                .build();
 
-        bc = BoundedContext.newBuilder()
-                           .setEventBus(eventBusBuilder)
-                           .setMultitenant(true)
-                           .build();
-
-        ProjectRepository projectRepository =
-                new ProjectRepository();
+        ProjectRepository projectRepository = new ProjectRepository();
         bc.register(projectRepository);
-
-        this.eventBus = bc.getEventBus();
+        eventBus = bc.getEventBus();
     }
 
     @Test

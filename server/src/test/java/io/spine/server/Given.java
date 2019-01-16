@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
@@ -65,9 +64,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Given {
 
@@ -265,8 +261,6 @@ public class Given {
     public static class CustomerAggregate
             extends Aggregate<CustomerId, Customer, CustomerVBuilder> {
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        // by convention (as it's used by Reflection).
         public CustomerAggregate(CustomerId id) {
             super(id);
         }
@@ -312,54 +306,6 @@ public class Given {
         @Subscribe
         public void on(BcProjectCreated event, EventContext context) {
             // Do nothing.
-        }
-    }
-
-    /*
-     * `SubscriptionServiceTest` environment.
-     ***************************************************/
-
-    static class MemoizeStreamObserver<T> implements StreamObserver<T> {
-
-        private T streamFlowValue;
-        private Throwable throwable;
-        private boolean isCompleted;
-
-        @Override
-        public void onNext(T value) {
-            this.streamFlowValue = value;
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            this.throwable = t;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.isCompleted = true;
-        }
-
-        void verifyState() {
-            verifyState(true);
-        }
-
-        void verifyState(boolean isCompleted) {
-            assertNotNull(streamFlowValue);
-            assertNull(throwable);
-            assertEquals(this.isCompleted, isCompleted);
-        }
-
-        T streamFlowValue() {
-            return streamFlowValue;
-        }
-
-        Throwable throwable() {
-            return throwable;
-        }
-
-        boolean isCompleted() {
-            return isCompleted;
         }
     }
 }
