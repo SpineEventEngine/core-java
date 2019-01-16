@@ -38,7 +38,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
  *
  * <p>The resulting filters contain the filtering by {@code before} and {@code after} fields
  * of the source query and by the {@code eventType} field of the underlying
- * {@linkplain EventFilter EventFilters}.
+ * {@linkplain EventStreamQuery#getFilterList() event filters}.
  */
 final class QueryToFilters {
 
