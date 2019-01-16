@@ -28,7 +28,7 @@ option java_package = "io.spine.core";
 option java_multiple_files = true;
 option java_outer_classname = "BoundedContextProto";
 
-// A name of `BoundedContext` used to distingush an instance of bounded context among other
+// A name of `BoundedContext` used to distinguish an instance of bounded context among other
 // bounded contexts that exist in the same application.
 //
 // Must be unique in scope of the application.

@@ -18,21 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.util.Timestamps;
+import io.spine.client.Filter;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
-import io.spine.client.Filter;
 import io.spine.client.Filters;
+import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStreamQuery;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.event.ERepository.toEntityFilters;
+import static io.spine.server.event.store.QueryToFilters.convert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,7 +46,7 @@ class ERepositoryTest {
     void convertEmptyToFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
-        Filters entityFilters = toEntityFilters(query);
+        Filters entityFilters = convert(query);
         assertTrue(entityFilters.getFilterList()
                                 .isEmpty());
     }
@@ -57,7 +59,7 @@ class ERepositoryTest {
                 .setAfter(Timestamps.MIN_VALUE)
                 .setBefore(Timestamps.MAX_VALUE)
                 .build();
-        Filters entityFilters = toEntityFilters(query);
+        Filters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeFilter compositeFilter = entityFilters.getFilter(0);
@@ -77,7 +79,7 @@ class ERepositoryTest {
                 .addFilter(validFilter)
                 .addFilter(invalidFilter)
                 .build();
-        Filters entityFilters = toEntityFilters(query);
+        Filters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeFilter compositeFilter = entityFilters.getFilter(0);

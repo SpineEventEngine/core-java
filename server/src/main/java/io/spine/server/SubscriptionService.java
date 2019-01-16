@@ -49,8 +49,6 @@ import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
  *
  * <p> For synchronous read-side updates please see {@link QueryService}.
  */
-@SuppressWarnings("MethodDoesntCallSuperMethod")
-// as we override default implementation with `unimplemented` status.
 public class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
         implements Logging {

@@ -40,6 +40,7 @@ import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.event.given.EventBusTestEnv.ProjectCreatedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
 import io.spine.server.event.given.EventBusTestEnv.UnsupportedEventAckObserver;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.event.EBTaskAdded;
