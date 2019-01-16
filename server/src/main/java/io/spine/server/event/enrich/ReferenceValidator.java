@@ -68,7 +68,6 @@ final class ReferenceValidator implements Logging {
     private static final String EMPTY_STRING = "";
     private static final Pattern SPACE_PATTERN = Pattern.compile(SPACE, Pattern.LITERAL);
 
-
     /** The reference to the event context used in the `by` field option. */
     @SuppressWarnings("DuplicateStringLiteralInspection") // refers to the proto field name,
         // not a variable name as other strings that use the same value.
@@ -105,8 +104,7 @@ final class ReferenceValidator implements Logging {
                 ImmutableMultimap.copyOf(fields);
         ImmutableList<EnrichmentFunction<?, ?, ?>> enrichmentFunctions =
                 ImmutableList.copyOf(functions);
-        ValidationResult result = new ValidationResult(enrichmentFunctions,
-                                                       sourceToTargetMap);
+        ValidationResult result = new ValidationResult(enrichmentFunctions, sourceToTargetMap);
         return result;
     }
 
@@ -115,12 +113,11 @@ final class ReferenceValidator implements Logging {
                                        FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
-            Optional<EnrichmentFunction<?, ?, ?>> function =
-                    getEnrichmentFunction(sourceField, enrichmentField);
-            if (function.isPresent()) {
-                functions.add(function.get());
+            Optional<EnrichmentFunction<?, ?, ?>> found = transition(sourceField, enrichmentField);
+            found.ifPresent(fn -> {
+                functions.add(fn);
                 fields.put(sourceField, enrichmentField);
-            }
+            });
         }
     }
 
@@ -247,12 +244,12 @@ final class ReferenceValidator implements Logging {
         return msg;
     }
 
-    private Optional<EnrichmentFunction<?, ?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
-                                                                        FieldDescriptor targetField) {
+    private Optional<EnrichmentFunction<?, ?, ?>> transition(FieldDescriptor srcField,
+                                                             FieldDescriptor targetField) {
         Class<?> sourceFieldClass = Field.getFieldClass(srcField);
         Class<?> targetFieldClass = Field.getFieldClass(targetField);
         Optional<EnrichmentFunction<?, ?, ?>> func =
-                enricher.functionFor(sourceFieldClass,targetFieldClass);
+                enricher.functionFor(sourceFieldClass, targetFieldClass);
         if (!func.isPresent()) {
             logNoFunction(sourceFieldClass, targetFieldClass);
         }
@@ -282,39 +279,7 @@ final class ReferenceValidator implements Logging {
     }
 
     private void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
-        log().debug("There is no enrichment function for translating {} into {}",
-                    sourceFieldClass, targetFieldClass);
-    }
-
-    /**
-     * A wrapper DTO for the validation result.
-     */
-    static class ValidationResult {
-        private final ImmutableList<EnrichmentFunction<?, ?, ?>> functions;
-        private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
-
-        private ValidationResult(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
-                                 ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
-            this.functions = functions;
-            this.fieldMap = fieldMap;
-        }
-
-        /**
-         * Returns the validated list of {@code EnrichmentFunction}s that may be used for
-         * the conversion in scope of the validated {@code Enricher}.
-         */
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK, since an `ImmutableList`
-                                                            // is returned.
-        List<EnrichmentFunction<?, ?, ?>> getFunctions() {
-            return functions;
-        }
-
-        /**
-         * Returns a map from source event/context field to target enrichment field descriptors,
-         * which is valid in scope of the target {@code Enricher}.
-         */
-        ImmutableMultimap<FieldDescriptor, FieldDescriptor> getFieldMap() {
-            return fieldMap;
-        }
+        _debug("There is no enrichment function for translating {} into {}",
+               sourceFieldClass, targetFieldClass);
     }
 }

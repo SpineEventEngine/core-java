@@ -66,9 +66,7 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
         return new MessageEnrichment<>(enricher, messageClass, enrichmentClass);
     }
 
-    private MessageEnrichment(Enricher enricher,
-                              Class<S> eventClass,
-                              Class<T> enrichmentClass) {
+    private MessageEnrichment(Enricher enricher, Class<S> eventClass, Class<T> enrichmentClass) {
         super(eventClass, enrichmentClass);
         this.enricher = enricher;
     }
@@ -79,7 +77,7 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
                 new ReferenceValidator(enricher, getSourceClass(), getEnrichmentClass());
         ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
                                                                       ImmutableMultimap.builder();
-        ReferenceValidator.ValidationResult validationResult = referenceValidator.validate();
+        ValidationResult validationResult = referenceValidator.validate();
         List<EnrichmentFunction<?, ?, ?>> fieldFunctions = validationResult.getFunctions();
         for (EnrichmentFunction<?, ?, ?> fieldFunction : fieldFunctions) {
             map.put(fieldFunction.getSourceClass(), fieldFunction);

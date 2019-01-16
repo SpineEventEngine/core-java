@@ -20,27 +20,20 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.type.TypeName;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.server.event.enrich.MessageEnrichment.create;
 
 /**
  * Enriches events <em>after</em> they are stored, and <em>before</em> they are dispatched.
@@ -67,19 +60,23 @@ public final class Enricher {
      *
      * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
-    private Enricher(Builder builder) {
+    Enricher(Builder builder) {
         LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap =
                 LinkedListMultimap.create();
-        for (EnrichmentFunction<?, ?, ?> function : builder.getFunctions()) {
-            funcMap.put(function.getSourceClass(), function);
+        for (EnrichmentFunction<?, ?, ?> fn : builder.getFunctions()) {
+            funcMap.put(fn.getSourceClass(), fn);
         }
         putMsgEnrichers(funcMap);
 
         this.functions = ImmutableMultimap.copyOf(funcMap);
     }
 
+    ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions() {
+        return functions;
+    }
+
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
-    private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> functionsMap) {
+    private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions) {
         ImmutableMultimap<String, String> enrichmentsMap = EnrichmentsMap.instance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
             Class<Message> enrichmentClass = TypeName.of(enrichmentType)
@@ -88,9 +85,8 @@ public final class Enricher {
             for (String srcType : srcMessageTypes) {
                 Class<Message> messageClass = TypeName.of(srcType)
                                                       .getMessageClass();
-                MessageEnrichment msgEnricher =
-                        MessageEnrichment.create(this, messageClass, enrichmentClass);
-                functionsMap.put(messageClass, msgEnricher);
+                MessageEnrichment msgEnricher = create(this, messageClass, enrichmentClass);
+                functions.put(messageClass, msgEnricher);
             }
         }
     }
@@ -179,88 +175,4 @@ public final class Enricher {
         return new Builder();
     }
 
-    /**
-     * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by
-     * the {@code Enricher} and set a custom translation function, if needed.
-     */
-    public static final class Builder {
-
-        /** Translation functions which perform the enrichment. */
-        private final Set<EnrichmentFunction<?, ?, ?>> functions = Sets.newHashSet();
-
-        /**
-         * Prevents direct instantiation.
-         */
-        private Builder() {
-        }
-
-        /**
-         * Adds a new field enrichment function.
-         *
-         * @param  sourceFieldClass
-         *         a class of the field in the source message
-         * @param  enrichmentFieldClass
-         *         a class of the field in the enrichment message
-         * @param  func
-         *         a function which converts fields
-         * @return the builder instance
-         */
-        public <S, T> Builder add(Class<S> sourceFieldClass,
-                                  Class<T> enrichmentFieldClass,
-                                  BiFunction<S, EventContext, T> func) {
-            checkNotNull(sourceFieldClass);
-            checkNotNull(enrichmentFieldClass);
-            checkNotNull(func);
-
-            EnrichmentFunction<S, T, ?> newEntry =
-                    FieldEnrichment.of(sourceFieldClass, enrichmentFieldClass, func);
-            checkDuplicate(newEntry, functions);
-            functions.add(newEntry);
-            return this;
-        }
-
-        /** Removes a translation for the passed type. */
-        public Builder remove(EnrichmentFunction entry) {
-            functions.remove(entry);
-            return this;
-        }
-
-        /** Creates a new {@code Enricher}. */
-        public Enricher build() {
-            Enricher result = new Enricher(this);
-            validate(result.functions);
-            return result;
-        }
-
-        @VisibleForTesting
-        Set<EnrichmentFunction<?, ?, ?>> getFunctions() {
-            return ImmutableSet.copyOf(functions);
-        }
-
-        /**
-         * Ensures that the passed enrichment function is not yet registered in this builder.
-         *
-         * @throws IllegalArgumentException
-         *         if the builder already has a function, which has the same couple of
-         *         source message and target enrichment classes
-         */
-        private static void checkDuplicate(EnrichmentFunction<?, ?, ?> candidate,
-                                           Iterable<EnrichmentFunction<?, ?, ?>> currentFns) {
-            Optional<EnrichmentFunction<?, ?, ?>> duplicate =
-                    EnrichmentFunction.firstThat(currentFns, SameTransition.asFor(candidate));
-            if (duplicate.isPresent()) {
-                throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
-                                                  candidate.getSourceClass(),
-                                                  candidate.getEnrichmentClass(),
-                                                  duplicate.get());
-            }
-        }
-
-        /** Performs validation by validating its functions. */
-        private static void validate(Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> fnRegistry) {
-            for (EnrichmentFunction<?, ?, ?> func : fnRegistry.values()) {
-                func.activate();
-            }
-        }
-    }
 }

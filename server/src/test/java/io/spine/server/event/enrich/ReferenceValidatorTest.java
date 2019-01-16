@@ -22,7 +22,6 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.server.event.enrich.ReferenceValidator.ValidationResult;
 import io.spine.server.event.given.ReferenceValidatorTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;

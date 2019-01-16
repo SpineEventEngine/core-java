@@ -29,6 +29,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
+import io.spine.server.event.enrich.Builder;
 import io.spine.server.event.enrich.Enricher;
 import io.spine.server.event.enrich.EnricherTest;
 import io.spine.test.event.ProjectCompleted;
@@ -203,7 +204,7 @@ public class EventEnricherTestEnv {
 
         /** Creates a new enricher with all required enrichment functions set. */
         public static Enricher newEventEnricher() {
-            Enricher.Builder builder = Enricher
+            Builder builder = Enricher
                     .newBuilder()
                     .add(ProjectId.class, String.class, new GetProjectName())
                     .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
