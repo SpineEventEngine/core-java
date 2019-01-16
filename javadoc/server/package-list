@@ -8,6 +8,7 @@ io.spine.server.entity
 io.spine.server.entity.storage
 io.spine.server.event
 io.spine.server.event.storage
+io.spine.server.event.store
 io.spine.server.integration
 io.spine.server.procman
 io.spine.server.projection
