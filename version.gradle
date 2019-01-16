@@ -25,7 +25,7 @@
  *  as we want to manage the versions in a single source.
  */
 
-def final SPINE_VERSION = '1.0.0-SNAPSHOT'
+def final SPINE_VERSION = '1.0.0-pre3'
 
 ext {
     // The version of the modules in this project.
