@@ -29,6 +29,7 @@ import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.logging.Logging;
+import io.spine.server.model.UnknownEntityTypeException;
 import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
 
@@ -38,7 +39,7 @@ import java.util.Set;
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
  *
- * <p> For asynchronous read-side updates please see {@link SubscriptionService}.
+ * <p>For asynchronous read-side updates please see {@link SubscriptionService}.
  */
 public class QueryService
         extends QueryServiceGrpc.QueryServiceImplBase
@@ -57,17 +58,33 @@ public class QueryService
 
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
-        log().debug("Incoming query: {}", query);
+        _debug("Incoming query: {}", query);
 
         TypeUrl type = Queries.typeOf(query);
         BoundedContext boundedContext = typeToContextMap.get(type);
+        if (boundedContext == null) {
+            handleUnsupported(type, responseObserver);
+        } else {
+            handleQuery(boundedContext, query, responseObserver);
+        }
+    }
+
+    private void handleQuery(BoundedContext boundedContext,
+                             Query query,
+                             StreamObserver<QueryResponse> responseObserver) {
         Stand stand = boundedContext.getStand();
         try {
             stand.execute(query, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            log().error("Error processing query", e);
+            _error(e, "Error processing query.");
             responseObserver.onError(e);
         }
+    }
+
+    private void handleUnsupported(TypeUrl type, StreamObserver<QueryResponse> observer) {
+        UnknownEntityTypeException exception = new UnknownEntityTypeException(type);
+        _error(exception, "Unknown type encountered.");
+        observer.onError(exception);
     }
 
     public static class Builder {

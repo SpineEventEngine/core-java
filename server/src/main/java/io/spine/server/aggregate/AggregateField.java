@@ -27,7 +27,6 @@ import io.spine.server.storage.StorageField;
  * A container for the storage fields specific for the {@link AggregateStorage}
  * and its implementations.
  *
- * @author Dmytro Dashenkov
  * @see StorageField
  */
 @SPI

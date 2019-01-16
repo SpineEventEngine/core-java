@@ -18,31 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.storage;
+package io.spine.server.event.store;
 
-import io.spine.annotation.SPI;
-import io.spine.server.storage.StorageField;
+import io.spine.server.event.EventFilter;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-/**
- * Enumeration of storage fields required for storing events.
- *
- * @see StorageField
- */
-@SPI
-public enum EventField implements StorageField {
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-    /**
-     * A field a string value of an identifier of an entity produced the event.
-     */
-    producer_id,
+@DisplayName("MatchFilter should")
+class MatchFilterTest {
 
-    /**
-     * A field containing value of an event ID.
-     */
-    event_id,
-
-    /**
-     * A type of an event message.
-     */
-    event_type
+    @Test
+    @DisplayName("not allow null events to pass")
+    void notAllowNullEvents() {
+        MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
+        assertFalse(filter.test(null));
+    }
 }

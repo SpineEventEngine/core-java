@@ -18,31 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.storage;
-
-import io.spine.annotation.SPI;
-import io.spine.server.storage.StorageField;
+package io.spine.server.event.store;
 
 /**
- * Enumeration of storage fields required for storing events.
- *
- * @see StorageField
+ * Event-specific column names.
  */
-@SPI
-public enum EventField implements StorageField {
+enum ColumnName {
 
     /**
-     * A field a string value of an identifier of an entity produced the event.
+     * The name of the entity column representing the time, when the event was fired.
+     *
+     * @see EEntity#getCreated()
      */
-    producer_id,
+    created,
 
     /**
-     * A field containing value of an event ID.
+     * The name of the entity column representing the Protobuf type name of the event.
+     *
+     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
+     * is enclosed in the {@code spine.test} Protobuf package would have this entity column
+     * equal to {@code "spine.test.TaskAdded"}.
+     *
+     * @see EEntity#getType()
      */
-    event_id,
-
-    /**
-     * A type of an event message.
-     */
-    event_type
+    type
 }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
@@ -33,35 +33,21 @@ import io.spine.server.entity.storage.Column;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Comparator;
-
 import static io.spine.core.Events.clearEnrichments;
 
 /**
  * An entity for storing an event.
  *
  * <p>An underlying event doesn't contain {@linkplain Events#clearEnrichments(Event) enrichments}.
+ *
+ * @apiNote This class is public so that {@link io.spine.server.entity.storage.EntityColumn
+ * EntityColumn} can access its column declarations.
  */
 @Internal
 public final class EEntity extends TransactionalEntity<EventId, Event, EventVBuilder> {
 
     /** Cached value of the event message type name. */
     private @Nullable TypeName typeName;
-
-    /**
-     * Compares event entities by timestamps of events.
-     */
-    private static final Comparator<EEntity> comparator = (e1, e2) -> {
-        Event event1 = e1.getState();
-        Event event2 = e2.getState();
-        int result = Events.eventComparator()
-                           .compare(event1, event2);
-        return result;
-    };
-
-    private EEntity(EventId id) {
-        super(id);
-    }
 
     /**
      * Creates a new entity stripping enrichments from the passed event.
@@ -72,11 +58,8 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
         return result;
     }
 
-    /**
-     * Returns comparator which sorts event entities chronologically.
-     */
-    static Comparator<EEntity> comparator() {
-        return comparator;
+    private EEntity(EventId id) {
+        super(id);
     }
 
     /**
@@ -111,30 +94,6 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
     }
 
     /**
-     * Event-specific column names.
-     */
-    public enum ColumnName {
-
-        /**
-         * The name of the entity column representing the time, when the event was fired.
-         *
-         * @see #getCreated()
-         */
-        created,
-
-        /**
-         * The name of the entity column representing the Protobuf type name of the event.
-         *
-         * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
-         * is enclosed in the {@code spine.test} Protobuf package would have this entity column
-         * equal to {@code "spine.test.TaskAdded"}.
-         *
-         * @see #getType()
-         */
-        type
-    }
-
-    /**
      * Creates a new entity stripping enrichments from the passed event.
      */
     private static class Factory extends Transaction<EventId, EEntity, Event, EventVBuilder> {
@@ -146,7 +105,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
             this.event = event;
         }
 
-        EEntity create() {
+        private EEntity create() {
             Event eventWithoutEnrichments = clearEnrichments(event);
             EEntity entity = getEntity();
             entity.getBuilder().mergeFrom(eventWithoutEnrichments);

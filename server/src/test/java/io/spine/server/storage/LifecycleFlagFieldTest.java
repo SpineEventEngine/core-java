@@ -18,31 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.storage;
+package io.spine.server.storage;
 
-import io.spine.annotation.SPI;
-import io.spine.server.storage.StorageField;
+import org.junit.jupiter.api.DisplayName;
 
-/**
- * Enumeration of storage fields required for storing events.
- *
- * @see StorageField
- */
-@SPI
-public enum EventField implements StorageField {
+@DisplayName("LifecycleFlagField should")
+class LifecycleFlagFieldTest extends AbstractStorageFieldTest<LifecycleFlagField> {
 
-    /**
-     * A field a string value of an identifier of an entity produced the event.
-     */
-    producer_id,
-
-    /**
-     * A field containing value of an event ID.
-     */
-    event_id,
-
-    /**
-     * A type of an event message.
-     */
-    event_type
+    LifecycleFlagFieldTest() {
+        super(LifecycleFlagField.class);
+    }
 }

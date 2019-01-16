@@ -18,31 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.storage;
-
-import io.spine.annotation.SPI;
-import io.spine.server.storage.StorageField;
-
 /**
- * Enumeration of storage fields required for storing events.
- *
- * @see StorageField
+ * Provides implementation of {@link io.spine.server.event.store.EventStore}.
  */
-@SPI
-public enum EventField implements StorageField {
 
-    /**
-     * A field a string value of an identifier of an entity produced the event.
-     */
-    producer_id,
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.event.store;
 
-    /**
-     * A field containing value of an event ID.
-     */
-    event_id,
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    /**
-     * A type of an event message.
-     */
-    event_type
-}
+import javax.annotation.ParametersAreNonnullByDefault;

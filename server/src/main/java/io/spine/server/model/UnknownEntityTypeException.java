@@ -18,31 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.storage;
+package io.spine.server.model;
 
-import io.spine.annotation.SPI;
-import io.spine.server.storage.StorageField;
+import io.spine.type.TypeUrl;
+
+import static java.lang.String.format;
 
 /**
- * Enumeration of storage fields required for storing events.
- *
- * @see StorageField
+ * An exception thrown when a {@link io.spine.client.Query Query} targets an unknown entity type.
  */
-@SPI
-public enum EventField implements StorageField {
+public final class UnknownEntityTypeException extends RuntimeException {
 
-    /**
-     * A field a string value of an identifier of an entity produced the event.
-     */
-    producer_id,
+    private static final long serialVersionUID = 0L;
 
-    /**
-     * A field containing value of an event ID.
-     */
-    event_id,
-
-    /**
-     * A type of an event message.
-     */
-    event_type
+    public UnknownEntityTypeException(TypeUrl type) {
+        super(format("Type `%s` does not belong to any known bounded context.", type));
+    }
 }

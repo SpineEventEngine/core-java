@@ -78,7 +78,7 @@ public class CommandService
 
     private void handleUnsupported(Command request, StreamObserver<Ack> responseObserver) {
         UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
-        log().error("Unsupported command posted to CommandService", unsupported);
+        _error(unsupported, "Unsupported command posted to CommandService.");
         Error error = unsupported.asError();
         Ack response = reject(request.getId(), error);
         responseObserver.onNext(response);
