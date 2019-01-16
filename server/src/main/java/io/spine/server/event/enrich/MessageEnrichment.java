@@ -21,6 +21,7 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
+import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
@@ -34,7 +35,6 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
-import static io.spine.protobuf.Messages.newInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -72,6 +72,10 @@ final class MessageEnrichment<S extends EventMessage, T extends Message, C exten
         this.enricher = enricher;
     }
 
+    static <T extends Message> T defaultInstance(Class<? extends T> cls) {
+        return Internal.getDefaultInstance(cls);
+    }
+
     @Override
     void activate() {
         Class<? extends EventMessage> eventClass = getSourceClass();
@@ -102,7 +106,7 @@ final class MessageEnrichment<S extends EventMessage, T extends Message, C exten
         ensureActive();
         verifyOwnState();
 
-        T defaultTarget = newInstance(getEnrichmentClass());
+        T defaultTarget = defaultInstance(getEnrichmentClass());
         Message.Builder builder = defaultTarget.toBuilder();
         setFields(builder, eventMsg, context);
         @SuppressWarnings("unchecked") // types are checked during the initialization and validation

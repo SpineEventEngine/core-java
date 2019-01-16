@@ -30,7 +30,6 @@ import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
-import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -82,8 +81,7 @@ final class ReferenceValidator implements Logging {
     }
 
     private static Descriptor descriptorOf(Class<? extends Message> cls) {
-        return TypeName.of(cls)
-                       .getMessageDescriptor();
+        return MessageEnrichment.defaultInstance(cls).getDescriptorForType();
     }
 
     /**
