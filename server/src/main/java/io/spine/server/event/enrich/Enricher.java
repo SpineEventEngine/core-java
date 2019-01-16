@@ -57,7 +57,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * </pre>
  */
 @SPI
-public class Enricher {
+public final class Enricher {
 
     /** Available enrichment functions per Java class. */
     private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions;
