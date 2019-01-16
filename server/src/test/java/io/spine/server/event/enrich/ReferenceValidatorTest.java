@@ -38,7 +38,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,9 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("ReferenceValidator should")
 class ReferenceValidatorTest {
@@ -116,11 +112,12 @@ class ReferenceValidatorTest {
     @Test
     @DisplayName("skip mapping if no mapping function is defined")
     void skipMappingIfNoFuncDefined() {
-        Enricher mockEnricher = mock(Enricher.class);
-        when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
-                .thenReturn(Optional.empty());
+        Enricher emptyEnricher = Enricher
+                .newBuilder()
+                .build();
+
         ReferenceValidator validator
-                = new ReferenceValidator(mockEnricher,
+                = new ReferenceValidator(emptyEnricher,
                                          UserDeletedEvent.class,
                                          EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
         ValidationResult result = validator.validate();
