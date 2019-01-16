@@ -25,12 +25,13 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 
 /**
  * A factory for creating storages used by repositories,
- * {@link io.spine.server.event.EventStore EventStore},
+ * {@link EventStore EventStore},
  * and {@link io.spine.server.stand.Stand Stand}.
  */
 public interface StorageFactory extends AutoCloseable {

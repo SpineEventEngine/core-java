@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.util.Timestamps;
@@ -26,19 +26,18 @@ import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.EntityFilters;
+import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStreamQuery;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.event.ERepository.toEntityFilters;
+import static io.spine.server.event.store.QueryToFilters.convert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Grankin
- */
 @DisplayName("ERepository should")
 class ERepositoryTest {
 
@@ -47,7 +46,7 @@ class ERepositoryTest {
     void convertEmptyToFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        EntityFilters entityFilters = convert(query);
         assertTrue(entityFilters.getFilterList()
                                 .isEmpty());
     }
@@ -60,7 +59,7 @@ class ERepositoryTest {
                 .setAfter(Timestamps.MIN_VALUE)
                 .setBefore(Timestamps.MAX_VALUE)
                 .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        EntityFilters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
@@ -80,7 +79,7 @@ class ERepositoryTest {
                 .addFilter(validFilter)
                 .addFilter(invalidFilter)
                 .build();
-        EntityFilters entityFilters = toEntityFilters(query);
+        EntityFilters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);

@@ -38,6 +38,7 @@ import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
@@ -409,7 +410,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
      *     <li>Closes {@link IntegrationBus}.
-     *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
+     *     <li>Closes {@link EventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
      *     <li>Closes all registered {@linkplain Repository repositories}.

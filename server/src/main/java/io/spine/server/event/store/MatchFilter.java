@@ -18,14 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.base.FieldFilter;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Events;
+import io.spine.server.event.EventFilter;
 import io.spine.server.reflect.Field;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
@@ -85,17 +87,16 @@ final class MatchFilter implements Predicate<Event> {
         return result;
     }
 
-    @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want traceability of exits.
     @Override
     public boolean test(@Nullable Event event) {
         if (event == null) {
             return false;
         }
 
-        Message message = Events.getMessage(event);
+        EventMessage eventMessage = Events.getMessage(event);
         EventContext context = event.getContext();
 
-        if (!checkEventType(message)) {
+        if (!checkEventType(eventMessage)) {
             return false;
         }
 
@@ -103,11 +104,11 @@ final class MatchFilter implements Predicate<Event> {
             return false;
         }
 
-        if (!checkEventFields(message)) {
+        if (!check(eventMessage, eventFieldFilters)) {
             return false;
         }
 
-        boolean result = checkContextFields(context);
+        boolean result = check(context, contextFieldFilters);
         return result;
     }
 
@@ -129,18 +130,11 @@ final class MatchFilter implements Predicate<Event> {
         return result;
     }
 
-    private boolean checkContextFields(EventContext context) {
-        for (FieldFilter filter : contextFieldFilters) {
-            boolean matchesFilter = checkFields(context, filter);
-            if (!matchesFilter) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean checkEventFields(Message message) {
-        for (FieldFilter filter : eventFieldFilters) {
+    /**
+     * Tells if the passed message matches the filters.
+     */
+    private static boolean check(Message message, Collection<FieldFilter> filters) {
+        for (FieldFilter filter : filters) {
             boolean matchesFilter = checkFields(message, filter);
             if (!matchesFilter) {
                 return false;

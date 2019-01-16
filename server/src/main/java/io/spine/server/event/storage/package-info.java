@@ -23,9 +23,11 @@
  */
 
 @SPI
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.event.storage;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.SPI;
 
 import javax.annotation.ParametersAreNonnullByDefault;

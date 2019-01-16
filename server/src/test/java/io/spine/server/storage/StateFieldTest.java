@@ -18,21 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.storage;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+@DisplayName("StateField should")
+class StateFieldTest extends AbstractStorageFieldTest<StateField> {
 
-@DisplayName("MatchFilter should")
-class MatchFilterTest {
-
-    @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
-    @Test
-    @DisplayName("not allow null events to pass")
-    void notAllowNullEvents() {
-        MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
-        assertFalse(filter.test(null));
+    StateFieldTest() {
+        super(StateField.class);
     }
 }
