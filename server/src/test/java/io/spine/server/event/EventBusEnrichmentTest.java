@@ -20,6 +20,8 @@
 
 package io.spine.server.event;
 
+import com.google.common.truth.MapSubject;
+import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
@@ -27,15 +29,17 @@ import io.spine.server.event.enrich.Enricher;
 import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;
+import io.spine.test.event.EnrichmentByContextFields;
+import io.spine.test.event.EnrichmentForSeveralEvents;
+import io.spine.test.event.ProjectCreatedSeparateEnrichment;
+import io.spine.test.event.ProjectId;
+import io.spine.type.TypeName;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.bus.EventBusTestEnv.eventBusBuilder;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("EventBus should manage event enrichment")
 class EventBusEnrichmentTest {
@@ -56,24 +60,42 @@ class EventBusEnrichmentTest {
         eventBus = bc.getEventBus();
     }
 
+    @AfterEach
+    void closeBoundedContext() throws Exception {
+        bc.close();
+    }
+
     @Test
     @DisplayName("for event that can be enriched")
     void forEnrichable() {
-        Enricher enricher = mock(Enricher.class);
         EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
-        doReturn(true).when(enricher)
-                      .canBeEnriched(any(EventEnvelope.class));
-        doReturn(event).when(enricher)
-                       .enrich(any(EventEnvelope.class));
+        Enricher enricher = Enricher
+                .newBuilder()
+                // This enrichment function turns on enrichments that map `ProjectId` to `String`.
+                // See `proto/spine/test/event/events.proto` for the declaration of `ProtoCreated`
+                // event and its enrichments.
+                .add(ProjectId.class, String.class,
+                     (id, context) -> String.valueOf(id.getId()))
+                .build();
 
-        // Close the bounded context, which was previously initialized in `@Before`.
-        closeBoundedContext();
         setUp(enricher);
-        eventBus.register(new RememberingSubscriber());
+        RememberingSubscriber subscriber = new RememberingSubscriber();
+        eventBus.register(subscriber);
 
         eventBus.post(event.getOuterObject());
 
-        verify(enricher).enrich(any(EventEnvelope.class));
+        MapSubject assertMap =
+                assertThat(subscriber.getEventContext()
+                                     .getEnrichment()
+                                     .getContainer()
+                                     .getItemsMap());
+        assertMap.containsKey(ofType(EnrichmentByContextFields.class));
+        assertMap.containsKey(ofType(EnrichmentForSeveralEvents.class));
+        assertMap.containsKey(ofType(ProjectCreatedSeparateEnrichment.class));
+    }
+
+    private static String ofType(Class<? extends Message> enrichmentClass) {
+        return TypeName.of(enrichmentClass).value();
     }
 
     @Test
@@ -83,8 +105,6 @@ class EventBusEnrichmentTest {
                 .newBuilder()
                 .build();
 
-        // Close the bounded context, which was previously initialized in `@Before`.
-        closeBoundedContext();
         setUp(enricher);
         RememberingSubscriber subscriber = new RememberingSubscriber();
         eventBus.register(subscriber);
@@ -94,12 +114,5 @@ class EventBusEnrichmentTest {
         assertThat(eventContext.getEnrichment()
                                .getContainer()
                                .getItemsCount()).isEqualTo(0);
-    }
-
-    private void closeBoundedContext() {
-        try {
-            bc.close();
-        } catch (Exception ignored) {
-        }
     }
 }

@@ -20,9 +20,11 @@
 
 package io.spine.server.event.enrich;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
@@ -30,9 +32,10 @@ import io.spine.type.TypeName;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
 
 /**
  * Performs enrichment operation of an enrichable message.
@@ -40,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class Action {
 
     private final EventEnvelope envelope;
-    private final Collection<EnrichmentFunction<?, ?, ?>> availableFunctions;
+    private final ImmutableCollection<EnrichmentFunction<?, ?, ?>> availableFunctions;
 
     private final Map<String, Any> enrichments = Maps.newHashMap();
 
@@ -50,9 +53,10 @@ final class Action {
                                                        .value();
         Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
                 parent.getFunctions(sourceClass);
-        this.availableFunctions = functionsPerClass.stream()
-                                                   .filter(EnrichmentFunction.activeOnly())
-                                                   .collect(Collectors.toList());
+        this.availableFunctions =
+                functionsPerClass.stream()
+                                 .filter(activeOnly())
+                                 .collect(toImmutableList());
     }
 
     EventEnvelope perform() {
@@ -62,14 +66,18 @@ final class Action {
     }
 
     private void createEnrichments() {
-        Message sourceMessage = envelope.getMessage();
+        EventMessage event = envelope.getMessage();
         for (EnrichmentFunction function : availableFunctions) {
-            Message enriched = apply(function, sourceMessage, envelope.getMessageContext());
-            checkResult(enriched, function);
-            String typeName = TypeName.of(enriched)
-                                      .value();
-            enrichments.put(typeName, AnyPacker.pack(enriched));
+            Message enrichment = apply(function, event, envelope.getEventContext());
+            checkResult(enrichment, function);
+            put(enrichment);
         }
+    }
+
+    private void put(Message enrichment) {
+        String typeName = TypeName.of(enrichment)
+                                  .value();
+        enrichments.put(typeName, AnyPacker.pack(enrichment));
     }
 
     /**
@@ -82,10 +90,8 @@ final class Action {
      * </ol>
      */
     @SuppressWarnings("unchecked")
-    private static Message apply(EnrichmentFunction function,
-                                 Message input,
-                                 EventContext context) {
-        Message result = (Message) function.apply(input, context);
+    private static Message apply(EnrichmentFunction fn, EventMessage event, EventContext context) {
+        Message result = (Message) fn.apply(event, context);
         return result;
     }
 

@@ -51,7 +51,6 @@ import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -304,8 +303,8 @@ class SubscriptionServiceTest {
             MemoizingObserver<Subscription> observer = new MemoizingObserver<>();
             // Causes NPE.
             subscriptionService.subscribe(null, observer);
-            assertNull(observer.firstResponse());
-            assertFalse(observer.isCompleted());
+            assertThat(observer.responses()).isEmpty();
+            assertThat(observer.isCompleted()).isFalse();
             assertThat(observer.getError()).isInstanceOf(NullPointerException.class);
         }
 
@@ -314,14 +313,15 @@ class SubscriptionServiceTest {
         void activation() {
             BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-            SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                         .add(boundedContext)
-                                                                         .build();
+            SubscriptionService subscriptionService = SubscriptionService
+                    .newBuilder()
+                    .add(boundedContext)
+                    .build();
             MemoizingObserver<SubscriptionUpdate> observer = new MemoizingObserver<>();
             // Causes NPE.
             subscriptionService.activate(null, observer);
-            assertNull(observer.firstResponse());
-            assertFalse(observer.isCompleted());
+            assertThat(observer.responses()).isEmpty();
+            assertThat(observer.isCompleted()).isFalse();
             assertThat(observer.getError()).isInstanceOf(NullPointerException.class);
         }
 
