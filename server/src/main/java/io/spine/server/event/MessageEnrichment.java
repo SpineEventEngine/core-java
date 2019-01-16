@@ -34,6 +34,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The default mechanism for enriching messages based on {@code FieldOptions}
@@ -41,10 +42,8 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  *
  * @param <S> a type of the source message to enrich
  * @param <T> a type of the target enrichment message
- *
- * @author Alexander Yevsyukov
  */
-class MessageEnrichment<S extends Message, T extends Message, C extends Message>
+final class MessageEnrichment<S extends Message, T extends Message, C extends Message>
         extends EnrichmentFunction<S, T, C> {
 
     /** A parent instance holding this instance and its siblings. */
@@ -140,11 +139,18 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
                     fieldFunctions.get(sourceFieldClass);
             Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
             for (FieldDescriptor targetField : targetFields) {
-                Optional<EnrichmentFunction<?, ?, ?>> function =
-                        firstThat(functions,
-                                  SupportsFieldConversion.of(sourceFieldClass,
-                                                             Field.getFieldClass(targetField)));
-                EnrichmentFunction fieldEnrichment = function.get();
+                SupportsFieldConversion conversion =
+                        SupportsFieldConversion.of(sourceFieldClass,
+                                                   Field.getFieldClass(targetField)
+                        );
+                Optional<EnrichmentFunction<?, ?, ?>> function = firstThat(functions, conversion);
+                EnrichmentFunction fieldEnrichment = function
+                        .orElseThrow(() -> newIllegalStateException(
+                                "Unable to get enrichment for the conversion from message field " +
+                                        "of type `%s` to enrichment field of type `%s`.",
+                                conversion.messageFieldClass(),
+                                conversion.enrichmentFieldClass()
+                        ));
 
                 @SuppressWarnings("unchecked") /* The model is checked during the initialization
                                                   and activation. */

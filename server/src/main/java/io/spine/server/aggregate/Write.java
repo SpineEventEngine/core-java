@@ -101,7 +101,7 @@ final class Write<I> {
     }
 
     private void persist(Collection<Event> events, Snapshot snapshot) {
-        AggregateStateRecord record = AggregateStateRecord
+        AggregateHistory record = AggregateHistory
                 .newBuilder()
                 .addAllEvent(events)
                 .setSnapshot(snapshot)
@@ -110,14 +110,14 @@ final class Write<I> {
     }
 
     private void persist(Collection<Event> events) {
-        AggregateStateRecord record = AggregateStateRecord
+        AggregateHistory record = AggregateHistory
                 .newBuilder()
                 .addAllEvent(events)
                 .build();
         persist(record);
     }
 
-    private void persist(AggregateStateRecord record) {
+    private void persist(AggregateHistory record) {
         storage.write(id, record);
     }
 

@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * a {@link CommandDispatchingException}.
  *
  * <p>On {@link #asRejection()}, returns {@link java.util.Optional#empty() Optional.empty()}
- *
- * @author Dmytro Dashenkov
  */
 final class CaughtRuntimeError implements CaughtError {
 

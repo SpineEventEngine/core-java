@@ -125,7 +125,7 @@ public abstract class Aggregate<I,
      * The count of events stored to the {@linkplain AggregateStorage storage} since the last
      * snapshot.
      *
-     * <p>This field is set in {@link #play(AggregateStateRecord)} and is effectively final.
+     * <p>This field is set in {@link #play(AggregateHistory)} and is effectively final.
      *
      * @see AggregateStorage#readEventCountAfterLastSnapshot(Object)
      */
@@ -256,17 +256,17 @@ public abstract class Aggregate<I,
      * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
-     * @param  aggregateStateRecord the aggregate state with events to play
+     * @param  aggregateHistory the aggregate state with events to play
      * @throws IllegalStateException
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
      */
-    void play(AggregateStateRecord aggregateStateRecord) {
-        Snapshot snapshot = aggregateStateRecord.getSnapshot();
+    void play(AggregateHistory aggregateHistory) {
+        Snapshot snapshot = aggregateHistory.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-        List<Event> events = aggregateStateRecord.getEventList();
+        List<Event> events = aggregateHistory.getEventList();
         eventCountAfterLastSnapshot = events.size();
         play(events);
         remember(events);
@@ -320,7 +320,7 @@ public abstract class Aggregate<I,
     /**
      * Restores the state and version from the passed snapshot.
      *
-     * <p>If this method is called during a {@linkplain #play(AggregateStateRecord) replay}
+     * <p>If this method is called during a {@linkplain #play(AggregateHistory) replay}
      * (because the snapshot was encountered) the method uses the state
      * {@linkplain #getBuilder() builder}, which is used during the replay.
      *

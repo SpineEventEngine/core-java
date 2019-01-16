@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.Enumerated;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,7 +31,7 @@ import static io.spine.server.entity.storage.given.column.TaskStatus.SUCCESS;
 import static io.spine.testing.Tests.nullRef;
 
 @SuppressWarnings("unused") // Reflective access
-public class TestEntity extends AbstractVersionableEntity<String, Any> {
+public class TestEntity extends AbstractEntity<String, Any> {
 
     private @Nullable Integer mutableState = 0;
 

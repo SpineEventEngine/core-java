@@ -21,21 +21,23 @@
 package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
-import io.spine.core.Version;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.Column;
 
-public class EntityRedefiningColumnAnnotation
-        extends AbstractEntity<String, Any> implements VersionableEntity<String, Any> {
+public class EntityRedefiningColumnAnnotation extends AbstractEntity<String, Any>
+        implements WithColumn<String, Any> {
 
     protected EntityRedefiningColumnAnnotation(String id) {
         super(id);
     }
 
+    /**
+     * This annotation {@code @Column} should not be used in the derived class,
+     * which is tested by {@code ColumnTest}.
+     */
     @Column
     @Override
-    public Version getVersion() {
-        return Version.getDefaultInstance();
+    public String getCustomColumn() {
+        return getClass().getCanonicalName();
     }
 }

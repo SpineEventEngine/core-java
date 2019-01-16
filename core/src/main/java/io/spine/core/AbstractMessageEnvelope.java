@@ -33,8 +33,6 @@ import static java.lang.String.format;
  * @param <I> the class of the message ID
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
 public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Message>
         implements MessageEnvelope<I, T, C> {

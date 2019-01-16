@@ -34,9 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>The predicate ignores the time of bounds and matches only
  * the {@link io.spine.base.FieldFilter fields} of the event message and
  * the {@link io.spine.core.EventContext EventContext}.
- *
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 final class MatchesStreamQuery implements Predicate<Event> {
 

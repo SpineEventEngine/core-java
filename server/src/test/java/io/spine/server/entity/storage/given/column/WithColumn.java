@@ -18,20 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Message;
-import io.spine.core.Version;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.Column;
 
 /**
- * An entity with version and timestamp of the last modification.
+ * This interface attempts to re-define already defined column.
+ * @param <I>
+ * @param <S>
  */
-public interface VersionableEntity<I, S extends Message> extends Entity<I, S> {
+public interface WithColumn<I, S extends Message> extends Entity<I, S> {
 
-    /**
-     * Obtains the version of the entity.
-     */
+    @SuppressWarnings("unused")
     @Column
-    Version getVersion();
+    String getCustomColumn();
 }

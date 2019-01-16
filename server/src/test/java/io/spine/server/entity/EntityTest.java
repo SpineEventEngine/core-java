@@ -20,16 +20,18 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.Range;
+import com.google.common.truth.LongSubject;
 import com.google.protobuf.StringValue;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.given.EntityTestEnv.BareBonesEntity;
-import io.spine.server.entity.given.EntityTestEnv.EntityWithMessageId;
-import io.spine.server.entity.given.EntityTestEnv.TestAggregate;
-import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdInteger;
-import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdLong;
-import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdMessage;
-import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdString;
+import io.spine.server.entity.given.entity.BareBonesEntity;
+import io.spine.server.entity.given.entity.EntityWithMessageId;
+import io.spine.server.entity.given.entity.TestAggregate;
+import io.spine.server.entity.given.entity.TestEntityWithIdInteger;
+import io.spine.server.entity.given.entity.TestEntityWithIdLong;
+import io.spine.server.entity.given.entity.TestEntityWithIdMessage;
+import io.spine.server.entity.given.entity.TestEntityWithIdString;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.test.entity.Project;
@@ -41,11 +43,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.server.entity.given.EntityTestEnv.isBetween;
 import static io.spine.testing.Tests.nullRef;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -224,9 +225,9 @@ class EntityTest {
             long timeBeforeIncrement = TimeTests.currentTimeSeconds();
             entityNew.incrementVersion();
             long timeAfterIncrement = TimeTests.currentTimeSeconds();
-            assertThat(entityNew.whenModified()
-                                .getSeconds(),
-                       isBetween(timeBeforeIncrement, timeAfterIncrement));
+
+            assertModificationTime()
+                    .isIn(Range.closed(timeBeforeIncrement, timeAfterIncrement));
         }
 
         @Test
@@ -234,7 +235,13 @@ class EntityTest {
         void onStateUpdate() {
             entityNew.incrementState(state);
             long expectedTimeSec = TimeTests.currentTimeSeconds();
-            assertEquals(expectedTimeSec, entityNew.whenModified().getSeconds());
+            assertModificationTime()
+                    .isEqualTo(expectedTimeSec);
+        }
+
+        private LongSubject assertModificationTime() {
+            return assertThat(entityNew.whenModified()
+                                       .getSeconds());
         }
     }
 
@@ -250,7 +257,6 @@ class EntityTest {
             assertEquals(aggregateWithState, another);
         }
 
-        @SuppressWarnings("EqualsWithItself") // Is the purpose of this method.
         @Test
         @DisplayName("entity is equal to itself")
         void equalToItself() {
@@ -263,7 +269,6 @@ class EntityTest {
             assertNotEquals(entityWithState, nullRef());
         }
 
-        @SuppressWarnings("EqualsBetweenInconvertibleTypes") // Is the purpose of this method.
         @Test
         @DisplayName("entity is not equal to object of another class")
         void notEqualToOtherClass() {
@@ -390,7 +395,7 @@ class EntityTest {
         @DisplayName("entities with different status are not equal")
         void consideredForEquality() {
             // Create an entity with the same ID and the same (default) state.
-            AbstractVersionableEntity another = new TestEntityWithIdString(entityNew.getId());
+            AbstractEntity another = new TestEntityWithIdString(entityNew.getId());
 
             another.setArchived(true);
 

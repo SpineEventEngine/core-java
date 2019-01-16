@@ -25,8 +25,10 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
+import io.spine.core.EventVBuilder;
 import io.spine.core.Events;
-import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.Transaction;
+import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,30 +41,9 @@ import static io.spine.core.Events.clearEnrichments;
  * An entity for storing an event.
  *
  * <p>An underlying event doesn't contain {@linkplain Events#clearEnrichments(Event) enrichments}.
- *
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 @Internal
-public class EEntity extends AbstractEntity<EventId, Event> {
-
-    /**
-     * The name of the entity column representing the time, when the event was fired.
-     *
-     * @see #getCreated()
-     */
-    static final String CREATED_TIME_COLUMN = "created";
-
-    /**
-     * The name of the entity column representing the Protobuf type name of the event.
-     *
-     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
-     * is enclosed in the {@code spine.test} Protobuf package would have this entity column
-     * equal to {@code "spine.test.TaskAdded"}.
-     *
-     * @see #getType()
-     */
-    static final String TYPE_COLUMN = "type";
+public final class EEntity extends TransactionalEntity<EventId, Event, EventVBuilder> {
 
     /** Cached value of the event message type name. */
     private @Nullable TypeName typeName;
@@ -78,14 +59,17 @@ public class EEntity extends AbstractEntity<EventId, Event> {
         return result;
     };
 
-    EEntity(EventId id) {
+    private EEntity(EventId id) {
         super(id);
     }
 
-    EEntity(Event event) {
-        this(event.getId());
-        Event eventWithoutEnrichments = clearEnrichments(event);
-        updateState(eventWithoutEnrichments);
+    /**
+     * Creates a new entity stripping enrichments from the passed event.
+     */
+    static EEntity create(Event event) {
+        Factory factory = new Factory(event);
+        EEntity result = factory.create();
+        return result;
     }
 
     /**
@@ -101,7 +85,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
      * <p>This method represents an entity column {@code created}.
      *
      * @return the time when the underlying event was fired
-     * @see #CREATED_TIME_COLUMN
+     * @see ColumnName#created
      */
     @Column
     public Timestamp getCreated() {
@@ -115,7 +99,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
      * <p>This method represents an entity column {@link TypeName}.
      *
      * @return the {@link TypeName} value of the event represented by this entity
-     * @see #TYPE_COLUMN
+     * @see ColumnName#type
      */
     @Column
     public String getType() {
@@ -124,5 +108,50 @@ public class EEntity extends AbstractEntity<EventId, Event> {
                                     .getTypeName();
         }
         return typeName.value();
+    }
+
+    /**
+     * Event-specific column names.
+     */
+    public enum ColumnName {
+
+        /**
+         * The name of the entity column representing the time, when the event was fired.
+         *
+         * @see #getCreated()
+         */
+        created,
+
+        /**
+         * The name of the entity column representing the Protobuf type name of the event.
+         *
+         * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
+         * is enclosed in the {@code spine.test} Protobuf package would have this entity column
+         * equal to {@code "spine.test.TaskAdded"}.
+         *
+         * @see #getType()
+         */
+        type
+    }
+
+    /**
+     * Creates a new entity stripping enrichments from the passed event.
+     */
+    private static class Factory extends Transaction<EventId, EEntity, Event, EventVBuilder> {
+
+        private final Event event;
+
+        private Factory(Event event) {
+            super(new EEntity(event.getId()));
+            this.event = event;
+        }
+
+        EEntity create() {
+            Event eventWithoutEnrichments = clearEnrichments(event);
+            EEntity entity = getEntity();
+            entity.getBuilder().mergeFrom(eventWithoutEnrichments);
+            commit();
+            return entity;
+        }
     }
 }

@@ -42,8 +42,6 @@ import java.lang.annotation.Target;
  *
  * <p>If the annotation is applied to a method which does not satisfy any of these requirements,
  * this method will not be registering for receiving events.
- *
- * @author Alexander Yevsyukov
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
