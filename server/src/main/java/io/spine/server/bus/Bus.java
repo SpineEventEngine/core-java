@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -391,7 +390,4 @@ public abstract class Bus<T extends Message,
      * @param messages the messages to store
      */
     protected abstract void store(Iterable<T> messages);
-
-    public interface DispatchCallback<E extends MessageEnvelope<?, ?, ?>> extends Consumer<E> {
-    }
 }
