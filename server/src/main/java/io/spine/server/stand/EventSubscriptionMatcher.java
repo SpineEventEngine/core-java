@@ -25,38 +25,31 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.Subscription;
-import io.spine.client.Target;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.type.TypeUrl;
 
 final class EventSubscriptionMatcher extends SubscriptionMatcher {
 
-    private EventSubscriptionMatcher(Target target) {
-        super(target);
-    }
-
-    static EventSubscriptionMatcher createFor(Subscription subscription) {
-        Target target = subscription.getTopic()
-                                    .getTarget();
-        return new EventSubscriptionMatcher(target);
+    EventSubscriptionMatcher(Subscription subscription) {
+        super(subscription);
     }
 
     @Override
-    protected TypeUrl getCheckedType(EventEnvelope event) {
+    protected TypeUrl getTypeToCheck(EventEnvelope event) {
         TypeUrl result = TypeUrl.of(event.getMessage());
         return result;
     }
 
     @Override
-    protected Any getCheckedId(EventEnvelope event) {
+    protected Any getIdToCheck(EventEnvelope event) {
         EventId eventId = event.getId();
         Any result = Identifier.pack(eventId);
         return result;
     }
 
     @Override
-    protected Message getCheckedMessage(EventEnvelope event) {
+    protected Message getStateToCheck(EventEnvelope event) {
         EventMessage result = event.getMessage();
         return result;
     }

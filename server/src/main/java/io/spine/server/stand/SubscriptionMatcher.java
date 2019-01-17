@@ -21,10 +21,10 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.client.CompositeFilter;
+import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.client.IdFilter;
@@ -44,10 +44,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 
-    private final Target target;
+    private final Subscription subscription;
 
-    SubscriptionMatcher(Target target) {
-        this.target = target;
+    SubscriptionMatcher(Subscription subscription) {
+        this.subscription = subscription;
     }
 
     @Override
@@ -56,22 +56,22 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
     }
 
     private boolean isTypeMatching(EventEnvelope event) {
-        TypeUrl typeUrl = getCheckedType(event);
+        TypeUrl typeUrl = getTypeToCheck(event);
         TypeUrl requiredType = TypeUrl.parse(target().getType());
         return requiredType.equals(typeUrl);
     }
 
     private boolean includeAll() {
-        return target.getIncludeAll();
+        return target().getIncludeAll();
     }
 
     private boolean matchByFilters(EventEnvelope event) {
-        return checkIdMatches(event) && checkMessageMatches(event);
+        return checkIdMatches(event) && checkStateMatches(event);
     }
 
     private boolean checkIdMatches(EventEnvelope event) {
-        Any id = getCheckedId(event);
-        Filters filters = target.getFilters();
+        Any id = getIdToCheck(event);
+        Filters filters = target().getFilters();
         IdFilter idFilter = filters.getIdFilter();
         boolean idFilterSet = !IdFilter.getDefaultInstance()
                                        .equals(idFilter);
@@ -83,22 +83,18 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
         return result;
     }
 
-    private boolean checkMessageMatches(EventEnvelope event) {
-        Message message = getCheckedMessage(event);
-        Filters filters = target.getFilters();
+    private boolean checkStateMatches(EventEnvelope event) {
+        Message state = getStateToCheck(event);
+        Filters filters = target().getFilters();
         boolean result = filters.getFilterList()
                                 .stream()
-                                .allMatch(filter -> checkPasses(message, filter));
+                                .allMatch(filter -> checkPasses(state, filter));
         return result;
-    }
-
-    protected Target target() {
-        return target;
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // OK for Proto enum.
     private static boolean checkPasses(Message state, CompositeFilter filter) {
-        CompositeFilter.CompositeOperator operator = filter.getOperator();
+        CompositeOperator operator = filter.getOperator();
         switch (operator) {
             case ALL:
                 return filter.getFilterList()
@@ -116,8 +112,8 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 
     private static boolean checkPasses(Message state, Filter filter) {
         String fieldName = filter.getFieldName();
-        Descriptors.FieldDescriptor fieldDescriptor = state.getDescriptorForType()
-                                                           .findFieldByName(fieldName);
+        FieldDescriptor fieldDescriptor = state.getDescriptorForType()
+                                               .findFieldByName(fieldName);
         Object actual = state.getField(fieldDescriptor);
 
         Any requiredAsAny = filter.getValue();
@@ -134,9 +130,14 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
         }
     }
 
-    protected abstract TypeUrl getCheckedType(EventEnvelope event);
+    private Target target() {
+        return subscription.getTopic()
+                           .getTarget();
+    }
 
-    protected abstract Any getCheckedId(EventEnvelope event);
+    protected abstract TypeUrl getTypeToCheck(EventEnvelope event);
 
-    protected abstract Message getCheckedMessage(EventEnvelope event);
+    protected abstract Any getIdToCheck(EventEnvelope event);
+
+    protected abstract Message getStateToCheck(EventEnvelope event);
 }

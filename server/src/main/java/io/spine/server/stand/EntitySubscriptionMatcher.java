@@ -26,7 +26,6 @@ import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.client.Subscription;
-import io.spine.client.Target;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.EntityStateChanged;
@@ -34,18 +33,12 @@ import io.spine.type.TypeUrl;
 
 final class EntitySubscriptionMatcher extends SubscriptionMatcher {
 
-    private EntitySubscriptionMatcher(Target target) {
-        super(target);
-    }
-
-    static EntitySubscriptionMatcher createFor(Subscription subscription) {
-        Target target = subscription.getTopic()
-                                    .getTarget();
-        return new EntitySubscriptionMatcher(target);
+    EntitySubscriptionMatcher(Subscription subscription) {
+        super(subscription);
     }
 
     @Override
-    protected TypeUrl getCheckedType(EventEnvelope event) {
+    protected TypeUrl getTypeToCheck(EventEnvelope event) {
         EntityStateChanged eventMessage = toEventMessage(event);
         String type = eventMessage.getId()
                                   .getTypeUrl();
@@ -54,7 +47,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
     }
 
     @Override
-    protected Any getCheckedId(EventEnvelope event) {
+    protected Any getIdToCheck(EventEnvelope event) {
         EntityStateChanged eventMessage = toEventMessage(event);
         EntityId entityId = eventMessage.getId()
                                         .getEntityId();
@@ -63,7 +56,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
     }
 
     @Override
-    protected Message getCheckedMessage(EventEnvelope event) {
+    protected Message getStateToCheck(EventEnvelope event) {
         EntityStateChanged eventMessage = toEventMessage(event);
         Any newState = eventMessage.getNewState();
         Message result = AnyPacker.unpack(newState);
