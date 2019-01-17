@@ -30,6 +30,7 @@ import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
@@ -94,7 +96,13 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     @Override
     public ImmutableSet<TypeUrl> typeSet() {
-        return registrySlice().typeSet();
+        Collection<SubscriptionRegistry> allRegistries = tenantSlices.values();
+        ImmutableSet<TypeUrl> result = allRegistries
+                .stream()
+                .map(SubscriptionRegistry::typeSet)
+                .flatMap(ImmutableSet::stream)
+                .collect(toImmutableSet());
+        return result;
     }
 
     boolean isMultitenant() {

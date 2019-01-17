@@ -49,9 +49,11 @@ import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -165,6 +167,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         lifecycle.onStateChanged(change, ImmutableSet.of());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>See {@link #canDispatch(EventEnvelope)}.
+     */
     @Override
     protected void handle(EventEnvelope envelope) {
         Collection<SubscriptionRecord> subscriptionRecords =
@@ -180,31 +187,50 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         activeSubscriptionsCache.removeRecords(envelope);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>If {@code Stand} can dispatch an event, i.e. there is a matching subscription, the method
+     * caches the matching subscription record to avoid searching for it again in
+     * {@link #handle(EventEnvelope)}.
+     */
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
         TypeUrl typeUrl = TypeUrl.of(envelope.getMessage());
-        if (!subscriptionRegistry.hasType(typeUrl)) {
-            return false;
-        }
-        Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
-        for (SubscriptionRecord record : allRecords) {
-            boolean subscriptionIsActive = record.isActive();
-            boolean stateMatches = record.matches(envelope);
-            if (subscriptionIsActive && stateMatches) {
-                activeSubscriptionsCache.put(envelope, record);
+        TenantAwareOperation op = new EventOperation(envelope.getOuterObject()) {
+            @Override
+            public void run() {
+                if (!subscriptionRegistry.hasType(typeUrl)) {
+                    return;
+                }
+                Set<SubscriptionRecord> records = subscriptionRegistry.byType(typeUrl);
+                records.stream()
+                       .filter(SubscriptionRecord::isActive)
+                       .filter(record -> record.matches(envelope))
+                       .forEach(record -> activeSubscriptionsCache.put(envelope, record));
             }
-        }
-        return !activeSubscriptionsCache.get(envelope)
-                                        .isEmpty();
+        };
+        op.execute();
+        boolean canDispatch = !activeSubscriptionsCache.get(envelope)
+                                                       .isEmpty();
+        return canDispatch;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Stand dispatches no message classes if there are no subscriptions present but as having
+     * such dispatcher is illegal we say that it always dispatches {@link EntityStateChanged}
+     * event.
+     */
     @Override
     public Set<EventClass> getMessageClasses() {
-        Set<EventClass> result = subscriptionRegistry
-                .typeSet()
+        ImmutableSet<TypeUrl> types = subscriptionRegistry.typeSet();
+        Set<EventClass> result = types
                 .stream()
                 .map(EventClass::from)
                 .collect(toSet());
+        result.add(EventClass.from(EntityStateChanged.class));
         return result;
     }
 
