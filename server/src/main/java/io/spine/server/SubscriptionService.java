@@ -19,7 +19,6 @@
  */
 package io.spine.server;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -57,13 +56,6 @@ public class SubscriptionService
     private SubscriptionService(Map<TypeUrl, BoundedContext> map) {
         super();
         this.typeToContextMap = ImmutableMap.copyOf(map);
-    }
-
-    private static SubscriptionService create(ImmutableMap<TypeUrl, BoundedContext> map) {
-        ImmutableCollection<BoundedContext> boundedContexts = map.values();
-        // todo think of a better place for this
-        boundedContexts.forEach(bc -> bc.registerEventDispatcher(bc.getStand()));
-        return new SubscriptionService(map);
     }
 
     public static Builder newBuilder() {
@@ -168,7 +160,7 @@ public class SubscriptionService
                         "Subscription service must have at least one bounded context.");
             }
             ImmutableMap<TypeUrl, BoundedContext> map = createMap();
-            SubscriptionService result = create(map);
+            SubscriptionService result = new SubscriptionService(map);
             return result;
         }
 

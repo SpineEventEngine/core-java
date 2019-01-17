@@ -211,7 +211,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     /**
      * {@inheritDoc}
      *
-     * <p>Stand does not subscribe to the external events.
+     * <p>Stand does not consume external events.
      */
     @Override
     public Set<EventClass> getExternalEventClasses() {
