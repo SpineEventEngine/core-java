@@ -35,6 +35,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.model.Nothing;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.aggregate.Project;
@@ -194,6 +195,12 @@ public class Given {
             // DO NOT replace the type name with another Project class.
             Query result = requestFactory.query()
                                          .all(io.spine.test.projection.Project.class);
+            return result;
+        }
+
+        static Query readUnknownType() {
+            Query result = requestFactory.query()
+                                         .all(Nothing.class);
             return result;
         }
     }
