@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -46,8 +45,14 @@ public final class ServerEnvironment {
     private static final @Nullable String appEngineRuntimeVersion =
             emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
 
-    private static @MonotonicNonNull Supplier<DeploymentType> deploymentTypeSupplier =
-            DeploymentDetector.newInstance();
+    /**
+     * The deployment detector is instantiated with a system {@link DeploymentDetector} and
+     * can be reassigned the value via {@link #configureDeployment(Supplier)}.
+     *
+     * <p>Value from this supplier are used to {@linkplain #getDeploymentType() get the deployment
+     * type}.
+     */
+    private static Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
@@ -90,7 +95,7 @@ public final class ServerEnvironment {
      * The type of the environment application is deployed to.
      */
     public static DeploymentType getDeploymentType() {
-        return deploymentTypeSupplier.get();
+        return deploymentDetector.get();
     }
 
     /**
@@ -112,6 +117,6 @@ public final class ServerEnvironment {
     @VisibleForTesting
     public static void configureDeployment(Supplier<DeploymentType> supplier) {
         checkNotNull(supplier);
-        deploymentTypeSupplier = supplier;
+        deploymentDetector = supplier;
     }
 }
