@@ -120,6 +120,11 @@ public class Given {
             super();
             getEventRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
         }
+
+        @Override
+        public EntityLifecycle lifecycleOf(ProjectId id) {
+            return super.lifecycleOf(id);
+        }
     }
 
     public static class StandTestAggregateRepository

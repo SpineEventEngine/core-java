@@ -275,6 +275,13 @@ public class Given {
         public CustomerAggregateRepository() {
             super();
         }
+
+        @SuppressWarnings("RedundantMethodOverride")
+        // Overridden to be exposed to the test package.
+        @Override
+        public EntityLifecycle lifecycleOf(CustomerId id) {
+            return super.lifecycleOf(id);
+        }
     }
 
     public static class CustomerAggregate

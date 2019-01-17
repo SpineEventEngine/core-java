@@ -26,6 +26,7 @@ import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.SubscriptionUpdate;
+import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
@@ -33,8 +34,6 @@ import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.system.server.NoOpSystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.stream.Stream;
 
 import static io.spine.core.BoundedContextNames.assumingTests;
 import static io.spine.server.storage.StorageFactorySwitch.newInstance;
@@ -52,20 +51,18 @@ public class StandTestEnv {
 
     @SuppressWarnings("unchecked") // Generic type matching issues. OK for tests.
     public static Stand newStand(boolean multitenant, Repository... repositories) {
-        Stand stand = Stand
+        Stand.Builder standBuilder = Stand
                 .newBuilder()
                 .setMultitenant(multitenant)
-                .setSystemReadSide(NoOpSystemReadSide.INSTANCE)
+                .setSystemReadSide(NoOpSystemReadSide.INSTANCE);
+        BoundedContext boundedContext = BoundedContext
+                .newBuilder()
+                .setStand(standBuilder)
                 .build();
-        StorageFactorySwitch storage = newInstance(assumingTests(), multitenant);
+        Stand stand = boundedContext.getStand();
         for (Repository repository : repositories) {
-            stand.registerTypeSupplier(repository);
-            repository.initStorage(storage.get());
+            boundedContext.register(repository);
         }
-        Stream.of(repositories)
-              .forEach(repository -> {
-
-              });
         return stand;
     }
 
