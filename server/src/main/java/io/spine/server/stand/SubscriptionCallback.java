@@ -49,7 +49,7 @@ abstract class SubscriptionCallback {
     }
 
     boolean isActive() {
-        return notifyAction == null;
+        return notifyAction != null;
     }
 
     public Subscription subscription() {
