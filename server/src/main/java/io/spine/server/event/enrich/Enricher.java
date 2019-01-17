@@ -61,7 +61,7 @@ public final class Enricher {
      *
      * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
-    Enricher(Builder builder) {
+    Enricher(EnricherBuilder builder) {
         LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap =
                 LinkedListMultimap.create();
         for (EnrichmentFunction<?, ?, ?> fn : builder.getFunctions()) {
@@ -172,8 +172,8 @@ public final class Enricher {
         return result;
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
+    public static EnricherBuilder newBuilder() {
+        return new EnricherBuilder();
     }
 
 }

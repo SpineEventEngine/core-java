@@ -36,7 +36,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by
  * the {@code Enricher} and set a custom translation function, if needed.
  */
-public final class Builder {
+public final class EnricherBuilder {
 
     /** Translation functions which perform the enrichment. */
     private final Set<EnrichmentFunction<?, ?, ?>> functions = Sets.newHashSet();
@@ -44,7 +44,7 @@ public final class Builder {
     /**
      * Prevents direct instantiation.
      */
-    Builder() {
+    EnricherBuilder() {
     }
 
     /**
@@ -58,9 +58,9 @@ public final class Builder {
      *         a function which converts fields
      * @return the builder instance
      */
-    public <S, T> Builder add(Class<S> sourceFieldClass,
-                              Class<T> enrichmentFieldClass,
-                              BiFunction<S, EventContext, T> func) {
+    public <S, T> EnricherBuilder add(Class<S> sourceFieldClass,
+                                      Class<T> enrichmentFieldClass,
+                                      BiFunction<S, EventContext, T> func) {
         checkNotNull(sourceFieldClass);
         checkNotNull(enrichmentFieldClass);
         checkNotNull(func);
@@ -73,7 +73,7 @@ public final class Builder {
     }
 
     /** Removes a translation for the passed type. */
-    public Builder remove(EnrichmentFunction entry) {
+    public EnricherBuilder remove(EnrichmentFunction entry) {
         functions.remove(entry);
         return this;
     }

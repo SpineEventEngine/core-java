@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Enricher Builder should")
 class EnricherBuilderTest {
 
-    private Builder builder;
+    private EnricherBuilder builder;
     private BiFunction<Timestamp, EventContext, StringValue> function;
     private FieldEnrichment<Timestamp, StringValue, ?> fieldEnrichment;
 
