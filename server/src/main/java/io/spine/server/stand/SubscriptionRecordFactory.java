@@ -40,37 +40,38 @@ final class SubscriptionRecordFactory {
      * @return
      */
     static SubscriptionRecord newRecordFor(Subscription subscription) {
-        TypeUrl type = getType(subscription);
-        if (isEvent(type)) {
-            return createEventRecord(subscription, type);
+        if (isEventSubscription(subscription)) {
+            return createEventRecord(subscription);
         }
         return createEntityRecord(subscription);
     }
 
-    private static SubscriptionRecord createEntityRecord(Subscription subscription) {
-        TypeUrl type = TypeUrl.of(EntityStateChanged.class);
-        SubscriptionMatcher matcher = EntitySubscriptionMatcher.createFor(subscription);
-        SubscriptionCallback callback = new EntitySubscriptionCallback(subscription);
-        return new SubscriptionRecord(subscription, type, matcher, callback);
-    }
-
-    private static SubscriptionRecord createEventRecord(Subscription subscription, TypeUrl type) {
-        SubscriptionMatcher matcher = EventSubscriptionMatcher.createFor(subscription);
+    private static SubscriptionRecord createEventRecord(Subscription subscription) {
+        TypeUrl type = getSubscriptionType(subscription);
+        SubscriptionMatcher matcher = new EventSubscriptionMatcher(subscription);
         SubscriptionCallback callback = new EventSubscriptionCallback(subscription);
         return new SubscriptionRecord(subscription, type, matcher, callback);
     }
 
-    private static TypeUrl getType(Subscription subscription) {
+    private static SubscriptionRecord createEntityRecord(Subscription subscription) {
+        TypeUrl type = TypeUrl.of(EntityStateChanged.class);
+        SubscriptionMatcher matcher = new EntitySubscriptionMatcher(subscription);
+        SubscriptionCallback callback = new EntitySubscriptionCallback(subscription);
+        return new SubscriptionRecord(subscription, type, matcher, callback);
+    }
+
+    private static boolean isEventSubscription(Subscription subscription) {
+        TypeUrl type = getSubscriptionType(subscription);
+        Class<?> javaClass = type.getJavaClass();
+        boolean result = EventMessage.class.isAssignableFrom(javaClass);
+        return result;
+    }
+
+    private static TypeUrl getSubscriptionType(Subscription subscription) {
         Topic topic = subscription.getTopic();
         String typeAsString = topic.getTarget()
                                    .getType();
         TypeUrl result = TypeUrl.parse(typeAsString);
-        return result;
-    }
-
-    private static boolean isEvent(TypeUrl type) {
-        Class<?> javaClass = type.getJavaClass();
-        boolean result = EventMessage.class.isAssignableFrom(javaClass);
         return result;
     }
 }
