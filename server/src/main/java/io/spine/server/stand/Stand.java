@@ -150,6 +150,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *         the entity whose state needs to be posted
      * @param lifecycle
      *         the lifecycle of the entity
+     * @deprecated Avoid posting entity state to the Stand directly and prefer relying on the
+     *             proper entity lifecycle via event dispatch.
      */
     @Deprecated
     public void post(Entity entity, EntityLifecycle lifecycle) {
