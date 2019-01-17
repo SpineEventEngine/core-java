@@ -83,7 +83,7 @@ public abstract class AbstractEventSubscriber
     }
 
     /**
-     * Handles an event dispatched to this subscriber.
+     * Handles an event dispatched to this subscriber instance.
      *
      * <p>By default passes the event to the corresponding {@linkplain io.spine.core.Subscribe
      * subscriber} method of the entity.
