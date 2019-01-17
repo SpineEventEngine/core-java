@@ -35,6 +35,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.event.EventFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -96,7 +97,7 @@ public class Given {
         return new StandTestProjectionRepository();
     }
 
-    public static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
+    public static StandTestAggregateRepository aggregateRepo() {
         return new StandTestAggregateRepository();
     }
 
@@ -125,6 +126,13 @@ public class Given {
             extends AggregateRepository<ProjectId, StandTestAggregate> {
         private StandTestAggregateRepository() {
             super();
+        }
+
+        @SuppressWarnings("RedundantMethodOverride")
+        // Overridden to be exposed to the test package.
+        @Override
+        public EntityLifecycle lifecycleOf(ProjectId id) {
+            return super.lifecycleOf(id);
         }
     }
 

@@ -22,15 +22,15 @@ package io.spine.server.stand.given;
 
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.EventMessage;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.client.SubscriptionUpdate;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.NoOpSystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -110,10 +110,17 @@ public class StandTestEnv {
 
         private Any newEntityState = null;
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Currently there is always exactly one {@code EntityStateUpdate} in a
+         * {@code SubscriptionUpdate}.
+         */
         @Override
-        public void update(EventMessage event) {
-            EntityStateChanged theEvent = (EntityStateChanged) event;
-            newEntityState = theEvent.getNewState();
+        public void accept(SubscriptionUpdate update) {
+            EntityStateUpdate entityStateUpdate = update.getEntityStateUpdatesList()
+                                                        .get(0);
+            newEntityState = entityStateUpdate.getState();
         }
 
         public @Nullable Any newEntityState() {

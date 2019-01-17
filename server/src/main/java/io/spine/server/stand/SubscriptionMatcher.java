@@ -40,7 +40,7 @@ import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Decides whether to update the subscription when a given event occurs in the system.
+ * Decides whether the given event matches a subscription criteria.
  */
 abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 

@@ -30,6 +30,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestAggregate;
+import io.spine.server.stand.given.Given.StandTestAggregateRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.test.projection.ProjectId;
@@ -152,7 +153,7 @@ class StandPostTest {
     @Test
     @DisplayName("deliver updates")
     void deliverUpdates() {
-        AggregateRepository<ProjectId, StandTestAggregate> repository = Given.aggregateRepo();
+        StandTestAggregateRepository repository = Given.aggregateRepo();
         ProjectId entityId = ProjectId
                 .newBuilder()
                 .setId("PRJ-001")
@@ -165,9 +166,7 @@ class StandPostTest {
                                 .build();
         Stand stand = spy(innerStand);
 
-        stand.post(requestFactory.createCommandContext()
-                                 .getActorContext()
-                                 .getTenantId(), entity);
+        stand.post(entity, repository.lifecycleOf(entityId));
     }
 
     @Test
@@ -214,11 +213,9 @@ class StandPostTest {
                     .newBuilder()
                     .setId(Identifier.newUuid())
                     .build();
-            StandTestAggregate entity = Given.aggregateRepo()
-                                             .create(entityId);
-            stand.post(requestFactory.createCommandContext()
-                                     .getActorContext()
-                                     .getTenantId(), entity);
+            StandTestAggregateRepository repository = Given.aggregateRepo();
+            StandTestAggregate entity = repository.create(entityId);
+            stand.post(entity, repository.lifecycleOf(entityId));
 
             threadInvocationRegistry.add(threadName);
         };

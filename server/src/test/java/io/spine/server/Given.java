@@ -36,6 +36,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.model.Nothing;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -214,6 +215,13 @@ public class Given {
 
         ProjectAggregateRepository() {
             super();
+        }
+
+        @SuppressWarnings("RedundantMethodOverride")
+        // Overridden to expose the method to the current package.
+        @Override
+        protected EntityLifecycle lifecycleOf(ProjectId id) {
+            return super.lifecycleOf(id);
         }
     }
 

@@ -30,14 +30,15 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.EventMessage;
 import io.spine.client.ActorRequestFactory;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Filters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
+import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
@@ -51,13 +52,11 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
-import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv;
 import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
-import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.MemoizingReadSide;
 import io.spine.system.server.NoOpSystemReadSide;
 import io.spine.test.commandservice.customer.Customer;
@@ -448,10 +447,11 @@ class StandTest extends TenantAwareTest {
         Collection<Customer> callbackStates = newHashSet();
         MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction() {
             @Override
-            public void update(EventMessage event) {
-                super.update(event);
-                EntityStateChanged theEvent = (EntityStateChanged) event;
-                Any newState = theEvent.getNewState();
+            public void accept(SubscriptionUpdate update) {
+                super.accept(update);
+                EntityStateUpdate entityStateUpdate = update.getEntityStateUpdatesList()
+                                                            .get(0);
+                Any newState = entityStateUpdate.getState();
                 Customer customerInCallback = unpack(newState, Customer.class);
                 callbackStates.add(customerInCallback);
             }
@@ -523,7 +523,7 @@ class StandTest extends TenantAwareTest {
         Any packedState = pack(customer);
         for (MemoizeNotifySubscriptionAction callback : callbacks) {
             assertEquals(packedState, callback.newEntityState());
-            verify(callback, times(1)).update(any(EventMessage.class));
+            verify(callback, times(1)).accept(any(SubscriptionUpdate.class));
         }
     }
 
@@ -539,7 +539,7 @@ class StandTest extends TenantAwareTest {
         CustomerId customerId = customer.getId();
         Version stateVersion = GivenVersion.withNumber(1);
 
-        verify(callback, never()).update(any(EventMessage.class));
+        verify(callback, never()).accept(any(SubscriptionUpdate.class));
     }
 
     private StandTestEnv.MemoizeNotifySubscriptionAction
@@ -1106,17 +1106,6 @@ class StandTest extends TenantAwareTest {
         return newEntityState -> {
             //do nothing
         };
-    }
-
-    /**
-     * Packs the parameters as {@code EntityStateEnvelope}
-     * bounded by the current {@linkplain #tenantId() tenant ID}.
-     */
-    protected EntityStateEnvelope asEnvelope(Object entityId,
-                                             Message entityState,
-                                             Version entityVersion) {
-        TenantId tenantId = isMultitenant() ? tenantId() : TenantId.getDefaultInstance();
-        return EntityStateEnvelope.of(entityId, entityState, entityVersion, tenantId);
     }
 
     private static Set<CustomerId> ids(Collection<Customer> customers) {

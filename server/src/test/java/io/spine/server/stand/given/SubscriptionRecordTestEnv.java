@@ -24,17 +24,14 @@ import com.google.protobuf.Message;
 import io.spine.client.Subscription;
 import io.spine.client.Target;
 import io.spine.client.Targets;
+import io.spine.client.Topic;
 import io.spine.test.aggregate.Project;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
 
 import java.util.Collections;
 
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
-public class SubscriptionRecordTestEnv {
+public final class SubscriptionRecordTestEnv {
 
     public static final TypeUrl TYPE = TypeUrl.of(Project.class);
     public static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
@@ -43,18 +40,37 @@ public class SubscriptionRecordTestEnv {
     private SubscriptionRecordTestEnv() {
     }
 
-    public static Target target() {
+    public static Subscription subscription() {
+        Target target = target();
+        Subscription subscription = withTarget(target);
+        return subscription;
+    }
+
+    public static Subscription subscription(Message targetId) {
+        Target target = target(targetId);
+        Subscription subscription = withTarget(target);
+        return subscription;
+
+    }
+
+    private static Subscription withTarget(Target target) {
+        Topic topic = Topic
+                .newBuilder()
+                .setTarget(target)
+                .build();
+        return Subscription
+                .newBuilder()
+                .setTopic(topic)
+                .build();
+    }
+
+    private static Target target() {
         Target target = Targets.allOf(Project.class);
         return target;
     }
 
-    public static Target target(Message targetId) {
+    private static Target target(Message targetId) {
         Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
         return target;
-    }
-
-    public static Subscription subscription() {
-        Subscription subscription = Subscription.getDefaultInstance();
-        return subscription;
     }
 }

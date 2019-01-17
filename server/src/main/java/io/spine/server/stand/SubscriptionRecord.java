@@ -36,9 +36,9 @@ final class SubscriptionRecord {
     private final SubscriptionCallback callback;
 
     SubscriptionRecord(Subscription subscription,
-                               TypeUrl type,
-                               SubscriptionMatcher matcher,
-                               SubscriptionCallback callback) {
+                       TypeUrl type,
+                       SubscriptionMatcher matcher,
+                       SubscriptionCallback callback) {
         this.subscription = subscription;
         this.type = type;
         this.matcher = matcher;
