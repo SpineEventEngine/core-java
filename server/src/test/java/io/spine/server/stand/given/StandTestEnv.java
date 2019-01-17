@@ -106,7 +106,7 @@ public class StandTestEnv {
         }
     }
 
-    public static class MemoizeUpdateCallback implements Stand.SubscriptionUpdateCallback {
+    public static class MemoizeNotifySubscriptionAction implements Stand.NotifySubscriptionAction {
 
         private Any newEntityState = null;
 

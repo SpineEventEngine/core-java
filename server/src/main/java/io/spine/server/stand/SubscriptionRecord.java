@@ -22,7 +22,7 @@ package io.spine.server.stand;
 import com.google.common.base.Objects;
 import io.spine.client.Subscription;
 import io.spine.core.EventEnvelope;
-import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
+import io.spine.server.stand.Stand.NotifySubscriptionAction;
 import io.spine.type.TypeUrl;
 
 /**
@@ -33,25 +33,25 @@ final class SubscriptionRecord {
     private final Subscription subscription;
     private final TypeUrl type;
     private final SubscriptionMatcher matcher;
-    private final SubscriptionCallbackRunner callbackRunner;
+    private final SubscriptionCallback callback;
 
     SubscriptionRecord(Subscription subscription,
                                TypeUrl type,
                                SubscriptionMatcher matcher,
-                               SubscriptionCallbackRunner callbackRunner) {
+                               SubscriptionCallback callback) {
         this.subscription = subscription;
         this.type = type;
         this.matcher = matcher;
-        this.callbackRunner = callbackRunner;
+        this.callback = callback;
     }
 
     /**
      * Attach an activation callback to this record.
      *
-     * @param callback the callback to attach
+     * @param notifyAction the callback to attach
      */
-    void activate(SubscriptionUpdateCallback callback) {
-        callbackRunner.setCallback(callback);
+    void activate(Stand.NotifySubscriptionAction notifyAction) {
+        callback.setNotifyAction(notifyAction);
     }
 
     /**
@@ -59,17 +59,17 @@ final class SubscriptionRecord {
      * @param event
      * @throws IllegalStateException
      *         if the subscription is not activated
-     * @see #activate(SubscriptionUpdateCallback)
+     * @see #activate(NotifySubscriptionAction)
      */
     void update(EventEnvelope event) {
-        callbackRunner.run(event);
+        callback.run(event);
     }
 
     /**
      * Checks whether this record has a callback attached.
      */
     boolean isActive() {
-        return callbackRunner.isActive();
+        return callback.isActive();
     }
 
     /**

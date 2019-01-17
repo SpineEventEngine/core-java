@@ -32,9 +32,9 @@ import io.spine.core.Responses;
 import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.EntityStateChanged;
 
-final class EntitySubscriptionRunner extends SubscriptionCallbackRunner {
+final class EntitySubscriptionCallback extends SubscriptionCallback {
 
-    EntitySubscriptionRunner(Subscription subscription) {
+    EntitySubscriptionCallback(Subscription subscription) {
         super(subscription);
     }
 

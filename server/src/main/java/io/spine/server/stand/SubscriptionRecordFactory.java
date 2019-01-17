@@ -50,14 +50,14 @@ final class SubscriptionRecordFactory {
     private static SubscriptionRecord createEntityRecord(Subscription subscription) {
         TypeUrl type = TypeUrl.of(EntityStateChanged.class);
         SubscriptionMatcher matcher = EntitySubscriptionMatcher.createFor(subscription);
-        SubscriptionCallbackRunner callbackRunner = new EntitySubscriptionRunner(subscription);
-        return new SubscriptionRecord(subscription, type, matcher, callbackRunner);
+        SubscriptionCallback callback = new EntitySubscriptionCallback(subscription);
+        return new SubscriptionRecord(subscription, type, matcher, callback);
     }
 
     private static SubscriptionRecord createEventRecord(Subscription subscription, TypeUrl type) {
         SubscriptionMatcher matcher = EventSubscriptionMatcher.createFor(subscription);
-        SubscriptionCallbackRunner callbackRunner = new EventSubscriptionRunner(subscription);
-        return new SubscriptionRecord(subscription, type, matcher, callbackRunner);
+        SubscriptionCallback callback = new EventSubscriptionCallback(subscription);
+        return new SubscriptionRecord(subscription, type, matcher, callback);
     }
 
     private static TypeUrl getType(Subscription subscription) {

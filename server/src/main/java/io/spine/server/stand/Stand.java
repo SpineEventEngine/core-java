@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -96,7 +97,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private final SubscriptionRegistry subscriptionRegistry;
 
-    private final SubscriptionCache subscriptionCache;
+    private final SubscriptionCache activeSubscriptionsCache;
 
     /**
      * Manages the {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
@@ -122,7 +123,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                            ? builder.multitenant
                            : false;
         this.subscriptionRegistry = builder.getSubscriptionRegistry();
-        this.subscriptionCache = builder.getSubscriptionCache();
+        this.activeSubscriptionsCache = builder.getSubscriptionCache();
         this.typeRegistry = builder.getTypeRegistry();
         this.topicValidator = builder.getTopicValidator();
         this.queryValidator = builder.getQueryValidator();
@@ -166,7 +167,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     @Override
     protected void handle(EventEnvelope envelope) {
-        Collection<SubscriptionRecord> subscriptionRecords = subscriptionCache.get(envelope);
+        Collection<SubscriptionRecord> subscriptionRecords =
+                activeSubscriptionsCache.get(envelope);
         checkState(!subscriptionRecords.isEmpty(),
                    "Dispatched an event with no active subscriptions on it");
         subscriptionRecords.forEach(
@@ -188,11 +190,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             boolean subscriptionIsActive = record.isActive();
             boolean stateMatches = record.matches(envelope);
             if (subscriptionIsActive && stateMatches) {
-                subscriptionCache.put(envelope, record);
+                activeSubscriptionsCache.put(envelope, record);
             }
         }
-        return !subscriptionCache.get(envelope)
-                                 .isEmpty();
+        return !activeSubscriptionsCache.get(envelope)
+                                        .isEmpty();
     }
 
     @Override
@@ -236,7 +238,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         TenantId tenantId = topic.getContext()
                                  .getTenantId();
         TenantAwareOperation op = new TenantAwareOperation(tenantId) {
-
             @Override
             public void run() {
                 Subscription subscription = subscriptionRegistry.add(topic);
@@ -252,27 +253,27 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * subscribe() method call}.
      *
      * <p>After the activation, the clients will start receiving the updates via
-     * {@code SubscriptionUpdateCallback} upon the changes in the entities, defined by
+     * {@code NotifySubscriptionAction} upon the changes in the entities, defined by
      * the {@code Target} attribute used for this subscription.
      *
      * @param subscription
-     *         the subscription to activate.
-     * @param callback
-     *         an instance of {@link SubscriptionUpdateCallback} executed upon entity update.
+     *         the subscription to activate
+     * @param notifyAction
+     *         an action which notifies the subscribers about an update
      * @see #subscribe(Topic, StreamObserver)
      */
     public void activate(Subscription subscription,
-                         SubscriptionUpdateCallback callback,
+                         NotifySubscriptionAction notifyAction,
                          StreamObserver<Response> responseObserver) {
         checkNotNull(subscription);
-        checkNotNull(callback);
+        checkNotNull(notifyAction);
 
         subscriptionValidator.validate(subscription, responseObserver);
 
         SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
             public void run() {
-                subscriptionRegistry.activate(subscription, callback);
+                subscriptionRegistry.activate(subscription, notifyAction);
                 ack(responseObserver);
             }
         };
@@ -284,19 +285,19 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * Cancels the {@link Subscription}.
      *
      * <p>Typically invoked to cancel the previous
-     * {@link #activate(Subscription, SubscriptionUpdateCallback, StreamObserver) activate()} call.
+     * {@link #activate(Subscription, NotifySubscriptionAction, StreamObserver) activate()} call.
      *
      * <p>After this method is called, the subscribers stop receiving the updates,
      * related to the given {@code Subscription}.
      *
-     * @param subscription a subscription to cancel.
+     * @param subscription
+     *         a subscription to cancel
      */
     public void cancel(Subscription subscription,
                        StreamObserver<Response> responseObserver) {
         subscriptionValidator.validate(subscription, responseObserver);
 
         SubscriptionOperation op = new SubscriptionOperation(subscription) {
-
             @Override
             public void run() {
                 subscriptionRegistry.remove(subscription);
@@ -391,14 +392,12 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * A callback which updates the subscription with a given event.
+     * Delivers the given subscription update to the subscribers.
      *
-     * @see #activate(Subscription, SubscriptionUpdateCallback, StreamObserver)
+     * @see #activate(Subscription, NotifySubscriptionAction, StreamObserver)
      * @see #cancel(Subscription, StreamObserver)
      */
-    public interface SubscriptionUpdateCallback {
-
-        void run(SubscriptionUpdate update);
+    public interface NotifySubscriptionAction extends Consumer<SubscriptionUpdate> {
     }
 
     /**

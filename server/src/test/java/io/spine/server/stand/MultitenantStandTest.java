@@ -24,12 +24,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Topic;
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.stand.given.StandTestEnv.MemoizeUpdateCallback;
+import io.spine.server.stand.given.StandTestEnv;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.testing.core.given.GivenVersion;
@@ -73,13 +71,13 @@ class MultitenantStandTest extends StandTest {
 
         // --- Default Tenant
         ActorRequestFactory requestFactory = getRequestFactory();
-        MemoizeUpdateCallback defaultTenantCallback =
+        StandTestEnv.MemoizeNotifySubscriptionAction defaultTenantCallback =
                 subscribeToAllOf(stand, requestFactory, Customer.class);
 
         // --- Another Tenant
         TenantId anotherTenant = newUuid();
         ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
-        MemoizeUpdateCallback anotherCallback =
+        StandTestEnv.MemoizeNotifySubscriptionAction anotherCallback =
                 subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
@@ -97,13 +95,13 @@ class MultitenantStandTest extends StandTest {
         assertNull(anotherCallback.newEntityState());
     }
 
-    protected MemoizeUpdateCallback
+    protected StandTestEnv.MemoizeNotifySubscriptionAction
     subscribeToAllOf(Stand stand,
                      ActorRequestFactory requestFactory,
                      Class<? extends Message> entityClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(entityClass);
-        MemoizeUpdateCallback callback = new MemoizeUpdateCallback();
+        StandTestEnv.MemoizeNotifySubscriptionAction callback = new StandTestEnv.MemoizeNotifySubscriptionAction();
         subscribeAndActivate(stand, allCustomers, callback);
 
         assertNull(callback.newEntityState());

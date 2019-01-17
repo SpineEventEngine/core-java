@@ -33,7 +33,6 @@ import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
-import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
@@ -100,13 +99,13 @@ public class SubscriptionService
 
         try {
             BoundedContext boundedContext = selectBoundedContext(subscription);
-            SubscriptionUpdateCallback updateCallback = update -> {
+            Stand.NotifySubscriptionAction notifyAction = update -> {
                 checkNotNull(update);
                 responseObserver.onNext(update);
             };
             Stand targetStand = boundedContext.getStand();
 
-            targetStand.activate(subscription, updateCallback, forwardErrorsOnly(responseObserver));
+            targetStand.activate(subscription, notifyAction, forwardErrorsOnly(responseObserver));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error activating the subscription", e);
             responseObserver.onError(e);

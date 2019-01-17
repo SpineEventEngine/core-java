@@ -23,39 +23,20 @@ package io.spine.server.stand;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.core.EventEnvelope;
-import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import static com.google.common.base.Preconditions.checkState;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
-// todo this sounds like something related to multithreading
-abstract class SubscriptionCallbackRunner {
+final class EventSubscriptionCallback extends SubscriptionCallback {
 
-    private final Subscription subscription;
-
-    private @MonotonicNonNull SubscriptionUpdateCallback callback = null;
-
-    SubscriptionCallbackRunner(Subscription subscription) {
-        this.subscription = subscription;
+    EventSubscriptionCallback(Subscription subscription) {
+        super(subscription);
     }
 
-    protected void run(EventEnvelope event) {
-        checkState(isActive(), "Notifying by a non-activated subscription.");
-        SubscriptionUpdate update = buildSubscriptionUpdate(event);
-        callback.run(update);
+    /**
+     * Always throws {@link IllegalStateException} as event subscriptions are unsupported for now.
+     */
+    @Override
+    protected SubscriptionUpdate buildSubscriptionUpdate(EventEnvelope event) {
+        throw newIllegalStateException("Event subscriptions are not implemented");
     }
-
-    void setCallback(SubscriptionUpdateCallback callback) {
-        this.callback = callback;
-    }
-
-    boolean isActive() {
-        return callback == null;
-    }
-
-    public Subscription subscription() {
-        return subscription;
-    }
-
-    protected abstract SubscriptionUpdate buildSubscriptionUpdate(EventEnvelope event);
 }

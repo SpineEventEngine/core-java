@@ -23,20 +23,38 @@ package io.spine.server.stand;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.core.EventEnvelope;
+import io.spine.server.stand.Stand.NotifySubscriptionAction;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static com.google.common.base.Preconditions.checkState;
 
-final class EventSubscriptionRunner extends SubscriptionCallbackRunner {
+abstract class SubscriptionCallback {
 
-    EventSubscriptionRunner(Subscription subscription) {
-        super(subscription);
+    private final Subscription subscription;
+
+    private @MonotonicNonNull NotifySubscriptionAction notifyAction = null;
+
+    SubscriptionCallback(Subscription subscription) {
+        this.subscription = subscription;
     }
 
-    /**
-     * Always throws {@link IllegalStateException} as event subscriptions are unsupported for now.
-     */
-    @Override
-    protected SubscriptionUpdate buildSubscriptionUpdate(EventEnvelope event) {
-        throw newIllegalStateException("Event subscriptions are not implemented");
+    protected void run(EventEnvelope event) {
+        checkState(isActive(), "Notifying by a non-activated subscription.");
+        SubscriptionUpdate update = buildSubscriptionUpdate(event);
+        notifyAction.accept(update);
     }
+
+    void setNotifyAction(NotifySubscriptionAction notifyAction) {
+        this.notifyAction = notifyAction;
+    }
+
+    boolean isActive() {
+        return notifyAction == null;
+    }
+
+    public Subscription subscription() {
+        return subscription;
+    }
+
+    protected abstract SubscriptionUpdate buildSubscriptionUpdate(EventEnvelope event);
 }

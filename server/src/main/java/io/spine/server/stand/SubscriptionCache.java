@@ -44,4 +44,8 @@ final class SubscriptionCache {
     void put(EventEnvelope event, SubscriptionRecord record) {
         cache.put(event, record);
     }
+
+    void removeRecords(EventEnvelope event) {
+        cache.removeAll(event);
+    }
 }

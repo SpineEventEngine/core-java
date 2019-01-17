@@ -53,9 +53,9 @@ import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
-import io.spine.server.stand.given.StandTestEnv.MemoizeUpdateCallback;
+import io.spine.server.stand.given.StandTestEnv;
+import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.MemoizingReadSide;
@@ -397,7 +397,7 @@ class StandTest extends TenantAwareTest {
             Topic allCustomers = requestFactory.topic()
                                                .allOf(Customer.class);
 
-            MemoizeUpdateCallback memoizeCallback = new MemoizeUpdateCallback();
+            MemoizeNotifySubscriptionAction memoizeCallback = new StandTestEnv.MemoizeNotifySubscriptionAction();
 
             subscribeAndActivate(stand, allCustomers, memoizeCallback);
             assertNull(memoizeCallback.newEntityState());
@@ -419,7 +419,7 @@ class StandTest extends TenantAwareTest {
             Topic allProjects = requestFactory.topic()
                                               .allOf(Project.class);
 
-            MemoizeUpdateCallback memoizeCallback = new MemoizeUpdateCallback();
+            MemoizeNotifySubscriptionAction memoizeCallback = new StandTestEnv.MemoizeNotifySubscriptionAction();
             subscribeAndActivate(stand, allProjects, memoizeCallback);
             assertNull(memoizeCallback.newEntityState());
 
@@ -446,7 +446,7 @@ class StandTest extends TenantAwareTest {
                                             .byId(ids(sampleCustomers))
                                             .build();
         Collection<Customer> callbackStates = newHashSet();
-        MemoizeUpdateCallback callback = new MemoizeUpdateCallback() {
+        MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction() {
             @Override
             public void update(EventMessage event) {
                 super.update(event);
@@ -473,7 +473,7 @@ class StandTest extends TenantAwareTest {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(Customer.class);
 
-        MemoizeUpdateCallback memoizeCallback = new MemoizeUpdateCallback();
+        MemoizeNotifySubscriptionAction memoizeCallback = new MemoizeNotifySubscriptionAction();
         Subscription subscription =
                 subscribeAndActivate(stand, allCustomers, memoizeCallback);
 
@@ -506,11 +506,11 @@ class StandTest extends TenantAwareTest {
         Stand stand = createStand();
         Target allCustomers = Targets.allOf(Customer.class);
 
-        Set<MemoizeUpdateCallback> callbacks = newHashSet();
+        Set<MemoizeNotifySubscriptionAction> callbacks = newHashSet();
         int totalCallbacks = 100;
 
         for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
-            MemoizeUpdateCallback callback = subscribeWithCallback(stand, allCustomers);
+            StandTestEnv.MemoizeNotifySubscriptionAction callback = subscribeWithCallback(stand, allCustomers);
             callbacks.add(callback);
         }
 
@@ -521,7 +521,7 @@ class StandTest extends TenantAwareTest {
         Version stateVersion = GivenVersion.withNumber(1);
 
         Any packedState = pack(customer);
-        for (MemoizeUpdateCallback callback : callbacks) {
+        for (MemoizeNotifySubscriptionAction callback : callbacks) {
             assertEquals(packedState, callback.newEntityState());
             verify(callback, times(1)).update(any(EventMessage.class));
         }
@@ -532,7 +532,7 @@ class StandTest extends TenantAwareTest {
     void notTriggerOnTypeMismatch() {
         Stand stand = createStand();
         Target allProjects = Targets.allOf(Project.class);
-        MemoizeUpdateCallback callback = subscribeWithCallback(stand, allProjects);
+        MemoizeNotifySubscriptionAction callback = subscribeWithCallback(stand, allProjects);
         Customer customer = fillSampleCustomers(1)
                 .iterator()
                 .next();
@@ -542,9 +542,9 @@ class StandTest extends TenantAwareTest {
         verify(callback, never()).update(any(EventMessage.class));
     }
 
-    private MemoizeUpdateCallback
+    private StandTestEnv.MemoizeNotifySubscriptionAction
     subscribeWithCallback(Stand stand, Target subscriptionTarget) {
-        MemoizeUpdateCallback callback = spy(new MemoizeUpdateCallback());
+        StandTestEnv.MemoizeNotifySubscriptionAction callback = spy(new MemoizeNotifySubscriptionAction());
         Topic topic = requestFactory.topic()
                                     .forTarget(subscriptionTarget);
         subscribeAndActivate(stand, topic, callback);
@@ -908,13 +908,12 @@ class StandTest extends TenantAwareTest {
     }
 
     @CanIgnoreReturnValue
-    protected static Subscription subscribeAndActivate(Stand stand,
-                                                       Topic topic,
-                                                       SubscriptionUpdateCallback callback) {
+    protected static Subscription
+    subscribeAndActivate(Stand stand, Topic topic, Stand.NotifySubscriptionAction notifyAction) {
         MemoizingObserver<Subscription> observer = memoizingObserver();
         stand.subscribe(topic, observer);
         Subscription subscription = observer.firstResponse();
-        stand.activate(subscription, callback, noOpObserver());
+        stand.activate(subscription, notifyAction, noOpObserver());
 
         assertNotNull(subscription);
         return subscription;
@@ -1103,7 +1102,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(expectedTypeUrl, actualTypeUrl, "Type was registered incorrectly");
     }
 
-    private static SubscriptionUpdateCallback emptyUpdateCallback() {
+    private static Stand.NotifySubscriptionAction emptyUpdateCallback() {
         return newEntityState -> {
             //do nothing
         };

@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Topic;
-import io.spine.server.stand.Stand.SubscriptionUpdateCallback;
 import io.spine.type.TypeUrl;
 
 import java.util.Set;
@@ -43,9 +42,9 @@ interface SubscriptionRegistry {
      * <p>The callback passed will become associated with the subscription.
      *
      * @param subscription the subscription to activate
-     * @param callback     the callback to make active
+     * @param notifyAction     the callback to make active
      */
-    void activate(Subscription subscription, SubscriptionUpdateCallback callback);
+    void activate(Subscription subscription, Stand.NotifySubscriptionAction notifyAction);
 
     /**
      * Creates a subscription for the passed {@link Topic} and adds it to the registry.
