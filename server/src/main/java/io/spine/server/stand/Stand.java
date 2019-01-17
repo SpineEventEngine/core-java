@@ -177,6 +177,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                     callbackExecutor.execute(action);
                 }
         );
+        activeSubscriptionsCache.removeRecords(envelope);
     }
 
     @Override
