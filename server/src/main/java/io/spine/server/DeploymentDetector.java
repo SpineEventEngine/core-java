@@ -44,7 +44,7 @@ class DeploymentDetector implements Supplier<DeploymentType> {
     static final String APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE = "Production";
     @VisibleForTesting
     static final String APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE = "Development";
-    
+
     private @MonotonicNonNull DeploymentType deploymentType;
 
     /** Prevent instantiation from outside. */
