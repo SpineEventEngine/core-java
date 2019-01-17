@@ -45,7 +45,7 @@ import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
  * from the server.
  *
- * <p> For synchronous read-side updates please see {@link QueryService}.
+ * <p>For synchronous read-side updates please see {@link QueryService}.
  */
 public class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
