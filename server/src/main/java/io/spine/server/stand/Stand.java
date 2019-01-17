@@ -230,7 +230,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 .stream()
                 .map(EventClass::from)
                 .collect(toSet());
-        result.add(EventClass.from(EntityStateChanged.class));
+        EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);
+        result.add(entityStateChanged);
         return result;
     }
 
