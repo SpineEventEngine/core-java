@@ -51,7 +51,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
         EntityStateChanged eventMessage = toEventMessage(event);
         EntityId entityId = eventMessage.getId()
                                         .getEntityId();
-        Any result = Identifier.pack(entityId);
+        Any result = entityId.getId();
         return result;
     }
 
