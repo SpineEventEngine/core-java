@@ -78,12 +78,6 @@ public class SubscriptionService
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Currently the method assumes that every event is an {@link EntityStateChanged} event as
-     * subscribing to other event types is not supported.
-     */
     @Override
     public void activate(Subscription subscription,
                          StreamObserver<SubscriptionUpdate> responseObserver) {
