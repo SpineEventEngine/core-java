@@ -100,7 +100,7 @@ public final class ServerEnvironment {
     @VisibleForTesting
     public static void resetDeploymentType() {
         Supplier<DeploymentType> supplier = DeploymentDetector.newInstance();
-        supplyDeploymentType(supplier);
+        configureDeployment(supplier);
     }
 
     /**
@@ -110,7 +110,7 @@ public final class ServerEnvironment {
      * {@linkplain #resetDeploymentType() reset it} during tear down.
      */
     @VisibleForTesting
-    public static void supplyDeploymentType(Supplier<DeploymentType> supplier) {
+    public static void configureDeployment(Supplier<DeploymentType> supplier) {
         checkNotNull(supplier);
         deploymentTypeSupplier = supplier;
     }
