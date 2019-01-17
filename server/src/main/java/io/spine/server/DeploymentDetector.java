@@ -48,7 +48,7 @@ final class DeploymentDetector implements Supplier<DeploymentType> {
     /**
      * The deployment type is instantiated lazily to a non-{@code null} value during {@link #get()}.
      *
-     * <p>Value is never changed it is initially set.
+     * <p>Value is never changed after it is initially set.
      */
     private @MonotonicNonNull DeploymentType deploymentType;
 
