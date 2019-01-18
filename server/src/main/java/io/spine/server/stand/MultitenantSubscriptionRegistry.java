@@ -37,7 +37,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.google.common.collect.Maps.newHashMap;
@@ -190,7 +189,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
         @Override
         public ImmutableSet<TypeUrl> typeSet() {
-            return copyOf(typeToRecord.keySet());
+            return ImmutableSet.copyOf(typeToRecord.keySet());
         }
 
         @Override
