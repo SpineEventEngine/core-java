@@ -18,37 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.server.event.given.bus;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.Command;
-import io.spine.server.event.enrich.Enricher;
-import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectId;
+import io.spine.test.event.ProjectStarted;
 
-import java.util.List;
+public class GivenEventMessage {
 
-/**
- * Test fixture for single-tenant Bounded Contexts.
- */
-@VisibleForTesting
-public final class SingleTenantBlackBoxContext
-        extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
+    private static final ProjectStarted PROJECT_STARTED = projectStarted(EventBusTestEnv.PROJECT_ID);
 
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(SingleTenantBlackBoxContext.class);
-
-    SingleTenantBlackBoxContext(Enricher enricher) {
-        super(false, enricher);
+    private GivenEventMessage() {
     }
 
-    @Override
-    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
-        List<Command> commands = commandTap.commands();
-        return new EmittedCommands(commands);
+    static ProjectStarted projectStarted() {
+        return PROJECT_STARTED;
     }
 
-    @Override
-    protected TestActorRequestFactory requestFactory() {
-        return requestFactory;
+    static ProjectCreated projectCreated(ProjectId id) {
+        return ProjectCreated.newBuilder()
+                             .setProjectId(id)
+                             .build();
+    }
+
+    static ProjectStarted projectStarted(ProjectId id) {
+        return ProjectStarted.newBuilder()
+                             .setProjectId(id)
+                             .build();
     }
 }

@@ -19,15 +19,13 @@
  */
 
 /**
- * Classes and interfaces generated from gRPC service definitions into this package are
- * a part of Service Provider Interface (SPI) of the framework. As such they are not
- * supposed to be used by code of applications.
+ * This package contains classes and interfaces related to enrichment of events.
  */
 
-@SPI
+@CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.event.grpc;
+package io.spine.server.event.enrich;
 
-import io.spine.annotation.SPI;
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

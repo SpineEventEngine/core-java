@@ -18,37 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.server.event.given.bus;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.Command;
-import io.spine.server.event.enrich.Enricher;
-import io.spine.testing.client.TestActorRequestFactory;
-
-import java.util.List;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.test.event.EBTaskAdded;
 
 /**
- * Test fixture for single-tenant Bounded Contexts.
+ * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
+ * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
  */
-@VisibleForTesting
-public final class SingleTenantBlackBoxContext
-        extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
+public class EBTaskAddedNoOpSubscriber extends AbstractEventSubscriber {
 
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(SingleTenantBlackBoxContext.class);
-
-    SingleTenantBlackBoxContext(Enricher enricher) {
-        super(false, enricher);
-    }
-
-    @Override
-    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
-        List<Command> commands = commandTap.commands();
-        return new EmittedCommands(commands);
-    }
-
-    @Override
-    protected TestActorRequestFactory requestFactory() {
-        return requestFactory;
+    @SuppressWarnings("unused")
+    @Subscribe
+    public void on(EBTaskAdded message, EventContext context) {
+        // Do nothing.
     }
 }

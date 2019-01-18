@@ -18,23 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.given.bus;
 
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.google.protobuf.Message;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.test.event.EBProjectArchived;
 
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+public class EBProjectArchivedSubscriber extends AbstractEventSubscriber {
 
-@DisplayName("SupportsFieldConversion should")
-class SupportsFieldConversionTest {
+    private Message eventMessage;
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        SupportsFieldConversion predicate =
-                SupportsFieldConversion.of(StringValue.class, String.class);
-        new NullPointerTester().testAllPublicInstanceMethods(predicate);
+    @Subscribe
+    public void on(EBProjectArchived message, EventContext ignored) {
+        this.eventMessage = message;
+    }
+
+    public Message getEventMessage() {
+        return eventMessage;
     }
 }

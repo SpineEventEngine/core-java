@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
@@ -33,9 +33,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-/**
- * @author Alexander Litus
- */
 @DisplayName("MessageEnrichment should")
 class MessageEnrichmentTest {
 

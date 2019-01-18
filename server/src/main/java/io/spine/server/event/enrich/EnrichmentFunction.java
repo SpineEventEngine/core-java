@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
+import io.spine.server.event.EventBus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -50,7 +51,7 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
      * We are having the generified class to be able to bound the types of messages and the
      * translation function when building the {@link Enricher}.
      *
-     * @see Enricher.Builder#add(Class, Class, java.util.function.BiFunction)
+     * @see EnricherBuilder#add(Class, Class, java.util.function.BiFunction)
      */
 
     private final Class<S> sourceClass;

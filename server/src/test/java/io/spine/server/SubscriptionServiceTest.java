@@ -20,6 +20,8 @@
 
 package io.spine.server;
 
+import com.google.common.truth.extensions.proto.ProtoSubject;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
@@ -27,7 +29,7 @@ import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Response;
-import io.spine.server.Given.MemoizeStreamObserver;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.Entity;
@@ -50,7 +52,6 @@ import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -103,48 +104,42 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("several bounded contexts")
         void severalBcs() {
-            BoundedContext firstBoundedContext = ctx("First");
-            BoundedContext secondBoundedContext = ctx("Second");
-            BoundedContext thirdBoundedContext = ctx("Third");
+            BoundedContext bc1 = ctx("First");
+            BoundedContext bc2 = ctx("Second");
+            BoundedContext bc3 = ctx("Third");
 
             SubscriptionService.Builder builder = SubscriptionService
                     .newBuilder()
-                    .add(firstBoundedContext)
-                    .add(secondBoundedContext)
-                    .add(thirdBoundedContext);
+                    .add(bc1)
+                    .add(bc2)
+                    .add(bc3);
             SubscriptionService service = builder.build();
             assertNotNull(service);
 
             List<BoundedContext> boundedContexts = builder.getBoundedContexts();
-            assertThat(boundedContexts).hasSize(3);
-            assertTrue(boundedContexts.contains(firstBoundedContext));
-            assertTrue(boundedContexts.contains(secondBoundedContext));
-            assertTrue(boundedContexts.contains(thirdBoundedContext));
+            assertThat(boundedContexts).containsExactly(bc1, bc2, bc3);
         }
     }
 
     @Test
     @DisplayName("be able to remove bounded context from builder")
     void removeBcFromBuilder() {
-        BoundedContext firstBoundedContext = ctx("Removed");
-        BoundedContext secondBoundedContext = ctx("Also removed");
-        BoundedContext thirdBoundedContext = ctx("The one to stay");
+        BoundedContext bc1 = ctx("Removed");
+        BoundedContext bc2 = ctx("Also removed");
+        BoundedContext bc3 = ctx("The one to stay");
 
         SubscriptionService.Builder builder = SubscriptionService
                 .newBuilder()
-                .add(firstBoundedContext)
-                .add(secondBoundedContext)
-                .add(thirdBoundedContext)
-                .remove(secondBoundedContext)
-                .remove(firstBoundedContext);
+                .add(bc1)
+                .add(bc2)
+                .add(bc3)
+                .remove(bc2)
+                .remove(bc1);
         SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
         List<BoundedContext> boundedContexts = builder.getBoundedContexts();
-        assertThat(boundedContexts).hasSize(1);
-        assertFalse(boundedContexts.contains(firstBoundedContext));
-        assertFalse(boundedContexts.contains(secondBoundedContext));
-        assertTrue(boundedContexts.contains(thirdBoundedContext));
+        assertThat(boundedContexts).containsExactly(bc3);
     }
 
     @Test
@@ -180,18 +175,24 @@ class SubscriptionServiceTest {
 
         Topic topic = requestFactory.topic().forTarget(target);
 
-        MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
+        MemoizingObserver<Subscription> observer = new MemoizingObserver<>();
 
         subscriptionService.subscribe(topic, observer);
 
-        assertNotNull(observer.streamFlowValue());
-        assertTrue(observer.streamFlowValue().isInitialized());
-        assertEquals(observer.streamFlowValue().getTopic()
-                                               .getTarget()
-                                               .getType(), type);
-
-        assertNull(observer.throwable());
-        assertTrue(observer.isCompleted());
+        Subscription response = observer.firstResponse();
+        ProtoSubject<?, Message> assertResponse = ProtoTruth.assertThat(response);
+        assertResponse
+                .isNotNull();
+        assertResponse
+                .hasAllRequiredFields();
+        assertThat(response.getTopic()
+                           .getTarget()
+                           .getType())
+                .isEqualTo(type);
+        assertThat(observer.getError())
+                .isNull();
+        assertThat(observer.isCompleted())
+                .isTrue();
     }
 
     @Test
@@ -210,14 +211,13 @@ class SubscriptionServiceTest {
                                     .forTarget(target);
 
         // Subscribe to the topic.
-        MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
+        MemoizingObserver<Subscription> subscriptionObserver = new MemoizingObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
-        subscriptionObserver.verifyState();
+        verifyState(subscriptionObserver, true);
 
         // Activate subscription.
-        MemoizeStreamObserver<SubscriptionUpdate> activationObserver =
-                new MemoizeStreamObserver<>();
-        subscriptionService.activate(subscriptionObserver.streamFlowValue(), activationObserver);
+        MemoizingObserver<SubscriptionUpdate> activationObserver = new MemoizingObserver<>();
+        subscriptionService.activate(subscriptionObserver.firstResponse(), activationObserver);
 
         // Post update to Stand directly.
         ProjectId projectId = ProjectId
@@ -234,9 +234,15 @@ class SubscriptionServiceTest {
         boundedContext.getStand()
                       .post(entity, repository.lifecycleOf(projectId));
 
-        // `isCompleted` set to false since we don't expect activationObserver::onCompleted to be
-        // called.
-        activationObserver.verifyState(false);
+        // `isCompleted` set to false since we don't expect
+        // activationObserver::onCompleted to be called.
+        verifyState(activationObserver, false);
+    }
+
+    private static <T> void verifyState(MemoizingObserver<T> observer, boolean completed) {
+        assertThat(observer.firstResponse()).isNotNull();
+        assertThat(observer.getError()).isNull();
+        assertThat(observer.isCompleted()).isEqualTo(completed);
     }
 
     @Test
@@ -255,17 +261,15 @@ class SubscriptionServiceTest {
         Topic topic = requestFactory.topic().forTarget(target);
 
         // Subscribe.
-        MemoizeStreamObserver<Subscription> subscribeObserver = new MemoizeStreamObserver<>();
+        MemoizingObserver<Subscription> subscribeObserver = new MemoizingObserver<>();
         subscriptionService.subscribe(topic, subscribeObserver);
 
         // Activate subscription.
-        MemoizeStreamObserver<SubscriptionUpdate> activateSubscription =
-                spy(new MemoizeStreamObserver<>());
-        subscriptionService.activate(subscribeObserver.streamFlowValue(), activateSubscription);
+        MemoizingObserver<SubscriptionUpdate> activateSubscription = spy(new MemoizingObserver<>());
+        subscriptionService.activate(subscribeObserver.firstResponse(), activateSubscription);
 
         // Cancel subscription.
-        subscriptionService.cancel(subscribeObserver.streamFlowValue(),
-                                   new MemoizeStreamObserver<>());
+        subscriptionService.cancel(subscribeObserver.firstResponse(), new MemoizingObserver<>());
 
         // Post update to Stand.
         ProjectId projectId = ProjectId
@@ -300,13 +304,12 @@ class SubscriptionServiceTest {
                     .newBuilder()
                     .add(boundedContext)
                     .build();
-            MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
+            MemoizingObserver<Subscription> observer = new MemoizingObserver<>();
             // Causes NPE.
             subscriptionService.subscribe(null, observer);
-            assertNull(observer.streamFlowValue());
-            assertFalse(observer.isCompleted());
-            assertNotNull(observer.throwable());
-            assertThat(observer.throwable()).isInstanceOf(NullPointerException.class);
+            assertThat(observer.responses()).isEmpty();
+            assertThat(observer.isCompleted()).isFalse();
+            assertThat(observer.getError()).isInstanceOf(NullPointerException.class);
         }
 
         @Test
@@ -318,13 +321,12 @@ class SubscriptionServiceTest {
                     .newBuilder()
                     .add(boundedContext)
                     .build();
-            MemoizeStreamObserver<SubscriptionUpdate> observer = new MemoizeStreamObserver<>();
+            MemoizingObserver<SubscriptionUpdate> observer = new MemoizingObserver<>();
             // Causes NPE.
             subscriptionService.activate(null, observer);
-            assertNull(observer.streamFlowValue());
-            assertFalse(observer.isCompleted());
-            assertNotNull(observer.throwable());
-            assertThat(observer.throwable()).isInstanceOf(NullPointerException.class);
+            assertThat(observer.responses()).isEmpty();
+            assertThat(observer.isCompleted()).isFalse();
+            assertThat(observer.getError()).isInstanceOf(NullPointerException.class);
         }
 
         @Test
@@ -341,24 +343,24 @@ class SubscriptionServiceTest {
             Topic topic = requestFactory.topic()
                                         .forTarget(target);
 
-            MemoizeStreamObserver<Subscription> subscriptionObserver =
-                    new MemoizeStreamObserver<>();
+            MemoizingObserver<Subscription> subscriptionObserver = new MemoizingObserver<>();
             subscriptionService.subscribe(topic, subscriptionObserver);
 
             String rejectionMessage = "Execution breaking exception";
-            MemoizeStreamObserver<Response> observer = new MemoizeStreamObserver<Response>() {
+            MemoizingObserver<Response> observer = new MemoizingObserver<Response>() {
                 @Override
                 public void onNext(Response value) {
                     super.onNext(value);
                     throw new RuntimeException(rejectionMessage);
                 }
             };
-            subscriptionService.cancel(subscriptionObserver.streamFlowValue(), observer);
-            assertNotNull(observer.streamFlowValue());
+            subscriptionService.cancel(subscriptionObserver.firstResponse(), observer);
+            assertNotNull(observer.firstResponse());
             assertFalse(observer.isCompleted());
-            assertNotNull(observer.throwable());
-            assertThat(observer.throwable()).isInstanceOf(RuntimeException.class);
-            assertEquals(observer.throwable().getMessage(), rejectionMessage);
+            assertThat(observer.getError())
+                    .isInstanceOf(RuntimeException.class);
+            assertThat(observer.getError().getMessage())
+                    .isEqualTo(rejectionMessage);
         }
     }
 

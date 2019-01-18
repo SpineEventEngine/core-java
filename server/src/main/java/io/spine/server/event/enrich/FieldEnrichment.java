@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.protobuf.Message;
 
@@ -38,9 +38,10 @@ final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<
     /** A function, which performs the translation. */
     private final BiFunction<S, C, T> function;
 
-    private FieldEnrichment(Class<S> eventClass, Class<T> enrichmentClass,
+    private FieldEnrichment(Class<S> eventFieldClass,
+                            Class<T> enrichmentFieldClass,
                             BiFunction<S, C, T> func) {
-        super(eventClass, enrichmentClass);
+        super(eventFieldClass, enrichmentFieldClass);
         this.function = checkNotNull(func);
     }
 
@@ -59,9 +60,7 @@ final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<
     FieldEnrichment<S, T, C> of(Class<S> messageFieldClass,
                                 Class<T> enrichmentFieldClass,
                                 BiFunction<S, C, T> func) {
-        FieldEnrichment<S, T, C> result =
-                new FieldEnrichment<>(messageFieldClass, enrichmentFieldClass, func);
-        return result;
+        return new FieldEnrichment<>(messageFieldClass, enrichmentFieldClass, func);
     }
 
     /**
