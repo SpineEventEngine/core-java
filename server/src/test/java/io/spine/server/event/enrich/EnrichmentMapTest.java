@@ -61,7 +61,7 @@ class EnrichmentMapTest {
     @Test
     @DisplayName("return map instance")
     void returnMapInstance() {
-        ImmutableSet<TypeName> typeNames = EnrichmentMap.instance()
+        ImmutableSet<TypeName> typeNames = EnrichmentMap.load()
                                                         .enrichmentTypes();
         assertThat(typeNames).isNotEmpty();
     }

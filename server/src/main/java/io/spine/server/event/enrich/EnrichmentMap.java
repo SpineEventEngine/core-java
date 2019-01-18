@@ -26,7 +26,7 @@ import io.spine.base.EventMessage;
 import io.spine.type.TypeName;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static io.spine.server.event.enrich.EnrichmentMapBuilder.buildEnrichmentsMap;
+import static io.spine.server.event.enrich.EnrichmentMapBuilder.loadFromResources;
 
 /**
  * A map from an event enrichment Protobuf type name to the corresponding
@@ -38,18 +38,17 @@ import static io.spine.server.event.enrich.EnrichmentMapBuilder.buildEnrichments
  */
 final class EnrichmentMap {
 
-    private static final EnrichmentMap INSTANCE = new EnrichmentMap();
-
     /** A multi-map from enrichment class name to enriched message class names. */
-    private final ImmutableMultimap<String, String> enrichmentsMap = buildEnrichmentsMap();
+    private final ImmutableMultimap<String, String> enrichmentsMap;
 
-    /** Prevents instantiation from outside. */
+    /** Creates new instance loading the map from resources. */
     private EnrichmentMap() {
+        this.enrichmentsMap = loadFromResources();
     }
 
-    /** Obtains singleton instance. */
-    static EnrichmentMap instance() {
-        return INSTANCE;
+    /** Loads the map from resources. */
+    static EnrichmentMap load() {
+        return new EnrichmentMap();
     }
 
     ImmutableSet<TypeName> enrichmentTypes() {
@@ -63,17 +62,18 @@ final class EnrichmentMap {
         @SuppressWarnings("unchecked") /* The cast is safe since values of the map contain type
             names of enriched event messages. */
         ImmutableSet<Class<EventMessage>> result =
-                sourceEventTypes(enrichmentType).stream()
-                                                .map(TypeName::getMessageClass)
-                                                .map(c -> (Class<EventMessage>) (Class<?>) c)
-                                                .collect(toImmutableSet());
+                sourceEventTypes(enrichmentType)
+                        .stream()
+                        .map(TypeName::getMessageClass)
+                        .map(c -> (Class<EventMessage>) (Class<?>) c)
+                        .collect(toImmutableSet());
         return result;
     }
 
     ImmutableSet<TypeName> sourceEventTypes(TypeName enrichmentType) {
         return enrichmentsMap.get(enrichmentType.value())
-                      .stream()
-                      .map(TypeName::of)
-                      .collect(toImmutableSet());
+                             .stream()
+                             .map(TypeName::of)
+                             .collect(toImmutableSet());
     }
 }

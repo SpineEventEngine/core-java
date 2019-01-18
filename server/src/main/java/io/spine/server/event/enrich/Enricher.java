@@ -75,7 +75,7 @@ public final class Enricher {
     }
 
     private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions) {
-        EnrichmentMap map = EnrichmentMap.instance();
+        EnrichmentMap map = EnrichmentMap.load();
         for (TypeName enrichment : map.enrichmentTypes()) {
             map.sourceEventClasses(enrichment)
                .forEach(

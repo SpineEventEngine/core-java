@@ -63,26 +63,26 @@ final class EnrichmentMapBuilder {
     private final Iterable<Properties> properties;
     private final ImmutableMultimap.Builder<String, String> builder;
 
-    EnrichmentMapBuilder(Iterable<Properties> properties) {
+    private EnrichmentMapBuilder(Iterable<Properties> properties) {
         this.properties = properties;
         this.builder = ImmutableMultimap.builder();
     }
 
-    static ImmutableMultimap<String, String> buildEnrichmentsMap() {
+    static ImmutableMultimap<String, String> loadFromResources() {
         Set<Properties> propertiesSet = loadAllProperties(Resources.ENRICHMENTS);
         EnrichmentMapBuilder builder = new EnrichmentMapBuilder(propertiesSet);
         ImmutableMultimap<String, String> result = builder.build();
         return result;
     }
 
-    ImmutableMultimap<String, String> build() {
+    private ImmutableMultimap<String, String> build() {
         for (Properties props : this.properties) {
-            put(props);
+            parse(props);
         }
         return builder.build();
     }
 
-    private void put(Properties props) {
+    private void parse(Properties props) {
         Set<String> enrichmentTypes = props.stringPropertyNames();
         for (String enrichmentType : enrichmentTypes) {
             String eventTypesStr = props.getProperty(enrichmentType);

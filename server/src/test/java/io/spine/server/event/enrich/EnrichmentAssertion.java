@@ -32,6 +32,8 @@ import static com.google.common.truth.Truth.assertThat;
  */
 final class EnrichmentAssertion {
 
+    private static final EnrichmentMap INSTANCE = EnrichmentMap.load();
+
     private final TypeName enrichmentType;
 
     private EnrichmentAssertion(Class<? extends Message> cls) {
@@ -68,6 +70,6 @@ final class EnrichmentAssertion {
     }
 
     private static EnrichmentMap map() {
-        return EnrichmentMap.instance();
+        return INSTANCE;
     }
 }
