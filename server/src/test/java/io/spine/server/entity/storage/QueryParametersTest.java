@@ -136,11 +136,11 @@ class QueryParametersTest {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
                 gt("thirdFilter", getCurrentTime())};
-        Multimap<EntityColumn, Filter> Filters =
+        Multimap<EntityColumn, Filter> filterMap =
                 ImmutableMultimap.of(mockColumn(), filters[0],
                                      mockColumn(), filters[1],
                                      mockColumn(), filters[2]);
-        CompositeQueryParameter parameter = CompositeQueryParameter.from(Filters, ALL);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(filterMap, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
         Collection<Filter> results = newLinkedList();
@@ -159,11 +159,11 @@ class QueryParametersTest {
                 eq("$2st", "entityColumnValue"),
                 gt("$3d", getCurrentTime())};
         EntityColumn[] columns = {mockColumn(), mockColumn(), mockColumn()};
-        Multimap<EntityColumn, Filter> Filters =
+        Multimap<EntityColumn, Filter> filterMap =
                 ImmutableMultimap.of(columns[0], filters[0],
                                      columns[1], filters[1],
                                      columns[2], filters[2]);
-        CompositeQueryParameter parameter = CompositeQueryParameter.from(Filters, ALL);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(filterMap, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
         CompositeQueryParameter singleParameter = parameters.iterator()
@@ -190,12 +190,12 @@ class QueryParametersTest {
 
         Filter startTimeFilter = gt(columnName, startTime);
         Filter deadlineFilter = le(columnName, deadline);
-        Multimap<EntityColumn, Filter> Filters =
+        Multimap<EntityColumn, Filter> filterMap =
                 ImmutableMultimap.<EntityColumn, Filter>builder()
                         .put(column, startTimeFilter)
                         .put(column, deadlineFilter)
                         .build();
-        CompositeQueryParameter parameter = CompositeQueryParameter.from(Filters, ALL);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(filterMap, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
         List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);

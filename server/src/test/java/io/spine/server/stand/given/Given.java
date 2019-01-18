@@ -54,7 +54,7 @@ public class Given {
     private Given() {
     }
 
-    public static Command validCommand() {
+    private static Command validCommand() {
         TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(Given.class);
         ProjectId projectId = ProjectId
                 .newBuilder()

@@ -22,9 +22,9 @@ package io.spine.server.event.store;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.util.Timestamps;
-import io.spine.client.Filter;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
@@ -63,9 +63,9 @@ class ERepositoryTest {
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeFilter compositeFilter = entityFilters.getFilter(0);
-        List<Filter> Filters = compositeFilter.getFilterList();
+        List<Filter> filters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.ALL, compositeFilter.getOperator());
-        assertEquals(2, Filters.size());
+        assertEquals(2, filters.size());
     }
 
     @Test
@@ -83,11 +83,11 @@ class ERepositoryTest {
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeFilter compositeFilter = entityFilters.getFilter(0);
-        List<Filter> Filters = compositeFilter.getFilterList();
+        List<Filter> filters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.EITHER, compositeFilter.getOperator());
-        assertEquals(1, Filters.size());
-        Any typeNameAsAny = Filters.get(0)
-                                         .getValue();
+        assertEquals(1, filters.size());
+        Any typeNameAsAny = filters.get(0)
+                                   .getValue();
         assertEquals(typeName.trim(), toObject(typeNameAsAny, String.class));
     }
 

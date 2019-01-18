@@ -61,6 +61,8 @@ class MultitenantStandTest extends StandTest {
         clearCurrentTenant();
     }
 
+    @SuppressWarnings("deprecation")
+    // Deprecated `Stand.post()` method will become test-only in future.
     @Test
     @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
     void updateOnlySameTenant() {

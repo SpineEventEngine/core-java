@@ -174,10 +174,10 @@ class TopicBuilderTest {
             Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
             CompositeFilter aggregatingFilter = aggregatingFilters.get(0);
-            Collection<Filter> Filters = aggregatingFilter.getFilterList();
-            Truth.assertThat(Filters)
+            Collection<Filter> filters = aggregatingFilter.getFilterList();
+            Truth.assertThat(filters)
                  .hasSize(1);
-            Any actualValue = findByName(Filters, columnName).getValue();
+            Any actualValue = findByName(filters, columnName).getValue();
             assertNotNull(columnValue);
             Int32Value messageValue = unpack(actualValue, Int32Value.class);
             int actualGenericValue = messageValue.getValue();
@@ -204,14 +204,14 @@ class TopicBuilderTest {
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
             Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
-            Collection<Filter> Filters = aggregatingFilters.get(0)
-                                                                             .getFilterList();
-            Any actualValue1 = findByName(Filters, columnName1).getValue();
+            Collection<Filter> filters = aggregatingFilters.get(0)
+                                                           .getFilterList();
+            Any actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
             int actualGenericValue1 = toObject(actualValue1, int.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            Any actualValue2 = findByName(Filters, columnName2).getValue();
+            Any actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
             Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
             assertEquals(columnValue2, actualGenericValue2);
@@ -328,17 +328,17 @@ class TopicBuilderTest {
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
             Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
-            Collection<Filter> Filters = aggregatingFilters.get(0)
-                                                                             .getFilterList();
-            Truth.assertThat(Filters)
+            Collection<Filter> filters = aggregatingFilters.get(0)
+                                                           .getFilterList();
+            Truth.assertThat(filters)
                  .hasSize(2);
 
-            Any actualValue1 = findByName(Filters, columnName1).getValue();
+            Any actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
             int actualGenericValue1 = toObject(actualValue1, int.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            Any actualValue2 = findByName(Filters, columnName2).getValue();
+            Any actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
             Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
             assertEquals(columnValue2, actualGenericValue2);
