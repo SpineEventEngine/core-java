@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.server.event.ReferenceValidator.ValidationResult;
 import io.spine.server.event.given.ReferenceValidatorTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
@@ -38,7 +37,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,9 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("ReferenceValidator should")
 class ReferenceValidatorTest {
@@ -116,12 +111,12 @@ class ReferenceValidatorTest {
     @Test
     @DisplayName("skip mapping if no mapping function is defined")
     void skipMappingIfNoFuncDefined() {
-        // TODO:2018-07-30:dmytro.dashenkov: Mock does not work.
-        Enricher mockEnricher = mock(Enricher.class);
-        when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
-                .thenReturn(Optional.empty());
+        Enricher emptyEnricher = Enricher
+                .newBuilder()
+                .build();
+
         ReferenceValidator validator
-                = new ReferenceValidator(mockEnricher,
+                = new ReferenceValidator(emptyEnricher,
                                          UserDeletedEvent.class,
                                          EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
         ValidationResult result = validator.validate();

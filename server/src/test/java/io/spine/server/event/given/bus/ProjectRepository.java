@@ -18,37 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.server.event.given.bus;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.Command;
-import io.spine.server.event.enrich.Enricher;
-import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.test.event.ProjectId;
 
-import java.util.List;
+public class ProjectRepository
+        extends AggregateRepository<ProjectId, ProjectAggregate> {
 
-/**
- * Test fixture for single-tenant Bounded Contexts.
- */
-@VisibleForTesting
-public final class SingleTenantBlackBoxContext
-        extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
-
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(SingleTenantBlackBoxContext.class);
-
-    SingleTenantBlackBoxContext(Enricher enricher) {
-        super(false, enricher);
-    }
-
-    @Override
-    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
-        List<Command> commands = commandTap.commands();
-        return new EmittedCommands(commands);
-    }
-
-    @Override
-    protected TestActorRequestFactory requestFactory() {
-        return requestFactory;
-    }
 }

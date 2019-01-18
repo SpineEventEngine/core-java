@@ -17,29 +17,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.server.event;
+package io.spine.server.event.given.bus;
 
-import "spine/options.proto";
+import com.google.protobuf.Message;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.test.event.ProjectCreated;
 
-option (type_url_prefix) = "type.spine.io";
-// Put generated code under the 'grpc' sub-package, which is annotated @SPI.
-option java_package = "io.spine.server.event.grpc";
-option java_multiple_files = true;
-option java_outer_classname = "EventStoreProto";
+/**
+ * Subscribes to the {@link ProjectCreated} event and remembers last event message and its context.
+ */
+public class RememberingSubscriber extends AbstractEventSubscriber {
 
-import "spine/core/event.proto";
-import "spine/core/response.proto";
-import "spine/server/event/event_stream_query.proto";
+    private Message eventMessage;
+    private EventContext eventContext;
 
-// `EventStore` service allows to store events and read them via streams.
-service EventStore {
-    option (SPI_service) = true;
+    @Subscribe
+    public void on(ProjectCreated eventMsg, EventContext context) {
+        this.eventMessage = eventMsg;
+        this.eventContext = context;
+    }
 
-    // Request to append events to the storage.
-    rpc Append(core.Event) returns (core.Response);
+    public Message getEventMessage() {
+        return eventMessage;
+    }
 
-    // Provides events matching the query as a stream.
-    rpc Read(EventStreamQuery) returns (stream core.Event);
+    public EventContext getEventContext() {
+        return eventContext;
+    }
 }

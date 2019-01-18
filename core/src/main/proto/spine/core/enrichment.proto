@@ -56,7 +56,7 @@ message Enrichment {
     //
     message Container {
 
-        // A map from a fully qualified Protobuf type name of an enrichment,
+        // A map from a fully-qualified Protobuf type name of an enrichment,
         // to its wrapped instance.
         map<string, google.protobuf.Any> items = 1;
     }

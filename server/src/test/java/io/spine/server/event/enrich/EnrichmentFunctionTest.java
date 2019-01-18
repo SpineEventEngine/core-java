@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
@@ -42,11 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("EnrichmentFunction should")
 class EnrichmentFunctionTest {
 
@@ -55,16 +50,12 @@ class EnrichmentFunctionTest {
 
     @BeforeEach
     void setUp() {
-        this.function = (input, context) -> {
-            if (input == null) {
-                return null;
-            }
-            ProjectCreated.Enrichment.Builder result = ProjectCreated.Enrichment
-                    .newBuilder()
-                    .setProjectName(input.getProjectId()
-                                         .getId());
-            return result.build();
-        };
+        this.function = (event, context) ->
+                ProjectCreated.Enrichment
+                        .newBuilder()
+                        .setProjectName(event.getProjectId()
+                                             .getId())
+                        .build();
         this.fieldEnrichment = FieldEnrichment.of(ProjectCreated.class,
                                                   ProjectCreated.Enrichment.class,
                                                   function);

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
+buildscript { final scriptHandler ->
 
     // Applying from `version.gradle` inside the `buildscript` section to reuse the properties.
     //
@@ -27,32 +27,7 @@ buildscript {
     apply from: 'version.gradle'
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
-    repositories {
-        mavenLocal()
-        maven { 
-            url = repos.spine 
-            content {
-                includeGroup 'io.spine'
-                includeGroup 'io.spine.tools'
-            }
-            mavenContent {
-                releasesOnly()
-            }
-        }
-        maven { 
-            url = repos.spineSnapshots
-            content {
-                includeGroup 'io.spine'
-                includeGroup 'io.spine.tools'
-            }
-            mavenContent {
-                snapshotsOnly()
-            }
-        }
-        jcenter()
-        maven { url = repos.gradlePlugins }
-    }
-
+    defaultRepositories(scriptHandler)
     dependencies {
         classpath deps.build.guava
         classpath deps.build.gradlePlugins.errorProne
@@ -60,12 +35,7 @@ buildscript {
         classpath "io.spine.tools:spine-model-compiler:$spineBaseVersion"
     }
 
-    configurations.all({
-        resolutionStrategy {
-            force deps.build.guava
-            force deps.build.protobuf
-        }
-    })
+    forceConfiguration(scriptHandler)
 }
 
 apply from: 'version.gradle'
@@ -113,21 +83,6 @@ static boolean shouldPublishJavadoc(final Project project) {
 }
 
 subprojects {
-
-    configurations {
-        // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
-        runtime.exclude group: "com.google.protobuf", module: "protobuf-lite"
-        testRuntime.exclude group: "com.google.protobuf", module: "protobuf-lite"
-
-        all {
-            resolutionStrategy {
-                force deps.build.guava
-                force deps.build.protobuf
-                force deps.test.guavaTestlib
-            }
-        }
-    }
-
     project.ext {
         sourcesRootDir = "$projectDir/src"
         generatedRootDir = "$projectDir/generated"
@@ -177,31 +132,7 @@ subprojects {
     // # suppress inspection "UnusedProperty"
     // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/
 
-    repositories {
-        mavenLocal()
-        maven {
-            url = repos.spine
-            content {
-                includeGroup 'io.spine'
-                includeGroup 'io.spine.tools'
-            }
-            mavenContent {
-                releasesOnly()
-            }
-        }
-        maven {
-            url = repos.spineSnapshots
-            content {
-                includeGroup 'io.spine'
-                includeGroup 'io.spine.tools'
-            }
-            mavenContent {
-                snapshotsOnly()
-            }
-        }
-        jcenter()
-    }
-
+    defaultRepositories(project)
     dependencies {
         errorprone deps.build.errorProneCore
         errorproneJavac deps.build.errorProneJavac
@@ -228,6 +159,13 @@ subprojects {
         testImplementation deps.test.junit5Runner
     }
 
+    forceConfiguration(project)
+    configurations {
+        // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
+        runtime.exclude group: "com.google.protobuf", module: "protobuf-lite"
+        testRuntime.exclude group: "com.google.protobuf", module: "protobuf-lite"
+    }
+
     sourceSets {
         main {
             proto.srcDirs "$sourcesRootDir/main/proto"
@@ -252,17 +190,17 @@ subprojects {
     
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
-        classifier "sources"
+        archiveClassifier.set("sources")
     }
 
     task testOutputJar(type: Jar) {
         from sourceSets.test.output
-        classifier "test"
+        archiveClassifier.set("test")
     }
 
     task javadocJar(type: Jar, dependsOn: 'javadoc') {
         from ("$projectDir/build/docs/javadoc")
-        classifier "javadoc"
+        archiveClassifier.set("javadoc")
     }
 
     // Apply the same IDEA module configuration for each of sub-projects.

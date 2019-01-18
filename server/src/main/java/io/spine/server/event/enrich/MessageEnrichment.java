@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.server.reflect.Field;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -43,7 +44,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S> a type of the source message to enrich
  * @param <T> a type of the target enrichment message
  */
-final class MessageEnrichment<S extends Message, T extends Message, C extends Message>
+final class MessageEnrichment<S extends EventMessage, T extends Message, C extends Message>
         extends EnrichmentFunction<S, T, C> {
 
     /** A parent instance holding this instance and its siblings. */
@@ -59,27 +60,30 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
     private @Nullable ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
     /** Creates a new message enricher instance. */
-    static <S extends Message, T extends Message, C extends Message>
+    static <S extends EventMessage, T extends Message, C extends Message>
     MessageEnrichment<S, T, C> create(Enricher enricher,
                                       Class<S> messageClass,
                                       Class<T> enrichmentClass) {
         return new MessageEnrichment<>(enricher, messageClass, enrichmentClass);
     }
 
-    private MessageEnrichment(Enricher enricher,
-                              Class<S> eventClass,
-                              Class<T> enrichmentClass) {
+    private MessageEnrichment(Enricher enricher, Class<S> eventClass, Class<T> enrichmentClass) {
         super(eventClass, enrichmentClass);
         this.enricher = enricher;
     }
 
+    static <T extends Message> T defaultInstance(Class<? extends T> cls) {
+        return Internal.getDefaultInstance(cls);
+    }
+
     @Override
     void activate() {
+        Class<? extends EventMessage> eventClass = getSourceClass();
         ReferenceValidator referenceValidator =
-                new ReferenceValidator(enricher, getSourceClass(), getEnrichmentClass());
+                new ReferenceValidator(enricher, eventClass, getEnrichmentClass());
         ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
                                                                       ImmutableMultimap.builder();
-        ReferenceValidator.ValidationResult validationResult = referenceValidator.validate();
+        ValidationResult validationResult = referenceValidator.validate();
         List<EnrichmentFunction<?, ?, ?>> fieldFunctions = validationResult.getFunctions();
         for (EnrichmentFunction<?, ?, ?> fieldFunction : fieldFunctions) {
             map.put(fieldFunction.getSourceClass(), fieldFunction);
@@ -102,7 +106,7 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
         ensureActive();
         verifyOwnState();
 
-        T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());
+        T defaultTarget = defaultInstance(getEnrichmentClass());
         Message.Builder builder = defaultTarget.toBuilder();
         setFields(builder, eventMsg, context);
         @SuppressWarnings("unchecked") // types are checked during the initialization and validation
