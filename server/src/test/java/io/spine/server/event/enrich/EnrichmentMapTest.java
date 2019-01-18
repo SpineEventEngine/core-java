@@ -20,7 +20,7 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.test.event.EnrichmentByContextFields;
 import io.spine.test.event.EnrichmentForSeveralEvents;
@@ -55,28 +55,20 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static io.spine.server.event.enrich.EnrichmentsMap.getEventTypes;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.event.enrich.EnrichmentMap.getEventTypes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EnrichmentsMap should")
-class EnrichmentsMapTest {
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveParameterlessCtor() {
-        assertHasPrivateParameterlessCtor(EnrichmentsMap.class);
-    }
+class EnrichmentMapTest {
 
     @Test
     @DisplayName("return map instance")
     void returnMapInstance() {
-        ImmutableMultimap<String, String> map = EnrichmentsMap.instance();
-
-        assertFalse(map.isEmpty());
+        ImmutableSet<TypeName> typeNames = EnrichmentMap.instance()
+                                                        .enrichmentTypes();
+        assertThat(typeNames).isNotEmpty();
     }
 
     @Nested

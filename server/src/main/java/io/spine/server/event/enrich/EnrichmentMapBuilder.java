@@ -24,6 +24,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Descriptors;
+import io.spine.Resources;
 import io.spine.option.OptionsProto;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
@@ -38,6 +39,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.io.PropertyFiles.loadAllProperties;
 import static java.util.stream.Collectors.toList;
 
 final class EnrichmentMapBuilder {
@@ -64,6 +66,13 @@ final class EnrichmentMapBuilder {
     EnrichmentMapBuilder(Iterable<Properties> properties) {
         this.properties = properties;
         this.builder = ImmutableMultimap.builder();
+    }
+
+    static ImmutableMultimap<String, String> buildEnrichmentsMap() {
+        Set<Properties> propertiesSet = loadAllProperties(Resources.ENRICHMENTS);
+        EnrichmentMapBuilder builder = new EnrichmentMapBuilder(propertiesSet);
+        ImmutableMultimap<String, String> result = builder.build();
+        return result;
     }
 
     ImmutableMultimap<String, String> build() {

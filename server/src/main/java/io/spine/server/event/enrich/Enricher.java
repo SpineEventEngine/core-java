@@ -20,13 +20,11 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
-import io.spine.base.EventMessage;
 import io.spine.core.EventEnvelope;
 import io.spine.type.TypeName;
 
@@ -76,19 +74,17 @@ public final class Enricher {
         return functions;
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
     private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions) {
-        ImmutableMultimap<String, String> enrichmentsMap = EnrichmentsMap.instance();
-        for (String enrichmentType : enrichmentsMap.keySet()) {
-            Class<Message> enrichmentClass = TypeName.of(enrichmentType)
-                                                     .getMessageClass();
-            ImmutableCollection<String> srcMessageTypes = enrichmentsMap.get(enrichmentType);
-            for (String srcType : srcMessageTypes) {
-                Class<EventMessage> messageClass = TypeName.of(srcType)
-                                                           .getMessageClass();
-                MessageEnrichment msgEnricher = create(this, messageClass, enrichmentClass);
-                functions.put(messageClass, msgEnricher);
-            }
+        EnrichmentMap map = EnrichmentMap.instance();
+        for (TypeName enrichment : map.enrichmentTypes()) {
+            map.getSourceEvents(enrichment)
+               .forEach(
+                    eventClass -> {
+                        Class<Message> enrichmentClass = enrichment.getMessageClass();
+                        MessageEnrichment msgEnricher = create(this, eventClass, enrichmentClass);
+                        functions.put(eventClass, msgEnricher);
+                    }
+            );
         }
     }
 
