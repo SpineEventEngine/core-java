@@ -21,7 +21,6 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.test.event.EnrichmentByContextFields;
 import io.spine.test.event.EnrichmentForSeveralEvents;
 import io.spine.test.event.ProjectCreated;
@@ -53,12 +52,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.event.enrich.EnrichmentMap.getEventTypes;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.spine.server.event.enrich.EnrichmentAssertion._assert;
 
 @DisplayName("EnrichmentsMap should")
 class EnrichmentMapTest {
@@ -78,52 +73,50 @@ class EnrichmentMapTest {
         @Test
         @DisplayName("ProjectCreatedEnrichment")
         void byProjectCreatedEnrichment() {
-            assertEnrichmentIsUsedOnlyInEvents(ProjectCreated.Enrichment.class,
-                                               ProjectCreated.class);
+            _assert(ProjectCreated.Enrichment.class)
+                    .enrichesOnly(ProjectCreated.class);
         }
 
         @Test
         @DisplayName("ProjectCreatedSeparateEnrichment")
         void byProjectCreatedSeparateEnrichment() {
-            assertEnrichmentIsUsedOnlyInEvents(ProjectCreatedSeparateEnrichment.class,
-                                               ProjectCreated.class);
+            _assert(ProjectCreatedSeparateEnrichment.class)
+                    .enrichesOnly(ProjectCreated.class);
         }
 
         @Test
         @DisplayName("ProjectCreatedEnrichmentAnotherPackage")
         void byProjectCreatedEnrichmentAnotherPackage() {
-            assertEnrichmentIsUsedOnlyInEvents(ProjectCreatedEnrichmentAnotherPackage.class,
-                                               ProjectCreated.class);
+            _assert(ProjectCreatedEnrichmentAnotherPackage.class)
+                    .enrichesOnly(ProjectCreated.class);
         }
 
         @Test
         @DisplayName("ProjectCreatedEnrichmentAnotherPackageFqn")
         void byProjectCreatedEnrichmentAnotherPackageFqn() {
-            assertEnrichmentIsUsedOnlyInEvents(ProjectCreatedEnrichmentAnotherPackageFqn.class,
-                                               ProjectCreated.class);
+            _assert(ProjectCreatedEnrichmentAnotherPackageFqn.class)
+                    .enrichesOnly(ProjectCreated.class);
         }
 
         @Test
         @DisplayName("ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt")
         void byProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt() {
-            assertEnrichmentIsUsedOnlyInEvents(
-                    ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class,
-                    ProjectCreated.class);
+            _assert(ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class)
+                    .enrichesOnly(ProjectCreated.class);
         }
 
         @Test
         @DisplayName("ProjectStartedEnrichment")
         void byProjectStartedEnrichment() {
-            assertEnrichmentIsUsedOnlyInEvents(ProjectStarted.Enrichment.class,
-                                               // Event classe
-                                               ProjectStarted.class);
+            _assert(ProjectStarted.Enrichment.class)
+                    .enrichesOnly(ProjectStarted.class);
         }
 
         @Test
         @DisplayName("EnrichmentByContextFields")
         void byEnrichmentByContextFields() {
-            assertEnrichmentIsUsedOnlyInEvents(EnrichmentByContextFields.class,
-                                               ProjectCreated.class);
+            _assert(EnrichmentByContextFields.class)
+                    .enrichesOnly(ProjectCreated.class);
         }
     }
 
@@ -134,64 +127,58 @@ class EnrichmentMapTest {
         @Test
         @DisplayName("by EnrichmentForSeveralEvents")
         void byEnrichmentForSeveralEvents() {
-            assertEnrichmentIsUsedOnlyInEvents(EnrichmentForSeveralEvents.class,
-                                               // Event classes
-                                               ProjectStarted.class,
-                                               ProjectCreated.class,
-                                               TaskAdded.class);
+            _assert(EnrichmentForSeveralEvents.class)
+                    .enrichesOnly(ProjectStarted.class,
+                                  ProjectCreated.class,
+                                  TaskAdded.class);
         }
 
         @Test
         @DisplayName("from package by one enrichment")
         void fromPackage() {
-            assertEnrichmentIsUsedOnlyInEvents(UserPackageEventsEnrichment.class,
-                                               // Event classes
-                                               UserLoggedInEvent.class,
-                                               UserMentionedEvent.class,
-                                               UserLoggedOutEvent.class,
-                                               PermissionGrantedEvent.class,
-                                               PermissionRevokedEvent.class,
-                                               SharingRequestSent.class,
-                                               SharingRequestApproved.class);
+            _assert(UserPackageEventsEnrichment.class)
+                    .enrichesOnly(UserLoggedInEvent.class,
+                                  UserMentionedEvent.class,
+                                  UserLoggedOutEvent.class,
+                                  PermissionGrantedEvent.class,
+                                  PermissionRevokedEvent.class,
+                                  SharingRequestSent.class,
+                                  SharingRequestApproved.class);
         }
 
         @Test
         @DisplayName("from subpackage by enrichment applied to root package")
         void fromSubpackage() {
-            assertEnrichmentIsAvailableForEvents(UserPackageEventsEnrichment.class,
-                                                 // Event classes
-                                                 PermissionRevokedEvent.class,
-                                                 PermissionGrantedEvent.class);
+            _assert(UserPackageEventsEnrichment.class)
+                    .enriches(PermissionRevokedEvent.class,
+                              PermissionGrantedEvent.class);
         }
 
         @Test
         @DisplayName("from package and standalone event")
         void fromPackageAndStandaloneEvent() {
-            assertEnrichmentIsUsedOnlyInEvents(SelectiveComplexEnrichment.class,
-                                               // Event classes
-                                               PermissionGrantedEvent.class,
-                                               PermissionRevokedEvent.class,
-                                               UserLoggedInEvent.class);
+            _assert(SelectiveComplexEnrichment.class)
+                    .enrichesOnly(PermissionGrantedEvent.class,
+                                  PermissionRevokedEvent.class,
+                                  UserLoggedInEvent.class);
         }
 
         @Test
         @DisplayName("from multiple packages")
         void fromMultiplePackages() {
-            assertEnrichmentIsUsedOnlyInEvents(MultiplePackageEnrichment.class,
-                                               // Event classes
-                                               PermissionGrantedEvent.class,
-                                               PermissionRevokedEvent.class,
-                                               SharingRequestSent.class,
-                                               SharingRequestApproved.class);
+            _assert(MultiplePackageEnrichment.class)
+                    .enrichesOnly(PermissionGrantedEvent.class,
+                                  PermissionRevokedEvent.class,
+                                  SharingRequestSent.class,
+                                  SharingRequestApproved.class);
         }
     }
 
     @Test
     @DisplayName("contain only events with target field if declared through package")
     void containOnlyWithTargetField() {
-        assertEnrichmentIsUsedOnlyInEvents(GranterEventsEnrichment.class,
-                                           // Event class
-                                           PermissionGrantedEvent.class);
+        _assert(GranterEventsEnrichment.class)
+                .enrichesOnly(PermissionGrantedEvent.class);
     }
 
     @Nested
@@ -201,75 +188,43 @@ class EnrichmentMapTest {
         @Test
         @DisplayName("with two arguments")
         void withTwoArgs() {
-            assertEnrichmentIsUsedOnlyInEvents(
-                    EnrichmentBoundWithFieldsWithDifferentNames.class,
-                    // Event classes
-                    SharingRequestApproved.class,
-                    PermissionGrantedEvent.class);
+            _assert(EnrichmentBoundWithFieldsWithDifferentNames.class)
+                    .enrichesOnly(SharingRequestApproved.class,
+                                  PermissionGrantedEvent.class);
         }
 
         @Test
         @DisplayName("with two fqn arguments")
         void withTwoFqnArgs() {
-            assertEnrichmentIsUsedOnlyInEvents(
-                    EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class,
-                    // Event classes
-                    SharingRequestApproved.class,
-                    PermissionGrantedEvent.class);
+            _assert(EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class)
+                    .enrichesOnly(SharingRequestApproved.class,
+                                  PermissionGrantedEvent.class);
         }
 
         @Test
         @DisplayName("with multiple arguments")
         void withMultipleArgs() {
-            assertEnrichmentIsUsedOnlyInEvents(
-                    EnrichmentBoundWithMultipleFieldsWithDifferentNames.class,
-                    // Event classes
-                    SharingRequestApproved.class,
-                    PermissionGrantedEvent.class,
-                    UserDeletedEvent.class);
+            _assert(EnrichmentBoundWithMultipleFieldsWithDifferentNames.class)
+                    .enrichesOnly(SharingRequestApproved.class,
+                                  PermissionGrantedEvent.class,
+                                  UserDeletedEvent.class);
         }
 
         @Test
         @DisplayName("with multiple arguments using wildcard")
         void withMultipleArgsThroughWildcard() {
-            assertEnrichmentIsUsedOnlyInEvents(
-                    EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes.class,
-                    // Event classes
-                    SharingRequestApproved.class,
-                    PermissionGrantedEvent.class,
-                    PermissionRevokedEvent.class);
+            _assert(EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes.class)
+                    .enrichesOnly(SharingRequestApproved.class,
+                                  PermissionGrantedEvent.class,
+                                  PermissionRevokedEvent.class);
         }
 
         @Test
         @DisplayName("containing separating spaces")
         void containingSeparatingSpaces() {
-            assertEnrichmentIsUsedOnlyInEvents(
-                    EnrichmentBoundWithFieldsSeparatedWithSpaces.class,
-                    // Event classes
-                    TaskAdded.class,
-                    PermissionGrantedEvent.class);
+            _assert(EnrichmentBoundWithFieldsSeparatedWithSpaces.class)
+                    .enrichesOnly(TaskAdded.class,
+                                  PermissionGrantedEvent.class);
         }
-    }
-
-    @SafeVarargs
-    private static void assertEnrichmentIsAvailableForEvents(
-            Class<? extends Message> enrichmentClass,
-            Class<? extends Message>... eventClassesExpected) {
-        Collection<String> eventTypesActual = getEventTypes(enrichmentClass);
-
-        for (Class<? extends Message> expectedClass : eventClassesExpected) {
-            String expectedTypeName = TypeName.of(expectedClass)
-                                              .value();
-            assertTrue(eventTypesActual.contains(expectedTypeName));
-        }
-    }
-
-    @SafeVarargs
-    private static void assertEnrichmentIsUsedOnlyInEvents(
-            Class<? extends Message> enrichmentClass,
-            Class<? extends Message>... eventClassesExpected) {
-        Collection<String> eventTypesActual = getEventTypes(enrichmentClass);
-        assertEquals(eventClassesExpected.length, eventTypesActual.size());
-        assertEnrichmentIsAvailableForEvents(enrichmentClass, eventClassesExpected);
     }
 }
