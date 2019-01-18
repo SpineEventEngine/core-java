@@ -106,6 +106,7 @@ public class StandTestEnv {
 
     public static class MemoizeNotifySubscriptionAction implements Stand.NotifySubscriptionAction {
 
+        private Any newEntityId = null;
         private Any newEntityState = null;
 
         /**
@@ -118,7 +119,12 @@ public class StandTestEnv {
         public void accept(SubscriptionUpdate update) {
             EntityStateUpdate entityStateUpdate = update.getEntityStateUpdatesList()
                                                         .get(0);
+            newEntityId = entityStateUpdate.getId();
             newEntityState = entityStateUpdate.getState();
+        }
+
+        public @Nullable Any newEntityId() {
+            return newEntityId;
         }
 
         public @Nullable Any newEntityState() {

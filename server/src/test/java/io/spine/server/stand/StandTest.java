@@ -30,7 +30,9 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
+import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.Filters;
 import io.spine.client.OrderBy;
@@ -44,6 +46,10 @@ import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -54,6 +60,7 @@ import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
@@ -61,6 +68,7 @@ import io.spine.system.server.MemoizingReadSide;
 import io.spine.system.server.NoOpSystemReadSide;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
+import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
@@ -390,6 +398,70 @@ class StandTest extends TenantAwareTest {
             stand.execute(query, observer);
 
             verifyObserver(observer);
+        }
+    }
+
+    @Nested
+    @DisplayName("receive updates")
+    class ReceiveUpdates {
+
+        @Test
+        @DisplayName("of aggregates")
+        void ofAggregates() {
+            // Subscribe to customer updates.
+            CustomerAggregateRepository repository = new CustomerAggregateRepository();
+            Stand stand = createStand(repository);
+            Topic allCustomers = requestFactory.topic()
+                                               .allOf(Customer.class);
+            MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction();
+            subscribeAndActivate(stand, allCustomers, callback);
+
+            // Send a command creating customer.
+            Customer customer = fillSampleCustomers(1)
+                    .iterator()
+                    .next();
+            CustomerId customerId = customer.getId();
+            CreateCustomer createCustomer = CreateCustomer
+                    .newBuilder()
+                    .setCustomerId(customerId)
+                    .setCustomer(customer)
+                    .build();
+            Command command = requestFactory.command()
+                                            .create(createCustomer);
+            CommandEnvelope cmd = CommandEnvelope.of(command);
+            CustomerId id = repository.dispatch(cmd);
+            assertEquals(customerId, id);
+
+            // Check the update received.
+            Any packedState = pack(customer);
+            assertEquals(packedState, callback.newEntityState());
+        }
+
+        @Test
+        @DisplayName("of projections")
+        void ofProjections() {
+            // Subscribe to project updates.
+            StandTestProjectionRepository repository = new StandTestProjectionRepository();
+            Stand stand = createStand(repository);
+            Topic allProjects = requestFactory.topic()
+                                              .allOf(Project.class);
+            MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction();
+            subscribeAndActivate(stand, allProjects, callback);
+
+            // Dispatch a project creation event.
+            Event event = Given.validEvent();
+            EventEnvelope envelope = EventEnvelope.of(event);
+            Set<ProjectId> projectIds = repository.dispatch(envelope);
+            assertThat(projectIds).hasSize(1);
+
+            // Check the projection that received event is the same as in subscription update.
+            ProjectId projectId = projectIds.iterator()
+                                            .next();
+            Any packedEntityId = callback.newEntityId();
+            EntityId entityId = Identifier.unpack(packedEntityId, EntityId.class);
+            Any packedProjectId = entityId.getId();
+            ProjectId idInUpdate = Identifier.unpack(packedProjectId, ProjectId.class);
+            assertEquals(projectId, idInUpdate);
         }
     }
 

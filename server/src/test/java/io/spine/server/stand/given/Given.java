@@ -62,14 +62,24 @@ public class Given {
     public static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
     public static final int AWAIT_SECONDS = 6;
     private static final String PROJECT_UUID = newUuid();
+    private static final String PROJECT_NAME = "generic-name";
 
     private Given() {
     }
 
     public static Command validCommand() {
         TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(Given.class);
+        ProjectId projectId = ProjectId
+                .newBuilder()
+                .setId(PROJECT_UUID)
+                .build();
+        PrjCreateProject commandMessage = PrjCreateProject
+                .newBuilder()
+                .setProjectId(projectId)
+                .setName(PROJECT_NAME)
+                .build();
         return requestFactory.command()
-                             .create(PrjCreateProject.getDefaultInstance());
+                             .create(commandMessage);
     }
 
     public static Event validEvent() {
