@@ -22,13 +22,12 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.type.TypeName;
 
 import static com.google.common.truth.Truth.assertThat;
 
 /**
- * Asserts that the passed enrichment class enriches events.
+ * Asserts that the passed enrichment class enriches message classes.
  */
 final class EnrichmentAssertion {
 
@@ -45,28 +44,28 @@ final class EnrichmentAssertion {
     }
 
     /**
-     * Asserts that the passed enrichment class is used for enriching passed event classes.
+     * Asserts that the passed enrichment class is used for enriching passed message classes.
      */
     @SafeVarargs
-    final void enriches(Class<? extends Message>... eventClassesExpected) {
-        ImmutableSet<TypeName> sourceEvents = map().sourceEventTypes(enrichmentType);
+    final void enriches(Class<? extends Message>... expectedClasses) {
+        ImmutableSet<TypeName> sourceEvents = map().sourceTypes(enrichmentType);
 
-        for (Class<? extends Message> eventClass : eventClassesExpected) {
+        for (Class<? extends Message> eventClass : expectedClasses) {
             TypeName eventType = TypeName.of(eventClass);
             assertThat(sourceEvents).contains(eventType);
         }
     }
 
     /**
-     * Asserts that passed enrichment class enriches <em>only</em> passed event classes.
+     * Asserts that passed enrichment class enriches <em>only</em> passed source message classes.
      */
     @SafeVarargs
-    final void enrichesOnly(Class<? extends Message>... expectedEventClasses) {
+    final void enrichesOnly(Class<? extends Message>... expectedClasses) {
 
-        ImmutableSet<Class<EventMessage>> actual = map().sourceEventClasses(enrichmentType);
+        ImmutableSet<Class<Message>> actual = map().sourceClasses(enrichmentType);
         assertThat(actual)
-                .hasSize(expectedEventClasses.length);
-        enriches(expectedEventClasses);
+                .hasSize(expectedClasses.length);
+        enriches(expectedClasses);
     }
 
     private static EnrichmentMap map() {

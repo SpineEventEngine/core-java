@@ -22,19 +22,14 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.EventMessage;
+import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.server.event.enrich.EnrichmentMapBuilder.loadFromResources;
 
 /**
- * A map from an event enrichment Protobuf type name to the corresponding
- * type name(s) of event(s) to enrich.
- *
- * <p>Example:
- * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.FirstEvent},
- * {@code proto.type.SecondEvent}
+ * A map from an enrichment type name to the corresponding type name(s) of enriched types.
  */
 final class EnrichmentMap {
 
@@ -58,19 +53,16 @@ final class EnrichmentMap {
                              .collect(toImmutableSet());
     }
 
-    ImmutableSet<Class<EventMessage>> sourceEventClasses(TypeName enrichmentType) {
-        @SuppressWarnings("unchecked") /* The cast is safe since values of the map contain type
-            names of enriched event messages. */
-        ImmutableSet<Class<EventMessage>> result =
-                sourceEventTypes(enrichmentType)
+    ImmutableSet<Class<Message>> sourceClasses(TypeName enrichmentType) {
+        ImmutableSet<Class<Message>> result =
+                sourceTypes(enrichmentType)
                         .stream()
                         .map(TypeName::getMessageClass)
-                        .map(c -> (Class<EventMessage>) (Class<?>) c)
                         .collect(toImmutableSet());
         return result;
     }
 
-    ImmutableSet<TypeName> sourceEventTypes(TypeName enrichmentType) {
+    ImmutableSet<TypeName> sourceTypes(TypeName enrichmentType) {
         return enrichmentsMap.get(enrichmentType.value())
                              .stream()
                              .map(TypeName::of)

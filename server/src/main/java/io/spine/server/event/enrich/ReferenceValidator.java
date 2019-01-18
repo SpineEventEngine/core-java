@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import io.spine.option.OptionsProto;
@@ -73,10 +72,10 @@ final class ReferenceValidator implements Logging {
     private final Descriptor enrichmentDescriptor;
 
     ReferenceValidator(Enricher enricher,
-                       Class<? extends EventMessage> eventClass,
+                       Class<? extends Message> sourceClass,
                        Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
-        this.eventDescriptor = descriptorOf(eventClass);
+        this.eventDescriptor = descriptorOf(sourceClass);
         this.enrichmentDescriptor = descriptorOf(enrichmentClass);
     }
 
