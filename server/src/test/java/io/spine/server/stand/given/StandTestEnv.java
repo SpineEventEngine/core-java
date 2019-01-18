@@ -31,12 +31,8 @@ import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.system.server.NoOpSystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import static io.spine.core.BoundedContextNames.assumingTests;
-import static io.spine.server.storage.StorageFactorySwitch.newInstance;
 
 public class StandTestEnv {
 
