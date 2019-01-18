@@ -21,9 +21,9 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
+import io.spine.protobuf.Messages;
 import io.spine.server.reflect.Field;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -72,7 +72,7 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
     }
 
     static <T extends Message> T defaultInstance(Class<? extends T> cls) {
-        return Internal.getDefaultInstance(cls);
+        return Messages.defaultInstance(cls);
     }
 
     @Override
