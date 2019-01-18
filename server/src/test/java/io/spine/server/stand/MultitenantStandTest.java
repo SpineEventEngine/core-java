@@ -25,12 +25,12 @@ import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
-import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.stand.given.StandTestEnv;
+import io.spine.server.Given.CustomerAggregate;
+import io.spine.server.Given.CustomerAggregateRepository;
+import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
-import io.spine.testing.core.given.GivenVersion;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,13 +38,10 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("Multitenant Stand should")
 class MultitenantStandTest extends StandTest {
 
@@ -67,25 +64,31 @@ class MultitenantStandTest extends StandTest {
     @Test
     @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
     void updateOnlySameTenant() {
-        Stand stand = newStand(isMultitenant());
+        CustomerAggregateRepository repository = new CustomerAggregateRepository();
+        Stand stand = newStand(isMultitenant(), repository);
 
         // --- Default Tenant
         ActorRequestFactory requestFactory = getRequestFactory();
-        StandTestEnv.MemoizeNotifySubscriptionAction defaultTenantCallback =
+        MemoizeNotifySubscriptionAction defaultTenantCallback =
                 subscribeToAllOf(stand, requestFactory, Customer.class);
 
         // --- Another Tenant
         TenantId anotherTenant = newUuid();
         ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
-        StandTestEnv.MemoizeNotifySubscriptionAction anotherCallback =
+        MemoizeNotifySubscriptionAction anotherCallback =
                 subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
-        Customer customer = fillSampleCustomers(1).iterator().next();
+        Customer customer = fillSampleCustomers(1).iterator()
+                                                  .next();
         CustomerId customerId = customer.getId();
-        Version stateVersion = GivenVersion.withNumber(1);
-
-        fail("Repair the test");
+        int version = 1;
+        CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+                .withId(customerId)
+                .withState(customer)
+                .withVersion(version)
+                .build();
+        stand.post(entity, repository.lifecycleOf(customerId));
 
         Any packedState = AnyPacker.pack(customer);
         // Verify that Default Tenant callback has got the update.
@@ -95,13 +98,13 @@ class MultitenantStandTest extends StandTest {
         assertNull(anotherCallback.newEntityState());
     }
 
-    protected StandTestEnv.MemoizeNotifySubscriptionAction
+    protected MemoizeNotifySubscriptionAction
     subscribeToAllOf(Stand stand,
                      ActorRequestFactory requestFactory,
                      Class<? extends Message> entityClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(entityClass);
-        StandTestEnv.MemoizeNotifySubscriptionAction callback = new StandTestEnv.MemoizeNotifySubscriptionAction();
+        MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction();
         subscribeAndActivate(stand, allCustomers, callback);
 
         assertNull(callback.newEntityState());

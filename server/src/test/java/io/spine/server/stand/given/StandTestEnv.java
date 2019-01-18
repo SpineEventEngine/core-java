@@ -57,6 +57,7 @@ public class StandTestEnv {
                 .setSystemReadSide(NoOpSystemReadSide.INSTANCE);
         BoundedContext boundedContext = BoundedContext
                 .newBuilder()
+                .setMultitenant(multitenant)
                 .setStand(standBuilder)
                 .build();
         Stand stand = boundedContext.getStand();

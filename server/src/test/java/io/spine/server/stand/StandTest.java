@@ -47,12 +47,12 @@ import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
-import io.spine.core.Version;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
+import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
@@ -64,7 +64,6 @@ import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.core.given.GivenVersion;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
@@ -136,7 +135,8 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({
         "OverlyCoupledClass",
         "ClassWithTooManyMethods",
-        "UnsecureRandomNumberGeneration"
+        "UnsecureRandomNumberGeneration",
+        "deprecation" /* The deprecated `Stand.post()` method will become test-only in future. */
 })
 @DisplayName("Stand should")
 class StandTest extends TenantAwareTest {
@@ -245,8 +245,8 @@ class StandTest extends TenantAwareTest {
                                                       .build();
         Stand stand = boundedContext.getStand();
 
-        StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository();
-        stand.registerTypeSupplier(standTestProjectionRepo);
+        StandTestProjectionRepository repository = new StandTestProjectionRepository();
+        boundedContext.register(repository);
 
         Topic projectProjections = requestFactory.topic()
                                                  .allOf(Project.class);
@@ -262,7 +262,13 @@ class StandTest extends TenantAwareTest {
         verify(executor, never()).execute(any(Runnable.class));
 
         ProjectId someId = ProjectId.getDefaultInstance();
-        Version stateVersion = GivenVersion.withNumber(1);
+        int version = 1;
+        StandTestProjection entity = projectionOfClass(StandTestProjection.class)
+                .withId(someId)
+                .withState(Project.getDefaultInstance())
+                .withVersion(version)
+                .build();
+        stand.post(entity, repository.lifecycleOf(someId));
 
         verify(executor, times(1)).execute(any(Runnable.class));
     }
@@ -341,7 +347,7 @@ class StandTest extends TenantAwareTest {
 
         private void doCheckReadingProjectByIdAndFieldMask(String... paths) {
             StandTestProjectionRepository repository = new StandTestProjectionRepository();
-            Stand stand = newStand(isMultitenant(), repository);
+            Stand stand = createStand(repository);
 
             int querySize = 2;
 
@@ -395,7 +401,7 @@ class StandTest extends TenantAwareTest {
         @DisplayName("upon update of aggregate")
         void uponUpdateOfAggregate() {
             CustomerAggregateRepository repository = new CustomerAggregateRepository();
-            Stand stand = newStand(isMultitenant(), repository);
+            Stand stand = createStand(repository);
             Topic allCustomers = requestFactory.topic()
                                                .allOf(Customer.class);
 
@@ -426,7 +432,7 @@ class StandTest extends TenantAwareTest {
         @DisplayName("upon update of projection")
         void uponUpdateOfProjection() {
             StandTestProjectionRepository repository = new StandTestProjectionRepository();
-            Stand stand = newStand(isMultitenant(), repository);
+            Stand stand = createStand(repository);
             Topic allProjects = requestFactory.topic()
                                               .allOf(Project.class);
 
@@ -455,7 +461,7 @@ class StandTest extends TenantAwareTest {
     @DisplayName("trigger subscription callbacks matching by ID")
     void triggerSubscriptionsMatchingById() {
         CustomerAggregateRepository repository = new CustomerAggregateRepository();
-        Stand stand = newStand(isMultitenant(), repository);
+        Stand stand = createStand(repository);
 
         Collection<Customer> sampleCustomers = fillSampleCustomers(10);
 
@@ -494,7 +500,8 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("allow cancelling subscriptions")
     void cancelSubscriptions() {
-        Stand stand = createStand();
+        CustomerAggregateRepository repository = new CustomerAggregateRepository();
+        Stand stand = createStand(repository);
         Topic allCustomers = requestFactory.topic()
                                            .allOf(Customer.class);
 
@@ -508,9 +515,13 @@ class StandTest extends TenantAwareTest {
                 .iterator()
                 .next();
         CustomerId customerId = customer.getId();
-        Version stateVersion = GivenVersion.withNumber(1);
-
-        fail("Repair test");
+        int version = 1;
+        CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+                .withId(customerId)
+                .withState(customer)
+                .withVersion(version)
+                .build();
+        stand.post(entity, repository.lifecycleOf(customerId));
 
         assertNull(memoizeCallback.newEntityState());
     }
@@ -531,7 +542,7 @@ class StandTest extends TenantAwareTest {
     @DisplayName("trigger each subscription callback once for multiple subscriptions")
     void triggerSubscriptionCallbackOnce() {
         CustomerAggregateRepository repository = new CustomerAggregateRepository();
-        Stand stand = newStand(isMultitenant(), repository);
+        Stand stand = createStand(repository);
         Target allCustomers = Targets.allOf(Customer.class);
 
         Set<MemoizeNotifySubscriptionAction> callbacks = newHashSet();
@@ -564,16 +575,22 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("not trigger subscription callbacks in case of another type criterion mismatch")
     void notTriggerOnTypeMismatch() {
-        Stand stand = createStand();
+        CustomerAggregateRepository repository = new CustomerAggregateRepository();
+        StandTestProjectionRepository projectionRepository = new StandTestProjectionRepository();
+        Stand stand = createStand(repository, projectionRepository);
         Target allProjects = Targets.allOf(Project.class);
         MemoizeNotifySubscriptionAction callback = subscribeWithCallback(stand, allProjects);
         Customer customer = fillSampleCustomers(1)
                 .iterator()
                 .next();
         CustomerId customerId = customer.getId();
-        Version stateVersion = GivenVersion.withNumber(1);
-
-        fail("Repair test");
+        int version = 1;
+        CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+                .withId(customerId)
+                .withState(customer)
+                .withVersion(version)
+                .build();
+        stand.post(entity, repository.lifecycleOf(customerId));
 
         verify(callback, never()).accept(any(SubscriptionUpdate.class));
     }
@@ -653,7 +670,7 @@ class StandTest extends TenantAwareTest {
     @DisplayName("handle mistakes in query silently")
     void handleMistakesInQuery() {
         StandTestProjectionRepository repository = new StandTestProjectionRepository();
-        Stand stand = newStand(isMultitenant(), repository);
+        Stand stand = createStand(repository);
         Project sampleProject = Project
                 .newBuilder()
                 .setId(projectIdFor(42))
@@ -944,6 +961,11 @@ class StandTest extends TenantAwareTest {
 
     private Stand createStand() {
         return newStand(isMultitenant());
+    }
+
+    @SuppressWarnings("OverloadedVarargsMethod") // OK for this helper method.
+    private Stand createStand(Repository<?, ?>... repositories) {
+        return newStand(isMultitenant(), repositories);
     }
 
     @CanIgnoreReturnValue
