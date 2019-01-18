@@ -7,6 +7,7 @@ io.spine.server.commandbus
 io.spine.server.entity
 io.spine.server.entity.storage
 io.spine.server.event
+io.spine.server.event.enrich
 io.spine.server.event.storage
 io.spine.server.event.store
 io.spine.server.integration
