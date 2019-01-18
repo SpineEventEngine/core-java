@@ -21,6 +21,7 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -35,7 +36,7 @@ import static java.util.Optional.ofNullable;
  * The default implementation of {@linkplain DeploymentType deployment type} 
  * {@linkplain Supplier supplier}.
  */
-class DeploymentDetector implements Supplier<DeploymentType> {
+final class DeploymentDetector implements Supplier<DeploymentType> {
 
     @VisibleForTesting
     static final String APP_ENGINE_ENVIRONMENT_PATH = "com.google.appengine.runtime.environment";
@@ -44,6 +45,12 @@ class DeploymentDetector implements Supplier<DeploymentType> {
     @VisibleForTesting
     static final String APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE = "Development";
 
+    /**
+     * The deployment type is instantiated lazily to a non-{@code null} value during {@link #get()}.
+     *
+     * <p>Value is never changed after it is initially set.
+     */
+    private @MonotonicNonNull DeploymentType deploymentType;
 
     /** Prevent instantiation from outside. */
     private DeploymentDetector() {
@@ -55,6 +62,13 @@ class DeploymentDetector implements Supplier<DeploymentType> {
 
     @Override
     public DeploymentType get() {
+        if (deploymentType == null) {
+            deploymentType = detect();
+        }
+        return deploymentType;
+    }
+
+    private static DeploymentType detect() {
         Optional<String> gaeEnvironment = getProperty(APP_ENGINE_ENVIRONMENT_PATH);
         if (gaeEnvironment.isPresent()) {
             if (APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE.equals(gaeEnvironment.get())) {

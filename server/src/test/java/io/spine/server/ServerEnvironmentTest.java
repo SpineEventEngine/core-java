@@ -26,12 +26,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
-import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
-import static io.spine.server.DeploymentType.STANDALONE;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PATH;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE;
+import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
+import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
+import static io.spine.server.DeploymentType.STANDALONE;
+import static io.spine.server.ServerEnvironment.resetDeploymentType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertFalse;
@@ -140,7 +141,7 @@ class ServerEnvironmentTest {
         void setUp() {
             initialValue = System.getProperty(APP_ENGINE_ENVIRONMENT_PATH);
             setGaeEnvironment(targetEnvironment);
-            ServerEnvironment.resetDeploymentType();
+            resetDeploymentType();
         }
 
         @AfterEach
@@ -150,6 +151,7 @@ class ServerEnvironmentTest {
             } else {
                 setGaeEnvironment(initialValue);
             }
+            resetDeploymentType();
         }
 
         void setGaeEnvironment(String value) {
