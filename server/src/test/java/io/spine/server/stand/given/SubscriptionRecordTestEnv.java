@@ -20,12 +20,20 @@
 
 package io.spine.server.stand.given;
 
-import com.google.protobuf.Message;
+import com.google.protobuf.Any;
+import io.spine.base.Identifier;
+import io.spine.client.EntityId;
 import io.spine.client.Subscription;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
+import io.spine.protobuf.TypeConverter;
+import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.ProjectId;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
 
@@ -40,28 +48,65 @@ public final class SubscriptionRecordTestEnv {
     private SubscriptionRecordTestEnv() {
     }
 
+    public static EventEnvelope stateChangedEnvelope(ProjectId id, Project newState) {
+        return stateChangedEnvelope(id, newState, TYPE);
+    }
+
+    public static EventEnvelope
+    stateChangedEnvelope(ProjectId id, Project newState, TypeUrl type) {
+        EntityStateChanged eventMessage = entityStateChanged(id, newState, type);
+        Any packedMessage = TypeConverter.toAny(eventMessage);
+        Event event = Event
+                .newBuilder()
+                .setMessage(packedMessage)
+                .build();
+        EventEnvelope result = EventEnvelope.of(event);
+        return result;
+    }
+
+    private static EntityStateChanged
+    entityStateChanged(ProjectId id, Project newState, TypeUrl type) {
+        Any packedId = Identifier.pack(id);
+        EntityId entityId = EntityId
+                .newBuilder()
+                .setId(packedId)
+                .build();
+        EntityHistoryId entityHistoryId = EntityHistoryId
+                .newBuilder()
+                .setTypeUrl(type.value())
+                .setEntityId(entityId)
+                .build();
+        Any packedMatchingState = TypeConverter.toAny(newState);
+        EntityStateChanged result = EntityStateChanged
+                .newBuilder()
+                .setId(entityHistoryId)
+                .setNewState(packedMatchingState)
+                .build();
+        return result;
+    }
+
     public static Subscription subscription() {
         Target target = target();
-        Subscription subscription = withTarget(target);
+        Subscription subscription = subscription(target);
         return subscription;
     }
 
-    public static Subscription subscription(Message targetId) {
+    public static Subscription subscription(ProjectId targetId) {
         Target target = target(targetId);
-        Subscription subscription = withTarget(target);
+        Subscription subscription = subscription(target);
         return subscription;
-
     }
 
-    private static Subscription withTarget(Target target) {
+    public static Subscription subscription(Target target) {
         Topic topic = Topic
                 .newBuilder()
                 .setTarget(target)
                 .build();
-        return Subscription
+        Subscription result = Subscription
                 .newBuilder()
                 .setTopic(topic)
                 .build();
+        return result;
     }
 
     private static Target target() {
@@ -69,7 +114,7 @@ public final class SubscriptionRecordTestEnv {
         return target;
     }
 
-    private static Target target(Message targetId) {
+    private static Target target(ProjectId targetId) {
         Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
         return target;
     }

@@ -94,9 +94,9 @@ public final class Targets {
      *         a set of entity column predicates each target entity must match
      * @return a {@code Target} instance formed according to the provided parameters
      */
-    static Target composeTarget(Class<? extends Message> entityClass,
-                                @Nullable Set<?> ids,
-                                @Nullable Set<CompositeFilter> filters) {
+    public static Target composeTarget(Class<? extends Message> entityClass,
+                                       @Nullable Iterable<?> ids,
+                                       @Nullable Iterable<CompositeFilter> filters) {
 
         boolean includeAll = (ids == null && filters == null);
 

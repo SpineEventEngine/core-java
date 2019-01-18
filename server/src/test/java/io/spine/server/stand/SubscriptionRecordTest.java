@@ -20,25 +20,27 @@
 
 package io.spine.server.stand;
 
-import com.google.protobuf.Any;
-import io.spine.base.Identifier;
-import io.spine.client.EntityId;
+import io.spine.client.CompositeFilter;
+import io.spine.client.Filter;
+import io.spine.client.FilterFactory;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
-import io.spine.core.Event;
+import io.spine.client.Target;
+import io.spine.client.Targets;
 import io.spine.core.EventEnvelope;
-import io.spine.protobuf.AnyPacker;
-import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.OTHER_TYPE;
-import static io.spine.server.stand.given.SubscriptionRecordTestEnv.TYPE;
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.stateChangedEnvelope;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.subscription;
+import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -47,80 +49,70 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("SubscriptionRecord should")
 class SubscriptionRecordTest {
 
-    @Test
-    @DisplayName("match record to given parameters")
-    void matchRecordToParams() {
-        SubscriptionRecord matchingRecord = newRecordFor(subscription());
-        EntityHistoryId entityHistoryId = EntityHistoryId
-                .newBuilder()
-                .setTypeUrl(TYPE.value())
-                .build();
-        EntityStateChanged eventMessage = EntityStateChanged
-                .newBuilder()
-                .setId(entityHistoryId)
-                .build();
-        Any packedMessage = AnyPacker.pack(eventMessage);
-        Event event = Event
-                .newBuilder()
-                .setMessage(packedMessage)
-                .build();
-        boolean matchResult = matchingRecord.matches(EventEnvelope.of(event));
-        assertTrue(matchResult);
-    }
+    private static final String TARGET_ID = "target-ID";
 
     @Test
     @DisplayName("fail to match improper type")
     void notMatchImproperType() {
-        SubscriptionRecord notMatchingRecord = newRecordFor(subscription());
-        EntityHistoryId entityHistoryId = EntityHistoryId
-                .newBuilder()
-                .setTypeUrl(OTHER_TYPE.value())
-                .build();
-        EntityStateChanged eventMessage = EntityStateChanged
-                .newBuilder()
-                .setId(entityHistoryId)
-                .build();
-        Any packedMessage = AnyPacker.pack(eventMessage);
-        Event event = Event
-                .newBuilder()
-                .setMessage(packedMessage)
-                .build();
-        boolean matchResult = notMatchingRecord.matches(EventEnvelope.of(event));
-        assertFalse(matchResult);
+        SubscriptionRecord record = newRecordFor(subscription());
+        ProjectId id = ProjectId.getDefaultInstance();
+        Project state = Project.getDefaultInstance();
+
+        EventEnvelope envelope = stateChangedEnvelope(id, state);
+        assertTrue(record.matches(envelope));
+
+        EventEnvelope envelope2 = stateChangedEnvelope(id, state, OTHER_TYPE);
+        assertFalse(record.matches(envelope2));
     }
 
     @Test
-    @DisplayName("fail to match improper target")
-    void notMatchImproperTarget() {
+    @DisplayName("fail to match improper ID")
+    void notMatchImproperId() {
         ProjectId targetId = ProjectId.newBuilder()
-                                      .setId("target-ID")
+                                      .setId(TARGET_ID)
                                       .build();
-        SubscriptionRecord notMatchingRecord = newRecordFor(subscription(targetId));
+        Project state = Project.getDefaultInstance();
+        SubscriptionRecord record = newRecordFor(subscription(targetId));
+
+        EventEnvelope envelope = stateChangedEnvelope(targetId, state);
+        assertTrue(record.matches(envelope));
 
         ProjectId otherId = ProjectId.newBuilder()
                                      .setId("some-other-ID")
                                      .build();
-        Any packedId = Identifier.pack(otherId);
-        EntityId entityId = EntityId
+        EventEnvelope envelope2 = stateChangedEnvelope(otherId, state);
+        assertFalse(record.matches(envelope2));
+    }
+
+    @Test
+    @DisplayName("fail to match improper state")
+    void notMatchImproperState() {
+        ProjectId targetId = ProjectId.newBuilder()
+                                      .setId(TARGET_ID)
+                                      .build();
+        String targetName = "super-project";
+
+        Filter filter = FilterFactory.eq("name", targetName);
+        CompositeFilter compositeFilter = FilterFactory.all(filter);
+        Set<CompositeFilter> filters = singleton(compositeFilter);
+        Target target = Targets.composeTarget(Project.class, singleton(targetId), filters);
+
+        Subscription subscription = subscription(target);
+        SubscriptionRecord record = newRecordFor(subscription);
+
+        Project matching = Project
                 .newBuilder()
-                .setId(packedId)
+                .setName(targetName)
                 .build();
-        EntityHistoryId entityHistoryId = EntityHistoryId
+        EventEnvelope envelope = stateChangedEnvelope(targetId, matching);
+        assertTrue(record.matches(envelope));
+
+        Project nonMatching = Project
                 .newBuilder()
-                .setTypeUrl(TYPE.value())
-                .setEntityId(entityId)
+                .setName("some-other-name")
                 .build();
-        EntityStateChanged eventMessage = EntityStateChanged
-                .newBuilder()
-                .setId(entityHistoryId)
-                .build();
-        Any packedMessage = AnyPacker.pack(eventMessage);
-        Event event = Event
-                .newBuilder()
-                .setMessage(packedMessage)
-                .build();
-        boolean matchResult = notMatchingRecord.matches(EventEnvelope.of(event));
-        assertFalse(matchResult);
+        EventEnvelope envelope2 = stateChangedEnvelope(targetId, nonMatching);
+        assertFalse(record.matches(envelope2));
     }
 
     @Test
