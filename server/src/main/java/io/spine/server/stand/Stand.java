@@ -581,9 +581,4 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             return result;
         }
     }
-
-    @Override
-    public String toString() {
-        return "Stand of Bounded Context...";
-    }
 }
