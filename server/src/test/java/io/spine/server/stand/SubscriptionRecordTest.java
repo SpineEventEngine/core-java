@@ -21,6 +21,8 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
+import io.spine.base.Identifier;
+import io.spine.client.EntityId;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
@@ -29,7 +31,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
-import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,17 +92,23 @@ class SubscriptionRecordTest {
     @Test
     @DisplayName("fail to match improper target")
     void notMatchImproperTarget() {
-        ProjectId nonExistingId = ProjectId.newBuilder()
-                                           .setId("never-existed")
-                                           .build();
-        SubscriptionRecord notMatchingRecord = newRecordFor(subscription(nonExistingId));
-        Project entityState = Project.getDefaultInstance();
-        Any wrappedState = AnyPacker.pack(entityState);
-        ProjectId redundantId = ProjectId.getDefaultInstance();
+        ProjectId targetId = ProjectId.newBuilder()
+                                      .setId("target-ID")
+                                      .build();
+        SubscriptionRecord notMatchingRecord = newRecordFor(subscription(targetId));
 
+        ProjectId otherId = ProjectId.newBuilder()
+                                     .setId("some-other-ID")
+                                     .build();
+        Any packedId = Identifier.pack(otherId);
+        EntityId entityId = EntityId
+                .newBuilder()
+                .setId(packedId)
+                .build();
         EntityHistoryId entityHistoryId = EntityHistoryId
                 .newBuilder()
                 .setTypeUrl(TYPE.value())
+                .setEntityId(entityId)
                 .build();
         EntityStateChanged eventMessage = EntityStateChanged
                 .newBuilder()
@@ -121,9 +128,10 @@ class SubscriptionRecordTest {
     void beEqualToSame() {
         Subscription oneSubscription = subscription();
         SubscriptionId breakingId = Subscriptions.newId("breaking-id");
-        Subscription otherSubscription = Subscription.newBuilder()
-                                                     .setId(breakingId)
-                                                     .build();
+        Subscription otherSubscription = oneSubscription
+                .toBuilder()
+                .setId(breakingId)
+                .build();
         @SuppressWarnings("QuestionableName")
         SubscriptionRecord one = newRecordFor(oneSubscription);
         SubscriptionRecord similar = newRecordFor(otherSubscription);
