@@ -30,9 +30,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.Filters;
 import io.spine.client.OrderBy;
@@ -401,68 +399,36 @@ class StandTest extends TenantAwareTest {
         }
     }
 
-    @Nested
-    @DisplayName("receive updates")
-    class ReceiveUpdates {
+    @Test
+    @DisplayName("receive entity updates")
+    void receiveEntityUpdates() {
+        // Subscribe to customer updates.
+        CustomerAggregateRepository repository = new CustomerAggregateRepository();
+        Executor executor = mock(Executor.class);
+        Stand stand = createStandWithExecutor(executor, repository);
+        Topic allCustomers = requestFactory.topic()
+                                           .allOf(Customer.class);
+        MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction();
+        subscribeAndActivate(stand, allCustomers, callback);
 
-        @Test
-        @DisplayName("of aggregates")
-        void ofAggregates() {
-            // Subscribe to customer updates.
-            CustomerAggregateRepository repository = new CustomerAggregateRepository();
-            Stand stand = createStand(repository);
-            Topic allCustomers = requestFactory.topic()
-                                               .allOf(Customer.class);
-            MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction();
-            subscribeAndActivate(stand, allCustomers, callback);
+        // Send a command creating customer.
+        Customer customer = fillSampleCustomers(1)
+                .iterator()
+                .next();
+        CustomerId customerId = customer.getId();
+        CreateCustomer createCustomer = CreateCustomer
+                .newBuilder()
+                .setCustomerId(customerId)
+                .setCustomer(customer)
+                .build();
+        Command command = requestFactory.command()
+                                        .create(createCustomer);
+        CommandEnvelope cmd = CommandEnvelope.of(command);
+        CustomerId id = repository.dispatch(cmd);
+        assertEquals(customerId, id);
 
-            // Send a command creating customer.
-            Customer customer = fillSampleCustomers(1)
-                    .iterator()
-                    .next();
-            CustomerId customerId = customer.getId();
-            CreateCustomer createCustomer = CreateCustomer
-                    .newBuilder()
-                    .setCustomerId(customerId)
-                    .setCustomer(customer)
-                    .build();
-            Command command = requestFactory.command()
-                                            .create(createCustomer);
-            CommandEnvelope cmd = CommandEnvelope.of(command);
-            CustomerId id = repository.dispatch(cmd);
-            assertEquals(customerId, id);
-
-            // Check the update received.
-            Any packedState = pack(customer);
-            assertEquals(packedState, callback.newEntityState());
-        }
-
-        @Test
-        @DisplayName("of projections")
-        void ofProjections() {
-            // Subscribe to project updates.
-            StandTestProjectionRepository repository = new StandTestProjectionRepository();
-            Stand stand = createStand(repository);
-            Topic allProjects = requestFactory.topic()
-                                              .allOf(Project.class);
-            MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction();
-            subscribeAndActivate(stand, allProjects, callback);
-
-            // Dispatch a project creation event.
-            Event event = Given.validEvent();
-            EventEnvelope envelope = EventEnvelope.of(event);
-            Set<ProjectId> projectIds = repository.dispatch(envelope);
-            assertThat(projectIds).hasSize(1);
-
-            // Check the projection that received event is the same as in subscription update.
-            ProjectId projectId = projectIds.iterator()
-                                            .next();
-            Any packedEntityId = callback.newEntityId();
-            EntityId entityId = Identifier.unpack(packedEntityId, EntityId.class);
-            Any packedProjectId = entityId.getId();
-            ProjectId idInUpdate = Identifier.unpack(packedProjectId, ProjectId.class);
-            assertEquals(projectId, idInUpdate);
-        }
+        // Check the subscription callback is run.
+        verify(executor, times(1)).execute(any(Runnable.class));
     }
 
     @Nested
@@ -1038,6 +1004,10 @@ class StandTest extends TenantAwareTest {
     @SuppressWarnings("OverloadedVarargsMethod") // OK for this helper method.
     private Stand createStand(Repository<?, ?>... repositories) {
         return newStand(isMultitenant(), repositories);
+    }
+
+    private Stand createStandWithExecutor(Executor executor, Repository<?, ?>... repositories) {
+        return newStand(isMultitenant(), executor, repositories);
     }
 
     @CanIgnoreReturnValue

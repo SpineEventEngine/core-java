@@ -21,73 +21,26 @@
 package io.spine.server.stand.given;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.StringValue;
-import io.spine.base.Identifier;
-import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.Enrichment;
-import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.event.EventFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
-import io.spine.test.projection.command.PrjCreateProject;
 import io.spine.test.projection.event.PrjProjectCreated;
-import io.spine.testing.client.TestActorRequestFactory;
 
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.testing.Tests.nullRef;
 
 public class Given {
 
     private static final String PROJECT_UUID = newUuid();
-    private static final String PROJECT_NAME = "generic-name";
 
     private Given() {
-    }
-
-    private static Command validCommand() {
-        TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(Given.class);
-        ProjectId projectId = ProjectId
-                .newBuilder()
-                .setId(PROJECT_UUID)
-                .build();
-        PrjCreateProject commandMessage = PrjCreateProject
-                .newBuilder()
-                .setProjectId(projectId)
-                .setName(PROJECT_NAME)
-                .build();
-        return requestFactory.command()
-                             .create(commandMessage);
-    }
-
-    public static Event validEvent() {
-        Command cmd = validCommand();
-        ProjectId.Builder projectIdBuilder = ProjectId.newBuilder()
-                                                      .setId("12345AD0");
-        PrjProjectCreated eventMessage = PrjProjectCreated.newBuilder()
-                                                          .setProjectId(projectIdBuilder)
-                                                          .build();
-        StringValue producerId = StringValue.of(Given.class.getSimpleName());
-        EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
-                                                    Identifier.pack(producerId));
-        Event event = eventFactory.createEvent(eventMessage, nullRef());
-        Event result = event.toBuilder()
-                            .setContext(event.getContext()
-                                             .toBuilder()
-                                             .setEnrichment(Enrichment.newBuilder()
-                                                                      .setDoNotEnrich(true))
-                                             .build())
-                            .build();
-        return result;
     }
 
     public static class StandTestProjectionRepository
