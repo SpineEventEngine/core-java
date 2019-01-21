@@ -24,7 +24,9 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.FieldPath;
 import io.spine.client.Filter.Operator;
+import io.spine.protobuf.FieldPaths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -118,14 +120,18 @@ class FilterFactoryTest {
         @DisplayName("`equals` for enumerated types")
         void equalsForEnum() {
             Filter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
-            assertEquals(ENUM_COLUMN_NAME, filter.getFieldName());
+            String columnName = filter.getFieldPath()
+                                      .getFieldName(0);
+            assertEquals(ENUM_COLUMN_NAME, columnName);
             assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
             assertEquals(EQUAL, filter.getOperator());
         }
 
         private void checkCreatesInstance(Filter filter,
                                           Operator operator) {
-            assertEquals(COLUMN_NAME, filter.getFieldName());
+            String columnName = filter.getFieldPath()
+                                      .getFieldName(0);
+            assertEquals(COLUMN_NAME, columnName);
             assertEquals(pack(COLUMN_VALUE), filter.getValue());
             assertEquals(operator, filter.getOperator());
         }

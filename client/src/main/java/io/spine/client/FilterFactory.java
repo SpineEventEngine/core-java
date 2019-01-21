@@ -23,7 +23,9 @@ package io.spine.client;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
+import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.protobuf.FieldPaths;
 
 import java.util.Collection;
 
@@ -76,15 +78,15 @@ public final class FilterFactory {
     /**
      * Creates new equality {@link Filter}.
      *
-     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
      * @return new instance of Filter
      */
-    public static Filter eq(String columnName, Object value) {
-        checkNotNull(columnName);
+    public static Filter eq(String fieldPath, Object value) {
+        checkNotNull(fieldPath);
         checkNotNull(value);
-        return createFilter(columnName, value, EQUAL);
+        return createFilter(fieldPath, value, EQUAL);
     }
 
     /**
@@ -92,16 +94,16 @@ public final class FilterFactory {
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
-     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
      * @return new instance of Filter
      */
-    public static Filter gt(String columnName, Object value) {
-        checkNotNull(columnName);
+    public static Filter gt(String fieldPath, Object value) {
+        checkNotNull(fieldPath);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(columnName, value, GREATER_THAN);
+        return createFilter(fieldPath, value, GREATER_THAN);
     }
 
     /**
@@ -109,16 +111,16 @@ public final class FilterFactory {
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
-     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
      * @return new instance of Filter
      */
-    public static Filter lt(String columnName, Object value) {
-        checkNotNull(columnName);
+    public static Filter lt(String fieldPath, Object value) {
+        checkNotNull(fieldPath);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(columnName, value, LESS_THAN);
+        return createFilter(fieldPath, value, LESS_THAN);
     }
 
     /**
@@ -126,16 +128,16 @@ public final class FilterFactory {
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
-     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
      * @return new instance of Filter
      */
-    public static Filter ge(String columnName, Object value) {
-        checkNotNull(columnName);
+    public static Filter ge(String fieldPath, Object value) {
+        checkNotNull(fieldPath);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(columnName, value, GREATER_OR_EQUAL);
+        return createFilter(fieldPath, value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -143,16 +145,16 @@ public final class FilterFactory {
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
-     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
      * @return new instance of Filter
      */
-    public static Filter le(String columnName, Object value) {
-        checkNotNull(columnName);
+    public static Filter le(String fieldPath, Object value) {
+        checkNotNull(fieldPath);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(columnName, value, LESS_OR_EQUAL);
+        return createFilter(fieldPath, value, LESS_OR_EQUAL);
     }
 
     /**
@@ -200,11 +202,12 @@ public final class FilterFactory {
         return composeFilters(filters, ALL);
     }
 
-    private static Filter createFilter(String columnName, Object value, Operator operator) {
+    private static Filter createFilter(String fieldPath, Object value, Operator operator) {
+        FieldPath path = FieldPaths.parse(fieldPath);
         Any wrappedValue = toAny(value);
         Filter filter = FilterVBuilder
                 .newBuilder()
-                .setFieldName(columnName)
+                .setFieldPath(path)
                 .setValue(wrappedValue)
                 .setOperator(operator)
                 .build();
@@ -212,7 +215,7 @@ public final class FilterFactory {
     }
 
     private static CompositeFilter composeFilters(Collection<Filter> filters,
-                                                        CompositeOperator operator) {
+                                                  CompositeOperator operator) {
         CompositeFilter result = CompositeFilter
                 .newBuilder()
                 .addAllFilter(filters)

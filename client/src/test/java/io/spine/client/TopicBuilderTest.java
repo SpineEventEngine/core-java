@@ -261,22 +261,30 @@ class TopicBuilderTest {
                  .hasSize(2);
 
             Filter companySizeLowerBound = allFilters.get(0);
-            assertEquals(companySizeColumn, companySizeLowerBound.getFieldName());
+            String columnName1 = companySizeLowerBound.getFieldPath()
+                                                      .getFieldName(0);
+            assertEquals(companySizeColumn, columnName1);
             assertEquals(50L, (long) toObject(companySizeLowerBound.getValue(), int.class));
             assertEquals(GREATER_OR_EQUAL, companySizeLowerBound.getOperator());
 
             Filter companySizeHigherBound = allFilters.get(1);
-            assertEquals(companySizeColumn, companySizeHigherBound.getFieldName());
+            String columnName2 = companySizeHigherBound.getFieldPath()
+                                                      .getFieldName(0);
+            assertEquals(companySizeColumn, columnName2);
             assertEquals(1000L, (long) toObject(companySizeHigherBound.getValue(), int.class));
             assertEquals(LESS_OR_EQUAL, companySizeHigherBound.getOperator());
 
             Filter establishedTimeFilter = eitherFilters.get(0);
-            assertEquals(establishedTimeColumn, establishedTimeFilter.getFieldName());
+            String columnName3 = establishedTimeFilter.getFieldPath()
+                                                      .getFieldName(0);
+            assertEquals(establishedTimeColumn, columnName3);
             assertEquals(twoDaysAgo, toObject(establishedTimeFilter.getValue(), Timestamp.class));
             assertEquals(GREATER_THAN, establishedTimeFilter.getOperator());
 
             Filter countryFilter = eitherFilters.get(1);
-            assertEquals(countryColumn, countryFilter.getFieldName());
+            String columnName4 = countryFilter.getFieldPath()
+                                              .getFieldName(0);
+            assertEquals(countryColumn, columnName4);
             assertEquals(countryName, toObject(countryFilter.getValue(), String.class));
             assertEquals(EQUAL, countryFilter.getOperator());
         }

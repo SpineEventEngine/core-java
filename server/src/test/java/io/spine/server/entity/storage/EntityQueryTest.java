@@ -27,9 +27,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.StringSubject;
+import io.spine.base.FieldPath;
 import io.spine.client.Filter;
 import io.spine.client.FilterFactory;
 import io.spine.client.IdFilter;
+import io.spine.protobuf.FieldPaths;
 import io.spine.server.entity.Entity;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
@@ -202,11 +204,12 @@ class EntityQueryTest {
         Multimap<EntityColumn, Filter> filters = HashMultimap.create(values.size(), 1);
         for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
             EntityColumn column = param.getKey();
+            FieldPath fieldPath = FieldPaths.parse(column.getName());
             Filter filter = Filter
                     .newBuilder()
                     .setOperator(EQUAL)
                     .setValue(toAny(param.getValue()))
-                    .setFieldName(column.getName())
+                    .setFieldPath(fieldPath)
                     .build();
             filters.put(column, filter);
         }

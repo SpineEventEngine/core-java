@@ -151,16 +151,18 @@ public final class EntityQueries {
 
     private static EntityColumn findMatchingColumn(Filter filter,
                                                    Collection<EntityColumn> entityColumns) {
+        String columnName = filter.getFieldPath()
+                                  .getFieldName(0);
         for (EntityColumn column : entityColumns) {
             if (column.getName()
-                      .equals(filter.getFieldName())) {
+                      .equals(columnName)) {
                 return column;
             }
         }
 
         throw new IllegalArgumentException(
                 format("Could not find an EntityColumn description for column with name %s.",
-                       filter.getFieldName()));
+                       columnName));
     }
 
     private static void checkFilterType(EntityColumn column, Filter filter) {

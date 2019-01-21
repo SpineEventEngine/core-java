@@ -47,7 +47,8 @@ public class TopicBuilderTestEnv {
 
     public static Filter findByName(Iterable<Filter> filters, String name) {
         for (Filter filter : filters) {
-            if (filter.getFieldName()
+            if (filter.getFieldPath()
+                      .getFieldName(0)
                       .equals(name)) {
                 return filter;
             }

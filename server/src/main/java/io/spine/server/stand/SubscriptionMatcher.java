@@ -21,8 +21,8 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
@@ -36,8 +36,10 @@ import io.spine.type.TypeUrl;
 
 import java.util.function.Predicate;
 
+import static io.spine.protobuf.FieldPaths.fieldAt;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.lang.String.join;
 
 /**
  * Decides whether the given event matches a subscription criteria.
@@ -111,11 +113,8 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
     }
 
     private static boolean checkPasses(Message state, Filter filter) {
-        String fieldName = filter.getFieldName();
-        FieldDescriptor fieldDescriptor = state.getDescriptorForType()
-                                               .findFieldByName(fieldName);
-        Object actual = state.getField(fieldDescriptor);
-
+        FieldPath fieldPath = filter.getFieldPath();
+        Object actual = fieldAt(state, fieldPath);
         Any requiredAsAny = filter.getValue();
         Object required = TypeConverter.toObject(requiredAsAny, actual.getClass());
         try {
@@ -125,7 +124,7 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
                     e,
                     "Filter value %s cannot be properly compared to the message field %s of " +
                             "type %s",
-                    required, fieldDescriptor.getFullName(), fieldDescriptor.getType()
+                    required, join(".", fieldPath.getFieldNameList()), actual.getClass()
             );
         }
     }
