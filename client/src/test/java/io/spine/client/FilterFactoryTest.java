@@ -24,9 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.FieldPath;
 import io.spine.client.Filter.Operator;
-import io.spine.protobuf.FieldPaths;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -70,7 +68,7 @@ class FilterFactoryTest {
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Filters.class);
+        assertHasPrivateParameterlessCtor(TargetFilters.class);
     }
 
     @Test

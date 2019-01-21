@@ -61,7 +61,7 @@ import static java.lang.String.format;
  *
  * <p>A {@linkplain #getName() name} for working with {@linkplain EntityQueries queries}
  * is determined by a name of column getter, e.g. {@code value} for {@code getValue()}.
- * A client should specify this value to a {@linkplain io.spine.client.Filters
+ * A client should specify this value to a {@linkplain io.spine.client.TargetFilters
  * column filters}.
  *
  * <p>A {@linkplain #getStoredName() stored name} is used as a {@code Storage} column name

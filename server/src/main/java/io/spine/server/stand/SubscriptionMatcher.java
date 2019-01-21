@@ -26,10 +26,10 @@ import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.Subscription;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.TypeConverter;
 import io.spine.type.TypeUrl;
@@ -73,7 +73,7 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 
     private boolean checkIdMatches(EventEnvelope event) {
         Any id = getIdToCheck(event);
-        Filters filters = target().getFilters();
+        TargetFilters filters = target().getFilters();
         IdFilter idFilter = filters.getIdFilter();
         boolean idFilterSet = !IdFilter.getDefaultInstance()
                                        .equals(idFilter);
@@ -87,7 +87,7 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 
     private boolean checkStateMatches(EventEnvelope event) {
         Message state = getStateToCheck(event);
-        Filters filters = target().getFilters();
+        TargetFilters filters = target().getFilters();
         boolean result = filters.getFilterList()
                                 .stream()
                                 .allMatch(filter -> checkPasses(state, filter));

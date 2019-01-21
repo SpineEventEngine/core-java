@@ -24,10 +24,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.ProtocolStringList;
-import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.Query;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
@@ -82,12 +82,12 @@ public class QueryFactoryTestEnv {
 
     public static void checkFiltersEmpty(Query query) {
         Target entityTarget = query.getTarget();
-        Filters filters = entityTarget.getFilters();
+        TargetFilters filters = entityTarget.getFilters();
         assertNotNull(filters);
-        assertEquals(Filters.getDefaultInstance(), filters);
+        assertEquals(TargetFilters.getDefaultInstance(), filters);
     }
 
-    public static void verifyIdFilter(Set<TestEntityId> expectedIds, Filters filters) {
+    public static void verifyIdFilter(Set<TestEntityId> expectedIds, TargetFilters filters) {
         assertNotNull(filters);
         IdFilter idFilter = filters.getIdFilter();
         assertNotNull(idFilter);
@@ -132,7 +132,7 @@ public class QueryFactoryTestEnv {
         }
     }
 
-    public static Filters stripIdFilter(Filters filters) {
+    public static TargetFilters stripIdFilter(TargetFilters filters) {
         return filters.toBuilder()
                       .clearIdFilter()
                       .build();
@@ -150,8 +150,8 @@ public class QueryFactoryTestEnv {
         Target factoryTarget = query1.getTarget();
         Target builderTarget = query2.getTarget();
 
-        Filters factoryFilters = factoryTarget.getFilters();
-        Filters builderFilters = builderTarget.getFilters();
+        TargetFilters factoryFilters = factoryTarget.getFilters();
+        TargetFilters builderFilters = builderTarget.getFilters();
 
         // Everything except filters is the same
         assertEquals(stripFilters(factoryTarget), stripFilters(builderTarget));

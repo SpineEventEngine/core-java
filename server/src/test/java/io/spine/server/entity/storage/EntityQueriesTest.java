@@ -28,11 +28,11 @@ import com.google.protobuf.Message;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.FilterFactory;
-import io.spine.client.Filters;
-import io.spine.client.FiltersVBuilder;
 import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.TargetFilters;
+import io.spine.client.TargetFiltersVBuilder;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
@@ -76,12 +76,12 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         super.configure(tester);
         tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
               .setDefault(Pagination.class, Pagination.getDefaultInstance())
-              .setDefault(Filters.class, Filters.getDefaultInstance())
+              .setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
               .setDefault(RecordStorage.class, mock(RecordStorage.class))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
-    private static EntityQuery<?> createEntityQuery(Filters filters,
+    private static EntityQuery<?> createEntityQuery(TargetFilters filters,
                                                     Class<? extends Entity> entityClass) {
         return createEntityQuery(filters, OrderBy.getDefaultInstance(),
                                  Pagination.getDefaultInstance(), entityClass);
@@ -91,7 +91,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
      * This method is not placed in test environment because it uses package-private 
      * {@link EntityQueries#from(EntityFilters, OrderBy, Pagination, Collection)}.
      */
-    private static EntityQuery<?> createEntityQuery(Filters filters,
+    private static EntityQuery<?> createEntityQuery(TargetFilters filters,
                                                     OrderBy orderBy,
                                                     Pagination pagination,
                                                     Class<? extends Entity> entityClass) {
@@ -105,7 +105,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         // Boolean EntityColumn queried for for an Integer value
         Filter filter = FilterFactory.gt(archived.name(), 42);
         CompositeFilter compositeFilter = FilterFactory.all(filter);
-        Filters filters = FiltersVBuilder
+        TargetFilters filters = TargetFiltersVBuilder
                 .newBuilder()
                 .addFilter(compositeFilter)
                 .build();
@@ -119,7 +119,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     void notCreateForNonExisting() {
         Filter filter = FilterFactory.eq("nonExistingColumn", 42);
         CompositeFilter compositeFilter = FilterFactory.all(filter);
-        Filters filters = FiltersVBuilder
+        TargetFilters filters = TargetFiltersVBuilder
                 .newBuilder()
                 .addFilter(compositeFilter)
                 .build();
@@ -131,7 +131,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     @Test
     @DisplayName("construct empty queries")
     void constructEmptyQueries() {
-        Filters filters = Filters.getDefaultInstance();
+        TargetFilters filters = TargetFilters.getDefaultInstance();
         EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
         assertNotNull(query);
         
@@ -170,7 +170,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
                 .addFilter(archivedFilter)
                 .setOperator(EITHER)
                 .build();
-        Filters filters = FiltersVBuilder
+        TargetFilters filters = TargetFiltersVBuilder
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(aggregatingFilter)
@@ -208,7 +208,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         String expectedColumn = "test";
         OrderBy.Direction expectedDirection = ASCENDING;
         int expectedLimit = 10;
-        EntityQuery<?> query = createEntityQuery(Filters.getDefaultInstance(),
+        EntityQuery<?> query = createEntityQuery(TargetFilters.getDefaultInstance(),
                                                  order(expectedColumn, expectedDirection),
                                                  pagination(expectedLimit),
                                                  AbstractEntity.class);

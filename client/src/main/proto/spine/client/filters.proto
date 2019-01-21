@@ -50,7 +50,7 @@ message Target {
         bool include_all = 2;
 
         // Filter the objects of a given type by certain criteria.
-        Filters filters = 3;
+        TargetFilters filters = 3;
     }
 }
 
@@ -58,7 +58,7 @@ message Target {
 //
 // To be used in scope of read-side API for specifying the target of query and subscription
 // operations.
-message Filters {
+message TargetFilters {
 
     // Match entities by IDs.
     IdFilter id_filter = 1;

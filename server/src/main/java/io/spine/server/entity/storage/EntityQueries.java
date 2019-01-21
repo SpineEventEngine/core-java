@@ -28,10 +28,10 @@ import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.TargetFilters;
 import io.spine.server.storage.RecordStorage;
 
 import java.util.Collection;
@@ -60,8 +60,8 @@ public final class EntityQueries {
     }
 
     /**
-     * Creates new {@link EntityQuery} instances for the given {@link OrderBy}, {@link Filters}, 
-     * {@link Pagination}, and {@link RecordStorage}.
+     * Creates new {@link EntityQuery} instances for the given {@link OrderBy},
+     * {@link TargetFilters}, {@link Pagination}, and {@link RecordStorage}.
      *
      * @param filters
      *         filters for the Entities specifying the query predicate
@@ -73,7 +73,7 @@ public final class EntityQueries {
      *         a storage for which the query is created
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
-    public static <I> EntityQuery<I> from(Filters filters,
+    public static <I> EntityQuery<I> from(TargetFilters filters,
                                           OrderBy orderBy,
                                           Pagination pagination,
                                           RecordStorage<I> storage) {
@@ -88,7 +88,7 @@ public final class EntityQueries {
     }
 
     @VisibleForTesting
-    static <I> EntityQuery<I> from(Filters filters,
+    static <I> EntityQuery<I> from(TargetFilters filters,
                                    OrderBy orderBy,
                                    Pagination pagination,
                                    Collection<EntityColumn> columns) {
@@ -105,7 +105,7 @@ public final class EntityQueries {
     }
 
     private static QueryParameters toQueryParams(OrderBy orderBy,
-                                                 Filters filters,
+                                                 TargetFilters filters,
                                                  Pagination pagination,
                                                  Collection<EntityColumn> entityColumns) {
 
@@ -114,7 +114,7 @@ public final class EntityQueries {
     }
 
     private static List<CompositeQueryParameter>
-    getFiltersQueryParams(Filters filters, Collection<EntityColumn> entityColumns) {
+    getFiltersQueryParams(TargetFilters filters, Collection<EntityColumn> entityColumns) {
         return filters.getFilterList()
                       .stream()
                       .map(filter -> queryParameterFromFilter(filter, entityColumns))
@@ -176,7 +176,7 @@ public final class EntityQueries {
                       filterValue);
     }
 
-    private static <I> Collection<I> toGenericIdValues(Filters filters) {
+    private static <I> Collection<I> toGenericIdValues(TargetFilters filters) {
         IdFilter idFilter = filters.getIdFilter();
         Collection<I> ids = newArrayList();
         for (Any entityId : idFilter.getIdsList()) {

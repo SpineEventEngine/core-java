@@ -205,8 +205,8 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * @param predicate
      *         the {@link io.spine.client.Filter}s to filter the requested entities by
      * @return self for method chaining
-     * @see io.spine.client.Filters for a convenient way to create {@link io.spine.client.Filter}
-     *      instances
+     * @see io.spine.client.FilterFactory for a convenient way to create
+     *      {@link io.spine.client.Filter} instances
      * @see #where(io.spine.client.CompositeFilter...)
      */
     public B where(Filter... predicate) {
@@ -282,8 +282,8 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      *         a number of {@link io.spine.client.CompositeFilter} instances forming the query
      *         predicate
      * @return self for method chaining
-     * @see io.spine.client.Filters for a convinient way to create {@link
-     *         io.spine.client.CompositeFilter} instances
+     * @see io.spine.client.FilterFactory for a convenient way to create {@link
+     *      io.spine.client.CompositeFilter} instances
      */
     public B where(CompositeFilter... predicate) {
         columns = ImmutableSet.copyOf(predicate);

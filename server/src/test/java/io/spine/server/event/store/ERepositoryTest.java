@@ -25,7 +25,7 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
+import io.spine.client.TargetFilters;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +46,7 @@ class ERepositoryTest {
     void convertEmptyToFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
-        Filters entityFilters = convert(query);
+        TargetFilters entityFilters = convert(query);
         assertTrue(entityFilters.getFilterList()
                                 .isEmpty());
     }
@@ -59,7 +59,7 @@ class ERepositoryTest {
                 .setAfter(Timestamps.MIN_VALUE)
                 .setBefore(Timestamps.MAX_VALUE)
                 .build();
-        Filters entityFilters = convert(query);
+        TargetFilters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeFilter compositeFilter = entityFilters.getFilter(0);
@@ -79,7 +79,7 @@ class ERepositoryTest {
                 .addFilter(validFilter)
                 .addFilter(invalidFilter)
                 .build();
-        Filters entityFilters = convert(query);
+        TargetFilters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
         CompositeFilter compositeFilter = entityFilters.getFilter(0);

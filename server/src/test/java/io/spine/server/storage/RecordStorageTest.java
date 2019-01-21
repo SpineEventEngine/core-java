@@ -28,8 +28,8 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
 import io.spine.client.IdFilter;
+import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
@@ -126,7 +126,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addFilter(status)
                 .addFilter(version)
                 .build();
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(aggregatingFilter)
                 .build();
@@ -216,7 +216,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .addIds(entityId)
                 .build();
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
@@ -247,7 +247,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(activeRecordId, create(activeRecord, activeEntity, storage));
         storage.write(archivedRecordId, create(archivedRecord, archivedEntity, storage));
 
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(all(eq(archived.toString(), true)))
                 .build();
@@ -287,7 +287,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addIds(pack(archivedId))
                 .addIds(pack(deletedId))
                 .build();
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
@@ -328,7 +328,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addIds(pack(archivedId))
                 .addIds(pack(deletedId))
                 .build();
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
@@ -370,7 +370,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addIds(pack(archivedId))
                 .addIds(pack(deletedId))
                 .build();
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
@@ -439,7 +439,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setOperator(ALL)
                 .addFilter(status)
                 .build();
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(aggregatingFilter)
                 .build();
@@ -501,7 +501,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addIds(pack(targetId))
                 .build();
         CompositeFilter filter = all(eq("projectStatusValue", CANCELLED.getNumber()));
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(filter)
@@ -546,7 +546,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setOperator(ALL)
                 .addFilter(status)
                 .build();
-        Filters filters = Filters
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(aggregatingFilter)
                 .build();

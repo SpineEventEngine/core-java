@@ -125,7 +125,7 @@ class TopicBuilderTest {
             Target target = topic.getTarget();
             assertFalse(target.getIncludeAll());
 
-            Filters entityFilters = target.getFilters();
+            TargetFilters entityFilters = target.getFilters();
             IdFilter idFilter = entityFilters.getIdFilter();
             Collection<Any> idValues = idFilter.getIdsList();
             Collection<Integer> intIdValues = idValues
@@ -169,7 +169,7 @@ class TopicBuilderTest {
             Target target = topic.getTarget();
             assertFalse(target.getIncludeAll());
 
-            Filters entityFilters = target.getFilters();
+            TargetFilters entityFilters = target.getFilters();
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
             Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
@@ -200,7 +200,7 @@ class TopicBuilderTest {
             Target target = topic.getTarget();
             assertFalse(target.getIncludeAll());
 
-            Filters entityFilters = target.getFilters();
+            TargetFilters entityFilters = target.getFilters();
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
             Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
@@ -319,10 +319,10 @@ class TopicBuilderTest {
 
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
-            Filters entityFilters = target.getFilters();
+            TargetFilters targetFilters = target.getFilters();
 
             // Check IDs
-            IdFilter idFilter = entityFilters.getIdFilter();
+            IdFilter idFilter = targetFilters.getIdFilter();
             Collection<Any> idValues = idFilter.getIdsList();
             Collection<Integer> intIdValues = idValues
                     .stream()
@@ -333,7 +333,7 @@ class TopicBuilderTest {
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
             // Check query params
-            List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
+            List<CompositeFilter> aggregatingFilters = targetFilters.getFilterList();
             Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
             Collection<Filter> filters = aggregatingFilters.get(0)
@@ -376,9 +376,9 @@ class TopicBuilderTest {
             assertNotNull(topic);
 
             Target target = topic.getTarget();
-            Filters filters = target.getFilters();
+            TargetFilters filters = target.getFilters();
             Collection<Any> entityIds = filters.getIdFilter()
-                                                    .getIdsList();
+                                               .getIdsList();
             Truth.assertThat(entityIds)
                  .hasSize(messageIds.length);
             Iterable<? extends Message> actualValues = entityIds

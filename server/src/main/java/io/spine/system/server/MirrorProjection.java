@@ -24,9 +24,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.CompositeFilter;
-import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
@@ -57,8 +57,6 @@ import static java.util.stream.Collectors.toList;
  * Many subscriber methods of this class ignore their arguments. The argument of a subscriber method
  * is an event used by the framework to bind the method to the event type. The content of the event,
  * in those cases, is irrelevant.
- *
- * @author Dmytro Dashenkov
  */
 public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
 
@@ -120,21 +118,21 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     /**
-     * Builds the {@link Filters} for the {@link Mirror} projection based on the domain aggregate 
-     * {@link Target}.
+     * Builds the {@link TargetFilters} for the {@link Mirror} projection based on the domain
+     * aggregate {@link Target}.
      *
      * @param target
      *         domain aggregate query target
      * @return entity filters for this projection
      */
-    static Filters buildFilters(Target target) {
+    static TargetFilters buildFilters(Target target) {
         IdFilter idFilter = buildIdFilter(target);
-        Filters filters = target.getFilters();
+        TargetFilters filters = target.getFilters();
         CompositeFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
-        Filters appendedFilters = filters.toBuilder()
-                                         .setIdFilter(idFilter)
-                                         .addFilter(typeFilter)
-                                         .build();
+        TargetFilters appendedFilters = filters.toBuilder()
+                                               .setIdFilter(idFilter)
+                                               .addFilter(typeFilter)
+                                               .build();
         return appendedFilters;
     }
 

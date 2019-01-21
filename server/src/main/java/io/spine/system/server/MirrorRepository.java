@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
-import io.spine.client.Filters;
 import io.spine.client.Query;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.type.TypeUrl;
@@ -123,7 +123,7 @@ final class MirrorRepository
     Iterator<Any> execute(Query query) {
         FieldMask aggregateFields = query.getFieldMask();
         Target target = query.getTarget();
-        Filters filters = buildFilters(target);
+        TargetFilters filters = buildFilters(target);
         Iterator<MirrorProjection> mirrors = find(filters, 
                                                   query.getOrderBy(), 
                                                   query.getPagination(), 

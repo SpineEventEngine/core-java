@@ -111,7 +111,7 @@ public final class Targets {
             IdFilter idFilter = composeIdFilter(idsList);
 
             List<CompositeFilter> filterList = notNullList(filters);
-            Filters targetFilters = filters(filterList, idFilter);
+            TargetFilters targetFilters = targetFilters(filterList, idFilter);
             builder.setFilters(targetFilters);
         }
 
@@ -151,11 +151,12 @@ public final class Targets {
         return item;
     }
 
-    private static Filters filters(List<CompositeFilter> entityColumnValues, IdFilter idFilter) {
-        return FiltersVBuilder.newBuilder()
-                              .setIdFilter(idFilter)
-                              .addAllFilter(entityColumnValues)
-                              .build();
+    private static TargetFilters targetFilters(List<CompositeFilter> entityColumnValues,
+                                               IdFilter idFilter) {
+        return TargetFiltersVBuilder.newBuilder()
+                                    .setIdFilter(idFilter)
+                                    .addAllFilter(entityColumnValues)
+                                    .build();
     }
 
     /**

@@ -24,11 +24,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.Filters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.Query;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
@@ -61,7 +61,7 @@ class EntityQueryProcessor implements QueryProcessor {
                                                .isEmpty()) {
             entities = repository.loadAll();
         } else {
-            Filters filters = target.getFilters();
+            TargetFilters filters = target.getFilters();
             OrderBy orderBy = query.getOrderBy();
             Pagination pagination = query.getPagination();
             entities = repository.find(filters, orderBy, pagination, fieldMask);

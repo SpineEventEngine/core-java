@@ -23,7 +23,7 @@ package io.spine.server.event.store;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
+import io.spine.client.TargetFilters;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 
@@ -34,7 +34,7 @@ import static io.spine.client.FilterFactory.gt;
 import static io.spine.client.FilterFactory.lt;
 
 /**
- * Converts {@link EventStreamQuery} to {@link Filters}.
+ * Converts {@link EventStreamQuery} to {@link TargetFilters}.
  *
  * <p>The resulting filters contain the filtering by {@code before} and {@code after} fields
  * of the source query and by the {@code eventType} field of the underlying
@@ -43,10 +43,10 @@ import static io.spine.client.FilterFactory.lt;
 final class QueryToFilters {
 
     private final EventStreamQuery query;
-    private final Filters.Builder builder;
+    private final TargetFilters.Builder builder;
 
     /**
-     * Creates an instance of {@link Filters} from the given {@link EventStreamQuery}.
+     * Creates an instance of {@link TargetFilters} from the given {@link EventStreamQuery}.
      *
      * <p>The resulting filters contain the filtering by {@code before} and {@code after} fields
      * of the source query and by the {@code eventType} field of the underlying
@@ -54,19 +54,19 @@ final class QueryToFilters {
      *
      * @param query
      *         the source {@link EventStreamQuery} to get the info from
-     * @return new instance of {@link Filters} filtering the events
+     * @return new instance of {@link TargetFilters} filtering the events
      */
-    static Filters convert(EventStreamQuery query) {
-        Filters result = new QueryToFilters(query).convert();
+    static TargetFilters convert(EventStreamQuery query) {
+        TargetFilters result = new QueryToFilters(query).convert();
         return result;
     }
 
     private QueryToFilters(EventStreamQuery query) {
         this.query = query;
-        this.builder = Filters.newBuilder();
+        this.builder = TargetFilters.newBuilder();
     }
 
-    private Filters convert() {
+    private TargetFilters convert() {
         addTimeFilter();
         addTypeFilter();
         return builder.build();

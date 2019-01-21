@@ -32,7 +32,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityStateUpdate;
-import io.spine.client.Filters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.Query;
@@ -42,12 +41,11 @@ import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -58,7 +56,6 @@ import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
@@ -1090,7 +1087,8 @@ class StandTest extends TenantAwareTest {
                 .thenReturn(allResults.iterator());
     }
 
-    private static ArgumentMatcher<Filters> entityFilterMatcher(Collection<ProjectId> projectIds) {
+    private static ArgumentMatcher<TargetFilters>
+    entityFilterMatcher(Collection<ProjectId> projectIds) {
         // This argument matcher does NOT mimic the exact repository behavior.
         // Instead, it only matches the EntityFilters instance in case it has IdFilter with
         // ALL the expected IDs.

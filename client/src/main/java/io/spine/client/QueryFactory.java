@@ -184,10 +184,10 @@ public final class QueryFactory {
 
     Query composeQuery(Class<? extends Message> entityClass,
                        @Nullable Set<?> ids,
-                       @Nullable Set<CompositeFilter> Filters,
+                       @Nullable Set<CompositeFilter> filters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
-        QueryVBuilder builder = queryBuilderFor(entityClass, ids, Filters, fieldMask);
+        QueryVBuilder builder = queryBuilderFor(entityClass, ids, filters, fieldMask);
         Query query = newQuery(builder);
         return query;
     }

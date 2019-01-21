@@ -86,11 +86,11 @@ public final class Queries {
     @SuppressWarnings("CheckReturnValue") // calling builder
     static QueryVBuilder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<?> ids,
-                                         @Nullable Set<CompositeFilter> Filters,
+                                         @Nullable Set<CompositeFilter> filters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
-        Target target = composeTarget(entityClass, ids, Filters);
+        Target target = composeTarget(entityClass, ids, filters);
         QueryVBuilder builder = queryBuilderFor(target, fieldMask);
         return builder;
     }

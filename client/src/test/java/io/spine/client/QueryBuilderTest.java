@@ -216,7 +216,7 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            Filters entityFilters = target.getFilters();
+            TargetFilters entityFilters = target.getFilters();
             IdFilter idFilter = entityFilters.getIdFilter();
             Collection<Any> idValues = idFilter.getIdsList();
             Collection<Integer> intIdValues = idValues
@@ -261,7 +261,7 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            Filters entityFilters = target.getFilters();
+            TargetFilters entityFilters = target.getFilters();
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
             Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
@@ -292,7 +292,7 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            Filters entityFilters = target.getFilters();
+            TargetFilters entityFilters = target.getFilters();
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
             Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
@@ -329,7 +329,7 @@ class QueryBuilderTest {
                                  .build();
             Target target = query.getTarget();
             List<CompositeFilter> filters = target.getFilters()
-                                                        .getFilterList();
+                                                  .getFilterList();
             Truth.assertThat(filters)
                  .hasSize(2);
 
@@ -355,7 +355,7 @@ class QueryBuilderTest {
 
             Filter companySizeLowerBound = allFilters.get(0);
             String columnName1 = companySizeLowerBound.getFieldPath()
-                                               .getFieldName(0);
+                                                      .getFieldName(0);
             assertEquals(companySizeColumn, columnName1);
             assertEquals(50L,
                          (long) toObject(companySizeLowerBound.getValue(), int.class));
@@ -420,7 +420,7 @@ class QueryBuilderTest {
 
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
-            Filters entityFilters = target.getFilters();
+            TargetFilters entityFilters = target.getFilters();
 
             // Check IDs
             IdFilter idFilter = entityFilters.getIdFilter();
@@ -499,9 +499,9 @@ class QueryBuilderTest {
             assertNotNull(query);
 
             Target target = query.getTarget();
-            Filters filters = target.getFilters();
+            TargetFilters filters = target.getFilters();
             Collection<Any> entityIds = filters.getIdFilter()
-                                                    .getIdsList();
+                                               .getIdsList();
             Truth.assertThat(entityIds)
                  .hasSize(messageIds.length);
             Iterable<? extends Message> actualValues = entityIds

@@ -32,9 +32,9 @@ import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
-import io.spine.client.FiltersVBuilder;
 import io.spine.client.IdFilter;
+import io.spine.client.TargetFilters;
+import io.spine.client.TargetFiltersVBuilder;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.storage.RecordStorage;
 import io.spine.testing.TestValues;
@@ -276,7 +276,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
                     .addFilter(filter)
                     .setOperator(ALL)
                     .build();
-            Filters filters = FiltersVBuilder
+            TargetFilters filters = TargetFiltersVBuilder
                     .newBuilder()
                     .addFilter(aggregatingFilter)
                     .build();
@@ -300,7 +300,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             int idsToObtain = count / 2;
             List<Any> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
 
-            Filters filters = createIdFilters(ids);
+            TargetFilters filters = createIdFilters(ids);
             FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
             Iterator<E> readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
@@ -380,7 +380,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             assertThat(found).isEmpty();
         }
 
-        private Iterator<E> find(Filters filters, FieldMask firstFieldOnly) {
+        private Iterator<E> find(TargetFilters filters, FieldMask firstFieldOnly) {
             return repository().find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
         }
 
@@ -402,12 +402,12 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             return ids;
         }
 
-        private Filters createIdFilters(List<Any> ids) {
+        private TargetFilters createIdFilters(List<Any> ids) {
             IdFilter filter = IdFilter
                     .newBuilder()
                     .addAllIds(ids)
                     .build();
-            Filters filters = FiltersVBuilder
+            TargetFilters filters = TargetFiltersVBuilder
                     .newBuilder()
                     .setIdFilter(filter)
                     .build();
@@ -538,7 +538,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         storeEntity(deletedEntity);
 
         CompositeFilter filter = all(eq(archived.name(), false));
-        Filters filters = FiltersVBuilder
+        TargetFilters filters = TargetFiltersVBuilder
                 .newBuilder()
                 .addFilter(filter)
                 .build();
