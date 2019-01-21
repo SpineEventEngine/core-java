@@ -28,26 +28,53 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.base.Preconditions.checkState;
 
+/**
+ * A callback that updates a subscription based on the incoming event.
+ *
+ * <p>This callback is meant to be run on the subscription which was already matched to the event
+ * and thus doesn't do any type checking and filter evaluation.
+ *
+ * <p>The class is abstract because the event and entity subscriptions receive different kinds of
+ * updates. See descendants for details.
+ */
 abstract class SubscriptionCallback {
 
+    /**
+     * A subscription to include in the update.
+     */
     private final Subscription subscription;
 
+    /**
+     * An action which accepts an update and notifies the read-side accordingly.
+     */
     private @MonotonicNonNull NotifySubscriptionAction notifyAction = null;
 
     SubscriptionCallback(Subscription subscription) {
         this.subscription = subscription;
     }
 
+    /**
+     * Runs the subscription update with the incoming event.
+     *
+     * @throws IllegalStateException
+     *         if the subscription hadn't been activated yet
+     */
     protected void run(EventEnvelope event) {
         checkState(isActive(), "Notifying by a non-activated subscription.");
-        SubscriptionUpdate update = buildSubscriptionUpdate(event);
+        SubscriptionUpdate update = createSubscriptionUpdate(event);
         notifyAction.accept(update);
     }
 
-    void setNotifyAction(NotifySubscriptionAction notifyAction) {
-        this.notifyAction = notifyAction;
+    /**
+     * "Activates" this callback with a given action.
+     */
+    void setNotifyAction(NotifySubscriptionAction action) {
+        this.notifyAction = action;
     }
 
+    /**
+     * Checks if this callback has a notify action set.
+     */
     boolean isActive() {
         return notifyAction != null;
     }
@@ -56,5 +83,8 @@ abstract class SubscriptionCallback {
         return subscription;
     }
 
-    protected abstract SubscriptionUpdate buildSubscriptionUpdate(EventEnvelope event);
+    /**
+     * Creates a subscription update based on the incoming event.
+     */
+    protected abstract SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event);
 }

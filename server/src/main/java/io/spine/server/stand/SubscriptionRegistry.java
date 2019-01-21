@@ -41,15 +41,18 @@ interface SubscriptionRegistry {
      *
      * <p>The callback passed will become associated with the subscription.
      *
-     * @param subscription the subscription to activate
-     * @param notifyAction     the callback to make active
+     * @param subscription
+     *         the subscription to activate
+     * @param notifyAction
+     *         the callback to make active
      */
     void activate(Subscription subscription, Stand.NotifySubscriptionAction notifyAction);
 
     /**
      * Creates a subscription for the passed {@link Topic} and adds it to the registry.
      *
-     * @param topic the topic to subscribe to
+     * @param topic
+     *         the topic to subscribe to
      * @return the created subscription
      */
     Subscription add(Topic topic);
@@ -60,14 +63,16 @@ interface SubscriptionRegistry {
      * <p>If there is no such subscription in this instance of {@code SubscriptionRegistry},
      * invocation has no effect.
      *
-     * @param subscription the subscription to remove
+     * @param subscription
+     *         the subscription to remove
      */
     void remove(Subscription subscription);
 
     /**
      * Allows to determine if this registry has an item with the specified ID.
      *
-     * @param subscriptionId the subscription ID to look for.
+     * @param subscriptionId
+     *         the subscription ID to look for.
      * @return {@code true}, if this registry has a subscription with the given ID,
      *         {@code false} otherwise.
      */
@@ -76,7 +81,8 @@ interface SubscriptionRegistry {
     /**
      * Filter the registered {@link SubscriptionRecord}s by their type.
      *
-     * @param type the type to filter by
+     * @param type
+     *         the type to filter by
      * @return the collection of filtered records
      */
     Set<SubscriptionRecord> byType(TypeUrl type);
@@ -89,5 +95,10 @@ interface SubscriptionRegistry {
      */
     boolean hasType(TypeUrl type);
 
+    /**
+     * Retrieves types of all subscriptions in this registry.
+     *
+     * @return a set of type URLs to which present records point
+     */
     ImmutableSet<TypeUrl> typeSet();
 }

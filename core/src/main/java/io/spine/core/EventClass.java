@@ -56,6 +56,12 @@ public class EventClass extends MessageClass<EventMessage> {
         return new EventClass(checkNotNull(value));
     }
 
+    /**
+     * Creates a new {@code EventClass} instance from the passed type URL.
+     *
+     * @throws IllegalArgumentException
+     *         if the passed {@code TypeUrl} does not represent an event type
+     */
     @SuppressWarnings("unchecked") // Logically checked.
     public static EventClass from(TypeUrl typeUrl) {
         Class<? extends Message> messageClass = typeUrl.getMessageClass();

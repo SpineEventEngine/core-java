@@ -42,7 +42,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.join;
 
 /**
- * Decides whether the given event matches a subscription criteria.
+ * Matches the incoming event against a subscription criteria.
+ *
+ * <p>The class is abstract because for event and entity subscriptions the different parts of event
+ * message are validated. See descendants for details.
  */
 abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 
@@ -57,20 +60,32 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
         return isTypeMatching(event) && (includeAll() || matchByFilters(event));
     }
 
+    /**
+     * Matches the event to the subscription type.
+     */
     private boolean isTypeMatching(EventEnvelope event) {
         TypeUrl typeUrl = getTypeToCheck(event);
         TypeUrl requiredType = TypeUrl.parse(target().getType());
         return requiredType.equals(typeUrl);
     }
 
+    /**
+     * Checks if the subscription has "include_all" clause.
+     */
     private boolean includeAll() {
         return target().getIncludeAll();
     }
 
+    /**
+     * Matches an event to the subscription filters.
+     */
     private boolean matchByFilters(EventEnvelope event) {
-        return checkIdMatches(event) && checkStateMatches(event);
+        return checkIdMatches(event) && checkEventMessageMatches(event);
     }
 
+    /**
+     * Checks if the event matches the subscription ID filter.
+     */
     private boolean checkIdMatches(EventEnvelope event) {
         Any id = getIdToCheck(event);
         TargetFilters filters = target().getFilters();
@@ -85,27 +100,31 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
         return result;
     }
 
-    private boolean checkStateMatches(EventEnvelope event) {
-        Message state = getStateToCheck(event);
+    /**
+     * Checks if the event message matches the subscription filters.
+     */
+    private boolean checkEventMessageMatches(EventEnvelope event) {
+        Message message = getMessageToCheck(event);
         TargetFilters filters = target().getFilters();
-        boolean result = filters.getFilterList()
-                                .stream()
-                                .allMatch(filter -> checkPasses(state, filter));
+        boolean result = filters
+                .getFilterList()
+                .stream()
+                .allMatch(filter -> checkPasses(message, filter));
         return result;
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // OK for Proto enum.
-    private static boolean checkPasses(Message state, CompositeFilter filter) {
+    private static boolean checkPasses(Message message, CompositeFilter filter) {
         CompositeOperator operator = filter.getOperator();
         switch (operator) {
             case ALL:
                 return filter.getFilterList()
                              .stream()
-                             .allMatch(f -> checkPasses(state, f));
+                             .allMatch(f -> checkPasses(message, f));
             case EITHER:
                 return filter.getFilterList()
                              .stream()
-                             .anyMatch(f -> checkPasses(state, f));
+                             .anyMatch(f -> checkPasses(message, f));
             default:
                 throw newIllegalArgumentException("Unknown composite filter operator %s.",
                                                   operator);
@@ -134,9 +153,18 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
                            .getTarget();
     }
 
+    /**
+     * Retrieves a type to check in the event.
+     */
     protected abstract TypeUrl getTypeToCheck(EventEnvelope event);
 
+    /**
+     * Retrieves an ID to check in the event.
+     */
     protected abstract Any getIdToCheck(EventEnvelope event);
 
-    protected abstract Message getStateToCheck(EventEnvelope event);
+    /**
+     * Retrieves a message or state to check in the event.
+     */
+    protected abstract Message getMessageToCheck(EventEnvelope event);
 }

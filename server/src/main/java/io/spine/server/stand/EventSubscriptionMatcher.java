@@ -29,18 +29,31 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.type.TypeUrl;
 
+/**
+ * Matches the event subscription against an incoming event.
+ */
 final class EventSubscriptionMatcher extends SubscriptionMatcher {
 
     EventSubscriptionMatcher(Subscription subscription) {
         super(subscription);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns the type of the event itself.
+     */
     @Override
     protected TypeUrl getTypeToCheck(EventEnvelope event) {
         TypeUrl result = TypeUrl.of(event.getMessage());
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns the event ID.
+     */
     @Override
     protected Any getIdToCheck(EventEnvelope event) {
         EventId eventId = event.getId();
@@ -48,8 +61,13 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns the event message.
+     */
     @Override
-    protected Message getStateToCheck(EventEnvelope event) {
+    protected Message getMessageToCheck(EventEnvelope event) {
         EventMessage result = event.getMessage();
         return result;
     }

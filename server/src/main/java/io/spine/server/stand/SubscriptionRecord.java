@@ -46,17 +46,20 @@ final class SubscriptionRecord {
     }
 
     /**
-     * Attach an activation callback to this record.
+     * Attaches an activation callback to this record.
      *
      * @param notifyAction the callback to attach
      */
-    void activate(Stand.NotifySubscriptionAction notifyAction) {
+    void activate(NotifySubscriptionAction notifyAction) {
         callback.setNotifyAction(notifyAction);
     }
 
     /**
+     * Updates the subscription with the given event.
      *
-     * @param event
+     * <p>Assumes the event is matching the subscription by both filters and type, and that the
+     * subscription is active.
+     *
      * @throws IllegalStateException
      *         if the subscription is not activated
      * @see #activate(NotifySubscriptionAction)
@@ -75,9 +78,10 @@ final class SubscriptionRecord {
     /**
      * Checks whether this record matches the given parameters.
      *
-     * @param event       the event to match
+     * @param event
+     *         the event to match
      * @return {@code true} if this record matches all the given parameters,
-     * {@code false} otherwise.
+     *         {@code false} otherwise.
      */
     boolean matches(EventEnvelope event) {
         return matcher.test(event);

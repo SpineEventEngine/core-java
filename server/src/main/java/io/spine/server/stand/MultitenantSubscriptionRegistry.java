@@ -44,8 +44,6 @@ import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 
 /**
  * Registry for subscription management in a multi-tenant context.
- *
- * @author Alex Tymchenko
  */
 final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
@@ -93,6 +91,12 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         return registrySlice().hasType(type);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code MultitenantSubscriptionRegistry} returns combined types of all registry slices
+     * as they are later used in a tenant-independent environment.
+     */
     @Override
     public ImmutableSet<TypeUrl> typeSet() {
         Collection<SubscriptionRegistry> allRegistries = tenantSlices.values();

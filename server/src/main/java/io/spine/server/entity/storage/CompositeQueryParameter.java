@@ -42,8 +42,6 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
 /**
  * A set of {@link Filter} instances joined by a logical
  * {@link CompositeOperator composite operator}.
- *
- * @author Dmytro Dashenkov
  */
 public final class CompositeQueryParameter implements Serializable {
 
@@ -70,8 +68,10 @@ public final class CompositeQueryParameter implements Serializable {
      * Creates a new instance of {@code CompositeQueryParameter} from the given filters joined
      * by the given operator.
      *
-     * @param filters  the filters to aggregate
-     * @param operator the operator to apply to the given filters
+     * @param filters
+     *         the filters to aggregate
+     * @param operator
+     *         the operator to apply to the given filters
      * @return new instance of {@code CompositeQueryParameter}
      */
     static CompositeQueryParameter from(Multimap<EntityColumn, Filter> filters,
@@ -117,7 +117,8 @@ public final class CompositeQueryParameter implements Serializable {
      * <p>The resulting {@code CompositeQueryParameter} contains all the filters of the current and
      * the given instances joined by the {@linkplain CompositeOperator#ALL conjunction operator}.
      *
-     * @param other the instances of the {@code CompositeQueryParameter} to merge with
+     * @param other
+     *         the instances of the {@code CompositeQueryParameter} to merge with
      * @return new instance of {@code CompositeQueryParameter} joining all the parameters
      */
     public CompositeQueryParameter conjunct(Iterable<CompositeQueryParameter> other) {
@@ -138,8 +139,10 @@ public final class CompositeQueryParameter implements Serializable {
      * <p>The resulting {@code CompositeQueryParameter} is joined with
      * the {@link CompositeOperator#ALL ALL} operator.
      *
-     * @param column the {@link EntityColumn} to add the filter to
-     * @param filter the value of the filter to add
+     * @param column
+     *         the {@link EntityColumn} to add the filter to
+     * @param filter
+     *         the value of the filter to add
      * @return new instance of {@code CompositeQueryParameter} merged from current instance and
      * the given filter
      */

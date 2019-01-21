@@ -99,8 +99,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private final SubscriptionRegistry subscriptionRegistry;
 
-    private final SubscriptionCache activeSubscriptionsCache;
-
     /**
      * Manages the {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
      */
@@ -110,6 +108,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * An instance of executor used to invoke callbacks.
      */
     private final Executor callbackExecutor;
+
+    /**
+     * A cache of active subscriptions at the event handling stage.
+     */
+    private final SubscriptionCache activeSubscriptionsCache;
 
     private final boolean multitenant;
 
@@ -143,11 +146,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @implNote
      * The only purpose of this method is to deliver the new entity state to the subscribers
      * through the artificially created {@link io.spine.system.server.EntityStateChanged} event. It
-     * doesn't do any proper lifecycle management, ignoring "archived"/"deleted" flags, applied
+     * doesn't do any proper lifecycle management, ignoring "archived"/"deleted" actions, applied
      * messages IDs, etc.
      *
      * @param entity
-     *         the entity whose state needs to be posted
+     *         the entity whose state to post
      * @param lifecycle
      *         the lifecycle of the entity
      * @deprecated Avoid posting entity state to the Stand directly and prefer relying on the
@@ -205,11 +208,12 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 if (!subscriptionRegistry.hasType(typeUrl)) {
                     return;
                 }
-                Set<SubscriptionRecord> records = subscriptionRegistry.byType(typeUrl);
-                records.stream()
-                       .filter(SubscriptionRecord::isActive)
-                       .filter(record -> record.matches(envelope))
-                       .forEach(record -> activeSubscriptionsCache.put(envelope, record));
+                subscriptionRegistry.byType(typeUrl)
+                                    .stream()
+                                    .filter(SubscriptionRecord::isActive)
+                                    .filter(record -> record.matches(envelope))
+                                    .forEach(record -> activeSubscriptionsCache.put(envelope,
+                                                                                    record));
             }
         };
         op.execute();
@@ -222,7 +226,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * {@inheritDoc}
      *
      * <p>Stand dispatches no message classes if there are no subscriptions present but as having
-     * such dispatcher is illegal we say that it always dispatches {@link EntityStateChanged}
+     * such dispatcher is illegal we say that it always dispatches the {@link EntityStateChanged}
      * event.
      */
     @Override
@@ -259,8 +263,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Once this instance of {@code Stand} receives an update of an entity
      * with the given {@code TypeUrl}, all such callbacks are executed.
      *
-     * @param topic an instance {@link Topic}, defining the entity and criteria,
-     *              which changes should be propagated to the {@code callback}
+     * @param topic
+     *         a {@link Topic} defining the entity whose changes should be propagated to the
+     *         {@code callback} as well as subscription criteria
      */
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
         topicValidator.validate(topic, responseObserver);
@@ -289,7 +294,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @param subscription
      *         the subscription to activate
      * @param notifyAction
-     *         an action which notifies the subscribers about an update
+     *         an action which notifies the subscribers about the update
      * @see #subscribe(Topic, StreamObserver)
      */
     public void activate(Subscription subscription,
@@ -371,8 +376,10 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>The query results are fed to an instance
      * of {@link StreamObserver}&lt;{@link QueryResponse}&gt;.
      *
-     * @param query            an instance of query
-     * @param responseObserver an observer to feed the query results to.
+     * @param query
+     *         an instance of query
+     * @param responseObserver
+     *         an observer to feed the query results to
      */
     public void execute(Query query,
                         StreamObserver<QueryResponse> responseObserver) {
@@ -422,7 +429,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * Delivers the given subscription update to the subscribers.
+     * Delivers the given subscription update to the read-side.
      *
      * @see #activate(Subscription, NotifySubscriptionAction, StreamObserver)
      * @see #cancel(Subscription, StreamObserver)
@@ -439,7 +446,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * tells the {@code Stand} about the essence of the object queried. Thus making it possible
      * to pick a proper strategy for data fetch.
      *
-     * @param type the target type of the {@code Query}
+     * @param type
+     *         the target type of the {@code Query}
      * @return suitable implementation of {@code QueryProcessor}
      */
     private QueryProcessor processorFor(TypeUrl type) {
@@ -493,7 +501,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
          * <p>If the {@code Executor} is not set,
          * {@link MoreExecutors#directExecutor() directExecutor()} will be used.
          *
-         * @param callbackExecutor the instance of {@code Executor}
+         * @param callbackExecutor
+         *         the instance of {@code Executor}
          * @return this instance of {@code Builder}
          */
         public Builder setCallbackExecutor(Executor callbackExecutor) {

@@ -32,7 +32,6 @@ import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
-import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;

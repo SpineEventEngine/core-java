@@ -29,7 +29,7 @@ import java.util.Collection;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
- * Caches the subscription records for the given event.
+ * The cache that stores subscription records by their event.
  */
 final class SubscriptionCache {
 

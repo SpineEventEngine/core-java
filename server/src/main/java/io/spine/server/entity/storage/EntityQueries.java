@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.base.FieldPath;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
@@ -44,6 +45,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -151,8 +153,11 @@ public final class EntityQueries {
 
     private static EntityColumn findMatchingColumn(Filter filter,
                                                    Collection<EntityColumn> entityColumns) {
-        String columnName = filter.getFieldPath()
-                                  .getFieldName(0);
+        FieldPath fieldPath = filter.getFieldPath();
+        checkArgument(fieldPath.getFieldNameCount() == 1,
+                      "Incorrect Entity Column name in Entity Filter: %s",
+                      join(".", fieldPath.getFieldNameList()));
+        String columnName = fieldPath.getFieldName(0);
         for (EntityColumn column : entityColumns) {
             if (column.getName()
                       .equals(columnName)) {

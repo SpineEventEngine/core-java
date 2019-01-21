@@ -23,7 +23,6 @@ package io.spine.server.stand;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.client.Subscription;
 import io.spine.core.EventEnvelope;
@@ -31,39 +30,57 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
+/**
+ * Matches the entity subscription against an incoming {@link EntityStateChanged} event.
+ */
 final class EntitySubscriptionMatcher extends SubscriptionMatcher {
 
     EntitySubscriptionMatcher(Subscription subscription) {
         super(subscription);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns an entity type encapsulated in the event message.
+     */
     @Override
     protected TypeUrl getTypeToCheck(EventEnvelope event) {
-        EntityStateChanged eventMessage = toEventMessage(event);
+        EntityStateChanged eventMessage = getEventMessage(event);
         String type = eventMessage.getId()
                                   .getTypeUrl();
         TypeUrl result = TypeUrl.parse(type);
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns an entity ID packed as {@link Any}.
+     */
     @Override
     protected Any getIdToCheck(EventEnvelope event) {
-        EntityStateChanged eventMessage = toEventMessage(event);
+        EntityStateChanged eventMessage = getEventMessage(event);
         EntityId entityId = eventMessage.getId()
                                         .getEntityId();
         Any result = entityId.getId();
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Unpacks and returns the entity state.
+     */
     @Override
-    protected Message getStateToCheck(EventEnvelope event) {
-        EntityStateChanged eventMessage = toEventMessage(event);
+    protected Message getMessageToCheck(EventEnvelope event) {
+        EntityStateChanged eventMessage = getEventMessage(event);
         Any newState = eventMessage.getNewState();
         Message result = AnyPacker.unpack(newState);
         return result;
     }
 
-    private static EntityStateChanged toEventMessage(EventEnvelope event) {
+    private static EntityStateChanged getEventMessage(EventEnvelope event) {
         EventMessage message = event.getMessage();
         EntityStateChanged result = (EntityStateChanged) message;
         return result;

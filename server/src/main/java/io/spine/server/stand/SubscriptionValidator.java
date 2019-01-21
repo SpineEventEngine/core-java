@@ -39,7 +39,8 @@ final class SubscriptionValidator extends RequestValidator<Subscription> {
     /**
      * Creates an instance of {@code SubscriptionValidator} based on the subscription registry.
      *
-     * @param registry the registry to validate the subscription against.
+     * @param registry
+     *         the registry to validate the subscription against
      */
     SubscriptionValidator(SubscriptionRegistry registry) {
         super();

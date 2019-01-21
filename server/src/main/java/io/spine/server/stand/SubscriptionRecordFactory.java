@@ -26,18 +26,21 @@ import io.spine.client.Topic;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
+/**
+ * A factory which assists in subscription record creation.
+ */
 final class SubscriptionRecordFactory {
 
+    /** Prevents the instantiation of this class. */
     private SubscriptionRecordFactory() {
     }
 
     /**
-     * ...
+     * Creates a subscription record for the given subscription.
      *
-     * <p>By default assumes that all non-event subscriptions are entity subscriptions.
+     * <p>Distinguishes event and entity subscriptions via the target type URL.
      *
-     * @param subscription
-     * @return
+     * <p>By default, assumes that all non-event subscriptions are entity subscriptions.
      */
     static SubscriptionRecord newRecordFor(Subscription subscription) {
         if (isEventSubscription(subscription)) {
@@ -46,6 +49,9 @@ final class SubscriptionRecordFactory {
         return createEntityRecord(subscription);
     }
 
+    /**
+     * Creates a record managing an event subscription.
+     */
     private static SubscriptionRecord createEventRecord(Subscription subscription) {
         TypeUrl type = getSubscriptionType(subscription);
         SubscriptionMatcher matcher = new EventSubscriptionMatcher(subscription);
@@ -53,6 +59,13 @@ final class SubscriptionRecordFactory {
         return new SubscriptionRecord(subscription, type, matcher, callback);
     }
 
+    /**
+     * Creates a record managing an entity subscription.
+     *
+     * <p>In fact, this is a subscription to {@link EntityStateChanged} event with custom
+     * subscription callback and subscription matcher (to validate entity state packed inside the
+     * event).
+     */
     private static SubscriptionRecord createEntityRecord(Subscription subscription) {
         TypeUrl type = TypeUrl.of(EntityStateChanged.class);
         SubscriptionMatcher matcher = new EntitySubscriptionMatcher(subscription);

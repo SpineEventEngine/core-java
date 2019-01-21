@@ -32,14 +32,23 @@ import io.spine.core.Responses;
 import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.EntityStateChanged;
 
+/**
+ * Updates an entity subscription based on the incoming {@link EntityStateChanged} event.
+ */
 final class EntitySubscriptionCallback extends SubscriptionCallback {
 
     EntitySubscriptionCallback(Subscription subscription) {
         super(subscription);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Creates an {@link EntityStateUpdate} and includes it into the returned subscription
+     * update instance.
+     */
     @Override
-    protected SubscriptionUpdate buildSubscriptionUpdate(EventEnvelope event) {
+    protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
         EntityStateChanged theEvent = (EntityStateChanged) event.getMessage();
         EntityStateUpdate stateUpdate = toStateUpdate(theEvent);
         SubscriptionUpdate result = SubscriptionUpdateVBuilder

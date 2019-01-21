@@ -26,6 +26,11 @@ import io.spine.core.EventEnvelope;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
+/**
+ * Runs an event subscription update based on the incoming event.
+ *
+ * <p>Currently unsupported.
+ */
 final class EventSubscriptionCallback extends SubscriptionCallback {
 
     EventSubscriptionCallback(Subscription subscription) {
@@ -33,10 +38,10 @@ final class EventSubscriptionCallback extends SubscriptionCallback {
     }
 
     /**
-     * Always throws {@link IllegalStateException} as event subscriptions are unsupported for now.
+     * Always throws {@link IllegalStateException} as event subscriptions are not supported yet.
      */
     @Override
-    protected SubscriptionUpdate buildSubscriptionUpdate(EventEnvelope event) {
+    protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
         throw newIllegalStateException("Event subscriptions are not implemented");
     }
 }
