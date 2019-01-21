@@ -139,4 +139,3 @@ message IdFilter {
     // The collection of IDs.
     repeated google.protobuf.Any ids = 1;
 }
-
