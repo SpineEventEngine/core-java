@@ -111,7 +111,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected void onError(EventEnvelope event, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         repository().onError(event, exception);
     }
 }

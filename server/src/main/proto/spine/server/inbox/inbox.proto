@@ -20,7 +20,7 @@
 
 syntax = "proto3";
 
-package spine.system.server;
+package spine.server.inbox;
 
 import "spine/options.proto";
 
@@ -36,6 +36,7 @@ import "google/protobuf/timestamp.proto";
 import "spine/client/entities.proto";
 import "spine/core/event.proto";
 import "spine/core/command.proto";
+import "spine/server/sharding/sharding.proto";
 
 
 // An identifier of an entity inbox.
@@ -84,25 +85,40 @@ message InboxMessageId {
     string uuid = 1 [(required) = true];
 }
 
-// A message put into `Inbox` and stored in the `InboxStorage`.
+// A message in the inbox.
 //
-message InboxMessageRecord {
-
-    InboxMessageId id = 1 [(required) = true];
-
-    // The identifier of the `Inbox` in which this message is stored.
-    InboxId inbox_id = 2 [(required) = true];
+message InboxMessage {
 
     // What the message is.
     oneof payload {
 
-        core.Event event = 3;
+        core.Event event = 1;
 
-        core.Command command = 4;
+        core.Command command = 2;
     }
 
-    InboxLabel label = 5 [(required) = true];
+    InboxLabel label = 3 [(required) = true];
 
     // A point in time when the message was received by the `Inbox` instance.
-    google.protobuf.Timestamp when_received = 6 [(required) = true];
+    google.protobuf.Timestamp when_received = 4 [(required) = true];
+
+    spine.server.sharding.ShardIndex shard_index = 5;
+}
+
+// An `InboxMessage` stored in the `InboxStorage`.
+//
+message InboxMessageRecord {
+
+    // The identifier of the `Inbox` in which this message is stored.
+    InboxId inbox_id = 1 [(required) = true];
+
+    InboxMessage message = 2;
+}
+
+// A record used to transfer the inbox contents to the storage.
+//
+message InboxContentRecord {
+
+    // The contents of inbox.
+    repeated InboxMessage message = 1;
 }

@@ -24,10 +24,13 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
+import io.spine.server.delivery.MessageEndpoint;
 import io.spine.string.Stringifiers;
+import io.spine.type.TypeUrl;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -38,55 +41,45 @@ import static java.lang.String.format;
  *
  * <p>Serves as a pre-stage allowing to filter, de-duplicate and reorder messages before they
  * are dispatched to their destination.
+ *
+ * @param <I>
+ *         the type of consumer identifiers.
  */
-public class Inbox {
+public class Inbox<I> {
 
     private final InboxId id;
-    private final ImmutableMap<InboxLabel, DispatchOperation> operations;
+    private final I entityId;
+    private final InboxStorage storage;
+    private final ImmutableMap<InboxLabel, GetEndpoint<I>> operations;
 
-    private Inbox(Builder builder) {
+    private Inbox(Builder<I> builder) {
         this.id = builder.inboxId;
+        this.storage = builder.storage;
         this.operations = ImmutableMap.copyOf(builder.operations);
+        this.entityId = toEntityId();
+    }
+
+    @SuppressWarnings("unchecked")  // Ensured by the `Inbox` definition.
+    private I toEntityId() {
+        return (I) InboxIds.unwrap(id);
     }
 
     /**
      * Creates an instance of {@code Builder} with the given consumer identifier.
      *
-     * @param inboxId
-     *         the identifier of the consumer for the messages in this {@code Inbox}.
+     * @param id
+     *         the identifier of a consumer
+     * @param typeUrl
+     *         the type URL of a consumer
      */
-    public static Builder newBuilder(InboxId inboxId) {
-        return new Builder(inboxId);
+    public static <I> Builder<I> newBuilder(Object id, TypeUrl typeUrl) {
+        InboxId inboxId = InboxIds.wrap(id, typeUrl);
+        return new Builder<>(inboxId);
     }
 
-    public interface DispatchOperation {
+    public interface GetEndpoint<I>
+            extends Function<ActorMessageEnvelope<?, ?, ?>, MessageEndpoint<I, ?>> {
 
-        void dispatch(ActorMessageEnvelope<?, ?, ?> envelope);
-    }
-
-    public static class Builder {
-
-        private final InboxId inboxId;
-        private final Map<InboxLabel, DispatchOperation> operations =
-                new EnumMap<>(InboxLabel.class);
-
-        /**
-         * Creates an instance of {@code Builder} with the given consumer identifier.
-         */
-        private Builder(InboxId id) {
-            inboxId = id;
-        }
-
-        public Builder add(InboxLabel label, DispatchOperation operation) {
-            checkNotNull(label);
-            checkNotNull(operation);
-            operations.put(label, operation);
-            return this;
-        }
-
-        public Inbox build() {
-            return new Inbox(this);
-        }
     }
 
     /**
@@ -120,14 +113,55 @@ public class Inbox {
 
         //TODO:2019-01-09:alex.tymchenko: store if windowing is enabled.
         // Deliver right away for now.
-
-        operations.get(label)
-                  .dispatch(envelope);
+        MessageEndpoint<I, ?> endpoint = operations.get(label)
+                                                   .apply(envelope);
+        endpoint.dispatchTo(entityId);
     }
 
     private void ensureHasDestination(InboxLabel label) {
         if (!operations.containsKey(label)) {
             throw new LabelNotFoundException(id, label);
+        }
+    }
+
+    /**
+     * A builder of {@link Inbox} instances.
+     *
+     * @param <I>
+     *         the type of identifier of the objects, for which the {@code Inbox} is built
+     */
+    public static class Builder<I> {
+
+        private final InboxId inboxId;
+        private final Map<InboxLabel, GetEndpoint<I>> operations =
+                new EnumMap<>(InboxLabel.class);
+        private InboxStorage storage;
+
+        /**
+         * Creates an instance of {@code Builder} with the given consumer identifier.
+         */
+        private Builder(InboxId id) {
+            inboxId = id;
+        }
+
+        /**
+         * Adds a certain label for the {@code Inbox} and specify a lazy-initialized endpoint,
+         * to which the respectively labelled messages should be delivered.
+         */
+        public Builder<I> add(InboxLabel label, GetEndpoint<I> operation) {
+            checkNotNull(label);
+            checkNotNull(operation);
+            operations.put(label, operation);
+            return this;
+        }
+
+        public Builder<I> setStorage(InboxStorage storage) {
+            this.storage = checkNotNull(storage);
+            return this;
+        }
+
+        public Inbox<I> build() {
+            return new Inbox<>(this);
         }
     }
 
@@ -206,7 +240,7 @@ public class Inbox {
     /**
      * Thrown if there is an attempt to mark a message put to {@code Inbox} with a label, which was
      * not {@linkplain io.spine.server.inbox.Inbox.Builder#add(InboxLabel,
-     * io.spine.server.inbox.Inbox.DispatchOperation) added} for the {@code Inbox} instance.
+     * io.spine.server.inbox.Inbox.GetEndpoint) added} for the {@code Inbox} instance.
      */
     public static class LabelNotFoundException extends RuntimeException {
 

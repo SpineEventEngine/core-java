@@ -248,7 +248,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
-            throw newIllegalStateException("The repository %s already has storage %s.",
+            throw newIllegalStateException("The repository %s already has the storage %s.",
                                            this, this.storage);
         }
 

@@ -18,43 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.inbox;
 
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.server.event.React;
+import io.spine.server.storage.AbstractStorage;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Dispatches an event to aggregates of the associated {@code AggregateRepository}.
- *
- * @see React
+ * Abstract base for the storage of {@link Inbox} messages.
  */
-final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEventEndpoint<I, A> {
+public abstract class InboxStorage
+        extends AbstractStorage<InboxId, InboxContentRecord, InboxReadRequest> {
 
-    AggregateEventReactionEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
-        super(repo, event);
+    protected InboxStorage(boolean multitenant) {
+        super(multitenant);
     }
 
     @Override
-    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope envelope) {
-        repository().onDispatchEvent(aggregate.getId(), envelope.getOuterObject());
-        return aggregate.reactOn(envelope);
+    public Optional<InboxContentRecord> read(InboxReadRequest request) {
+        return Optional.empty();
     }
 
-    @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
-    }
+    protected abstract void write(InboxId id, InboxMessage message);
 
-    /**
-     * Does nothing since a state of an aggregate should not be necessarily
-     * updated upon reacting on an event.
-     */
     @Override
-    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
-        // Do nothing.
+    public void write(InboxId id, InboxContentRecord content) {
+
+        List<InboxMessage> messages = content.getMessageList();
+        for (InboxMessage message : messages) {
+            write(id, message);
+        }
     }
 }

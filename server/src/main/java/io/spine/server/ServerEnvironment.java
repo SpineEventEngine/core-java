@@ -21,9 +21,13 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.server.sharding.ShardingStrategy;
+import io.spine.server.sharding.UniformAcrossAllShards;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
 public class ServerEnvironment {
@@ -36,8 +40,11 @@ public class ServerEnvironment {
     private static final @Nullable String appEngineRuntimeVersion =
             System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
+    private ShardingStrategy shardingStrategy;
+
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
+        shardingStrategy = UniformAcrossAllShards.singleShard();
     }
 
     /**
@@ -63,6 +70,15 @@ public class ServerEnvironment {
      */
     public Optional<String> appEngineVersion() {
         return Optional.ofNullable(appEngineRuntimeVersion);
+    }
+
+    public ShardingStrategy getShardingStrategy() {
+        return shardingStrategy;
+    }
+
+    public void setShardingStrategy(ShardingStrategy shardingStrategy) {
+        checkNotNull(shardingStrategy);
+        this.shardingStrategy = shardingStrategy;
     }
 
     /**

@@ -52,7 +52,7 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected void onError(CommandEnvelope envelope, RuntimeException exception) {
+    public void onError(CommandEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
     }
 

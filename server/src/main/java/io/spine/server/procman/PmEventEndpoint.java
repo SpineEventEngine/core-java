@@ -64,7 +64,7 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected void onError(EventEnvelope envelope, RuntimeException exception) {
+    public void onError(EventEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
     }
 }

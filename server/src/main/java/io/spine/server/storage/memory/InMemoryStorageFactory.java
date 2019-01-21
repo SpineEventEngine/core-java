@@ -27,6 +27,7 @@ import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.inbox.InboxStorage;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
@@ -96,6 +97,11 @@ public class InMemoryStorageFactory implements StorageFactory {
         InMemoryRecordStorage<I> recordStorage =
                 new InMemoryRecordStorage<>(spec, isMultitenant(), projectionClass);
         return new InMemoryProjectionStorage<>(recordStorage);
+    }
+
+    @Override
+    public InboxStorage createInboxStorage() {
+        return new InMemoryInboxStorage(isMultitenant());
     }
 
     /**

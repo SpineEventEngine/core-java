@@ -20,16 +20,16 @@
 
 package io.spine.server;
 
+import io.spine.server.sharding.ShardingStrategy;
+import io.spine.server.sharding.UniformAcrossAllShards;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("ServerEnvironment utility should")
 class ServerEnvironmentTest {
 
@@ -52,5 +52,25 @@ class ServerEnvironmentTest {
         // By default we're not running under AppEngine.
         assertFalse(ServerEnvironment.getInstance().appEngineVersion()
                                      .isPresent());
+    }
+
+    @Test
+    @DisplayName("return single-shard sharding strategy by default")
+    void returnSingleShardStrategyDefault() {
+        assertEquals(1,
+                     ServerEnvironment.getInstance().getShardingStrategy().getShardCount());
+    }
+
+    @Test
+    @DisplayName("allow to customize sharding strategy")
+    void allowToCustomizeShardingStrategy() {
+        ShardingStrategy strategy = UniformAcrossAllShards.forNumber(42);
+        ServerEnvironment environment = ServerEnvironment.getInstance();
+        ShardingStrategy defaultValue = environment.getShardingStrategy();
+        environment.setShardingStrategy(strategy);
+        assertEquals(strategy, environment.getShardingStrategy());
+
+        // Restore the default value.
+        environment.setShardingStrategy(defaultValue);
     }
 }

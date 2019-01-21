@@ -37,9 +37,8 @@ import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.inbox.Inbox;
-import io.spine.server.inbox.InboxId;
-import io.spine.server.inbox.InboxIds;
 import io.spine.server.inbox.InboxLabel;
+import io.spine.server.inbox.InboxStorage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -72,6 +71,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
+
+    /** An underlying {@link Inbox} storage for entities managed by this repository. */
+    private @Nullable InboxStorage inboxStorage;
 
     /**
      * Creates a new {@code ProjectionRepository}.
@@ -209,6 +211,21 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projectionStorage;
     }
 
+    @Override
+    public void initStorage(StorageFactory factory) {
+        super.initStorage(factory);
+        initInboxStorage(factory);
+    }
+
+    private void initInboxStorage(StorageFactory factory) {
+        if (this.inboxStorage != null) {
+            throw newIllegalStateException("The repository %s already has the inbox storage %s.",
+                                           this, this.inboxStorage);
+        }
+
+        this.inboxStorage = factory.createInboxStorage();
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -275,13 +292,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     //TODO:2019-01-10:alex.tymchenko: cache the `Inbox` instances.
-    private Inbox getInbox(I id) {
-        InboxId inboxId = InboxIds.wrap(id, getEntityStateType());
-        return Inbox.newBuilder(inboxId)
-                    .add(InboxLabel.UPDATE_SUBSCRIBER,
-                         envelope -> ProjectionEndpoint.of(this, (EventEnvelope) envelope)
-                                                       .dispatchTo(id))
-                    .build();
+    private Inbox<I> getInbox(I id) {
+        Inbox<I> inbox = Inbox
+                .<I>newBuilder(id, getEntityStateType())
+                .setStorage(inboxStorage)
+                .add(InboxLabel.UPDATE_SUBSCRIBER,
+                     e -> ProjectionEndpoint.of(this, (EventEnvelope) e))
+                .build();
+        return inbox;
     }
 
     @Internal
@@ -307,6 +325,15 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 .setAfter(timestamp)
                 .addAllFilter(eventFilters);
         return builder.build();
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        if(inboxStorage != null) {
+            inboxStorage.close();
+            inboxStorage = null;
+        }
     }
 
     /**
