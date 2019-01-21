@@ -98,7 +98,7 @@ class TopicBuilderTest {
     class CreateTopic {
 
         @Test
-        @DisplayName("for an entity type")
+        @DisplayName("for the type")
         void byType() {
             Topic topic = factory.select(TEST_ENTITY_TYPE)
                                  .build();
@@ -157,7 +157,7 @@ class TopicBuilderTest {
         }
 
         @Test
-        @DisplayName("matching a column predicate")
+        @DisplayName("matching a predicate")
         void byFilter() {
             String columnName = "myImaginaryColumn";
             Object columnValue = 42;
@@ -185,7 +185,7 @@ class TopicBuilderTest {
         }
 
         @Test
-        @DisplayName("matching multiple column predicate")
+        @DisplayName("matching multiple predicates")
         void byMultipleFilters() {
             String columnName1 = "myColumn";
             Object columnValue1 = 42;
@@ -220,7 +220,7 @@ class TopicBuilderTest {
         @SuppressWarnings("OverlyLongMethod")
         // A big test for the grouping operators proper building.
         @Test
-        @DisplayName("with columns")
+        @DisplayName("with filter groupings")
         void byFilterGrouping() {
             String establishedTimeColumn = "establishedTime";
             String companySizeColumn = "companySize";
@@ -237,7 +237,7 @@ class TopicBuilderTest {
                                  .build();
             Target target = topic.getTarget();
             List<CompositeFilter> filters = target.getFilters()
-                                                        .getFilterList();
+                                                  .getFilterList();
             Truth.assertThat(filters)
                  .hasSize(2);
 
@@ -358,7 +358,7 @@ class TopicBuilderTest {
     class Persist {
 
         @Test
-        @DisplayName("entity IDs")
+        @DisplayName("IDs")
         void lastIds() {
             Iterable<?> genericIds = asList(newUuid(), -1, newMessageId());
             Long[] longIds = {1L, 2L, 3L};
@@ -389,7 +389,7 @@ class TopicBuilderTest {
         }
 
         @Test
-        @DisplayName("field names")
+        @DisplayName("field mask")
         void lastFieldMask() {
             Iterable<String> iterableFields = singleton("TestEntity.firstField");
             String[] arrayFields = {"TestEntity.secondField"};

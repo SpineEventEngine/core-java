@@ -22,6 +22,7 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.DoubleValue;
+import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.client.Filter.Operator;
@@ -53,6 +54,7 @@ import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static java.lang.String.join;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -60,10 +62,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("Filters utility should")
 class FiltersTest {
 
-    private static final String COLUMN_NAME = "preciseColumn";
-    private static final Timestamp COLUMN_VALUE = getCurrentTime();
-    private static final String ENUM_COLUMN_NAME = "enumColumn";
-    private static final Operator ENUM_COLUMN_VALUE = EQUAL;
+    private static final String FIELD_PATH = "some.field.path";
+    private static final Timestamp REQUESTED_VALUE = getCurrentTime();
+    private static final String ENUM_FIELD_PATH = "enum.field";
+    private static final Operator ENUM_VALUE = EQUAL;
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
@@ -81,70 +83,69 @@ class FiltersTest {
     }
 
     @Nested
-    @DisplayName("create column filter of type")
+    @DisplayName("create filter of type")
     class CreateFilterOfType {
 
         @Test
         @DisplayName("`equals`")
         void equals() {
-            checkCreatesInstance(eq(COLUMN_NAME, COLUMN_VALUE), EQUAL);
+            checkCreatesInstance(eq(FIELD_PATH, REQUESTED_VALUE), EQUAL);
         }
 
         @Test
         @DisplayName("`greater than`")
         void greaterThan() {
-            checkCreatesInstance(gt(COLUMN_NAME, COLUMN_VALUE), GREATER_THAN);
+            checkCreatesInstance(gt(FIELD_PATH, REQUESTED_VALUE), GREATER_THAN);
         }
 
         @Test
         @DisplayName("`greater than or equals`")
         void greaterOrEqual() {
-            checkCreatesInstance(ge(COLUMN_NAME, COLUMN_VALUE), GREATER_OR_EQUAL);
+            checkCreatesInstance(ge(FIELD_PATH, REQUESTED_VALUE), GREATER_OR_EQUAL);
         }
 
         @Test
         @DisplayName("`less than`")
         void lessThan() {
-            checkCreatesInstance(lt(COLUMN_NAME, COLUMN_VALUE), LESS_THAN);
+            checkCreatesInstance(lt(FIELD_PATH, REQUESTED_VALUE), LESS_THAN);
         }
 
         @Test
         @DisplayName("`less than or equals`")
         void lessOrEqual() {
-            checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
+            checkCreatesInstance(le(FIELD_PATH, REQUESTED_VALUE), LESS_OR_EQUAL);
         }
 
         @Test
         @DisplayName("`equals` for enumerated types")
         void equalsForEnum() {
-            Filter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
-            String columnName = filter.getFieldPath()
-                                      .getFieldName(0);
-            assertEquals(ENUM_COLUMN_NAME, columnName);
-            assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
+            Filter filter = eq(ENUM_FIELD_PATH, ENUM_VALUE);
+            ProtocolStringList pathElements = filter.getFieldPath()
+                                                    .getFieldNameList();
+            assertEquals(ENUM_FIELD_PATH, join(".", pathElements));
+            assertEquals(toAny(ENUM_VALUE), filter.getValue());
             assertEquals(EQUAL, filter.getOperator());
         }
 
-        private void checkCreatesInstance(Filter filter,
-                                          Operator operator) {
-            String columnName = filter.getFieldPath()
-                                      .getFieldName(0);
-            assertEquals(COLUMN_NAME, columnName);
-            assertEquals(pack(COLUMN_VALUE), filter.getValue());
+        private void checkCreatesInstance(Filter filter, Operator operator) {
+            ProtocolStringList pathElements = filter.getFieldPath()
+                                                    .getFieldNameList();
+            assertEquals(FIELD_PATH, join(".", pathElements));
+            assertEquals(pack(REQUESTED_VALUE), filter.getValue());
             assertEquals(operator, filter.getOperator());
         }
     }
 
     @Nested
-    @DisplayName("create composite column filter of type")
+    @DisplayName("create composite filter of type")
     class CreateCompositeFilterOfType {
 
         @Test
         @DisplayName("`all`")
         void all() {
             Filter[] filters = {
-                    le(COLUMN_NAME, COLUMN_VALUE),
-                    ge(COLUMN_NAME, COLUMN_VALUE)
+                    le(FIELD_PATH, REQUESTED_VALUE),
+                    ge(FIELD_PATH, REQUESTED_VALUE)
             };
             checkCreatesInstance(Filters.all(filters[0], filters[1]), ALL, filters);
         }
@@ -153,8 +154,8 @@ class FiltersTest {
         @DisplayName("`either`")
         void either() {
             Filter[] filters = {
-                    lt(COLUMN_NAME, COLUMN_VALUE),
-                    gt(COLUMN_NAME, COLUMN_VALUE)
+                    lt(FIELD_PATH, REQUESTED_VALUE),
+                    gt(FIELD_PATH, REQUESTED_VALUE)
             };
             checkCreatesInstance(Filters.either(filters[0], filters[1]), EITHER, filters);
         }
@@ -175,7 +176,7 @@ class FiltersTest {
         @DisplayName("for numbers")
         void forNumbers() {
             double number = 3.14;
-            Filter filter = le("doubleColumn", number);
+            Filter filter = le("doubleField", number);
             assertNotNull(filter);
             assertEquals(LESS_OR_EQUAL, filter.getOperator());
             DoubleValue value = unpack(filter.getValue(), DoubleValue.class);
@@ -186,7 +187,7 @@ class FiltersTest {
         @DisplayName("for strings")
         void forStrings() {
             String theString = "abc";
-            Filter filter = gt("stringColumn", theString);
+            Filter filter = gt("stringField", theString);
             assertNotNull(filter);
             assertEquals(GREATER_THAN, filter.getOperator());
             StringValue value = unpack(filter.getValue(), StringValue.class);
@@ -202,21 +203,21 @@ class FiltersTest {
         @DisplayName("for enumerated types")
         void forEnums() {
             assertThrows(IllegalArgumentException.class,
-                         () -> ge(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE));
+                         () -> ge(ENUM_FIELD_PATH, ENUM_VALUE));
         }
 
         @Test
-        @DisplayName("for non primitive number types")
+        @DisplayName("for non-primitive number types")
         void forNonPrimitiveNumbers() {
             AtomicInteger number = new AtomicInteger(42);
-            assertThrows(IllegalArgumentException.class, () -> ge("atomicColumn", number));
+            assertThrows(IllegalArgumentException.class, () -> ge("atomicField", number));
         }
 
         @Test
         @DisplayName("for not supported types")
         void forUnsupportedTypes() {
             Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
-            assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
+            assertThrows(IllegalArgumentException.class, () -> le("invalidField", value));
         }
     }
 }

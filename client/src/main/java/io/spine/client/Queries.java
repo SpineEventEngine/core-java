@@ -36,9 +36,6 @@ import static java.lang.String.format;
 
 /**
  * Client-side utilities for working with queries.
- *
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
  */
 @Internal
 public final class Queries {
@@ -68,7 +65,7 @@ public final class Queries {
      * the application.
      *
      * @param query
-     *         the query of interest.
+     *         the query of interest
      * @return the URL of the type of the query {@linkplain Query#getTarget() target}
      */
     public static TypeUrl typeOf(Query query) {

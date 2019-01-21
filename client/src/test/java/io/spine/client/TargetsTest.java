@@ -58,7 +58,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
     }
 
     @Test
-    @DisplayName("compose Target with Messagee IDs")
+    @DisplayName("compose Target with Message IDs")
     void composeWithMessageIds() {
         TaskId taskId = newTaskId();
         Target target = someOf(TestEntity.class, newSet(taskId));

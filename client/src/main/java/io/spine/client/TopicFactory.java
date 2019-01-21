@@ -52,7 +52,7 @@ public final class TopicFactory {
      * construction.
      *
      * @param targetType
-     *         a class of target entities
+     *         a class of target events/entities
      * @return new {@link TopicBuilder} instance
      */
     public TopicBuilder select(Class<? extends Message> targetType) {
@@ -62,10 +62,10 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for all of the specified entity states.
+     * Creates a {@link Topic} for all objects of the specified type.
      *
      * @param targetType
-     *         a class of target entities
+     *         a class of target events/entities
      * @return the instance of {@code Topic} assembled according to the parameters
      */
     public Topic allOf(Class<? extends Message> targetType) {
@@ -78,7 +78,7 @@ public final class TopicFactory {
 
     /**
      * Creates a {@link Topic} for the specified {@link Target}, updates for which will include
-     * only the columns specified by the {@link FieldMask}.
+     * only the fields specified by the {@link FieldMask}.
      *
      * @param target
      *         a {@code Target} to create a topic for

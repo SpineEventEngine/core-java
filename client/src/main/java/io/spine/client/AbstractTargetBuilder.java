@@ -89,7 +89,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      */
 
     private @Nullable Set<?> ids;
-    private @Nullable Set<CompositeFilter> columns;
+    private @Nullable Set<CompositeFilter> filters;
     private @Nullable Set<String> fieldMask;
 
     AbstractTargetBuilder(Class<? extends Message> targetType) {
@@ -104,7 +104,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      *         target
      */
     Target buildTarget() {
-        return composeTarget(targetType, ids, columns);
+        return composeTarget(targetType, ids, filters);
     }
 
     @Nullable FieldMask composeMask() {
@@ -194,13 +194,11 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * Sets the Entity Column predicate to the {@link io.spine.client.Query}.
      *
      * <p>If there are no {@link io.spine.client.Filter}s (i.e. the passed array is empty),
-     * all
-     * the records will be retrieved regardless the Entity Columns values.
+     * all the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
      * a conjunction ({@link io.spine.client.CompositeFilter.CompositeOperator#ALL ALL}
-     * operator), i.e.
-     * a record matches this query only if it matches all of these parameters.
+     * operator), i.e. a record matches this query only if it matches all of these parameters.
      *
      * @param predicate
      *         the {@link io.spine.client.Filter}s to filter the requested entities by
@@ -210,7 +208,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      */
     public B where(Filter... predicate) {
         CompositeFilter aggregatingFilter = all(asList(predicate));
-        columns = singleton(aggregatingFilter);
+        filters = singleton(aggregatingFilter);
         return self();
     }
 
@@ -283,7 +281,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      *      instances
      */
     public B where(CompositeFilter... predicate) {
-        columns = ImmutableSet.copyOf(predicate);
+        filters = ImmutableSet.copyOf(predicate);
         return self();
     }
 
@@ -354,9 +352,9 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
               .append(valueSeparator);
         }
 
-        if (columns != null && !columns.isEmpty()) {
-            sb.append("AND columns: ")
-              .append(columns);
+        if (filters != null && !filters.isEmpty()) {
+            sb.append("AND filters: ")
+              .append(filters);
         }
 
         sb.append(");");

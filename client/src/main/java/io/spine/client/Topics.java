@@ -34,8 +34,8 @@ class Topics {
      */
     private static final String TOPIC_ID_FORMAT = "t-%s";
 
+    /** Prevents instantiation of this utility class. */
     private Topics() {
-        // Prevent instantiation of this utility class.
     }
 
     static TopicId generateId() {

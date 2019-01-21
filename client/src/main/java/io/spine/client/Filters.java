@@ -49,18 +49,18 @@ import static io.spine.protobuf.TypeConverter.toAny;
  * a {@link Filter}.
  *
  * <a name="types"></a>
- * <h1>Comparision types</h1>
+ * <h1>Comparison types</h1>
  *
- * <p>The Column filters support two generic kinds of comparison:
+ * <p>The filters support two generic kinds of comparison:
  * <ol>
  *     <li>Equality comparison;
  *     <li>Ordering comparison.
  * </ol>
  *
- * <p>The {@linkplain #eq equality comparison} supports any data type for the Entity Columns.
+ * <p>The {@linkplain #eq equality comparison} supports any data type for the compared objects.
  *
  * <p>The ordering comparison ({@link #gt &gt;}, {@link #lt &lt;}, {@link #ge &gt;=},
- * {@link #le &lt;=}) support only following data types for the Entity Columns:
+ * {@link #le &lt;=}) supports only following types:
  * <ul>
  *     <li>{@link Timestamp com.google.protobuf.Timestamp};
  *     <li>Java primitive number types;
@@ -78,9 +78,10 @@ public final class Filters {
     /**
      * Creates new equality {@link Filter}.
      *
-     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
-     *                   name with no type info
-     * @param value      the requested value of the Entity Column
+     * @param fieldPath
+     *         the field path, for entity filters it would be the entity column name
+     * @param value
+     *         the requested value
      * @return new instance of Filter
      */
     public static Filter eq(String fieldPath, Object value) {
@@ -94,9 +95,10 @@ public final class Filters {
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
-     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
-     *                   name with no type info
-     * @param value      the requested value of the Entity Column
+     * @param fieldPath
+     *         the field path, for entity filters it would be the entity column name
+     * @param value
+     *         the requested value
      * @return new instance of Filter
      */
     public static Filter gt(String fieldPath, Object value) {
@@ -111,9 +113,10 @@ public final class Filters {
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
-     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
-     *                   name with no type info
-     * @param value      the requested value of the Entity Column
+     * @param fieldPath
+     *         the field path, for entity filters it would be the entity column name
+     * @param value
+     *         the requested value
      * @return new instance of Filter
      */
     public static Filter lt(String fieldPath, Object value) {
@@ -128,9 +131,10 @@ public final class Filters {
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
-     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
-     *                   name with no type info
-     * @param value      the requested value of the Entity Column
+     * @param fieldPath
+     *         the field path, for entity filters it would be the entity column name
+     * @param value
+     *         the requested value
      * @return new instance of Filter
      */
     public static Filter ge(String fieldPath, Object value) {
@@ -145,9 +149,10 @@ public final class Filters {
      *
      * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
-     * @param fieldPath the name of the Entity Column to query by, expressed in a single field
-     *                   name with no type info
-     * @param value      the requested value of the Entity Column
+     * @param fieldPath
+     *         the field path, for entity filters it would be the entity column name
+     * @param value
+     *         the requested value
      * @return new instance of Filter
      */
     public static Filter le(String fieldPath, Object value) {
@@ -160,11 +165,13 @@ public final class Filters {
     /**
      * Creates new conjunction composite filter.
      *
-     * <p>A record is considered matching this filter if and only if it matches all of
-     * the aggregated Column filters.
+     * <p>A record is considered matching this filter if and only if it matches all of the
+     * aggregated filters.
      *
-     * @param first the first {@link Filter}
-     * @param rest  the array of additional {@linkplain Filter filters}, possibly empty
+     * @param first
+     *         the first {@link Filter}
+     * @param rest
+     *         the array of additional {@linkplain Filter filters}, possibly empty
      * @return new instance of {@link CompositeFilter}
      */
     public static CompositeFilter all(Filter first, Filter... rest) {
@@ -174,11 +181,13 @@ public final class Filters {
     /**
      * Creates new disjunction composite filter.
      *
-     * <p>A record is considered matching this filter if it matches at least one of the composite
-     * Column filters.
+     * <p>A record is considered matching this filter if it matches at least one of the aggregated
+     * filters.
      *
-     * @param first the first {@link Filter}
-     * @param rest  the array of additional {@linkplain Filter filters}, possibly empty
+     * @param first
+     *         the first {@link Filter}
+     * @param rest
+     *         the array of additional {@linkplain Filter filters}, possibly empty
      * @return new instance of {@link CompositeFilter}
      */
     public static CompositeFilter either(Filter first, Filter... rest) {
@@ -189,12 +198,13 @@ public final class Filters {
      * Creates new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of
-     * the composite Column filters.
+     * the aggregated filters.
      *
      * <p>This method is used to create the default {@code ALL} filter if the user chooses to pass
      * instances of {@link Filter} directly to the {@link QueryBuilder}.
      *
-     * @param filters the aggregated Column filters
+     * @param filters
+     *         the aggregated filters
      * @return new instance of {@link CompositeFilter}
      * @see #all(Filter, Filter...) for the public API equivalent
      */

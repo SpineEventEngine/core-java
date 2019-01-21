@@ -26,8 +26,6 @@ import static java.lang.String.format;
 
 /**
  * Utility class for working with {@linkplain Subscription subscriptions}.
- *
- * @author Alex Tymchenko
  */
 @Internal
 public final class Subscriptions {
@@ -37,8 +35,8 @@ public final class Subscriptions {
      */
     private static final String SUBSCRIPTION_ID_FORMAT = "s-%s";
 
+    /** Prevents the utility class instantiation. */
     private Subscriptions() {
-        // prevent instantiation.
     }
 
     /**

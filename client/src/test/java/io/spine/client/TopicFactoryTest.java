@@ -64,7 +64,7 @@ class TopicFactoryTest {
     class CreateTopic {
 
         @Test
-        @DisplayName("for all entities of kind")
+        @DisplayName("for all of a kind")
         void forAllOfKind() {
             Topic topic = factory.select(TEST_ENTITY_TYPE)
                                  .build();
@@ -78,7 +78,7 @@ class TopicFactoryTest {
         }
 
         @Test
-        @DisplayName("for specified entities of kind")
+        @DisplayName("for objects with specified IDs")
         void forSomeOfKind() {
             Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
             Topic topic = factory.select(TEST_ENTITY_TYPE)

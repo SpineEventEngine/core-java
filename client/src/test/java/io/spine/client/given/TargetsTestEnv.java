@@ -44,11 +44,11 @@ public class TargetsTestEnv {
 
     public static TargetFilters filtersForIds(Message... ids) {
         List<Message> idsList = asList(ids);
-        List<Any> entityIds = idsList.stream()
+        List<Any> packedIds = idsList.stream()
                                      .map(TargetsTestEnv::newId)
                                      .collect(toList());
         IdFilter idFilter = IdFilterVBuilder.newBuilder()
-                                            .addAllIds(entityIds)
+                                            .addAllIds(packedIds)
                                             .build();
         return TargetFiltersVBuilder.newBuilder()
                                     .setIdFilter(idFilter)
