@@ -352,6 +352,14 @@ public abstract class Bus<T extends Message,
     }
 
     /**
+     * Packs the given message of type {@code T} into an envelope of type {@code E}.
+     *
+     * @param message the message to pack
+     * @return new envelope with the given message inside
+     */
+    protected abstract E toEnvelope(T message);
+
+    /**
      * Passes the given envelope for dispatching.
      *
      * <p>Finds and invokes the {@linkplain MessageDispatcher MessageDispatcher(s)} for the given
@@ -362,14 +370,6 @@ public abstract class Bus<T extends Message,
      * @see #post(Message, StreamObserver) for the public API
      */
     protected abstract void dispatch(E envelope);
-
-    /**
-     * Packs the given message of type {@code T} into an envelope of type {@code E}.
-     *
-     * @param message the message to pack
-     * @return new envelope with the given message inside
-     */
-    protected abstract E toEnvelope(T message);
 
     /**
      * Posts each of the given envelopes into the bus and notifies the given observer.
