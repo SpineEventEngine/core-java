@@ -153,7 +153,7 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
      *
      * <p>Throws {@link IllegalStateException} if the instance is not active.
      */
-    protected void ensureActive() {
+    void ensureActive() {
         if (!isActive()) {
             throw newIllegalStateException(
                     "Enrichment function %s is not active. Please use `activate()` first.", this

@@ -38,27 +38,39 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
 
 /**
- * Performs enrichment operation of an enrichable message.
+ * Performs enrichment operation for an event.
  */
 final class Action {
 
+    /**
+     * The envelope with the event to enrich.
+     */
     private final EventEnvelope envelope;
-    private final ImmutableCollection<EnrichmentFunction<?, ?, ?>> availableFunctions;
 
+    /**
+     * Active functions applicable to the enriched event.
+     */
+    private final ImmutableCollection<EnrichmentFunction<?, ?, ?>> functions;
+
+    /**
+     * A map from the type name of an enrichment to its packed instance, in the form
+     * it is used in the enriched event context.
+     */
     private final Map<String, Any> enrichments = Maps.newHashMap();
 
     Action(Enricher parent, EventEnvelope envelope) {
         this.envelope = envelope;
         Class<? extends Message> sourceClass = envelope.getMessageClass()
                                                        .value();
-        Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
-                parent.getFunctions(sourceClass);
-        this.availableFunctions =
-                functionsPerClass.stream()
-                                 .filter(activeOnly())
-                                 .collect(toImmutableList());
+        Collection<EnrichmentFunction<?, ?, ?>> found = parent.getFunctions(sourceClass);
+        this.functions = found.stream()
+                              .filter(activeOnly())
+                              .collect(toImmutableList());
     }
 
+    /**
+     * Creates new envelope with the enriched version of the event.
+     */
     EventEnvelope perform() {
         createEnrichments();
         EventEnvelope enriched = envelope.toEnriched(enrichments);
@@ -67,7 +79,7 @@ final class Action {
 
     private void createEnrichments() {
         EventMessage event = envelope.getMessage();
-        for (EnrichmentFunction function : availableFunctions) {
+        for (EnrichmentFunction function : functions) {
             Message enrichment = apply(function, event, envelope.getEventContext());
             checkResult(enrichment, function);
             put(enrichment);

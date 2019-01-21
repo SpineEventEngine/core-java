@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.spine.server.event.enrich.MessageEnrichment.create;
 
 /**
  * Enriches events <em>after</em> they are stored, and <em>before</em> they are dispatched.
@@ -81,7 +80,8 @@ public final class Enricher {
                .forEach(
                     sourceClass -> {
                         Class<Message> enrichmentClass = enrichment.getMessageClass();
-                        MessageEnrichment msgEnricher = create(this, sourceClass, enrichmentClass);
+                        MessageEnrichment msgEnricher =
+                                MessageEnrichment.create(this, sourceClass, enrichmentClass);
                         functions.put(sourceClass, msgEnricher);
                     }
             );
