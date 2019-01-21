@@ -28,7 +28,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.protobuf.TypeConverter;
 import io.spine.test.client.TestEntityId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -221,7 +220,7 @@ class QueryBuilderTest {
             Collection<Any> idValues = idFilter.getIdsList();
             Collection<Integer> intIdValues = idValues
                     .stream()
-                    .map(id -> TypeConverter.toObject(id, int.class))
+                    .map(id -> toObject(id, int.class))
                     .collect(toList());
 
             Truth.assertThat(idValues)
@@ -427,7 +426,7 @@ class QueryBuilderTest {
             Collection<Any> idValues = idFilter.getIdsList();
             Collection<Integer> intIdValues = idValues
                     .stream()
-                    .map(id -> TypeConverter.toObject(id, int.class))
+                    .map(id -> toObject(id, int.class))
                     .collect(toList());
 
             Truth.assertThat(idValues)
@@ -506,7 +505,7 @@ class QueryBuilderTest {
                  .hasSize(messageIds.length);
             Iterable<? extends Message> actualValues = entityIds
                     .stream()
-                    .map(id -> TypeConverter.toObject(id, TestEntityId.class))
+                    .map(id -> toObject(id, TestEntityId.class))
                     .collect(toList());
             assertThat(actualValues, containsInAnyOrder(messageIds));
         }

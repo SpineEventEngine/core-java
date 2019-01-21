@@ -141,8 +141,7 @@ public final class EntityQueries {
 
     private static Multimap<EntityColumn, Filter>
     splitFilters(CompositeFilter filter, Collection<EntityColumn> entityColumns) {
-        Multimap<EntityColumn, Filter> filters =
-                create(filter.getFilterCount(), 1);
+        Multimap<EntityColumn, Filter> filters = create(filter.getFilterCount(), 1);
         for (Filter columnFilter : filter.getFilterList()) {
             EntityColumn column = findMatchingColumn(columnFilter, entityColumns);
             checkFilterType(column, columnFilter);

@@ -66,7 +66,8 @@ public class EventClass extends MessageClass<EventMessage> {
     public static EventClass from(TypeUrl typeUrl) {
         Class<? extends Message> messageClass = typeUrl.getMessageClass();
         checkArgument(EventMessage.class.isAssignableFrom(messageClass),
-                      "Event class constructed from non-EventMessage type URL");
+                      "Event class constructed from non-EventMessage type URL: %s",
+                      typeUrl.value());
         return from((Class<? extends EventMessage>) messageClass);
     }
 

@@ -28,7 +28,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.protobuf.TypeConverter;
 import io.spine.test.client.TestEntityId;
 import io.spine.test.queries.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -130,7 +129,7 @@ class TopicBuilderTest {
             Collection<Any> idValues = idFilter.getIdsList();
             Collection<Integer> intIdValues = idValues
                     .stream()
-                    .map(id -> TypeConverter.toObject(id, int.class))
+                    .map(id -> toObject(id, int.class))
                     .collect(Collectors.toList());
 
             Truth.assertThat(idValues)
@@ -269,7 +268,7 @@ class TopicBuilderTest {
 
             Filter companySizeHigherBound = allFilters.get(1);
             String columnName2 = companySizeHigherBound.getFieldPath()
-                                                      .getFieldName(0);
+                                                       .getFieldName(0);
             assertEquals(companySizeColumn, columnName2);
             assertEquals(1000L, (long) toObject(companySizeHigherBound.getValue(), int.class));
             assertEquals(LESS_OR_EQUAL, companySizeHigherBound.getOperator());
@@ -326,7 +325,7 @@ class TopicBuilderTest {
             Collection<Any> idValues = idFilter.getIdsList();
             Collection<Integer> intIdValues = idValues
                     .stream()
-                    .map(id -> TypeConverter.toObject(id, int.class))
+                    .map(id -> toObject(id, int.class))
                     .collect(Collectors.toList());
             Truth.assertThat(idValues)
                  .hasSize(2);
@@ -383,7 +382,7 @@ class TopicBuilderTest {
                  .hasSize(messageIds.length);
             Iterable<? extends Message> actualValues = entityIds
                     .stream()
-                    .map(id -> TypeConverter.toObject(id, TestEntityId.class))
+                    .map(id -> toObject(id, TestEntityId.class))
                     .collect(Collectors.toList());
             assertThat(actualValues, containsInAnyOrder(messageIds));
         }

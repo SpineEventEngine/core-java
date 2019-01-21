@@ -62,7 +62,7 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for all objects of the specified type.
+     * Creates a {@link Topic} for all events/entities of the specified type.
      *
      * @param targetType
      *         a class of target events/entities

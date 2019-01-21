@@ -79,7 +79,7 @@ public final class Filters {
      * Creates new equality {@link Filter}.
      *
      * @param fieldPath
-     *         the field path, for entity filters it would be the entity column name
+     *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
      * @return new instance of Filter
@@ -93,10 +93,10 @@ public final class Filters {
     /**
      * Creates new "greater than" {@link Filter}.
      *
-     * <p>For the supported types description see <a href="#types">Comparision types section</a>.
+     * <p>For the supported types description see <a href="#types">Comparison types section</a>.
      *
      * @param fieldPath
-     *         the field path, for entity filters it would be the entity column name
+     *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
      * @return new instance of Filter
@@ -111,10 +111,10 @@ public final class Filters {
     /**
      * Creates new "less than" {@link Filter}.
      *
-     * <p>For the supported types description see <a href="#types">Comparision types section</a>.
+     * <p>For the supported types description see <a href="#types">Comparison types section</a>.
      *
      * @param fieldPath
-     *         the field path, for entity filters it would be the entity column name
+     *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
      * @return new instance of Filter
@@ -129,10 +129,10 @@ public final class Filters {
     /**
      * Creates new "greater or equal" {@link Filter}.
      *
-     * <p>For the supported types description see <a href="#types">Comparision types section</a>.
+     * <p>For the supported types description see <a href="#types">Comparison types section</a>.
      *
      * @param fieldPath
-     *         the field path, for entity filters it would be the entity column name
+     *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
      * @return new instance of Filter
@@ -147,10 +147,10 @@ public final class Filters {
     /**
      * Creates new "less or equal" {@link Filter}.
      *
-     * <p>For the supported types description see <a href="#types">Comparision types section</a>.
+     * <p>For the supported types description see <a href="#types">Comparison types section</a>.
      *
      * @param fieldPath
-     *         the field path, for entity filters it would be the entity column name
+     *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
      * @return new instance of Filter

@@ -44,8 +44,8 @@ import static java.lang.String.join;
 /**
  * Matches the incoming event against a subscription criteria.
  *
- * <p>The class is abstract because for event and entity subscriptions the different parts of event
- * message are validated. See descendants for details.
+ * <p>The class is abstract because event and entity subscriptions match through the different
+ * parts of an event message. See descendants for details.
  */
 abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 
@@ -154,17 +154,17 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
     }
 
     /**
-     * Retrieves a type to check in the event.
+     * Retrieves a type to check from the event.
      */
     protected abstract TypeUrl getTypeToCheck(EventEnvelope event);
 
     /**
-     * Retrieves an ID to check in the event.
+     * Retrieves an ID to check from the event.
      */
     protected abstract Any getIdToCheck(EventEnvelope event);
 
     /**
-     * Retrieves a message or state to check in the event.
+     * Retrieves a message or state to check from the event.
      */
     protected abstract Message getMessageToCheck(EventEnvelope event);
 }

@@ -26,7 +26,7 @@ import io.spine.server.stand.Stand.NotifySubscriptionAction;
 import io.spine.type.TypeUrl;
 
 /**
- * A {@link SubscriptionRegistry} entry that manages a single {@link Subscription}.
+ * A {@link SubscriptionRegistry} entry that manages a single subscription.
  */
 final class SubscriptionRecord {
 
@@ -48,7 +48,8 @@ final class SubscriptionRecord {
     /**
      * Attaches an activation callback to this record.
      *
-     * @param notifyAction the callback to attach
+     * @param notifyAction
+     *         the callback to attach
      */
     void activate(NotifySubscriptionAction notifyAction) {
         callback.setNotifyAction(notifyAction);
@@ -69,7 +70,7 @@ final class SubscriptionRecord {
     }
 
     /**
-     * Checks whether this record has a callback attached.
+     * Checks whether this record has an active callback attached.
      */
     boolean isActive() {
         return callback.isActive();

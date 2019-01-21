@@ -37,14 +37,14 @@ import java.util.Set;
 interface SubscriptionRegistry {
 
     /**
-     * Activate the subscription with the passed callback.
+     * Activate the subscription with the passed action.
      *
-     * <p>The callback passed will become associated with the subscription.
+     * <p>The passed action will be used to notify the read-side about the subscription update.
      *
      * @param subscription
      *         the subscription to activate
      * @param notifyAction
-     *         the callback to make active
+     *         the action which notifies the subscription listeners on the read-side
      */
     void activate(Subscription subscription, Stand.NotifySubscriptionAction notifyAction);
 
@@ -72,7 +72,7 @@ interface SubscriptionRegistry {
      * Allows to determine if this registry has an item with the specified ID.
      *
      * @param subscriptionId
-     *         the subscription ID to look for.
+     *         the subscription ID to look for
      * @return {@code true}, if this registry has a subscription with the given ID,
      *         {@code false} otherwise.
      */
@@ -90,15 +90,16 @@ interface SubscriptionRegistry {
     /**
      * Checks whether the current registry has the records related to a given type.
      *
-     * @param type the type to check records for
+     * @param type
+     *         the type to check records for
      * @return {@code true} if there are records with the given type, {@code false} otherwise
      */
     boolean hasType(TypeUrl type);
 
     /**
-     * Retrieves types of all subscriptions in this registry.
+     * Retrieves the types of all subscriptions in this registry.
      *
-     * @return a set of type URLs to which present records point
+     * @return a set of type URLs to which the present records point
      */
     ImmutableSet<TypeUrl> typeSet();
 }

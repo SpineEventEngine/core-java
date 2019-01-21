@@ -27,9 +27,9 @@ import io.spine.core.EventEnvelope;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Runs an event subscription update based on the incoming event.
+ * Updates an event subscription based on the incoming event.
  *
- * <p>Currently unsupported.
+ * <p>Currently event subscriptions are unsupported.
  */
 final class EventSubscriptionCallback extends SubscriptionCallback {
 

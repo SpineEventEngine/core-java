@@ -173,7 +173,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * {@inheritDoc}
+     * Receives an event and notifies matching subscriptions.
      *
      * <p>See {@link #canDispatch(EventEnvelope)}.
      */
@@ -294,7 +294,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @param subscription
      *         the subscription to activate
      * @param notifyAction
-     *         an action which notifies the subscribers about the update
+     *         an action which notifies the subscribers about an update
      * @see #subscribe(Topic, StreamObserver)
      */
     public void activate(Subscription subscription,

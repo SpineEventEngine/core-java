@@ -358,7 +358,8 @@ public class EntityColumn implements Serializable {
      * the {@code null} input argument this method will always return {@code null}.
      *
      * <p>The method is accessible outside of the {@code EntityColumn} class to enable the proper
-     * {@link io.spine.client.Filter} conversion for the {@link Enumerated} column values.
+     * {@linkplain io.spine.client.Filter filters} conversion for the {@link Enumerated} column
+     * values.
      *
      * @param columnValue
      *         the column value to convert

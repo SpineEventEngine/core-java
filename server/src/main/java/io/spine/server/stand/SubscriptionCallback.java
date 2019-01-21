@@ -45,7 +45,7 @@ abstract class SubscriptionCallback {
     private final Subscription subscription;
 
     /**
-     * An action which accepts an update and notifies the read-side accordingly.
+     * An action which accepts the update and notifies the read-side accordingly.
      */
     private @MonotonicNonNull NotifySubscriptionAction notifyAction = null;
 

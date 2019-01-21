@@ -40,7 +40,8 @@ final class SubscriptionRecordFactory {
      *
      * <p>Distinguishes event and entity subscriptions via the target type URL.
      *
-     * <p>By default, assumes that all non-event subscriptions are entity subscriptions.
+     * <p>By default, assumes that all subscriptions with a non-event type are entity
+     * subscriptions.
      */
     static SubscriptionRecord newRecordFor(Subscription subscription) {
         if (isEventSubscription(subscription)) {
@@ -62,9 +63,8 @@ final class SubscriptionRecordFactory {
     /**
      * Creates a record managing an entity subscription.
      *
-     * <p>In fact, this is a subscription to {@link EntityStateChanged} event with custom
-     * subscription callback and subscription matcher (to validate entity state packed inside the
-     * event).
+     * <p>In fact, this is a subscription to an {@link EntityStateChanged} event with a custom
+     * callback and matcher (to validate the entity state packed inside the event).
      */
     private static SubscriptionRecord createEntityRecord(Subscription subscription) {
         TypeUrl type = TypeUrl.of(EntityStateChanged.class);

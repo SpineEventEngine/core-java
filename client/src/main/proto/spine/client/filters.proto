@@ -50,7 +50,7 @@ message Target {
         // The instruction to include all objects of a given type.
         bool include_all = 2;
 
-        // Filter the objects of a given type by certain criteria.
+        // Filter the objects by a certain criteria.
         TargetFilters filters = 3;
     }
 }
@@ -58,10 +58,10 @@ message Target {
 // The set of filters to narrow down the query results/subscription updates.
 message TargetFilters {
 
-    // Match objects by IDs.
+    // Match objects by their IDs.
     IdFilter id_filter = 1;
 
-    // Match the objects by the value of the event message fields or entity columns.
+    // Match objects by the values of event message fields or entity columns.
     repeated CompositeFilter filter = 2;
 
     // Reserved for more filter types
@@ -98,7 +98,8 @@ message Filter {
 
     // The path to the field to be matched.
     //
-    // For entities, the path will always contain exactly one entry - the name of entity column.
+    // For entities, the path will always contain exactly one entry - the name of the entity
+    // column.
     base.FieldPath field_path = 1 [(required) = true];
 
     // The value to compare upon.
@@ -116,16 +117,16 @@ message Filter {
         // The stored value is equal (`=`) to the passed value.
         EQUAL = 1;
 
-        // The stored value is greater then (`>`) the passed value.
+        // The stored value is greater than (`>`) the passed value.
         GREATER_THAN = 2;
 
-        // The stored value is less then (`<`) the passed value.
+        // The stored value is less than (`<`) the passed value.
         LESS_THAN = 4;
 
-        // The stored value is greater then or equal to (`>=`) the passed value.
+        // The stored value is greater than or equal to (`>=`) the passed value.
         GREATER_OR_EQUAL = 5;
 
-        // The stored value is less then or equal to (`<=`) the passed value.
+        // The stored value is less than or equal to (`<=`) the passed value.
         LESS_OR_EQUAL = 6;
     }
 }

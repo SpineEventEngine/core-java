@@ -70,7 +70,7 @@ public final class Targets {
     }
 
     /**
-     * Create a {@link Target} for all object of the specified type.
+     * Create a {@link Target} for all events/entities of the specified type.
      *
      * @param targetClass
      *         the class of a target event/entity
@@ -84,7 +84,7 @@ public final class Targets {
     }
 
     /**
-     * Composes a target for objects matching declared predicates.
+     * Composes a target for the events/entities matching declared predicates.
      *
      * @param targetClass
      *         the class of a target event/entity
