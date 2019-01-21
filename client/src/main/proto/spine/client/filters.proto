@@ -32,18 +32,19 @@ import "google/protobuf/any.proto";
 
 import "spine/base/field_path.proto";
 
-// Defines the entity type and filters.
+// Defines the target type and filters.
 //
-// Use Target to specify and narrow down the source for Topic and Query by an entity type and
+// Use Target to specify and narrow down the source for Topic and Query by the target type and
 // various criteria.
 message Target {
 
-    // Represents TypeUrl for the entity of interest.
+    // The type of the event or entity of interest.
+    //
+    // Queries support only entity targets while subscriptions work with both event and entity
+    // types.
     string type = 1;
 
-    // Modifies the entity collection of a specified type.
-    // Allows either to narrow it down by filtering out the entity objects or include all entity
-    // instances into the target.
+    // The filters which are applied to the received entity state or event message.
     oneof criterion {
 
         // The instruction to include all objects of a given type.
@@ -54,34 +55,31 @@ message Target {
     }
 }
 
-// Set of filters used to modify the entity collection.
-//
-// To be used in scope of read-side API for specifying the target of query and subscription
-// operations.
+// The set of filters to narrow down the query results/subscription updates.
 message TargetFilters {
 
-    // Match entities by IDs.
+    // Match objects by IDs.
     IdFilter id_filter = 1;
 
-    // Match the entities by the value of the Entity Columns.
+    // Match the objects by the value of the event message fields or entity columns.
     repeated CompositeFilter filter = 2;
 
     // Reserved for more filter types
     reserved 3 to 40;
 }
 
-// The filter grouping a number of Entity Column filters with a specified logical operator.
+// The filter grouping a number of simple filters with a specified logical operator.
 message CompositeFilter {
 
-    // The composite Entity Column filters.
+    // The list of filters.
     //
-    // If the list is empty, any record is considered matching this filter.
+    // If empty, any record is considered matching this filter.
     repeated Filter filter = 1;
 
     // The value of the composite operator which determines the behavior of the filter matching.
     CompositeOperator operator = 2 [(required) = true];
 
-    // An enumeration of all supported composite operators upon the Entity Column filters.
+    // An enumeration of all supported composite operators upon the filters.
     enum CompositeOperator {
 
         // Error value.
@@ -95,12 +93,12 @@ message CompositeFilter {
     }
 }
 
-// A filter matching the Entity Columns.
+// A filter matching some value in event message/entity state.
 message Filter {
 
-    // The name of the field to be matched.
+    // The path to the field to be matched.
     //
-    // For entities, this will be the name of entity column.
+    // For entities, the path will always contain exactly one entry - the name of entity column.
     base.FieldPath field_path = 1 [(required) = true];
 
     // The value to compare upon.
@@ -109,10 +107,10 @@ message Filter {
     // The comparison operator.
     Operator operator = 3 [(required) = true];
 
-    // An enumeration of all supported comparison operators applicable to the Entity Columns.
+    // An enumeration of all supported comparison operators.
     enum Operator {
 
-        // Error value
+        // Error value.
         CFO_UNDEFINED = 0;
 
         // The stored value is equal (`=`) to the passed value.
@@ -134,8 +132,8 @@ message Filter {
 
 // Allows to add an ID filter for the read operations.
 //
-// Used to modify the collection of interest by filtering out the objects with identifiers not
-// included into the filter. SQL equivalent is "... where row.id IN (...)".
+// Used to filter out all objects with identifiers not included into the filter. SQL equivalent is
+// "... where row.id IN (...)".
 message IdFilter {
 
     // The collection of IDs.
