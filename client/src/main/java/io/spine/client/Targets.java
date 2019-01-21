@@ -97,6 +97,7 @@ public final class Targets {
     public static Target composeTarget(Class<? extends Message> entityClass,
                                        @Nullable Iterable<?> ids,
                                        @Nullable Iterable<CompositeFilter> filters) {
+        checkNotNull(entityClass);
 
         boolean includeAll = (ids == null && filters == null);
 
