@@ -54,7 +54,7 @@ import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
  * </pre>
  *
  * @see QueryFactory#select(Class) to start query building
- * @see io.spine.client.FilterFactory for filter creation shortcuts
+ * @see Filters for filter creation shortcuts
  * @see AbstractTargetBuilder for more details on this builders API
  */
 public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilder> {

@@ -47,7 +47,7 @@ import java.util.Map;
 
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
-import static io.spine.client.FilterFactory.eq;
+import static io.spine.client.Filters.eq;
 import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
 import static io.spine.server.entity.storage.TestEntityQueryFactory.createQuery;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;

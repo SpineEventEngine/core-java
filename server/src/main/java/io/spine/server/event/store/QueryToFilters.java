@@ -29,9 +29,9 @@ import io.spine.server.event.EventStreamQuery;
 
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
-import static io.spine.client.FilterFactory.eq;
-import static io.spine.client.FilterFactory.gt;
-import static io.spine.client.FilterFactory.lt;
+import static io.spine.client.Filters.eq;
+import static io.spine.client.Filters.gt;
+import static io.spine.client.Filters.lt;
 
 /**
  * Converts {@link EventStreamQuery} to {@link TargetFilters}.

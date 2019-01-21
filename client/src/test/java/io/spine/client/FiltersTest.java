@@ -42,11 +42,11 @@ import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filter.Operator.LESS_THAN;
-import static io.spine.client.FilterFactory.eq;
-import static io.spine.client.FilterFactory.ge;
-import static io.spine.client.FilterFactory.gt;
-import static io.spine.client.FilterFactory.le;
-import static io.spine.client.FilterFactory.lt;
+import static io.spine.client.Filters.eq;
+import static io.spine.client.Filters.ge;
+import static io.spine.client.Filters.gt;
+import static io.spine.client.Filters.le;
+import static io.spine.client.Filters.lt;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toAny;
@@ -57,8 +57,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("FilterFactory should")
-class FilterFactoryTest {
+@DisplayName("Filters utility should")
+class FiltersTest {
 
     private static final String COLUMN_NAME = "preciseColumn";
     private static final Timestamp COLUMN_VALUE = getCurrentTime();
@@ -77,7 +77,7 @@ class FilterFactoryTest {
         new NullPointerTester()
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
                 .setDefault(Filter.class, Filter.getDefaultInstance())
-                .testAllPublicStaticMethods(FilterFactory.class);
+                .testAllPublicStaticMethods(Filters.class);
     }
 
     @Nested
@@ -146,7 +146,7 @@ class FilterFactoryTest {
                     le(COLUMN_NAME, COLUMN_VALUE),
                     ge(COLUMN_NAME, COLUMN_VALUE)
             };
-            checkCreatesInstance(FilterFactory.all(filters[0], filters[1]), ALL, filters);
+            checkCreatesInstance(Filters.all(filters[0], filters[1]), ALL, filters);
         }
 
         @Test
@@ -156,7 +156,7 @@ class FilterFactoryTest {
                     lt(COLUMN_NAME, COLUMN_VALUE),
                     gt(COLUMN_NAME, COLUMN_VALUE)
             };
-            checkCreatesInstance(FilterFactory.either(filters[0], filters[1]), EITHER, filters);
+            checkCreatesInstance(Filters.either(filters[0], filters[1]), EITHER, filters);
         }
 
         private void checkCreatesInstance(CompositeFilter filter,

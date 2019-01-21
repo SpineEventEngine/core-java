@@ -27,7 +27,7 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
-import io.spine.client.FilterFactory;
+import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
@@ -103,8 +103,8 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     @DisplayName("check filter type")
     void checkFilterType() {
         // Boolean EntityColumn queried for for an Integer value
-        Filter filter = FilterFactory.gt(archived.name(), 42);
-        CompositeFilter compositeFilter = FilterFactory.all(filter);
+        Filter filter = Filters.gt(archived.name(), 42);
+        CompositeFilter compositeFilter = Filters.all(filter);
         TargetFilters filters = TargetFiltersVBuilder
                 .newBuilder()
                 .addFilter(compositeFilter)
@@ -117,8 +117,8 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     @Test
     @DisplayName("not create query for non-existing column")
     void notCreateForNonExisting() {
-        Filter filter = FilterFactory.eq("nonExistingColumn", 42);
-        CompositeFilter compositeFilter = FilterFactory.all(filter);
+        Filter filter = Filters.eq("nonExistingColumn", 42);
+        CompositeFilter compositeFilter = Filters.all(filter);
         TargetFilters filters = TargetFiltersVBuilder
                 .newBuilder()
                 .addFilter(compositeFilter)
@@ -160,9 +160,9 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
                 .newBuilder()
                 .setValue(true)
                 .build();
-        Filter versionFilter = FilterFactory
+        Filter versionFilter = Filters
                 .eq(version.name(), v1);
-        Filter archivedFilter = FilterFactory
+        Filter archivedFilter = Filters
                 .eq(LifecycleFlagField.archived.name(), archived);
         CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()

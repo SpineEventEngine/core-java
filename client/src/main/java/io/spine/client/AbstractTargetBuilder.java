@@ -30,7 +30,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
-import static io.spine.client.FilterFactory.all;
+import static io.spine.client.Filters.all;
 import static io.spine.client.Targets.composeTarget;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -205,8 +205,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * @param predicate
      *         the {@link io.spine.client.Filter}s to filter the requested entities by
      * @return self for method chaining
-     * @see io.spine.client.FilterFactory for a convenient way to create
-     *      {@link io.spine.client.Filter} instances
+     * @see Filters for a convenient way to create {@link io.spine.client.Filter} instances
      * @see #where(io.spine.client.CompositeFilter...)
      */
     public B where(Filter... predicate) {
@@ -246,10 +245,8 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * companies that have their company size between 50 and 1000 employees and either have been
      * established less than two years ago, or originate from Germany.
      *
-     * <p>Note that the filters which belong to different {@link io.spine.client.FilterFactory#all
-     * all(...)} groups
-     * may be represented as a single {@link io.spine.client.FilterFactory#all all(...)} group. For
-     * example, two
+     * <p>Note that the filters which belong to different {@link Filters#all all(...)} groups
+     * may be represented as a single {@link Filters#all all(...)} group. For example, two
      * following queries would be identical:
      * <pre>
      *     {@code
@@ -282,8 +279,8 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      *         a number of {@link io.spine.client.CompositeFilter} instances forming the query
      *         predicate
      * @return self for method chaining
-     * @see io.spine.client.FilterFactory for a convenient way to create {@link
-     *      io.spine.client.CompositeFilter} instances
+     * @see Filters for a convenient way to create {@link io.spine.client.CompositeFilter}
+     *      instances
      */
     public B where(CompositeFilter... predicate) {
         columns = ImmutableSet.copyOf(predicate);

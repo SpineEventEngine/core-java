@@ -36,8 +36,8 @@ import io.spine.type.TypeUrl;
 import java.util.Collection;
 import java.util.List;
 
-import static io.spine.client.FilterFactory.all;
-import static io.spine.client.FilterFactory.eq;
+import static io.spine.client.Filters.all;
+import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;

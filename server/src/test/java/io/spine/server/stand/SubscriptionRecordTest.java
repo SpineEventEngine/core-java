@@ -22,7 +22,7 @@ package io.spine.server.stand;
 
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
-import io.spine.client.FilterFactory;
+import io.spine.client.Filters;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
@@ -92,8 +92,8 @@ class SubscriptionRecordTest {
                                       .build();
         String targetName = "super-project";
 
-        Filter filter = FilterFactory.eq("name", targetName);
-        CompositeFilter compositeFilter = FilterFactory.all(filter);
+        Filter filter = Filters.eq("name", targetName);
+        CompositeFilter compositeFilter = Filters.all(filter);
         Set<CompositeFilter> filters = singleton(compositeFilter);
         Target target = Targets.composeTarget(Project.class, singleton(targetId), filters);
 

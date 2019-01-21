@@ -29,7 +29,7 @@ import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.Filter;
-import io.spine.client.FilterFactory;
+import io.spine.client.Filters;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 import org.junit.jupiter.api.DisplayName;
@@ -48,9 +48,9 @@ import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
-import static io.spine.client.FilterFactory.eq;
-import static io.spine.client.FilterFactory.gt;
-import static io.spine.client.FilterFactory.le;
+import static io.spine.client.Filters.eq;
+import static io.spine.client.Filters.gt;
+import static io.spine.client.Filters.le;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.QueryParametersTestEnv.mockColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -72,7 +72,7 @@ class QueryParametersTest {
     void beSerializable() {
         String columnName = version.name();
         EntityColumn column = findColumn(Entity.class, columnName);
-        Filter filter = FilterFactory.eq(columnName, 1);
+        Filter filter = Filters.eq(columnName, 1);
         CompositeQueryParameter parameter = aggregatingParameter(column, filter);
         QueryParameters parameters = QueryParameters.newBuilder()
                                                     .add(parameter)
@@ -100,7 +100,7 @@ class QueryParametersTest {
         // --- Group B ---
         // Consists of 3 instances with a single filter targeting a String column
         EntityColumn bColumn = mockColumn();
-        Filter bFilter = FilterFactory.eq("b", "c");
+        Filter bFilter = Filters.eq("b", "c");
         QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                .build();
         QueryParameters paramsB2 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
@@ -111,7 +111,7 @@ class QueryParametersTest {
         // --- Group C ---
         // Consists of an instance with a single filter targeting an integer number column
         EntityColumn cColumn = mockColumn();
-        Filter cFilter = FilterFactory.eq("a", 42);
+        Filter cFilter = Filters.eq("a", 42);
         QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
                                               .build();
 

@@ -69,10 +69,10 @@ import static io.spine.protobuf.TypeConverter.toAny;
  *
  * @see QueryBuilder for the application
  */
-public final class FilterFactory {
+public final class Filters {
 
     /** Prevents this utility class instantiation. */
-    private FilterFactory() {
+    private Filters() {
     }
 
     /**

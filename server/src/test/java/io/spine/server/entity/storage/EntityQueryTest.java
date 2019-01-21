@@ -29,7 +29,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.StringSubject;
 import io.spine.base.FieldPath;
 import io.spine.client.Filter;
-import io.spine.client.FilterFactory;
+import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.protobuf.FieldPaths;
 import io.spine.server.entity.Entity;
@@ -80,7 +80,7 @@ class EntityQueryTest {
     void beSerializable() {
         String columnName = deleted.name();
         EntityColumn column = findColumn(Entity.class, columnName);
-        Filter filter = FilterFactory.eq(columnName, false);
+        Filter filter = Filters.eq(columnName, false);
         Multimap<EntityColumn, Filter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         QueryParameters parameters = QueryParameters
