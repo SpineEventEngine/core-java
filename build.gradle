@@ -163,6 +163,7 @@ subprojects {
     configurations {
         all {
             resolutionStrategy {
+                //noinspection GroovyAssignabilityCheck
                 force "io.spine:spine-base:$spineBaseVersion"
             }
         }
