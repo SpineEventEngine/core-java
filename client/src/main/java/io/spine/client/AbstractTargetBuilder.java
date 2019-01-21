@@ -122,11 +122,11 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * same type to the argument of this method. Moreover, the instances must be of the type of
      * the query target type identifier.
      *
-     * <p>This method or any of its overloads do not check these
-     * constrains an assume they are followed by the caller.
+     * <p>This method or any of its overloads do not check these constrains and assume they are
+     * followed by the caller.
      *
      * <p>If there are no IDs (i.e. and empty {@link Iterable} is passed), the query retrieves all
-     * the records regardless their IDs.
+     * the records regardless of their IDs.
      *
      * @param ids
      *         the values of the IDs to look up
@@ -191,17 +191,17 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
     }
 
     /**
-     * Sets the Entity Column predicate to the {@link io.spine.client.Query}.
+     * Sets the predicates for the {@link io.spine.client.Query}.
      *
      * <p>If there are no {@link io.spine.client.Filter}s (i.e. the passed array is empty),
-     * all the records will be retrieved regardless the Entity Columns values.
+     * all the records will be retrieved regardless of the column values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
      * a conjunction ({@link io.spine.client.CompositeFilter.CompositeOperator#ALL ALL}
      * operator), i.e. a record matches this query only if it matches all of these parameters.
      *
      * @param predicate
-     *         the {@link io.spine.client.Filter}s to filter the requested entities by
+     *         the {@link io.spine.client.Filter}s to filter the query results
      * @return self for method chaining
      * @see Filters for a convenient way to create {@link io.spine.client.Filter} instances
      * @see #where(io.spine.client.CompositeFilter...)
@@ -213,12 +213,12 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
     }
 
     /**
-     * Sets the Entity Column predicate to the {@link io.spine.client.Query}.
+     * Sets the predicates for the {@link io.spine.client.Query}.
      *
      * <p>If there are no {@link io.spine.client.Filter}s (i.e. the passed array is empty),
-     * all the records will be retrieved regardless the Entity Columns values.
+     * all the records will be retrieved regardless the column values.
      *
-     * <p>The input values represent groups of {@linkplain io.spine.client.Filter column
+     * <p>The input values represent groups of {@linkplain io.spine.client.Filter simple
      * filters} joined with
      * a {@linkplain io.spine.client.CompositeFilter.CompositeOperator composite operator}.
      *
