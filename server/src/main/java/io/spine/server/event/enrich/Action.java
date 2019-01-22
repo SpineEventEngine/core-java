@@ -29,6 +29,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 
@@ -102,7 +103,7 @@ final class Action {
         return result;
     }
 
-    private void checkResult(Message enriched, EnrichmentFunction function) {
+    private void checkResult(@Nullable Message enriched, EnrichmentFunction function) {
         checkNotNull(
             enriched,
             "EnrichmentFunction %s produced `null` for the source message %s",
