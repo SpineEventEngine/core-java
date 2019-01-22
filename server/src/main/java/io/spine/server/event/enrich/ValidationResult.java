@@ -65,7 +65,6 @@ final class ValidationResult {
         for (EnrichmentFunction<?, ?, ?> fieldFunction : this.functions) {
             map.put(fieldFunction.sourceClass(), fieldFunction);
         }
-
         return map.build();
     }
 }
