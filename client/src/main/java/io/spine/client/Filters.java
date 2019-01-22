@@ -174,7 +174,11 @@ public final class Filters {
      *         the array of additional {@linkplain Filter filters}, possibly empty
      * @return new instance of {@link CompositeFilter}
      */
+    @SuppressWarnings("OverloadedVarargsMethod")
+    // OK as the method is clearly distinguished by the first argument.
     public static CompositeFilter all(Filter first, Filter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
         return composeFilters(asList(first, rest), ALL);
     }
 
@@ -191,6 +195,8 @@ public final class Filters {
      * @return new instance of {@link CompositeFilter}
      */
     public static CompositeFilter either(Filter first, Filter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
         return composeFilters(asList(first, rest), EITHER);
     }
 
@@ -209,6 +215,9 @@ public final class Filters {
      * @see #all(Filter, Filter...) for the public API equivalent
      */
     static CompositeFilter all(Collection<Filter> filters) {
+        checkNotNull(filters);
+        checkArgument(!filters.isEmpty(),
+                      "Composite filter must contain at least one simple filter in it");
         return composeFilters(filters, ALL);
     }
 
