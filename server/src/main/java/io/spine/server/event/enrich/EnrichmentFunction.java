@@ -35,32 +35,35 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * {@code EnrichmentFunction} defines how a source message class can be transformed
- * into a target message class.
+ * Defines how an instance of a source class can be transformed into an instance
+ * of the target class.
  *
  * <p>{@code EnrichmentFunction}s are used by an {@link Enricher} to augment events
  * passed to {@link EventBus}.
  *
- * @apiNote We are having the generified class to be able to bound the types of messages and the
- * translation function when building the {@link Enricher}.
- *
- * @param <S> a type of the source object to enrich
- * @param <T> a type of the target enrichment
- * @param <C> a type of the message context
+ * @param <S>
+ *         a type of the source object to enrich
+ * @param <C>
+ *         a type of the source message context
+ * @param <T>
+ *         a type of the target enrichment
+ * @apiNote
+ * We are having the generified class to be able to bound the types of messages and the translation
+ * function when building the {@link Enricher}.
  * @see EnricherBuilder#add(Class, Class, java.util.function.BiFunction)
  */
-abstract class EnrichmentFunction<S, T, C extends Message> {
+abstract class EnrichmentFunction<S, C extends Message, T> {
 
     private final Class<S> sourceClass;
-    private final Class<T> enrichmentClass;
+    private final Class<T> targetClass;
 
-    EnrichmentFunction(Class<S> sourceClass, Class<T> enrichmentClass) {
+    EnrichmentFunction(Class<S> sourceClass, Class<T> targetClass) {
         this.sourceClass = checkNotNull(sourceClass);
-        this.enrichmentClass = checkNotNull(enrichmentClass);
+        this.targetClass = checkNotNull(targetClass);
         checkArgument(
-                !sourceClass.equals(enrichmentClass),
-                "Source and enrichment class must not be equal. Passed two values of %",
-                sourceClass
+                !sourceClass.equals(targetClass),
+                "Source and target classes must not be equal. Both are: `%s`",
+                sourceClass.getName()
         );
     }
 
@@ -73,12 +76,12 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
      */
     public abstract T apply(S input, C context);
 
-    Class<S> getSourceClass() {
+    Class<S> sourceClass() {
         return sourceClass;
     }
 
-    Class<T> getEnrichmentClass() {
-        return enrichmentClass;
+    Class<T> targetClass() {
+        return targetClass;
     }
 
     /**
@@ -121,7 +124,7 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(sourceClass, enrichmentClass);
+        return Objects.hash(sourceClass, targetClass);
     }
 
     @Override
@@ -134,14 +137,14 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
         }
         EnrichmentFunction other = (EnrichmentFunction) obj;
         return Objects.equals(this.sourceClass, other.sourceClass)
-                && Objects.equals(this.enrichmentClass, other.enrichmentClass);
+                && Objects.equals(this.targetClass, other.targetClass);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("sourceClass", sourceClass)
-                          .add("enrichmentClass", enrichmentClass)
+                          .add("targetClass", targetClass)
                           .toString();
     }
 

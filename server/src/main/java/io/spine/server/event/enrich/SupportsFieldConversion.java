@@ -53,8 +53,8 @@ public final class SupportsFieldConversion implements Predicate<EnrichmentFuncti
     @Override
     public boolean test(EnrichmentFunction<?, ?, ?> input) {
         checkNotNull(input);
-        boolean eventClassMatches = messageFieldClass.equals(input.getSourceClass());
-        boolean enrichmentClassMatches = enrichmentFieldClass.equals(input.getEnrichmentClass());
+        boolean eventClassMatches = messageFieldClass.equals(input.sourceClass());
+        boolean enrichmentClassMatches = enrichmentFieldClass.equals(input.targetClass());
         return eventClassMatches && enrichmentClassMatches;
     }
 

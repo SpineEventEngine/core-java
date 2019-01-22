@@ -65,7 +65,7 @@ public final class EnricherBuilder {
         checkNotNull(enrichmentFieldClass);
         checkNotNull(func);
 
-        EnrichmentFunction<S, T, ?> newEntry =
+        EnrichmentFunction<S, ?, T> newEntry =
                 FieldEnrichment.of(sourceFieldClass, enrichmentFieldClass, func);
         checkDuplicate(newEntry);
         functions.add(newEntry);
@@ -102,8 +102,8 @@ public final class EnricherBuilder {
                 EnrichmentFunction.firstThat(functions, SameTransition.asFor(candidate));
         if (duplicate.isPresent()) {
             throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
-                                              candidate.getSourceClass(),
-                                              candidate.getEnrichmentClass(),
+                                              candidate.sourceClass(),
+                                              candidate.targetClass(),
                                               duplicate.get());
         }
     }

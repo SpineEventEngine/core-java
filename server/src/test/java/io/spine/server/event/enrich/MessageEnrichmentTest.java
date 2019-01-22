@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @DisplayName("MessageEnrichment should")
 class MessageEnrichmentTest {
 
-    private MessageEnrichment<ProjectCreated, ProjectCreated.Enrichment, ?> enricher;
+    private MessageEnrichment<ProjectCreated, ?, ProjectCreated.Enrichment> enricher;
 
     @BeforeEach
     void setUp() {

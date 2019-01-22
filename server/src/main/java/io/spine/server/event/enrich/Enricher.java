@@ -62,7 +62,7 @@ public final class Enricher {
         LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap =
                 LinkedListMultimap.create();
         for (EnrichmentFunction<?, ?, ?> fn : builder.getFunctions()) {
-            funcMap.put(fn.getSourceClass(), fn);
+            funcMap.put(fn.sourceClass(), fn);
         }
         putMsgEnrichers(funcMap);
 

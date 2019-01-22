@@ -61,7 +61,7 @@ final class ValidationResult {
         ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
                 ImmutableMultimap.builder();
         for (EnrichmentFunction<?, ?, ?> fieldFunction : this.functions) {
-            map.put(fieldFunction.getSourceClass(), fieldFunction);
+            map.put(fieldFunction.sourceClass(), fieldFunction);
         }
 
         return map.build();

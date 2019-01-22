@@ -47,7 +47,7 @@ class EnricherBuilderTest {
 
     private EnricherBuilder builder;
     private BiFunction<Timestamp, EventContext, StringValue> function;
-    private FieldEnrichment<Timestamp, StringValue, ?> fieldEnrichment;
+    private FieldEnrichment<Timestamp, ?, StringValue> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
