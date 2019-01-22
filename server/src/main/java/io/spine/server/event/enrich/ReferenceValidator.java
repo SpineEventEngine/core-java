@@ -239,12 +239,13 @@ final class ReferenceValidator implements Logging {
 
     private Optional<EnrichmentFunction<?, ?, ?>>
     transition(FieldDescriptor source, FieldDescriptor target) {
-        Class<?> sourceFieldClass = Field.getFieldClass(source);
-        Class<?> targetFieldClass = Field.getFieldClass(target);
+        Class<?> sourceField = Field.getFieldClass(source);
+        Class<?> targetField = Field.getFieldClass(target);
         Optional<EnrichmentFunction<?, ?, ?>> func =
-                enricher.transition(sourceFieldClass, targetFieldClass);
+                enricher.schema()
+                        .transition(sourceField, targetField);
         if (!func.isPresent()) {
-            logNoFunction(sourceFieldClass, targetFieldClass);
+            logNoFunction(sourceField, targetField);
         }
         return func;
     }

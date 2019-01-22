@@ -25,10 +25,8 @@ import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Enriches events <em>after</em> they are stored, and <em>before</em> they are dispatched.
@@ -68,8 +66,11 @@ public final class Enricher {
     }
 
     private Schema createSchema(EnricherBuilder builder) {
-        Schema result = Schema.create(this, builder);
-        return checkNotNull(result);
+        return Schema.create(this, builder);
+    }
+
+    Schema schema() {
+        return schema;
     }
 
     /**
@@ -132,20 +133,5 @@ public final class Enricher {
     private static void checkEnabled(EventEnvelope envelope) {
         checkArgument(envelope.isEnrichmentEnabled(),
                       "Enrichment is disabled for the message %s", envelope.getOuterObject());
-    }
-
-    /**
-     * Obtains a function that converts a source message field into an enrichment field.
-     *
-     * @param fieldClass
-     *        the class of the source field
-     * @param enrichmentFieldClass
-     *        the class of the enrichment field
-     */
-    Optional<EnrichmentFunction<?, ?, ?>> transition(Class<?> fieldClass,
-                                                     Class<?> enrichmentFieldClass) {
-        Optional<EnrichmentFunction<?, ?, ?>> result =
-                schema.transition(fieldClass, enrichmentFieldClass);
-        return result;
     }
 }
