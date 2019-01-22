@@ -32,11 +32,11 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * A callback that updates a subscription based on the incoming event.
  *
- * <p>This callback is meant to be run on the subscription which was already matched to the event
+ * <p>This callback is meant to be run with the event already matched to the subscription criteria
  * and thus doesn't do any type checking and filter evaluation.
  *
- * <p>The class is abstract because the event and entity subscriptions receive different kinds of
- * updates. See descendants for details.
+ * <p>The descendants of the class decide on how to assemble the subscription update from the event
+ * data.
  */
 abstract class SubscriptionCallback {
 

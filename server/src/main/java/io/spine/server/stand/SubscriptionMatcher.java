@@ -44,8 +44,8 @@ import static java.lang.String.join;
 /**
  * Matches the incoming event against a subscription criteria.
  *
- * <p>The class is abstract because event and entity subscriptions match through the different
- * parts of an event message. See descendants for details.
+ * <p>The class descendants decide on how to turn the event envelope into a set of data pieces
+ * suitable for filtering.
  */
 abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
 
