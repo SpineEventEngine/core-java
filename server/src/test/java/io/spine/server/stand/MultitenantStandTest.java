@@ -62,7 +62,7 @@ class MultitenantStandTest extends StandTest {
     }
 
     @SuppressWarnings("deprecation")
-    // Deprecated `Stand.post()` method will become test-only in future.
+    // The deprecated `Stand.post()` method will become test-only in the future.
     @Test
     @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
     void updateOnlySameTenant() {
@@ -106,10 +106,10 @@ class MultitenantStandTest extends StandTest {
                      Class<? extends Message> entityClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(entityClass);
-        MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction();
-        subscribeAndActivate(stand, allCustomers, callback);
+        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
+        subscribeAndActivate(stand, allCustomers, action);
 
-        assertNull(callback.newEntityState());
-        return callback;
+        assertNull(action.newEntityState());
+        return action;
     }
 }

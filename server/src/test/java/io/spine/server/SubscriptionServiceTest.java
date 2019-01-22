@@ -60,7 +60,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("deprecation")
-// The deprecated `Stand.post()` method will become package-private and `VisibleForTesting` in future.
+// The deprecated `Stand.post()` method will become test-only in the future.
 @DisplayName("SubscriptionService should")
 class SubscriptionServiceTest {
 

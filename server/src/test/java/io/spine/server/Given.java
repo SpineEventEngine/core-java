@@ -213,8 +213,6 @@ public class Given {
             super();
         }
 
-        @SuppressWarnings("RedundantMethodOverride")
-        // Overridden to expose the method to the current package.
         @Override
         protected EntityLifecycle lifecycleOf(ProjectId id) {
             return super.lifecycleOf(id);
@@ -272,8 +270,6 @@ public class Given {
             super();
         }
 
-        @SuppressWarnings("RedundantMethodOverride")
-        // Overridden to be exposed to the test package.
         @Override
         public EntityLifecycle lifecycleOf(CustomerId id) {
             return super.lifecycleOf(id);

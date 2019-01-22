@@ -118,8 +118,8 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     /**
-     * Builds the {@link TargetFilters} for the {@link Mirror} projection based on the domain
-     * aggregate {@link Target}.
+     * Builds the {@linkplain TargetFilters entity filters} for the {@link Mirror} projection based
+     * on the domain aggregate {@link Target}.
      *
      * @param target
      *         domain aggregate query target

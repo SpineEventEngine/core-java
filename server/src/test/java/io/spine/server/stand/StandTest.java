@@ -139,7 +139,7 @@ import static org.mockito.Mockito.when;
         "OverlyCoupledClass",
         "ClassWithTooManyMethods",
         "UnsecureRandomNumberGeneration",
-        "deprecation" /* The deprecated `Stand.post()` method will become test-only in future. */
+        "deprecation" /* The `Stand.post()` method will become test-only in the future. */
 })
 @DisplayName("Stand should")
 class StandTest extends TenantAwareTest {
@@ -309,7 +309,8 @@ class StandTest extends TenantAwareTest {
             List<Any> messageList = checkAndGetMessageList(responseObserver);
             assertTrue(
                     messageList.isEmpty(),
-                    "Query returned a non-empty response message list though the target had been empty"
+                    "Query returned a non-empty response message list though the target had " +
+                            "been empty"
             );
         }
     }
@@ -405,8 +406,8 @@ class StandTest extends TenantAwareTest {
         Stand stand = createStandWithExecutor(executor, repository);
         Topic allCustomers = requestFactory.topic()
                                            .allOf(Customer.class);
-        MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction();
-        subscribeAndActivate(stand, allCustomers, callback);
+        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
+        subscribeAndActivate(stand, allCustomers, action);
 
         // Send a command creating customer.
         Customer customer = fillSampleCustomers(1)
@@ -424,7 +425,7 @@ class StandTest extends TenantAwareTest {
         CustomerId id = repository.dispatch(cmd);
         assertEquals(customerId, id);
 
-        // Check the subscription callback is run.
+        // Check the subscription callback is run notifying about new customer created.
         verify(executor, times(1)).execute(any(Runnable.class));
     }
 
@@ -440,11 +441,9 @@ class StandTest extends TenantAwareTest {
             Topic allCustomers = requestFactory.topic()
                                                .allOf(Customer.class);
 
-            MemoizeNotifySubscriptionAction memoizeCallback =
-                    new MemoizeNotifySubscriptionAction();
-
-            subscribeAndActivate(stand, allCustomers, memoizeCallback);
-            assertNull(memoizeCallback.newEntityState());
+            MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
+            subscribeAndActivate(stand, allCustomers, action);
+            assertNull(action.newEntityState());
 
             Customer customer = fillSampleCustomers(1)
                     .iterator()
@@ -460,7 +459,7 @@ class StandTest extends TenantAwareTest {
             stand.post(entity, repository.lifecycleOf(customerId));
 
             Any packedState = pack(customer);
-            assertEquals(packedState, memoizeCallback.newEntityState());
+            assertEquals(packedState, action.newEntityState());
         }
 
         @Test
@@ -471,9 +470,9 @@ class StandTest extends TenantAwareTest {
             Topic allProjects = requestFactory.topic()
                                               .allOf(Project.class);
 
-            MemoizeNotifySubscriptionAction memoizeCallback = new MemoizeNotifySubscriptionAction();
-            subscribeAndActivate(stand, allProjects, memoizeCallback);
-            assertNull(memoizeCallback.newEntityState());
+            MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
+            subscribeAndActivate(stand, allProjects, action);
+            assertNull(action.newEntityState());
 
             Project project = fillSampleProjects(1)
                     .iterator()
@@ -488,7 +487,7 @@ class StandTest extends TenantAwareTest {
             stand.post(entity, repository.lifecycleOf(projectId));
 
             Any packedState = pack(project);
-            assertEquals(packedState, memoizeCallback.newEntityState());
+            assertEquals(packedState, action.newEntityState());
         }
     }
 
@@ -505,7 +504,7 @@ class StandTest extends TenantAwareTest {
                                             .byId(ids(sampleCustomers))
                                             .build();
         Collection<Customer> callbackStates = newHashSet();
-        MemoizeNotifySubscriptionAction callback = new MemoizeNotifySubscriptionAction() {
+        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction() {
             @Override
             public void accept(SubscriptionUpdate update) {
                 super.accept(update);
@@ -516,7 +515,7 @@ class StandTest extends TenantAwareTest {
                 callbackStates.add(customerInCallback);
             }
         };
-        subscribeAndActivate(stand, someCustomers, callback);
+        subscribeAndActivate(stand, someCustomers, action);
 
         for (Customer customer : sampleCustomers) {
             CustomerId customerId = customer.getId();
@@ -540,9 +539,9 @@ class StandTest extends TenantAwareTest {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(Customer.class);
 
-        MemoizeNotifySubscriptionAction memoizeCallback = new MemoizeNotifySubscriptionAction();
+        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
         Subscription subscription =
-                subscribeAndActivate(stand, allCustomers, memoizeCallback);
+                subscribeAndActivate(stand, allCustomers, action);
 
         stand.cancel(subscription, noOpObserver());
 
@@ -558,16 +557,17 @@ class StandTest extends TenantAwareTest {
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        assertNull(memoizeCallback.newEntityState());
+        assertNull(action.newEntityState());
     }
 
     @Test
     @DisplayName("fail if cancelling non-existent subscription")
     void notCancelNonExistent() {
         Stand stand = createStand();
-        Subscription nonExistingSubscription = Subscription.newBuilder()
-                                                           .setId(Subscriptions.generateId())
-                                                           .build();
+        Subscription nonExistingSubscription = Subscription
+                .newBuilder()
+                .setId(Subscriptions.generateId())
+                .build();
         assertThrows(IllegalArgumentException.class,
                      () -> stand.cancel(nonExistingSubscription, noOpObserver()));
     }
@@ -584,8 +584,8 @@ class StandTest extends TenantAwareTest {
         int totalCallbacks = 100;
 
         for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
-            MemoizeNotifySubscriptionAction callback = subscribeWithCallback(stand, allCustomers);
-            callbacks.add(callback);
+            MemoizeNotifySubscriptionAction action = subscribeWithCallback(stand, allCustomers);
+            callbacks.add(action);
         }
 
         Customer customer = fillSampleCustomers(1)
@@ -601,9 +601,9 @@ class StandTest extends TenantAwareTest {
         stand.post(entity, repository.lifecycleOf(customerId));
 
         Any packedState = pack(customer);
-        for (MemoizeNotifySubscriptionAction callback : callbacks) {
-            assertEquals(packedState, callback.newEntityState());
-            verify(callback, times(1)).accept(any(SubscriptionUpdate.class));
+        for (MemoizeNotifySubscriptionAction action : callbacks) {
+            assertEquals(packedState, action.newEntityState());
+            verify(action, times(1)).accept(any(SubscriptionUpdate.class));
         }
     }
 
@@ -614,7 +614,7 @@ class StandTest extends TenantAwareTest {
         StandTestProjectionRepository projectionRepository = new StandTestProjectionRepository();
         Stand stand = createStand(repository, projectionRepository);
         Target allProjects = Targets.allOf(Project.class);
-        MemoizeNotifySubscriptionAction callback = subscribeWithCallback(stand, allProjects);
+        MemoizeNotifySubscriptionAction action = subscribeWithCallback(stand, allProjects);
         Customer customer = fillSampleCustomers(1)
                 .iterator()
                 .next();
@@ -627,18 +627,18 @@ class StandTest extends TenantAwareTest {
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        verify(callback, never()).accept(any(SubscriptionUpdate.class));
+        verify(action, never()).accept(any(SubscriptionUpdate.class));
     }
 
     private MemoizeNotifySubscriptionAction
     subscribeWithCallback(Stand stand, Target subscriptionTarget) {
-        MemoizeNotifySubscriptionAction callback = spy(new MemoizeNotifySubscriptionAction());
+        MemoizeNotifySubscriptionAction action = spy(new MemoizeNotifySubscriptionAction());
         Topic topic = requestFactory.topic()
                                     .forTarget(subscriptionTarget);
-        subscribeAndActivate(stand, topic, callback);
+        subscribeAndActivate(stand, topic, action);
 
-        assertNull(callback.newEntityState());
-        return callback;
+        assertNull(action.newEntityState());
+        return action;
     }
 
     private static CustomerId customerIdFor(int numericId) {

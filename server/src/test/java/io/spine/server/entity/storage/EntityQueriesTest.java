@@ -194,12 +194,12 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         assertFalse(parameters.ordered());
         
         CompositeQueryParameter singleParam = values.get(0);
-        Collection<Filter> filterMap = singleParam.getFilters()
+        Collection<Filter> columnFilters = singleParam.getFilters()
                                                   .values();
         assertEquals(EITHER, singleParam.getOperator());
-        IterableSubject assertColumFilters = assertThat(filterMap);
-        assertColumFilters.contains(versionFilter);
-        assertColumFilters.contains(archivedFilter);
+        IterableSubject assertColumnFilters = assertThat(columnFilters);
+        assertColumnFilters.contains(versionFilter);
+        assertColumnFilters.contains(archivedFilter);
     }
 
     @Test
