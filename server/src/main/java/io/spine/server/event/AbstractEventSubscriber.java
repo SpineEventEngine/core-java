@@ -59,11 +59,12 @@ public abstract class AbstractEventSubscriber
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
 
     /**
-     * Dispatches event to the handling mechanism.
+     * Dispatches event to the handling method.
      *
-     * @param envelope the envelope with the message
-     * @return a one element set with the result of {@link #toString()}
-     * as the identify of the subscriber, or empty set if dispatching failed
+     * @param envelope
+     *         the envelope with the message
+     * @return a one element set with the result of {@link #toString()} as the identify of the
+     *         subscriber, or empty set if dispatching failed
      */
     @Override
     public final Set<String> dispatch(EventEnvelope envelope) {
