@@ -37,7 +37,7 @@ import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventStore;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemClient;

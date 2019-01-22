@@ -259,7 +259,7 @@ public class RecordStorageTestEnv {
      * with the entity records, even if an actual entity is missing.
      *
      * <p>Note that there are cases, when a {@code RecordStorage} stores entity records with no such
-     * columns, e.g. the {@linkplain io.spine.server.event.EEntity event entity}. Thus, do not rely
+     * columns, e.g. the {@linkplain EEntity event entity}. Thus, do not rely
      * on these columns being present in all the entities by default when implementing
      * a {@code RecordStorage}.
      */

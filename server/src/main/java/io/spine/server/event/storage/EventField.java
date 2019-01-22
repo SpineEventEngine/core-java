@@ -26,7 +26,6 @@ import io.spine.server.storage.StorageField;
 /**
  * Enumeration of storage fields required for storing events.
  *
- * @author Dmytro Dashenkov
  * @see StorageField
  */
 @SPI

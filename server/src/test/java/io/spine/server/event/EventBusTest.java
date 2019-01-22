@@ -31,15 +31,18 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.given.EventBusTestEnv.BareDispatcher;
-import io.spine.server.event.given.EventBusTestEnv.EBExternalTaskAddedSubscriber;
-import io.spine.server.event.given.EventBusTestEnv.EBProjectArchivedSubscriber;
-import io.spine.server.event.given.EventBusTestEnv.EBProjectCreatedNoOpSubscriber;
-import io.spine.server.event.given.EventBusTestEnv.EBTaskAddedNoOpSubscriber;
-import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
-import io.spine.server.event.given.EventBusTestEnv.ProjectCreatedSubscriber;
-import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
-import io.spine.server.event.given.EventBusTestEnv.UnsupportedEventAckObserver;
+import io.spine.server.event.enrich.Enricher;
+import io.spine.server.event.given.bus.BareDispatcher;
+import io.spine.server.event.given.bus.EBExternalTaskAddedSubscriber;
+import io.spine.server.event.given.bus.EBProjectArchivedSubscriber;
+import io.spine.server.event.given.bus.EBProjectCreatedNoOpSubscriber;
+import io.spine.server.event.given.bus.EBTaskAddedNoOpSubscriber;
+import io.spine.server.event.given.bus.GivenEvent;
+import io.spine.server.event.given.bus.ProjectRepository;
+import io.spine.server.event.given.bus.RememberingSubscriber;
+import io.spine.server.event.given.bus.TaskCreatedFilter;
+import io.spine.server.event.given.bus.UnsupportedEventAckObserver;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.event.EBTaskAdded;
@@ -66,26 +69,20 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.event.given.EventBusTestEnv.TaskCreatedFilter;
-import static io.spine.server.event.given.EventBusTestEnv.addTasks;
-import static io.spine.server.event.given.EventBusTestEnv.command;
-import static io.spine.server.event.given.EventBusTestEnv.createProject;
-import static io.spine.server.event.given.EventBusTestEnv.eventBusBuilder;
-import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
-import static io.spine.server.event.given.EventBusTestEnv.newTask;
-import static io.spine.server.event.given.EventBusTestEnv.readEvents;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
+import static io.spine.server.event.given.bus.EventBusTestEnv.addTasks;
+import static io.spine.server.event.given.bus.EventBusTestEnv.command;
+import static io.spine.server.event.given.bus.EventBusTestEnv.createProject;
+import static io.spine.server.event.given.bus.EventBusTestEnv.eventBusBuilder;
+import static io.spine.server.event.given.bus.EventBusTestEnv.invalidArchiveProject;
+import static io.spine.server.event.given.bus.EventBusTestEnv.newTask;
+import static io.spine.server.event.given.bus.EventBusTestEnv.readEvents;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("EventBus should")
 public class EventBusTest {
@@ -155,8 +152,8 @@ public class EventBusTest {
         @Test
         @DisplayName("event subscriber")
         void eventSubscriber() {
-            AbstractEventSubscriber subscriberOne = new ProjectCreatedSubscriber();
-            AbstractEventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberOne = new RememberingSubscriber();
+            AbstractEventSubscriber subscriberTwo = new RememberingSubscriber();
 
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
@@ -189,8 +186,8 @@ public class EventBusTest {
         @Test
         @DisplayName("event subscriber")
         void eventSubscriber() {
-            AbstractEventSubscriber subscriberOne = new ProjectCreatedSubscriber();
-            AbstractEventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberOne = new RememberingSubscriber();
+            AbstractEventSubscriber subscriberTwo = new RememberingSubscriber();
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
             EventClass eventClass = EventClass.from(ProjectCreated.class);
@@ -240,7 +237,7 @@ public class EventBusTest {
         @Test
         @DisplayName("event subscriber")
         void eventSubscriber() {
-            ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+            RememberingSubscriber subscriber = new RememberingSubscriber();
             Event event = GivenEvent.projectCreated();
             eventBus.register(subscriber);
 
@@ -273,7 +270,7 @@ public class EventBusTest {
                 .setEventStore(eventStore)
                 .build();
         eventBus.register(new BareDispatcher());
-        eventBus.register(new ProjectCreatedSubscriber());
+        eventBus.register(new RememberingSubscriber());
         EventClass eventClass = EventClass.from(ProjectCreated.class);
 
         eventBus.close();
@@ -282,55 +279,6 @@ public class EventBusTest {
                            .isEmpty());
 
         assertFalse(eventStore.isOpen());
-    }
-
-    @Nested
-    @DisplayName("manage event enrichment")
-    class ManageEventEnrichment {
-
-        @Test
-        @DisplayName("for event that can be enriched")
-        void forEnrichable() {
-            Enricher enricher = mock(Enricher.class);
-            EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
-            doReturn(true).when(enricher)
-                          .canBeEnriched(any(EventEnvelope.class));
-            doReturn(event).when(enricher)
-                           .enrich(any(EventEnvelope.class));
-
-            // Close the bounded context, which was previously initialized in `@Before`.
-            closeBoundedContext();
-            setUp(enricher);
-            eventBus.register(new ProjectCreatedSubscriber());
-
-            eventBus.post(event.getOuterObject());
-
-            verify(enricher).enrich(any(EventEnvelope.class));
-        }
-
-        @Test
-        @DisplayName("for event that cannot be enriched")
-        void forNonEnrichable() {
-            Enricher enricher = mock(Enricher.class);
-            doReturn(false).when(enricher)
-                           .canBeEnriched(any(EventEnvelope.class));
-
-            // Close the bounded context, which was previously initialized in `@Before`.
-            closeBoundedContext();
-            setUp(enricher);
-            eventBus.register(new ProjectCreatedSubscriber());
-
-            eventBus.post(GivenEvent.projectCreated());
-
-            verify(enricher, never()).enrich(any(EventEnvelope.class));
-        }
-
-        private void closeBoundedContext() {
-            try {
-                bc.close();
-            } catch (Exception ignored) {
-            }
-        }
     }
 
     @Test

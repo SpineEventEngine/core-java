@@ -25,7 +25,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.event.Enricher;
+import io.spine.server.event.enrich.Enricher;
 
 import java.util.Optional;
 import java.util.function.BiFunction;

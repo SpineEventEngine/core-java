@@ -28,8 +28,6 @@ import io.spine.core.MessageRejection;
  * posted into a {@link Bus}.
  *
  * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface MessageUnhandled extends MessageRejection {

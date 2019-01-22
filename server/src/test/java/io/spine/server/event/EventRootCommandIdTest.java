@@ -31,6 +31,7 @@ import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRep
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
@@ -97,49 +98,52 @@ public class EventRootCommandIdTest {
             postCommand(command);
 
             List<Event> events = readEvents();
-            assertEquals(command.getId(), getRootCommandId(events.get(0)));
+            assertIsRootCommand(command, events.get(0));
         }
 
         @Test
         @DisplayName("aggregate in case command returns multiple events")
         void aggregateForMultipleEvents() {
             Command command = command(addTasks(projectId(), 3));
-
             postCommand(command);
 
             List<Event> events = readEvents();
             assertThat(events).hasSize(3);
-            assertEquals(command.getId(), getRootCommandId(events.get(0)));
-            assertEquals(command.getId(), getRootCommandId(events.get(1)));
-            assertEquals(command.getId(), getRootCommandId(events.get(2)));
+            assertIsRootCommand(command, events.get(0));
+            assertIsRootCommand(command, events.get(1));
+            assertIsRootCommand(command, events.get(2));
         }
 
         @Test
         @DisplayName("process manager")
         void processManager() {
             Command command = command(addTeamMember(teamId()));
-
             postCommand(command);
 
             List<Event> events = readEvents();
             assertThat(events).hasSize(1);
-
-            Event event = events.get(0);
-            assertEquals(command.getId(), getRootCommandId(event));
+            assertIsRootCommand(command, events.get(0));
         }
 
         @Test
         @DisplayName("process manager in case command returns multiple events")
         void processManagerForMultipleEvents() {
             Command command = command(inviteTeamMembers(teamId(), 3));
-
             postCommand(command);
 
             List<Event> events = readEvents();
             assertThat(events).hasSize(3);
-            assertEquals(command.getId(), getRootCommandId(events.get(0)));
-            assertEquals(command.getId(), getRootCommandId(events.get(1)));
-            assertEquals(command.getId(), getRootCommandId(events.get(2)));
+            assertIsRootCommand(command, events.get(0));
+            assertIsRootCommand(command, events.get(1));
+            assertIsRootCommand(command, events.get(2));
+        }
+
+        /**
+         * Asserts that the ID of the passed command is the root command ID of the passed event.
+         */
+        private void assertIsRootCommand(Command command, Event event) {
+            assertThat(getRootCommandId(event))
+                    .isEqualTo(command.getId());
         }
     }
 
