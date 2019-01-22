@@ -71,7 +71,7 @@ abstract class EnrichmentFunction<S, C extends Message, T> {
      * Performs the calculation of target enrichment type.
      *
      * @param  input the source of enrichment
-     * @param  context the context of the message
+     * @param  context the context of the message that this function enriches
      * @return enrichment result object
      */
     public abstract T apply(S input, C context);
@@ -90,7 +90,7 @@ abstract class EnrichmentFunction<S, C extends Message, T> {
      * <p>During the activation the internal state of the function may be adjusted.
      *
      * <p>A typical example of such an adjustment would be parsing and validation of the relations
-     * between {@code eventClass} and {@code enrichmentClass} from the corresponding {@code .proto}
+     * between the enriched type and the enrichment type from the corresponding {@code .proto}
      * definitions. The function internal state in this case is appended with the parsed data, which
      * is later used at runtime.
      *

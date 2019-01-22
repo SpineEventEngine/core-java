@@ -30,7 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A helper predicate that allows to find functions with the same transition from
  * source event to enrichment class.
  *
- * <p>Such functions are not necessarily equal because they may have different translators.
+ * <p>Such functions are not necessarily equal because they may have different implementations
+ * of {@link EnrichmentFunction#apply(Object, com.google.protobuf.Message)}.
  *
  * @see EnrichmentFunction
  */
