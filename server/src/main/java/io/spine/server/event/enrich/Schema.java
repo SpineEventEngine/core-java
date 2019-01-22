@@ -22,14 +22,14 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.Multimaps.toMultimap;
 import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
 import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
 
@@ -39,7 +39,7 @@ import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConve
 final class Schema {
 
     /** Available enrichment functions per Java class. */
-    private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> multimap;
+    private ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> multimap;
 
     static Schema create(Enricher enricher, EnricherBuilder builder) {
         Builder schemaBuilder = new Builder(enricher, builder);
@@ -50,9 +50,21 @@ final class Schema {
         this.multimap = checkNotNull(multimap);
     }
 
+    /**
+     * Activates all enrichment functions, and compresses the schema to contain only
+     * active functions.
+     */
     void activate() {
         multimap.values()
                 .forEach(EnrichmentFunction::activate);
+        LinkedListMultimap<? extends Class<?>, ? extends EnrichmentFunction<?, ?, ?>> compacted =
+                multimap.values()
+                        .stream()
+                        .filter(activeOnly())
+                        .collect(toMultimap(EnrichmentFunction::sourceClass,
+                                            e -> e,
+                                            LinkedListMultimap::create));
+        multimap = ImmutableMultimap.copyOf(compacted);
     }
 
     Optional<EnrichmentFunction<?, ?, ?>> transition(Class<?> fieldClass,
@@ -68,13 +80,8 @@ final class Schema {
     /**
      * Obtains active-only functions for enriching the passed message class.
      */
-    ImmutableSet<EnrichmentFunction<?, ?, ?>> get(Class<? extends Message> messageClass) {
-        ImmutableCollection<EnrichmentFunction<?, ?, ?>> unfiltered = multimap.get(messageClass);
-        ImmutableSet<EnrichmentFunction<?, ?, ?>> result =
-                unfiltered.stream()
-                          .filter(activeOnly())
-                          .collect(toImmutableSet());
-        return result;
+    ImmutableCollection<EnrichmentFunction<?, ?, ?>> get(Class<? extends Message> messageClass) {
+        return multimap.get(messageClass);
     }
 
     boolean supports(Class<?> sourceClass) {

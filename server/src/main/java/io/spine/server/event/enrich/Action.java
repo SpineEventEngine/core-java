@@ -20,7 +20,7 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -48,7 +48,7 @@ final class Action {
     /**
      * Active functions applicable to the enriched event.
      */
-    private final ImmutableSet<EnrichmentFunction<?, ?, ?>> functions;
+    private final ImmutableCollection<EnrichmentFunction<?, ?, ?>> functions;
 
     /**
      * A map from the type name of an enrichment to its packed instance, in the form
