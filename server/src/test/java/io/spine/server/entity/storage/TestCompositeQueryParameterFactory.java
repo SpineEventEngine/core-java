@@ -25,10 +25,11 @@ import io.spine.client.Filter;
 
 import static io.spine.client.CompositeFilter.CompositeOperator;
 
-/**
- * @author Dmytro Dashenkov
- */
-public class TestCompositeQueryParameterFactory {
+public final class TestCompositeQueryParameterFactory {
+
+    /** Prevents instantiation of test environment class. */
+    private TestCompositeQueryParameterFactory() {
+    }
 
     public static CompositeQueryParameter createParams(Multimap<EntityColumn, Filter> filters,
                                                        CompositeOperator operator) {
