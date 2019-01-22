@@ -24,6 +24,7 @@ import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.core.EventEnvelope;
 import io.spine.server.stand.Stand.NotifySubscriptionAction;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -60,7 +61,10 @@ abstract class SubscriptionCallback {
      *         if the subscription hadn't been activated yet
      */
     protected void run(EventEnvelope event) {
-        checkState(isActive(), "Notifying by a non-activated subscription.");
+        checkState(isActive(),
+                   "Dispatched an event of type %s to the non-active subscription with ID %s",
+                   TypeUrl.of(event.getMessage()), subscription.getId().getValue());
+
         SubscriptionUpdate update = createSubscriptionUpdate(event);
         notifyAction.accept(update);
     }
