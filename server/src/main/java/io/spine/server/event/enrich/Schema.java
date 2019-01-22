@@ -20,16 +20,19 @@
 
 package io.spine.server.event.enrich;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
-import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
 import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
 
 /**
@@ -64,8 +67,16 @@ final class Schema {
         return result;
     }
 
-    Collection<EnrichmentFunction<?, ?, ?>> get(Class<? extends Message> messageClass) {
-        return multimap.get(messageClass);
+    /**
+     * Obtains active-only functions for enriching the passed message class.
+     */
+    ImmutableSet<EnrichmentFunction<?, ?, ?>> get(Class<? extends Message> messageClass) {
+        ImmutableCollection<EnrichmentFunction<?, ?, ?>> unfiltered = multimap.get(messageClass);
+        ImmutableSet<EnrichmentFunction<?, ?, ?>> result =
+                unfiltered.stream()
+                          .filter(activeOnly())
+                          .collect(toImmutableSet());
+        return result;
     }
 
     boolean supports(Class<?> sourceClass) {

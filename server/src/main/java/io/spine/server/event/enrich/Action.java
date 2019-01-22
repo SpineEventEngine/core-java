@@ -20,7 +20,7 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -30,12 +30,9 @@ import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeName;
 
-import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
 
 /**
  * Performs enrichment operation for an event.
@@ -50,7 +47,7 @@ final class Action {
     /**
      * Active functions applicable to the enriched event.
      */
-    private final ImmutableCollection<EnrichmentFunction<?, ?, ?>> functions;
+    private final ImmutableSet<EnrichmentFunction<?, ?, ?>> functions;
 
     /**
      * A map from the type name of an enrichment to its packed instance, in the form
@@ -62,10 +59,8 @@ final class Action {
         this.envelope = envelope;
         Class<? extends Message> sourceClass = envelope.getMessageClass()
                                                        .value();
-        Collection<EnrichmentFunction<?, ?, ?>> found = parent.getFunctions(sourceClass);
-        this.functions = found.stream()
-                              .filter(activeOnly())
-                              .collect(toImmutableList());
+        this.functions = parent.schema()
+                               .get(sourceClass);
     }
 
     /**
