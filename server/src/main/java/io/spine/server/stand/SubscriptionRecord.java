@@ -46,10 +46,12 @@ final class SubscriptionRecord {
     }
 
     /**
-     * Attaches an activation callback to this record.
+     * Attaches an action which will notify the read-side about a subscription update.
+     *
+     * <p>Only activated subscription records are eligible to receiving any event/entity updates.
      *
      * @param notifyAction
-     *         the callback to attach
+     *         the action to attach to the record
      */
     void activate(NotifySubscriptionAction notifyAction) {
         callback.setNotifyAction(notifyAction);
