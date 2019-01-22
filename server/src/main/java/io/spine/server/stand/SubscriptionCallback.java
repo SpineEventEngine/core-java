@@ -79,7 +79,7 @@ abstract class SubscriptionCallback {
         return notifyAction != null;
     }
 
-    public Subscription subscription() {
+    protected Subscription subscription() {
         return subscription;
     }
 

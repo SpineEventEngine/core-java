@@ -121,11 +121,12 @@ public final class Targets {
     }
 
     private static IdFilter composeIdFilter(Collection<?> items) {
-        List<Any> ids = items.stream()
-                             .distinct()
-                             .map(Targets::checkId)
-                             .map(Identifier::pack)
-                             .collect(toList());
+        List<Any> ids = items
+                .stream()
+                .distinct()
+                .map(Targets::checkId)
+                .map(Identifier::pack)
+                .collect(toList());
         IdFilter filter = idFilter(ids);
         return filter;
     }

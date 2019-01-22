@@ -425,7 +425,7 @@ class StandTest extends TenantAwareTest {
         CustomerId id = repository.dispatch(cmd);
         assertEquals(customerId, id);
 
-        // Check the subscription callback is run notifying about new customer created.
+        // Check the subscription callback is run, notifying about new customer created.
         verify(executor, times(1)).execute(any(Runnable.class));
     }
 

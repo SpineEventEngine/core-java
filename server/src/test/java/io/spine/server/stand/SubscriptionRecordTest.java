@@ -68,18 +68,20 @@ class SubscriptionRecordTest {
     @Test
     @DisplayName("fail to match improper ID")
     void notMatchImproperId() {
-        ProjectId targetId = ProjectId.newBuilder()
-                                      .setId(TARGET_ID)
-                                      .build();
+        ProjectId targetId = ProjectId
+                .newBuilder()
+                .setId(TARGET_ID)
+                .build();
         Project state = Project.getDefaultInstance();
         SubscriptionRecord record = newRecordFor(subscription(targetId));
 
         EventEnvelope envelope = stateChangedEnvelope(targetId, state);
         assertTrue(record.matches(envelope));
 
-        ProjectId otherId = ProjectId.newBuilder()
-                                     .setId("some-other-ID")
-                                     .build();
+        ProjectId otherId = ProjectId
+                .newBuilder()
+                .setId("some-other-ID")
+                .build();
         EventEnvelope envelope2 = stateChangedEnvelope(otherId, state);
         assertFalse(record.matches(envelope2));
     }
@@ -87,9 +89,10 @@ class SubscriptionRecordTest {
     @Test
     @DisplayName("fail to match improper state")
     void notMatchImproperState() {
-        ProjectId targetId = ProjectId.newBuilder()
-                                      .setId(TARGET_ID)
-                                      .build();
+        ProjectId targetId = ProjectId
+                .newBuilder()
+                .setId(TARGET_ID)
+                .build();
         String targetName = "super-project";
 
         Filter filter = Filters.eq("name", targetName);

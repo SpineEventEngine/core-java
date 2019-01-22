@@ -53,7 +53,7 @@ public class TopicBuilderTestEnv {
                 return filter;
             }
         }
-        fail(format("No Filter found for %s.", name));
+        fail(format("No Filter found for %s. field", name));
         // avoid returning `null`
         throw new RuntimeException("never happens unless JUnit is broken");
     }

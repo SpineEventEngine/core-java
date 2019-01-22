@@ -122,7 +122,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * same type to the argument of this method. Moreover, the instances must be of the type of
      * the query target type identifier.
      *
-     * <p>This method or any of its overloads do not check these constrains and assume they are
+     * <p>This method or any of its overloads do not check these constraints and assume they are
      * followed by the caller.
      *
      * <p>If there are no IDs (i.e. and empty {@link Iterable} is passed), the query retrieves all

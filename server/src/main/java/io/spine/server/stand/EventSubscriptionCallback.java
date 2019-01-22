@@ -29,7 +29,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Updates an event subscription based on the incoming event.
  *
- * <p>Currently event subscriptions are unsupported.
+ * <p>Currently event subscriptions are not supported.
  */
 final class EventSubscriptionCallback extends SubscriptionCallback {
 

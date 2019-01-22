@@ -75,10 +75,11 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
 
     @Subscribe
     public void on(EntityArchived event) {
-        LifecycleFlags flags = getBuilder().getLifecycle()
-                                           .toBuilder()
-                                           .setArchived(true)
-                                           .build();
+        LifecycleFlags flags = getBuilder()
+                .getLifecycle()
+                .toBuilder()
+                .setArchived(true)
+                .build();
         getBuilder().setId(getId())
                     .setLifecycle(flags);
         setArchived(true);
@@ -86,10 +87,11 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
 
     @Subscribe
     public void on(EntityDeleted event) {
-        LifecycleFlags flags = getBuilder().getLifecycle()
-                                           .toBuilder()
-                                           .setDeleted(true)
-                                           .build();
+        LifecycleFlags flags = getBuilder()
+                .getLifecycle()
+                .toBuilder()
+                .setDeleted(true)
+                .build();
         getBuilder().setId(getId())
                     .setLifecycle(flags);
         setDeleted(true);
@@ -97,10 +99,11 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
 
     @Subscribe
     public void on(EntityExtractedFromArchive event) {
-        LifecycleFlags flags = getBuilder().getLifecycle()
-                                           .toBuilder()
-                                           .setArchived(false)
-                                           .build();
+        LifecycleFlags flags = getBuilder()
+                .getLifecycle()
+                .toBuilder()
+                .setArchived(false)
+                .build();
         getBuilder().setId(getId())
                     .setLifecycle(flags);
         setArchived(false);
@@ -108,10 +111,11 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
 
     @Subscribe
     public void on(EntityRestored event) {
-        LifecycleFlags flags = getBuilder().getLifecycle()
-                                           .toBuilder()
-                                           .setDeleted(false)
-                                           .build();
+        LifecycleFlags flags = getBuilder()
+                .getLifecycle()
+                .toBuilder()
+                .setDeleted(false)
+                .build();
         getBuilder().setId(getId())
                     .setLifecycle(flags);
         setDeleted(false);
@@ -129,10 +133,11 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         IdFilter idFilter = buildIdFilter(target);
         TargetFilters filters = target.getFilters();
         CompositeFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
-        TargetFilters appendedFilters = filters.toBuilder()
-                                               .setIdFilter(idFilter)
-                                               .addFilter(typeFilter)
-                                               .build();
+        TargetFilters appendedFilters = filters
+                .toBuilder()
+                .setIdFilter(idFilter)
+                .addFilter(typeFilter)
+                .build();
         return appendedFilters;
     }
 
@@ -151,9 +156,10 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     private static IdFilter assembleSystemIdFilter(Collection<Any> domainIds) {
-        List<Any> mirrorIds = domainIds.stream()
-                                       .map(MirrorProjection::domainToSystemId)
-                                       .collect(toList());
+        List<Any> mirrorIds = domainIds
+                .stream()
+                .map(MirrorProjection::domainToSystemId)
+                .collect(toList());
         IdFilter idFilter = IdFilter
                 .newBuilder()
                 .addAllIds(mirrorIds)

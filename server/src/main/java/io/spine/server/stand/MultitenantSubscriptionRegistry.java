@@ -95,7 +95,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
      * {@inheritDoc}
      *
      * <p>The {@code MultitenantSubscriptionRegistry} returns combined types of all registry slices
-     * as they are later used in a tenant-independent environment.
+     * as they are later used in the tenant-independent environment.
      */
     @Override
     public ImmutableSet<TypeUrl> typeSet() {
