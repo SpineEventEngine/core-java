@@ -51,9 +51,6 @@ import static java.lang.String.format;
 /**
  * Performs validation analyzing which of fields annotated in the enrichment message
  * can be initialized with the translation functions supplied in the parent enricher.
- *
- * <p>As long as the new enrichment functions may be appended to the parent enricher at runtime,
- * the validation result will vary for the same enricher depending on its actual state.
  */
 final class ReferenceValidator implements Logging {
 
