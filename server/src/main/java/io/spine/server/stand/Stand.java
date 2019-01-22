@@ -109,11 +109,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private final Executor callbackExecutor;
 
-    /**
-     * A cache of active subscriptions at the event handling stage.
-     */
-    private final SubscriptionCache activeSubscriptionsCache;
-
     private final boolean multitenant;
 
     private final TopicValidator topicValidator;
@@ -128,7 +123,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                            ? builder.multitenant
                            : false;
         this.subscriptionRegistry = builder.getSubscriptionRegistry();
-        this.activeSubscriptionsCache = builder.getSubscriptionCache();
         this.typeRegistry = builder.getTypeRegistry();
         this.topicValidator = builder.getTopicValidator();
         this.queryValidator = builder.getQueryValidator();
@@ -174,33 +168,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     /**
      * Receives an event and notifies matching subscriptions.
-     *
-     * <p>See {@link #canDispatch(EventEnvelope)}.
      */
     @Override
     protected void handle(EventEnvelope envelope) {
-        Collection<SubscriptionRecord> subscriptionRecords =
-                activeSubscriptionsCache.get(envelope);
-        checkState(!subscriptionRecords.isEmpty(),
-                   "Dispatched an event with no active subscriptions on it");
-        subscriptionRecords.forEach(
-                record -> {
-                    Runnable action = () -> record.update(envelope);
-                    callbackExecutor.execute(action);
-                }
-        );
-        activeSubscriptionsCache.removeRecords(envelope);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>If {@code Stand} can dispatch an event, i.e. there is a matching subscription, the method
-     * caches the matching subscription record to avoid searching for it again in
-     * {@link #handle(EventEnvelope)}.
-     */
-    @Override
-    public boolean canDispatch(EventEnvelope envelope) {
         TypeUrl typeUrl = TypeUrl.of(envelope.getMessage());
         TenantAwareOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
@@ -212,14 +182,20 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                                     .stream()
                                     .filter(SubscriptionRecord::isActive)
                                     .filter(record -> record.matches(envelope))
-                                    .forEach(record -> activeSubscriptionsCache.put(envelope,
-                                                                                    record));
+                                    .forEach(record -> runSubscriptionUpdate(record, envelope));
             }
         };
         op.execute();
-        boolean canDispatch = !activeSubscriptionsCache.get(envelope)
-                                                       .isEmpty();
-        return canDispatch;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always returns {@code true} as the filtering happens in {@link #handle(EventEnvelope)}.
+     */
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        return true;
     }
 
     /**
@@ -340,6 +316,14 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             }
         };
         op.execute();
+    }
+
+    /**
+     * Runs the subscription record update via the dedicated executor.
+     */
+    private void runSubscriptionUpdate(SubscriptionRecord record, EventEnvelope event) {
+        Runnable action = () -> record.update(event);
+        callbackExecutor.execute(action);
     }
 
     /**
@@ -484,7 +468,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
-        private SubscriptionCache subscriptionCache;
         private TypeRegistry typeRegistry;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
@@ -531,10 +514,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             return subscriptionRegistry;
         }
 
-        private SubscriptionCache getSubscriptionCache() {
-            return subscriptionCache;
-        }
-
         private TopicValidator getTopicValidator() {
             return topicValidator;
         }
@@ -577,8 +556,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             }
 
             subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
-
-            subscriptionCache = new SubscriptionCache();
 
             typeRegistry = InMemoryTypeRegistry.newInstance();
 
