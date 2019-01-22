@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.event.enrich.SupportsFieldConversion.conversion;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
 @DisplayName("SupportsFieldConversion should")
@@ -33,8 +34,7 @@ class SupportsFieldConversionTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        SupportsFieldConversion predicate =
-                SupportsFieldConversion.of(StringValue.class, String.class);
+        SupportsFieldConversion predicate = conversion(StringValue.class, String.class);
         new NullPointerTester().testAllPublicInstanceMethods(predicate);
     }
 }

@@ -22,18 +22,15 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
 import io.spine.protobuf.Messages;
 import io.spine.server.reflect.Field;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.server.event.enrich.SupportsFieldConversion.conversion;
 
 /**
  * The default mechanism for enriching messages based on {@code FieldOptions}
@@ -53,10 +50,10 @@ final class MessageEnrichment<S extends Message, C extends Message, T extends Me
     private boolean active = false;
 
     /** A map from source message field class to enrichment functions. */
-    private @Nullable ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> fieldFunctions;
+    private ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> fieldFunctions;
 
     /** A map from source message/context field to target enrichment field descriptors. */
-    private @Nullable ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
+    private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
     /** Creates a new message enricher instance. */
     static <S extends Message, T extends Message, C extends Message>
@@ -129,10 +126,16 @@ final class MessageEnrichment<S extends Message, C extends Message, T extends Me
      */
     private static final class Helper<S extends Message, C extends Message, T extends Message> {
 
+        /** The parent enrichment instance. */
         private final MessageEnrichment<S, C, T> enrichment;
+
+        /** The source message that we enrich. */
         private final S message;
+
+        /** The context of the source message. */
         private final C context;
 
+        /** The builder of the target message type. */
         private final Message.Builder builder;
 
         private Helper(MessageEnrichment<S, C, T> enrichment, S message, C context) {
@@ -144,55 +147,58 @@ final class MessageEnrichment<S extends Message, C extends Message, T extends Me
 
         private T createEnrichment() {
             setFields();
-            @SuppressWarnings("unchecked") /* Types are checked during the initialization and
-            validation. */
+            @SuppressWarnings("unchecked")
+            /* Types are checked during the initialization and validation. */
             T result = (T) builder.build();
             return result;
         }
 
-        @SuppressWarnings({
-                "ConstantConditions" /* it is assured that collections are not null, and
-                                    after validation maps have required entries. */,
-                "MethodWithMultipleLoops"}
-        )
         private void setFields() {
             for (FieldDescriptor srcField : enrichment.fieldMap.keySet()) {
-                Object srcFieldValue = getSrcFieldValue(srcField, message, context);
-                Class<?> sourceFieldClass = srcFieldValue.getClass();
-                Collection<EnrichmentFunction<?, ?, ?>> functions =
-                        enrichment.fieldFunctions.get(sourceFieldClass);
-                Collection<FieldDescriptor> targetFields = enrichment.fieldMap.get(srcField);
-                for (FieldDescriptor targetField : targetFields) {
-                    SupportsFieldConversion conversion =
-                            SupportsFieldConversion.of(sourceFieldClass,
-                                                       Field.getFieldClass(targetField)
-                            );
-                    Optional<EnrichmentFunction<?, ?, ?>> function = firstThat(functions, conversion);
-                    EnrichmentFunction fieldEnrichment = function
-                            .orElseThrow(() -> newIllegalStateException(
-                                    "Unable to get enrichment for the conversion from message field " +
-                                            "of type `%s` to enrichment field of type `%s`.",
-                                    conversion.messageFieldClass(),
-                                    conversion.enrichmentFieldClass()
-                            ));
+                enrichField(srcField);
+            }
+        }
 
-                    @SuppressWarnings("unchecked") /* The model is checked during the initialization
-                                                  and activation. */
-                            Object targetValue = fieldEnrichment.apply(srcFieldValue, context);
-                    if (targetValue != null) {
-                        builder.setField(targetField, targetValue);
-                    }
+        /**
+         * Creates one or more enrichments for the source field.
+         */
+        private void enrichField(FieldDescriptor srcField) {
+            Object sourceValue = getValue(srcField, message, context);
+            Class<?> sourceFieldClass = sourceValue.getClass();
+            Collection<FieldDescriptor> targetFields = enrichment.fieldMap.get(srcField);
+            for (FieldDescriptor targetField : targetFields) {
+                FieldEnrichment fieldEnrichment = find(sourceFieldClass, targetField);
+                @SuppressWarnings("unchecked")
+                /* The model is checked during the initialization and activation. */
+                Object targetValue = fieldEnrichment.apply(sourceValue, context);
+                if (targetValue != null) {
+                    builder.setField(targetField, targetValue);
                 }
             }
         }
 
-        private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg, C context) {
+        /**
+         * Obtains the value of the source field either from the message, or from the context,
+         * if the field descriptor represents a context field.
+         */
+        private Object getValue(FieldDescriptor srcField, S msg, C context) {
             boolean isContextField = srcField.getContainingType()
-                                             .equals(EventContext.getDescriptor());
+                                             .equals(context.getDescriptorForType());
             Object result = isContextField
                             ? context.getField(srcField)
-                            : eventMsg.getField(srcField);
+                            : msg.getField(srcField);
             return result;
+        }
+
+        private
+        FieldEnrichment<?, ?, ?> find(Class<?> sourceField, FieldDescriptor targetField) {
+            SupportsFieldConversion conversion =
+                    conversion(sourceField, Field.getFieldClass(targetField));
+            Iterable<EnrichmentFunction<?, ?, ?>> functions =
+                    enrichment.fieldFunctions.get(sourceField);
+            EnrichmentFunction<?, ?, ?> result = firstThat(functions, conversion)
+                    .orElseThrow(conversion::unsupported);
+            return (FieldEnrichment<?, ?, ?>) result;
         }
     }
 }

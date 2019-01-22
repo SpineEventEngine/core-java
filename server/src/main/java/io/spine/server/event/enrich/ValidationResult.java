@@ -26,6 +26,8 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A wrapper DTO for the validation result.
  */
@@ -36,8 +38,8 @@ final class ValidationResult {
 
     ValidationResult(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
                      ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
-        this.functions = functions;
-        this.fieldMap = fieldMap;
+        this.functions = checkNotNull(functions);
+        this.fieldMap = checkNotNull(fieldMap);
     }
 
     /**
