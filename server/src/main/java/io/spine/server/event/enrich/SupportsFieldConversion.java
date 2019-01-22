@@ -20,8 +20,6 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,7 +31,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @see Schema#transition(Class, Class)
  */
-@VisibleForTesting
 final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?, ?>> {
 
     private final Class<?> messageField;
@@ -52,9 +49,9 @@ final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?
     @Override
     public boolean test(EnrichmentFunction<?, ?, ?> input) {
         checkNotNull(input);
-        boolean eventClassMatches = messageField.equals(input.sourceClass());
-        boolean enrichmentClassMatches = enrichmentField.equals(input.targetClass());
-        return eventClassMatches && enrichmentClassMatches;
+        boolean sourceMatches = messageField.equals(input.sourceClass());
+        boolean targetMatches = enrichmentField.equals(input.targetClass());
+        return sourceMatches && targetMatches;
     }
 
     IllegalStateException unsupported() {
