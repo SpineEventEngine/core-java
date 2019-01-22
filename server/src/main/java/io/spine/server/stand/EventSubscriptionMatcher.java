@@ -64,7 +64,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
     /**
      * {@inheritDoc}
      *
-     * <p>Extracts the event message from the envelope.
+     * <p>Returns the event message itself.
      */
     @Override
     protected Message extractMessage(EventEnvelope event) {
