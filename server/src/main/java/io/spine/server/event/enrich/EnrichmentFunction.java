@@ -41,18 +41,15 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>{@code EnrichmentFunction}s are used by an {@link Enricher} to augment events
  * passed to {@link EventBus}.
  *
+ * @apiNote We are having the generified class to be able to bound the types of messages and the
+ * translation function when building the {@link Enricher}.
+ *
  * @param <S> a type of the source object to enrich
  * @param <T> a type of the target enrichment
  * @param <C> a type of the message context
+ * @see EnricherBuilder#add(Class, Class, java.util.function.BiFunction)
  */
 abstract class EnrichmentFunction<S, T, C extends Message> {
-
-    /**
-     * We are having the generified class to be able to bound the types of messages and the
-     * translation function when building the {@link Enricher}.
-     *
-     * @see EnricherBuilder#add(Class, Class, java.util.function.BiFunction)
-     */
 
     private final Class<S> sourceClass;
     private final Class<T> enrichmentClass;

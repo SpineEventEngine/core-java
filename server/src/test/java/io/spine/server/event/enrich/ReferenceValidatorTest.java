@@ -69,7 +69,7 @@ class ReferenceValidatorTest {
                                          UserDeletedEvent.class,
                                          EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
         ValidationResult result = validator.validate();
-        Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
+        Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertNotNull(fieldMap);
         assertThat(fieldMap).hasSize(1);
 
@@ -120,9 +120,9 @@ class ReferenceValidatorTest {
                                          UserDeletedEvent.class,
                                          EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
         ValidationResult result = validator.validate();
-        List<EnrichmentFunction<?, ?, ?>> functions = result.getFunctions();
+        List<EnrichmentFunction<?, ?, ?>> functions = result.functions();
         assertTrue(functions.isEmpty());
-        Multimap<FieldDescriptor, FieldDescriptor> fields = result.getFieldMap();
+        Multimap<FieldDescriptor, FieldDescriptor> fields = result.fieldMap();
         assertThat(fields).isEmpty();
     }
 
@@ -134,7 +134,7 @@ class ReferenceValidatorTest {
                                          TaskAdded.class,
                                          EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
         ValidationResult result = validator.validate();
-        Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
+        Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertFalse(fieldMap.isEmpty());
         assertThat(fieldMap).hasSize(1);
 

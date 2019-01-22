@@ -28,7 +28,6 @@ import io.spine.server.reflect.Field;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -80,15 +79,9 @@ final class MessageEnrichment<S extends Message, T extends Message, C extends Me
         Class<? extends Message> sourceClass = getSourceClass();
         ReferenceValidator referenceValidator =
                 new ReferenceValidator(enricher, sourceClass, getEnrichmentClass());
-        ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
-                                                                      ImmutableMultimap.builder();
         ValidationResult validationResult = referenceValidator.validate();
-        List<EnrichmentFunction<?, ?, ?>> fieldFunctions = validationResult.getFunctions();
-        for (EnrichmentFunction<?, ?, ?> fieldFunction : fieldFunctions) {
-            map.put(fieldFunction.getSourceClass(), fieldFunction);
-        }
-        this.fieldFunctions = map.build();
-        this.fieldMap = validationResult.getFieldMap();
+        this.fieldFunctions = validationResult.functionMap();
+        this.fieldMap = validationResult.fieldMap();
 
         markActive();
     }
