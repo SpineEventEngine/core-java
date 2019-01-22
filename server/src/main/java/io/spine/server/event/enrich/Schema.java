@@ -23,8 +23,6 @@ package io.spine.server.event.enrich;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
@@ -94,18 +92,18 @@ final class Schema {
 
         private final Enricher enricher;
         private final EnricherBuilder builder;
-        private final Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> multimap;
+        private final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> multimap;
 
         private Builder(Enricher enricher, EnricherBuilder builder) {
             this.enricher = enricher;
             this.builder = builder;
-            this.multimap = LinkedListMultimap.create();
+            this.multimap = ImmutableMultimap.builder();
         }
 
         private Schema build() {
             addFieldEnrichments();
             loadMessageEnrichments();
-            Schema result = new Schema(ImmutableMultimap.copyOf(multimap));
+            Schema result = new Schema(multimap.build());
             return result;
         }
 
@@ -125,8 +123,7 @@ final class Schema {
 
         private void addMessageEnrichment(Class<Message> sourceClass, TypeName enrichment) {
             Class<Message> enrichmentClass = enrichment.getMessageClass();
-            MessageEnrichment fn =
-                    MessageEnrichment.create(enricher, sourceClass, enrichmentClass);
+            MessageEnrichment fn = MessageEnrichment.create(enricher, sourceClass, enrichmentClass);
             multimap.put(sourceClass, fn);
         }
     }
