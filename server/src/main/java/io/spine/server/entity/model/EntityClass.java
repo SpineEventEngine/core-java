@@ -42,7 +42,6 @@ import static java.lang.String.format;
  * A class of entities.
  *
  * @param <E> the type of entities
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("SynchronizeOnThis") // Double-check idiom for lazy init.
 public class EntityClass<E extends Entity> extends ModelClass<E> {
@@ -171,7 +170,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
                 result = defaultState;
                 if (result == null) {
                     Class<? extends Message> stateClass = getStateClass();
-                    defaultState = Messages.newInstance(stateClass);
+                    defaultState = Messages.defaultInstance(stateClass);
                     result = defaultState;
                 }
             }

@@ -20,7 +20,6 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.spine.core.EventContext;
@@ -38,11 +37,13 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 public final class EnricherBuilder {
 
-    /** Translation functions which perform the enrichment. */
+    /**
+     * Functions which perform the enrichment.
+     */
     private final Set<EnrichmentFunction<?, ?, ?>> functions = Sets.newHashSet();
 
     /**
-     * Prevents direct instantiation.
+     * Creates new instance.
      */
     EnricherBuilder() {
     }
@@ -81,12 +82,10 @@ public final class EnricherBuilder {
     /** Creates a new {@code Enricher}. */
     public Enricher build() {
         Enricher result = new Enricher(this);
-        validate(result);
         return result;
     }
 
-    @VisibleForTesting
-    Set<EnrichmentFunction<?, ?, ?>> getFunctions() {
+    Set<EnrichmentFunction<?, ?, ?>> functions() {
         return ImmutableSet.copyOf(functions);
     }
 
@@ -106,12 +105,5 @@ public final class EnricherBuilder {
                                               candidate.targetClass(),
                                               duplicate.get());
         }
-    }
-
-    /** Performs validation of the {@code Enricher} by activating its functions. */
-    private static void validate(Enricher enricher) {
-        enricher.functions()
-                .values()
-                .forEach(EnrichmentFunction::activate);
     }
 }

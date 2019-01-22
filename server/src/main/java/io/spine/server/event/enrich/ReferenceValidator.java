@@ -240,12 +240,12 @@ final class ReferenceValidator implements Logging {
         return msg;
     }
 
-    private Optional<EnrichmentFunction<?, ?, ?>> transition(FieldDescriptor srcField,
-                                                             FieldDescriptor targetField) {
-        Class<?> sourceFieldClass = Field.getFieldClass(srcField);
-        Class<?> targetFieldClass = Field.getFieldClass(targetField);
+    private Optional<EnrichmentFunction<?, ?, ?>>
+    transition(FieldDescriptor source, FieldDescriptor target) {
+        Class<?> sourceFieldClass = Field.getFieldClass(source);
+        Class<?> targetFieldClass = Field.getFieldClass(target);
         Optional<EnrichmentFunction<?, ?, ?>> func =
-                enricher.functionFor(sourceFieldClass, targetFieldClass);
+                enricher.transition(sourceFieldClass, targetFieldClass);
         if (!func.isPresent()) {
             logNoFunction(sourceFieldClass, targetFieldClass);
         }
@@ -262,10 +262,9 @@ final class ReferenceValidator implements Logging {
         }
     }
 
-    private static IllegalStateException noFieldException(
-            String eventFieldName,
-            Descriptor srcMessage,
-            FieldDescriptor enrichmentField) {
+    private static IllegalStateException noFieldException(String eventFieldName,
+                                                          Descriptor srcMessage,
+                                                          FieldDescriptor enrichmentField) {
         throw newIllegalStateException(
                 "No field `%s` in the message `%s` found. " +
                 "The field is referenced in the option of the enrichment field `%s`.",

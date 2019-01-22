@@ -30,7 +30,7 @@ import java.util.Collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
-import static io.spine.server.event.enrich.SupportsFieldConversion.conversion;
+import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
 
 /**
  * The default mechanism for enriching messages based on {@code FieldOptions}
@@ -193,7 +193,7 @@ final class MessageEnrichment<S extends Message, C extends Message, T extends Me
         private
         FieldEnrichment<?, ?, ?> find(Class<?> sourceField, FieldDescriptor targetField) {
             SupportsFieldConversion conversion =
-                    conversion(sourceField, Field.getFieldClass(targetField));
+                    supportsConversion(sourceField, Field.getFieldClass(targetField));
             Iterable<EnrichmentFunction<?, ?, ?>> functions =
                     enrichment.fieldFunctions.get(sourceField);
             EnrichmentFunction<?, ?, ?> result = firstThat(functions, conversion)

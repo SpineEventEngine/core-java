@@ -20,19 +20,15 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.EventEnvelope;
-import io.spine.type.TypeName;
 
 import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.spine.server.event.enrich.MessageEnrichment.create;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Enriches events <em>after</em> they are stored, and <em>before</em> they are dispatched.
@@ -41,7 +37,7 @@ import static io.spine.server.event.enrich.MessageEnrichment.create;
  * <pre>
  *     {@code
  *     Enricher enricher = Enricher.newBuilder()
- *         .add(ProjectId.class, String.class, new BiFunction<ProjectId,  String> { ... } )
+ *         .add(ProjectId.class, String.class, new BiFunction<ProjectId, String> { ... } )
  *         .add(ProjectId.class, UserId.class, new BiFunction<ProjectId, UserId> { ... } )
  *         ...
  *         .build();
@@ -51,8 +47,15 @@ import static io.spine.server.event.enrich.MessageEnrichment.create;
 @SPI
 public final class Enricher {
 
-    /** Available enrichment functions per Java class. */
-    private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions;
+    /** Enrichment schema used by this enricher. */
+    private final Schema schema;
+
+    /**
+     * Creates a new builder.
+     */
+    public static EnricherBuilder newBuilder() {
+        return new EnricherBuilder();
+    }
 
     /**
      * Creates a new instance taking functions from the passed builder.
@@ -60,32 +63,13 @@ public final class Enricher {
      * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
     Enricher(EnricherBuilder builder) {
-        LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap =
-                LinkedListMultimap.create();
-        for (EnrichmentFunction<?, ?, ?> fn : builder.getFunctions()) {
-            funcMap.put(fn.sourceClass(), fn);
-        }
-        putMsgEnrichers(funcMap);
-
-        this.functions = ImmutableMultimap.copyOf(funcMap);
+        this.schema = createSchema(builder);
+        this.schema.activate();
     }
 
-    ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions() {
-        return functions;
-    }
-
-    private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions) {
-        EnrichmentMap map = EnrichmentMap.load();
-        for (TypeName enrichment : map.enrichmentTypes()) {
-            map.sourceClasses(enrichment)
-               .forEach(
-                    sourceClass -> {
-                        Class<Message> enrichmentClass = enrichment.getMessageClass();
-                        MessageEnrichment fn = create(this, sourceClass, enrichmentClass);
-                        functions.put(sourceClass, fn);
-                    }
-            );
-        }
+    private Schema createSchema(EnricherBuilder builder) {
+        Schema result = Schema.create(this, builder);
+        return checkNotNull(result);
     }
 
     /**
@@ -96,7 +80,7 @@ public final class Enricher {
      * <ol>
      *     <li>There is one or more enrichments defined in Protobuf using
      *     {@code enrichment_for} and/or {@code by} options.
-     *     <li>There is one or more field enrichment functions registered for
+     *     <li>There is one or more field enrichment schema registered for
      *     the class of the passed message.
      *     <li>The flag {@code do_not_enrich} is not set in the {@link io.spine.core.Enrichment
      *     Enrichment} instance of the context of the outer object of the message.
@@ -114,8 +98,8 @@ public final class Enricher {
     }
 
     private boolean enrichmentRegistered(EventEnvelope message) {
-        boolean result = functions.containsKey(message.getMessageClass()
-                                                      .value());
+        boolean result = schema.supports(message.getMessageClass()
+                                                .value());
         return result;
     }
 
@@ -137,7 +121,7 @@ public final class Enricher {
     }
 
     Collection<EnrichmentFunction<?, ?, ?>> getFunctions(Class<? extends Message> messageClass) {
-        return functions.get(messageClass);
+        return schema.get(messageClass);
     }
 
     private void checkTypeRegistered(EventEnvelope message) {
@@ -151,25 +135,17 @@ public final class Enricher {
     }
 
     /**
-     * Finds a function that converts an source message field into an enrichment field.
+     * Obtains a function that converts a source message field into an enrichment field.
      *
      * @param fieldClass
      *        the class of the source field
      * @param enrichmentFieldClass
      *        the class of the enrichment field
      */
-    Optional<EnrichmentFunction<?, ?, ?>> functionFor(Class<?> fieldClass,
-                                                      Class<?> enrichmentFieldClass) {
+    Optional<EnrichmentFunction<?, ?, ?>> transition(Class<?> fieldClass,
+                                                     Class<?> enrichmentFieldClass) {
         Optional<EnrichmentFunction<?, ?, ?>> result =
-                functions.values()
-                         .stream()
-                         .filter(SupportsFieldConversion.conversion(fieldClass, enrichmentFieldClass))
-                         .findFirst();
+                schema.transition(fieldClass, enrichmentFieldClass);
         return result;
     }
-
-    public static EnricherBuilder newBuilder() {
-        return new EnricherBuilder();
-    }
-
 }

@@ -102,7 +102,7 @@ class EnricherBuilderTest {
     void addFieldEnrichment() {
         builder.add(Timestamp.class, StringValue.class, function);
 
-        assertTrue(builder.getFunctions()
+        assertTrue(builder.functions()
                           .contains(fieldEnrichment));
     }
 
@@ -113,7 +113,7 @@ class EnricherBuilderTest {
 
         builder.remove(fieldEnrichment);
 
-        assertTrue(builder.getFunctions()
+        assertTrue(builder.functions()
                           .isEmpty());
     }
 

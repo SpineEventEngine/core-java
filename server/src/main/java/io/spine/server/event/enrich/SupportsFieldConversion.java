@@ -31,7 +31,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * The predicate that helps finding a function that converts a message field (of the given class)
  * into an enrichment field (of another given class).
  *
- * @see Enricher#functionFor(Class, Class)
+ * @see Enricher#transition(Class, Class)
  */
 @VisibleForTesting
 final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?, ?>> {
@@ -39,7 +39,8 @@ final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?
     private final Class<?> messageField;
     private final Class<?> enrichmentField;
 
-    static SupportsFieldConversion conversion(Class<?> messageField, Class<?> enrichmentField) {
+    static
+    SupportsFieldConversion supportsConversion(Class<?> messageField, Class<?> enrichmentField) {
         return new SupportsFieldConversion(messageField, enrichmentField);
     }
 
