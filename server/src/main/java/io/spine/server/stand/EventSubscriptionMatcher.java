@@ -44,7 +44,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
      * <p>Returns the type of the event itself.
      */
     @Override
-    protected TypeUrl getTypeToCheck(EventEnvelope event) {
+    protected TypeUrl extractType(EventEnvelope event) {
         TypeUrl result = TypeUrl.of(event.getMessage());
         return result;
     }
@@ -55,7 +55,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
      * <p>Returns the event ID.
      */
     @Override
-    protected Any getIdToCheck(EventEnvelope event) {
+    protected Any extractId(EventEnvelope event) {
         EventId eventId = event.getId();
         Any result = Identifier.pack(eventId);
         return result;
@@ -64,10 +64,10 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
     /**
      * {@inheritDoc}
      *
-     * <p>Returns the event message.
+     * <p>Extracts the event message from the envelope.
      */
     @Override
-    protected Message getMessageToCheck(EventEnvelope event) {
+    protected Message extractMessage(EventEnvelope event) {
         EventMessage result = event.getMessage();
         return result;
     }

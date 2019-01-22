@@ -64,7 +64,7 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
      * Matches the event to the subscription type.
      */
     private boolean isTypeMatching(EventEnvelope event) {
-        TypeUrl typeUrl = getTypeToCheck(event);
+        TypeUrl typeUrl = extractType(event);
         TypeUrl requiredType = TypeUrl.parse(target().getType());
         return requiredType.equals(typeUrl);
     }
@@ -87,7 +87,7 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
      * Checks if the event matches the subscription ID filter.
      */
     private boolean checkIdMatches(EventEnvelope event) {
-        Any id = getIdToCheck(event);
+        Any id = extractId(event);
         TargetFilters filters = target().getFilters();
         IdFilter idFilter = filters.getIdFilter();
         boolean idFilterSet = !IdFilter.getDefaultInstance()
@@ -104,7 +104,7 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
      * Checks if the event message matches the subscription filters.
      */
     private boolean checkEventMessageMatches(EventEnvelope event) {
-        Message message = getMessageToCheck(event);
+        Message message = extractMessage(event);
         TargetFilters filters = target().getFilters();
         boolean result = filters
                 .getFilterList()
@@ -154,17 +154,17 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
     }
 
     /**
-     * Retrieves a type to check from the event.
+     * Extracts the checked type from the event.
      */
-    protected abstract TypeUrl getTypeToCheck(EventEnvelope event);
+    protected abstract TypeUrl extractType(EventEnvelope event);
 
     /**
-     * Retrieves an ID to check from the event.
+     * Extracts the checked ID from the event.
      */
-    protected abstract Any getIdToCheck(EventEnvelope event);
+    protected abstract Any extractId(EventEnvelope event);
 
     /**
-     * Retrieves a message or state to check from the event.
+     * Extracts the checked message or state from the event.
      */
-    protected abstract Message getMessageToCheck(EventEnvelope event);
+    protected abstract Message extractMessage(EventEnvelope event);
 }

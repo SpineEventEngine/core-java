@@ -42,10 +42,10 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
     /**
      * {@inheritDoc}
      *
-     * <p>Returns an entity type encapsulated in the event message.
+     * <p>Extracts an entity type encapsulated in the event message.
      */
     @Override
-    protected TypeUrl getTypeToCheck(EventEnvelope event) {
+    protected TypeUrl extractType(EventEnvelope event) {
         EntityStateChanged eventMessage = getEventMessage(event);
         String type = eventMessage.getId()
                                   .getTypeUrl();
@@ -59,7 +59,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
      * <p>Returns an entity ID packed as {@link Any}.
      */
     @Override
-    protected Any getIdToCheck(EventEnvelope event) {
+    protected Any extractId(EventEnvelope event) {
         EntityStateChanged eventMessage = getEventMessage(event);
         EntityId entityId = eventMessage.getId()
                                         .getEntityId();
@@ -73,7 +73,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
      * <p>Unpacks and returns the entity state.
      */
     @Override
-    protected Message getMessageToCheck(EventEnvelope event) {
+    protected Message extractMessage(EventEnvelope event) {
         EntityStateChanged eventMessage = getEventMessage(event);
         Any newState = eventMessage.getNewState();
         Message result = AnyPacker.unpack(newState);
