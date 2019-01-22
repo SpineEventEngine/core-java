@@ -27,7 +27,7 @@ import static java.lang.String.format;
 /**
  * Utility class for working with {@link Topic}s.
  */
-class Topics {
+final class Topics {
 
     /**
      * The format of all {@linkplain TopicId topic identifiers}.
