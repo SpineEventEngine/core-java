@@ -61,7 +61,7 @@ message TargetFilters {
     // Match objects by their IDs.
     IdFilter id_filter = 1;
 
-    // Match objects by the values of event message fields or entity columns.
+    // Match objects by the values of their fields.
     repeated CompositeFilter filter = 2;
 
     // Reserved for more filter types
@@ -93,13 +93,12 @@ message CompositeFilter {
     }
 }
 
-// A filter matching some value in event message/entity state.
+// A filter matching some value in the event message/entity state.
 message Filter {
 
     // The path to the field to be matched.
     //
-    // For entities, the path will always contain exactly one entry - the name of the entity
-    // column.
+    // For entities, the path contains the only entry being the name of entity column.
     base.FieldPath field_path = 1 [(required) = true];
 
     // The value to compare upon.
