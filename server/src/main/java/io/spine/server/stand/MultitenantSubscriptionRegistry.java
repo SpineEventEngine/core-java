@@ -95,7 +95,9 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
      * {@inheritDoc}
      *
      * <p>The {@code MultitenantSubscriptionRegistry} returns combined types of all registry slices
-     * as they are later used in the tenant-independent environment.
+     * as they are later used in the tenant-independent environment. More specifically, with the
+     * help of this method the {@link Stand} decides which event types to receive from the event
+     * bus.
      */
     @Override
     public ImmutableSet<TypeUrl> typeSet() {
