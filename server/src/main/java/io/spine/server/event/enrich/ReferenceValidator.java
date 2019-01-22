@@ -45,6 +45,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
+import static io.spine.protobuf.Messages.defaultInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
@@ -77,7 +78,7 @@ final class ReferenceValidator implements Logging {
     }
 
     private static Descriptor descriptorOf(Class<? extends Message> cls) {
-        return MessageEnrichment.defaultInstance(cls).getDescriptorForType();
+        return defaultInstance(cls).getDescriptorForType();
     }
 
     /**

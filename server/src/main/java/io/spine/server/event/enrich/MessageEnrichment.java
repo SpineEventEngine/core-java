@@ -22,7 +22,6 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
-import io.spine.protobuf.Messages;
 import io.spine.server.reflect.Field;
 
 import java.util.Collection;
@@ -30,6 +29,7 @@ import java.util.Collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
+import static io.spine.protobuf.Messages.defaultInstance;
 import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
 
 /**
@@ -68,10 +68,6 @@ final class MessageEnrichment<S extends Message, C extends Message, T extends Me
         this.enricher = enricher;
     }
 
-    static <T extends Message> T defaultInstance(Class<? extends T> cls) {
-        return Messages.defaultInstance(cls);
-    }
-
     @Override
     void activate() {
         Class<? extends Message> sourceClass = sourceClass();
@@ -80,7 +76,6 @@ final class MessageEnrichment<S extends Message, C extends Message, T extends Me
         ValidationResult validationResult = referenceValidator.validate();
         this.fieldFunctions = validationResult.functionMap();
         this.fieldMap = validationResult.fieldMap();
-
         markActive();
     }
 
