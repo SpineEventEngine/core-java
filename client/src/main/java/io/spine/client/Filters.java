@@ -53,8 +53,8 @@ import static io.spine.protobuf.TypeConverter.toAny;
  *
  * <p>The filters support two generic kinds of comparison:
  * <ol>
- *     <li>Equality comparison;
- *     <li>Ordering comparison.
+ *     <li>equality comparison;
+ *     <li>ordering comparison.
  * </ol>
  *
  * <p>The {@linkplain #eq equality comparison} supports any data type for the compared objects.
