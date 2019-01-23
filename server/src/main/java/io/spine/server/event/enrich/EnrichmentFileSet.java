@@ -38,10 +38,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.io.PropertyFiles.loadAllProperties;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -185,8 +184,7 @@ final class EnrichmentFileSet {
      * of {@code "enrichment_for") option notation.
      */
     private static boolean isPackage(String qualifier) {
-        checkNotNull(qualifier);
-        checkArgument(!qualifier.isEmpty());
+        checkNotEmptyOrBlank(qualifier);
 
         int indexOfWildcardChar = qualifier.indexOf(PACKAGE_WILDCARD_INDICATOR);
         int qualifierLength = qualifier.length();
