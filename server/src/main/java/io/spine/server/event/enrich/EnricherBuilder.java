@@ -37,14 +37,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 public final class EnricherBuilder {
 
-    /**
-     * Functions which perform the enrichment.
-     */
+    /** Functions which perform the enrichment. */
     private final Set<EnrichmentFunction<?, ?, ?>> functions = Sets.newHashSet();
 
-    /**
-     * Creates new instance.
-     */
+    /** Creates new instance. */
     EnricherBuilder() {
     }
 
@@ -85,7 +81,10 @@ public final class EnricherBuilder {
         return result;
     }
 
-    Set<EnrichmentFunction<?, ?, ?>> functions() {
+    /**
+     * Obtains immutable set of functions added to the builder by the time of the call.
+     */
+    ImmutableSet<EnrichmentFunction<?, ?, ?>> functions() {
         return ImmutableSet.copyOf(functions);
     }
 
