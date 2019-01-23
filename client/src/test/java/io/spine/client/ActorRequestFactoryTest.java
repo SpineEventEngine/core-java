@@ -49,8 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Base tests for the {@linkplain ActorRequestFactory} descendants.
- *
- * @author Alex Tymchenko
  */
 @SuppressWarnings("unused") /* We're suppressing this warning since IDEA does not recognize
     nested JUnit classes in an abstract test base class. They are used via reflection by JUnit. */

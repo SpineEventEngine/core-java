@@ -27,7 +27,6 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.command.CommandErrorHandler;
@@ -39,7 +38,6 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
@@ -499,18 +497,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         result.play(history);
         tx.commit();
         return result;
-    }
-
-    /**
-     * Invoked by an endpoint after a message was dispatched to the aggregate.
-     *
-     * @param tenantId  the tenant associated with the processed message
-     * @param aggregate the updated aggregate
-     */
-    void onModifiedAggregate(TenantId tenantId, A aggregate) {
-        store(aggregate);
-        Stand stand = getBoundedContext().getStand();
-        stand.post(tenantId, aggregate);
     }
 
     /**

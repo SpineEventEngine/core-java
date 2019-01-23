@@ -35,7 +35,7 @@ import "spine/core/user_id.proto";
 import "spine/core/tenant_id.proto";
 import "spine/core/actor_context.proto";
 import "spine/core/response.proto";
-import "spine/client/entities.proto";
+import "spine/client/filters.proto";
 
 // Topic identifier.
 message TopicId {
@@ -49,20 +49,19 @@ message TopicId {
 
 // An object defining a unit of subscription.
 //
-// Defines the target (entities and criteria) of subscription.
+// Defines the target (type and criteria) of subscription.
 //
 message Topic {
 
     TopicId id = 1 [(required) = true];
 
-    // Defines the entity of interest, e.g. entity type URL and a set of subscription criteria.
+    // Defines the target of interest, e.g. event/entity type URL and a set of subscription
+    // criteria.
     Target target = 2 [(required) = true,
                        (valid) = true,
                        (if_invalid).msg_format = "Invalid topic target"];
 
-    // Field mask to be applied to the entity updates applicable to this topic.
-    //
-    // Applied to each of the entity state messages before returning in scope of SubscriptionUpdate.
+    // Field mask to be applied to the subscription updates.
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the topic was created.
@@ -81,7 +80,7 @@ message SubscriptionUpdate {
     Subscription subscription = 1 [(required) = true];
 
     // Represents the base part of the response,
-    //   i.e. whether the Topic subscription has been acked or not.
+    // i.e. whether the Topic subscription has been acked or not.
     core.Response response = 2 [(required) = true];
 
     // Reserved for more subscription update attributes.
