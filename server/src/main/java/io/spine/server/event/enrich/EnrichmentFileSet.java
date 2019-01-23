@@ -42,7 +42,11 @@ import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.io.PropertyFiles.loadAllProperties;
 import static java.util.stream.Collectors.toList;
 
-final class EnrichmentMapBuilder {
+/**
+ * Loads enrichment information from resource files named
+ * {@link Resources#ENRICHMENTS enrichments.properties}.
+ */
+final class EnrichmentFileSet {
 
     private static final char PROTO_PACKAGE_SEPARATOR = '.';
 
@@ -63,16 +67,19 @@ final class EnrichmentMapBuilder {
     private final Iterable<Properties> properties;
     private final ImmutableMultimap.Builder<String, String> builder;
 
-    private EnrichmentMapBuilder(Iterable<Properties> properties) {
-        this.properties = properties;
-        this.builder = ImmutableMultimap.builder();
-    }
-
+    /**
+     * Loads the enrichment map from all resource files.
+     */
     static ImmutableMultimap<String, String> loadFromResources() {
-        Set<Properties> propertiesSet = loadAllProperties(Resources.ENRICHMENTS);
-        EnrichmentMapBuilder builder = new EnrichmentMapBuilder(propertiesSet);
+        Set<Properties> files = loadAllProperties(Resources.ENRICHMENTS);
+        EnrichmentFileSet builder = new EnrichmentFileSet(files);
         ImmutableMultimap<String, String> result = builder.build();
         return result;
+    }
+
+    private EnrichmentFileSet(Iterable<Properties> properties) {
+        this.properties = properties;
+        this.builder = ImmutableMultimap.builder();
     }
 
     private ImmutableMultimap<String, String> build() {
@@ -142,7 +149,7 @@ final class EnrichmentMapBuilder {
                 pipeSeparatorPattern.splitAsStream(qualifiers)
                                                    .map(String::trim)
                                                    .filter(fieldName -> !fieldName.isEmpty())
-                                                   .map(EnrichmentMapBuilder::getSimpleFieldName)
+                                                   .map(EnrichmentFileSet::getSimpleFieldName)
                                                    .collect(toList());
         return result;
     }

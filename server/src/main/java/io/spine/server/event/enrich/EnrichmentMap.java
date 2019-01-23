@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static io.spine.server.event.enrich.EnrichmentMapBuilder.loadFromResources;
 
 /**
  * A map from an enrichment type name to the corresponding type name(s) of enriched types.
@@ -38,7 +37,7 @@ final class EnrichmentMap {
 
     /** Creates new instance loading the map from resources. */
     private EnrichmentMap() {
-        this.enrichmentsMap = loadFromResources();
+        this.enrichmentsMap = EnrichmentFileSet.loadFromResources();
     }
 
     /** Loads the map from resources. */
