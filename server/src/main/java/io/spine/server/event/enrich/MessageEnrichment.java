@@ -22,6 +22,7 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
+import io.spine.core.MessageContext;
 import io.spine.server.reflect.Field;
 
 import java.util.Collection;
@@ -40,7 +41,7 @@ import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConve
  * @param <T> a type of the target enrichment message
  * @param <C> the type of the source message context
  */
-class MessageEnrichment<S extends Message, C extends Message, T extends Message>
+class MessageEnrichment<S extends Message, C extends MessageContext, T extends Message>
         extends EnrichmentFunction<S, C, T> {
 
     /** A parent instance holding this instance and its siblings. */
@@ -105,13 +106,14 @@ class MessageEnrichment<S extends Message, C extends Message, T extends Message>
     }
 
     /**
-     * Method object for {@link MessageEnrichment#apply(Message, Message)}.
+     * Method object for {@link MessageEnrichment#apply(Message, MessageContext)}.
      *
      * @param <S> the type of the source message
      * @param <T> the type of the target message
      * @param <C> the type of the source message context
      */
-    private static final class Helper<S extends Message, C extends Message, T extends Message> {
+    private static final
+    class Helper<S extends Message, C extends MessageContext, T extends Message> {
 
         /** The parent enrichment instance. */
         private final MessageEnrichment<S, C, T> enrichment;

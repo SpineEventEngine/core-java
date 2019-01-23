@@ -21,9 +21,9 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.Resources;
 import io.spine.option.OptionsProto;
 import io.spine.type.KnownTypes;
@@ -32,14 +32,15 @@ import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.io.PropertyFiles.loadAllProperties;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -55,7 +56,8 @@ final class EnrichmentFileSet {
     /**
      * Constant indicating a package qualifier.
      *
-     * <p>Must be a postfix of the qualifier.
+     * <p>If this string is used as a suffix to a name of the proto package,
+     * it means “all messages in the package”.
      */
     private static final String PACKAGE_WILDCARD_INDICATOR = ".*";
 
@@ -124,18 +126,18 @@ final class EnrichmentFileSet {
         Collection<TypeUrl> eventTypes = KnownTypes.instance()
                                                    .getAllFromPackage(packageName);
         for (TypeUrl type : eventTypes) {
-            String typeQualifier = type.getTypeName();
-            if (hasOneOfTargetFields(typeQualifier, boundFields)) {
+            if (hasOneOfTargetFields(type.toName(), boundFields)) {
+                String typeQualifier = type.getTypeName();
                 builder.put(enrichmentType, typeQualifier);
             }
         }
     }
 
     private static Set<String> getBoundFields(String enrichmentType) {
-        Descriptors.Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
+        Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
                                                               .getMessageDescriptor();
         Set<String> result = newHashSet();
-        for (Descriptors.FieldDescriptor field : enrichmentDescriptor.getFields()) {
+        for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
             String extension = field.getOptions()
                                     .getExtension(OptionsProto.by);
             Collection<String> fieldNames = parseFieldNames(extension);
@@ -147,10 +149,10 @@ final class EnrichmentFileSet {
     private static Collection<String> parseFieldNames(String qualifiers) {
         Collection<String> result =
                 pipeSeparatorPattern.splitAsStream(qualifiers)
-                                                   .map(String::trim)
-                                                   .filter(fieldName -> !fieldName.isEmpty())
-                                                   .map(EnrichmentFileSet::getSimpleFieldName)
-                                                   .collect(toList());
+                                    .map(String::trim)
+                                    .filter(fieldName -> !fieldName.isEmpty())
+                                    .map(EnrichmentFileSet::getSimpleFieldName)
+                                    .collect(toList());
         return result;
     }
 
@@ -164,32 +166,27 @@ final class EnrichmentFileSet {
         return fieldName;
     }
 
-    private static boolean hasOneOfTargetFields(String eventType,
-                                                Collection<String> targetFields) {
-        Descriptors.Descriptor eventDescriptor = TypeName.of(eventType)
-                                                         .getMessageDescriptor();
-        List<Descriptors.FieldDescriptor> fields = eventDescriptor.getFields();
-        Collection<String> fieldNames = Collections2.transform(
-                fields,
-                input -> {
-                    checkNotNull(input);
-                    return input.getName();
-                });
-        for (String field : targetFields) {
-            if (fieldNames.contains(field)) {
-                return true;
-            }
-        }
-        return false;
+    private static
+    boolean hasOneOfTargetFields(TypeName eventType, Collection<String> targetFields) {
+        Descriptor eventDescriptor = eventType.getMessageDescriptor();
+        List<FieldDescriptor> fields = eventDescriptor.getFields();
+        Set<String> fieldNames =
+                fields.stream()
+                      .map(FieldDescriptor::getName)
+                      .collect(Collectors.toSet());
+        Optional<String> found =
+                targetFields.stream()
+                            .filter(fieldNames::contains)
+                            .findAny();
+        return found.isPresent();
     }
 
     /**
      * Returns {@code true} if the given qualifier is a package according to the contract
-     * of {@code "enrichment_for") option notation.
+     * of {@code (enrichment_for)} option notation.
      */
     private static boolean isPackage(String qualifier) {
-        checkNotNull(qualifier);
-        checkArgument(!qualifier.isEmpty());
+        checkNotEmptyOrBlank(qualifier);
 
         int indexOfWildcardChar = qualifier.indexOf(PACKAGE_WILDCARD_INDICATOR);
         int qualifierLength = qualifier.length();

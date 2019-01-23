@@ -21,7 +21,6 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
@@ -34,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * Performs enrichment operation for an event.
@@ -54,7 +54,7 @@ final class Action {
      * A map from the type name of an enrichment to its packed instance, in the form
      * it is used in the enriched event context.
      */
-    private final Map<String, Any> enrichments = Maps.newHashMap();
+    private final Map<String, Any> enrichments = newHashMap();
 
     Action(Enricher parent, EventEnvelope envelope) {
         this.envelope = envelope;
