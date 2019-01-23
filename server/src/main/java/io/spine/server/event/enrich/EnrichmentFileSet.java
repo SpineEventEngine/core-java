@@ -53,9 +53,8 @@ final class EnrichmentFileSet {
     private static final Pattern pipeSeparatorPattern = Pattern.compile("\\|");
 
     /**
-     * Constant indicating a package qualifier.
-     *
-     * <p>Must be a postfix of the qualifier.
+     * Constant indicating a package qualifier. If this string is used as a suffix
+     * to a name of the proto package, it means “all messages in the package”.
      */
     private static final String PACKAGE_WILDCARD_INDICATOR = ".*";
 
