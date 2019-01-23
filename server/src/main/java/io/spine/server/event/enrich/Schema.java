@@ -68,13 +68,19 @@ final class Schema {
         multimap = ImmutableMultimap.copyOf(compacted);
     }
 
-    Optional<EnrichmentFunction<?, ?, ?>> transition(Class<?> fieldClass,
-                                                     Class<?> enrichmentFieldClass) {
-        Optional<EnrichmentFunction<?, ?, ?>> result =
+    /**
+     * Obtains a field enrichment function for the passed source/target couple of classes.
+     */
+    Optional<FieldEnrichment<?, ?, ?>> transition(Class<?> fieldClass,
+                                                  Class<?> enrichmentFieldClass) {
+        Optional<EnrichmentFunction<?, ?, ?>> found =
                 multimap.values()
                         .stream()
                         .filter(supportsConversion(fieldClass, enrichmentFieldClass))
                         .findFirst();
+        Optional<FieldEnrichment<?, ?, ?>> result =
+                found.filter(f -> f instanceof FieldEnrichment)
+                     .map(f -> (FieldEnrichment<?, ?, ?>) f);
         return result;
     }
 
@@ -85,6 +91,9 @@ final class Schema {
         return multimap.get(messageClass);
     }
 
+    /**
+     * Verifies if there is at least one enrichment for instances the passed class.
+     */
     boolean supports(Class<?> sourceClass) {
         boolean result = multimap.containsKey(sourceClass);
         return result;

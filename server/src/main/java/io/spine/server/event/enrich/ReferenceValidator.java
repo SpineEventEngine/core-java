@@ -107,7 +107,7 @@ final class ReferenceValidator implements Logging {
                                        FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
-            Optional<EnrichmentFunction<?, ?, ?>> found = transition(sourceField, enrichmentField);
+            Optional<FieldEnrichment<?, ?, ?>> found = transition(sourceField, enrichmentField);
             found.ifPresent(fn -> {
                 functions.add(fn);
                 fields.put(sourceField, enrichmentField);
@@ -238,11 +238,11 @@ final class ReferenceValidator implements Logging {
         return msg;
     }
 
-    private Optional<EnrichmentFunction<?, ?, ?>>
+    private Optional<FieldEnrichment<?, ?, ?>>
     transition(FieldDescriptor source, FieldDescriptor target) {
         Class<?> sourceField = Field.getFieldClass(source);
         Class<?> targetField = Field.getFieldClass(target);
-        Optional<EnrichmentFunction<?, ?, ?>> func =
+        Optional<FieldEnrichment<?, ?, ?>> func =
                 enricher.schema()
                         .transition(sourceField, targetField);
         if (!func.isPresent()) {
