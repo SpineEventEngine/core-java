@@ -41,9 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
@@ -128,7 +125,7 @@ class AggregateStateIdStringifierTest {
         @DisplayName("int")
         void ofIntType() {
             int intId = 42;
-            String stringId = ANY_TYPE_URL.value() + "-Integer-" + String.valueOf(intId);
+            String stringId = ANY_TYPE_URL.value() + "-Integer-" + intId;
             Stringifier<AggregateStateId> stringifier = stringifier();
 
             AggregateStateId id = stringifier.reverse()
@@ -143,7 +140,7 @@ class AggregateStateIdStringifierTest {
         @DisplayName("long")
         void ofLongType() {
             long longId = 31415;
-            String stringId = ANY_TYPE_URL.value() + "-Long-" + String.valueOf(longId);
+            String stringId = ANY_TYPE_URL.value() + "-Long-" + longId;
             Stringifier<AggregateStateId> stringifier = stringifier();
 
             AggregateStateId id = stringifier.reverse()

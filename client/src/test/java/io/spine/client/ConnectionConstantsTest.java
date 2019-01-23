@@ -27,9 +27,6 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("ConnectionConstants should")
 class ConnectionConstantsTest {
 

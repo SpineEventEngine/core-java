@@ -19,8 +19,10 @@
  */
 package io.spine.client;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -31,7 +33,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.checkSupported;
-import static io.spine.base.Identifier.pack;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
@@ -42,114 +43,103 @@ import static java.util.stream.Collectors.toList;
 @Internal
 public final class Targets {
 
-    /** Prevent instantiation of this utility class. */
+    /** Prevents instantiation of this utility class. */
     private Targets() {
     }
 
     /**
-     * Create a {@link Target} for a subset of the entity states by specifying their IDs.
+     * Creates a {@link Target} for a subset of events/entities by specifying their IDs.
      *
-     * @param entityClass
-     *         the class of a target entity
+     * @param targetClass
+     *         the class of a target event or entity
      * @param ids
-     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
-     *         which is supported as identifier}
+     *         the IDs of interest of type
+     *         {@linkplain io.spine.base.Identifier#checkSupported(Class) which is supported as
+     *         identifier}
      * @return the instance of {@code Target} assembled according to the parameters.
      * @throws IllegalArgumentException
      *         if any of IDs have invalid type or are {@code null}
      */
-    public static Target someOf(Class<? extends Message> entityClass,
+    public static Target someOf(Class<? extends Message> targetClass,
                                 Set<?> ids) {
-        checkNotNull(entityClass);
+        checkNotNull(targetClass);
         checkNotNull(ids);
 
-        Target result = composeTarget(entityClass, ids, null);
+        Target result = composeTarget(targetClass, ids, null);
         return result;
     }
 
     /**
-     * Create a {@link Target} for all of the specified entity states.
+     * Create a {@link Target} for all events/entities of the specified type.
      *
-     * @param entityClass
-     *         the class of a target entity
+     * @param targetClass
+     *         the class of a target event/entity
      * @return the instance of {@code Target} assembled according to the parameters.
      */
-    public static Target allOf(Class<? extends Message> entityClass) {
-        checkNotNull(entityClass);
+    public static Target allOf(Class<? extends Message> targetClass) {
+        checkNotNull(targetClass);
 
-        Target result = composeTarget(entityClass, null, null);
+        Target result = composeTarget(targetClass, null, null);
         return result;
     }
 
     /**
-     * Composes a target for entities matching declared predicates.
+     * Composes a target for the events/entities matching declared predicates.
      *
-     * @param entityClass
-     *         the class of a target entity
+     * @param targetClass
+     *         the class of a target event/entity
      * @param ids
-     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
-     *         which is supported as identifier}
-     * @param columnFilters
-     *         a set of entity column predicates each target entity must match
+     *         the IDs of interest of type
+     *         {@linkplain io.spine.base.Identifier#checkSupported(Class) which is supported as
+     *         identifier}
+     * @param filters
+     *         a set of predicates which target entity state or event message must match
      * @return a {@code Target} instance formed according to the provided parameters
      */
-    static Target composeTarget(Class<? extends Message> entityClass,
-                                @Nullable Set<?> ids,
-                                @Nullable Set<CompositeColumnFilter> columnFilters) {
+    public static Target composeTarget(Class<? extends Message> targetClass,
+                                       @Nullable Iterable<?> ids,
+                                       @Nullable Iterable<CompositeFilter> filters) {
+        checkNotNull(targetClass);
 
-        boolean includeAll = (ids == null && columnFilters == null);
+        boolean includeAll = (ids == null && filters == null);
 
-        TypeUrl typeUrl = TypeUrl.of(entityClass);
+        TypeUrl typeUrl = TypeUrl.of(targetClass);
         TargetVBuilder builder = TargetVBuilder.newBuilder()
                                                .setType(typeUrl.value());
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {
             List<?> idsList = notNullList(ids);
-            EntityIdFilter idFilter = composeIdFilter(idsList);
+            IdFilter idFilter = composeIdFilter(idsList);
 
-            List<CompositeColumnFilter> columnFiltersList = notNullList(columnFilters);
-            EntityFilters filters = entityFilters(columnFiltersList, idFilter);
-            builder.setFilters(filters);
+            List<CompositeFilter> filterList = notNullList(filters);
+            TargetFilters targetFilters = targetFilters(filterList, idFilter);
+            builder.setFilters(targetFilters);
         }
 
         return builder.build();
     }
 
-    private static EntityIdFilter composeIdFilter(Collection<?> items) {
-        List<EntityId> ids = items.stream()
-                                  .distinct()
-                                  .map(Targets::entityId)
-                                  .collect(toList());
-        EntityIdFilter filter = idFilter(ids);
+    private static IdFilter composeIdFilter(Collection<?> items) {
+        List<Any> ids = items
+                .stream()
+                .distinct()
+                .map(Targets::checkId)
+                .map(Identifier::pack)
+                .collect(toList());
+        IdFilter filter = idFilter(ids);
         return filter;
     }
 
-    private static EntityIdFilter idFilter(List<EntityId> ids) {
-        return EntityIdFilterVBuilder.newBuilder()
-                                     .addAllIds(ids)
-                                     .build();
-    }
-
-    /**
-     * Creates an Entity ID from a provided object.
-     *
-     * @param value
-     *         a value to set as {@link EntityId#getId() id} attribute of {@code EntityId}
-     * @return an {@link EntityId} with provided value
-     * @throws IllegalArgumentException
-     *         if the object cannot be an {@link io.spine.base.Identifier} or is {@code null}
-     */
-    private static EntityId entityId(Object value) {
-        return EntityIdVBuilder.newBuilder()
-                               .setId(pack(checkId(value)))
+    private static IdFilter idFilter(List<Any> ids) {
+        return IdFilterVBuilder.newBuilder()
+                               .addAllIds(ids)
                                .build();
     }
 
     /**
      * Checks that object is not {@code null} and its type
-     * {@link io.spine.base.Identifier#checkSupported(Class)
-     * is supported as an identifier}.
+     * {@linkplain io.spine.base.Identifier#checkSupported(Class) is supported as an identifier}.
      *
      * @param item
      *         an object to check
@@ -163,11 +153,10 @@ public final class Targets {
         return item;
     }
 
-    private static EntityFilters entityFilters(List<CompositeColumnFilter> entityColumnValues,
-                                               EntityIdFilter idFilter) {
-        return EntityFiltersVBuilder.newBuilder()
+    private static TargetFilters targetFilters(List<CompositeFilter> filters, IdFilter idFilter) {
+        return TargetFiltersVBuilder.newBuilder()
                                     .setIdFilter(idFilter)
-                                    .addAllFilter(entityColumnValues)
+                                    .addAllFilter(filters)
                                     .build();
     }
 

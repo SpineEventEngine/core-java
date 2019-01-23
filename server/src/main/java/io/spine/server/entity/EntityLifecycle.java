@@ -265,8 +265,8 @@ public class EntityLifecycle {
      *         the IDs of the messages which caused the {@code change}; typically,
      *         {@link EventId EventId}s or {@link CommandId}s
      */
-    final void onStateChanged(EntityRecordChange change,
-                              Set<? extends Message> messageIds) {
+    public final void onStateChanged(EntityRecordChange change,
+                                     Set<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);

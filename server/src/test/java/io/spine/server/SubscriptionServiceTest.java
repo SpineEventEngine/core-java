@@ -30,6 +30,7 @@ import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.Entity;
 import io.spine.server.stand.Stand;
@@ -58,6 +59,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("deprecation")
+// The deprecated `Stand.post()` method will become test-only in the future.
 @DisplayName("SubscriptionService should")
 class SubscriptionServiceTest {
 
@@ -155,7 +158,7 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("subscribe to topic")
     void subscribeToTopic() {
-        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+        BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
 
         SubscriptionService subscriptionService = SubscriptionService
                 .newBuilder()
@@ -195,14 +198,17 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("activate subscription")
     void activateSubscription() {
-        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        BoundedContext boundedContext = boundedContextWith(repository);
 
-        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                     .add(boundedContext)
-                                                                     .build();
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
         Target target = getProjectQueryTarget();
 
-        Topic topic = requestFactory.topic().forTarget(target);
+        Topic topic = requestFactory.topic()
+                                    .forTarget(target);
 
         // Subscribe to the topic.
         MemoizingObserver<Subscription> subscriptionObserver = new MemoizingObserver<>();
@@ -226,9 +232,7 @@ class SubscriptionServiceTest {
 
         Entity entity = newEntity(projectId, projectState, version);
         boundedContext.getStand()
-                      .post(requestFactory.createCommandContext()
-                                          .getActorContext()
-                                          .getTenantId(), entity);
+                      .post(entity, repository.lifecycleOf(projectId));
 
         // `isCompleted` set to false since we don't expect
         // activationObserver::onCompleted to be called.
@@ -244,11 +248,13 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("cancel subscription")
     void cancelSubscription() {
-        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        BoundedContext boundedContext = boundedContextWith(repository);
 
-        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                     .add(boundedContext)
-                                                                     .build();
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
 
         Target target = getProjectQueryTarget();
 
@@ -277,9 +283,7 @@ class SubscriptionServiceTest {
         int version = 1;
         Entity entity = newEntity(projectId, projectState, version);
         boundedContext.getStand()
-                      .post(requestFactory.createCommandContext()
-                                          .getActorContext()
-                                          .getTenantId(), entity);
+                      .post(entity, repository.lifecycleOf(projectId));
 
         // The update must not be handled by the observer.
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
@@ -294,7 +298,7 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("subscription process")
         void subscription() {
-            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
 
             SubscriptionService subscriptionService = SubscriptionService
                     .newBuilder()
@@ -311,7 +315,7 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("activation process")
         void activation() {
-            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
 
             SubscriptionService subscriptionService = SubscriptionService
                     .newBuilder()
@@ -328,7 +332,7 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("cancellation process")
         void cancellation() {
-            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
 
             SubscriptionService subscriptionService = SubscriptionService
                     .newBuilder()
@@ -336,7 +340,8 @@ class SubscriptionServiceTest {
                     .build();
             Target target = getProjectQueryTarget();
 
-            Topic topic = requestFactory.topic().forTarget(target);
+            Topic topic = requestFactory.topic()
+                                        .forTarget(target);
 
             MemoizingObserver<Subscription> subscriptionObserver = new MemoizingObserver<>();
             subscriptionService.subscribe(topic, subscriptionObserver);
@@ -368,14 +373,12 @@ class SubscriptionServiceTest {
         return entity;
     }
 
-    private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setStand(Stand.newBuilder())
-                                                      .build();
-        Stand stand = boundedContext.getStand();
-
-        stand.registerTypeSupplier(new Given.ProjectAggregateRepository());
-
+    private static BoundedContext boundedContextWith(ProjectAggregateRepository repository) {
+        BoundedContext boundedContext = BoundedContext
+                .newBuilder()
+                .setStand(Stand.newBuilder())
+                .build();
+        boundedContext.register(repository);
         return boundedContext;
     }
 

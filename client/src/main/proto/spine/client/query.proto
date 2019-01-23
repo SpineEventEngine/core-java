@@ -34,7 +34,7 @@ import "google/protobuf/field_mask.proto";
 import "spine/core/user_id.proto";
 import "spine/core/actor_context.proto";
 import "spine/core/response.proto";
-import "spine/client/entities.proto";
+import "spine/client/filters.proto";
 
 // Query identifier.
 //

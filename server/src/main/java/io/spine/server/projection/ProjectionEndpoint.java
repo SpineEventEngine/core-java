@@ -96,9 +96,6 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         Timestamp eventTime = eventContext.getTimestamp();
         repository.projectionStorage()
                   .writeLastHandledEventTime(eventTime);
-
-        repository.getStand()
-                  .post(envelope().getTenantId(), projection);
     }
 
     /**
