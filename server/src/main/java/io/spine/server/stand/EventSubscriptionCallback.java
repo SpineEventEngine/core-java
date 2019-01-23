@@ -18,37 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.client.given;
+package io.spine.server.stand;
 
-import com.google.protobuf.Any;
-import io.spine.client.EntityId;
+import io.spine.client.Subscription;
+import io.spine.client.SubscriptionUpdate;
+import io.spine.core.EventEnvelope;
 
-import javax.annotation.Nullable;
-import java.util.function.Function;
-
-import static io.spine.protobuf.TypeConverter.toObject;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * @author Mykhailo Drachuk
+ * Updates an event subscription based on the incoming event.
+ *
+ * <p>Currently event subscriptions are not supported.
  */
-public class EntityIdUnpacker<T> implements Function<EntityId, T> {
+final class EventSubscriptionCallback extends SubscriptionCallback {
 
-    private final Class<T> targetClass;
-
-    public EntityIdUnpacker(Class<T> targetClass) {
-        this.targetClass = targetClass;
+    EventSubscriptionCallback(Subscription subscription) {
+        super(subscription);
     }
 
+    /**
+     * Always throws {@link IllegalStateException} as event subscriptions are not supported yet.
+     */
     @Override
-    public T apply(@Nullable EntityId entityId) {
-        assertNotNull(entityId);
-        Any value = entityId.getId();
-        T actual = toObject(value, targetClass);
-        return actual;
-    }
-
-    public static <T> EntityIdUnpacker<T> unpacker(Class<T> targetClass) {
-        return new EntityIdUnpacker<>(targetClass);
+    protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
+        throw newIllegalStateException("Event subscriptions are not implemented");
     }
 }

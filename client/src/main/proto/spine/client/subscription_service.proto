@@ -34,23 +34,28 @@ import "spine/core/response.proto";
 // A service for subscribing to the read-side changes by clients.
 service SubscriptionService {
 
-    // Create the subscription to the particular read-side updates.
+    // Creates the subscription to the particular read-side updates.
     //
     // Topic defines the target of subscription and other attributes (like field masks).
-    // NOTE: this method serves for Topic creation; to start listening for updates use #Activate(Subscription).
+    //
+    // NOTE: this method serves for Topic creation; to start listening for updates
+    // use #Activate(Subscription).
     rpc Subscribe (Topic) returns (Subscription);
 
 
-    // Activate the subscription to the particular read-side updates.
+    // Activates the subscription to the particular read-side updates.
     //
-    // The client will start receiving the subscription updates upon new topic target changes in the read-side.
+    // The client will start receiving the subscription updates upon new topic target changes in
+    // the read-side.
+    //
     // Cancelled subscriptions cannot be activated.
     rpc Activate(Subscription) returns (stream SubscriptionUpdate);
 
 
-    // Cancel the given subscription.
+    // Cancels the given subscription.
     //
     // Clients will stop receiving the SubscriptionUpdate after this method is called.
+    //
     // The subscription is destroyed as a result of invocation.
     rpc Cancel (Subscription) returns (core.Response);
 }

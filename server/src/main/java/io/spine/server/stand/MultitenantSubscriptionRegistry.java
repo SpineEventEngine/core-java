@@ -19,29 +19,31 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
+import io.spine.client.SubscriptionVBuilder;
 import io.spine.client.Subscriptions;
-import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 
 /**
  * Registry for subscription management in a multi-tenant context.
- *
- * @author Alex Tymchenko
  */
 final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
@@ -60,8 +62,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     @Override
     public synchronized void activate(Subscription subscription,
-                                      Stand.EntityUpdateCallback callback) {
-        registrySlice().activate(subscription, callback);
+                                      Stand.NotifySubscriptionAction notifyAction) {
+        registrySlice().activate(subscription, notifyAction);
     }
 
     @Override
@@ -87,6 +89,25 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     @Override
     public synchronized boolean hasType(TypeUrl type) {
         return registrySlice().hasType(type);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code MultitenantSubscriptionRegistry} returns combined types of all registry slices
+     * as they are later used in the tenant-independent environment. More specifically, with the
+     * help of this method the {@link Stand} decides which event types to receive from the event
+     * bus.
+     */
+    @Override
+    public ImmutableSet<TypeUrl> typeSet() {
+        Collection<SubscriptionRegistry> allRegistries = tenantSlices.values();
+        ImmutableSet<TypeUrl> result = allRegistries
+                .stream()
+                .map(SubscriptionRegistry::typeSet)
+                .flatMap(ImmutableSet::stream)
+                .collect(toImmutableSet());
+        return result;
     }
 
     boolean isMultitenant() {
@@ -118,27 +139,26 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
         @Override
         public synchronized void activate(Subscription subscription,
-                                          Stand.EntityUpdateCallback callback) {
+                                          Stand.NotifySubscriptionAction notifyAction) {
             checkState(subscriptionToAttrs.containsKey(subscription),
                        "Cannot find the subscription in the registry.");
             SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
-            subscriptionRecord.activate(callback);
+            subscriptionRecord.activate(notifyAction);
         }
 
         @Override
         public synchronized Subscription add(Topic topic) {
             SubscriptionId subscriptionId = Subscriptions.generateId();
-            Target target = topic.getTarget();
-            String typeAsString = target.getType();
-            TypeUrl type = TypeUrl.parse(typeAsString);
-            Subscription subscription = Subscription.newBuilder()
-                                                    .setId(subscriptionId)
-                                                    .setTopic(topic)
-                                                    .build();
-            SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
+            Subscription subscription = SubscriptionVBuilder
+                    .newBuilder()
+                    .setId(subscriptionId)
+                    .setTopic(topic)
+                    .build();
+            SubscriptionRecord record = newRecordFor(subscription);
+            TypeUrl type = record.getType();
 
             if (!typeToRecord.containsKey(type)) {
-                typeToRecord.put(type, new HashSet<SubscriptionRecord>());
+                typeToRecord.put(type, new HashSet<>());
             }
             typeToRecord.get(type)
                         .add(record);
@@ -171,6 +191,11 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         public synchronized boolean hasType(TypeUrl type) {
             boolean result = typeToRecord.containsKey(type);
             return result;
+        }
+
+        @Override
+        public ImmutableSet<TypeUrl> typeSet() {
+            return ImmutableSet.copyOf(typeToRecord.keySet());
         }
 
         @Override

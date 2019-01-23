@@ -37,8 +37,6 @@ import static java.lang.String.format;
  *
  * <p>The observer gets a reference to the parent class for which
  * to {@linkplain LoggerFactory#getLogger(Class) create a logger}.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 public final class LoggingObserver<V> implements StreamObserver<V> {

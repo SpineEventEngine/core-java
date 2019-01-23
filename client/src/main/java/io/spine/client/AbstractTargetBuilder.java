@@ -30,7 +30,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
-import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.Filters.all;
 import static io.spine.client.Targets.composeTarget;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -77,7 +77,6 @@ import static java.util.Collections.singleton;
  *         a type of the message which is returned by the implementations {@link #build()}
  * @param <B>
  *         a type of the builder implementations
- * @author Mykhailo Drachuk
  */
 abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTargetBuilder> {
 
@@ -90,7 +89,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      */
 
     private @Nullable Set<?> ids;
-    private @Nullable Set<CompositeColumnFilter> columns;
+    private @Nullable Set<CompositeFilter> filters;
     private @Nullable Set<String> fieldMask;
 
     AbstractTargetBuilder(Class<? extends Message> targetType) {
@@ -105,7 +104,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      *         target
      */
     Target buildTarget() {
-        return composeTarget(targetType, ids, columns);
+        return composeTarget(targetType, ids, filters);
     }
 
     @Nullable FieldMask composeMask() {
@@ -123,11 +122,11 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * same type to the argument of this method. Moreover, the instances must be of the type of
      * the query target type identifier.
      *
-     * <p>This method or any of its overloads do not check these
-     * constrains an assume they are followed by the caller.
+     * <p>This method or any of its overloads do not check these constraints and assume they are
+     * followed by the caller.
      *
      * <p>If there are no IDs (i.e. and empty {@link Iterable} is passed), the query retrieves all
-     * the records regardless their IDs.
+     * the records regardless of their IDs.
      *
      * @param ids
      *         the values of the IDs to look up
@@ -192,43 +191,39 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
     }
 
     /**
-     * Sets the Entity Column predicate to the {@link io.spine.client.Query}.
+     * Sets the predicates for the {@link io.spine.client.Query}.
      *
-     * <p>If there are no {@link io.spine.client.ColumnFilter}s (i.e. the passed array is empty),
-     * all
-     * the records will be retrieved regardless the Entity Columns values.
+     * <p>If there are no {@link io.spine.client.Filter}s (i.e. the passed array is empty),
+     * all the records will be retrieved regardless of the column values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
-     * a conjunction ({@link io.spine.client.CompositeColumnFilter.CompositeOperator#ALL ALL}
-     * operator), i.e.
-     * a record matches this query only if it matches all of these parameters.
+     * a conjunction ({@link io.spine.client.CompositeFilter.CompositeOperator#ALL ALL}
+     * operator), i.e. a record matches this query only if it matches all of these parameters.
      *
      * @param predicate
-     *         the {@link io.spine.client.ColumnFilter}s to filter the requested entities by
+     *         the {@link io.spine.client.Filter}s to filter the query results
      * @return self for method chaining
-     * @see io.spine.client.ColumnFilters for a convinient way to create {@link
-     *         io.spine.client.ColumnFilter} instances
-     * @see #where(io.spine.client.CompositeColumnFilter...)
+     * @see Filters for a convenient way to create {@link io.spine.client.Filter} instances
+     * @see #where(io.spine.client.CompositeFilter...)
      */
-    public B where(ColumnFilter... predicate) {
-        CompositeColumnFilter aggregatingFilter = all(asList(predicate));
-        columns = singleton(aggregatingFilter);
+    public B where(Filter... predicate) {
+        CompositeFilter aggregatingFilter = all(asList(predicate));
+        filters = singleton(aggregatingFilter);
         return self();
     }
 
     /**
-     * Sets the Entity Column predicate to the {@link io.spine.client.Query}.
+     * Sets the predicates for the {@link io.spine.client.Query}.
      *
-     * <p>If there are no {@link io.spine.client.ColumnFilter}s (i.e. the passed array is empty),
-     * all
-     * the records will be retrieved regardless the Entity Columns values.
+     * <p>If there are no {@link io.spine.client.Filter}s (i.e. the passed array is empty),
+     * all the records will be retrieved regardless the column values.
      *
-     * <p>The input values represent groups of {@linkplain io.spine.client.ColumnFilter column
+     * <p>The input values represent groups of {@linkplain io.spine.client.Filter simple
      * filters} joined with
-     * a {@linkplain io.spine.client.CompositeColumnFilter.CompositeOperator composite operator}.
+     * a {@linkplain io.spine.client.CompositeFilter.CompositeOperator composite operator}.
      *
      * <p>The input filter groups are effectively joined between each other by
-     * {@link io.spine.client.CompositeColumnFilter.CompositeOperator#ALL ALL} operator, i.e. a
+     * {@link io.spine.client.CompositeFilter.CompositeOperator#ALL ALL} operator, i.e. a
      * record matches
      * this query if it matches all the composite filters.
      *
@@ -248,10 +243,8 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * companies that have their company size between 50 and 1000 employees and either have been
      * established less than two years ago, or originate from Germany.
      *
-     * <p>Note that the filters which belong to different {@link io.spine.client.ColumnFilters#all
-     * all(...)} groups
-     * may be represented as a single {@link io.spine.client.ColumnFilters#all all(...)} group. For
-     * example, two
+     * <p>Note that the filters which belong to different {@link Filters#all all(...)} groups
+     * may be represented as a single {@link Filters#all all(...)} group. For example, two
      * following queries would be identical:
      * <pre>
      *     {@code
@@ -281,14 +274,14 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
      * those instances may not be equal in terms of {@link Object#equals(Object)} method.
      *
      * @param predicate
-     *         a number of {@link io.spine.client.CompositeColumnFilter} instances forming the query
+     *         a number of {@link io.spine.client.CompositeFilter} instances forming the query
      *         predicate
      * @return self for method chaining
-     * @see io.spine.client.ColumnFilters for a convinient way to create {@link
-     *         io.spine.client.CompositeColumnFilter} instances
+     * @see Filters for a convenient way to create {@link io.spine.client.CompositeFilter}
+     *      instances
      */
-    public B where(CompositeColumnFilter... predicate) {
-        columns = ImmutableSet.copyOf(predicate);
+    public B where(CompositeFilter... predicate) {
+        filters = ImmutableSet.copyOf(predicate);
         return self();
     }
 
@@ -359,9 +352,9 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
               .append(valueSeparator);
         }
 
-        if (columns != null && !columns.isEmpty()) {
-            sb.append("AND columns: ")
-              .append(columns);
+        if (filters != null && !filters.isEmpty()) {
+            sb.append("AND filters: ")
+              .append(filters);
         }
 
         sb.append(");");
