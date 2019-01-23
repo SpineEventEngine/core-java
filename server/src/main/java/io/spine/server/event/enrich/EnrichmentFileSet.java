@@ -181,7 +181,7 @@ final class EnrichmentFileSet {
 
     /**
      * Returns {@code true} if the given qualifier is a package according to the contract
-     * of {@code "enrichment_for") option notation.
+     * of {@code (enrichment_for)} option notation.
      */
     private static boolean isPackage(String qualifier) {
         checkNotEmptyOrBlank(qualifier);
