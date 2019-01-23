@@ -40,7 +40,7 @@ import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConve
  * @param <T> a type of the target enrichment message
  * @param <C> the type of the source message context
  */
-final class MessageEnrichment<S extends Message, C extends Message, T extends Message>
+class MessageEnrichment<S extends Message, C extends Message, T extends Message>
         extends EnrichmentFunction<S, C, T> {
 
     /** A parent instance holding this instance and its siblings. */
@@ -55,15 +55,7 @@ final class MessageEnrichment<S extends Message, C extends Message, T extends Me
     /** A map from source message/context field to target enrichment field descriptors. */
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
-    /** Creates a new message enricher instance. */
-    static <S extends Message, T extends Message, C extends Message>
-    MessageEnrichment<S, C, T> create(Enricher enricher,
-                                      Class<S> messageClass,
-                                      Class<T> enrichmentClass) {
-        return new MessageEnrichment<>(enricher, messageClass, enrichmentClass);
-    }
-
-    private MessageEnrichment(Enricher enricher, Class<S> sourceClass, Class<T> enrichmentClass) {
+    MessageEnrichment(Enricher enricher, Class<S> sourceClass, Class<T> enrichmentClass) {
         super(sourceClass, enrichmentClass);
         this.enricher = enricher;
     }

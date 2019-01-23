@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
@@ -109,7 +110,7 @@ final class Schema {
 
         private Schema build() {
             addFieldEnrichments();
-            loadMessageEnrichments();
+            loadEventEnrichments();
             Schema result = new Schema(multimap.build());
             return result;
         }
@@ -120,17 +121,22 @@ final class Schema {
             }
         }
 
-        private void loadMessageEnrichments() {
+        private void loadEventEnrichments() {
             EnrichmentMap map = EnrichmentMap.load();
             for (TypeName enrichment : map.enrichmentTypes()) {
                 map.sourceClasses(enrichment)
-                   .forEach(sourceClass -> addMessageEnrichment(sourceClass, enrichment));
+                   .forEach(sourceClass -> addEventEnrichment(sourceClass, enrichment));
             }
         }
 
-        private void addMessageEnrichment(Class<Message> sourceClass, TypeName enrichment) {
+        private void addEventEnrichment(Class<? extends Message> sourceClass, TypeName enrichment) {
             Class<Message> enrichmentClass = enrichment.getMessageClass();
-            MessageEnrichment fn = MessageEnrichment.create(enricher, sourceClass, enrichmentClass);
+            @SuppressWarnings("unchecked") /* It is relatively safe to cast since currently
+            only event enrichment is available via proto definitions, and the source types loaded by
+            EnrichmentMap are all event messages. Schema composition should be extended with
+            checking the returned class for enrichments of message other than EnrichmentMessage. */
+            Class<EventMessage> eventClass = (Class<EventMessage>) sourceClass;
+            MessageEnrichment fn = EventEnrichment.create(enricher, eventClass, enrichmentClass);
             multimap.put(sourceClass, fn);
         }
     }
