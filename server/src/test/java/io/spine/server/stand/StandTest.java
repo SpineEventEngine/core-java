@@ -508,7 +508,8 @@ class StandTest extends TenantAwareTest {
             @Override
             public void accept(SubscriptionUpdate update) {
                 super.accept(update);
-                EntityStateUpdate entityStateUpdate = update.getEntityStateUpdatesList()
+                EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
+                                                            .getUpdatesList()
                                                             .get(0);
                 Any newState = entityStateUpdate.getState();
                 Customer customerInCallback = unpack(newState, Customer.class);

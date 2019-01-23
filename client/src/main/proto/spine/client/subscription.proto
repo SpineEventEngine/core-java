@@ -34,6 +34,7 @@ import "google/protobuf/field_mask.proto";
 import "spine/core/user_id.proto";
 import "spine/core/tenant_id.proto";
 import "spine/core/actor_context.proto";
+import "spine/core/event.proto";
 import "spine/core/response.proto";
 import "spine/client/filters.proto";
 
@@ -88,18 +89,31 @@ message SubscriptionUpdate {
 
     // Deleted field `updates`.
     //
-    // Use `entity_state_updates` instead.
+    // Use new `update` field instead.
     //
     reserved 10;
 
-    // The updates of the entity states.
+    // Deleted field `entity_state_updates`.
     //
-    // Each update is a pair of an entity ID and state.
+    // Use new `update` field instead.
     //
-    // Each of the update state messages is affected by the field mask set for the current
-    // subscription.
-    //
-    repeated EntityStateUpdate entity_state_updates = 11 [(valid) = true];
+    reserved 11;
+
+    // Each subscription delivers updates on either occurred events or modified entity state.
+    oneof update {
+
+        // The entity state updates if it's an entity subscription.
+        EntityUpdates entity_updates = 12;
+
+        // The new events occurred in the system if it's an event subscription.
+        EventUpdates event_updates = 13;
+    }
+}
+
+// The updates on the observed entity state.
+message EntityUpdates {
+
+    repeated EntityStateUpdate updates = 1 [(valid) = true];
 }
 
 // The pair of the entity ID and the entity state both packed as Any.
@@ -113,6 +127,12 @@ message EntityStateUpdate {
     // May be affected by a field mask specified in the subscription Topic.
     //
     google.protobuf.Any state = 2 [(required) = true];
+}
+
+// The new events of the observed type that occurred in the system.
+message EventUpdates {
+
+    repeated core.Event events = 1 [(valid) = true];
 }
 
 // Subscription identifier.

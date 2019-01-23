@@ -121,7 +121,8 @@ public class StandTestEnv {
          */
         @Override
         public void accept(SubscriptionUpdate update) {
-            EntityStateUpdate entityStateUpdate = update.getEntityStateUpdatesList()
+            EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
+                                                        .getUpdatesList()
                                                         .get(0);
             newEntityState = entityStateUpdate.getState();
         }
