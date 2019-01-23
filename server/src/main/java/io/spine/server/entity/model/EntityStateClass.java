@@ -27,8 +27,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A value object holding a class of an {@linkplain Entity#getState() entity state}.
- *
- * @author Alex Tymchenko
  */
 public final class EntityStateClass extends MessageClass<Message> {
 

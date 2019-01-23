@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EnrichmentFunctionTest {
 
     private BiFunction<ProjectCreated, EventContext, ProjectCreated.Enrichment> function;
-    private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> fieldEnrichment;
+    private FieldEnrichment<ProjectCreated, EventContext, ProjectCreated.Enrichment> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
@@ -90,13 +90,13 @@ class EnrichmentFunctionTest {
     @Test
     @DisplayName("return source class")
     void returnSource() {
-        assertEquals(ProjectCreated.class, fieldEnrichment.getSourceClass());
+        assertEquals(ProjectCreated.class, fieldEnrichment.sourceClass());
     }
 
     @Test
     @DisplayName("return target class")
     void returnTarget() {
-        assertEquals(ProjectCreated.Enrichment.class, fieldEnrichment.getEnrichmentClass());
+        assertEquals(ProjectCreated.Enrichment.class, fieldEnrichment.targetClass());
     }
 
     @Test
@@ -137,7 +137,7 @@ class EnrichmentFunctionTest {
     @Test
     @DisplayName("support equality")
     void haveSmartEquals() {
-        FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> anotherEnricher =
+        FieldEnrichment<ProjectCreated, EventContext, ProjectCreated.Enrichment> anotherEnricher =
                 FieldEnrichment.of(ProjectCreated.class,
                                    ProjectCreated.Enrichment.class,
                                    function);

@@ -23,7 +23,6 @@ package io.spine.server.entity.model;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.protobuf.Messages;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
@@ -36,13 +35,13 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.Messages.defaultInstance;
 import static java.lang.String.format;
 
 /**
  * A class of entities.
  *
  * @param <E> the type of entities
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("SynchronizeOnThis") // Double-check idiom for lazy init.
 public class EntityClass<E extends Entity> extends ModelClass<E> {
@@ -171,7 +170,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
                 result = defaultState;
                 if (result == null) {
                     Class<? extends Message> stateClass = getStateClass();
-                    defaultState = Messages.newInstance(stateClass);
+                    defaultState = defaultInstance(stateClass);
                     result = defaultState;
                 }
             }

@@ -26,6 +26,8 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A wrapper DTO for the validation result.
  */
@@ -36,23 +38,33 @@ final class ValidationResult {
 
     ValidationResult(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
                      ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
-        this.functions = functions;
-        this.fieldMap = fieldMap;
+        this.functions = checkNotNull(functions);
+        this.fieldMap = checkNotNull(fieldMap);
     }
 
     /**
      * Returns the validated list of {@code EnrichmentFunction}s that may be used for
      * the conversion in scope of the validated {@code Enricher}.
      */
-    List<EnrichmentFunction<?, ?, ?>> getFunctions() {
+    List<EnrichmentFunction<?, ?, ?>> functions() {
         return functions;
     }
 
     /**
-     * Returns a map from source event/context field to target enrichment field descriptors,
-     * which is valid in scope of the target {@code Enricher}.
+     * Returns a map from the descriptor of a source event event message or event context field
+     * to the descriptor of the  target enrichment field descriptors, which is valid in the scope of
+     * the {@code Enricher}.
      */
-    ImmutableMultimap<FieldDescriptor, FieldDescriptor> getFieldMap() {
+    ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap() {
         return fieldMap;
+    }
+
+    ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functionMap() {
+        ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
+                ImmutableMultimap.builder();
+        for (EnrichmentFunction<?, ?, ?> fieldFunction : this.functions) {
+            map.put(fieldFunction.sourceClass(), fieldFunction);
+        }
+        return map.build();
     }
 }

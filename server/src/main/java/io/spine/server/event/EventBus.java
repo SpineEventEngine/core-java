@@ -210,11 +210,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     protected EventEnvelope enrich(EventEnvelope event) {
-        if (enricher == null || !enricher.canBeEnriched(event)) {
+        if (enricher == null) {
             return event;
         }
-        EventEnvelope enriched = enricher.enrich(event);
-        return enriched;
+        EventEnvelope maybeEnriched = enricher.enrich(event);
+        return maybeEnriched;
     }
 
     @Override

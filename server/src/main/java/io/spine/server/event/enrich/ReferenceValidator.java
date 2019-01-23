@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import io.spine.option.OptionsProto;
@@ -46,15 +45,13 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
+import static io.spine.protobuf.Messages.defaultInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
  * Performs validation analyzing which of fields annotated in the enrichment message
  * can be initialized with the translation functions supplied in the parent enricher.
- *
- * <p>As long as the new enrichment functions may be appended to the parent enricher at runtime,
- * the validation result will vary for the same enricher depending on its actual state.
  */
 final class ReferenceValidator implements Logging {
 
@@ -73,15 +70,15 @@ final class ReferenceValidator implements Logging {
     private final Descriptor enrichmentDescriptor;
 
     ReferenceValidator(Enricher enricher,
-                       Class<? extends EventMessage> eventClass,
+                       Class<? extends Message> sourceClass,
                        Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
-        this.eventDescriptor = descriptorOf(eventClass);
+        this.eventDescriptor = descriptorOf(sourceClass);
         this.enrichmentDescriptor = descriptorOf(enrichmentClass);
     }
 
     private static Descriptor descriptorOf(Class<? extends Message> cls) {
-        return MessageEnrichment.defaultInstance(cls).getDescriptorForType();
+        return defaultInstance(cls).getDescriptorForType();
     }
 
     /**
@@ -110,7 +107,7 @@ final class ReferenceValidator implements Logging {
                                        FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
-            Optional<EnrichmentFunction<?, ?, ?>> found = transition(sourceField, enrichmentField);
+            Optional<FieldEnrichment<?, ?, ?>> found = transition(sourceField, enrichmentField);
             found.ifPresent(fn -> {
                 functions.add(fn);
                 fields.put(sourceField, enrichmentField);
@@ -241,14 +238,15 @@ final class ReferenceValidator implements Logging {
         return msg;
     }
 
-    private Optional<EnrichmentFunction<?, ?, ?>> transition(FieldDescriptor srcField,
-                                                             FieldDescriptor targetField) {
-        Class<?> sourceFieldClass = Field.getFieldClass(srcField);
-        Class<?> targetFieldClass = Field.getFieldClass(targetField);
-        Optional<EnrichmentFunction<?, ?, ?>> func =
-                enricher.functionFor(sourceFieldClass, targetFieldClass);
+    private Optional<FieldEnrichment<?, ?, ?>>
+    transition(FieldDescriptor source, FieldDescriptor target) {
+        Class<?> sourceField = Field.getFieldClass(source);
+        Class<?> targetField = Field.getFieldClass(target);
+        Optional<FieldEnrichment<?, ?, ?>> func =
+                enricher.schema()
+                        .transition(sourceField, targetField);
         if (!func.isPresent()) {
-            logNoFunction(sourceFieldClass, targetFieldClass);
+            logNoFunction(sourceField, targetField);
         }
         return func;
     }
@@ -263,10 +261,9 @@ final class ReferenceValidator implements Logging {
         }
     }
 
-    private static IllegalStateException noFieldException(
-            String eventFieldName,
-            Descriptor srcMessage,
-            FieldDescriptor enrichmentField) {
+    private static IllegalStateException noFieldException(String eventFieldName,
+                                                          Descriptor srcMessage,
+                                                          FieldDescriptor enrichmentField) {
         throw newIllegalStateException(
                 "No field `%s` in the message `%s` found. " +
                 "The field is referenced in the option of the enrichment field `%s`.",

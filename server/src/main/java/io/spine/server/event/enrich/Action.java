@@ -21,7 +21,6 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
@@ -29,36 +28,45 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * Performs enrichment operation of an enrichable message.
+ * Performs enrichment operation for an event.
  */
 final class Action {
 
+    /**
+     * The envelope with the event to enrich.
+     */
     private final EventEnvelope envelope;
-    private final ImmutableCollection<EnrichmentFunction<?, ?, ?>> availableFunctions;
 
-    private final Map<String, Any> enrichments = Maps.newHashMap();
+    /**
+     * Active functions applicable to the enriched event.
+     */
+    private final ImmutableCollection<EnrichmentFunction<?, ?, ?>> functions;
+
+    /**
+     * A map from the type name of an enrichment to its packed instance, in the form
+     * it is used in the enriched event context.
+     */
+    private final Map<String, Any> enrichments = newHashMap();
 
     Action(Enricher parent, EventEnvelope envelope) {
         this.envelope = envelope;
         Class<? extends Message> sourceClass = envelope.getMessageClass()
                                                        .value();
-        Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
-                parent.getFunctions(sourceClass);
-        this.availableFunctions =
-                functionsPerClass.stream()
-                                 .filter(activeOnly())
-                                 .collect(toImmutableList());
+        this.functions = parent.schema()
+                               .get(sourceClass);
     }
 
+    /**
+     * Creates new envelope with the enriched version of the event.
+     */
     EventEnvelope perform() {
         createEnrichments();
         EventEnvelope enriched = envelope.toEnriched(enrichments);
@@ -67,7 +75,7 @@ final class Action {
 
     private void createEnrichments() {
         EventMessage event = envelope.getMessage();
-        for (EnrichmentFunction function : availableFunctions) {
+        for (EnrichmentFunction function : functions) {
             Message enrichment = apply(function, event, envelope.getEventContext());
             checkResult(enrichment, function);
             put(enrichment);
@@ -95,7 +103,7 @@ final class Action {
         return result;
     }
 
-    private void checkResult(Message enriched, EnrichmentFunction function) {
+    private void checkResult(@Nullable Message enriched, EnrichmentFunction function) {
         checkNotNull(
             enriched,
             "EnrichmentFunction %s produced `null` for the source message %s",

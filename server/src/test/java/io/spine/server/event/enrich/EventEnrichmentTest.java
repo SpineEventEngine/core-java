@@ -34,14 +34,14 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DisplayName("MessageEnrichment should")
-class MessageEnrichmentTest {
+class EventEnrichmentTest {
 
-    private MessageEnrichment<ProjectCreated, ProjectCreated.Enrichment, ?> enricher;
+    private EventEnrichment<ProjectCreated, ProjectCreated.Enrichment> enrichment;
 
     @BeforeEach
     void setUp() {
         Enricher enricher = Enrichment.newEventEnricher();
-        this.enricher = MessageEnrichment.create(
+        this.enrichment = EventEnrichment.create(
                 enricher,
                 ProjectCreated.class,
                 ProjectCreated.Enrichment.class);
@@ -53,12 +53,12 @@ class MessageEnrichmentTest {
         new NullPointerTester()
                 .setDefault(Message.class, Empty.getDefaultInstance())
                 .setDefault(EventContext.class, EventContext.getDefaultInstance())
-                .testAllPublicInstanceMethods(enricher);
+                .testAllPublicInstanceMethods(enrichment);
     }
 
     @Test
     @DisplayName("be inactive when created")
     void beInactiveWhenCreated() {
-        assertFalse(enricher.isActive());
+        assertFalse(enrichment.isActive());
     }
 }
