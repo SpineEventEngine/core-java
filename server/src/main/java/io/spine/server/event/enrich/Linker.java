@@ -22,8 +22,6 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
@@ -31,11 +29,9 @@ import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -50,10 +46,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
- * Performs validation analyzing which of fields annotated in the enrichment message
- * can be initialized with the translation functions supplied in the parent enricher.
+ * Analyzes which of fields annotated in the enrichment message can be initialized with the
+ * translation functions supplied in the parent Enricher.
  */
-final class ReferenceValidator implements Logging {
+final class Linker implements Logging {
 
     /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";
@@ -69,9 +65,14 @@ final class ReferenceValidator implements Logging {
     private final Descriptor eventDescriptor;
     private final Descriptor enrichmentDescriptor;
 
-    ReferenceValidator(Enricher enricher,
-                       Class<? extends Message> sourceClass,
-                       Class<? extends Message> enrichmentClass) {
+    private final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields =
+            ImmutableMultimap.builder();
+    private final ImmutableList.Builder<EnrichmentFunction<?, ?, ?>> functions =
+            ImmutableList.builder();
+
+    Linker(Enricher enricher,
+           Class<? extends Message> sourceClass,
+           Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
         this.eventDescriptor = descriptorOf(sourceClass);
         this.enrichmentDescriptor = descriptorOf(enrichmentClass);
@@ -82,29 +83,19 @@ final class ReferenceValidator implements Logging {
     }
 
     /**
-     * Returns those fields and functions, that may be used for the enrichment at the moment.
-     *
-     * @return a {@code ValidationResult} data transfer object, containing the valid fields and
-     * functions.
+     * Provides information on how to create an instance of the target enrichment
+     * from the source message.
      */
-    ValidationResult validate() {
-        List<EnrichmentFunction<?, ?, ?>> functions = new ArrayList<>();
-        Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
+    FieldTransitions link() {
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
-            putEnrichmentsByField(functions, fields, enrichmentField, sourceFields);
+            putEnrichmentsByField(enrichmentField, sourceFields);
         }
-        ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap =
-                ImmutableMultimap.copyOf(fields);
-        ImmutableList<EnrichmentFunction<?, ?, ?>> enrichmentFunctions =
-                ImmutableList.copyOf(functions);
-        ValidationResult result = new ValidationResult(enrichmentFunctions, sourceToTargetMap);
+        FieldTransitions result = new FieldTransitions(functions.build(), fields.build());
         return result;
     }
 
-    private void putEnrichmentsByField(List<EnrichmentFunction<?, ?, ?>> functions,
-                                       Multimap<FieldDescriptor, FieldDescriptor> fields,
-                                       FieldDescriptor enrichmentField,
+    private void putEnrichmentsByField(FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
             Optional<FieldEnrichment<?, ?, ?>> found = transition(sourceField, enrichmentField);

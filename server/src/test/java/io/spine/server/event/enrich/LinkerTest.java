@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ReferenceValidator should")
-class ReferenceValidatorTest {
+class LinkerTest {
 
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
     private final Enricher enricher = Enrichment.newEventEnricher();
@@ -54,21 +54,21 @@ class ReferenceValidatorTest {
     @Test
     @DisplayName("initialize with valid enricher")
     void initWithValidEnricher() {
-        ReferenceValidator validator =
-                new ReferenceValidator(enricher,
-                                       ProjectCreated.class,
-                                       ProjectCreatedEnrichmentAnotherPackage.class);
+        Linker validator =
+                new Linker(enricher,
+                           ProjectCreated.class,
+                           ProjectCreatedEnrichmentAnotherPackage.class);
         assertNotNull(validator);
     }
 
     @Test
     @DisplayName("store valid map of enrichment fields after validation")
     void storeFieldsAfterValidation() {
-        ReferenceValidator validator
-                = new ReferenceValidator(enricher,
-                                         UserDeletedEvent.class,
-                                         EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        ValidationResult result = validator.validate();
+        Linker validator
+                = new Linker(enricher,
+                             UserDeletedEvent.class,
+                             EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
+        FieldTransitions result = validator.link();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertNotNull(fieldMap);
         assertThat(fieldMap).hasSize(1);
@@ -102,10 +102,10 @@ class ReferenceValidatorTest {
     @Test
     @DisplayName("fail validation if enrichment is not declared")
     void failIfEnrichmentNotDeclared() {
-        ReferenceValidator validator = new ReferenceValidator(enricher,
-                                                              UserDeletedEvent.class,
-                                                              GranterEventsEnrichment.class);
-        assertThrows(IllegalStateException.class, validator::validate);
+        Linker validator = new Linker(enricher,
+                                      UserDeletedEvent.class,
+                                      GranterEventsEnrichment.class);
+        assertThrows(IllegalStateException.class, validator::link);
     }
 
     @Test
@@ -115,11 +115,11 @@ class ReferenceValidatorTest {
                 .newBuilder()
                 .build();
 
-        ReferenceValidator validator
-                = new ReferenceValidator(emptyEnricher,
-                                         UserDeletedEvent.class,
-                                         EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        ValidationResult result = validator.validate();
+        Linker validator
+                = new Linker(emptyEnricher,
+                             UserDeletedEvent.class,
+                             EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
+        FieldTransitions result = validator.link();
         List<EnrichmentFunction<?, ?, ?>> functions = result.functions();
         assertTrue(functions.isEmpty());
         Multimap<FieldDescriptor, FieldDescriptor> fields = result.fieldMap();
@@ -129,11 +129,11 @@ class ReferenceValidatorTest {
     @Test
     @DisplayName("handle separator spaces in `by` argument")
     void handleSeparatorSpaces() {
-        ReferenceValidator validator
-                = new ReferenceValidator(enricher,
-                                         TaskAdded.class,
-                                         EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
-        ValidationResult result = validator.validate();
+        Linker validator
+                = new Linker(enricher,
+                             TaskAdded.class,
+                             EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
+        FieldTransitions result = validator.link();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertFalse(fieldMap.isEmpty());
         assertThat(fieldMap).hasSize(1);

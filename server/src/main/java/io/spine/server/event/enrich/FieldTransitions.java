@@ -29,14 +29,14 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A wrapper DTO for the validation result.
+ * Matches source fields to enrichment fields, and provides functions for the transitions.
  */
-final class ValidationResult {
+final class FieldTransitions {
 
     private final ImmutableList<EnrichmentFunction<?, ?, ?>> functions;
     private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
-    ValidationResult(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
+    FieldTransitions(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
                      ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
         this.functions = checkNotNull(functions);
         this.fieldMap = checkNotNull(fieldMap);
