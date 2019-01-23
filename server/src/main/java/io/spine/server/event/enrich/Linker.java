@@ -86,7 +86,7 @@ final class Linker implements Logging {
      * Provides information on how to create an instance of the target enrichment
      * from the source message.
      */
-    FieldTransitions link() {
+    FieldTransitions createTransitions() {
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
             putEnrichmentsByField(enrichmentField, sourceFields);

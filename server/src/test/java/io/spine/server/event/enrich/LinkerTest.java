@@ -68,7 +68,7 @@ class LinkerTest {
                 = new Linker(enricher,
                              UserDeletedEvent.class,
                              EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        FieldTransitions result = validator.link();
+        FieldTransitions result = validator.createTransitions();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertNotNull(fieldMap);
         assertThat(fieldMap).hasSize(1);
@@ -105,7 +105,7 @@ class LinkerTest {
         Linker validator = new Linker(enricher,
                                       UserDeletedEvent.class,
                                       GranterEventsEnrichment.class);
-        assertThrows(IllegalStateException.class, validator::link);
+        assertThrows(IllegalStateException.class, validator::createTransitions);
     }
 
     @Test
@@ -119,7 +119,7 @@ class LinkerTest {
                 = new Linker(emptyEnricher,
                              UserDeletedEvent.class,
                              EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        FieldTransitions result = validator.link();
+        FieldTransitions result = validator.createTransitions();
         List<EnrichmentFunction<?, ?, ?>> functions = result.functions();
         assertTrue(functions.isEmpty());
         Multimap<FieldDescriptor, FieldDescriptor> fields = result.fieldMap();
@@ -133,7 +133,7 @@ class LinkerTest {
                 = new Linker(enricher,
                              TaskAdded.class,
                              EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
-        FieldTransitions result = validator.link();
+        FieldTransitions result = validator.createTransitions();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertFalse(fieldMap.isEmpty());
         assertThat(fieldMap).hasSize(1);

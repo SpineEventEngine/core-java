@@ -23,6 +23,7 @@ package io.spine.server.event.enrich;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Message;
 
 import java.util.List;
 
@@ -35,6 +36,15 @@ final class FieldTransitions {
 
     private final ImmutableList<EnrichmentFunction<?, ?, ?>> functions;
     private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
+
+    static FieldTransitions create(Enricher enricher,
+                                   Class<? extends Message> sourceClass,
+                                   Class<? extends Message> enrichmentClass) {
+
+        Linker linker = new Linker(enricher, sourceClass, enrichmentClass);
+        FieldTransitions result = linker.createTransitions();
+        return result;
+    }
 
     FieldTransitions(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
                      ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {

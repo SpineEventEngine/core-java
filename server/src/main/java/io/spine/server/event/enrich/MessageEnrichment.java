@@ -63,10 +63,9 @@ class MessageEnrichment<S extends Message, C extends MessageContext, T extends M
 
     @Override
     void activate() {
-        Linker linker = new Linker(enricher, sourceClass(), targetClass());
-        FieldTransitions fieldTransitions = linker.link();
-        this.fieldFunctions = fieldTransitions.functionMap();
-        this.fieldMap = fieldTransitions.fieldMap();
+        FieldTransitions ft = FieldTransitions.create(enricher, sourceClass(), targetClass());
+        this.fieldFunctions = ft.functionMap();
+        this.fieldMap = ft.fieldMap();
         markActive();
     }
 
