@@ -63,9 +63,8 @@ class MessageEnrichment<S extends Message, C extends MessageContext, T extends M
 
     @Override
     void activate() {
-        Class<? extends Message> sourceClass = sourceClass();
         ReferenceValidator referenceValidator =
-                new ReferenceValidator(enricher, sourceClass, targetClass());
+                new ReferenceValidator(enricher, sourceClass(), targetClass());
         ValidationResult validationResult = referenceValidator.validate();
         this.fieldFunctions = validationResult.functionMap();
         this.fieldMap = validationResult.fieldMap();
