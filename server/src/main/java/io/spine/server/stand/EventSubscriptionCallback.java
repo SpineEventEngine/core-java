@@ -39,7 +39,7 @@ final class EventSubscriptionCallback extends SubscriptionCallback {
     }
 
     /**
-     * Creates a subscription update with a single event obtained from the envelope.
+     * Creates a subscription update with a single {@link Event} obtained from the envelope.
      */
     @Override
     protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
