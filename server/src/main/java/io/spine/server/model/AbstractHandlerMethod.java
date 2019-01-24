@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
@@ -33,7 +34,10 @@ import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -164,6 +168,40 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public Method getRawMethod() {
         return method;
+    }
+
+    /**
+     * Retrieves the message classes produced by this handler method.
+     *
+     * <p>In Spine, all handlers that produce messages return them either as-is, or in
+     * {@code Optional<Message>}/{@code Iterable<Message>/Pair<Message1, Message2>} form.
+     *
+     * <p>Methods with other return types (for example, {@link Void} for subscribers/appliers or
+     * {@link Empty} for reactors are all valid cases) are deemed producing no messages.
+     *
+     * @return produced message classes or {@link Optional#empty()} if the method produces nothing
+     * @see MethodResult#toMessages(Object)
+     */
+    @SuppressWarnings("unchecked") // Logically checked.
+    public Optional<Class<? extends Message>> getProducedMessageTypes() {
+        Class<?> producedType = method.getReturnType();
+
+        if (Optional.class.isAssignableFrom(producedType)
+                || Iterable.class.isAssignableFrom(producedType)) {
+            ParameterizedType parameterized = (ParameterizedType) method.getGenericReturnType();
+            Type firstGenericParam = parameterized.getActualTypeArguments()[0];
+            producedType = (Class) firstGenericParam;
+        }
+        // todo use common IGNORED_MESSAGES with method result filters.
+        if (Nothing.class.isAssignableFrom(producedType)
+                || Empty.class.isAssignableFrom(producedType)) {
+            return Optional.empty();
+        }
+        if (Message.class.isAssignableFrom(producedType)) {
+            Class<? extends Message> messageClass = (Class<? extends Message>) producedType;
+            return Optional.of(messageClass);
+        }
+        return Optional.empty();
     }
 
     private int getModifiers() {
