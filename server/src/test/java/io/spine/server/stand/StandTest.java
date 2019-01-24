@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -225,7 +225,7 @@ class StandTest extends TenantAwareTest {
             CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository();
             stand.registerTypeSupplier(customerAggregateRepo);
 
-            Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
+            Descriptor customerEntityDescriptor = Customer.getDescriptor();
             checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
             checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
 
@@ -1191,8 +1191,8 @@ class StandTest extends TenantAwareTest {
                         .isEmpty());
     }
 
-    private static void checkHasExactlyOne(Set<TypeUrl> availableTypes,
-                                           Descriptors.Descriptor expectedType) {
+    private static void checkHasExactlyOne(Collection<TypeUrl> availableTypes,
+                                           Descriptor expectedType) {
         assertEquals(1, availableTypes.size());
 
         TypeUrl actualTypeUrl = availableTypes.iterator()
