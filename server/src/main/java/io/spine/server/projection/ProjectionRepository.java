@@ -293,11 +293,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     //TODO:2019-01-10:alex.tymchenko: cache the `Inbox` instances.
     private Inbox<I> getInbox(I id) {
+        checkNotNull(inboxStorage, "Inbox storage is not initialized in %s", this);
         Inbox<I> inbox = Inbox
                 .<I>newBuilder(id, getEntityStateType())
                 .setStorage(inboxStorage)
-                .add(InboxLabel.UPDATE_SUBSCRIBER,
-                     e -> ProjectionEndpoint.of(this, (EventEnvelope) e))
+                .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
+                                  e -> ProjectionEndpoint.of(this, e))
                 .build();
         return inbox;
     }

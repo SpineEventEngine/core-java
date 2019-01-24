@@ -20,20 +20,11 @@
 
 package io.spine.server.inbox;
 
-import com.google.common.collect.ImmutableMap;
-import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
-import io.spine.server.delivery.MessageEndpoint;
-import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.function.Function;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * A container for the messages dispatched to a certain consumer, such as an event subscriber
@@ -47,21 +38,17 @@ import static java.lang.String.format;
  */
 public class Inbox<I> {
 
-    private final InboxId id;
     private final I entityId;
-    private final InboxStorage storage;
-    private final ImmutableMap<InboxLabel, GetEndpoint<I>> operations;
+    private final Builder<I> builder;
 
     private Inbox(Builder<I> builder) {
-        this.id = builder.inboxId;
-        this.storage = builder.storage;
-        this.operations = ImmutableMap.copyOf(builder.operations);
-        this.entityId = toEntityId();
+        this.builder = builder;
+        this.entityId = toEntityId(builder.getInboxId());
     }
 
     @SuppressWarnings("unchecked")  // Ensured by the `Inbox` definition.
-    private I toEntityId() {
-        return (I) InboxIds.unwrap(id);
+    private I toEntityId(InboxId inboxId) {
+        return (I) InboxIds.unwrap(inboxId);
     }
 
     /**
@@ -75,11 +62,6 @@ public class Inbox<I> {
     public static <I> Builder<I> newBuilder(Object id, TypeUrl typeUrl) {
         InboxId inboxId = InboxIds.wrap(id, typeUrl);
         return new Builder<>(inboxId);
-    }
-
-    public interface GetEndpoint<I>
-            extends Function<ActorMessageEnvelope<?, ?, ?>, MessageEndpoint<I, ?>> {
-
     }
 
     /**
@@ -108,22 +90,6 @@ public class Inbox<I> {
         return new CommandLabels(envelope);
     }
 
-    private void storeOrDeliver(InboxLabel label, ActorMessageEnvelope<?, ?, ?> envelope) {
-        ensureHasDestination(label);
-
-        //TODO:2019-01-09:alex.tymchenko: store if windowing is enabled.
-        // Deliver right away for now.
-        MessageEndpoint<I, ?> endpoint = operations.get(label)
-                                                   .apply(envelope);
-        endpoint.dispatchTo(entityId);
-    }
-
-    private void ensureHasDestination(InboxLabel label) {
-        if (!operations.containsKey(label)) {
-            throw new LabelNotFoundException(id, label);
-        }
-    }
-
     /**
      * A builder of {@link Inbox} instances.
      *
@@ -133,8 +99,8 @@ public class Inbox<I> {
     public static class Builder<I> {
 
         private final InboxId inboxId;
-        private final Map<InboxLabel, GetEndpoint<I>> operations =
-                new EnumMap<>(InboxLabel.class);
+        private final LabelledEndpoints<I, EventEnvelope> eventEndpoints = new LabelledEndpoints<>();
+        private final LabelledEndpoints<I, CommandEnvelope> commandEndpoints = new LabelledEndpoints<>();
         private InboxStorage storage;
 
         /**
@@ -146,12 +112,25 @@ public class Inbox<I> {
 
         /**
          * Adds a certain label for the {@code Inbox} and specify a lazy-initialized endpoint,
-         * to which the respectively labelled messages should be delivered.
+         * to which the respectively labelled events should be delivered.
          */
-        public Builder<I> add(InboxLabel label, GetEndpoint<I> operation) {
+        public Builder<I> addEventEndpoint(InboxLabel label,
+                                           LazyEndpoint<I, EventEnvelope> lazyEndpoint) {
             checkNotNull(label);
-            checkNotNull(operation);
-            operations.put(label, operation);
+            checkNotNull(lazyEndpoint);
+            eventEndpoints.add(label, lazyEndpoint);
+            return this;
+        }
+
+        /**
+         * Adds a certain label for the {@code Inbox} and specify a lazy-initialized endpoint,
+         * to which the respectively labelled commands should be delivered.
+         */
+        public Builder<I> addCommandEndpoint(InboxLabel label,
+                                             LazyEndpoint<I, CommandEnvelope> lazyEndpoint) {
+            checkNotNull(label);
+            checkNotNull(lazyEndpoint);
+            commandEndpoints.add(label, lazyEndpoint);
             return this;
         }
 
@@ -163,6 +142,22 @@ public class Inbox<I> {
         public Inbox<I> build() {
             return new Inbox<>(this);
         }
+
+        InboxId getInboxId() {
+            return inboxId;
+        }
+
+        LabelledEndpoints<I, EventEnvelope> getEventEndpoints() {
+            return eventEndpoints;
+        }
+
+        LabelledEndpoints<I, CommandEnvelope> getCommandEndpoints() {
+            return commandEndpoints;
+        }
+
+        InboxStorage getStorage() {
+            return storage;
+        }
     }
 
     /**
@@ -172,24 +167,24 @@ public class Inbox<I> {
      */
     public class EventLabels {
 
-        private final EventEnvelope envelope;
+        private final InboxOfEvents handler;
 
         private EventLabels(EventEnvelope envelope) {
-            this.envelope = envelope;
+            this.handler = new InboxOfEvents<>(envelope, builder, entityId);
         }
 
         /**
          * Marks the event envelope with a label for passing to an event reactor method.
          */
         public void toReact() {
-            storeOrDeliver(InboxLabel.REACT_UPON_EVENT, envelope);
+            handler.storeOrDeliver(InboxLabel.REACT_UPON_EVENT);
         }
 
         /**
          * Marks the event envelope with a label for passing to an event importer method.
          */
         public void toImport() {
-            storeOrDeliver(InboxLabel.IMPORT_EVENT, envelope);
+            handler.storeOrDeliver(InboxLabel.IMPORT_EVENT);
         }
 
         /**
@@ -197,14 +192,14 @@ public class Inbox<I> {
          * response.
          */
         public void toCommand() {
-            storeOrDeliver(InboxLabel.COMMAND_UPON_EVENT, envelope);
+            handler.storeOrDeliver(InboxLabel.COMMAND_UPON_EVENT);
         }
 
         /**
          * Marks the event envelope with a label for passing to an event subscriber method.
          */
         public void forSubscriber() {
-            storeOrDeliver(InboxLabel.UPDATE_SUBSCRIBER, envelope);
+            handler.storeOrDeliver(InboxLabel.UPDATE_SUBSCRIBER);
         }
     }
 
@@ -215,17 +210,17 @@ public class Inbox<I> {
      */
     public class CommandLabels {
 
-        private final CommandEnvelope envelope;
+        private final InboxOfCommands handler;
 
         private CommandLabels(CommandEnvelope envelope) {
-            this.envelope = envelope;
+            this.handler = new InboxOfCommands<>(envelope, builder, entityId);
         }
 
         /**
          * Marks the command envelope with a label for passing to a command handler method.
          */
         public void toHandle() {
-            storeOrDeliver(InboxLabel.HANDLE_COMMAND, envelope);
+            handler.storeOrDeliver(InboxLabel.HANDLE_COMMAND);
         }
 
         /**
@@ -233,31 +228,7 @@ public class Inbox<I> {
          * response.
          */
         public void toTransform() {
-            storeOrDeliver(InboxLabel.TRANSFORM_COMMAND, envelope);
-        }
-    }
-
-    /**
-     * Thrown if there is an attempt to mark a message put to {@code Inbox} with a label, which was
-     * not {@linkplain io.spine.server.inbox.Inbox.Builder#add(InboxLabel,
-     * io.spine.server.inbox.Inbox.GetEndpoint) added} for the {@code Inbox} instance.
-     */
-    public static class LabelNotFoundException extends RuntimeException {
-
-        private static final long serialVersionUID = 1L;
-
-        private final InboxLabel label;
-        private final InboxId inboxId;
-
-        public LabelNotFoundException(InboxId id, InboxLabel label) {
-            this.label = label;
-            inboxId = id;
-        }
-
-        @Override
-        public String getMessage() {
-            return format("Inbox %s has no available label %s",
-                          Stringifiers.toString(inboxId), label);
+            handler.storeOrDeliver(InboxLabel.TRANSFORM_COMMAND);
         }
     }
 }
