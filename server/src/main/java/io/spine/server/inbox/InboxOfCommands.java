@@ -30,6 +30,9 @@ import java.util.Optional;
 /**
  * The part of {@link Inbox} responsible for processing incoming
  * {@link io.spine.core.CommandEnvelope commands}.
+ *
+ * @param <I>
+ *         the type of identifier or inbox target entities
  */
 class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
 

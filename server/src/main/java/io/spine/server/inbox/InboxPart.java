@@ -34,6 +34,11 @@ import java.util.Optional;
  * in a similar way, but still there is some difference in storage mechanism and measures
  * taken in case of some runtime issues (e.g. duplication). Therefore the inbox is split into
  * parts, specific to each of the message types.
+ *
+ * @param <I>
+ *         the type of identifier or inbox target entities
+ * @param <M>
+ *         the type of message envelopes, which are served by this inbox part
  */
 abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 

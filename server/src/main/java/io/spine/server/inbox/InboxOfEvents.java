@@ -30,6 +30,9 @@ import java.util.Optional;
 /**
  * The part of {@link Inbox} responsible for processing incoming {@link io.spine.core.EventEnvelope
  * events}.
+ *
+ * @param <I>
+ *         the type of identifier or inbox target entities
  */
 class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
