@@ -65,7 +65,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * wrapped into a inbox-specific runtime exception for further handling.
      */
     protected abstract Optional<CannotDeliverMessageException>
-    checkDuplicates(InboxContentRecord contentRecord);
+    checkDuplicates(InboxContentRecord contents);
 
     void storeOrDeliver(InboxLabel label) {
         MessageEndpoint<I, M> endpoint =

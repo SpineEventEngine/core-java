@@ -43,9 +43,9 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     }
 
     @Override
-    protected Optional<CannotDeliverMessageException> checkDuplicates(InboxContentRecord record) {
+    protected Optional<CannotDeliverMessageException> checkDuplicates(InboxContentRecord contents) {
         CommandEnvelope envelope = getEnvelope();
-        List<InboxMessage> messages = record.getMessageList();
+        List<InboxMessage> messages = contents.getMessageList();
         CannotDispatchCommandTwice duplicationException = null;
         for (InboxMessage message : messages) {
             if (duplicationException == null) {

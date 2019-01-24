@@ -43,9 +43,9 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     }
 
     @Override
-    protected Optional<CannotDeliverMessageException> checkDuplicates(InboxContentRecord record) {
+    protected Optional<CannotDeliverMessageException> checkDuplicates(InboxContentRecord contents) {
         EventEnvelope envelope = getEnvelope();
-        List<InboxMessage> messages = record.getMessageList();
+        List<InboxMessage> messages = contents.getMessageList();
         CannotDispatchEventTwice duplicationException = null;
         for (InboxMessage message : messages) {
             if (duplicationException == null) {
