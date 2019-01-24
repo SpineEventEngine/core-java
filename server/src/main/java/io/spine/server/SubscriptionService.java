@@ -137,7 +137,6 @@ public class SubscriptionService
             return this;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
         public ImmutableList<BoundedContext> getBoundedContexts() {
             return ImmutableList.copyOf(boundedContexts);
         }
