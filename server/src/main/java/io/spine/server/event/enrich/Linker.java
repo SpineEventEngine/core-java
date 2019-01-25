@@ -23,6 +23,7 @@ package io.spine.server.event.enrich;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
+import io.spine.code.proto.FieldReference;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import io.spine.option.OptionsProto;
@@ -38,6 +39,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
@@ -88,7 +90,7 @@ final class Linker implements Logging {
      */
     FieldTransitions createTransitions() {
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
-            Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
+            Collection<FieldDescriptor> sourceFields = toSourceFields(enrichmentField);
             putEnrichmentsByField(enrichmentField, sourceFields);
         }
         FieldTransitions result = new FieldTransitions(functions.build(), fields.build());
@@ -106,32 +108,50 @@ final class Linker implements Logging {
         }
     }
 
+    private Collection<FieldDescriptor> toSourceFields(FieldDescriptor enrichmentField) {
+        ImmutableList<FieldReference> fieldReferences =
+                FieldReference.allFrom(enrichmentField.toProto());
+        checkState(!fieldReferences.isEmpty(),
+                   "Unable to get source field information from the enrichment field `%s`",
+                   enrichmentField.getFullName());
+
+        ImmutableList<String> fieldNames =
+                fieldReferences.stream()
+                               .map(FieldReference::fieldName)
+                               .collect(toImmutableList());
+        return findSourceFieldsByNames(fieldNames, enrichmentField);
+    }
+
     /**
      * Searches for the event/context field with the name parsed from the enrichment
      * field {@code by} option.
      */
     private Collection<FieldDescriptor> findSourceFields(FieldDescriptor enrichmentField) {
+        String byOptionValue = byOptionValue(enrichmentField);
+        int pipeSeparatorIndex = byOptionValue.indexOf(PIPE_SEPARATOR);
+        if (pipeSeparatorIndex < 0) {
+            FieldDescriptor fieldDescriptor =
+                    findSourceFieldByName(byOptionValue, enrichmentField, true);
+            return Collections.singleton(fieldDescriptor);
+        } else {
+            String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(byOptionValue);
+            return findSourceFieldsByNames(ImmutableList.copyOf(targetFieldNames), enrichmentField);
+        }
+    }
+
+    private static String byOptionValue(FieldDescriptor enrichmentField) {
         String byOptionArgument = enrichmentField.getOptions()
                                                  .getExtension(OptionsProto.by);
         checkNotNull(byOptionArgument);
-        String targetFields = removeSpaces(byOptionArgument);
-        int pipeSeparatorIndex = targetFields.indexOf(PIPE_SEPARATOR);
-        if (pipeSeparatorIndex < 0) {
-            FieldDescriptor fieldDescriptor = findSourceFieldByName(targetFields,
-                                                                    enrichmentField,
-                                                                    true);
-            return Collections.singleton(fieldDescriptor);
-        } else {
-            String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(targetFields);
-            return findSourceFieldsByNames(targetFieldNames, enrichmentField);
-        }
+        return removeSpaces(byOptionArgument);
     }
 
     /**
      * Searches for the event/context field with the name retrieved from the
      * enrichment field {@code by} option.
      *
-     * @param name            the name of the searched field
+     * @param fieldReference
+     *         the reference to a field as discovered in the {@code (by)} option
      * @param enrichmentField the field of the enrichment targeted onto the searched field
      * @param strict          if {@code true} the field must be found, an exception is thrown
      *                        otherwise.
@@ -140,14 +160,14 @@ final class Linker implements Logging {
      * @return {@link FieldDescriptor} for the field with the given name or {@code null} if the
      * field is absent and if not in the strict mode
      */
-    private @Nullable FieldDescriptor findSourceFieldByName(String name,
+    private @Nullable FieldDescriptor findSourceFieldByName(String fieldReference,
                                                             FieldDescriptor enrichmentField,
                                                             boolean strict) {
-        checkSourceFieldName(name, enrichmentField);
-        Descriptor srcMessage = getSrcMessage(name);
-        FieldDescriptor field = findField(name, srcMessage);
+        checkSourceFieldName(fieldReference, enrichmentField);
+        Descriptor srcMessage = sourceDescriptor(fieldReference);
+        FieldDescriptor field = findField(fieldReference, srcMessage);
         if (field == null && strict) {
-            throw noFieldException(name, srcMessage, enrichmentField);
+            throw noFieldException(fieldReference, srcMessage, enrichmentField);
         }
         return field;
     }
@@ -159,13 +179,14 @@ final class Linker implements Logging {
         return result;
     }
 
-    private Collection<FieldDescriptor> findSourceFieldsByNames(String[] names,
+    private Collection<FieldDescriptor> findSourceFieldsByNames(ImmutableList<String> names,
                                                                 FieldDescriptor enrichmentField) {
-        checkArgument(names.length > 0, "Names may not be empty");
-        checkArgument(names.length > 1,
+        int nameCount = names.size();
+        checkArgument(nameCount > 0, "Names may not be empty");
+        checkArgument(nameCount > 1,
                       "Enrichment target field names may not be a singleton array. " +
                       "Use findSourceFieldByName().");
-        Collection<FieldDescriptor> result = new HashSet<>(names.length);
+        Collection<FieldDescriptor> result = new HashSet<>(nameCount);
 
         FieldDescriptor.Type basicType = null;
         Descriptor messageType = null;
@@ -174,7 +195,7 @@ final class Linker implements Logging {
             if (field == null) {
                 /* We don't know at this stage the type of the event.
                    The enrichment is to be included anyway,
-                   but by other ReferenceValidator instance */
+                   but by another Linker instance */
                 continue;
             }
 
@@ -208,22 +229,22 @@ final class Linker implements Logging {
     }
 
     private static
-    @Nullable FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
-        if (fieldNameFull.contains(PROTO_FQN_SEPARATOR)) { // is event field FQN or context field
-            int firstCharIndex = fieldNameFull.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
-            String fieldName = fieldNameFull.substring(firstCharIndex);
+    @Nullable FieldDescriptor findField(String fieldReference, Descriptor srcMessage) {
+        if (fieldReference.contains(PROTO_FQN_SEPARATOR)) { // is event field FQN or context field
+            int firstCharIndex = fieldReference.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
+            String fieldName = fieldReference.substring(firstCharIndex);
             return srcMessage.findFieldByName(fieldName);
         } else {
-            return srcMessage.findFieldByName(fieldNameFull);
+            return srcMessage.findFieldByName(fieldReference);
         }
     }
 
     /**
      * Returns an event descriptor or context descriptor
-     * if the field name contains {@link FieldReference#context#name()}.
+     * if the field name contains {@code "context"} in the name.
      */
-    private Descriptor getSrcMessage(String fieldName) {
-        Descriptor msg = FieldReference.context.matches(fieldName)
+    private Descriptor sourceDescriptor(String fieldName) {
+        Descriptor msg = io.spine.server.event.enrich.FieldReference.context.matches(fieldName)
                          ? EventContext.getDescriptor()
                          : eventDescriptor;
         return msg;
