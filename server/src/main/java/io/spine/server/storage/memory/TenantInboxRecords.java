@@ -93,7 +93,7 @@ class TenantInboxRecords implements TenantStorage<InboxId, InboxMessage> {
 
         @Override
         public int compare(InboxId first, InboxId second) {
-            if (first == second) {
+            if (Objects.equals(first,second)) {
                 return 0;
             }
             int firstHashCode = first.hashCode();
