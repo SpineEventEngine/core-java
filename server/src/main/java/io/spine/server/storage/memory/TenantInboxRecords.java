@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.spine.util.Exceptions.unsupported;
@@ -114,7 +115,7 @@ class TenantInboxRecords implements TenantStorage<InboxId, InboxMessage> {
 
         @Override
         public int compare(InboxMessage first, InboxMessage second) {
-            if (first == second) {
+            if (Objects.equals(first,second)) {
                 return 0;
             }
             Timestamp whenFirstReceived = first.getWhenReceived();
