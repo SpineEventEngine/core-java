@@ -43,14 +43,19 @@ import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.inbox.Inbox;
+import io.spine.server.inbox.InboxLabel;
+import io.spine.server.inbox.InboxStorage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
+import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Collection;
@@ -91,6 +96,9 @@ public abstract class ProcessManagerRepository<I,
      * method.
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
+
+    /** An underlying {@link Inbox} storage for entities managed by this repository. */
+    private @Nullable InboxStorage inboxStorage;
 
     /**
      * Creates a new instance with the event routing by the first message field.
@@ -144,6 +152,21 @@ public abstract class ProcessManagerRepository<I,
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
         systemSubscriber.registerIn(boundedContext);
+    }
+
+    @Override
+    public void initStorage(StorageFactory factory) {
+        super.initStorage(factory);
+        initInboxStorage(factory);
+    }
+
+    private void initInboxStorage(StorageFactory factory) {
+        if (this.inboxStorage != null) {
+            throw newIllegalStateException("The PM repository %s already has the inbox storage %s.",
+                                           this, this.inboxStorage);
+        }
+
+        this.inboxStorage = factory.createInboxStorage();
     }
 
     /**
@@ -238,8 +261,9 @@ public abstract class ProcessManagerRepository<I,
      *         the command to dispatch
      */
     void dispatchNowTo(I id, CommandEnvelope command) {
-        PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
-        endpoint.dispatchTo(id);
+        Inbox inbox = getInbox(id);
+        inbox.put(command)
+             .toHandle();
     }
 
     /**
@@ -261,9 +285,25 @@ public abstract class ProcessManagerRepository<I,
      *         the event to dispatch
      */
     void dispatchNowTo(I id, EventEnvelope event) {
-        PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, event);
-        endpoint.dispatchTo(id);
+        Inbox inbox = getInbox(id);
+        inbox.put(event)
+             .toReact();
     }
+
+    //TODO:2019-01-10:alex.tymchenko: cache the `Inbox` instances.
+    private Inbox<I> getInbox(I id) {
+        checkNotNull(inboxStorage, "Inbox storage is not initialized in PM %s", this);
+        Inbox<I> inbox = Inbox
+                .<I>newBuilder(id, getEntityStateType())
+                .setStorage(inboxStorage)
+                .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
+                                  e -> PmEventEndpoint.of(this, e))
+                .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
+                                    c -> PmCommandEndpoint.of(this, c))
+                .build();
+        return inbox;
+    }
+
 
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
@@ -349,6 +389,15 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected EventFilter eventFilter() {
         return entityStateChangedFilter;
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        if(inboxStorage != null) {
+            inboxStorage.close();
+            inboxStorage = null;
+        }
     }
 
     /**
