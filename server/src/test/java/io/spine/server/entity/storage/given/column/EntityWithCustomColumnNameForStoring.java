@@ -21,10 +21,10 @@
 package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.Column;
 
-public class EntityWithCustomColumnNameForStoring extends AbstractVersionableEntity<String, Any> {
+public class EntityWithCustomColumnNameForStoring extends AbstractEntity<String, Any> {
 
     public static final String CUSTOM_COLUMN_NAME = " customColumnName ";
 

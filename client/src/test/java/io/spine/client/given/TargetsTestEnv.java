@@ -20,13 +20,12 @@
 
 package io.spine.client.given;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityFiltersVBuilder;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
-import io.spine.client.EntityIdFilterVBuilder;
-import io.spine.client.EntityIdVBuilder;
+import io.spine.client.IdFilter;
+import io.spine.client.IdFilterVBuilder;
+import io.spine.client.TargetFilters;
+import io.spine.client.TargetFiltersVBuilder;
 import io.spine.test.queries.TaskId;
 import io.spine.test.queries.TaskIdVBuilder;
 
@@ -37,32 +36,29 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class TargetsTestEnv {
 
     /** Prevents instantiation of this test environment class. */
     private TargetsTestEnv() {
     }
 
-    public static EntityFilters filtersForIds(Message... ids) {
+    public static TargetFilters filtersForIds(Message... ids) {
         List<Message> idsList = asList(ids);
-        List<EntityId> entityIds = idsList.stream()
-                                          .map(TargetsTestEnv::newEntityId)
-                                          .collect(toList());
-        EntityIdFilter idFilter = EntityIdFilterVBuilder.newBuilder()
-                                                        .addAllIds(entityIds)
-                                                        .build();
-        return EntityFiltersVBuilder.newBuilder()
+        List<Any> packedIds = idsList
+                .stream()
+                .map(TargetsTestEnv::newId)
+                .collect(toList());
+        IdFilter idFilter = IdFilterVBuilder
+                .newBuilder()
+                .addAllIds(packedIds)
+                .build();
+        return TargetFiltersVBuilder.newBuilder()
                                     .setIdFilter(idFilter)
                                     .build();
     }
 
-    private static EntityId newEntityId(Message item) {
-        return EntityIdVBuilder.newBuilder()
-                               .setId(pack(item))
-                               .build();
+    private static Any newId(Message item) {
+        return pack(item);
     }
 
     public static TaskId newTaskId() {

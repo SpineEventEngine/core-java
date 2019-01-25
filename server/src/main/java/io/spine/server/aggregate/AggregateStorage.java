@@ -45,8 +45,8 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  */
 @SPI
 public abstract class AggregateStorage<I>
-        extends AbstractStorage<I, AggregateStateRecord, AggregateReadRequest<I>>
-        implements StorageWithLifecycleFlags<I, AggregateStateRecord, AggregateReadRequest<I>> {
+        extends AbstractStorage<I, AggregateHistory, AggregateReadRequest<I>>
+        implements StorageWithLifecycleFlags<I, AggregateHistory, AggregateReadRequest<I>> {
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -64,7 +64,7 @@ public abstract class AggregateStorage<I>
     }
 
     /**
-     * Forms and returns an {@link AggregateStateRecord} based on the
+     * Forms and returns an {@link AggregateHistory} based on the
      * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
      *
      * @param request the aggregate read request based on which to form a record
@@ -74,7 +74,7 @@ public abstract class AggregateStorage<I>
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
-    public Optional<AggregateStateRecord> read(AggregateReadRequest<I> request) {
+    public Optional<AggregateHistory> read(AggregateReadRequest<I> request) {
         ReadOperation<I> op = new ReadOperation<>(this, request);
         return op.perform();
     }
@@ -88,7 +88,7 @@ public abstract class AggregateStorage<I>
      * @param events non empty aggregate state record to store
      */
     @Override
-    public void write(I id, AggregateStateRecord events) {
+    public void write(I id, AggregateHistory events) {
         checkNotClosedAndArguments(id, events);
 
         List<Event> eventList = events.getEventList();

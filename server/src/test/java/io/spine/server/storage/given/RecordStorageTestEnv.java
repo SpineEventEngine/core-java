@@ -25,15 +25,13 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
 import io.spine.base.Time;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.TargetFilters;
 import io.spine.core.Version;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
@@ -137,17 +135,8 @@ public class RecordStorageTestEnv {
         assertEquals(expected, singleRecord);
     }
 
-    public static EntityId toEntityId(ProjectId id) {
-        Any packed = Identifier.pack(id);
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(packed)
-                .build();
-        return entityId;
-    }
-
-    public static <T> EntityQuery<T> newEntityQuery(EntityFilters filters,
-                                                    RecordStorage<T> storage) {
+    public static <T> EntityQuery<T>
+    newEntityQuery(TargetFilters filters, RecordStorage<T> storage) {
         return EntityQueries.from(filters, emptyOrderBy(), emptyPagination(), storage);
     }
 
@@ -159,8 +148,8 @@ public class RecordStorageTestEnv {
         return Pagination.getDefaultInstance();
     }
 
-    public static EntityFilters emptyFilters() {
-        return EntityFilters.getDefaultInstance();
+    public static TargetFilters emptyFilters() {
+        return TargetFilters.getDefaultInstance();
     }
 
     public static <E> void assertIteratorsEqual(Iterator<? extends E> first,
@@ -254,12 +243,12 @@ public class RecordStorageTestEnv {
     /**
      * Entity columns representing lifecycle flags, {@code archived} and {@code deleted}.
      *
-     * <p>These columns are present in each {@link EntityWithLifecycle} entity. For the purpose of
+     * <p>These columns are present in each {@linkplain Entity entity}. For the purpose of
      * tests being as close to the real production environment as possible, these columns are stored
      * with the entity records, even if an actual entity is missing.
      *
      * <p>Note that there are cases, when a {@code RecordStorage} stores entity records with no such
-     * columns, e.g. the {@linkplain io.spine.server.event.EEntity event entity}. Thus, do not rely
+     * columns, e.g. the {@linkplain EEntity event entity}. Thus, do not rely
      * on these columns being present in all the entities by default when implementing
      * a {@code RecordStorage}.
      */
@@ -272,9 +261,7 @@ public class RecordStorageTestEnv {
 
         LifecycleColumns(String getterName) {
             try {
-                this.column = EntityColumn.from(
-                        EntityWithLifecycle.class.getDeclaredMethod(getterName)
-                );
+                this.column = EntityColumn.from(Entity.class.getDeclaredMethod(getterName));
             } catch (NoSuchMethodException e) {
                 throw illegalStateWithCauseOf(e);
             }

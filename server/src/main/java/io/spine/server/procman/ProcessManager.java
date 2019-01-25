@@ -74,10 +74,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <I> the type of the process manager IDs
  * @param <S> the type of the process manager state
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for this central class.
 public abstract class ProcessManager<I,
                                      S extends Message,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>>
@@ -121,6 +118,12 @@ public abstract class ProcessManager<I,
      *
      * @throws IllegalStateException if the method is called from outside an event/rejection reactor
      *         or a command handler
+     * @apiNote Marked {@link VisibleForTesting} to allow package-local use of this method in tests.
+     *          It does not affect the visibility for inheritors, which stays {@code protected}
+     *          {@linkplain io.spine.server.entity.TransactionalEntity#getBuilder() as originally 
+     *          defined in parents}.
+     *          See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
+     *          for reason behind the warning.
      */
     @Override
     @VisibleForTesting

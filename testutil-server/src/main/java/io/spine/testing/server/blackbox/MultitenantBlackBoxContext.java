@@ -24,12 +24,14 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.Command;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
-import io.spine.server.event.Enricher;
+import io.spine.server.event.enrich.Enricher;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -81,6 +83,13 @@ public final class MultitenantBlackBoxContext
         TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
         EmittedEvents events = tenantAwareRunner.evaluate(super::emittedEvents);
         return events;
+    }
+
+    @Override
+    protected <D> @Nullable D readOperation(Supplier<D> supplier) {
+        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
+        D result = tenantAwareRunner.evaluate(() -> super.readOperation(supplier));
+        return result;
     }
 
     private TenantId tenantId() {

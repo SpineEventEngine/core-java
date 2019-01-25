@@ -40,6 +40,8 @@ import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
+import io.spine.server.event.enrich.Enricher;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -208,11 +210,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     protected EventEnvelope enrich(EventEnvelope event) {
-        if (enricher == null || !enricher.canBeEnriched(event)) {
+        if (enricher == null) {
             return event;
         }
-        EventEnvelope enriched = enricher.enrich(event);
-        return enriched;
+        EventEnvelope maybeEnriched = enricher.enrich(event);
+        return maybeEnriched;
     }
 
     @Override
@@ -428,7 +430,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
                         .newBuilder()
                         .setStreamExecutor(eventStoreStreamExecutor)
                         .setStorageFactory(storageFactory)
-                        .setLogger(EventStore.log())
+                        .withDefaultLogger()
                         .build();
             }
             EventBus result = new EventBus(this);

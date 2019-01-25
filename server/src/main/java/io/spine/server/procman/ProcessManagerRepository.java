@@ -30,9 +30,7 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
-import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
@@ -77,7 +75,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S> the type of process manager state messages
  * @see ProcessManager
  */
-@SuppressWarnings("OverlyCoupledClass")
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
@@ -110,7 +107,7 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Obtains class information of process managers managed by this repository.
      */
-    ProcessManagerClass<P> processManagerClass() {
+    private ProcessManagerClass<P> processManagerClass() {
         return (ProcessManagerClass<P>) entityClass();
     }
 
@@ -230,7 +227,6 @@ public abstract class ProcessManagerRepository<I,
      * a new process manager is created and stored after it handles the passed command.
      *
      * @param command a request to dispatch
-     * @see CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      */
     @Override
     public I dispatchCommand(CommandEnvelope command) {
@@ -306,12 +302,8 @@ public abstract class ProcessManagerRepository<I,
 
 
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        CaughtError error = commandErrorHandler.handleError(envelope, exception);
-        error.asRejection()
-             .map(RejectionEnvelope::getOuterObject)
-             .ifPresent(event -> postEvents(ImmutableList.of(event)));
-        error.rethrowOnce();
+    public void onError(CommandEnvelope cmd, RuntimeException exception) {
+        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.

@@ -21,10 +21,15 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.test.core.ProjectCreated;
+import io.spine.test.core.ProjectId;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("EventClass should")
 class EventClassTest {
@@ -34,5 +39,22 @@ class EventClassTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(EventClass.class);
+    }
+
+    @Test
+    @DisplayName("be constructed from TypeUrl instance")
+    void constructFromTypeUrl() {
+        TypeUrl typeUrl = TypeUrl.from(ProjectCreated.getDescriptor());
+        EventClass eventClass = EventClass.from(typeUrl);
+        assertEquals(ProjectCreated.class, eventClass.value());
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Method called to throw exception.
+    @Test
+    @DisplayName("throw IAE when constructing from non-event type URL")
+    void throwOnNonEventType() {
+        TypeUrl typeUrl = TypeUrl.from(ProjectId.getDescriptor());
+        assertThrows(IllegalArgumentException.class, () -> EventClass.from(typeUrl));
     }
 }

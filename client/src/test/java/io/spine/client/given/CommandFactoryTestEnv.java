@@ -22,9 +22,6 @@ package io.spine.client.given;
 
 import io.spine.test.commands.RequiredFieldCommand;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class CommandFactoryTestEnv {
 
     public static final RequiredFieldCommand INVALID_COMMAND = invalidCommand();

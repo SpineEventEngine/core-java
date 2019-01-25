@@ -34,8 +34,6 @@ import java.util.Map;
 
 /**
  * A base for exceptions related to events.
- *
- * @author Alexander Litus
  */
 public abstract class EventException extends RuntimeException implements MessageRejection {
 

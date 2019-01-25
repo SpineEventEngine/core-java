@@ -45,7 +45,6 @@ public abstract class AggregatePartRepository<I,
         super();
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // We create objects of another class.
     @Override
     public A create(I id) {
         AggregateRoot<I> root = createAggregateRoot(id);

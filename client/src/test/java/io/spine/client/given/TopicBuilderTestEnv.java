@@ -21,7 +21,7 @@
 package io.spine.client.given;
 
 import com.google.protobuf.Message;
-import io.spine.client.ColumnFilter;
+import io.spine.client.Filter;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
@@ -30,9 +30,6 @@ import static java.lang.String.format;
 import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.junit.Assert.fail;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class TopicBuilderTestEnv {
 
     public static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
@@ -48,14 +45,15 @@ public class TopicBuilderTestEnv {
                            .build();
     }
 
-    public static ColumnFilter findByName(Iterable<ColumnFilter> filters, String name) {
-        for (ColumnFilter filter : filters) {
-            if (filter.getColumnName()
+    public static Filter findByName(Iterable<Filter> filters, String name) {
+        for (Filter filter : filters) {
+            if (filter.getFieldPath()
+                      .getFieldName(0)
                       .equals(name)) {
                 return filter;
             }
         }
-        fail(format("No ColumnFilter found for %s.", name));
+        fail(format("No Filter found for %s. field", name));
         // avoid returning `null`
         throw new RuntimeException("never happens unless JUnit is broken");
     }

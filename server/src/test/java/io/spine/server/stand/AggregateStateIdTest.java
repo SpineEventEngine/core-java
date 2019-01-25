@@ -32,9 +32,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("AggregateStateId should")
 class AggregateStateIdTest {
 

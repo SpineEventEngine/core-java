@@ -36,9 +36,6 @@ import static java.lang.String.format;
 
 /**
  * Client-side utilities for working with queries.
- *
- * @author Alex Tymchenko
- * @author Dmytro Dashenkov
  */
 @Internal
 public final class Queries {
@@ -68,7 +65,7 @@ public final class Queries {
      * the application.
      *
      * @param query
-     *         the query of interest.
+     *         the query of interest
      * @return the URL of the type of the query {@linkplain Query#getTarget() target}
      */
     public static TypeUrl typeOf(Query query) {
@@ -86,11 +83,11 @@ public final class Queries {
     @SuppressWarnings("CheckReturnValue") // calling builder
     static QueryVBuilder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<?> ids,
-                                         @Nullable Set<CompositeColumnFilter> columnFilters,
+                                         @Nullable Set<CompositeFilter> filters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
-        Target target = composeTarget(entityClass, ids, columnFilters);
+        Target target = composeTarget(entityClass, ids, filters);
         QueryVBuilder builder = queryBuilderFor(target, fieldMask);
         return builder;
     }

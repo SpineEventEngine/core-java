@@ -44,7 +44,6 @@ import java.util.List;
  * @param <I> the type of process manager IDs
  * @param <S> the type of process manager state
  * @param <B> the type of a {@code ValidatingBuilder} for the process manager state
- * @author Alex Tymchenko
  */
 @Internal
 public class PmTransaction<I,

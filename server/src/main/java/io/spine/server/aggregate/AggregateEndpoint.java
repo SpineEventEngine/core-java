@@ -36,7 +36,6 @@ import java.util.List;
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
  * @param <M> the type of message envelopes
- * @author Alexander Yevsyukov
  */
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
@@ -106,7 +105,7 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected final void onModified(A entity) {
-        repository().onModifiedAggregate(envelope().getTenantId(), entity);
+        repository().store(entity);
     }
 
     @Override

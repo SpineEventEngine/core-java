@@ -30,7 +30,6 @@ import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
-import io.spine.core.Responses;
 import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
@@ -45,12 +44,8 @@ import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
  * from the server.
  *
- * <p> For synchronous read-side updates please see {@link QueryService}.
- *
- * @author Alex Tymchenko
+ * <p>For synchronous read-side updates please see {@link QueryService}.
  */
-@SuppressWarnings("MethodDoesntCallSuperMethod")
-// as we override default implementation with `unimplemented` status.
 public class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
         implements Logging {
@@ -68,7 +63,7 @@ public class SubscriptionService
 
     @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
-        log().debug("Creating the subscription to a topic: {}", topic);
+        _debug("Creating the subscription to a topic: {}", topic);
 
         try {
             Target target = topic.getTarget();
@@ -77,52 +72,47 @@ public class SubscriptionService
 
             stand.subscribe(topic, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            log().error("Error processing subscription request", e);
+            _error(e, "Error processing subscription request");
             responseObserver.onError(e);
         }
     }
 
     @Override
-    public void activate(Subscription subscription,
-                         StreamObserver<SubscriptionUpdate> responseObserver) {
-        log().debug("Activating the subscription: {}", subscription);
+    public void activate(Subscription subscription, StreamObserver<SubscriptionUpdate> observer) {
+        _debug("Activating the subscription: {}", subscription);
 
         try {
             BoundedContext boundedContext = selectBoundedContext(subscription);
-
-            Stand.EntityUpdateCallback updateCallback = stateUpdate -> {
-                checkNotNull(subscription);
-                SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
-                                                              .setSubscription(subscription)
-                                                              .setResponse(Responses.ok())
-                                                              .addEntityStateUpdates(stateUpdate)
-                                                              .build();
-                responseObserver.onNext(update);
+            Stand.NotifySubscriptionAction notifyAction = update -> {
+                checkNotNull(update);
+                observer.onNext(update);
             };
             Stand targetStand = boundedContext.getStand();
-            targetStand.activate(subscription, updateCallback, forwardErrorsOnly(responseObserver));
+
+            targetStand.activate(subscription, notifyAction, forwardErrorsOnly(observer));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            log().error("Error activating the subscription", e);
-            responseObserver.onError(e);
+            _error(e, "Error activating the subscription");
+            observer.onError(e);
         }
     }
 
     @Override
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
-        log().debug("Incoming cancel request for the subscription topic: {}", subscription);
+        _debug("Incoming cancel request for the subscription topic: {}", subscription);
 
         BoundedContext boundedContext = selectBoundedContext(subscription);
         try {
             Stand stand = boundedContext.getStand();
             stand.cancel(subscription, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            log().error("Error processing cancel subscription request", e);
+            _error(e, "Error processing cancel subscription request");
             responseObserver.onError(e);
         }
     }
 
     private BoundedContext selectBoundedContext(Subscription subscription) {
-        Target target = subscription.getTopic().getTarget();
+        Target target = subscription.getTopic()
+                                    .getTarget();
         BoundedContext context = selectBoundedContext(target);
         return context;
     }

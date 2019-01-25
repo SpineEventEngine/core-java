@@ -31,7 +31,7 @@ class ProjectWizardRepository
         extends ProcessManagerRepository<ProjectId, ProjectWizard, Project> {
 
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+    public void onError(CommandEnvelope cmd, RuntimeException exception) {
         throw illegalStateWithCauseOf(exception);
     }
 }

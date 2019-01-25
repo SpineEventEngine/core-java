@@ -34,7 +34,7 @@ import "google/protobuf/field_mask.proto";
 import "spine/core/user_id.proto";
 import "spine/core/actor_context.proto";
 import "spine/core/response.proto";
-import "spine/client/entities.proto";
+import "spine/client/filters.proto";
 
 // Query identifier.
 //
@@ -98,8 +98,7 @@ message Pagination {
     //
     // A minimum of 1 items per page can be requested.
     //
-    uint32 page_size = 1 [(required) = true,
-                          (min).value = "1"];
+    uint32 page_size = 1 [(min).value = "1"];
 }
 
 // Allows clients to form the requests to the read-side through the `QueryService`.

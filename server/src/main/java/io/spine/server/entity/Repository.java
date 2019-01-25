@@ -30,7 +30,6 @@ import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemWriteSide;
@@ -55,8 +54,7 @@ import static java.lang.String.format;
  * Abstract base class for repositories.
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
-public abstract class Repository<I, E extends Entity<I, ?>>
-        implements RepositoryView<I, E>, AutoCloseable, Logging {
+public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable, Logging {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -87,6 +85,45 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Creates the repository.
      */
     protected Repository() {
+    }
+
+    /**
+     * Create a new entity instance with its default state.
+     *
+     * @param id the id of the entity
+     * @return new entity instance
+     */
+    public abstract E create(I id);
+
+    /**
+     * Stores the passed object.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
+     *
+     * @param obj an instance to store
+     */
+    protected abstract void store(E obj);
+
+    /**
+     * Finds an entity with the passed ID.
+     *
+     * @param id the ID of the entity to load
+     * @return the entity or {@link Optional#empty()} if there's no entity with such ID
+     */
+    public abstract Optional<E> find(I id);
+
+    /**
+     * Returns an iterator over the entities managed by the repository that match the passed filter.
+     *
+     * <p>The returned iterator does not support removal.
+     *
+     * <p>Iteration through entities is performed by {@linkplain #find(Object) loading}
+     * them one by one.
+     */
+    public Iterator<E> iterator(Predicate<E> filter) {
+        Iterator<E> unfiltered = new EntityIterator<>(this);
+        Iterator<E> filtered = Iterators.filter(unfiltered, filter::test);
+        return filtered;
     }
 
     /**
@@ -168,76 +205,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * The callback called by a {@link BoundedContext} during the {@linkplain
      * BoundedContext#register(Repository) registration} of the repository.
-     *
-     * <p>If entities managed by this repository are {@linkplain VersionableEntity versionable},
-     * registers itself as a type supplier with the {@link Stand} of the parent
-     * {@linkplain #getBoundedContext() parent} {@code BoundedContext}.
      */
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
-        if (managesVersionableEntities()) {
-            getBoundedContext().getStand()
-                               .registerTypeSupplier(cast(this));
-        }
-    }
-
-    /**
-     * Verifies if the repository manages instances of {@link VersionableEntity}.
-     */
-    private boolean managesVersionableEntities() {
-        Class entityClass = getEntityClass();
-        boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
-        return result;
-    }
-
-    /**
-     * Casts the passed repository to one that manages {@link VersionableEntity}
-     * instead of just {@link Entity}.
-     *
-     * <p>The cast is required for registering the repository as a type supplier
-     * in the {@link Stand}.
-     *
-     * <p>The cast is safe because the method is called after the
-     * {@linkplain #managesVersionableEntities() type check}.
-     *
-     * @see #onRegistered()
-     */
-    @SuppressWarnings("unchecked") // See Javadoc above.
-    private static <I, E extends Entity<I, ?>>
-    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
-        return (Repository<I, VersionableEntity<I, ?>>) repository;
-    }
-
-    /**
-     * Create a new entity instance with its default state.
-     *
-     * @param id the id of the entity
-     * @return new entity instance
-     */
-    public abstract E create(I id);
-
-    /**
-     * Stores the passed object.
-     *
-     * <p>NOTE: The storage must be assigned before calling this method.
-     *
-     * @param obj an instance to store
-     */
-    protected abstract void store(E obj);
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The returned iterator does not support removal.
-     *
-     * <p>Iteration through entities is performed by {@linkplain #find(Object) loading}
-     * them one by one.
-     */
-    @Override
-    public Iterator<E> iterator(Predicate<E> filter) {
-        Iterator<E> unfiltered = new EntityIterator<>(this);
-        Iterator<E> filtered = Iterators.filter(unfiltered, filter::test);
-        return filtered;
+        getBoundedContext().getStand()
+                           .registerTypeSupplier(this);
     }
 
     /**

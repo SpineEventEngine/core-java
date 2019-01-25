@@ -37,7 +37,7 @@ import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventStore;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemClient;
@@ -219,8 +219,6 @@ class BoundedContextTest {
      * </ul>
      * All of the returned repositories manage entities of the same state type.
      */
-    @SuppressWarnings("unchecked")
-        // Entities managed by created repositories are all of state type `Project`.
     private static Stream<Arguments> sameStateRepositories() {
         Set<Repository<?, ?>> repositories =
                 ImmutableSet.of(new ProjectAggregateRepository(),

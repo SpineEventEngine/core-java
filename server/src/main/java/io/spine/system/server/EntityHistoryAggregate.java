@@ -116,7 +116,8 @@ final class EntityHistoryAggregate
 
     @Apply(allowImport = true)
     void on(EntityStateChanged event) {
-        getBuilder().setLastStateChange(event.getWhen());
+        getBuilder().setId(event.getId())
+                    .setLastStateChange(event.getWhen());
     }
 
     @Apply(allowImport = true)

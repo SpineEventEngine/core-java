@@ -38,7 +38,7 @@ message Version {
     // When numbering versions of entities the zero value is reserved for
     // the "pre-initialization" version of an entity.
     //
-    int32 number = 1 [(required) = true];
+    int32 number = 1 [(min).value = "0"];
 
     // A moment in time when the new version was created.
     google.protobuf.Timestamp timestamp = 2 [(required) = true];
