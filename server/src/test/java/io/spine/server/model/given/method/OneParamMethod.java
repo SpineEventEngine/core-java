@@ -20,7 +20,9 @@
 
 package io.spine.server.model.given.method;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -39,7 +41,7 @@ public class OneParamMethod
                                       MethodResult<Empty>> {
 
     public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec);
+        super(method, parameterSpec, ImmutableSet.of());
     }
 
     @Override

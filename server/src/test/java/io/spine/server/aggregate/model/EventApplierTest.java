@@ -73,7 +73,7 @@ class EventApplierTest {
         Optional<EventApplier> actual = signature.create(method);
         assertTrue(actual.isPresent());
 
-        assertEquals(new EventApplier(method, EventApplierParams.MESSAGE), actual.get());
+        assertEquals(new EventApplier(method, EventApplierParams.MESSAGE, emittedMessages), actual.get());
     }
 
     @Test

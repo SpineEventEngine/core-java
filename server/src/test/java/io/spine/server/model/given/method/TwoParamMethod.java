@@ -20,6 +20,7 @@
 
 package io.spine.server.model.given.method;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
@@ -39,7 +40,7 @@ public class TwoParamMethod
                                       MethodResult<Empty>> {
 
     public TwoParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec);
+        super(method, parameterSpec, ImmutableSet.of());
     }
 
     @Override

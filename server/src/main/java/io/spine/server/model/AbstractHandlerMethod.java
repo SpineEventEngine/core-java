@@ -34,8 +34,6 @@ import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -93,19 +91,31 @@ public abstract class AbstractHandlerMethod<T,
     private final ParameterSpec<E> parameterSpec;
 
     /**
-     * Creates a new instance to wrap {@code method} on {@code target}.
+     * ...
      *
-     * @param method
+     * @apiNote
+     * The generated message classes can be different from the one specified in this handler's
+     * {@link MethodResult} params for return types like {@link io.spine.server.tuple.Tuple}
+     * hence we use {@code Class} with a wildcard instead of parameterizing the list.
+     */
+    private final ImmutableSet<Class<? extends Message>> emittedMessages;
+
+    /**
+     * Creates a new instance to wrap {@code method} on {@code target}.
+     *  @param method
      *         subscriber method
      * @param parameterSpec
      *         the specification of method parameters
+     * @param emittedMessages
      */
     protected AbstractHandlerMethod(Method method,
-                                    ParameterSpec<E> parameterSpec) {
+                                    ParameterSpec<E> parameterSpec,
+                                    ImmutableSet<Class<? extends Message>> emittedMessages) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
+        this.emittedMessages = emittedMessages;
 
         method.setAccessible(true);
     }
@@ -174,34 +184,20 @@ public abstract class AbstractHandlerMethod<T,
      * Retrieves the message classes produced by this handler method.
      *
      * <p>In Spine, all handlers that produce messages return them either as-is, or in
-     * {@code Optional<Message>}/{@code Iterable<Message>/Pair<Message1, Message2>} form.
+     * {@code Optional<Message>}/{@code Iterable<Message>/Tuple<Message1, Message2, ...>/Either<>} form.
      *
      * <p>Methods with other return types (for example, {@link Void} for subscribers/appliers or
      * {@link Empty} for reactors are all valid cases) are deemed producing no messages.
      *
      * @return produced message classes or {@link Optional#empty()} if the method produces nothing
-     * @see MethodResult#toMessages(Object)
+     * @see MethodResult#toMessages(Object).
+     *
+     * // todo mention somewhere about Either and if you know for sure which types it will emit and
+     * // todo want to subscribe to them, please use Tuple, subscribing for produced Either
+     * // todo instances is disabled for obvious reasons.
      */
-    @SuppressWarnings("unchecked") // Logically checked.
-    public Optional<Class<? extends Message>> getProducedMessageTypes() {
-        Class<?> producedType = method.getReturnType();
-
-        if (Optional.class.isAssignableFrom(producedType)
-                || Iterable.class.isAssignableFrom(producedType)) {
-            ParameterizedType parameterized = (ParameterizedType) method.getGenericReturnType();
-            Type firstGenericParam = parameterized.getActualTypeArguments()[0];
-            producedType = (Class) firstGenericParam;
-        }
-        // todo use common IGNORED_MESSAGES with method result filters.
-        if (Nothing.class.isAssignableFrom(producedType)
-                || Empty.class.isAssignableFrom(producedType)) {
-            return Optional.empty();
-        }
-        if (Message.class.isAssignableFrom(producedType)) {
-            Class<? extends Message> messageClass = (Class<? extends Message>) producedType;
-            return Optional.of(messageClass);
-        }
-        return Optional.empty();
+    public ImmutableSet<Class<? extends Message>> getEmittedMessages() {
+        return emittedMessages;
     }
 
     private int getModifiers() {

@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandEnvelope;
@@ -46,9 +47,11 @@ public final class CommandHandlerMethod
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method   command handler method
+     * @param emittedMessages
      */
-    CommandHandlerMethod(Method method, ParameterSpec<CommandEnvelope> params) {
-        super(method, params);
+    CommandHandlerMethod(Method method, ParameterSpec<CommandEnvelope> params,
+                         ImmutableSet<Class<? extends Message>> emittedMessages) {
+        super(method, params, emittedMessages);
     }
 
     /**

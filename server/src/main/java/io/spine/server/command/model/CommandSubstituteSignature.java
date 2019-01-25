@@ -21,13 +21,17 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.CommandMessage;
+import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
+
+import static io.spine.server.model.declare.ReturnType.COMMAND_MESSAGE;
+import static io.spine.server.model.declare.ReturnType.ITERABLE;
 
 /**
  * A signature of {@link io.spine.server.command.model.CommandSubstituteMethod
@@ -43,14 +47,16 @@ public class CommandSubstituteSignature
     }
 
     @Override
-    public CommandSubstituteMethod doCreate(Method method,
-                                            ParameterSpec<CommandEnvelope> parameterSpec) {
-        return new CommandSubstituteMethod(method, parameterSpec);
+    public CommandSubstituteMethod
+    doCreate(Method method,
+             ParameterSpec<CommandEnvelope> parameterSpec,
+             ImmutableSet<Class<? extends Message>> emittedMessages) {
+        return new CommandSubstituteMethod(method, parameterSpec, emittedMessages);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return ImmutableSet.of(CommandMessage.class, Iterable.class);
+    protected ImmutableSet<ReturnType> getValidReturnTypes() {
+        return ImmutableSet.of(COMMAND_MESSAGE, ITERABLE);
     }
 
     /**

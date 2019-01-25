@@ -21,6 +21,7 @@
 package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.model.HandlerMethod;
@@ -83,7 +84,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<Class<?>> getValidReturnTypes();
+    protected abstract ImmutableSet<ReturnType> getValidReturnTypes();
 
     /**
      * Obtains the set of allowed exceptions that method may declare to throw.
@@ -158,9 +159,11 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *
      * @param method the raw method to wrap into a {@code HandlerMethod} instance being created
      * @param parameterSpec the specification of method parameters
+     * @param emittedMessages
      * @return new instance of {@code HandlerMethod}
      */
-    public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec);
+    public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec,
+                               ImmutableSet<Class<? extends Message>> emittedMessages);
 
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
@@ -188,10 +191,11 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
             return Optional.empty();
         }
         Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecs());
+        ImmutableSet<Class<? extends Message>> emitted = extractEmittedMessages(method);
         return matchingSpec.map(spec -> {
-            H handler = doCreate(method, spec);
-            handler.discoverAttributes();
-            return handler;
+                H handler = doCreate(method, spec, emitted);
+                handler.discoverAttributes();
+                return handler;
         });
     }
 
@@ -213,5 +217,11 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                       .map(Optional::get)
                       .collect(toList());
         return result;
+    }
+
+    private ImmutableSet<Class<? extends Message>> extractEmittedMessages(Method method) {
+        Optional<ReturnType> returnType = ReturnType.findMatching(method, getValidReturnTypes());
+        return returnType.map(type -> type.emittedMessages(method))
+                         .orElse(ImmutableSet.of());
     }
 }

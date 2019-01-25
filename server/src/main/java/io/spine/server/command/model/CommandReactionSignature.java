@@ -22,7 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.base.CommandMessage;
+import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
@@ -33,12 +33,15 @@ import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
+import static io.spine.server.model.declare.ReturnType.COMMAND_MESSAGE;
+import static io.spine.server.model.declare.ReturnType.ITERABLE;
+import static io.spine.server.model.declare.ReturnType.OPTIONAL;
 
 /**
  * A signature of {@link CommandReactionMethod}.
@@ -61,14 +64,15 @@ public class CommandReactionSignature
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
+    protected ImmutableSet<ReturnType> getValidReturnTypes() {
+        return ImmutableSet.of(COMMAND_MESSAGE, ITERABLE, OPTIONAL);
     }
 
     @Override
     public CommandReactionMethod doCreate(Method method,
-                                          ParameterSpec<EventEnvelope> parameterSpec) {
-        return new CommandReactionMethod(method, parameterSpec);
+                                          ParameterSpec<EventEnvelope> parameterSpec,
+                                          ImmutableSet<Class<? extends Message>> emittedMessages) {
+        return new CommandReactionMethod(method, parameterSpec, emittedMessages);
     }
 
     /**

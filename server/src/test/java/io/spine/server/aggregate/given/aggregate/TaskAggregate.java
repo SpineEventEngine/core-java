@@ -62,7 +62,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
      * {@linkplain AggCreateTask#getAssignee() assignee}.
      */
     @Assign
-    Pair<AggTaskCreated, Optional<AggTaskAssigned>> handle(AggCreateTask command) {
+    public Pair<AggTaskCreated, Optional<AggTaskAssigned>> handle(AggCreateTask command) {
         AggTaskId id = command.getTaskId();
         AggTaskCreated createdEvent = taskCreated(id);
 

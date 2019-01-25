@@ -21,14 +21,18 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.EventMessage;
+import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
+
+import static io.spine.server.model.declare.ReturnType.EVENT_MESSAGE;
+import static io.spine.server.model.declare.ReturnType.ITERABLE;
+import static io.spine.server.model.declare.ReturnType.OPTIONAL;
 
 /**
  * The signature of {@link EventReactorMethod}.
@@ -45,12 +49,13 @@ class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> 
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
+    protected ImmutableSet<ReturnType> getValidReturnTypes() {
+        return ImmutableSet.of(EVENT_MESSAGE, ITERABLE, OPTIONAL);
     }
 
     @Override
-    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventReactorMethod(method, parameterSpec);
+    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec,
+                                       ImmutableSet<Class<? extends Message>> emittedMessages) {
+        return new EventReactorMethod(method, parameterSpec, emittedMessages);
     }
 }

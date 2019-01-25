@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Environment;
@@ -54,8 +55,9 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     private final BoundedContextName contextOfSubscriber;
     private final Any typeUrlAsAny;
 
-    EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec);
+    EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec,
+                           ImmutableSet<Class<? extends Message>> emittedMessages) {
+        super(method, parameterSpec, emittedMessages);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         checkNotFiltered(method);
         checkExternal();

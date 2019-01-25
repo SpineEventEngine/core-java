@@ -20,8 +20,10 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
 import io.spine.core.EventClass;
@@ -52,8 +54,9 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
                                                                      EventEnvelope,
                                                                      MethodResult<Empty>> {
 
-    protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec);
+    protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec,
+                               ImmutableSet<Class<? extends Message>> emittedMessages) {
+        super(method, parameterSpec, emittedMessages);
     }
 
     @Override

@@ -20,6 +20,8 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventReactor;
@@ -41,8 +43,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EventReactorMethod
         extends EventHandlerMethod<EventReactor, ReactorMethodResult> {
 
-    EventReactorMethod(Method method, ParameterSpec<EventEnvelope> params) {
-        super(method, params);
+    EventReactorMethod(Method method, ParameterSpec<EventEnvelope> params,
+                       ImmutableSet<Class<? extends Message>> emittedMessages) {
+        super(method, params, emittedMessages);
     }
 
     @Override

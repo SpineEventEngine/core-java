@@ -20,7 +20,9 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -41,8 +43,9 @@ import java.lang.reflect.Method;
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, R> {
 
-    CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
-        super(method, params);
+    CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params,
+                           ImmutableSet<Class<? extends Message>> emittedMessages) {
+        super(method, params, emittedMessages);
     }
 
     @Override

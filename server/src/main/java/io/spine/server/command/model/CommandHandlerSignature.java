@@ -21,12 +21,16 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.EventMessage;
+import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Assign;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
+
+import static io.spine.server.model.declare.ReturnType.EVENT_MESSAGE;
+import static io.spine.server.model.declare.ReturnType.ITERABLE;
 
 /**
  * The signature of {@code Command} handler method.
@@ -40,13 +44,14 @@ public class CommandHandlerSignature extends CommandAcceptingMethodSignature<Com
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return ImmutableSet.of(EventMessage.class, Iterable.class);
+    protected ImmutableSet<ReturnType> getValidReturnTypes() {
+        return ImmutableSet.of(EVENT_MESSAGE, ITERABLE);
     }
 
     @Override
     public CommandHandlerMethod doCreate(Method method,
-                                         ParameterSpec<CommandEnvelope> parameterSpec) {
-        return new CommandHandlerMethod(method, parameterSpec);
+                                         ParameterSpec<CommandEnvelope> parameterSpec,
+                                         ImmutableSet<Class<? extends Message>> emittedMessages) {
+        return new CommandHandlerMethod(method, parameterSpec, emittedMessages);
     }
 }

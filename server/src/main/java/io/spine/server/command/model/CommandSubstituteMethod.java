@@ -20,6 +20,8 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandReceiver;
@@ -38,8 +40,9 @@ public final class CommandSubstituteMethod
         implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope, Result> {
 
     CommandSubstituteMethod(Method method,
-                            ParameterSpec<CommandEnvelope> paramSpec) {
-        super(method, paramSpec);
+                            ParameterSpec<CommandEnvelope> paramSpec,
+                            ImmutableSet<Class<? extends Message>> emittedMessages) {
+        super(method, paramSpec, emittedMessages);
     }
 
     @Override

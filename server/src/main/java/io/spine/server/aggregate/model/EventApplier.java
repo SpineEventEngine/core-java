@@ -23,6 +23,7 @@ package io.spine.server.aggregate.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -50,13 +51,14 @@ public final class EventApplier
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
-     *
-     * @param method   the applier method
+     *  @param method   the applier method
      * @param signature {@link ParameterSpec} which describes the method
+     * @param emittedMessages
      */
     EventApplier(Method method,
-                 ParameterSpec<EventEnvelope> signature) {
-        super(method, signature);
+                 ParameterSpec<EventEnvelope> signature,
+                 ImmutableSet<Class<? extends Message>> emittedMessages) {
+        super(method, signature, emittedMessages);
     }
 
     /**

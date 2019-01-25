@@ -22,13 +22,17 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
+
+import static io.spine.server.model.declare.ReturnType.VOID;
 
 /**
  * A signature of {@link SubscriberMethod}.
@@ -45,8 +49,8 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return ImmutableSet.of(void.class);
+    protected ImmutableSet<ReturnType> getValidReturnTypes() {
+        return ImmutableSet.of(VOID);
     }
 
     @Override
@@ -60,10 +64,11 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    public SubscriberMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+    public SubscriberMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec,
+                                     ImmutableSet<Class<? extends Message>> emittedMessages) {
         return isEntitySubscriber(method)
-               ? new EntitySubscriberMethod(method, parameterSpec)
-               : new EventSubscriberMethod(method, parameterSpec);
+               ? new EntitySubscriberMethod(method, parameterSpec, emittedMessages)
+               : new EventSubscriberMethod(method, parameterSpec, emittedMessages);
     }
 
     private static boolean isEntitySubscriber(Method method) {

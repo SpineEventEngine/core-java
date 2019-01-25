@@ -57,17 +57,17 @@ public enum MatchCriterion {
      * {@linkplain MethodSignature#getValidReturnTypes() expected}.
      */
     RETURN_TYPE(ERROR,
-                "The return type of `%s` method does not match the constraints " +
+                "The return type `%s` of `%s` method does not match the constraints " +
                         "set for `%s`-annotated method.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            Class<?> returnType = method.getReturnType();
-            boolean conforms = signature.getValidReturnTypes()
-                                        .stream()
-                                        .anyMatch(type -> type.isAssignableFrom(returnType));
-            if (!conforms) {
+            Optional<ReturnType> matching =
+                    ReturnType.findMatching(method, signature.getValidReturnTypes());
+            if (!matching.isPresent()) {
                 SignatureMismatch mismatch =
                         create(this,
+                               method.getReturnType()
+                                     .getSimpleName(),
                                methodAsString(method),
                                signature.getAnnotation()
                                         .getSimpleName());

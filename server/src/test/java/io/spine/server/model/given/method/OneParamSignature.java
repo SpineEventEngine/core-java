@@ -21,10 +21,12 @@
 package io.spine.server.model.given.method;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -33,6 +35,7 @@ import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
 import static io.spine.server.model.declare.AccessModifier.PRIVATE;
 import static io.spine.server.model.declare.AccessModifier.PROTECTED;
 import static io.spine.server.model.declare.AccessModifier.PUBLIC;
+import static io.spine.server.model.declare.ReturnType.VOID;
 
 public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnvelope> {
 
@@ -51,12 +54,13 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return ImmutableSet.of(Object.class);
+    protected ImmutableSet<ReturnType> getValidReturnTypes() {
+        return ImmutableSet.of(VOID);
     }
 
     @Override
-    public OneParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+    public OneParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec,
+                                   ImmutableSet<Class<? extends Message>> ignored) {
         return new OneParamMethod(method, parameterSpec);
     }
 

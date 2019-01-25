@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -49,9 +50,11 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
+     * @param emittedMessages
      */
-    EventHandlerMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec);
+    EventHandlerMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec,
+                       ImmutableSet<Class<? extends Message>> emittedMessages) {
+        super(method, parameterSpec, emittedMessages);
     }
 
     @Override
