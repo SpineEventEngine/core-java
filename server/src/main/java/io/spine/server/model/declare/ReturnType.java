@@ -31,6 +31,8 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Optional;
 
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+
 /**
  * A wrapper around method's return type which knows how to get emitted messages (events and
  * commands) of the method.
@@ -39,49 +41,49 @@ public enum ReturnType {
 
     VOID(void.class) {
         @Override
-        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+        protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
             return ImmutableSet.of();
         }
     },
 
     NOTHING(Nothing.class) {
         @Override
-        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+        protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
             return ImmutableSet.of();
         }
     },
 
     COMMAND_MESSAGE(CommandMessage.class) {
         @Override
-        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+        protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
             return ImmutableSet.of();
         }
     },
 
     EVENT_MESSAGE(EventMessage.class, NOTHING) {
         @Override
-        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+        protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
             return ImmutableSet.of();
         }
     },
 
     OPTIONAL(Optional.class) {
         @Override
-        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+        protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
             return ImmutableSet.of();
         }
     },
 
     PAIR(Pair.class) {
         @Override
-        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+        protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
             return ImmutableSet.of();
         }
     },
 
     ITERABLE(Iterable.class, PAIR) {
         @Override
-        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+        protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
             return ImmutableSet.of();
         }
     };
@@ -94,27 +96,50 @@ public enum ReturnType {
         this.specialCases = ImmutableSet.copyOf(specialCases);
     }
 
+    Optional<ReturnType> getMatching(Class<?> methodReturnType) {
+        Optional<ReturnType> specialCase = specialCases
+                .stream()
+                .filter(type -> type.matches(methodReturnType))
+                .findFirst();
+        if (specialCase.isPresent()) {
+            return specialCase;
+        }
+        Optional<ReturnType> result = matches(methodReturnType)
+                                      ? Optional.of(this)
+                                      : Optional.empty();
+        return result;
+    }
+
     private boolean matches(Class<?> methodReturnType) {
         return returnType.isAssignableFrom(methodReturnType);
     }
 
-    protected abstract ImmutableSet<Class<? extends Message>> emittedMessages(Method method);
+    ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+        Class<?> returnType = method.getReturnType();
+        ImmutableSet<Class<? extends Message>> result = getMatching(returnType)
+                .orElseThrow(() -> signatureMismatchError(method))
+                .gatherEmittedMessages(method);
+        return result;
+    }
+
+    private IllegalArgumentException signatureMismatchError(Method method) {
+        return newIllegalArgumentException(
+                "Trying to gather emitted messages for method %s on mismatching return type %s",
+                method.getName(),
+                this.name()
+        );
+    }
+
+    protected abstract ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method);
 
     static Optional<ReturnType> findMatching(Method method, Collection<ReturnType> types) {
         Class<?> returnType = method.getReturnType();
-        Optional<ReturnType> matchingSpecialCase = types
-                .stream()
-                .flatMap(type -> type.specialCases.stream())
-                .filter(specialCase -> specialCase.matches(returnType))
-                .findFirst();
-
-        if (matchingSpecialCase.isPresent()) {
-            return matchingSpecialCase;
-        }
         Optional<ReturnType> result = types
                 .stream()
-                .filter(type -> type.matches(returnType))
-                .findFirst();
+                .map(type -> type.getMatching(returnType))
+                .filter(Optional::isPresent)
+                .findFirst()
+                .orElseGet(Optional::empty);
         return result;
     }
 }
