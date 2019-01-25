@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.server.model.Nothing;
+import io.spine.server.tuple.Pair;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -71,7 +72,14 @@ public enum ReturnType {
         }
     },
 
-    ITERABLE(Iterable.class) {
+    PAIR(Pair.class) {
+        @Override
+        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+            return ImmutableSet.of();
+        }
+    },
+
+    ITERABLE(Iterable.class, PAIR) {
         @Override
         protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
             return ImmutableSet.of();
