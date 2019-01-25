@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.server.model.Nothing;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -43,41 +43,50 @@ public enum ReturnType {
         }
     },
 
-    COMMAND_MESSAGE(CommandMessage.class) {
+    NOTHING(Nothing.class) {
         @Override
         protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
-            return null;
+            return ImmutableSet.of();
         }
     },
 
-    EVENT_MESSAGE(EventMessage.class) {
+    COMMAND_MESSAGE(CommandMessage.class) {
         @Override
         protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
-            return null;
+            return ImmutableSet.of();
+        }
+    },
+
+    EVENT_MESSAGE(EventMessage.class, NOTHING) {
+        @Override
+        protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
+            return ImmutableSet.of();
         }
     },
 
     OPTIONAL(Optional.class) {
         @Override
         protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
-            return null;
+            return ImmutableSet.of();
         }
     },
 
     ITERABLE(Iterable.class) {
         @Override
         protected ImmutableSet<Class<? extends Message>> emittedMessages(Method method) {
-            return null;
+            return ImmutableSet.of();
         }
     };
 
     private final Class<?> returnType;
+    private final ImmutableSet<ReturnType> specialCases;
 
-    ReturnType(Class<?> type) {
+    ReturnType(Class<?> type, ReturnType... specialCases) {
         returnType = type;
+        this.specialCases = ImmutableSet.copyOf(specialCases);
     }
 
-    boolean matches(Class<?> methodReturnType) {
+    private boolean matches(Class<?> methodReturnType) {
         return returnType.isAssignableFrom(methodReturnType);
     }
 
@@ -85,6 +94,15 @@ public enum ReturnType {
 
     static Optional<ReturnType> findMatching(Method method, Collection<ReturnType> types) {
         Class<?> returnType = method.getReturnType();
+        Optional<ReturnType> matchingSpecialCase = types
+                .stream()
+                .flatMap(type -> type.specialCases.stream())
+                .filter(specialCase -> specialCase.matches(returnType))
+                .findFirst();
+
+        if (matchingSpecialCase.isPresent()) {
+            return matchingSpecialCase;
+        }
         Optional<ReturnType> result = types
                 .stream()
                 .filter(type -> type.matches(returnType))
