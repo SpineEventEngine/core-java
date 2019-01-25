@@ -28,7 +28,6 @@ import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
-import io.spine.system.server.HistoryRejections;
 
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
@@ -53,10 +52,10 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
         repository.dispatchNowTo(id, envelope);
     }
 
-    @Subscribe
-    public void on(HistoryRejections.CannotDispatchEventTwice event) {
-        onError(event.getPayload());
-    }
+//    @Subscribe
+//    public void on(HistoryRejections.CannotDispatchEventTwice event) {
+//        onError(event.getPayload());
+//    }
 
     private void onError(Event event) {
         RuntimeException exception = new DuplicateEventException(event);

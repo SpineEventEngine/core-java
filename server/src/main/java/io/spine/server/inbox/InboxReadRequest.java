@@ -25,7 +25,7 @@ import io.spine.server.storage.ReadRequest;
 /**
  * A request to read the contents of a certain {@link Inbox}.
  */
-class InboxReadRequest implements ReadRequest<InboxId> {
+public class InboxReadRequest implements ReadRequest<InboxId> {
 
     private final InboxId inboxId;
 

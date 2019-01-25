@@ -35,9 +35,7 @@ import static java.lang.String.format;
  * Reports an attempt to dispatch a duplicate command.
  *
  * <p>A command is considered a duplicate when its ID matches the ID of a command which was
- * already dispatched emitting events in a target aggregate.
- *
- * @author Mykhailo Drachuk
+ * already dispatched emitting events in a target entity.
  */
 public class DuplicateCommandException extends CommandException implements MessageInvalid {
 
@@ -56,7 +54,7 @@ public class DuplicateCommandException extends CommandException implements Messa
     public static DuplicateCommandException of(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
         Message commandMessage = envelope.getMessage();
-        String errorMessage = aggregateErrorMessage(envelope);
+        String errorMessage = duplicationErrorFor(envelope);
         Error error = error(commandMessage, errorMessage);
         return new DuplicateCommandException(errorMessage, command, error);
     }
@@ -78,12 +76,12 @@ public class DuplicateCommandException extends CommandException implements Messa
     }
 
     /**
-     * Generates a formatted duplicate aggregate command error message.
+     * Generates a formatted duplicate command error message.
      *
      * @param envelope the envelope with a command which is considered a duplicate
      * @return a string with details on what happened
      */
-    private static String aggregateErrorMessage(CommandEnvelope envelope) {
+    private static String duplicationErrorFor(CommandEnvelope envelope) {
         return format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched to a "
                         + "single entity twice.",

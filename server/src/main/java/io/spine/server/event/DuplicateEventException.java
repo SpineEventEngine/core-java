@@ -33,8 +33,6 @@ import static java.lang.String.format;
  *
  * <p>An event is considered a duplicate when its ID matches the ID of another event which was
  * already dispatched to a given entity.
- *
- * @author Dmytro Dashenkov
  */
 public final class DuplicateEventException extends RuntimeException {
 

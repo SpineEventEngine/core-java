@@ -22,8 +22,11 @@ package io.spine.server.inbox;
 
 import io.spine.server.storage.AbstractStorage;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Abstract base for the storage of {@link Inbox} messages.
@@ -35,12 +38,25 @@ public abstract class InboxStorage
         super(multitenant);
     }
 
+    protected abstract void write(InboxId id, InboxMessage message);
+
+    protected abstract Iterator<InboxMessage> readAll(InboxId id);
+
     @Override
     public Optional<InboxContentRecord> read(InboxReadRequest request) {
-        return Optional.empty();
-    }
+        Iterator<InboxMessage> iterator = readAll(request.getRecordId());
 
-    protected abstract void write(InboxId id, InboxMessage message);
+        if (!iterator.hasNext()) {
+            return Optional.empty();
+        }
+
+        InboxContentRecord result =
+                InboxContentRecordVBuilder
+                        .newBuilder()
+                        .addAllMessage(newArrayList(iterator))
+                        .build();
+        return Optional.of(result);
+    }
 
     @Override
     public void write(InboxId id, InboxContentRecord content) {

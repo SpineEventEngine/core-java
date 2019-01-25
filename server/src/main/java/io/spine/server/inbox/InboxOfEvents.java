@@ -20,11 +20,9 @@
 
 package io.spine.server.inbox;
 
-import io.spine.base.Time;
 import io.spine.core.EventEnvelope;
-import io.spine.system.server.CannotDispatchEventTwice;
+import io.spine.server.event.DuplicateEventException;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -46,33 +44,19 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     }
 
     @Override
-    protected Optional<CannotDeliverMessageException> checkDuplicates(InboxContentRecord contents) {
+    protected Optional<DuplicateEventException> checkDuplicates(InboxContentRecord contents) {
         EventEnvelope envelope = getEnvelope();
-        List<InboxMessage> messages = contents.getMessageList();
-        CannotDispatchEventTwice duplicationException = null;
-        for (InboxMessage message : messages) {
-            if (duplicationException == null) {
-                if (message.hasEvent() && message.getEvent()
-                                                 .getId()
-                                                 .equals(envelope.getId())) {
-
-                    duplicationException = duplicateEventOf(envelope);
-                }
-            }
+        boolean hasDuplicate = contents.getMessageList()
+                                       .stream()
+                                       .filter(InboxMessage::hasEvent)
+                                       .anyMatch(m -> envelope.getId()
+                                                              .equals(m.getEvent()
+                                                                       .getId()));
+        if (hasDuplicate) {
+            DuplicateEventException exception =
+                    new DuplicateEventException(envelope.getOuterObject());
+            return Optional.of(exception);
         }
-        return duplicationException == null
-               ? Optional.empty()
-               : Optional.of(new CannotDeliverMessageException(duplicationException));
-    }
-
-    private static CannotDispatchEventTwice duplicateEventOf(EventEnvelope envelope) {
-        CannotDispatchEventTwice result =
-                CannotDispatchEventTwice
-                        .newBuilder()
-                        .setPayload(envelope.getOuterObject())
-//                      .setReceiver(...)
-                        .setWhenDispatched(Time.getCurrentTime())
-                        .build();
-        return result;
+        return Optional.empty();
     }
 }

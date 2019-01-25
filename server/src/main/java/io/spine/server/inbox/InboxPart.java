@@ -69,7 +69,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * <p>In case of duplication returns an {@code Optional} containing the duplication exception
      * wrapped into a inbox-specific runtime exception for further handling.
      */
-    protected abstract Optional<CannotDeliverMessageException>
+    protected abstract Optional<? extends RuntimeException>
     checkDuplicates(InboxContentRecord contents);
 
     void storeOrDeliver(InboxLabel label) {
@@ -81,8 +81,11 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
         Optional<InboxContentRecord> contents = storage.read(new InboxReadRequest(inboxId));
         if (contents.isPresent()) {
             InboxContentRecord contentRecord = contents.get();
-            checkDuplicates(contentRecord).ifPresent(e -> endpoint.onError(envelope, e));
-            return;
+            Optional<? extends RuntimeException> duplicateFound = checkDuplicates(contentRecord);
+            if(duplicateFound.isPresent()) {
+                endpoint.onError(envelope, duplicateFound.get());
+                return;
+            }
         }
 
         //TODO:2019-01-09:alex.tymchenko: store if windowing is enabled.

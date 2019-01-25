@@ -20,11 +20,9 @@
 
 package io.spine.server.inbox;
 
-import io.spine.base.Time;
 import io.spine.core.CommandEnvelope;
-import io.spine.system.server.CannotDispatchCommandTwice;
+import io.spine.server.commandbus.DuplicateCommandException;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -45,35 +43,21 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
         builder.setCommand(envelope.getOuterObject());
     }
 
+    //TODO:2019-01-25:alex.tymchenko: should we post rejections?
     @Override
-    protected Optional<CannotDeliverMessageException> checkDuplicates(InboxContentRecord contents) {
+    protected Optional<DuplicateCommandException> checkDuplicates(InboxContentRecord contents) {
         CommandEnvelope envelope = getEnvelope();
-        List<InboxMessage> messages = contents.getMessageList();
-        CannotDispatchCommandTwice duplicationException = null;
-        for (InboxMessage message : messages) {
-            if (duplicationException == null) {
-                if (message.hasCommand() && message.getCommand()
-                                                   .getId()
-                                                   .equals(envelope.getId())) {
-
-                    duplicationException = duplicateCommandOf(envelope);
-                }
-            }
+        boolean hasDuplicate = contents.getMessageList()
+                                       .stream()
+                                       .filter(InboxMessage::hasCommand)
+                                       .anyMatch(m -> envelope.getId()
+                                                              .equals(m.getCommand()
+                                                                       .getId()));
+        if (hasDuplicate) {
+            DuplicateCommandException exception =
+                    DuplicateCommandException.of(envelope.getOuterObject());
+            return Optional.of(exception);
         }
-
-        return duplicationException == null
-               ? Optional.empty()
-               : Optional.of(new CannotDeliverMessageException(duplicationException));
-    }
-
-    private static CannotDispatchCommandTwice duplicateCommandOf(CommandEnvelope envelope) {
-        CannotDispatchCommandTwice result =
-                CannotDispatchCommandTwice
-                        .newBuilder()
-                        .setPayload(envelope.getOuterObject())
-//                      .setReceiver(...)
-                        .setWhenDispatched(Time.getCurrentTime())
-                        .build();
-        return result;
+        return Optional.empty();
     }
 }

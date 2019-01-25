@@ -30,8 +30,6 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.commandbus.DuplicateCommandException;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.system.server.CommandDispatchedToHandler;
 import io.spine.system.server.CommandDispatchedToHandlerVBuilder;
@@ -49,8 +47,6 @@ import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.system.server.HistoryRejections.CannotDispatchCommandTwice;
-import static io.spine.system.server.HistoryRejections.CannotDispatchEventTwice;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -138,41 +134,41 @@ class PmSystemEventWatcherTest {
     @DisplayName("on a system rejection, warn repository with")
     class NegativeOutcome {
 
-        @Test
-        @DisplayName("DuplicateEventException")
-        void event() {
-            Event payload = GivenMessage.projectStarted();
-            CannotDispatchEventTwice rejection = CannotDispatchEventTwice
-                    .newBuilder()
-                    .setPayload(payload)
-                    .setReceiver(historyId())
-                    .setWhenDispatched(getCurrentTime())
-                    .build();
-            watcher.on(rejection);
-
-            verify(repository).onError(
-                    eq(EventEnvelope.of(payload)),
-                    any(DuplicateEventException.class)
-            );
-        }
-
-        @Test
-        @DisplayName("DuplicateCommandException")
-        void command() {
-            Command payload = GivenMessage.createProject();
-            CannotDispatchCommandTwice rejection = CannotDispatchCommandTwice
-                    .newBuilder()
-                    .setPayload(payload)
-                    .setReceiver(historyId())
-                    .setWhenDispatched(getCurrentTime())
-                    .build();
-            watcher.on(rejection);
-
-            verify(repository).onError(
-                    eq(CommandEnvelope.of(payload)),
-                    any(DuplicateCommandException.class)
-            );
-        }
+//        @Test
+//        @DisplayName("DuplicateEventException")
+//        void event() {
+//            Event payload = GivenMessage.projectStarted();
+//            CannotDispatchEventTwice rejection = CannotDispatchEventTwice
+//                    .newBuilder()
+//                    .setPayload(payload)
+//                    .setReceiver(historyId())
+//                    .setWhenDispatched(getCurrentTime())
+//                    .build();
+//            watcher.on(rejection);
+//
+//            verify(repository).onError(
+//                    eq(EventEnvelope.of(payload)),
+//                    any(DuplicateEventException.class)
+//            );
+//        }
+//
+//        @Test
+//        @DisplayName("DuplicateCommandException")
+//        void command() {
+//            Command payload = GivenMessage.createProject();
+//            CannotDispatchCommandTwice rejection = CannotDispatchCommandTwice
+//                    .newBuilder()
+//                    .setPayload(payload)
+//                    .setReceiver(historyId())
+//                    .setWhenDispatched(getCurrentTime())
+//                    .build();
+//            watcher.on(rejection);
+//
+//            verify(repository).onError(
+//                    eq(CommandEnvelope.of(payload)),
+//                    any(DuplicateCommandException.class)
+//            );
+//        }
     }
 
     @Nested
@@ -211,31 +207,31 @@ class PmSystemEventWatcherTest {
             checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }
 
-        @Test
-        @DisplayName("on duplicate event rejection")
-        void duplicateEvent() {
-            Event payload = GivenMessage.projectStarted();
-            CannotDispatchEventTwice rejection = CannotDispatchEventTwice
-                    .newBuilder()
-                    .setPayload(payload)
-                    .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
-                    .build();
-            checkCannotDispatch(rejection, rejection.getReceiver());
-        }
-
-        @Test
-        @DisplayName("on duplicate command rejection")
-        void command() {
-            Command payload = GivenMessage.createProject();
-            CannotDispatchCommandTwice rejection = CannotDispatchCommandTwice
-                    .newBuilder()
-                    .setPayload(payload)
-                    .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
-                    .build();
-            checkCannotDispatch(rejection, rejection.getReceiver());
-        }
+//        @Test
+//        @DisplayName("on duplicate event rejection")
+//        void duplicateEvent() {
+//            Event payload = GivenMessage.projectStarted();
+//            CannotDispatchEventTwice rejection = CannotDispatchEventTwice
+//                    .newBuilder()
+//                    .setPayload(payload)
+//                    .setReceiver(wrongHistoryId())
+//                    .setWhenDispatched(getCurrentTime())
+//                    .build();
+//            checkCannotDispatch(rejection, rejection.getReceiver());
+//        }
+//
+//        @Test
+//        @DisplayName("on duplicate command rejection")
+//        void command() {
+//            Command payload = GivenMessage.createProject();
+//            CannotDispatchCommandTwice rejection = CannotDispatchCommandTwice
+//                    .newBuilder()
+//                    .setPayload(payload)
+//                    .setReceiver(wrongHistoryId())
+//                    .setWhenDispatched(getCurrentTime())
+//                    .build();
+//            checkCannotDispatch(rejection, rejection.getReceiver());
+//        }
 
         private EntityHistoryId wrongHistoryId() {
             return historyId().toBuilder()

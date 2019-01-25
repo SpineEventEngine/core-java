@@ -20,6 +20,8 @@
 
 package io.spine.server.sharding;
 
+import com.google.errorprone.annotations.Immutable;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -32,7 +34,8 @@ import static java.lang.Math.abs;
  *  <p>Uses a hash code of the entity identifier and the remainder of its division by the total
  *  number of shards to determine the index of a shard, at which the modification is allowed.
  */
-public class UniformAcrossAllShards implements ShardingStrategy, Serializable {
+@Immutable
+public final class UniformAcrossAllShards implements ShardingStrategy, Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -109,7 +112,6 @@ public class UniformAcrossAllShards implements ShardingStrategy, Serializable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(numberOfShards);
     }
 }

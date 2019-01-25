@@ -20,18 +20,13 @@
 
 package io.spine.server.procman;
 
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
-import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.delivery.SystemEventWatcher;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.CommandDispatchedToHandler;
 import io.spine.system.server.EventDispatchedToReactor;
-import io.spine.system.server.HistoryRejections;
 
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
@@ -53,13 +48,13 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
         repository.dispatchNowTo(id, envelope);
     }
 
-    @Subscribe
-    public void on(HistoryRejections.CannotDispatchCommandTwice event) {
-        Command command = event.getPayload();
-        DuplicateCommandException exception = DuplicateCommandException.of(command);
-        CommandEnvelope envelope = CommandEnvelope.of(command);
-        repository.onError(envelope, exception);
-    }
+//    @Subscribe
+//    public void on(HistoryRejections.CannotDispatchCommandTwice event) {
+//        Command command = event.getPayload();
+//        DuplicateCommandException exception = DuplicateCommandException.of(command);
+//        CommandEnvelope envelope = CommandEnvelope.of(command);
+//        repository.onError(envelope, exception);
+//    }
 
     @Subscribe
     public void on(EventDispatchedToReactor event) {
@@ -68,13 +63,13 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
         repository.dispatchNowTo(id, envelope);
     }
 
-    @Subscribe
-    public void on(HistoryRejections.CannotDispatchEventTwice event) {
-        Event payload = event.getPayload();
-        DuplicateEventException exception = new DuplicateEventException(payload);
-        EventEnvelope envelope = EventEnvelope.of(payload);
-        repository.onError(envelope, exception);
-    }
+//    @Subscribe
+//    public void on(HistoryRejections.CannotDispatchEventTwice event) {
+//        Event payload = event.getPayload();
+//        DuplicateEventException exception = new DuplicateEventException(payload);
+//        EventEnvelope envelope = EventEnvelope.of(payload);
+//        repository.onError(envelope, exception);
+//    }
 
     @Override // Exposes the method to this package.
     protected void registerIn(BoundedContext context) {

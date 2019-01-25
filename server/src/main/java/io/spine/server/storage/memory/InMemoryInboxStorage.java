@@ -25,6 +25,7 @@ import io.spine.server.inbox.InboxMessage;
 import io.spine.server.inbox.InboxStorage;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * In-memory implementation of messages stored in {@link io.spine.server.inbox.Inbox Inbox}.
@@ -45,11 +46,20 @@ public class InMemoryInboxStorage extends InboxStorage {
 
     @Override
     protected void write(InboxId id, InboxMessage message) {
-        multitenantStorage.getStorage().put(id, message);
+        multitenantStorage.getStorage()
+                          .put(id, message);
+    }
+
+    @Override
+    protected Iterator<InboxMessage> readAll(InboxId id) {
+        List<InboxMessage> result = multitenantStorage.getStorage()
+                                                      .getAll(id);
+        return result.iterator();
     }
 
     @Override
     public Iterator<InboxId> index() {
-        return multitenantStorage.getStorage().index();
+        return multitenantStorage.getStorage()
+                                 .index();
     }
 }

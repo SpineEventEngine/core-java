@@ -62,10 +62,8 @@ final class EntityHistoryAggregate
     }
 
     @Assign
-    EventDispatchedToSubscriber handle(DispatchEventToSubscriber command)
-            throws CannotDispatchEventTwice {
+    EventDispatchedToSubscriber handle(DispatchEventToSubscriber command) {
         Event event = command.getEvent();
-        checkNotDuplicate(event);
         return EventDispatchedToSubscriber.newBuilder()
                                           .setReceiver(command.getReceiver())
                                           .setPayload(event)
@@ -74,10 +72,8 @@ final class EntityHistoryAggregate
     }
 
     @Assign
-    EventDispatchedToReactor handle(DispatchEventToReactor command)
-            throws CannotDispatchEventTwice {
+    EventDispatchedToReactor handle(DispatchEventToReactor command) {
         Event event = command.getEvent();
-        checkNotDuplicate(event);
         return EventDispatchedToReactor.newBuilder()
                                        .setReceiver(command.getReceiver())
                                        .setPayload(event)
@@ -86,10 +82,8 @@ final class EntityHistoryAggregate
     }
 
     @Assign
-    CommandDispatchedToHandler handle(DispatchCommandToHandler command)
-            throws CannotDispatchCommandTwice {
+    CommandDispatchedToHandler handle(DispatchCommandToHandler command) {
         Command domainCommand = command.getCommand();
-        checkNotDuplicate(domainCommand);
         return CommandDispatchedToHandler.newBuilder()
                                          .setReceiver(command.getReceiver())
                                          .setPayload(domainCommand)
@@ -158,31 +152,6 @@ final class EntityHistoryAggregate
         updateLastEventTime(event.getWhenImported());
     }
 
-    private void checkNotDuplicate(Event event) throws CannotDispatchEventTwice {
-        DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
-        boolean duplicate = lookup.isDuplicate(event);
-        if (duplicate) {
-            throw CannotDispatchEventTwice
-                    .newBuilder()
-                    .setReceiver(getId())
-                    .setPayload(event)
-                    .setWhenDispatched(now())
-                    .build();
-        }
-    }
-
-    private void checkNotDuplicate(Command command) throws CannotDispatchCommandTwice {
-        DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
-        boolean duplicate = lookup.isDuplicate(command);
-        if (duplicate) {
-            throw CannotDispatchCommandTwice
-                    .newBuilder()
-                    .setReceiver(getId())
-                    .setPayload(command)
-                    .setWhenDispatched(now())
-                    .build();
-        }
-    }
 
     private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
         LifecycleHistory oldLifecycleHistory = getBuilder().getLifecycle();

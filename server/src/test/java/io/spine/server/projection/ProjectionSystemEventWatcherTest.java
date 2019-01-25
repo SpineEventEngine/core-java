@@ -28,7 +28,6 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.EntityHistoryIds;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
 import io.spine.system.server.EventDispatchedToSubscriberVBuilder;
@@ -42,7 +41,6 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.system.server.HistoryRejections.CannotDispatchEventTwice;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -103,24 +101,24 @@ class ProjectionSystemEventWatcherTest {
         verify(repository).dispatchNowTo(any(), eq(EventEnvelope.of(payload)));
     }
 
-    @Test
-    @DisplayName("warn repository with DuplicateEventException")
-    void duplicateEvent() {
-        ProjectionSystemEventWatcher<?> watcher = new ProjectionSystemEventWatcher<>(repository);
-        Event payload = GivenEvent.arbitrary();
-        CannotDispatchEventTwice rejection = CannotDispatchEventTwice
-                .newBuilder()
-                .setPayload(payload)
-                .setReceiver(historyId())
-                .setWhenDispatched(getCurrentTime())
-                .build();
-        watcher.on(rejection);
-
-        verify(repository).onError(
-                eq(EventEnvelope.of(payload)),
-                any(DuplicateEventException.class)
-        );
-    }
+//    @Test
+//    @DisplayName("warn repository with DuplicateEventException")
+//    void duplicateEvent() {
+//        ProjectionSystemEventWatcher<?> watcher = new ProjectionSystemEventWatcher<>(repository);
+//        Event payload = GivenEvent.arbitrary();
+//        CannotDispatchEventTwice rejection = CannotDispatchEventTwice
+//                .newBuilder()
+//                .setPayload(payload)
+//                .setReceiver(historyId())
+//                .setWhenDispatched(getCurrentTime())
+//                .build();
+//        watcher.on(rejection);
+//
+//        verify(repository).onError(
+//                eq(EventEnvelope.of(payload)),
+//                any(DuplicateEventException.class)
+//        );
+//    }
 
     @Nested
     @DisplayName("perform no action if type is wrong")
@@ -147,18 +145,18 @@ class ProjectionSystemEventWatcherTest {
             checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }
 
-        @Test
-        @DisplayName("on duplicate event rejection")
-        void duplicateEvent() {
-            Event payload = GivenEvent.arbitrary();
-            CannotDispatchEventTwice rejection = CannotDispatchEventTwice
-                    .newBuilder()
-                    .setPayload(payload)
-                    .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
-                    .build();
-            checkCannotDispatch(rejection, rejection.getReceiver());
-        }
+//        @Test
+//        @DisplayName("on duplicate event rejection")
+//        void duplicateEvent() {
+//            Event payload = GivenEvent.arbitrary();
+//            CannotDispatchEventTwice rejection = CannotDispatchEventTwice
+//                    .newBuilder()
+//                    .setPayload(payload)
+//                    .setReceiver(wrongHistoryId())
+//                    .setWhenDispatched(getCurrentTime())
+//                    .build();
+//            checkCannotDispatch(rejection, rejection.getReceiver());
+//        }
 
         private void checkCannotDispatch(EventMessage eventMessage, EntityHistoryId producer) {
             TestEventFactory eventFactory =
