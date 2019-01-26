@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.CommandContext;
@@ -73,7 +74,9 @@ class EventApplierTest {
         Optional<EventApplier> actual = signature.create(method);
         assertTrue(actual.isPresent());
 
-        assertEquals(new EventApplier(method, EventApplierParams.MESSAGE, emittedMessages), actual.get());
+        EventApplier expected =
+                new EventApplier(method, EventApplierParams.MESSAGE, ImmutableSet.of());
+        assertEquals(expected, actual.get());
     }
 
     @Test
