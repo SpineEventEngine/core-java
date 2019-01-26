@@ -21,6 +21,7 @@
 package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -28,6 +29,7 @@ import io.spine.server.model.Nothing;
 import io.spine.server.tuple.Pair;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -36,6 +38,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * A wrapper around method's return type which knows how to get emitted messages (events and
  * commands) of the method.
+ *
+ * @see io.spine.server.model.MethodResult
  */
 public enum ReturnType {
 
@@ -54,22 +58,45 @@ public enum ReturnType {
     },
 
     COMMAND_MESSAGE(CommandMessage.class) {
+        @SuppressWarnings("unchecked") // Checked when matching method's return type.
         @Override
         protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
+            Class<? extends CommandMessage> returnType =
+                    (Class<? extends CommandMessage>) method.getReturnType();
+            if (!CommandMessage.class.equals(returnType)) {
+                return ImmutableSet.of(returnType);
+            }
             return ImmutableSet.of();
         }
     },
 
     EVENT_MESSAGE(EventMessage.class, NOTHING) {
+        @SuppressWarnings("unchecked") // Checked when matching method's return type.
         @Override
         protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
+            Class<? extends EventMessage> returnType =
+                    (Class<? extends EventMessage>) method.getReturnType();
+            if (!EventMessage.class.equals(returnType)) {
+                return ImmutableSet.of(returnType);
+            }
             return ImmutableSet.of();
         }
     },
 
     OPTIONAL(Optional.class) {
+        @SuppressWarnings("UnstableApiUsage") // Still better than re-implement the same thing.
         @Override
         protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
+            TypeToken<?> token = TypeToken.of(method.getGenericReturnType());
+            TypeVariable<Class<Optional>> typeParam = Optional.class.getTypeParameters()[0];
+            Class<?> paramValue = token.resolveType(typeParam)
+                                       .getRawType();
+            if (CommandMessage.class.isAssignableFrom(paramValue)) {
+                // Call CommandMessage return type analyzer.
+            } else if (EventMessage.class.isAssignableFrom(paramValue)) {
+                // Call EventMessage return type analyzer.
+            }
+            // The method returns optional of some supertype, like 'Optional<Message>'.
             return ImmutableSet.of();
         }
     },
@@ -82,8 +109,26 @@ public enum ReturnType {
     },
 
     ITERABLE(Iterable.class, PAIR) {
+        /**
+         * {@inheritDoc}
+         *
+         * <p>We must take care that the return type can be some descendant of {@link Iterable}.
+         */
+        @SuppressWarnings("unchecked") // Checked when matching method's return type.
         @Override
         protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
+            Class<? extends Iterable> type = (Class<? extends Iterable>) method.getReturnType();
+            TypeToken<? extends Iterable> token = TypeToken.of(type);
+            TypeToken<?> iterable = token.getSupertype(Iterable.class);
+            TypeVariable<Class<Iterable>> typeParam = Iterable.class.getTypeParameters()[0];
+            Class<?> paramValue = iterable.resolveType(typeParam)
+                                          .getRawType();
+            if (CommandMessage.class.isAssignableFrom(paramValue)) {
+                // Call CommandMessage return type analyzer.
+            } else if (EventMessage.class.isAssignableFrom(paramValue)) {
+                // Call EventMessage return type analyzer.
+            }
+            // The method returns iterable of some supertype, like 'Iterable<Message>'.
             return ImmutableSet.of();
         }
     };
