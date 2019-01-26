@@ -161,6 +161,12 @@ subprojects {
 
     forceConfiguration(project)
     configurations {
+        all {
+            resolutionStrategy {
+                //noinspection GroovyAssignabilityCheck
+                force "io.spine:spine-base:$spineBaseVersion"
+            }
+        }
         // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
         runtime.exclude group: "com.google.protobuf", module: "protobuf-lite"
         testRuntime.exclude group: "com.google.protobuf", module: "protobuf-lite"

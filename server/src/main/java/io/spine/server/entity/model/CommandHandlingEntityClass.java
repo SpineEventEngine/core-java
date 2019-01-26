@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.model;
 
-import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerSignature;
@@ -32,10 +31,7 @@ import java.util.Set;
 
 /**
  * Abstract base for entity classes that handle commands.
- *
- * @author Alexander Yevsyukov
  */
-@Internal
 public abstract class CommandHandlingEntityClass<E extends Entity>
         extends EntityClass<E>
         implements CommandHandlingClass {

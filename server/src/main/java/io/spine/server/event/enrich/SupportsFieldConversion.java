@@ -20,55 +20,46 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.annotation.Internal;
-
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The predicate that helps finding a function that converts a message field (of the given class)
  * into an enrichment field (of another given class).
  *
- * @see Enricher#functionFor(Class, Class)
+ * @see Schema#transition(Class, Class)
  */
-@Internal
-@VisibleForTesting
-public final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?, ?>> {
+final class SupportsFieldConversion implements Predicate<EnrichmentFunction<?, ?, ?>> {
 
-    private final Class<?> messageFieldClass;
-    private final Class<?> enrichmentFieldClass;
+    private final Class<?> messageField;
+    private final Class<?> enrichmentField;
 
-    public static SupportsFieldConversion of(Class<?> messageFieldClass,
-                                             Class<?> enrichmentFieldClass) {
-        return new SupportsFieldConversion(messageFieldClass, enrichmentFieldClass);
+    static
+    SupportsFieldConversion supportsConversion(Class<?> messageField, Class<?> enrichmentField) {
+        return new SupportsFieldConversion(messageField, enrichmentField);
     }
 
-    private SupportsFieldConversion(Class<?> messageFieldClass, Class<?> enrichmentFieldClass) {
-        this.messageFieldClass = messageFieldClass;
-        this.enrichmentFieldClass = enrichmentFieldClass;
+    private SupportsFieldConversion(Class<?> messageField, Class<?> enrichmentField) {
+        this.messageField = messageField;
+        this.enrichmentField = enrichmentField;
     }
 
     @Override
     public boolean test(EnrichmentFunction<?, ?, ?> input) {
         checkNotNull(input);
-        boolean eventClassMatches = messageFieldClass.equals(input.getSourceClass());
-        boolean enrichmentClassMatches = enrichmentFieldClass.equals(input.getEnrichmentClass());
-        return eventClassMatches && enrichmentClassMatches;
+        boolean sourceMatches = messageField.equals(input.sourceClass());
+        boolean targetMatches = enrichmentField.equals(input.targetClass());
+        return sourceMatches && targetMatches;
     }
 
-    /**
-     * Obtains the class name of an enriched message field.
-     */
-    public final String messageFieldClass() {
-        return messageFieldClass.getName();
-    }
-
-    /**
-     * Obtains the class name of the field enrichment.
-     */
-    public final String enrichmentFieldClass() {
-        return enrichmentFieldClass.getName();
+    IllegalStateException unsupported() {
+        return newIllegalStateException(
+                "Unable to get enrichment for the conversion from message field " +
+                        "of type `%s` to enrichment field of type `%s`.",
+                messageField.getName(),
+                enrichmentField.getName()
+        );
     }
 }

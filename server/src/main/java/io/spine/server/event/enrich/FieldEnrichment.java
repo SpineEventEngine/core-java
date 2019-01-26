@@ -33,34 +33,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <T> the type of the field in the target enrichment message
  * @param <C> the type of the event context
  */
-final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<S, T, C> {
+final class FieldEnrichment<S, C extends Message, T>
+        extends EnrichmentFunction<S, C, T> {
 
     /** A function, which performs the translation. */
     private final BiFunction<S, C, T> function;
 
-    private FieldEnrichment(Class<S> eventFieldClass,
-                            Class<T> enrichmentFieldClass,
-                            BiFunction<S, C, T> func) {
-        super(eventFieldClass, enrichmentFieldClass);
+    private FieldEnrichment(Class<S> source, Class<T> target, BiFunction<S, C, T> func) {
+        super(source, target);
         this.function = checkNotNull(func);
     }
 
     /**
      * Creates a new instance.
      *
-     * @param  messageFieldClass
+     * @param source
      *         a class of the field in the source message
-     * @param  enrichmentFieldClass
+     * @param target
      *         a class of the field in the enrichment message
-     * @param  func
+     * @param func
      *         a conversion function
      * @return a new instance
      */
     static <S, T, C extends Message>
-    FieldEnrichment<S, T, C> of(Class<S> messageFieldClass,
-                                Class<T> enrichmentFieldClass,
-                                BiFunction<S, C, T> func) {
-        return new FieldEnrichment<>(messageFieldClass, enrichmentFieldClass, func);
+    FieldEnrichment<S, C, T> of(Class<S> source, Class<T> target, BiFunction<S, C, T> func) {
+        return new FieldEnrichment<>(source, target, func);
     }
 
     /**

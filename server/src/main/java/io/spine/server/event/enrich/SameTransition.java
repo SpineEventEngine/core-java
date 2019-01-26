@@ -30,7 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A helper predicate that allows to find functions with the same transition from
  * source event to enrichment class.
  *
- * <p>Such functions are not necessarily equal because they may have different translators.
+ * <p>Such functions are not necessarily equal because they may have different implementations
+ * of {@link EnrichmentFunction#apply(Object, com.google.protobuf.Message)}.
  *
  * @see EnrichmentFunction
  */
@@ -52,10 +53,10 @@ final class SameTransition implements Predicate<EnrichmentFunction> {
         if (input == null) {
             return false;
         }
-        boolean sameSourceClass = function.getSourceClass()
-                                          .equals(input.getSourceClass());
-        boolean sameEnrichmentClass = function.getEnrichmentClass()
-                                              .equals(input.getEnrichmentClass());
+        boolean sameSourceClass = function.sourceClass()
+                                          .equals(input.sourceClass());
+        boolean sameEnrichmentClass = function.targetClass()
+                                              .equals(input.targetClass());
         return sameSourceClass && sameEnrichmentClass;
     }
 }

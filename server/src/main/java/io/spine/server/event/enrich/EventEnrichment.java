@@ -20,21 +20,23 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
 
-import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+/**
+ * A function which enriches an event message.
+ */
+final class EventEnrichment<S extends EventMessage, T extends Message>
+        extends MessageEnrichment<S, EventContext, T> {
 
-@DisplayName("SupportsFieldConversion should")
-class SupportsFieldConversionTest {
+    private EventEnrichment(Enricher enricher, Class<S> sourceClass, Class<T> enrichmentClass) {
+        super(enricher, sourceClass, enrichmentClass);
+    }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        SupportsFieldConversion predicate = supportsConversion(StringValue.class, String.class);
-        new NullPointerTester().testAllPublicInstanceMethods(predicate);
+    /** Creates a new message enricher instance. */
+    static <S extends EventMessage, T extends Message>
+    EventEnrichment<S, T> create(Enricher parent, Class<S> messageClass, Class<T> enrichmentClass) {
+        return new EventEnrichment<>(parent, messageClass, enrichmentClass);
     }
 }
