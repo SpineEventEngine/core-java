@@ -29,6 +29,7 @@ import io.spine.server.model.Nothing;
 import io.spine.server.tuple.Pair;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Optional;
@@ -117,8 +118,9 @@ public enum ReturnType {
         @SuppressWarnings("unchecked") // Checked when matching method's return type.
         @Override
         protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
-            Class<? extends Iterable> type = (Class<? extends Iterable>) method.getReturnType();
-            TypeToken<? extends Iterable> token = TypeToken.of(type);
+            Type type = method.getGenericReturnType();
+            TypeToken<? extends Iterable> token =
+                    (TypeToken<? extends Iterable>) TypeToken.of(type);
             TypeToken<?> iterable = token.getSupertype(Iterable.class);
             TypeVariable<Class<Iterable>> typeParam = Iterable.class.getTypeParameters()[0];
             Class<?> paramValue = iterable.resolveType(typeParam)
@@ -128,7 +130,7 @@ public enum ReturnType {
             } else if (EventMessage.class.isAssignableFrom(paramValue)) {
                 // Call EventMessage return type analyzer.
             }
-            // The method returns iterable of some supertype, like 'Iterable<Message>'.
+            // The method returns iterable of some supertype, like 'Iterable<Message>', or 'Either'.
             return ImmutableSet.of();
         }
     };
