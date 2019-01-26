@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.server.model.Nothing;
+import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.Pair;
 
 import java.lang.reflect.Method;
@@ -33,7 +34,9 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -42,6 +45,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @see io.spine.server.model.MethodResult
  */
+@SuppressWarnings({"UnstableApiUsage" /* To avoid re-implementing same thing from scratch. */,
+        "unchecked" /* A lot of logically checked return type casts. */})
 public enum ReturnType {
 
     VOID(void.class) {
@@ -85,10 +90,10 @@ public enum ReturnType {
     },
 
     OPTIONAL(Optional.class) {
-        @SuppressWarnings("UnstableApiUsage") // Still better than re-implement the same thing.
         @Override
         protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
-            TypeToken<?> token = TypeToken.of(method.getGenericReturnType());
+            Type type = method.getGenericReturnType();
+            TypeToken<Optional> token = (TypeToken<Optional>) TypeToken.of(type);
             TypeVariable<Class<Optional>> typeParam = Optional.class.getTypeParameters()[0];
             Class<?> paramValue = token.resolveType(typeParam)
                                        .getRawType();
@@ -105,11 +110,49 @@ public enum ReturnType {
     PAIR(Pair.class) {
         @Override
         protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
+            Type type = method.getGenericReturnType();
+            TypeToken<Pair> token = (TypeToken<Pair>) TypeToken.of(type);
+            TypeVariable<Class<Pair>>[] typeParams = Pair.class.getTypeParameters();
+            Class<?> firstParamValue = token.resolveType(typeParams[0])
+                                            .getRawType();
+
+            Set<Class<? extends Message>> emittedTypes = newHashSet();
+            // We know for sure the first param must be 'Message'.
+            if (CommandMessage.class.isAssignableFrom(firstParamValue)) {
+                // Call CommandMessage return type analyzer.
+                // Add to emittedTypes;
+            } else if (EventMessage.class.isAssignableFrom(firstParamValue)) {
+                // Call EventMessage return type analyzer.
+                // Add to emittedTypes;
+            }
+            Class<?> secondParamValue = token.resolveType(typeParams[1])
+                                             .getRawType();
+            // Second param can be 1. Message, 2. Optional, 3. Either
+            if (CommandMessage.class.isAssignableFrom(secondParamValue)) {
+                // Call CommandMessage return type analyzer.
+                // Add to emittedTypes;
+            } else if (EventMessage.class.isAssignableFrom(secondParamValue)) {
+                // Call EventMessage return type analyzer.
+                // Add to emittedTypes;
+            } else if (Optional.class.isAssignableFrom(secondParamValue)) {
+                // Call Optional return type analyzer.
+                // Add to emittedTypes;
+            } else if (EitherOf2.class.isAssignableFrom(secondParamValue)) {
+                // Call Either_of_2 return type analyzer.
+                // Add to emittedTypes;
+            }
+            return ImmutableSet.copyOf(emittedTypes);
+        }
+    },
+
+    EITHER_OF_2(EitherOf2.class) {
+        @Override
+        protected ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method) {
             return ImmutableSet.of();
         }
     },
 
-    ITERABLE(Iterable.class, PAIR) {
+    ITERABLE(Iterable.class, PAIR, EITHER_OF_2) {
         /**
          * {@inheritDoc}
          *
@@ -130,7 +173,8 @@ public enum ReturnType {
             } else if (EventMessage.class.isAssignableFrom(paramValue)) {
                 // Call EventMessage return type analyzer.
             }
-            // The method returns iterable of some supertype, like 'Iterable<Message>', or 'Either'.
+            // The method returns iterable of some supertype, like 'Iterable<Message>' or its
+            // descendant (like 'Either').
             return ImmutableSet.of();
         }
     };
