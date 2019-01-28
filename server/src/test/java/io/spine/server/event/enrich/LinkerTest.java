@@ -98,8 +98,19 @@ class LinkerTest {
         assertEquals(USER_GOOGLE_UID_FIELD, enrichmentFieldName);
     }
 
+    /**
+     * This test verifies that the {@code Linker} should fail on attempt to link a message
+     * to an enrichment type which is not related to the message.
+     *
+     * <p>The {@link GranterEventsEnrichment}
+     * (see {@code spine.test.event.enrichment.even_enrichment.proto}) reference all types
+     * from the proto package {@code spine.test.event.user.permission.*}.
+     * The passed message type ({@link UserDeletedEvent}) is from the proto package
+     * {@code spine.test.event.user}. Therefore, the enrichment cannot be built for this message,
+     * and the {@code Linker} should fail.
+     */
     @Test
-    @DisplayName("fail validation if enrichment is not declared")
+    @DisplayName("fail linking if enrichment is not declared")
     void failIfEnrichmentNotDeclared() {
         Linker linker = new Linker(enricher, UserDeletedEvent.class, GranterEventsEnrichment.class);
         assertThrows(IllegalStateException.class, linker::createTransitions);
