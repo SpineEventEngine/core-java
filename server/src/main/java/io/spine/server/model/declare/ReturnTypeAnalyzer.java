@@ -46,13 +46,10 @@ abstract class ReturnTypeAnalyzer {
 
     private static final Map<Class<?>, AnalyzerSupplier> suppliers = analyzerSuppliers();
 
-    // todo try merge these
-    private final Class<?> rawType;
-    private final Type genericType;
+    private final Type type;
 
-    ReturnTypeAnalyzer(Class<?> rawType, Type genericType) {
-        this.rawType = rawType;
-        this.genericType = genericType;
+    ReturnTypeAnalyzer(Type type) {
+        this.type = type;
     }
 
     @SuppressWarnings("ComparatorMethodParameterNotUsed") // See doc.
@@ -69,7 +66,6 @@ abstract class ReturnTypeAnalyzer {
 
     static ReturnTypeAnalyzer forMethod(Method method) {
         Class<?> rawReturnType = method.getReturnType();
-        Type genericReturnType = method.getGenericReturnType();
         Optional<AnalyzerSupplier> supplierForClass = supplierFor(rawReturnType);
 
         checkArgument(supplierForClass.isPresent(),
@@ -77,16 +73,13 @@ abstract class ReturnTypeAnalyzer {
                       rawReturnType.getSimpleName(), method.getName());
 
         AnalyzerSupplier supplier = supplierForClass.get();
-        ReturnTypeAnalyzer analyzer = supplier.get(rawReturnType, genericReturnType);
+        Type genericReturnType = method.getGenericReturnType();
+        ReturnTypeAnalyzer analyzer = supplier.get(genericReturnType);
         return analyzer;
     }
 
-    Class<?> rawType() {
-        return rawType;
-    }
-
-    Type genericType() {
-        return genericType;
+    Type type() {
+        return type;
     }
 
     protected abstract ImmutableSet<Class<? extends Message>> extractEmittedTypes();
@@ -97,28 +90,26 @@ abstract class ReturnTypeAnalyzer {
         result.put(void.class, NoopAnalyzer::new);
         result.put(Nothing.class, NoopAnalyzer::new);
 
-        result.put(CommandMessage.class, (rawType, genericType) ->
-                new SimpleMessage(rawType, genericType,
-                                  ImmutableSet.of(CommandMessage.class)));
+        result.put(CommandMessage.class, type ->
+                new SimpleMessage(type, ImmutableSet.of(CommandMessage.class)));
 
-        result.put(EventMessage.class, (rawType, genericType) ->
-                new SimpleMessage(rawType, genericType,
-                                  ImmutableSet.of(EventMessage.class, RejectionMessage.class)));
+        result.put(EventMessage.class, type ->
+                new SimpleMessage(type, ImmutableSet.of(EventMessage.class,
+                                                        RejectionMessage.class)));
 
         result.put(Optional.class, ParameterizedType::new);
         result.put(Tuple.class, ParameterizedType::new);
         result.put(Either.class, ParameterizedType::new);
 
-        result.put(Iterable.class, (rawType, genericType) ->
-                new ParameterizedSupertype<>(rawType, genericType, Iterable.class));
+        result.put(Iterable.class, type -> new ParameterizedSupertype<>(type, Iterable.class));
 
         return result;
     }
 
     private static class NoopAnalyzer extends ReturnTypeAnalyzer {
 
-        private NoopAnalyzer(Class<?> rawType, Type genericType) {
-            super(rawType, genericType);
+        private NoopAnalyzer(Type genericType) {
+            super(genericType);
         }
 
         @Override
@@ -131,17 +122,17 @@ abstract class ReturnTypeAnalyzer {
 
         private final ImmutableSet<Class<? extends Message>> ignoredTypes;
 
-        private SimpleMessage(Class<?> rawType,
-                              Type genericType,
+        private SimpleMessage(Type genericType,
                               ImmutableSet<Class<? extends Message>> ignoredTypes) {
-            super(rawType, genericType);
+            super(genericType);
             this.ignoredTypes = ignoredTypes;
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public ImmutableSet<Class<? extends Message>> extractEmittedTypes() {
-            Class<? extends Message> returnType = (Class<? extends Message>) rawType();
+            TypeToken<?> token = TypeToken.of(type());
+            Class<? extends Message> returnType = (Class<? extends Message>) token.getRawType();
             if (ignoredTypes.contains(returnType)) {
                 return ImmutableSet.of();
             }
@@ -151,27 +142,27 @@ abstract class ReturnTypeAnalyzer {
 
     private static class ParameterizedType extends ReturnTypeAnalyzer {
 
-        private ParameterizedType(Class<?> rawType, Type genericType) {
-            super(rawType, genericType);
+        private ParameterizedType(Type genericType) {
+            super(genericType);
         }
 
         @Override
         protected ImmutableSet<Class<? extends Message>> extractEmittedTypes() {
-            TypeToken<?> token = TypeToken.of(genericType());
-            Set<Class<? extends Message>> emitted = newHashSet();
-            for (TypeVariable<?> typeParam : rawType().getTypeParameters()) {
+            TypeToken<?> token = TypeToken.of(type());
+            Class<?> rawType = token.getRawType();
+            ImmutableSet.Builder<Class<? extends Message>> emitted = ImmutableSet.builder();
+            for (TypeVariable<?> typeParam : rawType.getTypeParameters()) {
                 TypeToken<?> resolved = token.resolveType(typeParam);
                 Class<?> resolvedRawType = resolved.getRawType();
                 Optional<AnalyzerSupplier> supplierForType = supplierFor(resolvedRawType);
                 if (supplierForType.isPresent()) {
                     Type resolvedGenericType = resolved.getType();
                     AnalyzerSupplier supplier = supplierForType.get();
-                    ReturnTypeAnalyzer analyzer =
-                            supplier.get(resolvedRawType, resolvedGenericType);
+                    ReturnTypeAnalyzer analyzer = supplier.get(resolvedGenericType);
                     emitted.addAll(analyzer.extractEmittedTypes());
                 }
             }
-            return ImmutableSet.copyOf(emitted);
+            return emitted.build();
         }
     }
 
@@ -179,26 +170,25 @@ abstract class ReturnTypeAnalyzer {
 
         private final Class<T> supertype;
 
-        // todo try make first param Class<? extends T>
-        private ParameterizedSupertype(Class<?> rawType, Type genericType, Class<T> supertype) {
-            super(rawType, genericType);
+        private ParameterizedSupertype(Type genericType, Class<T> supertype) {
+            super(genericType);
             this.supertype = supertype;
         }
 
         @SuppressWarnings("unchecked")
         @Override
         protected ImmutableSet<Class<? extends Message>> extractEmittedTypes() {
-            TypeToken<? extends T> token = (TypeToken<? extends T>) TypeToken.of(genericType());
+            TypeToken<? extends T> token = (TypeToken<? extends T>) TypeToken.of(type());
             TypeToken<?> supertype = token.getSupertype(this.supertype);
             Set<Class<? extends Message>> emitted = newHashSet();
             for (TypeVariable<?> typeParam : this.supertype.getTypeParameters()) {
                 TypeToken<?> resolved = supertype.resolveType(typeParam);
                 Class<?> resolvedRawType = resolved.getRawType();
-                AnalyzerSupplier supplier = suppliers.get(resolvedRawType);
-                if (supplier != null) {
+                Optional<AnalyzerSupplier> supplierForType = supplierFor(resolvedRawType);
+                if (supplierForType.isPresent()) {
                     Type resolvedGenericType = resolved.getType();
-                    ReturnTypeAnalyzer analyzer =
-                            supplier.get(resolvedRawType, resolvedGenericType);
+                    AnalyzerSupplier supplier = supplierForType.get();
+                    ReturnTypeAnalyzer analyzer = supplier.get(resolvedGenericType);
                     emitted.addAll(analyzer.extractEmittedTypes());
                 }
             }
@@ -208,6 +198,6 @@ abstract class ReturnTypeAnalyzer {
 
     @FunctionalInterface
     private interface AnalyzerSupplier {
-        ReturnTypeAnalyzer get(Class<?> rawType, Type genericType);
+        ReturnTypeAnalyzer get(Type returnType);
     }
 }
