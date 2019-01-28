@@ -241,7 +241,7 @@ final class Linker implements Logging {
      * if the field name contains {@code "context"} in the name.
      */
     private Descriptor sourceDescriptor(String fieldName) {
-        Descriptor msg = io.spine.server.event.enrich.FieldReference.context.matches(fieldName)
+        Descriptor msg = FieldReference.Via.context.matches(fieldName)
                          ? EventContext.getDescriptor()
                          : eventDescriptor;
         return msg;
