@@ -21,9 +21,16 @@
 package io.spine.server.model.declare.given;
 
 import com.google.common.collect.ImmutableList;
+import io.spine.base.Identifier;
+import io.spine.server.tuple.Pair;
+import io.spine.test.core.TaskAssigned;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectId;
 
 import java.util.List;
+import java.util.Optional;
+
+import static io.spine.base.Identifier.newUuid;
 
 public final class ReturnTypeAnalyzerTestEnv {
 
@@ -35,6 +42,15 @@ public final class ReturnTypeAnalyzerTestEnv {
 
         public List<ProjectCreated> returnList() {
             return ImmutableList.of();
+        }
+
+        public Pair<ProjectCreated, Optional<TaskAssigned>> returnPair() {
+            ProjectId projectId = Identifier.generate(ProjectId.class);
+            ProjectCreated projectCreated = ProjectCreated
+                    .newBuilder()
+                    .setProjectId(projectId)
+                    .build();
+            return Pair.withNullable(projectCreated, null);
         }
     }
 }
