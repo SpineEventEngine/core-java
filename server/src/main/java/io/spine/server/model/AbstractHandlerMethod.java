@@ -27,6 +27,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -98,7 +99,7 @@ public abstract class AbstractHandlerMethod<T,
      * {@link MethodResult} params for return types like {@link io.spine.server.tuple.Tuple}
      * hence we use {@code Class} with a wildcard instead of parameterizing the list.
      */
-    private final ImmutableSet<Class<? extends Message>> emittedMessages;
+    private final ReturnType returnType;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -106,16 +107,16 @@ public abstract class AbstractHandlerMethod<T,
      *         subscriber method
      * @param parameterSpec
      *         the specification of method parameters
-     * @param emittedMessages
+     * @param returnType
      */
     protected AbstractHandlerMethod(Method method,
                                     ParameterSpec<E> parameterSpec,
-                                    ImmutableSet<Class<? extends Message>> emittedMessages) {
+                                    ReturnType returnType) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
-        this.emittedMessages = emittedMessages;
+        this.returnType = returnType;
 
         method.setAccessible(true);
     }
@@ -180,6 +181,14 @@ public abstract class AbstractHandlerMethod<T,
         return method;
     }
 
+    private int getModifiers() {
+        return method.getModifiers();
+    }
+
+    protected ParameterSpec<E> getParameterSpec() {
+        return parameterSpec;
+    }
+
     /**
      * Retrieves the message classes produced by this handler method.
      *
@@ -191,21 +200,9 @@ public abstract class AbstractHandlerMethod<T,
      *
      * @return produced message classes or {@link Optional#empty()} if the method produces nothing
      * @see MethodResult#toMessages(Object).
-     *
-     * // todo mention somewhere about Either and if you know for sure which types it will emit and
-     * // todo want to subscribe to them, please use Tuple, subscribing for produced Either
-     * // todo instances is disabled for obvious reasons.
      */
     public ImmutableSet<Class<? extends Message>> getEmittedMessages() {
-        return emittedMessages;
-    }
-
-    private int getModifiers() {
-        return method.getModifiers();
-    }
-
-    protected ParameterSpec<E> getParameterSpec() {
-        return parameterSpec;
+        return returnType.emittedMessages();
     }
 
     /**

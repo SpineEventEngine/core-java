@@ -23,6 +23,7 @@ package io.spine.server.aggregate.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
@@ -30,6 +31,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.model.EventApplierSignature.EventApplierParams;
 import io.spine.server.model.declare.MatchCriterion;
+import io.spine.server.model.declare.ReturnType;
 import io.spine.server.model.declare.SignatureMismatch;
 import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.server.test.shared.EmptyAggregateVBuilder;
@@ -74,8 +76,9 @@ class EventApplierTest {
         Optional<EventApplier> actual = signature.create(method);
         assertTrue(actual.isPresent());
 
+        ReturnType returnType = ReturnType.of(Empty.class, ImmutableSet.of());
         EventApplier expected =
-                new EventApplier(method, EventApplierParams.MESSAGE, ImmutableSet.of());
+                new EventApplier(method, EventApplierParams.MESSAGE, returnType);
         assertEquals(expected, actual.get());
     }
 

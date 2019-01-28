@@ -20,8 +20,6 @@
 
 package io.spine.server.command.model;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -29,6 +27,7 @@ import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -45,9 +44,10 @@ public final class CommandReactionMethod
                                       Result>
         implements CommandingMethod<EventReceiver, EventClass, EventEnvelope, Result> {
 
-    CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature,
-                          ImmutableSet<Class<? extends Message>> emittedMessages) {
-        super(method, signature, emittedMessages);
+    CommandReactionMethod(Method method,
+                          ParameterSpec<EventEnvelope> signature,
+                          ReturnType returnType) {
+        super(method, signature, returnType);
     }
 
     @Override

@@ -34,9 +34,9 @@ class ReturnTypeAnalyzerTest {
     @Test
     @DisplayName("extract emitted messages from method return type")
     void extractEmittedMessages() throws NoSuchMethodException {
-        Method method = MethodContainer.class.getMethod("returnList");
-        ReturnTypeAnalyzer analyzer = ReturnTypeAnalyzer.forMethod(method);
-        ImmutableSet<Class<? extends Message>> emitted = analyzer.extractEmittedTypes();
+        Method method = MethodContainer.class.getMethod("returnPair");
+        ReturnType returnType = ReturnType.of(method);
+        ImmutableSet<Class<? extends Message>> emitted = returnType.emittedMessages();
         System.out.println(emitted);
     }
 }

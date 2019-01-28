@@ -159,11 +159,11 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *
      * @param method the raw method to wrap into a {@code HandlerMethod} instance being created
      * @param parameterSpec the specification of method parameters
-     * @param emittedMessages
+     * @param returnType
      * @return new instance of {@code HandlerMethod}
      */
     public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec,
-                               ImmutableSet<Class<? extends Message>> emittedMessages);
+                               ReturnType returnType);
 
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
@@ -191,9 +191,9 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
             return Optional.empty();
         }
         Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecs());
-        ImmutableSet<Class<? extends Message>> emitted = extractEmittedTypes(method);
+        ReturnType returnType = ReturnType.of(method);
         return matchingSpec.map(spec -> {
-                H handler = doCreate(method, spec, emitted);
+                H handler = doCreate(method, spec, returnType);
                 handler.discoverAttributes();
                 return handler;
         });
@@ -216,12 +216,6 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                       .filter(Optional::isPresent)
                       .map(Optional::get)
                       .collect(toList());
-        return result;
-    }
-
-    private static ImmutableSet<Class<? extends Message>> extractEmittedTypes(Method method) {
-        ReturnTypeAnalyzer analyzer = ReturnTypeAnalyzer.forMethod(method);
-        ImmutableSet<Class<? extends Message>> result = analyzer.extractEmittedTypes();
         return result;
     }
 }

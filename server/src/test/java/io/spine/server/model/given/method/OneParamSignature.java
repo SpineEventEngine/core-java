@@ -21,11 +21,11 @@
 package io.spine.server.model.given.method;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -58,7 +58,7 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
 
     @Override
     public OneParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec,
-                                   ImmutableSet<Class<? extends Message>> ignored) {
+                                   ReturnType ignored) {
         return new OneParamMethod(method, parameterSpec);
     }
 

@@ -20,13 +20,12 @@
 
 package io.spine.server.command.model;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandReceiver;
 import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -41,8 +40,8 @@ public final class CommandSubstituteMethod
 
     CommandSubstituteMethod(Method method,
                             ParameterSpec<CommandEnvelope> paramSpec,
-                            ImmutableSet<Class<? extends Message>> emittedMessages) {
-        super(method, paramSpec, emittedMessages);
+                            ReturnType returnType) {
+        super(method, paramSpec, returnType);
     }
 
     @Override

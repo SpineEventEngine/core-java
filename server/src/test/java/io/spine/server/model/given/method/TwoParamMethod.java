@@ -29,6 +29,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -40,7 +41,7 @@ public class TwoParamMethod
                                       MethodResult<Empty>> {
 
     public TwoParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec, ImmutableSet.of());
+        super(method, parameterSpec, ReturnType.of(Empty.class, ImmutableSet.of()));
     }
 
     @Override

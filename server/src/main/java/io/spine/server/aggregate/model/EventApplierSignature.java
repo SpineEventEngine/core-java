@@ -23,13 +23,13 @@ package io.spine.server.aggregate.model;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -51,8 +51,8 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
 
     @Override
     public EventApplier doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec,
-                                 ImmutableSet<Class<? extends Message>> emittedMessages) {
-        return new EventApplier(method, parameterSpec, emittedMessages);
+                                 ReturnType returnType) {
+        return new EventApplier(method, parameterSpec, returnType);
     }
 
     @Override

@@ -22,7 +22,6 @@ package io.spine.server.model.given.method;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -30,6 +29,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -41,7 +41,7 @@ public class OneParamMethod
                                       MethodResult<Empty>> {
 
     public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec, ImmutableSet.of());
+        super(method, parameterSpec, ReturnType.of(Empty.class, ImmutableSet.of()));
     }
 
     @Override

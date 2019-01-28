@@ -20,9 +20,7 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.FieldPath;
 import io.spine.core.ByField;
 import io.spine.core.EventEnvelope;
@@ -30,6 +28,7 @@ import io.spine.core.Subscribe;
 import io.spine.protobuf.FieldPaths;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -43,9 +42,10 @@ import static io.spine.string.Stringifiers.fromString;
 public final class EventSubscriberMethod extends SubscriberMethod {
 
     /** Creates a new instance. */
-    EventSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec,
-                          ImmutableSet<Class<? extends Message>> emittedMessages) {
-        super(method, parameterSpec, emittedMessages);
+    EventSubscriberMethod(Method method,
+                          ParameterSpec<EventEnvelope> parameterSpec,
+                          ReturnType returnType) {
+        super(method, parameterSpec, returnType);
     }
 
     @Override
