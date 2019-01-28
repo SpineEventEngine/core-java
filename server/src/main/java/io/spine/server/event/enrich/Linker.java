@@ -32,11 +32,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
@@ -50,15 +48,8 @@ import static java.lang.String.format;
  */
 final class Linker implements Logging {
 
-    /** The separator used in Protobuf fully-qualified names. */
-    private static final String PROTO_FQN_SEPARATOR = ".";
-
-    private static final String SPACE = " ";
-    private static final String EMPTY_STRING = "";
-    private static final Pattern SPACE_PATTERN = Pattern.compile(SPACE, Pattern.LITERAL);
-
     private final Enricher enricher;
-    private final Descriptor eventDescriptor;
+    private final Descriptor sourceDescriptor;
     private final Descriptor enrichmentDescriptor;
 
     private final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields =
@@ -70,7 +61,7 @@ final class Linker implements Logging {
            Class<? extends Message> sourceClass,
            Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
-        this.eventDescriptor = descriptorOf(sourceClass);
+        this.sourceDescriptor = descriptorOf(sourceClass);
         this.enrichmentDescriptor = descriptorOf(enrichmentClass);
     }
 
@@ -109,49 +100,31 @@ final class Linker implements Logging {
                    "Unable to get source field information from the enrichment field `%s`",
                    enrichmentField.getFullName());
 
-        ImmutableList<String> fieldNames =
-                fieldReferences.stream()
-                               .map(FieldReference::fieldName)
-                               .collect(toImmutableList());
-        return findSourceFieldsByNames(fieldNames, enrichmentField);
+        return findSourceFields(fieldReferences, enrichmentField);
     }
 
-    /**
-     * Searches for the event/context field with the name retrieved from the
-     * enrichment field {@code by} option.
-     *
-     * @param fieldReference
-     *         the reference to a field as discovered in the {@code (by)} option
-     * @param enrichmentField the field of the enrichment targeted onto the searched field
-     * @param strict          if {@code true} the field must be found, an exception is thrown
-     *                        otherwise.
-     *                        <p>If {@code false} {@code null} will be returned upon an
-     *                        unsuccessful search
-     * @return {@link FieldDescriptor} for the field with the given name or {@code null} if the
-     * field is absent and if not in the strict mode
-     */
-    private @Nullable FieldDescriptor findSourceFieldByName(String fieldReference,
-                                                            FieldDescriptor enrichmentField,
-                                                            boolean strict) {
-        checkSourceFieldName(fieldReference, enrichmentField);
-        Descriptor srcMessage = sourceDescriptor(fieldReference);
-        FieldDescriptor field = findField(fieldReference, srcMessage);
-        if (field == null && strict) {
-            throw noFieldException(fieldReference, srcMessage, enrichmentField);
-        }
-        return field;
-    }
-
-    private Collection<FieldDescriptor> findSourceFieldsByNames(ImmutableList<String> names,
-                                                                FieldDescriptor enrichmentField) {
-        int nameCount = names.size();
-        checkArgument(nameCount > 0, "Names may not be empty");
-        Collection<FieldDescriptor> result = new HashSet<>(nameCount);
+    private Collection<FieldDescriptor> findSourceFields(ImmutableList<FieldReference> references,
+                                                         FieldDescriptor enrichmentField) {
+        int refCount = references.size();
+        checkArgument(refCount > 0, "References may not be empty");
+        Collection<FieldDescriptor> result = new HashSet<>(refCount);
 
         FieldDescriptor.Type basicType = null;
         Descriptor messageType = null;
-        for (String name : names) {
-            FieldDescriptor field = findSourceFieldByName(name, enrichmentField, false);
+        for (FieldReference ref : references) {
+
+            /* TODO: the 2nd parameter is true when there is no pipe in references
+        if (pipeSeparatorIndex < 0) {
+            FieldDescriptor fieldDescriptor =
+                    findSourceFieldByName(byOptionValue, enrichmentField, true);
+            return Collections.singleton(fieldDescriptor);
+        } else {
+            String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(byOptionValue);
+            return findSourceFieldsByNames(ImmutableList.copyOf(targetFieldNames), enrichmentField);
+        }
+             */
+
+            FieldDescriptor field = findSourceField(ref, enrichmentField, false);
             if (field == null) {
                 /* We don't know at this stage the type of the event.
                    The enrichment is to be included anyway,
@@ -178,35 +151,53 @@ final class Linker implements Logging {
                     noDuplicateFiled,
                     "Enrichment target field names may contain no duplicates. " +
                     "Found duplicate field: %s",
-                    name
+                    ref
             );
         }
         return result;
+    }
+
+    /**
+     * Searches for the event/context field with the name retrieved from the
+     * enrichment field {@code by} option.
+     *
+     * @param ref
+     *         the reference to a field as discovered in the {@code (by)} option
+     * @param enrichmentField
+     *         the field of the enrichment targeted onto the searched field
+     * @param strict
+     *         if {@code true} the field must be found, an exception is thrown
+     *         otherwise.
+     *         <p>If {@code false} {@code null} will be returned upon an
+     *         unsuccessful search
+     * @return {@link FieldDescriptor} for the field with the given name or {@code null} if the
+     *         field is absent and if not in the strict mode
+     */
+    private @Nullable FieldDescriptor
+    findSourceField(FieldReference ref, FieldDescriptor enrichmentField, boolean strict) {
+        Descriptor srcMessage = sourceDescriptor(ref);
+        if (ref.hasType() && !ref.matchesType(srcMessage)) {
+            return null;
+        }
+        Optional<FieldDescriptor> field = ref.find(srcMessage);
+        if (!field.isPresent() && strict) {
+            throw noFieldException(ref, srcMessage, enrichmentField);
+        }
+        return field.orElse(null);
     }
 
     private static String differentTypesErrorMessage(FieldDescriptor enrichmentField) {
         return format("Enrichment field %s targets fields of different types.", enrichmentField);
     }
 
-    private static
-    @Nullable FieldDescriptor findField(String fieldReference, Descriptor srcMessage) {
-        if (fieldReference.contains(PROTO_FQN_SEPARATOR)) { // is event field FQN or context field
-            int firstCharIndex = fieldReference.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
-            String fieldName = fieldReference.substring(firstCharIndex);
-            return srcMessage.findFieldByName(fieldName);
-        } else {
-            return srcMessage.findFieldByName(fieldReference);
-        }
-    }
-
     /**
      * Returns an event descriptor or context descriptor
      * if the field name contains {@code "context"} in the name.
      */
-    private Descriptor sourceDescriptor(String fieldName) {
-        Descriptor msg = FieldReference.Via.context.matches(fieldName)
+    private Descriptor sourceDescriptor(FieldReference fieldReference) {
+        Descriptor msg = fieldReference.isContext()
                          ? EventContext.getDescriptor()
-                         : eventDescriptor;
+                         : sourceDescriptor;
         return msg;
     }
 
@@ -223,23 +214,13 @@ final class Linker implements Logging {
         return func;
     }
 
-    /**
-     * Checks if the source field name (from event or context) is not empty.
-     */
-    private static void checkSourceFieldName(String srcFieldName, FieldDescriptor enrichmentField) {
-        if (srcFieldName.isEmpty()) {
-            throw newIllegalStateException("There is no `by` option for the enrichment field `%s`",
-                                            enrichmentField.getFullName());
-        }
-    }
-
-    private static IllegalStateException noFieldException(String eventFieldName,
+    private static IllegalStateException noFieldException(FieldReference fieldReference,
                                                           Descriptor srcMessage,
                                                           FieldDescriptor enrichmentField) {
         throw newIllegalStateException(
                 "No field `%s` in the message `%s` found. " +
                 "The field is referenced in the option of the enrichment field `%s`.",
-                eventFieldName,
+                fieldReference,
                 srcMessage.getFullName(),
                 enrichmentField.getFullName());
     }

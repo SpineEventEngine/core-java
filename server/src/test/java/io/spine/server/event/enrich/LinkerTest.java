@@ -22,7 +22,7 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.server.event.given.ReferenceValidatorTestEnv.Enrichment;
+import io.spine.server.event.given.linker.Given;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -45,11 +44,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ReferenceValidator should")
+@DisplayName("Linker should")
 class LinkerTest {
 
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
-    private final Enricher enricher = Enrichment.newEventEnricher();
+    private final Enricher enricher = Given.newEventEnricher();
 
     @Test
     @DisplayName("initialize with valid enricher")
@@ -62,8 +61,8 @@ class LinkerTest {
     }
 
     @Test
-    @DisplayName("store valid map of enrichment fields after validation")
-    void storeFieldsAfterValidation() {
+    @DisplayName("store valid map of enrichment fields after linking")
+    void storeFieldsAfterLinking() {
         Linker validator
                 = new Linker(enricher,
                              UserDeletedEvent.class,
@@ -102,10 +101,8 @@ class LinkerTest {
     @Test
     @DisplayName("fail validation if enrichment is not declared")
     void failIfEnrichmentNotDeclared() {
-        Linker validator = new Linker(enricher,
-                                      UserDeletedEvent.class,
-                                      GranterEventsEnrichment.class);
-        assertThrows(IllegalStateException.class, validator::createTransitions);
+        Linker linker = new Linker(enricher, UserDeletedEvent.class, GranterEventsEnrichment.class);
+        assertThrows(IllegalStateException.class, linker::createTransitions);
     }
 
     @Test
@@ -114,26 +111,26 @@ class LinkerTest {
         Enricher emptyEnricher = Enricher
                 .newBuilder()
                 .build();
+        Linker linker = new Linker(emptyEnricher,
+                                   UserDeletedEvent.class,
+                                   EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
 
-        Linker validator
-                = new Linker(emptyEnricher,
-                             UserDeletedEvent.class,
-                             EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        FieldTransitions result = validator.createTransitions();
-        List<EnrichmentFunction<?, ?, ?>> functions = result.functions();
-        assertTrue(functions.isEmpty());
-        Multimap<FieldDescriptor, FieldDescriptor> fields = result.fieldMap();
-        assertThat(fields).isEmpty();
+        FieldTransitions result = linker.createTransitions();
+
+        assertThat(result.functions())
+                .isEmpty();
+        assertThat(result.fieldMap())
+                .isEmpty();
     }
 
     @Test
     @DisplayName("handle separator spaces in `by` argument")
     void handleSeparatorSpaces() {
-        Linker validator
+        Linker linker
                 = new Linker(enricher,
                              TaskAdded.class,
                              EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
-        FieldTransitions result = validator.createTransitions();
+        FieldTransitions result = linker.createTransitions();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertFalse(fieldMap.isEmpty());
         assertThat(fieldMap).hasSize(1);
