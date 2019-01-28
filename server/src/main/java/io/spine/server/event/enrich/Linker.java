@@ -26,18 +26,15 @@ import com.google.protobuf.Message;
 import io.spine.code.proto.FieldReference;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
-import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.protobuf.Descriptors.Descriptor;
@@ -55,9 +52,6 @@ final class Linker implements Logging {
 
     /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";
-
-    private static final String PIPE_SEPARATOR = "|";
-    private static final Pattern PATTERN_PIPE_SEPARATOR = Pattern.compile("\\|");
 
     private static final String SPACE = " ";
     private static final String EMPTY_STRING = "";
@@ -123,30 +117,6 @@ final class Linker implements Logging {
     }
 
     /**
-     * Searches for the event/context field with the name parsed from the enrichment
-     * field {@code by} option.
-     */
-    private Collection<FieldDescriptor> findSourceFields(FieldDescriptor enrichmentField) {
-        String byOptionValue = byOptionValue(enrichmentField);
-        int pipeSeparatorIndex = byOptionValue.indexOf(PIPE_SEPARATOR);
-        if (pipeSeparatorIndex < 0) {
-            FieldDescriptor fieldDescriptor =
-                    findSourceFieldByName(byOptionValue, enrichmentField, true);
-            return Collections.singleton(fieldDescriptor);
-        } else {
-            String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(byOptionValue);
-            return findSourceFieldsByNames(ImmutableList.copyOf(targetFieldNames), enrichmentField);
-        }
-    }
-
-    private static String byOptionValue(FieldDescriptor enrichmentField) {
-        String byOptionArgument = enrichmentField.getOptions()
-                                                 .getExtension(OptionsProto.by);
-        checkNotNull(byOptionArgument);
-        return removeSpaces(byOptionArgument);
-    }
-
-    /**
      * Searches for the event/context field with the name retrieved from the
      * enrichment field {@code by} option.
      *
@@ -170,13 +140,6 @@ final class Linker implements Logging {
             throw noFieldException(fieldReference, srcMessage, enrichmentField);
         }
         return field;
-    }
-
-    private static String removeSpaces(String source) {
-        checkNotNull(source);
-        String result = SPACE_PATTERN.matcher(source)
-                                     .replaceAll(EMPTY_STRING);
-        return result;
     }
 
     private Collection<FieldDescriptor> findSourceFieldsByNames(ImmutableList<String> names,
