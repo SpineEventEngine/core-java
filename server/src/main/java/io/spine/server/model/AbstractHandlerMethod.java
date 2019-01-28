@@ -94,7 +94,7 @@ public abstract class AbstractHandlerMethod<T,
      * ...
      *
      * @apiNote
-     * The generated message classes can be different from the one specified in this handler's
+     * The emitted message classes can be different from the one specified in this handler's
      * {@link MethodResult} params for return types like {@link io.spine.server.tuple.Tuple}
      * hence we use {@code Class} with a wildcard instead of parameterizing the list.
      */

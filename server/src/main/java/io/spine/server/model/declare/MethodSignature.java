@@ -191,7 +191,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
             return Optional.empty();
         }
         Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecs());
-        ImmutableSet<Class<? extends Message>> emitted = extractEmittedMessages(method);
+        ImmutableSet<Class<? extends Message>> emitted = extractEmittedTypes(method);
         return matchingSpec.map(spec -> {
                 H handler = doCreate(method, spec, emitted);
                 handler.discoverAttributes();
@@ -219,9 +219,9 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         return result;
     }
 
-    private static ImmutableSet<Class<? extends Message>> extractEmittedMessages(Method method) {
+    private static ImmutableSet<Class<? extends Message>> extractEmittedTypes(Method method) {
         ReturnTypeAnalyzer analyzer = ReturnTypeAnalyzer.forMethod(method);
-        ImmutableSet<Class<? extends Message>> result = analyzer.getEmittedMessages();
+        ImmutableSet<Class<? extends Message>> result = analyzer.extractEmittedTypes();
         return result;
     }
 }
