@@ -25,12 +25,9 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Assign;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
+import sun.plugin2.message.EventMessage;
 
 import java.lang.reflect.Method;
-
-import static io.spine.server.model.declare.ReturnType.EVENT_MESSAGE;
-import static io.spine.server.model.declare.ReturnType.ITERABLE;
 
 /**
  * The signature of {@code Command} handler method.
@@ -44,8 +41,8 @@ public class CommandHandlerSignature extends CommandAcceptingMethodSignature<Com
     }
 
     @Override
-    protected ImmutableSet<ReturnType> getValidReturnTypes() {
-        return ImmutableSet.of(EVENT_MESSAGE, ITERABLE);
+    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+        return ImmutableSet.of(EventMessage.class, Iterable.class);
     }
 
     @Override

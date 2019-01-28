@@ -18,41 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
-import io.spine.core.EventEnvelope;
-import io.spine.server.event.React;
-import io.spine.server.model.declare.AccessModifier;
-import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 
-/**
- * The signature of {@link EventReactorMethod}.
- */
-class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
+interface ReturnTypeAnalyzer {
 
-    EventReactorSignature() {
-        super(React.class);
-    }
+    ImmutableSet<Class<? extends Message>> getEmittedMessages();
 
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
-    }
-
-    @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
-    }
-
-    @Override
-    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec,
-                                       ImmutableSet<Class<? extends Message>> emittedMessages) {
-        return new EventReactorMethod(method, parameterSpec, emittedMessages);
+    static ReturnTypeAnalyzer forMethod(Method method) {
+        return null;
     }
 }

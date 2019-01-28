@@ -222,15 +222,4 @@ public enum ReturnType {
     }
 
     protected abstract ImmutableSet<Class<? extends Message>> gatherEmittedMessages(Method method);
-
-    static Optional<ReturnType> findMatching(Method method, Collection<ReturnType> types) {
-        Class<?> returnType = method.getReturnType();
-        Optional<ReturnType> result = types
-                .stream()
-                .map(type -> type.getMatching(returnType))
-                .filter(Optional::isPresent)
-                .findFirst()
-                .orElseGet(Optional::empty);
-        return result;
-    }
 }

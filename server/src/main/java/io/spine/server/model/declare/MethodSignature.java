@@ -84,7 +84,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<ReturnType> getValidReturnTypes();
+    protected abstract ImmutableSet<Class<?>> getValidReturnTypes();
 
     /**
      * Obtains the set of allowed exceptions that method may declare to throw.
@@ -219,9 +219,9 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         return result;
     }
 
-    private ImmutableSet<Class<? extends Message>> extractEmittedMessages(Method method) {
-        Optional<ReturnType> returnType = ReturnType.findMatching(method, getValidReturnTypes());
-        return returnType.map(type -> type.emittedMessages(method))
-                         .orElse(ImmutableSet.of());
+    private static ImmutableSet<Class<? extends Message>> extractEmittedMessages(Method method) {
+        ReturnTypeAnalyzer analyzer = ReturnTypeAnalyzer.forMethod(method);
+        ImmutableSet<Class<? extends Message>> result = analyzer.getEmittedMessages();
+        return result;
     }
 }

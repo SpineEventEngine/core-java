@@ -28,11 +28,8 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
-
-import static io.spine.server.model.declare.ReturnType.VOID;
 
 /**
  * A signature of {@link SubscriberMethod}.
@@ -49,8 +46,8 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    protected ImmutableSet<ReturnType> getValidReturnTypes() {
-        return ImmutableSet.of(VOID);
+    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+        return ImmutableSet.of(void.class);
     }
 
     @Override
