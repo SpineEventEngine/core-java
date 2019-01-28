@@ -162,8 +162,8 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      * @param returnType
      * @return new instance of {@code HandlerMethod}
      */
-    public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec,
-                               ReturnType returnType);
+    public abstract H
+    doCreate(Method method, ParameterSpec<E> parameterSpec, ReturnType returnType);
 
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
