@@ -30,18 +30,16 @@ import io.spine.server.model.Nothing;
 import io.spine.server.tuple.Either;
 import io.spine.server.tuple.Tuple;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
 
-@SuppressWarnings("Duplicates") // todo temporarily
 abstract class ReturnTypeAnalyzer {
 
     private static final Map<Class<?>, AnalyzerSupplier> suppliers = analyzerSuppliers();
@@ -101,7 +99,7 @@ abstract class ReturnTypeAnalyzer {
         result.put(Tuple.class, ParameterizedType::new);
         result.put(Either.class, ParameterizedType::new);
 
-        result.put(Iterable.class, type -> new ParameterizedSupertype<>(type, Iterable.class));
+        result.put(Iterable.class, type -> new ParameterizedType<>(type, Iterable.class));
 
         return result;
     }
@@ -140,15 +138,30 @@ abstract class ReturnTypeAnalyzer {
         }
     }
 
-    private static class ParameterizedType extends ReturnTypeAnalyzer {
+    private static class ParameterizedType<T> extends ReturnTypeAnalyzer {
 
-        private ParameterizedType(Type genericType) {
-            super(genericType);
+        @Nullable
+        private final Class<T> targetSupertype;
+
+        private ParameterizedType(Type type, @Nullable Class<T> targetSupertype) {
+            super(type);
+            this.targetSupertype = targetSupertype;
+        }
+
+        private ParameterizedType(Type type) {
+            this(type, null);
         }
 
         @Override
         protected ImmutableSet<Class<? extends Message>> extractEmittedTypes() {
-            TypeToken<?> token = TypeToken.of(type());
+            TypeToken<?> token;
+
+            if (targetSupertype != null) {
+                TypeToken<? extends T> current = (TypeToken<? extends T>) TypeToken.of(type());
+                token = current.getSupertype(targetSupertype);
+            } else {
+                token = TypeToken.of(type());
+            }
             Class<?> rawType = token.getRawType();
             ImmutableSet.Builder<Class<? extends Message>> emitted = ImmutableSet.builder();
             for (TypeVariable<?> typeParam : rawType.getTypeParameters()) {
@@ -166,38 +179,9 @@ abstract class ReturnTypeAnalyzer {
         }
     }
 
-    private static class ParameterizedSupertype<T> extends ReturnTypeAnalyzer {
-
-        private final Class<T> supertype;
-
-        private ParameterizedSupertype(Type genericType, Class<T> supertype) {
-            super(genericType);
-            this.supertype = supertype;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        protected ImmutableSet<Class<? extends Message>> extractEmittedTypes() {
-            TypeToken<? extends T> token = (TypeToken<? extends T>) TypeToken.of(type());
-            TypeToken<?> supertype = token.getSupertype(this.supertype);
-            Set<Class<? extends Message>> emitted = newHashSet();
-            for (TypeVariable<?> typeParam : this.supertype.getTypeParameters()) {
-                TypeToken<?> resolved = supertype.resolveType(typeParam);
-                Class<?> resolvedRawType = resolved.getRawType();
-                Optional<AnalyzerSupplier> supplierForType = supplierFor(resolvedRawType);
-                if (supplierForType.isPresent()) {
-                    Type resolvedGenericType = resolved.getType();
-                    AnalyzerSupplier supplier = supplierForType.get();
-                    ReturnTypeAnalyzer analyzer = supplier.get(resolvedGenericType);
-                    emitted.addAll(analyzer.extractEmittedTypes());
-                }
-            }
-            return ImmutableSet.copyOf(emitted);
-        }
-    }
-
     @FunctionalInterface
     private interface AnalyzerSupplier {
+
         ReturnTypeAnalyzer get(Type returnType);
     }
 }
