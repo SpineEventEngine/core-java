@@ -183,9 +183,6 @@ final class Linker implements Logging {
                                                                 FieldDescriptor enrichmentField) {
         int nameCount = names.size();
         checkArgument(nameCount > 0, "Names may not be empty");
-        checkArgument(nameCount > 1,
-                      "Enrichment target field names may not be a singleton array. " +
-                      "Use findSourceFieldByName().");
         Collection<FieldDescriptor> result = new HashSet<>(nameCount);
 
         FieldDescriptor.Type basicType = null;
