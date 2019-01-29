@@ -93,7 +93,7 @@ public abstract class AbstractHandlerMethod<T,
     /**
      * ...
      *
-     * <p>Not evaluated until they are queried.
+     * <p>The emitted messages set is not evaluated until it's queried.
      *
      * @apiNote
      * The emitted message classes can be different from the one specified in this handler's
