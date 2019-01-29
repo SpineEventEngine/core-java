@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings("UnstableApiUsage") // Guava's `TypeToken` will most probably be OK.
 abstract class EmittedTypesExtractor {
 
     private static final Map<Class<?>, ExtractorProvider> extractorProviders =
@@ -132,7 +132,7 @@ abstract class EmittedTypesExtractor {
             this.tooBroadTypes = tooBroadTypes;
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked") // Checked logically.
         @Override
         public ImmutableSet<Class<? extends Message>> extract() {
             TypeToken<?> token = TypeToken.of(type());
@@ -171,7 +171,7 @@ abstract class EmittedTypesExtractor {
             return emitted.build();
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked") // Checked logically.
         private TypeToken<?> tokenFor(Type type) {
             if (targetSupertype != null) {
                 TypeToken<? extends T> current = (TypeToken<? extends T>) TypeToken.of(type);
