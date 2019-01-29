@@ -21,17 +21,27 @@
 package io.spine.server.model.given;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
+import io.spine.base.RejectionMessage;
+import io.spine.server.model.Nothing;
+import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
-import io.spine.test.aggregate.event.AggTaskAdded;
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectId;
+import io.spine.test.model.ModCreateProject;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.ModProjectOwnerAssigned;
+import io.spine.test.model.ModProjectStarted;
+import io.spine.test.model.ModStartProject;
+import io.spine.test.model.Rejections.ModCannotAssignOwnerToProject;
+import io.spine.test.model.Rejections.ModProjectAlreadyExists;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static io.spine.base.Identifier.newUuid;
 
 public final class EmittedTypesExtractorTestEnv {
 
@@ -39,19 +49,80 @@ public final class EmittedTypesExtractorTestEnv {
     private EmittedTypesExtractorTestEnv() {
     }
 
-    public static class MethodContainer {
+    @SuppressWarnings("unused") // Reflective access only.
+    public static class MessageEmitter {
 
-        public List<ProjectCreated> returnList() {
+        /** Prevents instantiation of this reflective-access-only class. */
+        private MessageEmitter() {
+        }
+
+        public ModCreateProject emitCommand() {
+            return ModCreateProject.getDefaultInstance();
+        }
+
+        public ModProjectCreated emitEvent() {
+            return ModProjectCreated.getDefaultInstance();
+        }
+
+        public Optional<ModProjectStarted> emitOptionalEvent() {
+            return Optional.of(ModProjectStarted.getDefaultInstance());
+        }
+
+        public List<ModStartProject> emitListOfCommands() {
             return ImmutableList.of();
         }
 
-        public Pair<ProjectCreated, EitherOf3<EventMessage, AggTaskAdded, Any>> returnPair() {
-            ProjectId projectId = Identifier.generate(ProjectId.class);
-            ProjectCreated projectCreated = ProjectCreated
-                    .newBuilder()
-                    .setProjectId(projectId)
-                    .build();
-            return Pair.withEither(projectCreated, null);
+        public ModProjectStartedList emitModProjectStartedList() {
+            return new ModProjectStartedList();
         }
+
+        public EitherOf2<ModProjectCreated, ModProjectAlreadyExists> emitEither() {
+            return EitherOf2.withA(ModProjectCreated.getDefaultInstance());
+        }
+
+        public Pair<ModProjectCreated,
+                EitherOf2<ModProjectOwnerAssigned, ModCannotAssignOwnerToProject>>
+        emitPair() {
+            ModProjectCreated projectCreated = ModProjectCreated
+                    .newBuilder()
+                    .setId(newUuid())
+                    .build();
+            EitherOf2<ModProjectOwnerAssigned, ModCannotAssignOwnerToProject> either =
+                    EitherOf2.withA(ModProjectOwnerAssigned.getDefaultInstance());
+            return Pair.withEither(projectCreated, either);
+        }
+
+        public EitherOf3<ModProjectOwnerAssigned, ModCannotAssignOwnerToProject, RejectionMessage>
+        emitEitherWithTooBroad() {
+            return EitherOf3.withA(ModProjectOwnerAssigned.getDefaultInstance());
+        }
+
+        public void returnVoid() {
+        }
+
+        public Nothing returnNothing() {
+            return Nothing.getDefaultInstance();
+        }
+
+        public Empty returnEmpty() {
+            return Empty.getDefaultInstance();
+        }
+
+        public EventMessage returnTooBroadEvent() {
+            return ModProjectCreated.getDefaultInstance();
+        }
+
+        public Iterable<Message> returnTooBroadIterable() {
+            return ImmutableList.of();
+        }
+
+        public int returnRandomType() {
+            return 42;
+        }
+    }
+
+    @SuppressWarnings("ClassExtendsConcreteCollection") // Necessary for test.
+    private static class ModProjectStartedList extends ArrayList<ModProjectStarted> {
+        private static final long serialVersionUID = 0L;
     }
 }

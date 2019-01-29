@@ -57,7 +57,6 @@ abstract class EmittedTypesExtractor {
 
     static EmittedTypesExtractor forMethod(Method method) {
         checkNotNull(method);
-
         Type type = method.getGenericReturnType();
         Optional<EmittedTypesExtractor> extractor = forType(type);
         checkArgument(extractor.isPresent(),
@@ -126,11 +125,11 @@ abstract class EmittedTypesExtractor {
 
     private static class MessageType extends EmittedTypesExtractor {
 
-        private final ImmutableSet<Class<? extends Message>> ignoredTypes;
+        private final ImmutableSet<Class<? extends Message>> tooBroadTypes;
 
-        private MessageType(Type type, ImmutableSet<Class<? extends Message>> ignoredTypes) {
+        private MessageType(Type type, ImmutableSet<Class<? extends Message>> tooBroadTypes) {
             super(type);
-            this.ignoredTypes = ignoredTypes;
+            this.tooBroadTypes = tooBroadTypes;
         }
 
         @SuppressWarnings("unchecked")
@@ -138,7 +137,7 @@ abstract class EmittedTypesExtractor {
         public ImmutableSet<Class<? extends Message>> extract() {
             TypeToken<?> token = TypeToken.of(type());
             Class<? extends Message> returnType = (Class<? extends Message>) token.getRawType();
-            if (ignoredTypes.contains(returnType)) {
+            if (tooBroadTypes.contains(returnType)) {
                 return ImmutableSet.of();
             }
             return ImmutableSet.of(returnType);
@@ -166,8 +165,8 @@ abstract class EmittedTypesExtractor {
             for (TypeVariable<?> typeParam : token.getRawType()
                                                   .getTypeParameters()) {
                 TypeToken<?> resolved = token.resolveType(typeParam);
-                Optional<EmittedTypesExtractor> provider = forType(resolved.getType());
-                provider.ifPresent(extractor -> emitted.addAll(extractor.extract()));
+                Optional<EmittedTypesExtractor> extractor = forType(resolved.getType());
+                extractor.ifPresent(e -> emitted.addAll(e.extract()));
             }
             return emitted.build();
         }

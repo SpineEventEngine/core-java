@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
@@ -37,7 +36,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -99,8 +97,7 @@ public abstract class AbstractHandlerMethod<T,
      *
      * @apiNote
      * The emitted message classes can be different from the one specified in this handler's
-     * {@link MethodResult} params for return types like {@link io.spine.server.tuple.Tuple}
-     * hence we use {@code Class} with a wildcard instead of parameterizing the list.
+     * {@link MethodResult} params for return types like {@link io.spine.server.tuple.Tuple}.
      */
     @LazyInit
     private @MonotonicNonNull ImmutableSet<Class<? extends Message>> emittedMessages;

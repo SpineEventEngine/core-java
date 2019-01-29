@@ -22,15 +22,12 @@ package io.spine.server.model.given;
 
 import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
-import io.spine.test.model.Rejections.ProjectAlreadyExists;
+import io.spine.test.model.Rejections.ModProjectAlreadyExists;
 
 import java.io.IOException;
 
 import static io.spine.base.Identifier.newUuid;
 
-/**
- * @author Dmytro Kuzmin
- */
 public class MethodExceptionCheckerTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -56,7 +53,7 @@ public class MethodExceptionCheckerTestEnv {
         }
 
         private static void methodDescendantException() throws DescendantThrowableMessage {
-            ProjectAlreadyExists rejection = ProjectAlreadyExists
+            ModProjectAlreadyExists rejection = ModProjectAlreadyExists
                     .newBuilder()
                     .setId(newUuid())
                     .build();
