@@ -27,6 +27,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.core.EmptyClass;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
@@ -110,6 +111,16 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     public ImmutableSet<M> getMessageClasses(Predicate<? super H> predicate) {
         Multimap<HandlerTypeInfo, H> filtered = Multimaps.filterValues(map, predicate::test);
         return messageClasses(filtered.values());
+    }
+
+    public ImmutableSet<Class<? extends Message>> getEmittedTypes() {
+        ImmutableSet<Class<? extends Message>> result = map
+                .values()
+                .stream()
+                .map(HandlerMethod::getEmittedTypes)
+                .flatMap(Set::stream)
+                .collect(toImmutableSet());
+        return result;
     }
 
     /**

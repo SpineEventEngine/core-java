@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
@@ -28,9 +29,11 @@ import io.spine.server.command.Commander;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * Provides information on message handling for a class of {@link Commander}s.
@@ -87,5 +90,17 @@ public final class CommanderClass<C extends Commander>
 
     public boolean producesCommandsOn(EventClass eventClass) {
         return delegate.contains(eventClass);
+    }
+
+    @Override
+    public Set<Class<? extends CommandMessage>> getProducedCommands() {
+        Set<Class<? extends CommandMessage>> result = newHashSet();
+        Collection<Class<? extends CommandMessage>> fromCommandHandling =
+                (Set<Class<? extends CommandMessage>>) getProducedMessages();
+        result.addAll(fromCommandHandling);
+        Collection<Class<? extends CommandMessage>> fromEventReact =
+                (Set<Class<? extends CommandMessage>>) delegate.getEmittedTypes();
+        result.addAll(fromEventReact);
+        return result;
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.model;
 
+import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerSignature;
@@ -47,6 +48,11 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     @Override
     public Set<CommandClass> getCommands() {
         return commands.getMessageClasses();
+    }
+
+    @Override
+    public Set<Class<? extends Message>> getProducedMessages() {
+        return commands.getEmittedTypes();
     }
 
     public boolean handlesCommand(CommandClass commandClass) {

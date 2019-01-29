@@ -91,20 +91,16 @@ public abstract class AbstractHandlerMethod<T,
     private final ParameterSpec<E> parameterSpec;
 
     /**
-     * ...
+     * The message types (commands or events) emitted by this handler method.
      *
-     * <p>The emitted messages set is not evaluated until it's queried.
-     *
-     * @apiNote
-     * The emitted message classes can be different from the one specified in this handler's
-     * {@link MethodResult} params for return types like {@link io.spine.server.tuple.Tuple}.
+     * <p>Is not evaluated until it's queried.
      */
     @LazyInit
-    private @MonotonicNonNull ImmutableSet<Class<? extends Message>> emittedMessages;
+    private @MonotonicNonNull ImmutableSet<Class<? extends Message>> emittedMessageTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
-     *  @param method
+     * @param method
      *         subscriber method
      * @param parameterSpec
      *         the specification of method parameters
@@ -191,12 +187,13 @@ public abstract class AbstractHandlerMethod<T,
      *
      * @see MethodResult#toMessages(Object).
      */
-    public ImmutableSet<Class<? extends Message>> emittedMessages() {
-        if (emittedMessages == null) {
+    @Override
+    public Set<Class<? extends Message>> getEmittedTypes() {
+        if (emittedMessageTypes == null) {
             EmittedTypesExtractor extractor = EmittedTypesExtractor.forMethod(method);
-            emittedMessages = extractor.extract();
+            emittedMessageTypes = extractor.extract();
         }
-        return emittedMessages;
+        return emittedMessageTypes;
     }
 
     /**

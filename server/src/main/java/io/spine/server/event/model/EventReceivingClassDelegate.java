@@ -22,6 +22,7 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
@@ -82,6 +83,10 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         return externalEvents;
     }
 
+    public Set<Class<? extends Message>> getEmittedTypes() {
+        return events.getEmittedTypes();
+    }
+
     /**
      * Obtains the method which handles the passed event class.
      *
@@ -99,5 +104,4 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     public M getMethod(EventClass eventClass, MessageClass originClass) {
         return events.getSingleMethod(eventClass, originClass);
     }
-
 }

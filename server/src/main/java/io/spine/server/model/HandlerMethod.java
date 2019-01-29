@@ -20,8 +20,10 @@
 
 package io.spine.server.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -69,6 +71,11 @@ public interface HandlerMethod<T,
      * Obtains the handling method.
      */
     Method getRawMethod();
+
+    /**
+     * Obtains message types emitted by this handler.
+     */
+    Set<Class<? extends Message>> getEmittedTypes();
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.

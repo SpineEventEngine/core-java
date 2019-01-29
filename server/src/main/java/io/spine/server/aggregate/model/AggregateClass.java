@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
@@ -110,6 +111,11 @@ public class AggregateClass<A extends Aggregate>
     @Override
     public final EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
         return delegate.getReactor(eventClass, commandClass);
+    }
+
+    @Override
+    public Set<Class<? extends EventMessage>> getProducedEvents() {
+        return delegate.getProducedEvents();
     }
 
     /**

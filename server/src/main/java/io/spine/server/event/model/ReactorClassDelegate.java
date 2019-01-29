@@ -20,9 +20,12 @@
 
 package io.spine.server.event.model;
 
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.type.MessageClass;
+
+import java.util.Set;
 
 /**
  * The helper class for holding messaging information on behalf of another model class.
@@ -44,5 +47,11 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     @Override
     public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
         return getMethod(eventClass, originClass);
+    }
+
+    @Override
+    public Set<Class<? extends EventMessage>> getProducedEvents() {
+        // todo try doing something about these casts
+        return (Set<Class<? extends EventMessage>>) getEmittedTypes();
     }
 }

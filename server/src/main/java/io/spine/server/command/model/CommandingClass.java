@@ -20,10 +20,16 @@
 
 package io.spine.server.command.model;
 
+import io.spine.base.CommandMessage;
+
+import java.util.Set;
+
 /**
  * An interface common for model classes of objects that create commands.
  *
  * @author Alexander Yevsyukov
  */
 public interface CommandingClass {
+
+    Set<Class<? extends CommandMessage>> getProducedCommands();
 }

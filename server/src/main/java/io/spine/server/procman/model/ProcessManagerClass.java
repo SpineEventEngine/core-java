@@ -21,6 +21,8 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.Sets.SetView;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.command.model.CommandReactionMethod;
@@ -97,6 +99,11 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return reactorDelegate.getReactor(eventClass, originClass);
     }
 
+    @Override
+    public Set<Class<? extends EventMessage>> getProducedEvents() {
+        return reactorDelegate.getProducedEvents();
+    }
+
     public CommandSubstituteMethod getCommander(CommandClass commandClass) {
         return commanderDelegate.getHandler(commandClass);
     }
@@ -115,5 +122,10 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     public boolean producesCommandsOn(EventClass eventClass) {
         return commanderDelegate.producesCommandsOn(eventClass);
+    }
+
+    @Override
+    public Set<Class<? extends CommandMessage>> getProducedCommands() {
+        return commanderDelegate.getProducedCommands();
     }
 }

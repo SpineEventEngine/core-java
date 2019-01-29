@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
@@ -51,6 +52,11 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
     @Override
     public Set<CommandClass> getCommands() {
         return commands.getMessageClasses();
+    }
+
+    @Override
+    public Set<Class<? extends Message>> getProducedMessages() {
+        return commands.getEmittedTypes();
     }
 
     /** Obtains the handler method for the passed command class. */
