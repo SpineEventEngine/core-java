@@ -21,7 +21,6 @@
 package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.model.HandlerMethod;
@@ -159,11 +158,9 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *
      * @param method the raw method to wrap into a {@code HandlerMethod} instance being created
      * @param parameterSpec the specification of method parameters
-     * @param returnType
      * @return new instance of {@code HandlerMethod}
      */
-    public abstract H
-    doCreate(Method method, ParameterSpec<E> parameterSpec, ReturnType returnType);
+    public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec);
 
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
@@ -191,9 +188,8 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
             return Optional.empty();
         }
         Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecs());
-        ReturnType returnType = ReturnType.of(method);
         return matchingSpec.map(spec -> {
-                H handler = doCreate(method, spec, returnType);
+                H handler = doCreate(method, spec);
                 handler.discoverAttributes();
                 return handler;
         });

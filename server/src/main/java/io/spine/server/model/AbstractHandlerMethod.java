@@ -23,12 +23,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -94,12 +95,15 @@ public abstract class AbstractHandlerMethod<T,
     /**
      * ...
      *
+     * <p>Not evaluated until they are queried.
+     *
      * @apiNote
      * The emitted message classes can be different from the one specified in this handler's
      * {@link MethodResult} params for return types like {@link io.spine.server.tuple.Tuple}
      * hence we use {@code Class} with a wildcard instead of parameterizing the list.
      */
-    private final ReturnType returnType;
+    @LazyInit
+    private @MonotonicNonNull ImmutableSet<Class<? extends Message>> emittedMessages;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -107,16 +111,12 @@ public abstract class AbstractHandlerMethod<T,
      *         subscriber method
      * @param parameterSpec
      *         the specification of method parameters
-     * @param returnType
      */
-    protected AbstractHandlerMethod(Method method,
-                                    ParameterSpec<E> parameterSpec,
-                                    ReturnType returnType) {
+    protected AbstractHandlerMethod(Method method, ParameterSpec<E> parameterSpec) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
-        this.returnType = returnType;
 
         method.setAccessible(true);
     }
@@ -192,17 +192,14 @@ public abstract class AbstractHandlerMethod<T,
     /**
      * Retrieves the message classes produced by this handler method.
      *
-     * <p>In Spine, all handlers that produce messages return them either as-is, or in
-     * {@code Optional<Message>}/{@code Iterable<Message>/Tuple<Message1, Message2, ...>/Either<>} form.
-     *
-     * <p>Methods with other return types (for example, {@link Void} for subscribers/appliers or
-     * {@link Empty} for reactors are all valid cases) are deemed producing no messages.
-     *
-     * @return produced message classes or {@link Optional#empty()} if the method produces nothing
      * @see MethodResult#toMessages(Object).
      */
-    public ImmutableSet<Class<? extends Message>> getEmittedMessages() {
-        return returnType.emittedMessages();
+    public ImmutableSet<Class<? extends Message>> emittedMessages() {
+        if (emittedMessages == null) {
+            EmittedTypesExtractor extractor = EmittedTypesExtractor.forMethod(method);
+            emittedMessages = extractor.extract();
+        }
+        return emittedMessages;
     }
 
     /**

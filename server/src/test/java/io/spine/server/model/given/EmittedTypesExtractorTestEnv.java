@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare.given;
+package io.spine.server.model.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
@@ -32,10 +33,10 @@ import io.spine.test.event.ProjectId;
 
 import java.util.List;
 
-public final class ReturnTypeAnalyzerTestEnv {
+public final class EmittedTypesExtractorTestEnv {
 
     /** Prevents instantiation of this test environment class. */
-    private ReturnTypeAnalyzerTestEnv() {
+    private EmittedTypesExtractorTestEnv() {
     }
 
     public static class MethodContainer {
@@ -44,7 +45,7 @@ public final class ReturnTypeAnalyzerTestEnv {
             return ImmutableList.of();
         }
 
-        public Pair<ProjectCreated, EitherOf3<Message, AggTaskAdded, Any>> returnPair() {
+        public Pair<ProjectCreated, EitherOf3<EventMessage, AggTaskAdded, Any>> returnPair() {
             ProjectId projectId = Identifier.generate(ProjectId.class);
             ProjectCreated projectCreated = ProjectCreated
                     .newBuilder()

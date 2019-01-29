@@ -27,7 +27,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -42,10 +41,8 @@ import java.lang.reflect.Method;
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, R> {
 
-    CommandAcceptingMethod(Method method,
-                           ParameterSpec<CommandEnvelope> params,
-                           ReturnType returnType) {
-        super(method, params, returnType);
+    CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
+        super(method, params);
     }
 
     @Override

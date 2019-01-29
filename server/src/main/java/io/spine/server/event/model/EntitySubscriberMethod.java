@@ -35,7 +35,6 @@ import io.spine.server.annotation.BoundedContext;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.Model;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
@@ -55,10 +54,8 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     private final BoundedContextName contextOfSubscriber;
     private final Any typeUrlAsAny;
 
-    EntitySubscriberMethod(Method method,
-                           ParameterSpec<EventEnvelope> parameterSpec,
-                           ReturnType returnType) {
-        super(method, parameterSpec, returnType);
+    EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         checkNotFiltered(method);
         checkExternal();

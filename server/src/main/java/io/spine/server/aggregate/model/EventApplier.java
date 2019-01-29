@@ -31,7 +31,6 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAttribute;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -53,12 +52,9 @@ public final class EventApplier
      * Creates a new instance to wrap {@code method} on {@code target}.
      *  @param method   the applier method
      * @param signature {@link ParameterSpec} which describes the method
-     * @param returnType
      */
-    EventApplier(Method method,
-                 ParameterSpec<EventEnvelope> signature,
-                 ReturnType returnType) {
-        super(method, signature, returnType);
+    EventApplier(Method method, ParameterSpec<EventEnvelope> signature) {
+        super(method, signature);
     }
 
     /**

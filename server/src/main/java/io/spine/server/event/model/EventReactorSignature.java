@@ -26,7 +26,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -51,8 +50,7 @@ class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> 
     }
 
     @Override
-    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec,
-                                       ReturnType returnType) {
-        return new EventReactorMethod(method, parameterSpec, returnType);
+    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        return new EventReactorMethod(method, parameterSpec);
     }
 }

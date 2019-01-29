@@ -28,7 +28,6 @@ import io.spine.core.Subscribe;
 import io.spine.protobuf.FieldPaths;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -42,10 +41,8 @@ import static io.spine.string.Stringifiers.fromString;
 public final class EventSubscriberMethod extends SubscriberMethod {
 
     /** Creates a new instance. */
-    EventSubscriberMethod(Method method,
-                          ParameterSpec<EventEnvelope> parameterSpec,
-                          ReturnType returnType) {
-        super(method, parameterSpec, returnType);
+    EventSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
     }
 
     @Override

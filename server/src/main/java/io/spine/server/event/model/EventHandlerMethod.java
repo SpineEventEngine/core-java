@@ -30,7 +30,6 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -50,12 +49,9 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
-     * @param returnType
      */
-    EventHandlerMethod(Method method,
-                       ParameterSpec<EventEnvelope> parameterSpec,
-                       ReturnType returnType) {
-        super(method, parameterSpec, returnType);
+    EventHandlerMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
     }
 
     @Override

@@ -33,7 +33,6 @@ import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -68,9 +67,8 @@ public class CommandReactionSignature
 
     @Override
     public CommandReactionMethod doCreate(Method method,
-                                          ParameterSpec<EventEnvelope> parameterSpec,
-                                          ReturnType returnType) {
-        return new CommandReactionMethod(method, parameterSpec, returnType);
+                                          ParameterSpec<EventEnvelope> parameterSpec) {
+        return new CommandReactionMethod(method, parameterSpec);
     }
 
     /**

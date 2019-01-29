@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Assign;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 import sun.plugin2.message.EventMessage;
 
 import java.lang.reflect.Method;
@@ -47,8 +46,7 @@ public class CommandHandlerSignature extends CommandAcceptingMethodSignature<Com
 
     @Override
     public CommandHandlerMethod doCreate(Method method,
-                                         ParameterSpec<CommandEnvelope> parameterSpec,
-                                         ReturnType returnType) {
-        return new CommandHandlerMethod(method, parameterSpec, returnType);
+                                         ParameterSpec<CommandEnvelope> parameterSpec) {
+        return new CommandHandlerMethod(method, parameterSpec);
     }
 }

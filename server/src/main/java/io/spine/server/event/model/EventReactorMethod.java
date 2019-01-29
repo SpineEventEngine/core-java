@@ -26,7 +26,6 @@ import io.spine.server.event.EventReactor;
 import io.spine.server.event.React;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -42,10 +41,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EventReactorMethod
         extends EventHandlerMethod<EventReactor, ReactorMethodResult> {
 
-    EventReactorMethod(Method method,
-                       ParameterSpec<EventEnvelope> params,
-                       ReturnType returnType) {
-        super(method, params, returnType);
+    EventReactorMethod(Method method, ParameterSpec<EventEnvelope> params) {
+        super(method, params);
     }
 
     @Override

@@ -25,7 +25,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandReceiver;
 import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -38,10 +37,8 @@ public final class CommandSubstituteMethod
         extends CommandAcceptingMethod<CommandReceiver, Result>
         implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope, Result> {
 
-    CommandSubstituteMethod(Method method,
-                            ParameterSpec<CommandEnvelope> paramSpec,
-                            ReturnType returnType) {
-        super(method, paramSpec, returnType);
+    CommandSubstituteMethod(Method method, ParameterSpec<CommandEnvelope> paramSpec) {
+        super(method, paramSpec);
     }
 
     @Override

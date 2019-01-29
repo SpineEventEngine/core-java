@@ -27,7 +27,6 @@ import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -44,10 +43,8 @@ public final class CommandReactionMethod
                                       Result>
         implements CommandingMethod<EventReceiver, EventClass, EventEnvelope, Result> {
 
-    CommandReactionMethod(Method method,
-                          ParameterSpec<EventEnvelope> signature,
-                          ReturnType returnType) {
-        super(method, signature, returnType);
+    CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
+        super(method, signature);
     }
 
     @Override

@@ -18,25 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare;
+package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.server.model.declare.given.ReturnTypeAnalyzerTestEnv.MethodContainer;
+import io.spine.server.model.given.EmittedTypesExtractorTestEnv.MethodContainer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
 @DisplayName("ReturnTypeAnalyzerShould")
-class ReturnTypeAnalyzerTest {
+class EmittedTypesExtractorTest {
 
     @Test
     @DisplayName("extract emitted messages from method return type")
     void extractEmittedMessages() throws NoSuchMethodException {
         Method method = MethodContainer.class.getMethod("returnPair");
-        ReturnType returnType = ReturnType.of(method);
-        ImmutableSet<Class<? extends Message>> emitted = returnType.emittedMessages();
+        EmittedTypesExtractor emittedTypesExtractor = EmittedTypesExtractor.forMethod(method);
+        ImmutableSet<Class<? extends Message>> emitted = emittedTypesExtractor.extract();
         System.out.println(emitted);
     }
 }

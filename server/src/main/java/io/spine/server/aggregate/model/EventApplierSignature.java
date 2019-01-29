@@ -29,7 +29,6 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -50,9 +49,8 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
     }
 
     @Override
-    public EventApplier doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec,
-                                 ReturnType returnType) {
-        return new EventApplier(method, parameterSpec, returnType);
+    public EventApplier doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        return new EventApplier(method, parameterSpec);
     }
 
     @Override

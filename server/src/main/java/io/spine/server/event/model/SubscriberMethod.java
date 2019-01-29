@@ -32,7 +32,6 @@ import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.ReturnType;
 
 import java.lang.reflect.Method;
 
@@ -53,10 +52,8 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
                                                                      EventEnvelope,
                                                                      MethodResult<Empty>> {
 
-    protected SubscriberMethod(Method method,
-                               ParameterSpec<EventEnvelope> parameterSpec,
-                               ReturnType returnType) {
-        super(method, parameterSpec, returnType);
+    protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
     }
 
     @Override
