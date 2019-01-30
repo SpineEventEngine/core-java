@@ -33,8 +33,6 @@ import static java.util.stream.Collectors.toSet;
  * The helper class for holding messaging information on behalf of another model class.
  *
  * @param <T> the type of the raw class for obtaining messaging information
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  */
 public final class ReactorClassDelegate<T extends EventReceiver>
         extends EventReceivingClassDelegate<T, EventMessage, EventReactorMethod>

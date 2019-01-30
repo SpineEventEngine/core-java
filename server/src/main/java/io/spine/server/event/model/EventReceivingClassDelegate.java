@@ -40,7 +40,6 @@ import java.util.Set;
  *
  * @param <T> the type of target objects that handle messages
  * @param <M> the type of handler method objects
- * @author Alexander Yevsyukov
  */
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,

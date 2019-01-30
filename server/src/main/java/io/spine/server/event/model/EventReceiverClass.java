@@ -29,8 +29,6 @@ import java.util.Set;
  *
  * <p>A class can declare methods to receive events from the same Bounded Context (“domestic”
  * events), or events originated in another Bounded Context (“external” events).
- *
- * @author Alexander Yevsyukov
  */
 public interface EventReceiverClass {
 

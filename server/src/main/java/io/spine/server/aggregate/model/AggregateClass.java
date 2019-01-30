@@ -36,13 +36,11 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * Provides message handling information on an aggregate class.
  *
  * @param <A> the type of aggregates
- * @author Alexander Yevsyukov
  */
 public class AggregateClass<A extends Aggregate>
         extends CommandHandlingEntityClass<A>

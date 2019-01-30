@@ -28,8 +28,6 @@ import java.util.Set;
 
 /**
  * Provides message handling information on a class that reacts on messages.
- *
- * @author Alexander Yevsyukov
  */
 public interface ReactingClass extends EventReceiverClass {
 

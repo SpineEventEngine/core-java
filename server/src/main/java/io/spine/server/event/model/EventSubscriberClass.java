@@ -38,7 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Provides type information on an {@link AbstractEventSubscriber} class.
  *
  * @param <S> the type of event subscribers
- * @author Alexander Yevsyukov
  */
 public final class EventSubscriberClass<S extends AbstractEventSubscriber> extends ModelClass<S>
     implements EventReceiverClass, SubscribingClass {
