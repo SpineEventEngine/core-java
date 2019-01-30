@@ -36,6 +36,7 @@ public class TwoParamMethod
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
+                                      Empty,
                                       MethodResult<Empty>> {
 
     public TwoParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {

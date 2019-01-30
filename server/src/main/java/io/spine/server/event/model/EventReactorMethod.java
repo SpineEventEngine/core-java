@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventReactor;
@@ -35,11 +36,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A wrapper for a method which {@linkplain React reacts} on events.
  *
- * @author Alexander Yevsyukov
  * @see React
  */
 public final class EventReactorMethod
-        extends EventHandlerMethod<EventReactor, ReactorMethodResult> {
+        extends EventHandlerMethod<EventReactor, EventMessage, ReactorMethodResult> {
 
     EventReactorMethod(Method method, ParameterSpec<EventEnvelope> params) {
         super(method, params);

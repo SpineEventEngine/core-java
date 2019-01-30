@@ -42,8 +42,8 @@ import static io.spine.server.model.Handlers.createId;
  *
  * @author Dmytro Dashenkov
  */
-public abstract class EventHandlerMethod<T, R extends MethodResult>
-        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R> {
+public abstract class EventHandlerMethod<T, P extends Message, R extends MethodResult<P>>
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, P, R> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.

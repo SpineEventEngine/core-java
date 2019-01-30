@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -40,8 +41,9 @@ public final class CommandReactionMethod
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
+                                      CommandMessage,
                                       Result>
-        implements CommandingMethod<EventReceiver, EventClass, EventEnvelope, Result> {
+        implements CommandingMethod<EventReceiver, EventClass, EventEnvelope> {
 
     CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
         super(method, signature);

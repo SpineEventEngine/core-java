@@ -50,6 +50,7 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
                                                                      EventMessage,
                                                                      EventClass,
                                                                      EventEnvelope,
+                                                                     Empty,
                                                                      MethodResult<Empty>> {
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {

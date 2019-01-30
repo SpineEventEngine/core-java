@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -38,8 +39,8 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 @Immutable
-public abstract class CommandAcceptingMethod<T, R extends MethodResult>
-        extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, R> {
+public abstract class CommandAcceptingMethod<T, P extends Message, R extends MethodResult<P>>
+        extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, P, R> {
 
     CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
         super(method, params);

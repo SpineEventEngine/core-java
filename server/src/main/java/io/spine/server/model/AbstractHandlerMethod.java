@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
@@ -40,6 +41,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.lang.String.format;
 
 /**
@@ -59,8 +61,9 @@ public abstract class AbstractHandlerMethod<T,
                                             M extends Message,
                                             C extends MessageClass<M>,
                                             E extends MessageEnvelope<?, ?, ?>,
-                                            R extends MethodResult>
-        implements HandlerMethod<T, C, E, R> {
+                                            P extends Message,
+                                            R extends MethodResult<P>>
+        implements HandlerMethod<T, C, E, P, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
@@ -96,7 +99,7 @@ public abstract class AbstractHandlerMethod<T,
      * <p>Is not evaluated until it's queried.
      */
     @LazyInit
-    private @MonotonicNonNull ImmutableSet<Class<? extends Message>> producedMessageTypes;
+    private @MonotonicNonNull ImmutableSet<Class<? extends P>> producedMessageTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -183,10 +186,14 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<Class<? extends Message>> getProducedMessages() {
+    public Set<Class<? extends P>> getProducedMessages() {
         if (producedMessageTypes == null) {
             ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
-            producedMessageTypes = parser.parseProducedMessages();
+            ImmutableSet<Class<? extends Message>> messages = parser.parseProducedMessages();
+            producedMessageTypes = messages
+                    .stream()
+                    .map(cls -> (Class<? extends P>) cls)
+                    .collect(toImmutableSet());
         }
         return producedMessageTypes;
     }

@@ -46,6 +46,7 @@ public final class EventApplier
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
+                                      Empty,
                                       MethodResult<Empty>> {
 
     /**

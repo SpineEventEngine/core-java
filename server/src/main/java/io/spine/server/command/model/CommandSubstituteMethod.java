@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandReceiver;
@@ -34,8 +35,8 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<CommandReceiver, Result>
-        implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope, Result> {
+        extends CommandAcceptingMethod<CommandReceiver, CommandMessage, Result>
+        implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope> {
 
     CommandSubstituteMethod(Method method, ParameterSpec<CommandEnvelope> paramSpec) {
         super(method, paramSpec);

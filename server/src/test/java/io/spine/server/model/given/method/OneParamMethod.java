@@ -36,6 +36,7 @@ public class OneParamMethod
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
+                                      Empty,
                                       MethodResult<Empty>> {
 
     public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {

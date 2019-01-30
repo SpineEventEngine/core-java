@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Yevsyukov
  */
 public final class CommandHandlerMethod
-        extends CommandAcceptingMethod<CommandHandler, CommandHandlerMethod.Result> {
+        extends CommandAcceptingMethod<CommandHandler, EventMessage, CommandHandlerMethod.Result> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
