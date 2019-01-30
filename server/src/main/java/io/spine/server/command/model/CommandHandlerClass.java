@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Provides message handling information on a command handler class.
  *
  * @param <C> the type of command handlers
- * @author Alexander Yevsyukov
  */
 public final class CommandHandlerClass<C extends AbstractCommandHandler>
         extends AbstractCommandHandlingClass<C, CommandHandlerMethod> {
