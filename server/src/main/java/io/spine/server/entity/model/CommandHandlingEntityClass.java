@@ -52,7 +52,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
 
     @Override
     public Set<Class<? extends Message>> getProducedMessages() {
-        return commands.getEmittedTypes();
+        return commands.getProducedTypes();
     }
 
     public boolean handlesCommand(CommandClass commandClass) {

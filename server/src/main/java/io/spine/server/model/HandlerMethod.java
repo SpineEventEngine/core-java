@@ -73,9 +73,11 @@ public interface HandlerMethod<T,
     Method getRawMethod();
 
     /**
-     * Obtains message types emitted by this handler.
+     * Retrieves the message classes produced by this handler method.
+     *
+     * @see MethodResult#toMessages(Object).
      */
-    Set<Class<? extends Message>> getEmittedTypes();
+    Set<Class<? extends Message>> getProducedMessages();
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.

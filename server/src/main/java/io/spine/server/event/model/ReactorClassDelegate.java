@@ -52,6 +52,6 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     @Override
     public Set<Class<? extends EventMessage>> getProducedEvents() {
         // todo try doing something about these casts
-        return (Set<Class<? extends EventMessage>>) getEmittedTypes();
+        return (Set<Class<? extends EventMessage>>) getProducedTypes();
     }
 }

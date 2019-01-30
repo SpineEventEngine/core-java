@@ -113,11 +113,11 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         return messageClasses(filtered.values());
     }
 
-    public ImmutableSet<Class<? extends Message>> getEmittedTypes() {
+    public ImmutableSet<Class<? extends Message>> getProducedTypes() {
         ImmutableSet<Class<? extends Message>> result = map
                 .values()
                 .stream()
-                .map(HandlerMethod::getEmittedTypes)
+                .map(HandlerMethod::getProducedMessages)
                 .flatMap(Set::stream)
                 .collect(toImmutableSet());
         return result;

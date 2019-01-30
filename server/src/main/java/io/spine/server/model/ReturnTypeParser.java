@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
 @SuppressWarnings("UnstableApiUsage") // Guava's `TypeToken` will most probably be OK.
-abstract class EmittedTypesExtractor {
+abstract class ReturnTypeParser {
 
     private static final Map<Class<?>, ExtractorProvider> extractorProviders =
             extractorProviders();
@@ -51,31 +51,31 @@ abstract class EmittedTypesExtractor {
     private final Type type;
 
     /** Forbids inheriting the class except for inner classes. */
-    private EmittedTypesExtractor(Type type) {
+    private ReturnTypeParser(Type type) {
         this.type = type;
     }
 
-    static EmittedTypesExtractor forMethod(Method method) {
+    static ReturnTypeParser forMethod(Method method) {
         checkNotNull(method);
         Type type = method.getGenericReturnType();
-        Optional<EmittedTypesExtractor> extractor = forType(type);
+        Optional<ReturnTypeParser> extractor = forType(type);
         checkArgument(extractor.isPresent(),
                       "There is no known return type parser for return type %s of method %s",
                       type.getTypeName(), method.getName());
         return extractor.get();
     }
 
-    abstract ImmutableSet<Class<? extends Message>> extract();
+    abstract ImmutableSet<Class<? extends Message>> parseProducedMessages();
 
     protected Type type() {
         return type;
     }
 
-    private static Optional<EmittedTypesExtractor> forType(Type type) {
+    private static Optional<ReturnTypeParser> forType(Type type) {
         Class<?> rawType = TypeToken.of(type)
                                     .getRawType();
         Optional<ExtractorProvider> provider = chooseProvider(rawType);
-        Optional<EmittedTypesExtractor> result = provider.map(p -> p.apply(type));
+        Optional<ReturnTypeParser> result = provider.map(p -> p.apply(type));
         return result;
     }
 
@@ -111,19 +111,19 @@ abstract class EmittedTypesExtractor {
         return result;
     }
 
-    private static class Noop extends EmittedTypesExtractor {
+    private static class Noop extends ReturnTypeParser {
 
         private Noop(Type type) {
             super(type);
         }
 
         @Override
-        ImmutableSet<Class<? extends Message>> extract() {
+        ImmutableSet<Class<? extends Message>> parseProducedMessages() {
             return ImmutableSet.of();
         }
     }
 
-    private static class MessageType extends EmittedTypesExtractor {
+    private static class MessageType extends ReturnTypeParser {
 
         private final ImmutableSet<Class<? extends Message>> tooBroadTypes;
 
@@ -134,7 +134,7 @@ abstract class EmittedTypesExtractor {
 
         @SuppressWarnings("unchecked") // Checked logically.
         @Override
-        public ImmutableSet<Class<? extends Message>> extract() {
+        public ImmutableSet<Class<? extends Message>> parseProducedMessages() {
             TypeToken<?> token = TypeToken.of(type());
             Class<? extends Message> returnType = (Class<? extends Message>) token.getRawType();
             if (tooBroadTypes.contains(returnType)) {
@@ -144,7 +144,7 @@ abstract class EmittedTypesExtractor {
         }
     }
 
-    private static class ParameterizedType<T> extends EmittedTypesExtractor {
+    private static class ParameterizedType<T> extends ReturnTypeParser {
 
         @Nullable
         private final Class<T> targetSupertype;
@@ -159,16 +159,16 @@ abstract class EmittedTypesExtractor {
         }
 
         @Override
-        public ImmutableSet<Class<? extends Message>> extract() {
+        public ImmutableSet<Class<? extends Message>> parseProducedMessages() {
             TypeToken<?> token = tokenFor(type());
-            ImmutableSet.Builder<Class<? extends Message>> emitted = ImmutableSet.builder();
+            ImmutableSet.Builder<Class<? extends Message>> produced = ImmutableSet.builder();
             for (TypeVariable<?> typeParam : token.getRawType()
                                                   .getTypeParameters()) {
                 TypeToken<?> resolved = token.resolveType(typeParam);
-                Optional<EmittedTypesExtractor> extractor = forType(resolved.getType());
-                extractor.ifPresent(e -> emitted.addAll(e.extract()));
+                Optional<ReturnTypeParser> extractor = forType(resolved.getType());
+                extractor.ifPresent(e -> produced.addAll(e.parseProducedMessages()));
             }
-            return emitted.build();
+            return produced.build();
         }
 
         @SuppressWarnings("unchecked") // Checked logically.
@@ -182,6 +182,6 @@ abstract class EmittedTypesExtractor {
     }
 
     @FunctionalInterface
-    private interface ExtractorProvider extends Function<Type, EmittedTypesExtractor> {
+    private interface ExtractorProvider extends Function<Type, ReturnTypeParser> {
     }
 }

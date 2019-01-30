@@ -39,7 +39,6 @@ import static com.google.common.collect.Sets.newHashSet;
  * Provides information on message handling for a class of {@link Commander}s.
  *
  * @param <C> the type of commanders
- * @author Alexander Yevsyukov
  */
 public final class CommanderClass<C extends Commander>
         extends AbstractCommandHandlingClass<C, CommandSubstituteMethod>
@@ -99,7 +98,7 @@ public final class CommanderClass<C extends Commander>
                 (Set<Class<? extends CommandMessage>>) getProducedMessages();
         result.addAll(fromCommandHandling);
         Collection<Class<? extends CommandMessage>> fromEventReact =
-                (Set<Class<? extends CommandMessage>>) delegate.getEmittedTypes();
+                (Set<Class<? extends CommandMessage>>) delegate.getProducedTypes();
         result.addAll(fromEventReact);
         return result;
     }

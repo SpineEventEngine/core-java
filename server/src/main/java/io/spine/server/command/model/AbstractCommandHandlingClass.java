@@ -56,7 +56,7 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
 
     @Override
     public Set<Class<? extends Message>> getProducedMessages() {
-        return commands.getEmittedTypes();
+        return commands.getProducedTypes();
     }
 
     /** Obtains the handler method for the passed command class. */

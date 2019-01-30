@@ -83,8 +83,8 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         return externalEvents;
     }
 
-    public Set<Class<? extends Message>> getEmittedTypes() {
-        return events.getEmittedTypes();
+    public Set<Class<? extends Message>> getProducedTypes() {
+        return events.getProducedTypes();
     }
 
     /**

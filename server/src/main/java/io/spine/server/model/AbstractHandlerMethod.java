@@ -96,7 +96,7 @@ public abstract class AbstractHandlerMethod<T,
      * <p>Is not evaluated until it's queried.
      */
     @LazyInit
-    private @MonotonicNonNull ImmutableSet<Class<? extends Message>> emittedMessageTypes;
+    private @MonotonicNonNull ImmutableSet<Class<? extends Message>> producedMessageTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -182,18 +182,13 @@ public abstract class AbstractHandlerMethod<T,
         return parameterSpec;
     }
 
-    /**
-     * Retrieves the message classes produced by this handler method.
-     *
-     * @see MethodResult#toMessages(Object).
-     */
     @Override
-    public Set<Class<? extends Message>> getEmittedTypes() {
-        if (emittedMessageTypes == null) {
-            EmittedTypesExtractor extractor = EmittedTypesExtractor.forMethod(method);
-            emittedMessageTypes = extractor.extract();
+    public Set<Class<? extends Message>> getProducedMessages() {
+        if (producedMessageTypes == null) {
+            ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
+            producedMessageTypes = parser.parseProducedMessages();
         }
-        return emittedMessageTypes;
+        return producedMessageTypes;
     }
 
     /**

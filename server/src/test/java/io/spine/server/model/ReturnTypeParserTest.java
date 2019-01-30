@@ -22,7 +22,7 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.server.model.given.EmittedTypesExtractorTestEnv.MessageEmitter;
+import io.spine.server.model.given.ReturnTypeParserTestEnv.MessageProducer;
 import io.spine.test.model.ModCreateProject;
 import io.spine.test.model.ModProjectCreated;
 import io.spine.test.model.ModProjectOwnerAssigned;
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("ReturnTypeAnalyzerShould")
-class EmittedTypesExtractorTest {
+class ReturnTypeParserTest {
 
     @Nested
     @DisplayName("extract emitted message type")
@@ -50,31 +50,31 @@ class EmittedTypesExtractorTest {
         @Test
         @DisplayName("from command return type")
         void fromCommand() {
-            checkEmits("emitCommand", ImmutableSet.of(ModCreateProject.class));
+            checkProduces("emitCommand", ImmutableSet.of(ModCreateProject.class));
         }
 
         @Test
         @DisplayName("from event return type")
         void fromEvent() {
-            checkEmits("emitEvent", ImmutableSet.of(ModProjectCreated.class));
+            checkProduces("emitEvent", ImmutableSet.of(ModProjectCreated.class));
         }
 
         @Test
         @DisplayName("from `Optional` return type")
         void fromOptional() {
-            checkEmits("emitOptionalEvent", ImmutableSet.of(ModProjectStarted.class));
+            checkProduces("emitOptionalEvent", ImmutableSet.of(ModProjectStarted.class));
         }
 
         @Test
         @DisplayName("from `Iterable` return type")
         void fromIterable() {
-            checkEmits("emitListOfCommands", ImmutableSet.of(ModStartProject.class));
+            checkProduces("emitListOfCommands", ImmutableSet.of(ModStartProject.class));
         }
 
         @Test
         @DisplayName("from non-parameterized `Iterable` descendant")
         void fromIterableDescendant() {
-            checkEmits("emitModProjectStartedList", ImmutableSet.of(ModProjectStarted.class));
+            checkProduces("emitModProjectStartedList", ImmutableSet.of(ModProjectStarted.class));
         }
     }
 
@@ -85,16 +85,16 @@ class EmittedTypesExtractorTest {
         @Test
         @DisplayName("from `Either` return type")
         void fromEither() {
-            checkEmits("emitEither",
-                       ImmutableSet.of(ModProjectCreated.class,
+            checkProduces("emitEither",
+                          ImmutableSet.of(ModProjectCreated.class,
                                        ModProjectAlreadyExists.class));
         }
 
         @Test
         @DisplayName("from `Tuple` return type")
         void fromTuple() {
-            checkEmits("emitPair",
-                       ImmutableSet.of(ModProjectCreated.class,
+            checkProduces("emitPair",
+                          ImmutableSet.of(ModProjectCreated.class,
                                        ModProjectOwnerAssigned.class,
                                        ModCannotAssignOwnerToProject.class));
         }
@@ -102,8 +102,8 @@ class EmittedTypesExtractorTest {
         @Test
         @DisplayName("from type that mixes concrete type params and too broad type params")
         void fromMixedReturnType() {
-            checkEmits("emitEitherWithTooBroad",
-                       ImmutableSet.of(ModProjectOwnerAssigned.class,
+            checkProduces("emitEitherWithTooBroad",
+                          ImmutableSet.of(ModProjectOwnerAssigned.class,
                                        ModCannotAssignOwnerToProject.class));
         }
     }
@@ -115,35 +115,35 @@ class EmittedTypesExtractorTest {
         @Test
         @DisplayName("for `void` return type")
         void forVoid() {
-            checkEmitsNothing("returnVoid");
+            checkProducesNothing("returnVoid");
         }
 
         @Test
         @DisplayName("for `Nothing` return type")
         void forNothing() {
-            checkEmitsNothing("returnNothing");
+            checkProducesNothing("returnNothing");
         }
 
         @Test
         @DisplayName("for `Empty` return type")
         void forEmpty() {
-            checkEmitsNothing("returnEmpty");
+            checkProducesNothing("returnEmpty");
         }
 
         @Test
         @DisplayName("for method returning too broad message type")
         void forTooBroadType() {
-            checkEmitsNothing("returnTooBroadEvent");
+            checkProducesNothing("returnTooBroadEvent");
         }
 
         @Test
         @DisplayName("for method parameterized with too broad message type")
         void forTooBroadTypeParam() {
-            checkEmitsNothing("returnTooBroadIterable");
+            checkProducesNothing("returnTooBroadIterable");
         }
 
-        private void checkEmitsNothing(String methodName) {
-            checkEmits(methodName, ImmutableSet.of());
+        private void checkProducesNothing(String methodName) {
+            checkProduces(methodName, ImmutableSet.of());
         }
     }
 
@@ -152,17 +152,17 @@ class EmittedTypesExtractorTest {
     @Test
     @DisplayName("throw IAE when created for method with non-familiar return type")
     void throwOnUnknownReturnType() throws NoSuchMethodException {
-        Method method = MessageEmitter.class.getMethod("returnRandomType");
+        Method method = MessageProducer.class.getMethod("returnRandomType");
         assertThrows(IllegalArgumentException.class,
-                     () -> EmittedTypesExtractor.forMethod(method));
+                     () -> ReturnTypeParser.forMethod(method));
     }
 
-    private static void checkEmits(String methodName,
-                                   Iterable<Class<? extends Message>> messageTypes) {
+    private static void checkProduces(String methodName,
+                                      Iterable<Class<? extends Message>> messageTypes) {
         try {
-            Method method = MessageEmitter.class.getMethod(methodName);
-            EmittedTypesExtractor extractor = EmittedTypesExtractor.forMethod(method);
-            ImmutableSet<Class<? extends Message>> classes = extractor.extract();
+            Method method = MessageProducer.class.getMethod(methodName);
+            ReturnTypeParser extractor = ReturnTypeParser.forMethod(method);
+            ImmutableSet<Class<? extends Message>> classes = extractor.parseProducedMessages();
             assertThat(classes).containsExactlyElementsIn(messageTypes);
         } catch (NoSuchMethodException e) {
             fail(e);

@@ -43,17 +43,17 @@ import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
 
-public final class EmittedTypesExtractorTestEnv {
+public final class ReturnTypeParserTestEnv {
 
     /** Prevents instantiation of this test environment class. */
-    private EmittedTypesExtractorTestEnv() {
+    private ReturnTypeParserTestEnv() {
     }
 
     @SuppressWarnings("unused") // Reflective access only.
-    public static class MessageEmitter {
+    public static class MessageProducer {
 
         /** Prevents instantiation of this reflective-access-only class. */
-        private MessageEmitter() {
+        private MessageProducer() {
         }
 
         public ModCreateProject emitCommand() {
