@@ -44,7 +44,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
-@SuppressWarnings("UnstableApiUsage") // Guava's `TypeToken` will most probably be OK.
+@SuppressWarnings({"UnstableApiUsage" /* Guava's Reflection API will most probably be OK. */,
+        "unchecked" /* A lot of unchecked operations due to `TypeToken` nature. */})
 abstract class ReturnTypeParser {
 
     private static final Map<Class<?>, Provider> parserProviders = parserProviders();
@@ -85,8 +86,8 @@ abstract class ReturnTypeParser {
         Optional<Provider> result = parserProviders
                 .keySet()
                 .stream()
-                .filter(clazz -> clazz.isAssignableFrom(rawType))
-                .sorted((o1, o2) -> o1.isAssignableFrom(o2) ? 1 : -1)
+                .filter(cls -> cls.isAssignableFrom(rawType))
+                .sorted((cls1, cls2) -> cls1.isAssignableFrom(cls2) ? 1 : -1)
                 .map(parserProviders::get)
                 .findFirst();
         return result;
@@ -128,7 +129,6 @@ abstract class ReturnTypeParser {
             super(type);
         }
 
-        @SuppressWarnings("unchecked") // Checked logically.
         @Override
         ImmutableSet<MessageClass<?>> parseProducedMessages() {
             TypeToken<?> token = TypeToken.of(type());
@@ -148,7 +148,6 @@ abstract class ReturnTypeParser {
             super(type);
         }
 
-        @SuppressWarnings("unchecked") // Checked logically.
         @Override
         ImmutableSet<MessageClass<?>> parseProducedMessages() {
             TypeToken<?> token = TypeToken.of(type());
@@ -190,7 +189,6 @@ abstract class ReturnTypeParser {
             return produced.build();
         }
 
-        @SuppressWarnings("unchecked") // Checked logically.
         private TypeToken<?> tokenFor(Type type) {
             if (targetSupertype != null) {
                 TypeToken<? extends T> current = (TypeToken<? extends T>) TypeToken.of(type);

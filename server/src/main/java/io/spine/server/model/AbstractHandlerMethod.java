@@ -187,7 +187,7 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public Set<P> getProducedMessages() {
         if (producedMessageTypes == null) {
-            producedMessageTypes = parseProducedMessages();
+            producedMessageTypes = acquireProducedMessages();
         }
         return producedMessageTypes;
     }
@@ -283,7 +283,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @SuppressWarnings("unchecked") // See doc.
-    private ImmutableSet<P> parseProducedMessages() {
+    private ImmutableSet<P> acquireProducedMessages() {
         ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
         ImmutableSet<MessageClass<?>> messages = parser.parseProducedMessages();
         ImmutableSet<P> result = messages
