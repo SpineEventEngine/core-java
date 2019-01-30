@@ -49,7 +49,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 @SuppressWarnings("UnstableApiUsage") // Guava's `TypeToken` will most probably be OK.
 abstract class ReturnTypeParser {
 
-    private static final Map<Class<?>, Provider> providers = parserProviders();
+    private static final Map<Class<?>, Provider> parserProviders = parserProviders();
 
     private final Type type;
 
@@ -84,12 +84,12 @@ abstract class ReturnTypeParser {
 
     @SuppressWarnings("ComparatorMethodParameterNotUsed") // See doc.
     private static Optional<Provider> chooseProvider(Class<?> rawType) {
-        Optional<Provider> result = providers
+        Optional<Provider> result = parserProviders
                 .keySet()
                 .stream()
                 .filter(clazz -> clazz.isAssignableFrom(rawType))
                 .sorted((o1, o2) -> o1.isAssignableFrom(o2) ? 1 : -1)
-                .map(providers::get)
+                .map(parserProviders::get)
                 .findFirst();
         return result;
     }
@@ -97,26 +97,26 @@ abstract class ReturnTypeParser {
     private static Map<Class<?>, Provider> parserProviders() {
         Map<Class<?>, Provider> result = newHashMap();
 
-        result.put(void.class, Noop::new);
-        result.put(Nothing.class, Noop::new);
-        result.put(Empty.class, Noop::new);
+        result.put(void.class, NoopParser::new);
+        result.put(Nothing.class, NoopParser::new);
+        result.put(Empty.class, NoopParser::new);
 
-        result.put(CommandMessage.class, type ->
-                new MessageType(type, ImmutableSet.of(CommandMessage.class)));
-        result.put(EventMessage.class, type ->
-                new MessageType(type, ImmutableSet.of(EventMessage.class,
-                                                      RejectionMessage.class)));
-        result.put(Optional.class, ParameterizedType::new);
-        result.put(Tuple.class, ParameterizedType::new);
-        result.put(Either.class, ParameterizedType::new);
+        result.put(CommandMessage.class,
+                   type -> new MessageParser(type, ImmutableSet.of(CommandMessage.class)));
+        result.put(EventMessage.class,
+                   type -> new MessageParser(type, ImmutableSet.of(EventMessage.class,
+                                                                   RejectionMessage.class)));
+        result.put(Optional.class, ParameterizedTypeParser::new);
+        result.put(Tuple.class, ParameterizedTypeParser::new);
+        result.put(Either.class, ParameterizedTypeParser::new);
 
-        result.put(Iterable.class, type -> new ParameterizedType<>(type, Iterable.class));
+        result.put(Iterable.class, type -> new ParameterizedTypeParser<>(type, Iterable.class));
         return result;
     }
 
-    private static class Noop extends ReturnTypeParser {
+    private static class NoopParser extends ReturnTypeParser {
 
-        private Noop(Type type) {
+        private NoopParser(Type type) {
             super(type);
         }
 
@@ -126,13 +126,12 @@ abstract class ReturnTypeParser {
         }
     }
 
-    // todo rename to MessageTypeParser and so on
-    private static class MessageType extends ReturnTypeParser {
+    private static class MessageParser extends ReturnTypeParser {
 
         private final ImmutableSet<Class<? extends Message>> tooBroadTypes;
 
-        private MessageType(Type type,
-                            ImmutableSet<Class<? extends Message>> tooBroadTypes) {
+        private MessageParser(Type type,
+                              ImmutableSet<Class<? extends Message>> tooBroadTypes) {
             super(type);
             this.tooBroadTypes = tooBroadTypes;
         }
@@ -161,18 +160,18 @@ abstract class ReturnTypeParser {
         }
     }
 
-    private static class ParameterizedType<T> extends ReturnTypeParser {
+    private static class ParameterizedTypeParser<T> extends ReturnTypeParser {
 
         @Nullable
         private final Class<T> targetSupertype;
 
-        private ParameterizedType(Type type) {
+        private ParameterizedTypeParser(Type type) {
             this(type, null);
         }
 
-        private ParameterizedType(Type type, @Nullable Class<T> supertype) {
+        private ParameterizedTypeParser(Type type, @Nullable Class<T> targetSupertype) {
             super(type);
-            targetSupertype = supertype;
+            this.targetSupertype = targetSupertype;
         }
 
         @Override
