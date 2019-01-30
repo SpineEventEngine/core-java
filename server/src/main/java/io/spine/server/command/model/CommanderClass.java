@@ -94,16 +94,8 @@ public final class CommanderClass<C extends Commander>
 
     @Override
     public Set<Class<? extends CommandMessage>> getProducedCommands() {
-        Set<? extends Class<? extends CommandMessage>> fromCommandHandling = getProducedTypes()
-                .stream()
-                .map(cls -> (Class<? extends CommandMessage>) cls)
-                .collect(toSet());
-        Set<? extends Class<? extends CommandMessage>> fromEventReact = delegate.getProducedTypes()
-                .stream()
-                .map(cls -> (Class<? extends CommandMessage>) cls)
-                .collect(toSet());
         SetView<Class<? extends CommandMessage>> result =
-                union(fromCommandHandling, fromEventReact);
+                union(getProducedTypes(), delegate.getProducedTypes());
         return result;
     }
 }
