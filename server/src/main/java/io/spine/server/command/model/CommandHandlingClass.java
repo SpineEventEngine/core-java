@@ -37,7 +37,7 @@ public interface CommandHandlingClass<H extends CommandAcceptingMethod> {
      */
     Set<CommandClass> getCommands();
 
-    Set<Class<? extends Message>> getProducedMessages();
+    Set<Class<? extends Message>> getProducedTypes();
 
     /**
      * Obtains the handler method for the passed command class.

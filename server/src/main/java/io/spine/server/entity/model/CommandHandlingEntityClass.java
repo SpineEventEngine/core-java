@@ -51,7 +51,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     }
 
     @Override
-    public Set<Class<? extends Message>> getProducedMessages() {
+    public Set<Class<? extends Message>> getProducedTypes() {
         return commands.getProducedTypes();
     }
 

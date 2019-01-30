@@ -34,6 +34,8 @@ import io.spine.type.MessageClass;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.union;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Provides message handling information on an aggregate class.
@@ -114,8 +116,18 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<Class<? extends EventMessage>> getProducedEvents() {
-        return delegate.getProducedEvents();
+    public Set<Class<? extends EventMessage>> reactsWith() {
+        return delegate.reactsWith();
+    }
+
+    // todo expose these and importable events for subscription
+    public Set<Class<? extends EventMessage>> allEmittedEvents() {
+        Set<? extends Class<? extends EventMessage>> producedOnHandle = getProducedTypes()
+                .stream()
+                .map(cls -> (Class<? extends EventMessage>) cls)
+                .collect(toSet());
+        Set<Class<? extends EventMessage>> result = union(producedOnHandle, reactsWith());
+        return result;
     }
 
     /**

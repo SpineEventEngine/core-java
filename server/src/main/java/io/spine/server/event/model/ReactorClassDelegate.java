@@ -27,6 +27,8 @@ import io.spine.type.MessageClass;
 
 import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
+
 /**
  * The helper class for holding messaging information on behalf of another model class.
  *
@@ -50,8 +52,12 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     }
 
     @Override
-    public Set<Class<? extends EventMessage>> getProducedEvents() {
+    public Set<Class<? extends EventMessage>> reactsWith() {
         // todo try doing something about these casts
-        return (Set<Class<? extends EventMessage>>) getProducedTypes();
+        Set<Class<? extends EventMessage>> result = getProducedTypes()
+                .stream()
+                .map(cls -> (Class<? extends EventMessage>) cls)
+                .collect(toSet());
+        return result;
     }
 }

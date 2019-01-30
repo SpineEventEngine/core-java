@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.Sets.SetView;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EmptyClass;
@@ -29,11 +30,12 @@ import io.spine.server.command.Commander;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 
-import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.union;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Provides information on message handling for a class of {@link Commander}s.
@@ -93,13 +95,16 @@ public final class CommanderClass<C extends Commander>
 
     @Override
     public Set<Class<? extends CommandMessage>> getProducedCommands() {
-        Set<Class<? extends CommandMessage>> result = newHashSet();
-        Collection<Class<? extends CommandMessage>> fromCommandHandling =
-                (Set<Class<? extends CommandMessage>>) getProducedMessages();
-        result.addAll(fromCommandHandling);
-        Collection<Class<? extends CommandMessage>> fromEventReact =
-                (Set<Class<? extends CommandMessage>>) delegate.getProducedTypes();
-        result.addAll(fromEventReact);
+        Set<? extends Class<? extends CommandMessage>> fromCommandHandling = getProducedTypes()
+                .stream()
+                .map(cls -> (Class<? extends CommandMessage>) cls)
+                .collect(toSet());
+        Set<? extends Class<? extends CommandMessage>> fromEventReact = delegate.getProducedTypes()
+                .stream()
+                .map(cls -> (Class<? extends CommandMessage>) cls)
+                .collect(toSet());
+        SetView<Class<? extends CommandMessage>> result =
+                union(fromCommandHandling, fromEventReact);
         return result;
     }
 }
