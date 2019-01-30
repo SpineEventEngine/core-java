@@ -175,13 +175,14 @@ class ReturnTypeParserTest {
                     .stream()
                     .map(ReturnTypeParserTest::toCommandOrEventClass)
                     .collect(toSet());
-            ImmutableSet<MessageClass<?>> classes = extractor.getProducedMessages();
+            ImmutableSet<MessageClass<?>> classes = extractor.parseProducedMessages();
             assertThat(classes).containsExactlyElementsIn(expectedTypes);
         } catch (NoSuchMethodException e) {
             fail(e);
         }
     }
 
+    @SuppressWarnings("unchecked") // Checked logically.
     private static MessageClass<?> toCommandOrEventClass(Class<? extends Message> type) {
         if (CommandMessage.class.isAssignableFrom(type)) {
             return CommandClass.from((Class<? extends CommandMessage>) type);
@@ -189,7 +190,7 @@ class ReturnTypeParserTest {
         if (EventMessage.class.isAssignableFrom(type)) {
             return EventClass.from((Class<? extends EventMessage>) type);
         }
-        // Never happens.
-        throw newIllegalArgumentException("Unknown Message type: %s", type.getCanonicalName());
+        throw newIllegalArgumentException("Unknown command/event type: %s",
+                                          type.getCanonicalName());
     }
 }

@@ -23,7 +23,6 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
@@ -44,7 +43,6 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 @SuppressWarnings("UnstableApiUsage") // Guava's `TypeToken` will most probably be OK.
 abstract class ReturnTypeParser {
@@ -68,7 +66,7 @@ abstract class ReturnTypeParser {
         return parser.get();
     }
 
-    abstract ImmutableSet<MessageClass<?>> getProducedMessages();
+    abstract ImmutableSet<MessageClass<?>> parseProducedMessages();
 
     protected Type type() {
         return type;
@@ -101,11 +99,9 @@ abstract class ReturnTypeParser {
         result.put(Nothing.class, NoopParser::new);
         result.put(Empty.class, NoopParser::new);
 
-        result.put(CommandMessage.class,
-                   type -> new MessageParser(type, ImmutableSet.of(CommandMessage.class)));
-        result.put(EventMessage.class,
-                   type -> new MessageParser(type, ImmutableSet.of(EventMessage.class,
-                                                                   RejectionMessage.class)));
+        result.put(CommandMessage.class, CommandMessageParser::new);
+        result.put(EventMessage.class, EventMessageParser::new);
+
         result.put(Optional.class, ParameterizedTypeParser::new);
         result.put(Tuple.class, ParameterizedTypeParser::new);
         result.put(Either.class, ParameterizedTypeParser::new);
@@ -121,42 +117,49 @@ abstract class ReturnTypeParser {
         }
 
         @Override
-        ImmutableSet<MessageClass<?>> getProducedMessages() {
+        ImmutableSet<MessageClass<?>> parseProducedMessages() {
             return ImmutableSet.of();
         }
     }
 
-    private static class MessageParser extends ReturnTypeParser {
+    private static class CommandMessageParser extends ReturnTypeParser {
 
-        private final ImmutableSet<Class<? extends Message>> tooBroadTypes;
-
-        private MessageParser(Type type,
-                              ImmutableSet<Class<? extends Message>> tooBroadTypes) {
+        private CommandMessageParser(Type type) {
             super(type);
-            this.tooBroadTypes = tooBroadTypes;
         }
 
         @SuppressWarnings("unchecked") // Checked logically.
         @Override
-        public ImmutableSet<MessageClass<?>> getProducedMessages() {
+        ImmutableSet<MessageClass<?>> parseProducedMessages() {
             TypeToken<?> token = TypeToken.of(type());
-            Class<? extends Message> returnType = (Class<? extends Message>) token.getRawType();
-            if (tooBroadTypes.contains(returnType)) {
+            Class<? extends CommandMessage> returnType =
+                    (Class<? extends CommandMessage>) token.getRawType();
+            if (CommandMessage.class.equals(returnType)) {
                 return ImmutableSet.of();
             }
-            MessageClass<?> messageClass = toCommandOrEventClass(returnType);
-            return ImmutableSet.of(messageClass);
+            CommandClass commandClass = CommandClass.from(returnType);
+            return ImmutableSet.of(commandClass);
+        }
+    }
+
+    private static class EventMessageParser extends ReturnTypeParser {
+
+        private EventMessageParser(Type type) {
+            super(type);
         }
 
-        private static MessageClass<?> toCommandOrEventClass(Class<? extends Message> type) {
-            if (CommandMessage.class.isAssignableFrom(type)) {
-                return CommandClass.from((Class<? extends CommandMessage>) type);
+        @SuppressWarnings("unchecked") // Checked logically.
+        @Override
+        ImmutableSet<MessageClass<?>> parseProducedMessages() {
+            TypeToken<?> token = TypeToken.of(type());
+            Class<? extends EventMessage> returnType =
+                    (Class<? extends EventMessage>) token.getRawType();
+            if (EventMessage.class.equals(returnType)
+                    || RejectionMessage.class.equals(returnType)) {
+                return ImmutableSet.of();
             }
-            if (EventMessage.class.isAssignableFrom(type)) {
-                return EventClass.from((Class<? extends EventMessage>) type);
-            }
-            // Never happens.
-            throw newIllegalArgumentException("Unknown Message type: %s", type.getCanonicalName());
+            EventClass eventClass = EventClass.from(returnType);
+            return ImmutableSet.of(eventClass);
         }
     }
 
@@ -175,14 +178,14 @@ abstract class ReturnTypeParser {
         }
 
         @Override
-        public ImmutableSet<MessageClass<?>> getProducedMessages() {
+        public ImmutableSet<MessageClass<?>> parseProducedMessages() {
             TypeToken<?> token = tokenFor(type());
             ImmutableSet.Builder<MessageClass<?>> produced = ImmutableSet.builder();
             for (TypeVariable<?> typeParam : token.getRawType()
                                                   .getTypeParameters()) {
                 TypeToken<?> resolved = token.resolveType(typeParam);
                 Optional<ReturnTypeParser> parser = forType(resolved.getType());
-                parser.ifPresent(p -> produced.addAll(p.getProducedMessages()));
+                parser.ifPresent(p -> produced.addAll(p.parseProducedMessages()));
             }
             return produced.build();
         }

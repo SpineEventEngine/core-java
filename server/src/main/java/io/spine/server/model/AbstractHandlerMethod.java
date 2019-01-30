@@ -285,7 +285,7 @@ public abstract class AbstractHandlerMethod<T,
     @SuppressWarnings("unchecked") // See doc.
     private ImmutableSet<P> parseProducedMessages() {
         ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
-        ImmutableSet<MessageClass<?>> messages = parser.getProducedMessages();
+        ImmutableSet<MessageClass<?>> messages = parser.parseProducedMessages();
         ImmutableSet<P> result = messages
                 .stream()
                 .map(cls -> (P) cls)
