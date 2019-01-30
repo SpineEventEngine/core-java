@@ -52,7 +52,7 @@ abstract class ReturnTypeParser {
 
     private final Type type;
 
-    /** Forbids inheriting the class except for inner classes. */
+    /** Forbids inheriting except for inner classes. */
     private ReturnTypeParser(Type type) {
         this.type = type;
     }
