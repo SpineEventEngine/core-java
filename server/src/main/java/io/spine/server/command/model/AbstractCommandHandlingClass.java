@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -35,7 +36,7 @@ import java.util.Set;
  */
 @Immutable(containerOf = "H")
 public abstract class AbstractCommandHandlingClass<C,
-                                                   P extends Message,
+                                                   P extends MessageClass<?>,
                                                    H extends CommandAcceptingMethod<?, P, ?>>
         extends ModelClass<C>
         implements CommandHandlingClass {
@@ -56,7 +57,7 @@ public abstract class AbstractCommandHandlingClass<C,
     }
 
     @Override
-    public Set<Class<? extends P>> getProducedTypes() {
+    public Set<P> getProducedTypes() {
         return commands.getProducedTypes();
     }
 

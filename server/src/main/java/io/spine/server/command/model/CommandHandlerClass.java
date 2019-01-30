@@ -20,7 +20,7 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.EventMessage;
+import io.spine.core.EventClass;
 import io.spine.server.command.AbstractCommandHandler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <C> the type of command handlers
  */
 public final class CommandHandlerClass<C extends AbstractCommandHandler>
-        extends AbstractCommandHandlingClass<C, EventMessage, CommandHandlerMethod> {
+        extends AbstractCommandHandlingClass<C, EventClass, CommandHandlerMethod> {
 
     private static final long serialVersionUID = 0L;
 

@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
+import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventSubscriber;
@@ -50,7 +51,7 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
                                                                      EventMessage,
                                                                      EventClass,
                                                                      EventEnvelope,
-                                                                     Empty,
+                                                                     EmptyClass,
                                                                      MethodResult<Empty>> {
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {

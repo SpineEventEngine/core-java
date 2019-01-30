@@ -22,6 +22,10 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
+import io.spine.core.CommandClass;
+import io.spine.core.EventClass;
 import io.spine.server.model.given.ReturnTypeParserTestEnv.MessageProducer;
 import io.spine.test.model.ModCreateProject;
 import io.spine.test.model.ModProjectCreated;
@@ -30,13 +34,18 @@ import io.spine.test.model.ModProjectStarted;
 import io.spine.test.model.ModStartProject;
 import io.spine.test.model.Rejections.ModCannotAssignOwnerToProject;
 import io.spine.test.model.Rejections.ModProjectAlreadyExists;
+import io.spine.type.MessageClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -87,7 +96,7 @@ class ReturnTypeParserTest {
         void fromEither() {
             checkProduces("emitEither",
                           ImmutableSet.of(ModProjectCreated.class,
-                                       ModProjectAlreadyExists.class));
+                                          ModProjectAlreadyExists.class));
         }
 
         @Test
@@ -95,8 +104,8 @@ class ReturnTypeParserTest {
         void fromTuple() {
             checkProduces("emitPair",
                           ImmutableSet.of(ModProjectCreated.class,
-                                       ModProjectOwnerAssigned.class,
-                                       ModCannotAssignOwnerToProject.class));
+                                          ModProjectOwnerAssigned.class,
+                                          ModCannotAssignOwnerToProject.class));
         }
 
         @Test
@@ -104,7 +113,7 @@ class ReturnTypeParserTest {
         void fromMixedReturnType() {
             checkProduces("emitEitherWithTooBroad",
                           ImmutableSet.of(ModProjectOwnerAssigned.class,
-                                       ModCannotAssignOwnerToProject.class));
+                                          ModCannotAssignOwnerToProject.class));
         }
     }
 
@@ -158,14 +167,29 @@ class ReturnTypeParserTest {
     }
 
     private static void checkProduces(String methodName,
-                                      Iterable<Class<? extends Message>> messageTypes) {
+                                      Collection<Class<? extends Message>> messageTypes) {
         try {
             Method method = MessageProducer.class.getMethod(methodName);
             ReturnTypeParser extractor = ReturnTypeParser.forMethod(method);
-            ImmutableSet<Class<? extends Message>> classes = extractor.parseProducedMessages();
-            assertThat(classes).containsExactlyElementsIn(messageTypes);
+            Set<? extends MessageClass<?>> expectedTypes = messageTypes
+                    .stream()
+                    .map(ReturnTypeParserTest::toCommandOrEventClass)
+                    .collect(toSet());
+            ImmutableSet<MessageClass<?>> classes = extractor.getProducedMessages();
+            assertThat(classes).containsExactlyElementsIn(expectedTypes);
         } catch (NoSuchMethodException e) {
             fail(e);
         }
+    }
+
+    private static MessageClass<?> toCommandOrEventClass(Class<? extends Message> type) {
+        if (CommandMessage.class.isAssignableFrom(type)) {
+            return CommandClass.from((Class<? extends CommandMessage>) type);
+        }
+        if (EventMessage.class.isAssignableFrom(type)) {
+            return EventClass.from((Class<? extends EventMessage>) type);
+        }
+        // Never happens.
+        throw newIllegalArgumentException("Unknown Message type: %s", type.getCanonicalName());
     }
 }

@@ -20,10 +20,8 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -46,8 +44,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 public interface HandlerMethod<T,
                                C extends MessageClass,
                                E extends MessageEnvelope<?, ?, ?>,
-                               P extends Message,
-                               R extends MethodResult<P>> {
+                               P extends MessageClass<?>,
+                               R extends MethodResult<?>> {
 
     /**
      * Obtains the type of the incoming message class.
@@ -79,7 +77,7 @@ public interface HandlerMethod<T,
      *
      * @see MethodResult#toMessages(Object).
      */
-    Set<Class<? extends P>> getProducedMessages();
+    Set<P> getProducedMessages();
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.

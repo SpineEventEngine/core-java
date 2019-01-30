@@ -105,7 +105,7 @@ final class ClassMap {
         ModelClass<T> modelClass;
         modelClass = supplier.get();
         if (modelClass instanceof CommandHandlingClass) {
-            checkDuplicates((CommandHandlingClass<?>) modelClass);
+            checkDuplicates((CommandHandlingClass<?, ?>) modelClass);
         }
         classes.put(key, modelClass);
         return modelClass;
@@ -115,7 +115,7 @@ final class ClassMap {
         classes.clear();
     }
 
-    private void checkDuplicates(CommandHandlingClass<?> candidate)
+    private void checkDuplicates(CommandHandlingClass<?, ?> candidate)
             throws DuplicateCommandHandlerError {
         Set<CommandClass> candidateCommands = candidate.getCommands();
         ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> duplicates =
@@ -123,7 +123,8 @@ final class ClassMap {
 
         for (ModelClass<?> modelClass : classes.values()) {
             if (modelClass instanceof CommandHandlingClass) {
-                CommandHandlingClass<?> commandHandler = (CommandHandlingClass<?>) modelClass;
+                CommandHandlingClass<?, ?> commandHandler =
+                        (CommandHandlingClass<?, ?>) modelClass;
                 Set<CommandClass> alreadyHandled = commandHandler.getCommands();
                 Set<CommandClass> intersection = intersection(alreadyHandled, candidateCommands);
                 if (intersection.size() > 0) {

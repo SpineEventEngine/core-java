@@ -22,6 +22,7 @@ package io.spine.server.model.given.method;
 
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
+import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
@@ -36,7 +37,7 @@ public class OneParamMethod
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
-                                      Empty,
+                                      EmptyClass,
                                       MethodResult<Empty>> {
 
     public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {

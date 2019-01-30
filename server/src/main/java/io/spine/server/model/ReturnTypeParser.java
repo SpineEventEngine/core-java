@@ -27,8 +27,11 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
+import io.spine.core.CommandClass;
+import io.spine.core.EventClass;
 import io.spine.server.tuple.Either;
 import io.spine.server.tuple.Tuple;
+import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -41,6 +44,7 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 @SuppressWarnings("UnstableApiUsage") // Guava's `TypeToken` will most probably be OK.
 abstract class ReturnTypeParser {
@@ -64,7 +68,7 @@ abstract class ReturnTypeParser {
         return parser.get();
     }
 
-    abstract ImmutableSet<Class<? extends Message>> parseProducedMessages();
+    abstract ImmutableSet<MessageClass<?>> getProducedMessages();
 
     protected Type type() {
         return type;
@@ -117,29 +121,43 @@ abstract class ReturnTypeParser {
         }
 
         @Override
-        ImmutableSet<Class<? extends Message>> parseProducedMessages() {
+        ImmutableSet<MessageClass<?>> getProducedMessages() {
             return ImmutableSet.of();
         }
     }
 
+    // todo rename to MessageTypeParser and so on
     private static class MessageType extends ReturnTypeParser {
 
         private final ImmutableSet<Class<? extends Message>> tooBroadTypes;
 
-        private MessageType(Type type, ImmutableSet<Class<? extends Message>> tooBroadTypes) {
+        private MessageType(Type type,
+                            ImmutableSet<Class<? extends Message>> tooBroadTypes) {
             super(type);
             this.tooBroadTypes = tooBroadTypes;
         }
 
         @SuppressWarnings("unchecked") // Checked logically.
         @Override
-        public ImmutableSet<Class<? extends Message>> parseProducedMessages() {
+        public ImmutableSet<MessageClass<?>> getProducedMessages() {
             TypeToken<?> token = TypeToken.of(type());
             Class<? extends Message> returnType = (Class<? extends Message>) token.getRawType();
             if (tooBroadTypes.contains(returnType)) {
                 return ImmutableSet.of();
             }
-            return ImmutableSet.of(returnType);
+            MessageClass<?> messageClass = toCommandOrEventClass(returnType);
+            return ImmutableSet.of(messageClass);
+        }
+
+        private static MessageClass<?> toCommandOrEventClass(Class<? extends Message> type) {
+            if (CommandMessage.class.isAssignableFrom(type)) {
+                return CommandClass.from((Class<? extends CommandMessage>) type);
+            }
+            if (EventMessage.class.isAssignableFrom(type)) {
+                return EventClass.from((Class<? extends EventMessage>) type);
+            }
+            // Never happens.
+            throw newIllegalArgumentException("Unknown Message type: %s", type.getCanonicalName());
         }
     }
 
@@ -158,14 +176,14 @@ abstract class ReturnTypeParser {
         }
 
         @Override
-        public ImmutableSet<Class<? extends Message>> parseProducedMessages() {
+        public ImmutableSet<MessageClass<?>> getProducedMessages() {
             TypeToken<?> token = tokenFor(type());
-            ImmutableSet.Builder<Class<? extends Message>> produced = ImmutableSet.builder();
+            ImmutableSet.Builder<MessageClass<?>> produced = ImmutableSet.builder();
             for (TypeVariable<?> typeParam : token.getRawType()
                                                   .getTypeParameters()) {
                 TypeToken<?> resolved = token.resolveType(typeParam);
                 Optional<ReturnTypeParser> parser = forType(resolved.getType());
-                parser.ifPresent(p -> produced.addAll(p.parseProducedMessages()));
+                parser.ifPresent(p -> produced.addAll(p.getProducedMessages()));
             }
             return produced.build();
         }

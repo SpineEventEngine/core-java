@@ -22,7 +22,6 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
@@ -43,7 +42,7 @@ import java.util.Set;
  */
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
-                                         P extends Message,
+                                         P extends MessageClass<?>,
                                          M extends HandlerMethod<?, EventClass, ?, P, ?>>
         extends ModelClass<T> {
 
@@ -83,7 +82,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         return externalEvents;
     }
 
-    public Set<Class<? extends P>> getProducedTypes() {
+    public Set<P> getProducedTypes() {
         return events.getProducedTypes();
     }
 

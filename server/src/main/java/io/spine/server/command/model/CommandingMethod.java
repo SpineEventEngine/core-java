@@ -23,6 +23,7 @@ package io.spine.server.command.model;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
@@ -55,7 +56,7 @@ import static io.spine.server.commandbus.Transform.transform;
 public interface CommandingMethod<T,
                                   M extends MessageClass,
                                   E extends MessageEnvelope<?, ?, ?>>
-        extends HandlerMethod<T, M, E, CommandMessage, CommandingMethod.Result> {
+        extends HandlerMethod<T, M, E, CommandClass, CommandingMethod.Result> {
 
     /**
      * A commanding method returns one or more command messages.

@@ -21,7 +21,6 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.Sets.SetView;
-import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
@@ -34,7 +33,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * Provides information on message handling for a class of {@link Commander}s.
@@ -42,11 +40,11 @@ import static java.util.stream.Collectors.toSet;
  * @param <C> the type of commanders
  */
 public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandMessage, CommandSubstituteMethod>
+        extends AbstractCommandHandlingClass<C, CommandClass, CommandSubstituteMethod>
         implements EventReceiverClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<C, CommandMessage, CommandReactionMethod> delegate;
+    private final EventReceivingClassDelegate<C, CommandClass, CommandReactionMethod> delegate;
 
     private CommanderClass(Class<C> cls) {
         super(cls, new CommandSubstituteSignature());
@@ -93,9 +91,8 @@ public final class CommanderClass<C extends Commander>
     }
 
     @Override
-    public Set<Class<? extends CommandMessage>> getProducedCommands() {
-        SetView<Class<? extends CommandMessage>> result =
-                union(getProducedTypes(), delegate.getProducedTypes());
+    public Set<CommandClass> getProducedCommands() {
+        SetView<CommandClass> result = union(getProducedTypes(), delegate.getProducedTypes());
         return result;
     }
 }

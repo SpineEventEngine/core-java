@@ -20,14 +20,11 @@
 
 package io.spine.server.event.model;
 
-import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
 
 /**
  * The helper class for holding messaging information on behalf of another model class.
@@ -35,7 +32,7 @@ import static java.util.stream.Collectors.toSet;
  * @param <T> the type of the raw class for obtaining messaging information
  */
 public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventMessage, EventReactorMethod>
+        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
         implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
@@ -50,7 +47,7 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     }
 
     @Override
-    public Set<Class<? extends EventMessage>> reactsWith() {
+    public Set<EventClass> reactsWith() {
         return getProducedTypes();
     }
 }

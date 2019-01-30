@@ -20,8 +20,8 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.model.CommandingMethod.Result;
@@ -41,7 +41,7 @@ public final class CommandReactionMethod
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
-                                      CommandMessage,
+                                      CommandClass,
                                       Result>
         implements CommandingMethod<EventReceiver, EventClass, EventEnvelope> {
 

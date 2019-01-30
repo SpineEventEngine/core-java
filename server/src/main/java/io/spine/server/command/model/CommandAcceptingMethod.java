@@ -21,13 +21,13 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
 
@@ -40,7 +40,9 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 @Immutable
-public abstract class CommandAcceptingMethod<T, P extends Message, R extends MethodResult<P>>
+public abstract class CommandAcceptingMethod<T,
+                                             P extends MessageClass<?>,
+                                             R extends MethodResult<?>>
         extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, P, R> {
 
     CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {

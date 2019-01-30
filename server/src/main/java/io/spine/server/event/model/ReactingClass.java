@@ -20,7 +20,6 @@
 
 package io.spine.server.event.model;
 
-import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.type.MessageClass;
 
@@ -36,5 +35,5 @@ public interface ReactingClass extends EventReceiverClass {
      */
     EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass);
 
-    Set<Class<? extends EventMessage>> reactsWith();
+    Set<EventClass> reactsWith();
 }

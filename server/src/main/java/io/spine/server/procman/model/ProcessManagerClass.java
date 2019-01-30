@@ -21,9 +21,6 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.Sets.SetView;
-import com.google.protobuf.Message;
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.command.model.CommandReactionMethod;
@@ -101,19 +98,19 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<Class<? extends EventMessage>> reactsWith() {
+    public Set<EventClass> reactsWith() {
         return reactorDelegate.reactsWith();
     }
 
     @Override
-    public Set<Class<? extends CommandMessage>> getProducedCommands() {
+    public Set<CommandClass> getProducedCommands() {
         return commanderDelegate.getProducedCommands();
     }
 
-    public Set<Class<? extends Message>> allProducedTypes() {
-        SetView<Class<? extends Message>> producedEvents =
+    public Set<MessageClass<?>> allProducedTypes() {
+        SetView<EventClass> producedEvents =
                 union(getProducedTypes(), reactsWith());
-        SetView<Class<? extends Message>> result =
+        SetView<MessageClass<?>> result =
                 union(producedEvents, getProducedCommands());
         return result;
     }

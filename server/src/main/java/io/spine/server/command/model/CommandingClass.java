@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import io.spine.base.CommandMessage;
+import io.spine.core.CommandClass;
 
 import java.util.Set;
 
@@ -29,5 +30,5 @@ import java.util.Set;
  */
 public interface CommandingClass {
 
-    Set<Class<? extends CommandMessage>> getProducedCommands();
+    Set<CommandClass> getProducedCommands();
 }

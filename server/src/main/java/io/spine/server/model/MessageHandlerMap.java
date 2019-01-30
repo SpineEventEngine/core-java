@@ -27,7 +27,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.core.EmptyClass;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
@@ -52,7 +51,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 @Immutable(containerOf = {"M", "H"})
 public final class MessageHandlerMap<M extends MessageClass<?>,
-                                     P extends Message,
+                                     P extends MessageClass<?>,
                                      H extends HandlerMethod<?, M, ?, P, ?>>
         implements Serializable {
 
@@ -78,7 +77,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      *         signature
      */
     public static <M extends MessageClass<?>,
-                   P extends Message,
+                   P extends MessageClass<?>,
                    H extends HandlerMethod<?, M, ?, P, ?>>
     MessageHandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
@@ -116,8 +115,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         return messageClasses(filtered.values());
     }
 
-    public ImmutableSet<Class<? extends P>> getProducedTypes() {
-        ImmutableSet<Class<? extends P>> result = map
+    public ImmutableSet<P> getProducedTypes() {
+        ImmutableSet<P> result = map
                 .values()
                 .stream()
                 .map(HandlerMethod::getProducedMessages)

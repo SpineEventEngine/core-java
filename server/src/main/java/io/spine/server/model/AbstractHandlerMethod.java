@@ -60,8 +60,8 @@ public abstract class AbstractHandlerMethod<T,
                                             M extends Message,
                                             C extends MessageClass<M>,
                                             E extends MessageEnvelope<?, ?, ?>,
-                                            P extends Message,
-                                            R extends MethodResult<P>>
+                                            P extends MessageClass<?>,
+                                            R extends MethodResult<?>>
         implements HandlerMethod<T, C, E, P, R> {
 
     /** The method to be called. */
@@ -98,7 +98,7 @@ public abstract class AbstractHandlerMethod<T,
      * <p>Is not evaluated until it's queried.
      */
     @LazyInit
-    private @MonotonicNonNull ImmutableSet<Class<? extends P>> producedMessageTypes;
+    private @MonotonicNonNull ImmutableSet<P> producedMessageTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -185,7 +185,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<Class<? extends P>> getProducedMessages() {
+    public Set<P> getProducedMessages() {
         if (producedMessageTypes == null) {
             producedMessageTypes = parseProducedMessages();
         }
@@ -283,12 +283,12 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @SuppressWarnings("unchecked") // See doc.
-    private ImmutableSet<Class<? extends P>> parseProducedMessages() {
+    private ImmutableSet<P> parseProducedMessages() {
         ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
-        ImmutableSet<Class<? extends Message>> messages = parser.parseProducedMessages();
-        ImmutableSet<Class<? extends P>> result = messages
+        ImmutableSet<MessageClass<?>> messages = parser.getProducedMessages();
+        ImmutableSet<P> result = messages
                 .stream()
-                .map(cls -> (Class<? extends P>) cls)
+                .map(cls -> (P) cls)
                 .collect(toImmutableSet());
         return result;
     }

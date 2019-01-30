@@ -22,6 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -30,14 +31,15 @@ import java.util.Set;
  *
  * @author Alexander Yevsyukov
  */
-public interface CommandHandlingClass<H extends CommandAcceptingMethod> {
+public interface CommandHandlingClass<P extends MessageClass<?>,
+                                      H extends CommandAcceptingMethod<?, P, ?>> {
 
     /**
      * Obtains classes of commands handled by the class.
      */
     Set<CommandClass> getCommands();
 
-    Set<Class<? extends Message>> getProducedTypes();
+    Set<P> getProducedTypes();
 
     /**
      * Obtains the handler method for the passed command class.

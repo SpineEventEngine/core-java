@@ -35,7 +35,7 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<CommandReceiver, CommandMessage, Result>
+        extends CommandAcceptingMethod<CommandReceiver, CommandClass, Result>
         implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope> {
 
     CommandSubstituteMethod(Method method, ParameterSpec<CommandEnvelope> paramSpec) {

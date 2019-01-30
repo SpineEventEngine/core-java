@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
+import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
@@ -46,7 +47,7 @@ public final class EventApplier
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
-                                      Empty,
+                                      EmptyClass,
                                       MethodResult<Empty>> {
 
     /**

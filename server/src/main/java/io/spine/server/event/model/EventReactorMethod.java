@@ -20,7 +20,6 @@
 
 package io.spine.server.event.model;
 
-import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventReactor;
@@ -39,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see React
  */
 public final class EventReactorMethod
-        extends EventHandlerMethod<EventReactor, EventMessage, ReactorMethodResult> {
+        extends EventHandlerMethod<EventReactor, EventClass, ReactorMethodResult> {
 
     EventReactorMethod(Method method, ParameterSpec<EventEnvelope> params) {
         super(method, params);
