@@ -192,6 +192,17 @@ public abstract class AbstractHandlerMethod<T,
         return producedMessageTypes;
     }
 
+    @SuppressWarnings("unchecked") // See doc.
+    private ImmutableSet<P> acquireProducedMessages() {
+        ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
+        ImmutableSet<MessageClass<?>> messages = parser.parseProducedMessages();
+        ImmutableSet<P> result = messages
+                .stream()
+                .map(cls -> (P) cls)
+                .collect(toImmutableSet());
+        return result;
+    }
+
     /**
      * Returns {@code true} if the method is declared {@code public},
      * {@code false} otherwise.
@@ -280,17 +291,6 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public HandlerId id() {
         return Handlers.createId(getMessageClass());
-    }
-
-    @SuppressWarnings("unchecked") // See doc.
-    private ImmutableSet<P> acquireProducedMessages() {
-        ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
-        ImmutableSet<MessageClass<?>> messages = parser.parseProducedMessages();
-        ImmutableSet<P> result = messages
-                .stream()
-                .map(cls -> (P) cls)
-                .collect(toImmutableSet());
-        return result;
     }
 
     @Override
