@@ -57,7 +57,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Alex Tymchenko
  */
-public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
+public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
                                       E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
     private final Class<? extends Annotation> annotation;

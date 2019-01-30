@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
@@ -49,7 +50,7 @@ public class AggregateClass<A extends Aggregate>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventApplier> stateEvents;
+    private final MessageHandlerMap<EventClass, Empty, EventApplier> stateEvents;
     private final ImmutableSet<EventClass> importableEvents;
     private final ReactorClassDelegate<A> delegate;
 
@@ -122,11 +123,7 @@ public class AggregateClass<A extends Aggregate>
 
     // todo expose these and importable events for subscription
     public Set<Class<? extends EventMessage>> allEmittedEvents() {
-        Set<? extends Class<? extends EventMessage>> producedOnHandle = getProducedTypes()
-                .stream()
-                .map(cls -> (Class<? extends EventMessage>) cls)
-                .collect(toSet());
-        Set<Class<? extends EventMessage>> result = union(producedOnHandle, reactsWith());
+        Set<Class<? extends EventMessage>> result = union(getProducedTypes(), reactsWith());
         return result;
     }
 

@@ -52,7 +52,8 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 @Immutable(containerOf = {"M", "H"})
 public final class MessageHandlerMap<M extends MessageClass<?>,
-                                     H extends HandlerMethod<?, M, ?, ?>>
+                                     P extends Message,
+                                     H extends HandlerMethod<?, M, ?, P, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -76,8 +77,10 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * @return new {@code MessageHandlerMap} of methods of the given class matching the given
      *         signature
      */
-    public static <M extends MessageClass<?>, H extends HandlerMethod<?, M, ?, ?>>
-    MessageHandlerMap<M, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+    public static <M extends MessageClass<?>,
+                   P extends Message,
+                   H extends HandlerMethod<?, M, ?, P, ?>>
+    MessageHandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
 
@@ -113,8 +116,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         return messageClasses(filtered.values());
     }
 
-    public ImmutableSet<Class<? extends Message>> getProducedTypes() {
-        ImmutableSet<Class<? extends Message>> result = map
+    public ImmutableSet<Class<? extends P>> getProducedTypes() {
+        ImmutableSet<Class<? extends P>> result = map
                 .values()
                 .stream()
                 .map(HandlerMethod::getProducedMessages)
@@ -228,7 +231,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         return result;
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
+    private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?, ?>>
     ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
         ImmutableSet<M> result = Streams.stream(handlerMethods)
                                         .map(HandlerMethod::getMessageClass)

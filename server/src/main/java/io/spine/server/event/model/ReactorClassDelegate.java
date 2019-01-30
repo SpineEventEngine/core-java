@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.toSet;
  * @author Alexander Yevsyukov
  */
 public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventReactorMethod>
+        extends EventReceivingClassDelegate<T, EventMessage, EventReactorMethod>
         implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
@@ -53,11 +53,6 @@ public final class ReactorClassDelegate<T extends EventReceiver>
 
     @Override
     public Set<Class<? extends EventMessage>> reactsWith() {
-        // todo try doing something about these casts
-        Set<Class<? extends EventMessage>> result = getProducedTypes()
-                .stream()
-                .map(cls -> (Class<? extends EventMessage>) cls)
-                .collect(toSet());
-        return result;
+        return getProducedTypes();
     }
 }

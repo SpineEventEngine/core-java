@@ -25,7 +25,6 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
@@ -188,12 +187,7 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public Set<Class<? extends P>> getProducedMessages() {
         if (producedMessageTypes == null) {
-            ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
-            ImmutableSet<Class<? extends Message>> messages = parser.parseProducedMessages();
-            producedMessageTypes = messages
-                    .stream()
-                    .map(cls -> (Class<? extends P>) cls)
-                    .collect(toImmutableSet());
+            producedMessageTypes = parseProducedMessages();
         }
         return producedMessageTypes;
     }
@@ -286,6 +280,17 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public HandlerId id() {
         return Handlers.createId(getMessageClass());
+    }
+
+    @SuppressWarnings("unchecked") // See doc.
+    private ImmutableSet<Class<? extends P>> parseProducedMessages() {
+        ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
+        ImmutableSet<Class<? extends Message>> messages = parser.parseProducedMessages();
+        ImmutableSet<Class<? extends P>> result = messages
+                .stream()
+                .map(cls -> (Class<? extends P>) cls)
+                .collect(toImmutableSet());
+        return result;
     }
 
     @Override

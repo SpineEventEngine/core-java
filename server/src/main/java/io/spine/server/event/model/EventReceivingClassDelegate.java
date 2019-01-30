@@ -44,12 +44,13 @@ import java.util.Set;
  */
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
-                                         M extends HandlerMethod<?, EventClass, ?, ?>>
+                                         P extends Message,
+                                         M extends HandlerMethod<?, EventClass, ?, P, ?>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
     
-    private final MessageHandlerMap<EventClass, M> events;
+    private final MessageHandlerMap<EventClass, P, M> events;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
 
@@ -83,7 +84,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         return externalEvents;
     }
 
-    public Set<Class<? extends Message>> getProducedTypes() {
+    public Set<Class<? extends P>> getProducedTypes() {
         return events.getProducedTypes();
     }
 

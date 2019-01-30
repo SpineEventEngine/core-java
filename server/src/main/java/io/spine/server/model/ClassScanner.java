@@ -72,7 +72,7 @@ public final class ClassScanner {
      *         the type of the handler methods
      * @return map of {@link HandlerTypeInfo}s to the handler methods of the given type
      */
-    <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMultimap<HandlerTypeInfo, H>
+    <H extends HandlerMethod<?, ?, ?, ?, ?>> ImmutableMultimap<HandlerTypeInfo, H>
     findMethodsBy(MethodSignature<H, ?> signature) {
         MethodScan<H> operation = new MethodScan<>(declaringClass, signature);
         ImmutableMultimap<HandlerTypeInfo, H> result = operation.perform();
@@ -87,7 +87,7 @@ public final class ClassScanner {
      * @param <H>
      *         the type of handler method to find
      */
-    private static final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
+    private static final class MethodScan<H extends HandlerMethod<?, ?, ?, ?, ?>> {
 
         private final Class<?> declaringClass;
         private final Multimap<HandlerTypeInfo, H> handlers;
@@ -171,7 +171,7 @@ public final class ClassScanner {
      * @param <H>
      *         the type of handler method
      */
-    private static final class FilteredHandler<H extends HandlerMethod<?, ?, ?, ?>> {
+    private static final class FilteredHandler<H extends HandlerMethod<?, ?, ?, ?, ?>> {
 
         private final H handler;
         private final FieldPath filteredField;

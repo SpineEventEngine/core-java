@@ -42,11 +42,11 @@ import static java.util.stream.Collectors.toSet;
  * @param <C> the type of commanders
  */
 public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandSubstituteMethod>
+        extends AbstractCommandHandlingClass<C, CommandMessage, CommandSubstituteMethod>
         implements EventReceiverClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<C, CommandReactionMethod> delegate;
+    private final EventReceivingClassDelegate<C, CommandMessage, CommandReactionMethod> delegate;
 
     private CommanderClass(Class<C> cls) {
         super(cls, new CommandSubstituteSignature());

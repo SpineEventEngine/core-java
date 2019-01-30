@@ -20,6 +20,7 @@
 
 package io.spine.server.projection.model;
 
+import com.google.protobuf.Empty;
 import io.spine.core.EventClass;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.model.EventReceiverClass;
@@ -46,7 +47,7 @@ public final class ProjectionClass<P extends Projection>
         implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<P, SubscriberMethod> delegate;
+    private final EventReceivingClassDelegate<P, Empty, SubscriberMethod> delegate;
 
     private ProjectionClass(Class<P> cls) {
         super(cls);

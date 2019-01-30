@@ -20,10 +20,7 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Empty;
-import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.given.method.OneParamMethod;
@@ -53,22 +50,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("AbstractHandlerMethod should")
 class AbstractHandlerMethodTest {
 
     private final OneParamSignature signature = new OneParamSignature();
 
-    private
-    AbstractHandlerMethod<Object, EventMessage, EventClass, EventEnvelope, MethodResult<Empty>>
-            twoParamMethod;
-    private
-    AbstractHandlerMethod<Object, EventMessage, EventClass, EventEnvelope, MethodResult<Empty>>
-            oneParamMethod;
+    private TwoParamMethod twoParamMethod;
+    private OneParamMethod oneParamMethod;
 
     private Object target;
 
@@ -190,7 +179,7 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<?, ?, ?, ?, ?> anotherMethod =
+            AbstractHandlerMethod<?, ?, ?, ?, ?, ?> anotherMethod =
                     new TwoParamMethod(StubHandler.getTwoParameterMethod(),
                                        TwoParamSpec.INSTANCE);
             assertEquals(twoParamMethod, anotherMethod);

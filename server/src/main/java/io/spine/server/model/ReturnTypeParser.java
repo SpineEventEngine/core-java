@@ -45,8 +45,7 @@ import static com.google.common.collect.Maps.newHashMap;
 @SuppressWarnings("UnstableApiUsage") // Guava's `TypeToken` will most probably be OK.
 abstract class ReturnTypeParser {
 
-    private static final Map<Class<?>, ExtractorProvider> extractorProviders =
-            extractorProviders();
+    private static final Map<Class<?>, Provider> providers = parserProviders();
 
     private final Type type;
 
@@ -58,11 +57,11 @@ abstract class ReturnTypeParser {
     static ReturnTypeParser forMethod(Method method) {
         checkNotNull(method);
         Type type = method.getGenericReturnType();
-        Optional<ReturnTypeParser> extractor = forType(type);
-        checkArgument(extractor.isPresent(),
-                      "There is no known return type parser for return type %s of method %s",
+        Optional<ReturnTypeParser> parser = forType(type);
+        checkArgument(parser.isPresent(),
+                      "There is no known parser for the return type %s of the method %s",
                       type.getTypeName(), method.getName());
-        return extractor.get();
+        return parser.get();
     }
 
     abstract ImmutableSet<Class<? extends Message>> parseProducedMessages();
@@ -74,25 +73,25 @@ abstract class ReturnTypeParser {
     private static Optional<ReturnTypeParser> forType(Type type) {
         Class<?> rawType = TypeToken.of(type)
                                     .getRawType();
-        Optional<ExtractorProvider> provider = chooseProvider(rawType);
+        Optional<Provider> provider = chooseProvider(rawType);
         Optional<ReturnTypeParser> result = provider.map(p -> p.apply(type));
         return result;
     }
 
     @SuppressWarnings("ComparatorMethodParameterNotUsed") // See doc.
-    private static Optional<ExtractorProvider> chooseProvider(Class<?> rawType) {
-        Optional<ExtractorProvider> result = extractorProviders
+    private static Optional<Provider> chooseProvider(Class<?> rawType) {
+        Optional<Provider> result = providers
                 .keySet()
                 .stream()
                 .filter(clazz -> clazz.isAssignableFrom(rawType))
                 .sorted((o1, o2) -> o1.isAssignableFrom(o2) ? 1 : -1)
-                .map(extractorProviders::get)
+                .map(providers::get)
                 .findFirst();
         return result;
     }
 
-    private static Map<Class<?>, ExtractorProvider> extractorProviders() {
-        Map<Class<?>, ExtractorProvider> result = newHashMap();
+    private static Map<Class<?>, Provider> parserProviders() {
+        Map<Class<?>, Provider> result = newHashMap();
 
         result.put(void.class, Noop::new);
         result.put(Nothing.class, Noop::new);
@@ -165,8 +164,8 @@ abstract class ReturnTypeParser {
             for (TypeVariable<?> typeParam : token.getRawType()
                                                   .getTypeParameters()) {
                 TypeToken<?> resolved = token.resolveType(typeParam);
-                Optional<ReturnTypeParser> extractor = forType(resolved.getType());
-                extractor.ifPresent(e -> produced.addAll(e.parseProducedMessages()));
+                Optional<ReturnTypeParser> parser = forType(resolved.getType());
+                parser.ifPresent(p -> produced.addAll(p.parseProducedMessages()));
             }
             return produced.build();
         }
@@ -182,6 +181,6 @@ abstract class ReturnTypeParser {
     }
 
     @FunctionalInterface
-    private interface ExtractorProvider extends Function<Type, ReturnTypeParser> {
+    private interface Provider extends Function<Type, ReturnTypeParser> {
     }
 }

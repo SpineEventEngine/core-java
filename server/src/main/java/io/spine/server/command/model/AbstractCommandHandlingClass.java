@@ -35,13 +35,15 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 @Immutable(containerOf = "H")
-public abstract class AbstractCommandHandlingClass<C, H extends CommandAcceptingMethod<?, ?>>
+public abstract class AbstractCommandHandlingClass<C,
+                                                   P extends Message,
+                                                   H extends CommandAcceptingMethod<?, P, ?>>
         extends ModelClass<C>
         implements CommandHandlingClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, H> commands;
+    private final MessageHandlerMap<CommandClass, P, H> commands;
 
     AbstractCommandHandlingClass(Class<? extends C> cls,
                                  CommandAcceptingMethodSignature<H> signature) {
@@ -55,7 +57,7 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
     }
 
     @Override
-    public Set<Class<? extends Message>> getProducedTypes() {
+    public Set<Class<? extends P>> getProducedTypes() {
         return commands.getProducedTypes();
     }
 

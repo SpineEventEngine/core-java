@@ -20,7 +20,7 @@
 
 package io.spine.server.entity.model;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerSignature;
@@ -38,7 +38,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
         implements CommandHandlingClass {
 
     private static final long serialVersionUID = 0L;
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
+    private final MessageHandlerMap<CommandClass, EventMessage, CommandHandlerMethod> commands;
 
     protected CommandHandlingEntityClass(Class<E> cls) {
         super(cls);
@@ -51,7 +51,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     }
 
     @Override
-    public Set<Class<? extends Message>> getProducedTypes() {
+    public Set<Class<? extends EventMessage>> getProducedTypes() {
         return commands.getProducedTypes();
     }
 

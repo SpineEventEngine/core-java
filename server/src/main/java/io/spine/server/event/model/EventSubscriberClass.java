@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Empty;
 import io.spine.core.EventClass;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.model.HandlerMethod;
@@ -44,7 +45,7 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, SubscriberMethod> eventSubscriptions;
+    private final MessageHandlerMap<EventClass, Empty, SubscriberMethod> eventSubscriptions;
     private final ImmutableSet<EventClass> domesticSubscriptions;
     private final ImmutableSet<EventClass> externalSubscriptions;
 
