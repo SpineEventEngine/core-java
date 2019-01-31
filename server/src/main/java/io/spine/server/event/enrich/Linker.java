@@ -79,8 +79,27 @@ final class Linker implements Logging {
             Collection<FieldDescriptor> sourceFields = toSourceFields(enrichmentField);
             putEnrichmentsByField(enrichmentField, sourceFields);
         }
-        FieldTransitions result = new FieldTransitions(functions.build(), fields.build());
+
+        ImmutableList<EnrichmentFunction<?, ?, ?>> functions = this.functions.build();
+        //checkFunctions(functions);
+        ImmutableMultimap<FieldDescriptor, FieldDescriptor> fields = this.fields.build();
+        //checkFields(fields);
+
+        FieldTransitions result = new FieldTransitions(functions, fields);
         return result;
+    }
+
+    private void checkFields(
+            ImmutableMultimap<FieldDescriptor, FieldDescriptor> fields) {
+        checkState(!fields.isEmpty(),
+                   "Unable to match fields for enriching `%s` with `%s`",
+                   sourceDescriptor.getFullName(), enrichmentDescriptor.getFullName());
+    }
+
+    private void checkFunctions(ImmutableList<EnrichmentFunction<?, ?, ?>> functions) {
+        checkState(!functions.isEmpty(),
+                   "No functions found for enriching `%s` with `%s`",
+                   sourceDescriptor.getFullName(), enrichmentDescriptor.getFullName());
     }
 
     private void putEnrichmentsByField(FieldDescriptor enrichmentField,
