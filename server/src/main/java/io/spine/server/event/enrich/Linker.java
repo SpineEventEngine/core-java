@@ -23,7 +23,7 @@ package io.spine.server.event.enrich;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
-import io.spine.code.proto.FieldReference;
+import io.spine.code.proto.ref.FieldRef;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import io.spine.server.reflect.Field;
@@ -38,6 +38,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
+import static io.spine.code.proto.ref.FieldRef.allFrom;
 import static io.spine.protobuf.Messages.defaultInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -94,8 +95,7 @@ final class Linker implements Logging {
     }
 
     private Collection<FieldDescriptor> toSourceFields(FieldDescriptor enrichmentField) {
-        ImmutableList<FieldReference> fieldReferences =
-                FieldReference.allFrom(enrichmentField.toProto());
+        ImmutableList<FieldRef> fieldReferences = allFrom(enrichmentField.toProto());
         checkState(!fieldReferences.isEmpty(),
                    "Unable to get source field information from the enrichment field `%s`",
                    enrichmentField.getFullName());
@@ -103,7 +103,7 @@ final class Linker implements Logging {
         return findSourceFields(fieldReferences, enrichmentField);
     }
 
-    private Collection<FieldDescriptor> findSourceFields(ImmutableList<FieldReference> references,
+    private Collection<FieldDescriptor> findSourceFields(ImmutableList<FieldRef> references,
                                                          FieldDescriptor enrichmentField) {
         int refCount = references.size();
         checkArgument(refCount > 0, "References may not be empty");
@@ -111,7 +111,7 @@ final class Linker implements Logging {
 
         FieldDescriptor.Type basicType = null;
         Descriptor messageType = null;
-        for (FieldReference ref : references) {
+        for (FieldRef ref : references) {
 
             /* TODO: the 2nd parameter is true when there is no pipe in references
         if (pipeSeparatorIndex < 0) {
@@ -174,7 +174,7 @@ final class Linker implements Logging {
      *         field is absent and if not in the strict mode
      */
     private @Nullable FieldDescriptor
-    findSourceField(FieldReference ref, FieldDescriptor enrichmentField, boolean strict) {
+    findSourceField(FieldRef ref, FieldDescriptor enrichmentField, boolean strict) {
         Descriptor srcMessage = sourceDescriptor(ref);
         if (ref.hasType() && !ref.matchesType(srcMessage)) {
             return null;
@@ -194,7 +194,7 @@ final class Linker implements Logging {
      * Returns an event descriptor or context descriptor
      * if the field name contains {@code "context"} in the name.
      */
-    private Descriptor sourceDescriptor(FieldReference fieldReference) {
+    private Descriptor sourceDescriptor(FieldRef fieldReference) {
         Descriptor msg = fieldReference.isContext()
                          ? EventContext.getDescriptor()
                          : sourceDescriptor;
@@ -214,13 +214,12 @@ final class Linker implements Logging {
         return func;
     }
 
-    private static IllegalStateException noFieldException(FieldReference fieldReference,
-                                                          Descriptor srcMessage,
-                                                          FieldDescriptor enrichmentField) {
+    private static IllegalStateException
+    noFieldException(FieldRef fieldRef, Descriptor srcMessage, FieldDescriptor enrichmentField) {
         throw newIllegalStateException(
                 "No field `%s` in the message `%s` found. " +
                 "The field is referenced in the option of the enrichment field `%s`.",
-                fieldReference,
+                fieldRef,
                 srcMessage.getFullName(),
                 enrichmentField.getFullName());
     }
