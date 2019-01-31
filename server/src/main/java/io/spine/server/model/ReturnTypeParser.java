@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
 @SuppressWarnings({"UnstableApiUsage" /* Guava's Reflection API will most probably be OK. */,
-        "unchecked" /* A lot of unchecked operations due to `TypeToken` nature. */})
+        "unchecked" /* A lot of logically checked casts due to the `TypeToken` nature. */})
 abstract class ReturnTypeParser {
 
     private static final Map<Class<?>, Provider> parserProviders = parserProviders();
