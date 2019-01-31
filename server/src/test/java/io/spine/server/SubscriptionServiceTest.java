@@ -34,9 +34,11 @@ import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.Entity;
 import io.spine.server.stand.Stand;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
+import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
@@ -49,7 +51,6 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -155,44 +156,75 @@ class SubscriptionServiceTest {
      * ------------------
      */
 
-    @Test
-    @DisplayName("subscribe to topic")
-    void subscribeToTopic() {
-        BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
+    @Nested
+    @DisplayName("subscribe to")
+    class SubscribeTo {
 
+        @Test
+        @DisplayName("entity updates")
+        void entityTopic() {
+            checkSubscriptionTo(Project.class);
+        }
+
+        @Test
+        @DisplayName("events")
+        void eventTopic() {
+            checkSubscriptionTo(AggProjectCreated.class);
+        }
+
+        private void checkSubscriptionTo(Class<? extends Message> aClass) {
+            Target target = Targets.allOf(aClass);
+            BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
+
+            SubscriptionService subscriptionService = SubscriptionService
+                    .newBuilder()
+                    .add(boundedContext)
+                    .build();
+
+            Topic topic = requestFactory.topic()
+                                        .forTarget(target);
+
+            MemoizingObserver<Subscription> observer = new MemoizingObserver<>();
+
+            subscriptionService.subscribe(topic, observer);
+
+            Subscription response = observer.firstResponse();
+            ProtoSubject<?, Message> assertResponse = ProtoTruth.assertThat(response);
+            assertResponse
+                    .isNotNull();
+            assertResponse
+                    .hasAllRequiredFields();
+            assertThat(response.getTopic()
+                               .getTarget()
+                               .getType())
+                    .isEqualTo(target.getType());
+            assertThat(observer.getError())
+                    .isNull();
+            assertThat(observer.isCompleted())
+                    .isTrue();
+        }
+    }
+
+    @Test
+    @DisplayName("not subscribe to a system event")
+    void notSubscribeToSystemEvent() {
+        BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
         SubscriptionService subscriptionService = SubscriptionService
                 .newBuilder()
                 .add(boundedContext)
                 .build();
-        String type = boundedContext.getStand()
-                                    .getExposedTypes()
-                                    .iterator()
-                                    .next()
-                                    .value();
-        Target target = getProjectQueryTarget();
-
-        assertEquals(type, target.getType());
-
-        Topic topic = requestFactory.topic().forTarget(target);
-
+        Topic topic = requestFactory.topic()
+                                    .allOf(EntityStateChanged.class);
         MemoizingObserver<Subscription> observer = new MemoizingObserver<>();
 
         subscriptionService.subscribe(topic, observer);
 
-        Subscription response = observer.firstResponse();
-        ProtoSubject<?, Message> assertResponse = ProtoTruth.assertThat(response);
-        assertResponse
-                .isNotNull();
-        assertResponse
-                .hasAllRequiredFields();
-        assertThat(response.getTopic()
-                           .getTarget()
-                           .getType())
-                .isEqualTo(type);
-        assertThat(observer.getError())
-                .isNull();
+        assertThat(observer.responses())
+                .isEmpty();
         assertThat(observer.isCompleted())
-                .isTrue();
+                .isFalse();
+        assertThat(observer.getError())
+                .isNotNull();
     }
 
     @Test
