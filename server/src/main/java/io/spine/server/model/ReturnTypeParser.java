@@ -38,7 +38,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -61,7 +60,7 @@ abstract class ReturnTypeParser {
         Class<?> rawType = TypeToken.of(type)
                                     .getRawType();
         Optional<Provider> provider = chooseProvider(rawType);
-        Optional<ReturnTypeParser> result = provider.map(p -> p.apply(type));
+        Optional<ReturnTypeParser> result = provider.map(p -> p.newParserFor(type));
         return result;
     }
 
@@ -199,6 +198,7 @@ abstract class ReturnTypeParser {
     }
 
     @FunctionalInterface
-    private interface Provider extends Function<Type, ReturnTypeParser> {
+    private interface Provider {
+        ReturnTypeParser newParserFor(Type type);
     }
 }
