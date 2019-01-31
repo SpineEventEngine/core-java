@@ -20,7 +20,6 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 
 import java.util.Set;

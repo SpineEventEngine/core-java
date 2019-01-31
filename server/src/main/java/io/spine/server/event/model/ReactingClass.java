@@ -35,5 +35,5 @@ public interface ReactingClass extends EventReceiverClass {
      */
     EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass);
 
-    Set<EventClass> reactsWith();
+    Set<EventClass> getReactProducts();
 }

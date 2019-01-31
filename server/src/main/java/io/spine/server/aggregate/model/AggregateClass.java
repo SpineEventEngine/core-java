@@ -114,12 +114,12 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<EventClass> reactsWith() {
-        return delegate.reactsWith();
+    public Set<EventClass> getReactProducts() {
+        return delegate.getReactProducts();
     }
 
     public Set<EventClass> getEmittedEvents() {
-        Set<EventClass> result = union(getProducedTypes(), reactsWith());
+        Set<EventClass> result = union(getHandleProducts(), getReactProducts());
         return result;
     }
 

@@ -98,8 +98,8 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<EventClass> reactsWith() {
-        return reactorDelegate.reactsWith();
+    public Set<EventClass> getReactProducts() {
+        return reactorDelegate.getReactProducts();
     }
 
     @Override
@@ -108,7 +108,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     public Set<EventClass> getEmittedEvents() {
-        SetView<EventClass> result = union(getProducedTypes(), reactsWith());
+        SetView<EventClass> result = union(getHandleProducts(), getReactProducts());
         return result;
     }
 

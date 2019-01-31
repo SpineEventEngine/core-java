@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.model;
 
-import io.spine.base.EventMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.command.model.CommandHandlerMethod;
@@ -52,7 +51,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     }
 
     @Override
-    public Set<EventClass> getProducedTypes() {
+    public Set<EventClass> getHandleProducts() {
         return commands.getProducedTypes();
     }
 

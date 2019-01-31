@@ -92,7 +92,7 @@ public final class CommanderClass<C extends Commander>
 
     @Override
     public Set<CommandClass> getProducedCommands() {
-        SetView<CommandClass> result = union(getProducedTypes(), delegate.getProducedTypes());
+        SetView<CommandClass> result = union(getHandleProducts(), delegate.getProducedTypes());
         return result;
     }
 }

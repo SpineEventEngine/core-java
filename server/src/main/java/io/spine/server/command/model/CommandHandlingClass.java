@@ -20,7 +20,6 @@
 
 package io.spine.server.command.model;
 
-import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.type.MessageClass;
 
@@ -39,7 +38,7 @@ public interface CommandHandlingClass<P extends MessageClass<?>,
      */
     Set<CommandClass> getCommands();
 
-    Set<P> getProducedTypes();
+    Set<P> getHandleProducts();
 
     /**
      * Obtains the handler method for the passed command class.

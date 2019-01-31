@@ -21,7 +21,6 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
@@ -57,7 +56,7 @@ public abstract class AbstractCommandHandlingClass<C,
     }
 
     @Override
-    public Set<P> getProducedTypes() {
+    public Set<P> getHandleProducts() {
         return commands.getProducedTypes();
     }
 
