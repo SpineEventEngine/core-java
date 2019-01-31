@@ -32,6 +32,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -65,57 +66,79 @@ class SubscriptionRecordTest {
         assertFalse(record.matches(envelope2));
     }
 
-    @Test
+    @Nested
     @DisplayName("fail to match improper ID")
-    void notMatchImproperId() {
-        ProjectId targetId = ProjectId
-                .newBuilder()
-                .setId(TARGET_ID)
-                .build();
-        Project state = Project.getDefaultInstance();
-        SubscriptionRecord record = newRecordFor(subscription(targetId));
+    class MatchById {
 
-        EventEnvelope envelope = stateChangedEnvelope(targetId, state);
-        assertTrue(record.matches(envelope));
+        @Test
+        @DisplayName("in case of entity subscription")
+        void entitySubscription() {
+            ProjectId targetId = ProjectId
+                    .newBuilder()
+                    .setId(TARGET_ID)
+                    .build();
+            Project state = Project.getDefaultInstance();
+            SubscriptionRecord record = newRecordFor(subscription(targetId));
 
-        ProjectId otherId = ProjectId
-                .newBuilder()
-                .setId("some-other-ID")
-                .build();
-        EventEnvelope envelope2 = stateChangedEnvelope(otherId, state);
-        assertFalse(record.matches(envelope2));
+            EventEnvelope envelope = stateChangedEnvelope(targetId, state);
+            assertTrue(record.matches(envelope));
+
+            ProjectId otherId = ProjectId
+                    .newBuilder()
+                    .setId("some-other-ID")
+                    .build();
+            EventEnvelope envelope2 = stateChangedEnvelope(otherId, state);
+            assertFalse(record.matches(envelope2));
+        }
+
+        @Test
+        @DisplayName("in case of event subscription")
+        void eventSubscription() {
+
+        }
     }
 
-    @Test
+    @Nested
     @DisplayName("fail to match improper state")
-    void notMatchImproperState() {
-        ProjectId targetId = ProjectId
-                .newBuilder()
-                .setId(TARGET_ID)
-                .build();
-        String targetName = "super-project";
+    class MatchByState {
 
-        Filter filter = Filters.eq("name", targetName);
-        CompositeFilter compositeFilter = Filters.all(filter);
-        Set<CompositeFilter> filters = singleton(compositeFilter);
-        Target target = Targets.composeTarget(Project.class, singleton(targetId), filters);
+        @Test
+        @DisplayName("in case of entity subscription")
+        void entitySubscription() {
+            ProjectId targetId = ProjectId
+                    .newBuilder()
+                    .setId(TARGET_ID)
+                    .build();
+            String targetName = "super-project";
 
-        Subscription subscription = subscription(target);
-        SubscriptionRecord record = newRecordFor(subscription);
+            Filter filter = Filters.eq("name", targetName);
+            CompositeFilter compositeFilter = Filters.all(filter);
+            Set<CompositeFilter> filters = singleton(compositeFilter);
+            Target target = Targets.composeTarget(Project.class, singleton(targetId), filters);
 
-        Project matching = Project
-                .newBuilder()
-                .setName(targetName)
-                .build();
-        EventEnvelope envelope = stateChangedEnvelope(targetId, matching);
-        assertTrue(record.matches(envelope));
+            Subscription subscription = subscription(target);
+            SubscriptionRecord record = newRecordFor(subscription);
 
-        Project nonMatching = Project
-                .newBuilder()
-                .setName("some-other-name")
-                .build();
-        EventEnvelope envelope2 = stateChangedEnvelope(targetId, nonMatching);
-        assertFalse(record.matches(envelope2));
+            Project matching = Project
+                    .newBuilder()
+                    .setName(targetName)
+                    .build();
+            EventEnvelope envelope = stateChangedEnvelope(targetId, matching);
+            assertTrue(record.matches(envelope));
+
+            Project nonMatching = Project
+                    .newBuilder()
+                    .setName("some-other-name")
+                    .build();
+            EventEnvelope envelope2 = stateChangedEnvelope(targetId, nonMatching);
+            assertFalse(record.matches(envelope2));
+        }
+
+        @Test
+        @DisplayName("in case of event subscription")
+        void eventSubscription() {
+
+        }
     }
 
     @Test
