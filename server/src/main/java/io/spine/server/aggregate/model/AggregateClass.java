@@ -118,8 +118,7 @@ public class AggregateClass<A extends Aggregate>
         return delegate.reactsWith();
     }
 
-    // todo expose these and importable events for subscription
-    public Set<EventClass> allEmittedEvents() {
+    public Set<EventClass> getEmittedEvents() {
         Set<EventClass> result = union(getProducedTypes(), reactsWith());
         return result;
     }

@@ -107,11 +107,8 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return commanderDelegate.getProducedCommands();
     }
 
-    public Set<MessageClass<?>> allProducedTypes() {
-        SetView<EventClass> producedEvents =
-                union(getProducedTypes(), reactsWith());
-        SetView<MessageClass<?>> result =
-                union(producedEvents, getProducedCommands());
+    public Set<EventClass> getEmittedEvents() {
+        SetView<EventClass> result = union(getProducedTypes(), reactsWith());
         return result;
     }
 
