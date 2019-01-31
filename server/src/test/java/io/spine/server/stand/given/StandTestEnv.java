@@ -27,6 +27,7 @@ import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.SubscriptionUpdate;
+import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
@@ -112,6 +113,7 @@ public class StandTestEnv {
     public static class MemoizeNotifySubscriptionAction implements Stand.NotifySubscriptionAction {
 
         private Any newEntityState = null;
+        private Event newEvent = null;
 
         /**
          * {@inheritDoc}
@@ -119,16 +121,29 @@ public class StandTestEnv {
          * <p>Currently there is always exactly one {@code EntityStateUpdate} in a
          * {@code SubscriptionUpdate}.
          */
+        @SuppressWarnings("SwitchStatementWithoutDefaultBranch") // OK for this test class.
         @Override
         public void accept(SubscriptionUpdate update) {
-            EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
-                                                        .getUpdatesList()
-                                                        .get(0);
-            newEntityState = entityStateUpdate.getState();
+            switch (update.getUpdateCase()) {
+                case ENTITY_UPDATES:
+                    EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
+                                                                .getUpdatesList()
+                                                                .get(0);
+                    newEntityState = entityStateUpdate.getState();
+                    break;
+                case EVENT_UPDATES:
+                    newEvent = update.getEventUpdates()
+                                     .getEventsList()
+                                     .get(0);
+            }
         }
 
         public @Nullable Any newEntityState() {
             return newEntityState;
+        }
+
+        public @Nullable Event newEvent() {
+            return newEvent;
         }
     }
 }

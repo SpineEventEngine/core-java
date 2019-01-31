@@ -45,7 +45,9 @@ import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -509,6 +511,44 @@ class StandTest extends TenantAwareTest {
 
             Any packedState = pack(project);
             assertEquals(packedState, action.newEntityState());
+        }
+
+        @Test
+        @DisplayName("upon event of observed type received")
+        void uponEvent() {
+            CustomerAggregateRepository repository = new CustomerAggregateRepository();
+            Stand stand = createStand(repository);
+            Topic topic = requestFactory.topic()
+                                        .allOf(CustomerCreated.class);
+            MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
+            subscribeAndActivate(stand, topic, action);
+
+            Customer customer = fillSampleCustomers(1)
+                    .iterator()
+                    .next();
+            CustomerId customerId = customer.getId();
+            CreateCustomer createCustomer = CreateCustomer
+                    .newBuilder()
+                    .setCustomerId(customerId)
+                    .setCustomer(customer)
+                    .build();
+            Command command = requestFactory.command()
+                                            .create(createCustomer);
+            CommandEnvelope cmd = CommandEnvelope.of(command);
+            CustomerId id = repository.dispatch(cmd);
+            assertEquals(customerId, id);
+
+            Event event = action.newEvent();
+            assertNotNull(event);
+
+            CommandContext eventOrigin = event.getContext()
+                                              .getCommandContext();
+            assertThat(eventOrigin).isEqualTo(cmd.getCommandContext());
+            Any packedMessage = event.getMessage();
+            CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
+
+            assertThat(eventMessage.getCustomerId()).isEqualTo(customerId);
+            assertThat(eventMessage.getCustomer()).isEqualTo(customer);
         }
     }
 
