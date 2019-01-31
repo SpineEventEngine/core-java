@@ -57,6 +57,14 @@ abstract class ReturnTypeParser {
         this.type = type;
     }
 
+    private static Optional<ReturnTypeParser> forType(Type type) {
+        Class<?> rawType = TypeToken.of(type)
+                                    .getRawType();
+        Optional<Provider> provider = chooseProvider(rawType);
+        Optional<ReturnTypeParser> result = provider.map(p -> p.apply(type));
+        return result;
+    }
+
     static ReturnTypeParser forMethod(Method method) {
         checkNotNull(method);
         Type type = method.getGenericReturnType();
@@ -71,14 +79,6 @@ abstract class ReturnTypeParser {
 
     protected Type type() {
         return type;
-    }
-
-    private static Optional<ReturnTypeParser> forType(Type type) {
-        Class<?> rawType = TypeToken.of(type)
-                                    .getRawType();
-        Optional<Provider> provider = chooseProvider(rawType);
-        Optional<ReturnTypeParser> result = provider.map(p -> p.apply(type));
-        return result;
     }
 
     @SuppressWarnings("ComparatorMethodParameterNotUsed") // See doc.
