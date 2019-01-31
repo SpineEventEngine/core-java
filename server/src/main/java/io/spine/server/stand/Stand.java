@@ -27,7 +27,6 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -67,7 +66,6 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.ack;
 import static java.util.stream.Collectors.toSet;
@@ -105,8 +103,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * Manages the {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
      */
     private final TypeRegistry typeRegistry;
-
-    private final Set<TypeUrl> eventClasses = newConcurrentHashSet();
 
     /**
      * An instance of executor used to invoke callbacks.
@@ -340,7 +336,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedTypes() {
-        return typeRegistry.getTypes();
+        return typeRegistry.getEntityTypes();
+    }
+
+    public ImmutableSet<TypeUrl> getExposedEventTypes() {
+        return typeRegistry.getEventTypes();
     }
 
     /**
@@ -393,6 +393,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
+     * todo update doc
      * Registers a supplier for the objects of a certain {@link TypeUrl} to be able
      * to read them in response to a {@link Query Query}.
      *
@@ -405,14 +406,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
         typeRegistry.register(repository);
-    }
-
-    public void addEmittedEventClasses(Collection<Class<? extends EventMessage>> classes) {
-        Set<TypeUrl> typeUrls = classes
-                .stream()
-                .map(TypeUrl::of)
-                .collect(toSet());
-        eventClasses.addAll(typeUrls);
     }
 
     /**

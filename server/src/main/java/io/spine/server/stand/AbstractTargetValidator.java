@@ -38,9 +38,11 @@ abstract class AbstractTargetValidator<M extends Message> extends RequestValidat
 
     boolean targetSupported(Target target) {
         TypeUrl typeUrl = getTypeOf(target);
-        boolean result = typeRegistry.getTypes()
-                                     .contains(typeUrl);
-        return result;
+        boolean isKnownEntity = typeRegistry.getEntityTypes()
+                                            .contains(typeUrl);
+        boolean isKnownEvent = typeRegistry.getEventTypes()
+                                           .contains(typeUrl);
+        return isKnownEntity || isKnownEvent;
     }
 
     static TypeUrl getTypeOf(Target target) {

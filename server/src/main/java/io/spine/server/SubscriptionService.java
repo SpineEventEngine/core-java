@@ -36,6 +36,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
@@ -167,10 +168,11 @@ public class SubscriptionService
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
             Stand stand = boundedContext.getStand();
-            ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
-            for (TypeUrl availableType : exposedTypes) {
-                mapBuilder.put(availableType, boundedContext);
-            }
+            Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, boundedContext);
+            stand.getExposedTypes()
+                 .forEach(putIntoMap);
+            stand.getExposedEventTypes()
+                 .forEach(putIntoMap);
         }
     }
 }

@@ -20,11 +20,13 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
+import io.spine.core.EventClass;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
@@ -164,6 +166,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     public TypeUrl getEntityStateType() {
         return entityClass().getStateType();
+    }
+
+    public ImmutableSet<EventClass> producedEventClasses() {
+        return ImmutableSet.of();
     }
 
     /**

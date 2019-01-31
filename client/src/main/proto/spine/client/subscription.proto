@@ -99,7 +99,8 @@ message SubscriptionUpdate {
     //
     reserved 11;
 
-    // Each subscription delivers updates on either occurred events or modified entity state.
+    // Each subscription delivers either entity state updates or events that occurred in the
+    // system.
     oneof update {
 
         // The entity state updates if it's an entity subscription.

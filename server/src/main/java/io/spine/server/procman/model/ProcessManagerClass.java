@@ -92,6 +92,11 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return result;
     }
 
+    public Set<EventClass> getEmittedEventClasses() {
+        SetView<EventClass> result = union(getHandleProducts(), getReactProducts());
+        return result;
+    }
+
     @Override
     public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
         return reactorDelegate.getReactor(eventClass, originClass);
@@ -105,11 +110,6 @@ public final class ProcessManagerClass<P extends ProcessManager>
     @Override
     public Set<CommandClass> getProducedCommands() {
         return commanderDelegate.getProducedCommands();
-    }
-
-    public Set<EventClass> getEmittedEvents() {
-        SetView<EventClass> result = union(getHandleProducts(), getReactProducts());
-        return result;
     }
 
     public CommandSubstituteMethod getCommander(CommandClass commandClass) {

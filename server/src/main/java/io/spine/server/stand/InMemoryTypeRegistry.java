@@ -20,8 +20,8 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import io.spine.core.EventClass;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
@@ -33,15 +33,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toSet;
 
 /**
- * The in-memory concurrency-friendly implementation of {
- * @linkplain TypeRegistry Stand type registry}.
- *
- * @author Alex Tymchenko
+ * The in-memory concurrency-friendly implementation of
+ * {@linkplain TypeRegistry Stand type registry}.
  */
-class InMemoryTypeRegistry implements TypeRegistry {
+final class InMemoryTypeRegistry implements TypeRegistry {
 
     /**
      * The mapping between {@code TypeUrl} instances and repositories providing
@@ -54,10 +54,12 @@ class InMemoryTypeRegistry implements TypeRegistry {
      * Stores  known {@code Aggregate} types in order to distinguish
      * them among all instances of {@code TypeUrl}.
      */
-    private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
+    private final Set<TypeUrl> knownAggregateTypes = newConcurrentHashSet();
 
+    private final Set<TypeUrl> knownEventTypes = newConcurrentHashSet();
+
+    /** Prevents instantiation from the outside. */
     private InMemoryTypeRegistry() {
-        // Prevent instantiation from the outside.
     }
 
     static TypeRegistry newInstance() {
@@ -76,23 +78,13 @@ class InMemoryTypeRegistry implements TypeRegistry {
         if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);
         }
+        addProducedEvents(repository);
     }
-
 
     @Override
     public Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl type) {
-        RecordBasedRepository<?, ?, ? > repo = typeToRepositoryMap.get(type);
+        RecordBasedRepository<?, ?, ?> repo = typeToRepositoryMap.get(type);
         Optional<? extends RecordBasedRepository<?, ?, ?>> result = ofNullable(repo);
-        return result;
-    }
-
-    @Override
-    public ImmutableSet<TypeUrl> getTypes() {
-        ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
-        Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
-        resultBuilder.addAll(projectionTypes)
-                     .addAll(knownAggregateTypes);
-        ImmutableSet<TypeUrl> result = resultBuilder.build();
         return result;
     }
 
@@ -103,8 +95,34 @@ class InMemoryTypeRegistry implements TypeRegistry {
     }
 
     @Override
+    public ImmutableSet<TypeUrl> getEntityTypes() {
+        ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
+        Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
+        resultBuilder.addAll(projectionTypes)
+                     .addAll(knownAggregateTypes);
+        ImmutableSet<TypeUrl> result = resultBuilder.build();
+        return result;
+    }
+
+    @Override
+    public ImmutableSet<TypeUrl> getEventTypes() {
+        return ImmutableSet.copyOf(knownEventTypes);
+    }
+
+    @Override
     public void close() {
         typeToRepositoryMap.clear();
         knownAggregateTypes.clear();
+        knownEventTypes.clear();
+    }
+
+    private <I, E extends Entity<I, ?>> void addProducedEvents(Repository<I, E> repository) {
+        Set<TypeUrl> typeUrls = repository
+                .producedEventClasses()
+                .stream()
+                .map(EventClass::value)
+                .map(TypeUrl::of)
+                .collect(toSet());
+        knownEventTypes.addAll(typeUrls);
     }
 }

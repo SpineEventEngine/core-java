@@ -79,6 +79,11 @@ public class AggregateClass<A extends Aggregate>
         return delegate.getExternalEventClasses();
     }
 
+    public Set<EventClass> getEmittedEventClasses() {
+        Set<EventClass> result = union(getHandleProducts(), getReactProducts());
+        return result;
+    }
+
     /**
      * Obtains set of classes of events used as arguments of applier methods.
      *
@@ -116,11 +121,6 @@ public class AggregateClass<A extends Aggregate>
     @Override
     public Set<EventClass> getReactProducts() {
         return delegate.getReactProducts();
-    }
-
-    public Set<EventClass> getEmittedEvents() {
-        Set<EventClass> result = union(getHandleProducts(), getReactProducts());
-        return result;
     }
 
     /**

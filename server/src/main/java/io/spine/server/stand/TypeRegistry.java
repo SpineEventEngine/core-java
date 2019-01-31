@@ -36,15 +36,16 @@ import java.util.Optional;
 interface TypeRegistry extends AutoCloseable {
 
     /**
-     * Registers a {@linkplain Repository repository} of objects and
-     * {@linkplain Repository#getEntityStateType its entity state type} in this registry.
+     * Registers a {@linkplain Repository repository} of objects,
+     * {@linkplain Repository#getEntityStateType its entity state type} and
+     * {@linkplain Repository#producedEventClasses() produced events} in this registry.
      *
      * <p>For {@linkplain RecordBasedRepository record-based repositories},
      * the reference to the {@code repository} is also kept to allow accessing its records
      * from {@code Stand}.
      *
-     * <p>In case {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
-     * instance is passed, only its {@code type} is registered.
+     * <p>In case an {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
+     * instance is passed, only its types are registered.
      */
     <I, E extends Entity<I, ?>> void register(Repository<I, E> repository);
 
@@ -53,11 +54,11 @@ interface TypeRegistry extends AutoCloseable {
      * {@linkplain TypeUrl type}, if it {@linkplain #register(Repository) has been registered}
      * previously.
      *
-     * @param type the type of {@code Entity} to obtain a repository for
+     * @param entityType the type of {@code Entity} to obtain a repository for
      * @return {@code RecordBasedRepository} managing the objects of the given {@code type},
      *         or {@code Optional.empty()} if no such repository has been registered
      */
-    Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl type);
+    Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl entityType);
 
     /**
      * Reads all {@link io.spine.server.aggregate.Aggregate Aggregate} entity state types
@@ -74,5 +75,7 @@ interface TypeRegistry extends AutoCloseable {
      *
      * @return the set of types as {@link TypeUrl} instances
      */
-    ImmutableSet<TypeUrl> getTypes();
+    ImmutableSet<TypeUrl> getEntityTypes();
+
+    ImmutableSet<TypeUrl> getEventTypes();
 }
