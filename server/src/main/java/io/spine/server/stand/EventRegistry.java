@@ -17,34 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.stand;
 
-import com.google.protobuf.Message;
-import io.spine.client.Target;
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.EventClass;
+import io.spine.server.entity.Repository;
 import io.spine.type.TypeUrl;
 
-/**
- * An abstract base for {@code RequestValidator}s, that check
- * whether the {@link Target target} is supported.
- */
-abstract class AbstractTargetValidator<M extends Message> extends RequestValidator<M> {
+interface EventRegistry extends AutoCloseable {
 
-    private final TypeRegistry typeRegistry;
+    void register(Repository<?, ?> repository);
 
-    AbstractTargetValidator(TypeRegistry typeRegistry) {
-        super();
-        this.typeRegistry = typeRegistry;
-    }
+    ImmutableSet<TypeUrl> getTypes();
 
-    boolean typeRegistryContains(Target target) {
-        TypeUrl typeUrl = getTypeOf(target);
-        boolean result = typeRegistry.getTypes()
-                                     .contains(typeUrl);
-        return result;
-    }
+    boolean containsType(TypeUrl type);
 
-    static TypeUrl getTypeOf(Target target) {
-        String typeAsString = target.getType();
-        return TypeUrl.parse(typeAsString);
-    }
+    ImmutableSet<EventClass> getEventClasses();
 }

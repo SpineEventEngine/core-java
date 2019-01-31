@@ -54,11 +54,12 @@ interface TypeRegistry extends AutoCloseable {
      * {@linkplain TypeUrl type}, if it {@linkplain #register(Repository) has been registered}
      * previously.
      *
-     * @param entityType the type of {@code Entity} to obtain a repository for
+     * @param type
+     *         the type of {@code Entity} to obtain a repository for
      * @return {@code RecordBasedRepository} managing the objects of the given {@code type},
      *         or {@code Optional.empty()} if no such repository has been registered
      */
-    Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl entityType);
+    Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl type);
 
     /**
      * Reads all {@link io.spine.server.aggregate.Aggregate Aggregate} entity state types
@@ -75,7 +76,5 @@ interface TypeRegistry extends AutoCloseable {
      *
      * @return the set of types as {@link TypeUrl} instances
      */
-    ImmutableSet<TypeUrl> getEntityTypes();
-
-    ImmutableSet<TypeUrl> getEventTypes();
+    ImmutableSet<TypeUrl> getTypes();
 }

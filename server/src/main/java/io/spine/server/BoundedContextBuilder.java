@@ -308,17 +308,8 @@ public final class BoundedContextBuilder implements Logging {
         BoundedContext result = buildDefault(system, transport);
         log().debug("{} created.", result.nameForLogging());
 
-        registerStand(result);
         registerRepositories(result);
         return result;
-    }
-
-    /**
-     * Registers bounded context's own stand as an event dispatcher.
-     */
-    private static void registerStand(BoundedContext result) {
-        Stand stand = result.getStand();
-        result.registerEventDispatcher(stand);
     }
 
     private void registerRepositories(BoundedContext result) {

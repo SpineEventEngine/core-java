@@ -49,7 +49,6 @@ import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -66,9 +65,10 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.union;
 import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.ack;
-import static java.util.stream.Collectors.toSet;
+import static java.util.Collections.singleton;
 
 /**
  * A container for storing the latest {@link io.spine.server.aggregate.Aggregate Aggregate}
@@ -104,6 +104,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private final TypeRegistry typeRegistry;
 
+    private final EventRegistry eventRegistry;
+
     /**
      * An instance of executor used to invoke callbacks.
      */
@@ -124,6 +126,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                            : false;
         this.subscriptionRegistry = builder.getSubscriptionRegistry();
         this.typeRegistry = builder.getTypeRegistry();
+        this.eventRegistry = builder.getEventRegistry();
         this.topicValidator = builder.getTopicValidator();
         this.queryValidator = builder.getQueryValidator();
         this.subscriptionValidator = builder.getSubscriptionValidator();
@@ -172,20 +175,14 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     @Override
     protected void handle(EventEnvelope envelope) {
         TypeUrl typeUrl = TypeUrl.of(envelope.getMessage());
-        TenantAwareOperation op = new EventOperation(envelope.getOuterObject()) {
-            @Override
-            public void run() {
-                if (!subscriptionRegistry.hasType(typeUrl)) {
-                    return;
-                }
-                subscriptionRegistry.byType(typeUrl)
-                                    .stream()
-                                    .filter(SubscriptionRecord::isActive)
-                                    .filter(record -> record.matches(envelope))
-                                    .forEach(record -> runSubscriptionUpdate(record, envelope));
-            }
-        };
-        op.execute();
+        if (!subscriptionRegistry.hasType(typeUrl)) {
+            return;
+        }
+        subscriptionRegistry.byType(typeUrl)
+                            .stream()
+                            .filter(SubscriptionRecord::isActive)
+                            .filter(record -> record.matches(envelope))
+                            .forEach(record -> runSubscriptionUpdate(record, envelope));
     }
 
     /**
@@ -198,22 +195,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Stand dispatches no message classes if there are no subscriptions present but as having
-     * such dispatcher is illegal we say that it always dispatches the {@link EntityStateChanged}
-     * event.
-     */
     @Override
     public Set<EventClass> getMessageClasses() {
-        ImmutableSet<TypeUrl> types = subscriptionRegistry.typeSet();
-        Set<EventClass> result = types
-                .stream()
-                .map(EventClass::from)
-                .collect(toSet());
         EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);
-        result.add(entityStateChanged);
+        Set<EventClass> result =
+                union(eventRegistry.getEventClasses(), singleton(entityStateChanged));
         return result;
     }
 
@@ -336,11 +322,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedTypes() {
-        return typeRegistry.getEntityTypes();
+        return typeRegistry.getTypes();
     }
 
     public ImmutableSet<TypeUrl> getExposedEventTypes() {
-        return typeRegistry.getEventTypes();
+        return eventRegistry.getTypes();
     }
 
     /**
@@ -406,6 +392,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
         typeRegistry.register(repository);
+        eventRegistry.register(repository);
     }
 
     /**
@@ -473,6 +460,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
         private TypeRegistry typeRegistry;
+        private EventRegistry eventRegistry;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
@@ -534,6 +522,10 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             return typeRegistry;
         }
 
+        public EventRegistry getEventRegistry() {
+            return eventRegistry;
+        }
+
         private SystemReadSide getSystemReadSide() {
             return systemReadSide;
         }
@@ -562,8 +554,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
 
             typeRegistry = InMemoryTypeRegistry.newInstance();
+            eventRegistry = InMemoryEventRegistry.newInstance();
 
-            topicValidator = new TopicValidator(typeRegistry);
+            topicValidator = new TopicValidator(typeRegistry, eventRegistry);
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 
