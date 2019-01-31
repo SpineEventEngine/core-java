@@ -81,7 +81,7 @@ final class Linker implements Logging {
         }
 
         ImmutableList<EnrichmentFunction<?, ?, ?>> functions = this.functions.build();
-        //checkFunctions(functions);
+        checkFunctions(functions);
         ImmutableMultimap<FieldDescriptor, FieldDescriptor> fields = this.fields.build();
         //checkFields(fields);
 
@@ -89,16 +89,15 @@ final class Linker implements Logging {
         return result;
     }
 
-    private void checkFields(
-            ImmutableMultimap<FieldDescriptor, FieldDescriptor> fields) {
-        checkState(!fields.isEmpty(),
-                   "Unable to match fields for enriching `%s` with `%s`",
-                   sourceDescriptor.getFullName(), enrichmentDescriptor.getFullName());
-    }
-
     private void checkFunctions(ImmutableList<EnrichmentFunction<?, ?, ?>> functions) {
         checkState(!functions.isEmpty(),
                    "No functions found for enriching `%s` with `%s`",
+                   sourceDescriptor.getFullName(), enrichmentDescriptor.getFullName());
+    }
+
+    private void checkFields(ImmutableMultimap<FieldDescriptor, FieldDescriptor> fields) {
+        checkState(!fields.isEmpty(),
+                   "Unable to match fields for enriching `%s` with `%s`",
                    sourceDescriptor.getFullName(), enrichmentDescriptor.getFullName());
     }
 

@@ -30,6 +30,7 @@ import io.spine.server.event.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -72,6 +73,8 @@ class EnrichmentFunctionTest {
     }
 
     @Test
+    @Disabled("Because there can be cases when source field and target field can be of the same class." +
+            "For example, we have String ID, and create text representation basing on this ID.")
     @DisplayName("not accept same source and target class")
     void rejectSameSourceAndTarget() {
         BiFunction<StringValue, EventContext, StringValue> func =

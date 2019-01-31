@@ -30,7 +30,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -60,11 +59,11 @@ abstract class EnrichmentFunction<S, C extends Message, T> {
     EnrichmentFunction(Class<S> sourceClass, Class<T> targetClass) {
         this.sourceClass = checkNotNull(sourceClass);
         this.targetClass = checkNotNull(targetClass);
-        checkArgument(
-                !sourceClass.equals(targetClass),
-                "Source and target classes must not be equal. Both are: `%s`",
-                sourceClass.getName()
-        );
+//        checkArgument(
+//                !sourceClass.equals(targetClass),
+//                "Source and target classes must not be equal. Both are: `%s`",
+//                sourceClass.getName()
+//        );
     }
 
     /**

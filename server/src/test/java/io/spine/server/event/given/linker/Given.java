@@ -69,6 +69,9 @@ public class Given {
     private static final BiFunction<String, EventContext, Integer> STRING_TO_INT =
             (input, context) -> Integer.valueOf(input);
 
+    private static final BiFunction<String, EventContext, String> STRING_TO_STRING =
+            (input, context) -> input;
+
     /** Prevents instantiation of this utility class. */
     private Given() {
     }
@@ -86,7 +89,8 @@ public class Given {
                 .add(Integer.class, String.class, VERSION_TO_STRING)
                 .add(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
                 .add(String.class, PersonName.class, STRING_TO_PERSON_NAME)
-                .add(String.class, Integer.class, STRING_TO_INT);
+                .add(String.class, Integer.class, STRING_TO_INT)
+                .add(String.class, String.class, STRING_TO_STRING);
         return builder.build();
     }
 
