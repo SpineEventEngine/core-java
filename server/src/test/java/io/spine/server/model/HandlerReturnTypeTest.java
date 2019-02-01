@@ -26,7 +26,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
-import io.spine.server.model.given.ReturnTypeParserTestEnv.MessageProducer;
+import io.spine.server.model.given.HandlerReturnTypeTestEnv.MessageProducer;
 import io.spine.test.model.ModCreateProject;
 import io.spine.test.model.ModProjectCreated;
 import io.spine.test.model.ModProjectOwnerAssigned;
@@ -46,15 +46,14 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("ReturnTypeAnalyzerShould")
-class ReturnTypeParserTest {
+@DisplayName("HandlerReturnType should")
+class HandlerReturnTypeTest {
 
     @Nested
-    @DisplayName("extract emitted message type")
-    class ExtractEmitted {
+    @DisplayName("extract produced message type")
+    class ExtractProducedMessage {
 
         @Test
         @DisplayName("from command return type")
@@ -79,17 +78,11 @@ class ReturnTypeParserTest {
         void fromIterable() {
             checkProduces("emitListOfCommands", ImmutableSet.of(ModStartProject.class));
         }
-
-        @Test
-        @DisplayName("from non-parameterized `Iterable` descendant")
-        void fromIterableDescendant() {
-            checkProduces("emitModProjectStartedList", ImmutableSet.of(ModProjectStarted.class));
-        }
     }
 
     @Nested
-    @DisplayName("extract multiple emitted types")
-    class ExtractMultipleEmitted {
+    @DisplayName("extract multiple produced types")
+    class ExtractMultipleProducedTypes {
 
         @Test
         @DisplayName("from `Either` return type")
@@ -118,7 +111,7 @@ class ReturnTypeParserTest {
     }
 
     @Nested
-    @DisplayName("return empty emitted messages list")
+    @DisplayName("return empty produced messages list")
     class ReturnEmptyList {
 
         @Test
@@ -156,26 +149,16 @@ class ReturnTypeParserTest {
         }
     }
 
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Method called to throw exception.
-    @Test
-    @DisplayName("throw IAE when created for method with non-familiar return type")
-    void throwOnUnknownReturnType() throws NoSuchMethodException {
-        Method method = MessageProducer.class.getMethod("returnRandomType");
-        assertThrows(IllegalArgumentException.class,
-                     () -> ReturnTypeParser.forMethod(method));
-    }
-
     private static void checkProduces(String methodName,
                                       Collection<Class<? extends Message>> messageTypes) {
         try {
             Method method = MessageProducer.class.getMethod(methodName);
-            ReturnTypeParser extractor = ReturnTypeParser.forMethod(method);
+            HandlerReturnType<?> returnType = HandlerReturnType.of(method);
             Set<? extends MessageClass<?>> expectedTypes = messageTypes
                     .stream()
-                    .map(ReturnTypeParserTest::toCommandOrEventClass)
+                    .map(HandlerReturnTypeTest::toCommandOrEventClass)
                     .collect(toSet());
-            ImmutableSet<MessageClass<?>> classes = extractor.parseProducedMessages();
+            ImmutableSet<?> classes = returnType.producedMessages();
             assertThat(classes).containsExactlyElementsIn(expectedTypes);
         } catch (NoSuchMethodException e) {
             fail(e);

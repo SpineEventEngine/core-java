@@ -37,16 +37,15 @@ import io.spine.test.model.ModStartProject;
 import io.spine.test.model.Rejections.ModCannotAssignOwnerToProject;
 import io.spine.test.model.Rejections.ModProjectAlreadyExists;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
 
-public final class ReturnTypeParserTestEnv {
+public final class HandlerReturnTypeTestEnv {
 
     /** Prevents instantiation of this test environment class. */
-    private ReturnTypeParserTestEnv() {
+    private HandlerReturnTypeTestEnv() {
     }
 
     @SuppressWarnings("unused") // Reflective access only.
@@ -70,10 +69,6 @@ public final class ReturnTypeParserTestEnv {
 
         public List<ModStartProject> emitListOfCommands() {
             return ImmutableList.of();
-        }
-
-        public ModProjectStartedList emitModProjectStartedList() {
-            return new ModProjectStartedList();
         }
 
         public EitherOf2<ModProjectCreated, ModProjectAlreadyExists> emitEither() {
@@ -119,10 +114,5 @@ public final class ReturnTypeParserTestEnv {
         public int returnRandomType() {
             return 42;
         }
-    }
-
-    @SuppressWarnings("ClassExtendsConcreteCollection") // Necessary for test.
-    private static class ModProjectStartedList extends ArrayList<ModProjectStarted> {
-        private static final long serialVersionUID = 0L;
     }
 }

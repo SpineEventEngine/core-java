@@ -23,12 +23,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -40,7 +38,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.lang.String.format;
 
 /**
@@ -92,13 +89,7 @@ public abstract class AbstractHandlerMethod<T,
      */
     private final ParameterSpec<E> parameterSpec;
 
-    /**
-     * The message types (commands or events) emitted by this handler method.
-     *
-     * <p>Is not evaluated until it's queried.
-     */
-    @LazyInit
-    private @MonotonicNonNull ImmutableSet<P> producedMessageTypes;
+    private final HandlerReturnType<P> returnType;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -112,6 +103,7 @@ public abstract class AbstractHandlerMethod<T,
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
+        this.returnType = HandlerReturnType.of(method);
 
         method.setAccessible(true);
     }
@@ -186,21 +178,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @Override
     public Set<P> getProducedMessages() {
-        if (producedMessageTypes == null) {
-            producedMessageTypes = acquireProducedMessages();
-        }
-        return producedMessageTypes;
-    }
-
-    @SuppressWarnings("unchecked") // See doc.
-    private ImmutableSet<P> acquireProducedMessages() {
-        ReturnTypeParser parser = ReturnTypeParser.forMethod(method);
-        ImmutableSet<MessageClass<?>> messages = parser.parseProducedMessages();
-        ImmutableSet<P> result = messages
-                .stream()
-                .map(cls -> (P) cls)
-                .collect(toImmutableSet());
-        return result;
+        return returnType.producedMessages();
     }
 
     /**
