@@ -93,6 +93,7 @@ public abstract class AbstractHandlerMethod<T,
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
+     *
      * @param method
      *         subscriber method
      * @param parameterSpec
