@@ -52,8 +52,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 class HandlerReturnTypeTest {
 
     @Nested
-    @DisplayName("extract produced message type")
-    class ExtractProducedMessage {
+    @DisplayName("collect a single produced message type")
+    class CollectProducedMessageType {
 
         @Test
         @DisplayName("from command return type")
@@ -81,8 +81,8 @@ class HandlerReturnTypeTest {
     }
 
     @Nested
-    @DisplayName("extract multiple produced types")
-    class ExtractMultipleProducedTypes {
+    @DisplayName("collect multiple produced types")
+    class CollectMultipleProducedTypes {
 
         @Test
         @DisplayName("from `Either` return type")
@@ -111,8 +111,8 @@ class HandlerReturnTypeTest {
     }
 
     @Nested
-    @DisplayName("return empty produced messages list")
-    class ReturnEmptyList {
+    @DisplayName("collect empty produced messages list")
+    class CollectEmptyList {
 
         @Test
         @DisplayName("for `void` return type")
