@@ -65,10 +65,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests of {@link BoundedContext}.
@@ -192,6 +196,20 @@ class BoundedContextTest {
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
         assertThat(stand.getExposedTypes(), contains(repository.getEntityStateType()));
+    }
+
+    @Test
+    @DisplayName("re-register Stand as event dispatcher when registering repository")
+    void registerStandAsEventDispatcher() {
+        EventBus eventBusMock = mock(EventBus.class);
+        EventBus.Builder builderMock = mock(EventBus.Builder.class);
+        when(builderMock.build()).thenReturn(eventBusMock);
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setEventBus(builderMock)
+                                                      .build();
+        boundedContext.register(new ProjectAggregateRepository());
+        verify(eventBusMock, times(1))
+                .register(eq(boundedContext.getStand()));
     }
 
     @ParameterizedTest

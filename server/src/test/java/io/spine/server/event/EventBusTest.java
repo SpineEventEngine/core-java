@@ -41,7 +41,6 @@ import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;
 import io.spine.server.event.given.bus.TaskCreatedFilter;
-import io.spine.server.event.given.bus.UnsupportedEventAckObserver;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
@@ -80,6 +79,7 @@ import static io.spine.server.event.given.bus.EventBusTestEnv.readEvents;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -421,7 +421,8 @@ public class EventBusTest {
     @Test
     @DisplayName("not dispatch domestic event to external handler")
     void domesticEventToExternalMethod() {
-        eventBus.register(new EBExternalTaskAddedSubscriber());
+        EBExternalTaskAddedSubscriber subscriber = new EBExternalTaskAddedSubscriber();
+        eventBus.register(subscriber);
 
         ProjectId projectId = Sample.messageOfType(ProjectId.class);
         Task task = Sample.messageOfType(Task.class);
@@ -431,10 +432,8 @@ public class EventBusTest {
                 .setTask(task)
                 .build();
         Event event = eventFactory.createEvent(eventMessage);
-        UnsupportedEventAckObserver observer = new UnsupportedEventAckObserver();
-        eventBus.post(event, observer);
-        assertTrue(observer.observedUnsupportedEvent());
-        assertTrue(observer.isCompleted());
+        eventBus.post(event, StreamObservers.noOpObserver());
+        assertNull(subscriber.receivedExternalMessage());
     }
 
     /**
