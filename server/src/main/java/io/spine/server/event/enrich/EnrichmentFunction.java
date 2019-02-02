@@ -59,11 +59,6 @@ abstract class EnrichmentFunction<S, C extends Message, T> {
     EnrichmentFunction(Class<S> sourceClass, Class<T> targetClass) {
         this.sourceClass = checkNotNull(sourceClass);
         this.targetClass = checkNotNull(targetClass);
-//        checkArgument(
-//                !sourceClass.equals(targetClass),
-//                "Source and target classes must not be equal. Both are: `%s`",
-//                sourceClass.getName()
-//        );
     }
 
     /**
