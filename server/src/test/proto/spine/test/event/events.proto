@@ -94,18 +94,16 @@ message EnrichmentByContextFields {
 }
 
 message ProjectCompleted {
-    option (enrichment) = "SeparateEnrichmentForMultipleProjectEvents";
-
     ProjectId project_id = 1;
 }
 
 message ProjectStarred {
-    option (enrichment) = "SeparateEnrichmentForMultipleProjectEvents";
-
     ProjectId project_id = 1;
 }
 
 message SeparateEnrichmentForMultipleProjectEvents {
+    option (enrichment_for) = "ProjectStarred,ProjectCompleted";
+
     string project_name = 1 [(by) = "*.project_id"];
 }
 

@@ -29,9 +29,9 @@ import io.spine.logging.Logging;
 import io.spine.server.reflect.Field;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -76,25 +76,34 @@ final class Linker implements Logging {
      */
     FieldTransitions createTransitions() {
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
-            Collection<FieldDescriptor> sourceFields = toSourceFields(enrichmentField);
+            Set<FieldDescriptor> sourceFields = toSourceFields(enrichmentField);
             putEnrichmentsByField(enrichmentField, sourceFields);
         }
 
         ImmutableList<EnrichmentFunction<?, ?, ?>> functions = this.functions.build();
-        checkFunctions(functions);
         ImmutableMultimap<FieldDescriptor, FieldDescriptor> fields = this.fields.build();
+        //TODO:2019-02-02:alexander.yevsyukov: Enable the below checks when enrichment schemas are generated per bounded context.
+        //checkFunctions(functions);
         //checkFields(fields);
 
         FieldTransitions result = new FieldTransitions(functions, fields);
         return result;
     }
 
+    @SuppressWarnings("unused")
     private void checkFunctions(ImmutableList<EnrichmentFunction<?, ?, ?>> functions) {
-        checkState(!functions.isEmpty(),
-                   "No functions found for enriching `%s` with `%s`",
-                   sourceDescriptor.getFullName(), enrichmentDescriptor.getFullName());
+        checkState(
+                !functions.isEmpty(),
+                "No functions found for creating enrichment of type `%s`" +
+                " by the source message of the type `%s`." +
+                " Please check `EnricherBuilder.add()` is called with corresponding" +
+                " source/target field class arguments.",
+                enrichmentDescriptor.getFullName(),
+                sourceDescriptor.getFullName()
+        );
     }
 
+    @SuppressWarnings("unused")
     private void checkFields(ImmutableMultimap<FieldDescriptor, FieldDescriptor> fields) {
         checkState(!fields.isEmpty(),
                    "Unable to match fields for enriching `%s` with `%s`",
@@ -112,7 +121,7 @@ final class Linker implements Logging {
         }
     }
 
-    private Collection<FieldDescriptor> toSourceFields(FieldDescriptor enrichmentField) {
+    private Set<FieldDescriptor> toSourceFields(FieldDescriptor enrichmentField) {
         ImmutableList<FieldRef> fieldReferences = allFrom(enrichmentField.toProto());
         checkState(!fieldReferences.isEmpty(),
                    "Unable to get source field information from the enrichment field `%s`",
@@ -121,32 +130,21 @@ final class Linker implements Logging {
         return findSourceFields(fieldReferences, enrichmentField);
     }
 
-    private Collection<FieldDescriptor> findSourceFields(ImmutableList<FieldRef> references,
-                                                         FieldDescriptor enrichmentField) {
+    private Set<FieldDescriptor>
+    findSourceFields(ImmutableList<FieldRef> references, FieldDescriptor enrichmentField) {
         int refCount = references.size();
         checkArgument(refCount > 0, "References may not be empty");
-        Collection<FieldDescriptor> result = new HashSet<>(refCount);
+        Set<FieldDescriptor> result = new HashSet<>(refCount);
 
         FieldDescriptor.Type basicType = null;
         Descriptor messageType = null;
         for (FieldRef ref : references) {
-
-            /* TODO: the 2nd parameter is true when there is no pipe in references
-        if (pipeSeparatorIndex < 0) {
-            FieldDescriptor fieldDescriptor =
-                    findSourceFieldByName(byOptionValue, enrichmentField, true);
-            return Collections.singleton(fieldDescriptor);
-        } else {
-            String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(byOptionValue);
-            return findSourceFieldsByNames(ImmutableList.copyOf(targetFieldNames), enrichmentField);
-        }
-             */
-
-            FieldDescriptor field = findSourceField(ref, enrichmentField, false);
+            boolean strict = refCount == 1;
+            FieldDescriptor field = findSourceField(ref, enrichmentField, strict);
             if (field == null) {
                 /* We don't know at this stage the type of the event.
                    The enrichment is to be included anyway,
-                   but by another Linker instance */
+                   but by another Linker instance. */
                 continue;
             }
 

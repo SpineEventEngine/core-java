@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -51,8 +50,9 @@ final class FieldTransitions {
                      ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
         checkNotNull(functions);
         checkNotNull(fieldMap);
-        checkArgument(!functions.isEmpty(), "No transition functions provided.");
-        checkArgument(!fieldMap.isEmpty(), "`fieldMap` cannot be empty");
+        //TODO:2019-02-02:alexander.yevsyukov: Enable the below checks when enrichment schemas are generated per bounded context.
+        //checkArgument(!functions.isEmpty(), "No transition functions provided.");
+        //checkArgument(!fieldMap.isEmpty(), "`fieldMap` cannot be empty");
         this.functions = checkNotNull(functions);
         this.fieldMap = checkNotNull(fieldMap);
     }
