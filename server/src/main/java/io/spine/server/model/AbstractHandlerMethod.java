@@ -89,7 +89,7 @@ public abstract class AbstractHandlerMethod<T,
      */
     private final ParameterSpec<E> parameterSpec;
 
-    private final HandlerReturnType<P> returnType;
+    private final ProducedTypeSet<P> producedTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -104,7 +104,7 @@ public abstract class AbstractHandlerMethod<T,
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
-        this.returnType = HandlerReturnType.of(method);
+        this.producedTypes = ProducedTypeSet.collect(method);
 
         method.setAccessible(true);
     }
@@ -179,7 +179,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @Override
     public Set<P> getProducedMessages() {
-        return returnType.producedMessages();
+        return producedTypes.get();
     }
 
     /**

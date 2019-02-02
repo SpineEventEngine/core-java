@@ -48,8 +48,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("HandlerReturnType should")
-class HandlerReturnTypeTest {
+@DisplayName("ProducedTypeSet should")
+class ProducedTypeSetTest {
 
     @Nested
     @DisplayName("collect a single produced message type")
@@ -153,12 +153,12 @@ class HandlerReturnTypeTest {
                                       Collection<Class<? extends Message>> messageTypes) {
         try {
             Method method = MessageProducer.class.getMethod(methodName);
-            HandlerReturnType<?> returnType = HandlerReturnType.of(method);
+            ProducedTypeSet<?> producedTypes = ProducedTypeSet.collect(method);
             Set<? extends MessageClass<?>> expectedTypes = messageTypes
                     .stream()
-                    .map(HandlerReturnTypeTest::toCommandOrEventClass)
+                    .map(ProducedTypeSetTest::toCommandOrEventClass)
                     .collect(toSet());
-            ImmutableSet<?> classes = returnType.producedMessages();
+            ImmutableSet<?> classes = producedTypes.get();
             assertThat(classes).containsExactlyElementsIn(expectedTypes);
         } catch (NoSuchMethodException e) {
             fail(e);

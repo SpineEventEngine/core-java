@@ -45,49 +45,39 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 @SuppressWarnings("UnstableApiUsage") // Guava's Reflection API will most probably be OK.
 @Immutable
-final class HandlerReturnType<P extends MessageClass<?>> {
+final class ProducedTypeSet<P extends MessageClass<?>> {
 
-    @SuppressWarnings("Immutable")
-    private final Type type;
+    private final ImmutableSet<P> producedTypes;
 
-    private final ImmutableSet<P> producedMessages;
-
-    /** Forbids inheriting except for inner classes. */
-    private HandlerReturnType(Type type, ImmutableSet<P> producedMessages) {
-        this.type = type;
-        this.producedMessages = producedMessages;
+    private ProducedTypeSet(ImmutableSet<P> producedTypes) {
+        this.producedTypes = producedTypes;
     }
 
-    static <P extends MessageClass<?>> HandlerReturnType<P> of(Method handlerMethod) {
-        checkNotNull(handlerMethod);
-        Type type = handlerMethod.getGenericReturnType();
-        ImmutableSet<P> producedMessages = collectProducedMessages(type);
-        return new HandlerReturnType<>(type, producedMessages);
+    static <P extends MessageClass<?>> ProducedTypeSet<P> collect(Method method) {
+        checkNotNull(method);
+        Type returnType = method.getGenericReturnType();
+        ImmutableSet<P> producedMessages = collectProducedTypes(returnType);
+        return new ProducedTypeSet<>(producedMessages);
     }
 
-    Type type() {
-        return type;
+    ImmutableSet<P> get() {
+        return producedTypes;
     }
 
-    ImmutableSet<P> producedMessages() {
-        return producedMessages;
-    }
-
-    private static <P extends MessageClass<?>> ImmutableSet<P>
-    collectProducedMessages(Type type) {
+    private static <P extends MessageClass<?>> ImmutableSet<P> collectProducedTypes(Type type) {
         Iterable<Type> allTypes = Traverser.forTree(Types::resolveArguments)
                                            .breadthFirst(type);
         ImmutableSet<P> result =
                 Streams.stream(allTypes)
                        .map(TypeToken::of)
                        .map(TypeToken::getRawType)
-                       .filter(new IsEmittedMessage())
+                       .filter(new IsCommandOrEvent())
                        .map(new ToMessageClass<P>())
                        .collect(toImmutableSet());
         return result;
     }
 
-    private static class IsEmittedMessage implements Predicate<Class<?>> {
+    private static class IsCommandOrEvent implements Predicate<Class<?>> {
 
         private static final ImmutableSet<Class<? extends Message>> IGNORED_TYPES =
                 ImmutableSet.of(
@@ -110,7 +100,7 @@ final class HandlerReturnType<P extends MessageClass<?>> {
     private static class ToMessageClass<P extends MessageClass<?>>
             implements Function<Class<?>, P> {
 
-        @SuppressWarnings("unchecked") // See doc.
+        @SuppressWarnings("unchecked") // See class doc.
         @Override
         public P apply(Class<?> aClass) {
             if (EventMessage.class.isAssignableFrom(aClass)) {
