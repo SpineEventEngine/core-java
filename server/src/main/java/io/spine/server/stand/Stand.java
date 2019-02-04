@@ -118,6 +118,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     private final AggregateQueryProcessor aggregateQueryProcessor;
 
     private Stand(Builder builder) {
+        super();
         this.callbackExecutor = builder.getCallbackExecutor();
         this.multitenant = builder.multitenant != null
                            ? builder.multitenant
