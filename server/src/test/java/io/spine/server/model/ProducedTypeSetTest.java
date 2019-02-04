@@ -158,7 +158,7 @@ class ProducedTypeSetTest {
                     .stream()
                     .map(ProducedTypeSetTest::toCommandOrEventClass)
                     .collect(toSet());
-            ImmutableSet<?> classes = producedTypes.get();
+            ImmutableSet<?> classes = producedTypes.typeSet();
             assertThat(classes).containsExactlyElementsIn(expectedTypes);
         } catch (NoSuchMethodException e) {
             fail(e);

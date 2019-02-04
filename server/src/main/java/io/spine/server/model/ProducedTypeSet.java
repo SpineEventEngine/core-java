@@ -56,15 +56,15 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
     static <P extends MessageClass<?>> ProducedTypeSet<P> collect(Method method) {
         checkNotNull(method);
         Type returnType = method.getGenericReturnType();
-        ImmutableSet<P> producedMessages = collectProducedTypes(returnType);
+        ImmutableSet<P> producedMessages = collectProducedMessages(returnType);
         return new ProducedTypeSet<>(producedMessages);
     }
 
-    ImmutableSet<P> get() {
+    ImmutableSet<P> typeSet() {
         return producedTypes;
     }
 
-    private static <P extends MessageClass<?>> ImmutableSet<P> collectProducedTypes(Type type) {
+    private static <P extends MessageClass<?>> ImmutableSet<P> collectProducedMessages(Type type) {
         Iterable<Type> allTypes = Traverser.forTree(Types::resolveArguments)
                                            .breadthFirst(type);
         ImmutableSet<P> result =

@@ -179,7 +179,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @Override
     public Set<P> getProducedMessages() {
-        return producedTypes.get();
+        return producedTypes.typeSet();
     }
 
     /**
