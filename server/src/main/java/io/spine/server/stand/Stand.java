@@ -100,10 +100,13 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     private final SubscriptionRegistry subscriptionRegistry;
 
     /**
-     * Manages the {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
+     * Manages the entity {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
      */
     private final TypeRegistry typeRegistry;
 
+    /**
+     * Manages the events produced by the associated repositories.
+     */
     private final EventRegistry eventRegistry;
 
     /**
@@ -199,8 +202,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * {@inheritDoc}
      *
      * <p>As dynamically changed event classes for subscribers are currently not supported,
-     * {@code Stand} receives all events exposed by the related repositories and then filters them
-     * according to subscriptions.
+     * {@code Stand} receives all events produced by the associated repositories and then notifies
+     * subscriptions if necessary.
      *
      * <p>Also receives {@link EntityStateChanged} event class to enable entity subscriptions.
      */
@@ -229,14 +232,14 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * Subscribes for all further changes of an entity state, which satisfies the {@link Topic}.
+     * Subscribes to the updates of entity state or to the specific types of events, according to
+     * {@link Topic}.
      *
-     * <p>Once this instance of {@code Stand} receives an update of an entity
+     * <p>Once this instance of {@code Stand} receives an update of an entity or a matching event
      * with the given {@code TypeUrl}, all such callbacks are executed.
      *
      * @param topic
-     *         a {@link Topic} defining the entity whose changes should be propagated to the
-     *         {@code callback} as well as subscription criteria
+     *         a {@link Topic} defining the subscription target
      */
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
         topicValidator.validate(topic, responseObserver);
@@ -259,8 +262,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * subscribe() method call}.
      *
      * <p>After the activation, the clients will start receiving the updates via
-     * {@code NotifySubscriptionAction} upon the changes in the entities, defined by
-     * the {@code Target} attribute used for this subscription.
+     * {@code NotifySubscriptionAction} upon entity state changes or new events arrival.
      *
      * @param subscription
      *         the subscription to activate
@@ -334,6 +336,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         return typeRegistry.getTypes();
     }
 
+    /**
+     * Reads all event types produced by the repositories associated with this {@code Stand}.
+     *
+     * @return the set of types as {@link TypeUrl} instances
+     */
     public ImmutableSet<TypeUrl> getExposedEventTypes() {
         return eventRegistry.getTypes();
     }
@@ -388,13 +395,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * todo update doc
-     * Registers a supplier for the objects of a certain {@link TypeUrl} to be able
-     * to read them in response to a {@link Query Query}.
+     * Registers a {@code Repository} as an entity/event type supplier.
      *
-     * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository}
-     * is not registered as type supplier, since the {@code Aggregate} reads are performed
-     * by accessing the latest state in the supplied {@code StandStorage}.
+     * <p>In case of an {@link AggregateRepository}, the repository is not registered as
+     * a supplier for read operations, since the {@code Aggregate} reads are performed by
+     * accessing the latest state in the corresponding {@code MirrorProjection}.
      *
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
@@ -410,6 +415,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     @Override
     public void close() throws Exception {
         typeRegistry.close();
+        eventRegistry.close();
     }
 
     /**
