@@ -199,7 +199,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public ImmutableSet<EventClass> getProducedEvents() {
-        Set<EventClass> eventClasses = processManagerClass().getEmittedEventClasses();
+        Set<EventClass> eventClasses = processManagerClass().getProducedEvents();
         return ImmutableSet.copyOf(eventClasses);
     }
 

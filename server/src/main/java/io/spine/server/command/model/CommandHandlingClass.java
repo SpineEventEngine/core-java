@@ -28,7 +28,10 @@ import java.util.Set;
 /**
  * A common interface for classes that handle commands.
  *
- * @author Alexander Yevsyukov
+ * @param <P>
+ *         the type of message classes produced from the command handle
+ * @param <H>
+ *         the type of methods which perform command handling
  */
 public interface CommandHandlingClass<P extends MessageClass<?>,
                                       H extends CommandAcceptingMethod<?, P, ?>> {
@@ -38,6 +41,9 @@ public interface CommandHandlingClass<P extends MessageClass<?>,
      */
     Set<CommandClass> getCommands();
 
+    /**
+     * Obtains classes of all messages produced as a result of command handle.
+     */
     Set<P> getHandleProducts();
 
     /**

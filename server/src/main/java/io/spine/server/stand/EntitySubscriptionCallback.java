@@ -44,8 +44,8 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
     }
 
     /**
-     * Creates a subscription update with a single {@link EntityStateUpdate} based on the passed
-     * event instance.
+     * Creates a subscription update with a single {@link EntityStateUpdate} based on the
+     * information in the event.
      */
     @Override
     protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {

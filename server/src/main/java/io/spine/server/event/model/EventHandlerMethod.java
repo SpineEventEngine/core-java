@@ -40,6 +40,13 @@ import static io.spine.server.model.Handlers.createId;
 
 /**
  * An abstract base for methods handling events.
+ *
+ * @param <T>
+ *         the type of the target object
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <R>
+ *         the type of the method invocation result
  */
 public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends MethodResult<?>>
         extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, P, R> {

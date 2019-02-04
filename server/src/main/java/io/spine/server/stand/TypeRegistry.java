@@ -43,8 +43,8 @@ interface TypeRegistry extends AutoCloseable {
      * the reference to the {@code repository} is also kept to allow accessing its records
      * from {@code Stand}.
      *
-     * <p>In case an {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
-     * instance is passed, only its types are registered.
+     * <p>In case {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
+     * instance is passed, only its {@code type} is registered.
      */
     <I, E extends Entity<I, ?>> void register(Repository<I, E> repository);
 

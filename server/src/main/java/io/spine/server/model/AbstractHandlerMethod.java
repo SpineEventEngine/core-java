@@ -46,11 +46,18 @@ import static java.lang.String.format;
  * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).
  *
- * @param <T> the type of the target object
- * @param <M> the type of the message handled by this method
- * @param <C> the type of the message class
- * @param <E> the type of message envelopes, in which the messages to handle are wrapped
- * @param <R> the type of the method invocation result
+ * @param <T>
+ *         the type of the target object
+ * @param <M>
+ *         the type of the message handled by this method
+ * @param <C>
+ *         the type of the message class
+ * @param <E>
+ *         the type of message envelopes, in which the messages to handle are wrapped
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <R>
+ *         the type of the method invocation result
  */
 @Immutable
 public abstract class AbstractHandlerMethod<T,

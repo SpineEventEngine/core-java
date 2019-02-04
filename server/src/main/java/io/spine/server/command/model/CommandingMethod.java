@@ -48,9 +48,12 @@ import static io.spine.server.commandbus.Transform.transform;
  * Base interface for methods that generate one or more command messages in response to
  * an incoming message.
  *
- * @param <T> the type of the target object
- * @param <M> the type of the message class
- * @param <E> the type of the message envelope, in which the incoming message is wrapped
+ * @param <T>
+ *         the type of the target object
+ * @param <M>
+ *         the type of the message class
+ * @param <E>
+ *         the type of the message envelope, in which the incoming message is wrapped
  */
 @Immutable
 public interface CommandingMethod<T,

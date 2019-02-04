@@ -79,7 +79,10 @@ public class AggregateClass<A extends Aggregate>
         return delegate.getExternalEventClasses();
     }
 
-    public Set<EventClass> getEmittedEventClasses() {
+    /**
+     * Obtains event types produced by this aggregate class.
+     */
+    public Set<EventClass> getProducedEvents() {
         Set<EventClass> result = union(getHandleProducts(), getReactProducts());
         return result;
     }

@@ -20,7 +20,6 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.CommandMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandReceiver;
@@ -31,8 +30,6 @@ import java.lang.reflect.Method;
 
 /**
  * A method that produces one or more command messages in response to an incoming command.
- *
- * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
         extends CommandAcceptingMethod<CommandReceiver, CommandClass, Result>

@@ -47,7 +47,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * A collection of command or event types produced by a {@link HandlerMethod}.
  *
  * @param <P>
- *         the type of the produced message class
+ *         the type of the produced message classes
  */
 @SuppressWarnings("UnstableApiUsage") // Guava's Reflection API will most probably be OK.
 @Immutable
@@ -71,7 +71,7 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
      * @param method
      *         the handler method
      * @param <P>
-     *         the type of the produced message class
+     *         the type of the produced message classes
      * @return a new {@code ProducedTypeSet} instance
      */
     static <P extends MessageClass<?>> ProducedTypeSet<P> collect(Method method) {
@@ -108,14 +108,14 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
     }
 
     /**
-     * Checks if the class is a concrete {@linkplain CommandMessage command} or {@linkplain
-     * EventMessage event}.
+     * Checks if the class is a concrete {@linkplain CommandMessage command} or
+     * {@linkplain EventMessage event}.
      */
     private static class IsCommandOrEvent implements Predicate<Class<?>> {
 
         /**
          * Ignored command/event types include both too broad types like {@link EventMessage} and
-         * special-case types of commands and events which should not be exposed, like
+         * special-case types of commands and events which should not be exposed like
          * {@link Nothing}.
          */
         private static final ImmutableSet<Class<? extends Message>> IGNORED_TYPES =

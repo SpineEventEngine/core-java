@@ -33,8 +33,6 @@ import java.lang.reflect.Method;
 
 /**
  * A method which <em>may</em> generate one or more command messages in response to an event.
- *
- * @author Alexander Yevsyukov
  */
 public final class CommandReactionMethod
         extends AbstractHandlerMethod<EventReceiver,

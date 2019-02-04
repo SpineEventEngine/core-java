@@ -31,7 +31,12 @@ import java.util.Set;
 /**
  * Abstract base for classes providing message handling information of classes that handle commands.
  *
- * @param <C> the type of a command handling class
+ * @param <C>
+ *         the type of a command handling class
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <H>
+ *         the type of methods performing the command handle
  */
 @Immutable(containerOf = "H")
 public abstract class AbstractCommandHandlingClass<C,

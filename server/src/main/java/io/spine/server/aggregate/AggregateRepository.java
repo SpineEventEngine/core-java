@@ -270,7 +270,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public ImmutableSet<EventClass> getProducedEvents() {
         SetView<EventClass> eventClasses =
-                union(aggregateClass().getEmittedEventClasses(), getImportableEventClasses());
+                union(aggregateClass().getProducedEvents(), getImportableEventClasses());
         return ImmutableSet.copyOf(eventClasses);
     }
 

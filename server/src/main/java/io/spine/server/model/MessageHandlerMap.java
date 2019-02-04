@@ -46,6 +46,8 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  *
  * @param <M>
  *         the type of messages
+ * @param <P>
+ *         the type of message classes produced by handler methods
  * @param <H>
  *         the type of handler methods
  */
@@ -115,6 +117,9 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         return messageClasses(filtered.values());
     }
 
+    /**
+     * Obtains the classes of messages produced by the handler methods in this map.
+     */
     public ImmutableSet<P> getProducedTypes() {
         ImmutableSet<P> result = map
                 .values()

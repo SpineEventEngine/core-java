@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @param <E>
  *         the type of the {@link MessageEnvelope} wrapping the method arguments
  * @param <P>
- *         the type of the produced message class
+ *         the type of the produced message classes
  * @param <R>
  *         the type of the method result object
  */

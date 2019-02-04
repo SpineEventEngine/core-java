@@ -37,8 +37,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 /**
  * The wrapper for a command handler method.
- *
- * @author Alexander Yevsyukov
  */
 public final class CommandHandlerMethod
         extends CommandAcceptingMethod<CommandHandler, EventClass, CommandHandlerMethod.Result> {

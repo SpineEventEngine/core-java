@@ -92,7 +92,10 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return result;
     }
 
-    public Set<EventClass> getEmittedEventClasses() {
+    /**
+     * Obtains event classes produced by this process manager class.
+     */
+    public Set<EventClass> getProducedEvents() {
         SetView<EventClass> result = union(getHandleProducts(), getReactProducts());
         return result;
     }

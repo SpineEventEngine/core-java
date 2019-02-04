@@ -37,7 +37,8 @@ import static com.google.common.collect.Sets.union;
 /**
  * Provides information on message handling for a class of {@link Commander}s.
  *
- * @param <C> the type of commanders
+ * @param <C>
+ *         the type of commanders
  */
 public final class CommanderClass<C extends Commander>
         extends AbstractCommandHandlingClass<C, CommandClass, CommandSubstituteMethod>

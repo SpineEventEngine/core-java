@@ -29,7 +29,8 @@ import java.util.Set;
 /**
  * The helper class for holding messaging information on behalf of another model class.
  *
- * @param <T> the type of the raw class for obtaining messaging information
+ * @param <T>
+ *         the type of the raw class for obtaining messaging information
  */
 public final class ReactorClassDelegate<T extends EventReceiver>
         extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>

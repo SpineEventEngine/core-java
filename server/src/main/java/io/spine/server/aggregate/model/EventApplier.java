@@ -39,8 +39,6 @@ import java.util.function.Function;
 
 /**
  * A wrapper for event applier method.
- *
- * @author Alexander Yevsyukov
  */
 public final class EventApplier
         extends AbstractHandlerMethod<Aggregate,
@@ -52,10 +50,14 @@ public final class EventApplier
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
-     *  @param method   the applier method
-     * @param signature {@link ParameterSpec} which describes the method
+     *
+     * @param method
+     *         the applier method
+     * @param signature
+     *         {@link ParameterSpec} which describes the method
      */
-    EventApplier(Method method, ParameterSpec<EventEnvelope> signature) {
+    EventApplier(Method method,
+                 ParameterSpec<EventEnvelope> signature) {
         super(method, signature);
     }
 

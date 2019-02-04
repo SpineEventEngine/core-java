@@ -34,10 +34,12 @@ import java.lang.reflect.Method;
 /**
  * An abstract base for methods that accept a command message and optionally its context.
  *
- * @param <T> the type of the target object
+ * @param <T>
+ *         the type of the target object
  * @param <P>
- * @param <R> the type of the result object returned by the method
- * @author Alexander Yevsyukov
+ *         the type of the produced message classes
+ * @param <R>
+ *         the type of the result object returned by the method
  */
 @Immutable
 public abstract class CommandAcceptingMethod<T,

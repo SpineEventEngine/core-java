@@ -39,7 +39,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Provides type information on a projection class.
  *
- * @param <P> the type of projections
+ * @param <P>
+ *         the type of projections
  */
 public final class ProjectionClass<P extends Projection>
         extends EntityClass<P>

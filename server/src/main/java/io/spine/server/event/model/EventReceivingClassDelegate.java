@@ -37,8 +37,12 @@ import java.util.Set;
  * Helper object for storing information about methods and events of an
  * {@linkplain EventReceiverClass event receiving class}.
  *
- * @param <T> the type of target objects that handle messages
- * @param <M> the type of handler method objects
+ * @param <T>
+ *         the type of target objects that handle messages
+ * @param <P>
+ *         the type of message classes produced by handler methods
+ * @param <M>
+ *         the type of handler method objects
  */
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
@@ -82,6 +86,9 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         return externalEvents;
     }
 
+    /**
+     * Obtains the classes of messages produced by handler methods of this class.
+     */
     public Set<P> getProducedTypes() {
         return events.getProducedTypes();
     }
