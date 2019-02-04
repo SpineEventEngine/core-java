@@ -83,6 +83,7 @@ final class Linker implements Logging {
         ImmutableList<EnrichmentFunction<?, ?, ?>> functions = this.functions.build();
         ImmutableMultimap<FieldDescriptor, FieldDescriptor> fields = this.fields.build();
         //TODO:2019-02-02:alexander.yevsyukov: Enable the below checks when enrichment schemas are generated per bounded context.
+        // See: https://github.com/SpineEventEngine/core-java/issues/960
         //checkFunctions(functions);
         //checkFields(fields);
 
