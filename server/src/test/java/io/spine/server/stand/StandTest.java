@@ -1093,7 +1093,7 @@ class StandTest extends TenantAwareTest {
         StandTestProjectionRepository projectionRepository =
                 mock(StandTestProjectionRepository.class);
         when(projectionRepository.getEntityStateType()).thenReturn(projectType);
-        when(projectionRepository.producedEventTypes()).thenReturn(ImmutableSet.of());
+        when(projectionRepository.getProducedEvents()).thenReturn(ImmutableSet.of());
         setupExpectedFindAllBehaviour(sampleProjects, projectionRepository);
 
         Stand stand = prepareStandWithProjectionRepo(projectionRepository);

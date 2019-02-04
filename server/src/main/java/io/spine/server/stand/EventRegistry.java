@@ -25,13 +25,28 @@ import io.spine.core.EventClass;
 import io.spine.server.entity.Repository;
 import io.spine.type.TypeUrl;
 
+/**
+ * Manages the event types exposed by the associated instance of {@link Stand}.
+ */
 interface EventRegistry extends AutoCloseable {
 
+    /**
+     * Registers the repository as an event producer.
+     */
     void register(Repository<?, ?> repository);
 
-    ImmutableSet<TypeUrl> getTypes();
+    /**
+     * Retrieves all event {@linkplain TypeUrl types} stored in this registry.
+     */
+    ImmutableSet<TypeUrl> typeSet();
 
-    boolean containsType(TypeUrl type);
+    /**
+     * Checks if this registry instance contains the specified event type.
+     */
+    boolean contains(TypeUrl type);
 
-    ImmutableSet<EventClass> getEventClasses();
+    /**
+     * Retrieves all stored event types as {@link EventClass} instances.
+     */
+    ImmutableSet<EventClass> eventClasses();
 }

@@ -28,6 +28,9 @@ import io.spine.type.TypeUrl;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * The in-memory concurrency-friendly implementation of the {@link EventRegistry}.
+ */
 final class InMemoryEventRegistry implements EventRegistry {
 
     private final ConcurrentMap<TypeUrl, EventClass> eventClasses = new ConcurrentHashMap<>();
@@ -42,22 +45,22 @@ final class InMemoryEventRegistry implements EventRegistry {
 
     @Override
     public void register(Repository<?, ?> repository) {
-        repository.producedEventTypes()
+        repository.getProducedEvents()
                   .forEach(this::putIntoMap);
     }
 
     @Override
-    public ImmutableSet<TypeUrl> getTypes() {
+    public ImmutableSet<TypeUrl> typeSet() {
         return ImmutableSet.copyOf(eventClasses.keySet());
     }
 
     @Override
-    public boolean containsType(TypeUrl type) {
+    public boolean contains(TypeUrl type) {
         return eventClasses.containsKey(type);
     }
 
     @Override
-    public ImmutableSet<EventClass> getEventClasses() {
+    public ImmutableSet<EventClass> eventClasses() {
         return ImmutableSet.copyOf(eventClasses.values());
     }
 

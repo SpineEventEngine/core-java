@@ -268,7 +268,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * in the same {@code EventBus} and have the same behaviour as the ones emitted by aggregates.
      */
     @Override
-    public ImmutableSet<EventClass> producedEventTypes() {
+    public ImmutableSet<EventClass> getProducedEvents() {
         SetView<EventClass> eventClasses =
                 union(aggregateClass().getEmittedEventClasses(), getImportableEventClasses());
         return ImmutableSet.copyOf(eventClasses);

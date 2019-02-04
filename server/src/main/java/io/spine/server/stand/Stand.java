@@ -211,7 +211,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     public Set<EventClass> getMessageClasses() {
         EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);
         Set<EventClass> result =
-                union(eventRegistry.getEventClasses(), singleton(entityStateChanged));
+                union(eventRegistry.eventClasses(), singleton(entityStateChanged));
         return result;
     }
 
@@ -342,7 +342,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedEventTypes() {
-        return eventRegistry.getTypes();
+        return eventRegistry.typeSet();
     }
 
     /**
