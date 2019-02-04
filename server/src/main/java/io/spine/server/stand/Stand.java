@@ -195,6 +195,15 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>As dynamically changed event classes for subscribers are currently not supported,
+     * {@code Stand} receives all events exposed by the related repositories and then filters them
+     * according to subscriptions.
+     *
+     * <p>Also receives {@link EntityStateChanged} event class to enable entity subscriptions.
+     */
     @Override
     public Set<EventClass> getMessageClasses() {
         EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);

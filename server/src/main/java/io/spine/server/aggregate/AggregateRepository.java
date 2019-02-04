@@ -259,8 +259,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return aggregateClass().getImportableEventClasses();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns both events emitted by the aggregate class and importable events.
+     *
+     * <p>Although technically imported events are not "produced" in this repository, they end up
+     * in the same {@code EventBus} and have the same behaviour as the ones emitted by aggregates.
+     */
     @Override
-    public ImmutableSet<EventClass> producedEventClasses() {
+    public ImmutableSet<EventClass> producedEventTypes() {
         SetView<EventClass> eventClasses =
                 union(aggregateClass().getEmittedEventClasses(), getImportableEventClasses());
         return ImmutableSet.copyOf(eventClasses);

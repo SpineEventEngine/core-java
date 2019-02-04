@@ -168,7 +168,14 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         return entityClass().getStateType();
     }
 
-    public ImmutableSet<EventClass> producedEventClasses() {
+    /**
+     * Obtains types of the events produced by this {@code Repository}.
+     *
+     * @apiNote
+     * For convenience, the default version returns empty collection. This method should be
+     * overridden by repositories which actually produce events.
+     */
+    public ImmutableSet<EventClass> producedEventTypes() {
         return ImmutableSet.of();
     }
 

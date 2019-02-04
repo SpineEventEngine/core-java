@@ -38,7 +38,7 @@ interface TypeRegistry extends AutoCloseable {
     /**
      * Registers a {@linkplain Repository repository} of objects,
      * {@linkplain Repository#getEntityStateType its entity state type} and
-     * {@linkplain Repository#producedEventClasses() produced events} in this registry.
+     * {@linkplain Repository#producedEventTypes() produced events} in this registry.
      *
      * <p>For {@linkplain RecordBasedRepository record-based repositories},
      * the reference to the {@code repository} is also kept to allow accessing its records

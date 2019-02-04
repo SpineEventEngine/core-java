@@ -42,7 +42,7 @@ final class InMemoryEventRegistry implements EventRegistry {
 
     @Override
     public void register(Repository<?, ?> repository) {
-        repository.producedEventClasses()
+        repository.producedEventTypes()
                   .forEach(this::putIntoMap);
     }
 

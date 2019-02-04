@@ -198,7 +198,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public ImmutableSet<EventClass> producedEventClasses() {
+    public ImmutableSet<EventClass> producedEventTypes() {
         Set<EventClass> eventClasses = processManagerClass().getEmittedEventClasses();
         return ImmutableSet.copyOf(eventClasses);
     }

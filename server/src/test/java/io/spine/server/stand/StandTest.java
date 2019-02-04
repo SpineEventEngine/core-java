@@ -513,6 +513,7 @@ class StandTest extends TenantAwareTest {
             assertEquals(packedState, action.newEntityState());
         }
 
+        @SuppressWarnings("OverlyCoupledMethod") // Huge end-to-end test.
         @Test
         @DisplayName("upon event of observed type received")
         void uponEvent() {
@@ -1092,7 +1093,7 @@ class StandTest extends TenantAwareTest {
         StandTestProjectionRepository projectionRepository =
                 mock(StandTestProjectionRepository.class);
         when(projectionRepository.getEntityStateType()).thenReturn(projectType);
-        when(projectionRepository.producedEventClasses()).thenReturn(ImmutableSet.of());
+        when(projectionRepository.producedEventTypes()).thenReturn(ImmutableSet.of());
         setupExpectedFindAllBehaviour(sampleProjects, projectionRepository);
 
         Stand stand = prepareStandWithProjectionRepo(projectionRepository);

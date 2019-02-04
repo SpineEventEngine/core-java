@@ -114,6 +114,7 @@ message SubscriptionUpdate {
 // The updates on the observed entity state.
 message EntityUpdates {
 
+    // The entity state update list.
     repeated EntityStateUpdate updates = 1 [(valid) = true];
 }
 
@@ -133,6 +134,7 @@ message EntityStateUpdate {
 // The new events of the observed type that occurred in the system.
 message EventUpdates {
 
+    // The event list.
     repeated core.Event events = 1 [(valid) = true];
 }
 
