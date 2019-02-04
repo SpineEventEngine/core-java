@@ -23,21 +23,37 @@ package io.spine.server.event.enrich;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Message;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A wrapper DTO for the validation result.
+ * Matches source fields to enrichment fields, and provides functions for the transitions.
  */
-final class ValidationResult {
+final class FieldTransitions {
 
     private final ImmutableList<EnrichmentFunction<?, ?, ?>> functions;
     private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
-    ValidationResult(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
+    static FieldTransitions create(Enricher enricher,
+                                   Class<? extends Message> sourceClass,
+                                   Class<? extends Message> enrichmentClass) {
+
+        Linker linker = new Linker(enricher, sourceClass, enrichmentClass);
+        FieldTransitions result = linker.createTransitions();
+        return result;
+    }
+
+    FieldTransitions(ImmutableList<EnrichmentFunction<?, ?, ?>> functions,
                      ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
+        checkNotNull(functions);
+        checkNotNull(fieldMap);
+        //TODO:2019-02-02:alexander.yevsyukov: Enable the below checks when enrichment schemas are generated per bounded context.
+        // See: https://github.com/SpineEventEngine/core-java/issues/960
+        //checkArgument(!functions.isEmpty(), "No transition functions provided.");
+        //checkArgument(!fieldMap.isEmpty(), "`fieldMap` cannot be empty");
         this.functions = checkNotNull(functions);
         this.fieldMap = checkNotNull(fieldMap);
     }

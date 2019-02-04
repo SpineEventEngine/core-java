@@ -22,7 +22,7 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.server.event.given.ReferenceValidatorTestEnv.Enrichment;
+import io.spine.server.event.given.linker.Given;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -45,30 +44,30 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ReferenceValidator should")
-class ReferenceValidatorTest {
+@DisplayName("Linker should")
+class LinkerTest {
 
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
-    private final Enricher enricher = Enrichment.newEventEnricher();
+    private final Enricher enricher = Given.newEventEnricher();
 
     @Test
     @DisplayName("initialize with valid enricher")
     void initWithValidEnricher() {
-        ReferenceValidator validator =
-                new ReferenceValidator(enricher,
-                                       ProjectCreated.class,
-                                       ProjectCreatedEnrichmentAnotherPackage.class);
+        Linker validator =
+                new Linker(enricher,
+                           ProjectCreated.class,
+                           ProjectCreatedEnrichmentAnotherPackage.class);
         assertNotNull(validator);
     }
 
     @Test
-    @DisplayName("store valid map of enrichment fields after validation")
-    void storeFieldsAfterValidation() {
-        ReferenceValidator validator
-                = new ReferenceValidator(enricher,
-                                         UserDeletedEvent.class,
-                                         EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        ValidationResult result = validator.validate();
+    @DisplayName("store valid map of enrichment fields after linking")
+    void storeFieldsAfterLinking() {
+        Linker validator
+                = new Linker(enricher,
+                             UserDeletedEvent.class,
+                             EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
+        FieldTransitions result = validator.createTransitions();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertNotNull(fieldMap);
         assertThat(fieldMap).hasSize(1);
@@ -99,13 +98,22 @@ class ReferenceValidatorTest {
         assertEquals(USER_GOOGLE_UID_FIELD, enrichmentFieldName);
     }
 
+    /**
+     * This test verifies that the {@code Linker} should fail on attempt to link a message
+     * to an enrichment type which is not related to the message.
+     *
+     * <p>The {@link GranterEventsEnrichment}
+     * (see {@code spine.test.event.enrichment.even_enrichment.proto}) reference all types
+     * from the proto package {@code spine.test.event.user.permission.*}.
+     * The passed message type ({@link UserDeletedEvent}) is from the proto package
+     * {@code spine.test.event.user}. Therefore, the enrichment cannot be built for this message,
+     * and the {@code Linker} should fail.
+     */
     @Test
-    @DisplayName("fail validation if enrichment is not declared")
+    @DisplayName("fail linking if enrichment is not declared")
     void failIfEnrichmentNotDeclared() {
-        ReferenceValidator validator = new ReferenceValidator(enricher,
-                                                              UserDeletedEvent.class,
-                                                              GranterEventsEnrichment.class);
-        assertThrows(IllegalStateException.class, validator::validate);
+        Linker linker = new Linker(enricher, UserDeletedEvent.class, GranterEventsEnrichment.class);
+        assertThrows(IllegalStateException.class, linker::createTransitions);
     }
 
     @Test
@@ -114,26 +122,26 @@ class ReferenceValidatorTest {
         Enricher emptyEnricher = Enricher
                 .newBuilder()
                 .build();
+        Linker linker = new Linker(emptyEnricher,
+                                   UserDeletedEvent.class,
+                                   EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
 
-        ReferenceValidator validator
-                = new ReferenceValidator(emptyEnricher,
-                                         UserDeletedEvent.class,
-                                         EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        ValidationResult result = validator.validate();
-        List<EnrichmentFunction<?, ?, ?>> functions = result.functions();
-        assertTrue(functions.isEmpty());
-        Multimap<FieldDescriptor, FieldDescriptor> fields = result.fieldMap();
-        assertThat(fields).isEmpty();
+        FieldTransitions result = linker.createTransitions();
+
+        assertThat(result.functions())
+                .isEmpty();
+        assertThat(result.fieldMap())
+                .isEmpty();
     }
 
     @Test
     @DisplayName("handle separator spaces in `by` argument")
     void handleSeparatorSpaces() {
-        ReferenceValidator validator
-                = new ReferenceValidator(enricher,
-                                         TaskAdded.class,
-                                         EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
-        ValidationResult result = validator.validate();
+        Linker linker
+                = new Linker(enricher,
+                             TaskAdded.class,
+                             EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
+        FieldTransitions result = linker.createTransitions();
         Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.fieldMap();
         assertFalse(fieldMap.isEmpty());
         assertThat(fieldMap).hasSize(1);

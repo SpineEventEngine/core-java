@@ -27,8 +27,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The holder of a {@code Command}, which provides convenient access to its properties.
- *
- * @author Alexander Yevsyukov
  */
 public final class CommandEnvelope
         extends AbstractMessageEnvelope<CommandId, Command, CommandContext>
