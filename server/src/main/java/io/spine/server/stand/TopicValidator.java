@@ -79,7 +79,7 @@ final class TopicValidator extends AbstractTargetValidator<Topic> {
     }
 
     private boolean eventRegistryContains(Target target) {
-        TypeUrl type = AbstractTargetValidator.getTypeOf(target);
+        TypeUrl type = getTypeOf(target);
         boolean result = eventRegistry.contains(type);
         return result;
     }

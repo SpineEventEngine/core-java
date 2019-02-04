@@ -31,12 +31,12 @@ import io.spine.type.TypeUrl;
 interface EventRegistry extends AutoCloseable {
 
     /**
-     * Registers the repository as an event producer.
+     * Registers the repository as an event producer in this registry.
      */
     void register(Repository<?, ?> repository);
 
     /**
-     * Retrieves all event {@linkplain TypeUrl types} stored in this registry.
+     * Retrieves all event {@linkplain TypeUrl types} stored in the registry.
      */
     ImmutableSet<TypeUrl> typeSet();
 

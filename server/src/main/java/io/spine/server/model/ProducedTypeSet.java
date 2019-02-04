@@ -49,7 +49,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @param <P>
  *         the type of the produced message classes
  */
-@SuppressWarnings("UnstableApiUsage") // Guava's Reflection API will most probably be OK.
+@SuppressWarnings("UnstableApiUsage") // Guava's Reflection and Graph API will most probably be OK.
 @Immutable
 final class ProducedTypeSet<P extends MessageClass<?>> {
 

@@ -171,8 +171,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains classes of the events produced by this {@code Repository}.
      *
-     * @apiNote
-     * For convenience, the default version returns empty collection. This method should be
+     * <p>For convenience, the default version returns empty collection. This method should be
      * overridden by repositories which actually produce events.
      */
     public ImmutableSet<EventClass> getProducedEvents() {

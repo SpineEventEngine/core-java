@@ -262,10 +262,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * {@inheritDoc}
      *
-     * <p>Returns both events emitted by the aggregate class and importable events.
+     * <p>Returns events emitted by the aggregate class as well as importable events.
      *
      * <p>Although technically imported events are not "produced" in this repository, they end up
-     * in the same {@code EventBus} and have the same behaviour as the ones emitted by aggregates.
+     * in the same {@code EventBus} and have the same behaviour as the ones emitted by the
+     * aggregates.
      */
     @Override
     public ImmutableSet<EventClass> getProducedEvents() {
