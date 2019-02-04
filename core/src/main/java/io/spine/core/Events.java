@@ -421,7 +421,10 @@ public final class Events {
                 case ORIGIN_NOT_SET:
                 default:
                     throw newIllegalArgumentException(
-                            "The provided event context has no origin set");
+                            "The provided event context (id: %s) has no origin defined.",
+                            eventContext.getEventId()
+                                        .getValue()
+                    );
             }
         }
         return actorContext;
