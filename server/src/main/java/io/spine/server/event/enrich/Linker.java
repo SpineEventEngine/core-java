@@ -139,8 +139,8 @@ final class Linker implements Logging {
 
         FieldDescriptor.Type basicType = null;
         Descriptor messageType = null;
+        boolean strict = refCount == 1;
         for (FieldRef ref : references) {
-            boolean strict = refCount == 1;
             FieldDescriptor field = findSourceField(ref, enrichmentField, strict);
             if (field == null) {
                 /* We don't know at this stage the type of the event.
