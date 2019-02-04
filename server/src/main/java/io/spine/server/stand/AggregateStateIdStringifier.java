@@ -55,6 +55,7 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
 
     /** Prevents direct instantiation. */
     private AggregateStateIdStringifier() {
+        super();
     }
 
     @Override
