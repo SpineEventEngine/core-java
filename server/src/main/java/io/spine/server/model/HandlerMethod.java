@@ -34,11 +34,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * Describes a method that accepts a message and optionally its context.
  *
- * @param <T> the type of the target object
- * @param <C> the type of the incoming message class
- * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
- * @param <P> the type of the produced messages
- * @param <R> the type of the method result object
+ * @param <T>
+ *         the type of the target object
+ * @param <C>
+ *         the type of the incoming message class
+ * @param <E>
+ *         the type of the {@link MessageEnvelope} wrapping the method arguments
+ * @param <P>
+ *         the type of the produced message class
+ * @param <R>
+ *         the type of the method result object
  */
 @Immutable
 public interface HandlerMethod<T,
