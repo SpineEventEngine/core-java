@@ -78,9 +78,9 @@ final class FieldEnrichment<S, C extends Message, T>
     }
 
     @Override
-    public T apply(S message, C context) {
+    public T apply(S sourceField, C context) {
         ensureActive();
-        T result = function.apply(message, context);
+        T result = function.apply(sourceField, context);
         return result;
     }
 }

@@ -18,20 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
-
 /**
- * Names of default field references used for enrichments.
+ * Test environment for {@link io.spine.server.event.enrich.LinkerTest}.
  */
-enum FieldReference {
 
-    /**
-     * The reference to the {@linkplain io.spine.core.Event#getContext() event context}
-     * used in the {@code by} field option.
-     */
-    context;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.event.given.linker;
 
-    boolean matches(String fieldName) {
-        return fieldName.contains(name());
-    }
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

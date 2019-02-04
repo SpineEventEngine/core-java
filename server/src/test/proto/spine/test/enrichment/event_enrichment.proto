@@ -48,8 +48,7 @@ message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
 
 // The enrichment for all the events declared in the "spine.test.event.user" package.
 //
-// See `EventEnrichmentsMapShould#contain_all_events_from_package_by_one_enrichment` test
-// for details.
+// See `EnrichmentMapTest` for details.
 //
 message UserPackageEventsEnrichment {
     option (enrichment_for) = "spine.test.event.user.*";
@@ -60,8 +59,7 @@ message UserPackageEventsEnrichment {
 // The enrichment for all the event declared in "spine.test.event.user.permission" package and
 // referencing user who is able to grant permissions.
 //
-// See `EventEnrichmentsMapShould#contain_only_events_with_target_field_if_declared_though_package`
-// test for details.
+// See `LinkerTest.failIfEnrichmentNotDeclared()`.
 //
 message GranterEventsEnrichment {
     option (enrichment_for) = "spine.test.event.user.permission.*";
@@ -72,8 +70,7 @@ message GranterEventsEnrichment {
 // The enrichment for all the events declared in the "spine.test.event.user" package and
 // for spine.test.event.user.UserLoggedInEvent.
 //
-// See `EventEnrichmentsMapShould#contain_events_from_package_and_standalone_event` test
-// for details.
+// See `EnrichmentMapTest` for details.
 //
 message SelectiveComplexEnrichment {
     option (enrichment_for) = "spine.test.event.user.permission.*,spine.test.event.user.UserLoggedInEvent";
@@ -84,7 +81,7 @@ message SelectiveComplexEnrichment {
 // The enrichment for all the events declared in the "spine.test.event.user.permission" and
 // "spine.test.event.user.sharing" packages.
 //
-// See `EventEnrichmentsMapShould#contain_events_from_multiple_packages` test for details.
+// See `EnrichmentMapTest` for details.
 //
 message MultiplePackageEnrichment {
     option (enrichment_for) = "spine.test.event.user.permission.*,spine.test.event.user.sharing.*";

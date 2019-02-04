@@ -24,11 +24,9 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.EventContext;
 import io.spine.server.event.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCreated;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +37,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EnrichmentFunction should")
@@ -69,22 +66,6 @@ class EnrichmentFunctionTest {
                 .setDefault(Class.class, Empty.class)
                 .setDefault(BiFunction.class, function)
                 .testAllPublicStaticMethods(FieldEnrichment.class);
-    }
-
-    @Test
-    @DisplayName("not accept same source and target class")
-    void rejectSameSourceAndTarget() {
-        BiFunction<StringValue, EventContext, StringValue> func =
-                new BiFunction<StringValue, EventContext, StringValue>() {
-                    @Override
-                    public @Nullable StringValue apply(@Nullable StringValue input,
-                                                       EventContext context) {
-                        return null;
-                    }
-                };
-
-        assertThrows(IllegalArgumentException.class,
-                     () -> FieldEnrichment.of(StringValue.class, StringValue.class, func));
     }
 
     @Test

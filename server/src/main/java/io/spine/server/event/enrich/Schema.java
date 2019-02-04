@@ -35,7 +35,7 @@ import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
 import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
 
 /**
- * Enrichment multimap provides an enrichment function for a Java class.
+ * Provides enrichment functions for a {@linkplain #get(Class) source message Java class}.
  */
 final class Schema {
 

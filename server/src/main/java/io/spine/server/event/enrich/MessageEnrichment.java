@@ -41,7 +41,7 @@ import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConve
  * @param <T> a type of the target enrichment message
  * @param <C> the type of the source message context
  */
-class MessageEnrichment<S extends Message, C extends MessageContext, T extends Message>
+abstract class MessageEnrichment<S extends Message, C extends MessageContext, T extends Message>
         extends EnrichmentFunction<S, C, T> {
 
     /** A parent instance holding this instance and its siblings. */
@@ -63,12 +63,9 @@ class MessageEnrichment<S extends Message, C extends MessageContext, T extends M
 
     @Override
     void activate() {
-        Class<? extends Message> sourceClass = sourceClass();
-        ReferenceValidator referenceValidator =
-                new ReferenceValidator(enricher, sourceClass, targetClass());
-        ValidationResult validationResult = referenceValidator.validate();
-        this.fieldFunctions = validationResult.functionMap();
-        this.fieldMap = validationResult.fieldMap();
+        FieldTransitions ft = FieldTransitions.create(enricher, sourceClass(), targetClass());
+        this.fieldFunctions = ft.functionMap();
+        this.fieldMap = ft.fieldMap();
         markActive();
     }
 
