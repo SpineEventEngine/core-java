@@ -51,7 +51,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     }
 
     @Override
-    public Set<EventClass> getHandleProducts() {
+    public Set<EventClass> getCommandOutput() {
         return commands.getProducedTypes();
     }
 

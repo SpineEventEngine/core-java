@@ -44,7 +44,7 @@ public interface CommandHandlingClass<P extends MessageClass<?>,
     /**
      * Obtains classes of all messages produced as a result of command handle.
      */
-    Set<P> getHandleProducts();
+    Set<P> getCommandOutput();
 
     /**
      * Obtains the handler method for the passed command class.

@@ -61,7 +61,7 @@ public abstract class AbstractCommandHandlingClass<C,
     }
 
     @Override
-    public Set<P> getHandleProducts() {
+    public Set<P> getCommandOutput() {
         return commands.getProducedTypes();
     }
 

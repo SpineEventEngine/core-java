@@ -83,7 +83,7 @@ public class AggregateClass<A extends Aggregate>
      * Obtains event types produced by this aggregate class.
      */
     public Set<EventClass> getProducedEvents() {
-        Set<EventClass> result = union(getHandleProducts(), getReactProducts());
+        Set<EventClass> result = union(getCommandOutput(), getReactionOutput());
         return result;
     }
 
@@ -122,8 +122,8 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<EventClass> getReactProducts() {
-        return delegate.getReactProducts();
+    public Set<EventClass> getReactionOutput() {
+        return delegate.getReactionOutput();
     }
 
     /**

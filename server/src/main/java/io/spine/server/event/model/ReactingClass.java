@@ -38,5 +38,5 @@ public interface ReactingClass extends EventReceiverClass {
     /**
      * Obtains the classes of events produced from the event react.
      */
-    Set<EventClass> getReactProducts();
+    Set<EventClass> getReactionOutput();
 }

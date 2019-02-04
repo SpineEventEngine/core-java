@@ -48,7 +48,7 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     }
 
     @Override
-    public Set<EventClass> getReactProducts() {
+    public Set<EventClass> getReactionOutput() {
         return getProducedTypes();
     }
 }

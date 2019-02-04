@@ -36,7 +36,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * in applications running under the Google App Engine.
  *
  * @see ScheduledExecutorService
- * @author Alexander Litus
  */
 public class ExecutorCommandScheduler extends CommandScheduler {
 
