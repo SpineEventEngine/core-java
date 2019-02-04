@@ -52,114 +52,114 @@ import static org.junit.jupiter.api.Assertions.fail;
 class ProducedTypeSetTest {
 
     @Nested
-    @DisplayName("collect a single produced message type")
-    class CollectProducedMessageType {
+    @DisplayName("be collected from a single produced message type")
+    class IncludeProducedMessageType {
 
         @Test
         @DisplayName("from command return type")
         void fromCommand() {
-            checkProduces("emitCommand", ImmutableSet.of(ModCreateProject.class));
+            checkCollectedFor("emitCommand", ImmutableSet.of(ModCreateProject.class));
         }
 
         @Test
         @DisplayName("from event return type")
         void fromEvent() {
-            checkProduces("emitEvent", ImmutableSet.of(ModProjectCreated.class));
+            checkCollectedFor("emitEvent", ImmutableSet.of(ModProjectCreated.class));
         }
 
         @Test
         @DisplayName("from `Optional` return type")
         void fromOptional() {
-            checkProduces("emitOptionalEvent", ImmutableSet.of(ModProjectStarted.class));
+            checkCollectedFor("emitOptionalEvent", ImmutableSet.of(ModProjectStarted.class));
         }
 
         @Test
         @DisplayName("from `Iterable` return type")
         void fromIterable() {
-            checkProduces("emitListOfCommands", ImmutableSet.of(ModStartProject.class));
+            checkCollectedFor("emitListOfCommands", ImmutableSet.of(ModStartProject.class));
         }
     }
 
     @Nested
-    @DisplayName("collect multiple produced types")
-    class CollectMultipleProducedTypes {
+    @DisplayName("be collected from multiple produced types")
+    class IncludeMultipleProducedTypes {
 
         @Test
         @DisplayName("from `Either` return type")
         void fromEither() {
-            checkProduces("emitEither",
-                          ImmutableSet.of(ModProjectCreated.class,
-                                          ModProjectAlreadyExists.class));
+            checkCollectedFor("emitEither",
+                              ImmutableSet.of(ModProjectCreated.class,
+                                              ModProjectAlreadyExists.class));
         }
 
         @Test
         @DisplayName("from `Tuple` return type")
         void fromTuple() {
-            checkProduces("emitPair",
-                          ImmutableSet.of(ModProjectCreated.class,
-                                          ModProjectOwnerAssigned.class,
-                                          ModCannotAssignOwnerToProject.class));
+            checkCollectedFor("emitPair",
+                              ImmutableSet.of(ModProjectCreated.class,
+                                              ModProjectOwnerAssigned.class,
+                                              ModCannotAssignOwnerToProject.class));
         }
 
         @Test
         @DisplayName("from type that mixes concrete type params and too broad type params")
         void fromMixedReturnType() {
-            checkProduces("emitEitherWithTooBroad",
-                          ImmutableSet.of(ModProjectOwnerAssigned.class,
-                                          ModCannotAssignOwnerToProject.class));
+            checkCollectedFor("emitEitherWithTooBroad",
+                              ImmutableSet.of(ModProjectOwnerAssigned.class,
+                                              ModCannotAssignOwnerToProject.class));
         }
     }
 
     @Nested
-    @DisplayName("collect empty produced messages list")
-    class CollectEmptyList {
+    @DisplayName("be an empty produced messages list")
+    class BeEmptyList {
 
         @Test
         @DisplayName("for `void` return type")
         void forVoid() {
-            checkProducesNothing("returnVoid");
+            checkIsEmptyFor("returnVoid");
         }
 
         @Test
         @DisplayName("for `Nothing` return type")
         void forNothing() {
-            checkProducesNothing("returnNothing");
+            checkIsEmptyFor("returnNothing");
         }
 
         @Test
         @DisplayName("for `Empty` return type")
         void forEmpty() {
-            checkProducesNothing("returnEmpty");
+            checkIsEmptyFor("returnEmpty");
         }
 
         @Test
         @DisplayName("for method returning too broad message type")
         void forTooBroadType() {
-            checkProducesNothing("returnTooBroadEvent");
+            checkIsEmptyFor("returnTooBroadEvent");
         }
 
         @Test
         @DisplayName("for method parameterized with too broad message type")
         void forTooBroadTypeParam() {
-            checkProducesNothing("returnTooBroadIterable");
+            checkIsEmptyFor("returnTooBroadIterable");
         }
 
-        private void checkProducesNothing(String methodName) {
-            checkProduces(methodName, ImmutableSet.of());
+        private void checkIsEmptyFor(String methodName) {
+            checkCollectedFor(methodName, ImmutableSet.of());
         }
     }
 
-    private static void checkProduces(String methodName,
-                                      Collection<Class<? extends Message>> messageTypes) {
+    private static void checkCollectedFor(String methodName,
+                                          Collection<Class<? extends Message>> expectedTypes) {
         try {
             Method method = MessageProducer.class.getMethod(methodName);
             ProducedTypeSet<?> producedTypes = ProducedTypeSet.collect(method);
-            Set<? extends MessageClass<?>> expectedTypes = messageTypes
+            Set<? extends MessageClass<?>> expectedClasses = expectedTypes
                     .stream()
                     .map(ProducedTypeSetTest::toCommandOrEventClass)
                     .collect(toSet());
             ImmutableSet<?> classes = producedTypes.typeSet();
-            assertThat(classes).containsExactlyElementsIn(expectedTypes);
+            assertThat(classes).containsExactlyElementsIn(expectedClasses);
         } catch (NoSuchMethodException e) {
             fail(e);
         }

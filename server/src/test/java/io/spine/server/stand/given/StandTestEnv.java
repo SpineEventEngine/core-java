@@ -112,8 +112,8 @@ public class StandTestEnv {
 
     public static class MemoizeNotifySubscriptionAction implements Stand.NotifySubscriptionAction {
 
-        private Any newEntityState = null;
-        private Event newEvent = null;
+        private @Nullable Any newEntityState = null;
+        private @Nullable Event newEvent = null;
 
         /**
          * {@inheritDoc}
@@ -121,7 +121,9 @@ public class StandTestEnv {
          * <p>Currently there is always exactly one {@code EntityStateUpdate} in a
          * {@code SubscriptionUpdate}.
          */
-        @SuppressWarnings("SwitchStatementWithoutDefaultBranch") // OK for this test class.
+        @SuppressWarnings({"SwitchStatementWithoutDefaultBranch",
+                "EnumSwitchStatementWhichMissesCases"})
+        // OK for this test class.
         @Override
         public void accept(SubscriptionUpdate update) {
             switch (update.getUpdateCase()) {

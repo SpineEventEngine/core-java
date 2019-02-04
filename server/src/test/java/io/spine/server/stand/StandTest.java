@@ -459,6 +459,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("upon update of aggregate")
         void uponUpdateOfAggregate() {
+            // Subscribe to changes of Customer aggregate.
             CustomerAggregateRepository repository = new CustomerAggregateRepository();
             Stand stand = createStand(repository);
             Topic allCustomers = requestFactory.topic()
@@ -468,6 +469,7 @@ class StandTest extends TenantAwareTest {
             subscribeAndActivate(stand, allCustomers, action);
             assertNull(action.newEntityState());
 
+            // Post a new entity state.
             Customer customer = fillSampleCustomers(1)
                     .iterator()
                     .next();
@@ -481,6 +483,7 @@ class StandTest extends TenantAwareTest {
 
             stand.post(entity, repository.lifecycleOf(customerId));
 
+            // Check notify action is called with the correct value.
             Any packedState = pack(customer);
             assertEquals(packedState, action.newEntityState());
         }
@@ -488,6 +491,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("upon update of projection")
         void uponUpdateOfProjection() {
+            // Subscribe to changes of StandTest projection.
             StandTestProjectionRepository repository = new StandTestProjectionRepository();
             Stand stand = createStand(repository);
             Topic allProjects = requestFactory.topic()
@@ -497,6 +501,7 @@ class StandTest extends TenantAwareTest {
             subscribeAndActivate(stand, allProjects, action);
             assertNull(action.newEntityState());
 
+            // Post a new entity state.
             Project project = fillSampleProjects(1)
                     .iterator()
                     .next();
@@ -509,6 +514,7 @@ class StandTest extends TenantAwareTest {
                     .build();
             stand.post(entity, repository.lifecycleOf(projectId));
 
+            // Check notify action is called with the correct value.
             Any packedState = pack(project);
             assertEquals(packedState, action.newEntityState());
         }
@@ -517,6 +523,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("upon event of observed type received")
         void uponEvent() {
+            // Subscribe to Customer aggregate updates.
             CustomerAggregateRepository repository = new CustomerAggregateRepository();
             Stand stand = createStand(repository);
             Topic topic = requestFactory.topic()
@@ -524,6 +531,7 @@ class StandTest extends TenantAwareTest {
             MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
             subscribeAndActivate(stand, topic, action);
 
+            // Send a command creating a new Customer and triggering a CustomerCreated event.
             Customer customer = fillSampleCustomers(1)
                     .iterator()
                     .next();
@@ -539,6 +547,7 @@ class StandTest extends TenantAwareTest {
             CustomerId id = repository.dispatch(cmd);
             assertEquals(customerId, id);
 
+            // Check the notify action is called with the correct event.
             Event event = action.newEvent();
             assertNotNull(event);
 

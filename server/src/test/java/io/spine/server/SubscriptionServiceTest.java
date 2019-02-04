@@ -163,16 +163,16 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("entity updates")
         void entityTopic() {
-            checkSubscriptionTo(Project.class);
+            checkSubscribesTo(Project.class);
         }
 
         @Test
         @DisplayName("events")
         void eventTopic() {
-            checkSubscriptionTo(AggProjectCreated.class);
+            checkSubscribesTo(AggProjectCreated.class);
         }
 
-        private void checkSubscriptionTo(Class<? extends Message> aClass) {
+        private void checkSubscribesTo(Class<? extends Message> aClass) {
             Target target = Targets.allOf(aClass);
             BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
 

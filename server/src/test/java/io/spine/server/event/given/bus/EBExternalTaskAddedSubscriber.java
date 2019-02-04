@@ -26,14 +26,13 @@ import io.spine.json.Json;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
 
-    private @Nullable EBTaskAdded receivedMessage;
+    private boolean receivedMessage;
 
     @Subscribe(external = true)
     void on(EBTaskAdded message, EventContext context) {
@@ -43,7 +42,7 @@ public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
                     message.getClass()
             ));
         }
-        receivedMessage = message;
+        receivedMessage = true;
     }
 
     /**
@@ -58,7 +57,7 @@ public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
         fail("Unexpected event " + Json.toJson(event));
     }
 
-    public @Nullable EBTaskAdded receivedExternalMessage() {
+    public boolean receivedExternalMessage() {
         return receivedMessage;
     }
 }

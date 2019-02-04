@@ -433,7 +433,7 @@ public class EventBusTest {
                 .build();
         Event event = eventFactory.createEvent(eventMessage);
         eventBus.post(event, StreamObservers.noOpObserver());
-        assertNull(subscriber.receivedExternalMessage());
+        assertFalse(subscriber.receivedExternalMessage());
     }
 
     /**
