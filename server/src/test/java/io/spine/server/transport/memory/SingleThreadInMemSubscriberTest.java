@@ -26,6 +26,7 @@ import io.spine.base.Identifier;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.transport.memory.given.SingleThreadInMemSubscriberTestEnv.ThrowingObserver;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,7 @@ class SingleThreadInMemSubscriberTest {
     @SuppressWarnings("unchecked") // OK for testing mocks.
     @Test
     @DisplayName("not halt after observer throws an error")
+    @MuteLogging
     void recoverFromObserverError() {
         SingleThreadInMemSubscriber subscriber =
                 new SingleThreadInMemSubscriber(ChannelId.getDefaultInstance());

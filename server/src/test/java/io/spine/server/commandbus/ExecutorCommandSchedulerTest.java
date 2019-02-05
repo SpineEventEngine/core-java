@@ -127,8 +127,8 @@ class ExecutorCommandSchedulerTest {
     }
 
     @Test
-    @MuteLogging
     @DisplayName("continue scheduling commands after error in `post`")
+    @MuteLogging
     void recoverFromPostFail() {
         doThrow(new IllegalStateException("Post failed"))
                 .when(commandBus)
