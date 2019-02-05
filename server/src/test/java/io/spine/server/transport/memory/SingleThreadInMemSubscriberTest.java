@@ -32,10 +32,17 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 @DisplayName("SingleThreadInMemSubscriber should")
 class SingleThreadInMemSubscriberTest {
+
+    /**
+     * Wait time to make sure the observer is called.
+     */
+    private static final int SYNC_TIMEOUT_MILLS = 500;
 
     @SuppressWarnings("unchecked") // OK for testing mocks.
     @Test
@@ -45,7 +52,7 @@ class SingleThreadInMemSubscriberTest {
         SingleThreadInMemSubscriber subscriber =
                 new SingleThreadInMemSubscriber(ChannelId.getDefaultInstance());
 
-        StreamObserver<ExternalMessage> throwingObserver = new ThrowingObserver();
+        StreamObserver<ExternalMessage> throwingObserver = spy(new ThrowingObserver());
         subscriber.addObserver(throwingObserver);
 
         Any id = Identifier.pack(newUuid());
@@ -54,12 +61,13 @@ class SingleThreadInMemSubscriberTest {
                 .setId(id)
                 .build();
         subscriber.onMessage(externalMessage);
+        verify(throwingObserver, timeout(SYNC_TIMEOUT_MILLS)).onNext(externalMessage);
 
         subscriber.removeObserver(throwingObserver);
 
         StreamObserver observerMock = mock(StreamObserver.class);
         subscriber.addObserver(observerMock);
         subscriber.onMessage(externalMessage);
-        verify(observerMock).onNext(externalMessage);
+        verify(observerMock, timeout(SYNC_TIMEOUT_MILLS)).onNext(externalMessage);
     }
 }
