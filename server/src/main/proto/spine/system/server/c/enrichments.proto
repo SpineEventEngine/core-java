@@ -45,5 +45,5 @@ message CommandEnrichment {
     // The purpose of using an enrichment in the `CommandScheduled` event is to avoid storing
     // an instance of `Command` in the event stream multiple times.
     //
-    spine.core.Command command = 1 [(by) = "*.id"];
+    spine.core.Command command = 1 [(by) = "id"];
 }
