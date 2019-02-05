@@ -42,8 +42,6 @@ import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;
 
 /**
  * A engine which handles commands and reacts on domestic and external events.
- *
- * @author Alexander Yevsyukov
  */
 public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder> {
 
