@@ -62,7 +62,7 @@ class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging 
     private @Nullable Void logError(Throwable throwable, ExternalMessage message) {
         Object id = Identifier.unpack(message.getId());
         _error(throwable,
-               "Error dispatching an external message {} with ID {} to observers: {}",
+               "Error dispatching an external message `{}` with ID `{}`: {}",
                message.getOriginalMessage().getTypeUrl(),
                id,
                throwable.getLocalizedMessage());
