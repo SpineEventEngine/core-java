@@ -70,6 +70,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@MuteLogging
 @DisplayName("ModelVerifier should")
 class ModelVerifierTest {
 
@@ -176,7 +177,6 @@ class ModelVerifierTest {
     }
 
     @Test
-    @MuteLogging
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
         String invalidClassname = "non.existing.class.Name";
