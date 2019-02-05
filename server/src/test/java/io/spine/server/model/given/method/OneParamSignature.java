@@ -52,7 +52,7 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
 
     @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return ImmutableSet.of(Object.class);
+        return ImmutableSet.of(void.class);
     }
 
     @Override

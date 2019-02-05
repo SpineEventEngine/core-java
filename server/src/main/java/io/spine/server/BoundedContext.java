@@ -203,6 +203,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * <p>Checks whether there is a default state for entity type.
      *
+     * <p>Re-registers own {@code Stand} as event dispatcher to make sure it receives repository's
+     * produced events.
+     *
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
      * @param <E>        the type of entities or aggregates
@@ -213,6 +216,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         repository.setBoundedContext(this);
         guard.register(repository);
         repository.onRegistered();
+        registerEventDispatcher(getStand());
     }
 
     /**

@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
@@ -194,6 +195,12 @@ public abstract class ProcessManagerRepository<I,
      */
     protected final CommandRouting<I> getCommandRouting() {
         return commandRouting;
+    }
+
+    @Override
+    public ImmutableSet<EventClass> getProducedEvents() {
+        Set<EventClass> eventClasses = processManagerClass().getProducedEvents();
+        return ImmutableSet.copyOf(eventClasses);
     }
 
     /**

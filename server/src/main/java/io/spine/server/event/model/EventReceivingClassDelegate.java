@@ -37,18 +37,22 @@ import java.util.Set;
  * Helper object for storing information about methods and events of an
  * {@linkplain EventReceiverClass event receiving class}.
  *
- * @param <T> the type of target objects that handle messages
- * @param <M> the type of handler method objects
- * @author Alexander Yevsyukov
+ * @param <T>
+ *         the type of target objects that handle messages
+ * @param <P>
+ *         the type of message classes produced by handler methods
+ * @param <M>
+ *         the type of handler method objects
  */
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
-                                         M extends HandlerMethod<?, EventClass, ?, ?>>
+                                         P extends MessageClass<?>,
+                                         M extends HandlerMethod<?, EventClass, ?, P, ?>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
     
-    private final MessageHandlerMap<EventClass, M> events;
+    private final MessageHandlerMap<EventClass, P, M> events;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
 
@@ -83,6 +87,13 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     }
 
     /**
+     * Obtains the classes of messages produced by handler methods of this class.
+     */
+    public Set<P> getProducedTypes() {
+        return events.getProducedTypes();
+    }
+
+    /**
      * Obtains the method which handles the passed event class.
      *
      * @throws IllegalStateException if there is such method in the class
@@ -99,5 +110,4 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     public M getMethod(EventClass eventClass, MessageClass originClass) {
         return events.getSingleMethod(eventClass, originClass);
     }
-
 }

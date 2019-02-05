@@ -35,11 +35,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A wrapper for a method which {@linkplain React reacts} on events.
  *
- * @author Alexander Yevsyukov
  * @see React
  */
 public final class EventReactorMethod
-        extends EventHandlerMethod<EventReactor, ReactorMethodResult> {
+        extends EventHandlerMethod<EventReactor, EventClass, ReactorMethodResult> {
 
     EventReactorMethod(Method method, ParameterSpec<EventEnvelope> params) {
         super(method, params);

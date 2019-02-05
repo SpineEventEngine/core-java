@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import io.spine.base.EventMessage;
+import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.model.CommandingMethod.Result;
@@ -32,16 +33,15 @@ import java.lang.reflect.Method;
 
 /**
  * A method which <em>may</em> generate one or more command messages in response to an event.
- *
- * @author Alexander Yevsyukov
  */
 public final class CommandReactionMethod
         extends AbstractHandlerMethod<EventReceiver,
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
+                                      CommandClass,
                                       Result>
-        implements CommandingMethod<EventReceiver, EventClass, EventEnvelope, Result> {
+        implements CommandingMethod<EventReceiver, EventClass, EventEnvelope> {
 
     CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
         super(method, signature);

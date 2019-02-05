@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.Sets.SetView;
 import io.spine.core.CommandClass;
 import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
@@ -31,19 +32,20 @@ import io.spine.server.event.model.EventReceivingClassDelegate;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.union;
 
 /**
  * Provides information on message handling for a class of {@link Commander}s.
  *
- * @param <C> the type of commanders
- * @author Alexander Yevsyukov
+ * @param <C>
+ *         the type of commanders
  */
 public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandSubstituteMethod>
+        extends AbstractCommandHandlingClass<C, CommandClass, CommandSubstituteMethod>
         implements EventReceiverClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<C, CommandReactionMethod> delegate;
+    private final EventReceivingClassDelegate<C, CommandClass, CommandReactionMethod> delegate;
 
     private CommanderClass(Class<C> cls) {
         super(cls, new CommandSubstituteSignature());
@@ -87,5 +89,11 @@ public final class CommanderClass<C extends Commander>
 
     public boolean producesCommandsOn(EventClass eventClass) {
         return delegate.contains(eventClass);
+    }
+
+    @Override
+    public Set<CommandClass> getProducedCommands() {
+        SetView<CommandClass> result = union(getCommandOutput(), delegate.getProducedTypes());
+        return result;
     }
 }

@@ -57,7 +57,7 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
 
     @Override
     protected boolean isSupported(Query request) {
-        return targetSupported(request.getTarget());
+        return typeRegistryContains(request.getTarget());
     }
 
     @Override

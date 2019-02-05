@@ -38,7 +38,6 @@ import static java.lang.String.format;
  * Provides type information on an aggregate part class.
  *
  * @param <A> the type of aggregate parts.
- * @author Alexander Yevsyukov
  */
 public final class AggregatePartClass<A extends AggregatePart> extends AggregateClass<A> {
 

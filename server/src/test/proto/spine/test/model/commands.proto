@@ -17,20 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.command.model;
+package spine.test.model;
 
-import io.spine.core.CommandClass;
+import "spine/options.proto";
 
-import java.util.Set;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.test.model";
+option java_multiple_files = true;
+option java_outer_classname = "CommandsProto";
 
-/**
- * An interface common for model classes of objects that create commands.
- */
-public interface CommandingClass {
+message ModCreateProject {
+    string id = 1;
+}
 
-    /**
-     * Obtains the classes of commands produced by this commanding class.
-     */
-    Set<CommandClass> getProducedCommands();
+message ModStartProject {
+    string id = 1;
 }

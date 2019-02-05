@@ -25,6 +25,8 @@ import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityStateUpdateVBuilder;
+import io.spine.client.EntityUpdates;
+import io.spine.client.EntityUpdatesVBuilder;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionUpdateVBuilder;
@@ -42,33 +44,35 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Creates an {@link EntityStateUpdate} and includes it into the returned subscription
-     * update instance.
+     * Creates a subscription update with a single {@link EntityStateUpdate} based on the
+     * information in the event.
      */
     @Override
     protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
         EntityStateChanged theEvent = (EntityStateChanged) event.getMessage();
-        EntityStateUpdate stateUpdate = toStateUpdate(theEvent);
+        EntityUpdates updates = extractEntityUpdates(theEvent);
         SubscriptionUpdate result = SubscriptionUpdateVBuilder
                 .newBuilder()
                 .setSubscription(subscription())
                 .setResponse(Responses.ok())
-                .addEntityStateUpdates(stateUpdate)
+                .setEntityUpdates(updates)
                 .build();
         return result;
     }
 
-    private static EntityStateUpdate toStateUpdate(EntityStateChanged event) {
+    private static EntityUpdates extractEntityUpdates(EntityStateChanged event) {
         EntityId entityId = event.getId()
                                  .getEntityId();
         Any packedEntityId = Identifier.pack(entityId);
         Any packedEntityState = event.getNewState();
-        EntityStateUpdate result = EntityStateUpdateVBuilder
+        EntityStateUpdate stateUpdate = EntityStateUpdateVBuilder
                 .newBuilder()
                 .setId(packedEntityId)
                 .setState(packedEntityState)
+                .build();
+        EntityUpdates result = EntityUpdatesVBuilder
+                .newBuilder()
+                .addUpdates(stateUpdate)
                 .build();
         return result;
     }

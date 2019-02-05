@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
@@ -33,12 +34,12 @@ import io.spine.type.MessageClass;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.union;
 
 /**
  * Provides message handling information on an aggregate class.
  *
  * @param <A> the type of aggregates
- * @author Alexander Yevsyukov
  */
 public class AggregateClass<A extends Aggregate>
         extends CommandHandlingEntityClass<A>
@@ -46,7 +47,7 @@ public class AggregateClass<A extends Aggregate>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventApplier> stateEvents;
+    private final MessageHandlerMap<EventClass, EmptyClass, EventApplier> stateEvents;
     private final ImmutableSet<EventClass> importableEvents;
     private final ReactorClassDelegate<A> delegate;
 
@@ -76,6 +77,14 @@ public class AggregateClass<A extends Aggregate>
     @Override
     public final Set<EventClass> getExternalEventClasses() {
         return delegate.getExternalEventClasses();
+    }
+
+    /**
+     * Obtains event types produced by this aggregate class.
+     */
+    public Set<EventClass> getProducedEvents() {
+        Set<EventClass> result = union(getCommandOutput(), getReactionOutput());
+        return result;
     }
 
     /**
@@ -110,6 +119,11 @@ public class AggregateClass<A extends Aggregate>
     @Override
     public final EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
         return delegate.getReactor(eventClass, commandClass);
+    }
+
+    @Override
+    public Set<EventClass> getReactionOutput() {
+        return delegate.getReactionOutput();
     }
 
     /**

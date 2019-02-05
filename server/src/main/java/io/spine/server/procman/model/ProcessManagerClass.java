@@ -92,9 +92,27 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return result;
     }
 
+    /**
+     * Obtains event classes produced by this process manager class.
+     */
+    public Set<EventClass> getProducedEvents() {
+        SetView<EventClass> result = union(getCommandOutput(), getReactionOutput());
+        return result;
+    }
+
     @Override
     public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
         return reactorDelegate.getReactor(eventClass, originClass);
+    }
+
+    @Override
+    public Set<EventClass> getReactionOutput() {
+        return reactorDelegate.getReactionOutput();
+    }
+
+    @Override
+    public Set<CommandClass> getProducedCommands() {
+        return commanderDelegate.getProducedCommands();
     }
 
     public CommandSubstituteMethod getCommander(CommandClass commandClass) {

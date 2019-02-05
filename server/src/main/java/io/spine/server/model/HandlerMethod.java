@@ -34,16 +34,23 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * Describes a method that accepts a message and optionally its context.
  *
- * @param <T> the type of the target object
- * @param <C> the type of the incoming message class
- * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
- * @param <R> the type of the method result object
+ * @param <T>
+ *         the type of the target object
+ * @param <C>
+ *         the type of the incoming message class
+ * @param <E>
+ *         the type of the {@link MessageEnvelope} wrapping the method arguments
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <R>
+ *         the type of the method result object
  */
 @Immutable
 public interface HandlerMethod<T,
                                C extends MessageClass,
                                E extends MessageEnvelope<?, ?, ?>,
-                               R extends MethodResult> {
+                               P extends MessageClass<?>,
+                               R extends MethodResult<?>> {
 
     /**
      * Obtains the type of the incoming message class.
@@ -69,6 +76,13 @@ public interface HandlerMethod<T,
      * Obtains the handling method.
      */
     Method getRawMethod();
+
+    /**
+     * Retrieves the message classes produced by this handler method.
+     *
+     * @see MethodResult#toMessages(Object).
+     */
+    Set<P> getProducedMessages();
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.

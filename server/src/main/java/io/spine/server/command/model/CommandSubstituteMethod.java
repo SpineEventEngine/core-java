@@ -30,15 +30,12 @@ import java.lang.reflect.Method;
 
 /**
  * A method that produces one or more command messages in response to an incoming command.
- *
- * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<CommandReceiver, Result>
-        implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope, Result> {
+        extends CommandAcceptingMethod<CommandReceiver, CommandClass, Result>
+        implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope> {
 
-    CommandSubstituteMethod(Method method,
-                            ParameterSpec<CommandEnvelope> paramSpec) {
+    CommandSubstituteMethod(Method method, ParameterSpec<CommandEnvelope> paramSpec) {
         super(method, paramSpec);
     }
 

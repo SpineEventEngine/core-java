@@ -21,6 +21,7 @@ package io.spine.server.stand;
 
 import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
+import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.TopicValidationError;
 import io.spine.type.TypeUrl;
@@ -34,8 +35,11 @@ import static java.lang.String.format;
  */
 final class TopicValidator extends AbstractTargetValidator<Topic> {
 
-    TopicValidator(TypeRegistry typeRegistry) {
+    private final EventRegistry eventRegistry;
+
+    TopicValidator(TypeRegistry typeRegistry, EventRegistry eventRegistry) {
         super(typeRegistry);
+        this.eventRegistry = eventRegistry;
     }
 
     @Override
@@ -57,7 +61,8 @@ final class TopicValidator extends AbstractTargetValidator<Topic> {
 
     @Override
     protected boolean isSupported(Topic request) {
-        return targetSupported(request.getTarget());
+        Target target = request.getTarget();
+        return typeRegistryContains(target) || eventRegistryContains(target);
     }
 
     @Override
@@ -71,5 +76,11 @@ final class TopicValidator extends AbstractTargetValidator<Topic> {
     protected String errorMessage(Topic request) {
         TypeUrl targetType = getTypeOf(request.getTarget());
         return format("The topic target type is not supported: %s", targetType.getTypeName());
+    }
+
+    private boolean eventRegistryContains(Target target) {
+        TypeUrl type = getTypeOf(target);
+        boolean result = eventRegistry.contains(type);
+        return result;
     }
 }

@@ -21,7 +21,6 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
@@ -36,6 +35,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
@@ -137,7 +137,6 @@ public class SubscriptionService
             return this;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
         public ImmutableList<BoundedContext> getBoundedContexts() {
             return ImmutableList.copyOf(boundedContexts);
         }
@@ -168,10 +167,11 @@ public class SubscriptionService
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
             Stand stand = boundedContext.getStand();
-            ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
-            for (TypeUrl availableType : exposedTypes) {
-                mapBuilder.put(availableType, boundedContext);
-            }
+            Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, boundedContext);
+            stand.getExposedTypes()
+                 .forEach(putIntoMap);
+            stand.getExposedEventTypes()
+                 .forEach(putIntoMap);
         }
     }
 }

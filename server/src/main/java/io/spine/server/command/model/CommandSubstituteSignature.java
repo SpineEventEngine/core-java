@@ -61,6 +61,7 @@ public class CommandSubstituteSignature
      * the methods which first parameter {@linkplain MethodParams#isFirstParamCommand(Method)
      * is NOT} a {@code Command} message.
      */
+    @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
     protected boolean skipMethod(Method method) {
         boolean parentResult = !super.skipMethod(method);

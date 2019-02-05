@@ -24,15 +24,16 @@ import io.spine.core.EventClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.type.MessageClass;
 
+import java.util.Set;
+
 /**
  * The helper class for holding messaging information on behalf of another model class.
  *
- * @param <T> the type of the raw class for obtaining messaging information
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
+ * @param <T>
+ *         the type of the raw class for obtaining messaging information
  */
 public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventReactorMethod>
+        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
         implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
@@ -44,5 +45,10 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     @Override
     public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
         return getMethod(eventClass, originClass);
+    }
+
+    @Override
+    public Set<EventClass> getReactionOutput() {
+        return getProducedTypes();
     }
 }

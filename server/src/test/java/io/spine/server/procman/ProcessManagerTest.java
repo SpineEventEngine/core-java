@@ -26,8 +26,10 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
@@ -40,6 +42,7 @@ import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerDispatcher;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
+import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.test.shared.AnyProcess;
@@ -53,6 +56,9 @@ import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartIteration;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationCompleted;
+import io.spine.test.procman.event.PmIterationPlanned;
+import io.spine.test.procman.event.PmIterationStarted;
+import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
@@ -78,8 +84,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.pm.GivenMessages.addTask;
@@ -93,6 +101,7 @@ import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
 import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testdata.Sample.messageOfType;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -503,6 +512,41 @@ class ProcessManagerTest {
                     .assertThat(emittedEvents(PmQuizStarted.class))
                     .assertThat(emittedEvent(Nothing.class, none()))
                     .close();
+        }
+    }
+
+    @Nested
+    @DisplayName("in its class, expose")
+    class ExposeInClass {
+
+        @Test
+        @DisplayName("produced commands")
+        void producedCommands() {
+            ProcessManagerClass<TestProcessManager> pmClass =
+                    asProcessManagerClass(TestProcessManager.class);
+            Set<CommandClass> commands = pmClass.getProducedCommands();
+            assertThat(commands).containsExactlyElementsIn(CommandClass.setOf(
+                    PmAddTask.class,
+                    PmReviewBacklog.class,
+                    PmScheduleRetrospective.class,
+                    PmPlanIteration.class,
+                    PmStartIteration.class
+            ));
+        }
+
+        @Test
+        @DisplayName("produced events")
+        void producedEvents() {
+            ProcessManagerClass<TestProcessManager> pmClass =
+                    asProcessManagerClass(TestProcessManager.class);
+            Set<EventClass> events = pmClass.getProducedEvents();
+            assertThat(events).containsExactlyElementsIn(EventClass.setOf(
+                    PmProjectCreated.class,
+                    PmTaskAdded.class,
+                    PmNotificationSent.class,
+                    PmIterationPlanned.class,
+                    PmIterationStarted.class
+            ));
         }
     }
 }

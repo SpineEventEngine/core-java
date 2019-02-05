@@ -21,6 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets.SetView;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
@@ -48,6 +50,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -254,6 +257,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     public Set<EventClass> getImportableEventClasses() {
         return aggregateClass().getImportableEventClasses();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns events emitted by the aggregate class as well as importable events.
+     *
+     * <p>Although technically imported events are not "produced" in this repository, they end up
+     * in the same {@code EventBus} and have the same behaviour as the ones emitted by the
+     * aggregates.
+     */
+    @Override
+    public ImmutableSet<EventClass> getProducedEvents() {
+        SetView<EventClass> eventClasses =
+                union(aggregateClass().getProducedEvents(), getImportableEventClasses());
+        return ImmutableSet.copyOf(eventClasses);
     }
 
     /**

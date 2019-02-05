@@ -18,19 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.stand;
 
-import io.spine.core.CommandClass;
-
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.EventClass;
+import io.spine.server.entity.Repository;
+import io.spine.type.TypeUrl;
 
 /**
- * An interface common for model classes of objects that create commands.
+ * Manages the event types exposed by the associated instance of {@link Stand}.
  */
-public interface CommandingClass {
+interface EventRegistry extends AutoCloseable {
 
     /**
-     * Obtains the classes of commands produced by this commanding class.
+     * Registers the repository as an event producer in this registry.
      */
-    Set<CommandClass> getProducedCommands();
+    void register(Repository<?, ?> repository);
+
+    /**
+     * Retrieves all event {@linkplain TypeUrl types} stored in the registry.
+     */
+    ImmutableSet<TypeUrl> typeSet();
+
+    /**
+     * Checks if this registry instance contains the specified event type.
+     */
+    boolean contains(TypeUrl type);
+
+    /**
+     * Retrieves all stored event types as {@link EventClass} instances.
+     */
+    ImmutableSet<EventClass> eventClasses();
 }

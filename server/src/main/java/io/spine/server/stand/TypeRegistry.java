@@ -53,7 +53,8 @@ interface TypeRegistry extends AutoCloseable {
      * {@linkplain TypeUrl type}, if it {@linkplain #register(Repository) has been registered}
      * previously.
      *
-     * @param type the type of {@code Entity} to obtain a repository for
+     * @param type
+     *         the type of {@code Entity} to obtain a repository for
      * @return {@code RecordBasedRepository} managing the objects of the given {@code type},
      *         or {@code Optional.empty()} if no such repository has been registered
      */

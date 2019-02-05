@@ -24,7 +24,6 @@ import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventDispatcher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
@@ -35,20 +34,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.function.Supplier;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent",
         "DuplicateStringLiteralInspection" /* Common test display names. */})
@@ -190,21 +183,6 @@ class BoundedContextBuilderTest {
             assertNotNull(boundedContext.getCommandBus());
             assertNotNull(boundedContext.getEventBus());
         }
-    }
-
-    @Test
-    @DisplayName("automatically register Stand as event dispatcher")
-    void addStandAsEventDispatcher() {
-        List<EventDispatcher<?>> dispatchers = newArrayList();
-
-        EventBus.Builder busBuilderMock = mock(EventBus.Builder.class);
-        EventBus busMock = mock(EventBus.class);
-        doAnswer(invocation -> dispatchers.add(invocation.getArgument(0))).when(busMock)
-                                                                          .register(any());
-        when(busBuilderMock.build()).thenReturn(busMock);
-        BoundedContext boundedContext = builder.setEventBus(busBuilderMock)
-                                               .build();
-        assertThat(dispatchers).contains(boundedContext.getStand());
     }
 
     @Test

@@ -30,6 +30,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -40,10 +41,15 @@ import static io.spine.server.model.Handlers.createId;
 /**
  * An abstract base for methods handling events.
  *
- * @author Dmytro Dashenkov
+ * @param <T>
+ *         the type of the target object
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <R>
+ *         the type of the method invocation result
  */
-public abstract class EventHandlerMethod<T, R extends MethodResult>
-        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R> {
+public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends MethodResult<?>>
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, P, R> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.

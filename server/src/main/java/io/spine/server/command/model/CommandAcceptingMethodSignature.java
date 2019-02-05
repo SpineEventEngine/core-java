@@ -43,7 +43,7 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
  * @param <H> the type of {@link HandlerMethod} which signature this is
  */
 abstract class CommandAcceptingMethodSignature
-        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
+        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
     CommandAcceptingMethodSignature(Class<? extends Annotation> annotation) {

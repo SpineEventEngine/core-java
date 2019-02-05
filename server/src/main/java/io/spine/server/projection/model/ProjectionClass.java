@@ -20,6 +20,7 @@
 
 package io.spine.server.projection.model;
 
+import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.model.EventReceiverClass;
@@ -38,15 +39,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Provides type information on a projection class.
  *
- * @param <P> the type of projections
- * @author Alexander Yevsyukov
+ * @param <P>
+ *         the type of projections
  */
 public final class ProjectionClass<P extends Projection>
         extends EntityClass<P>
         implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<P, SubscriberMethod> delegate;
+    private final EventReceivingClassDelegate<P, EmptyClass, SubscriberMethod> delegate;
 
     private ProjectionClass(Class<P> cls) {
         super(cls);

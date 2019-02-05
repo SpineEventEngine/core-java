@@ -24,23 +24,30 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.core.CommandClass;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
 /**
  * Abstract base for classes providing message handling information of classes that handle commands.
  *
- * @param <C> the type of a command handling class
- * @author Alexander Yevsyukov
+ * @param <C>
+ *         the type of a command handling class
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <H>
+ *         the type of methods performing the command handle
  */
 @Immutable(containerOf = "H")
-public abstract class AbstractCommandHandlingClass<C, H extends CommandAcceptingMethod<?, ?>>
+public abstract class AbstractCommandHandlingClass<C,
+                                                   P extends MessageClass<?>,
+                                                   H extends CommandAcceptingMethod<?, P, ?>>
         extends ModelClass<C>
         implements CommandHandlingClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, H> commands;
+    private final MessageHandlerMap<CommandClass, P, H> commands;
 
     AbstractCommandHandlingClass(Class<? extends C> cls,
                                  CommandAcceptingMethodSignature<H> signature) {
@@ -51,6 +58,11 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
     @Override
     public Set<CommandClass> getCommands() {
         return commands.getMessageClasses();
+    }
+
+    @Override
+    public Set<P> getCommandOutput() {
+        return commands.getProducedTypes();
     }
 
     /** Obtains the handler method for the passed command class. */

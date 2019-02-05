@@ -62,9 +62,10 @@ public enum MatchCriterion {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Class<?> returnType = method.getReturnType();
-            boolean conforms = signature.getValidReturnTypes()
-                                        .stream()
-                                        .anyMatch(type -> type.isAssignableFrom(returnType));
+            boolean conforms = signature
+                    .getValidReturnTypes()
+                    .stream()
+                    .anyMatch(type -> type.isAssignableFrom(returnType));
             if (!conforms) {
                 SignatureMismatch mismatch =
                         create(this,
