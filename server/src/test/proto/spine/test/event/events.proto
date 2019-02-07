@@ -104,7 +104,7 @@ message ProjectStarred {
 message SeparateEnrichmentForMultipleProjectEvents {
     option (enrichment_for) = "ProjectStarred,ProjectCompleted";
 
-    string project_name = 1 [(by) = "*.project_id"];
+    string project_name = 1 [(by) = "project_id"];
 }
 
 

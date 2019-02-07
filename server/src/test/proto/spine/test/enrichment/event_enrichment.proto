@@ -36,14 +36,18 @@ message ProjectCreatedEnrichmentAnotherPackage {
     string project_name = 1 [(by) = "project_id"];
 }
 
+//TODO:2019-02-07:alexander.yevsyukov: Remove this type. It used to have type reference in (by) only.
 message ProjectCreatedEnrichmentAnotherPackageFqn {
-    string project_name = 1 [(by) = "spine.test.event.ProjectCreated.project_id"];
+    option (enrichment_for) = "spine.test.event.ProjectCreated";
+
+    string project_name = 1 [(by) = "project_id"];
 }
 
+//TODO:2019-02-07:alexander.yevsyukov: Remove this type. It used to combine types from `enrichment_for` and `by`.
 message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
     option (enrichment_for) = "spine.test.event.ProjectCreated";
 
-    string project_name = 1 [(by) = "spine.test.event.ProjectCreated.project_id"];
+    string project_name = 1 [(by) = "project_id"];
 }
 
 // The enrichment for all the events declared in the "spine.test.event.user" package.
@@ -53,7 +57,7 @@ message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
 message UserPackageEventsEnrichment {
     option (enrichment_for) = "spine.test.event.user.*";
 
-    spine.time.ZoneOffset time_zone = 1 [(by) = "*.user_uid"];
+    spine.time.ZoneOffset time_zone = 1 [(by) = "user_uid"];
 }
 
 // The enrichment for all the event declared in "spine.test.event.user.permission" package and
@@ -64,7 +68,7 @@ message UserPackageEventsEnrichment {
 message GranterEventsEnrichment {
     option (enrichment_for) = "spine.test.event.user.permission.*";
 
-    spine.people.PersonName granter_name = 1 [(by) = "*.granter_uid"];
+    spine.people.PersonName granter_name = 1 [(by) = "granter_uid"];
 }
 
 // The enrichment for all the events declared in the "spine.test.event.user" package and
@@ -73,9 +77,11 @@ message GranterEventsEnrichment {
 // See `EnrichmentMapTest` for details.
 //
 message SelectiveComplexEnrichment {
-    option (enrichment_for) = "spine.test.event.user.permission.*,spine.test.event.user.UserLoggedInEvent";
+    option (enrichment_for) =
+           "spine.test.event.user.permission.*,"
+           "spine.test.event.user.UserLoggedInEvent";
 
-    int32 security_warn = 1 [(by) = "*.user_uid"];
+    int32 security_warn = 1 [(by) = "user_uid"];
 }
 
 // The enrichment for all the events declared in the "spine.test.event.user.permission" and
@@ -84,33 +90,51 @@ message SelectiveComplexEnrichment {
 // See `EnrichmentMapTest` for details.
 //
 message MultiplePackageEnrichment {
-    option (enrichment_for) = "spine.test.event.user.permission.*,spine.test.event.user.sharing.*";
+    option (enrichment_for) =
+           "spine.test.event.user.permission.*,"
+           "spine.test.event.user.sharing.*";
 
-    int32 sharing_type = 1[(by) = "*.user_uid"];
+    int32 sharing_type = 1[(by) = "user_uid"];
 }
 
 message EnrichmentBoundWithFieldsWithDifferentNames {
-    option (enrichment_for) = "spine.test.event.user.sharing.SharingRequestApproved,spine.test.event.user.permission.PermissionGrantedEvent";
+    option (enrichment_for) =
+           "spine.test.event.user.sharing.SharingRequestApproved,"
+           "spine.test.event.user.permission.PermissionGrantedEvent";
 
-    int32 user_google_uid = 1 [(by) = "SharingRequestApproved.second_user_uid|PermissionGrantedEvent.user_uid"];
+    int32 user_google_uid = 1 [(by) = "second_user_uid | user_uid"];
 }
 
+//TODO:2019-02-07:alexander.yevsyukov: Rename this type. It no longer does what it's named after.
 message EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames {
-    int32 user_google_uid = 1 [(by) = "spine.test.event.user.sharing.SharingRequestApproved.second_user_uid|spine.test.event.user.permission.PermissionGrantedEvent.user_uid"];
+    option (enrichment_for) =
+        "spine.test.event.user.sharing.SharingRequestApproved,"
+        "spine.test.event.user.permission.PermissionGrantedEvent";
+    int32 user_google_uid = 1
+        [(by) = "second_user_uid|user_uid"];
 }
 
 message EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes {
-    option (enrichment_for) = "spine.test.event.user.sharing.SharingRequestApproved,spine.test.event.user.permission.*";
+    option (enrichment_for) =
+           "spine.test.event.user.sharing.SharingRequestApproved,"
+           "spine.test.event.user.permission.*";
 
-    int32 user_google_uid = 1 [(by) = "SharingRequestApproved.second_user_uid|*.user_uid"];
+    int32 user_google_uid = 1 [(by) = "SharingRequestApproved.second_user_uid|user_uid"];
 }
 
 message EnrichmentBoundWithMultipleFieldsWithDifferentNames {
-    option (enrichment_for) = "spine.test.event.user.sharing.SharingRequestApproved,spine.test.event.user.permission.PermissionGrantedEvent,spine.test.event.user.UserDeletedEvent";
+    option (enrichment_for) =
+            "spine.test.event.user.sharing.SharingRequestApproved,"
+            "spine.test.event.user.permission.PermissionGrantedEvent,"
+            "spine.test.event.user.UserDeletedEvent";
 
-    int32 user_google_uid = 1 [(by) = "SharingRequestApproved.second_user_uid|PermissionGrantedEvent.user_uid|UserDeletedEvent.deleted_uid"];
+    int32 user_google_uid = 1 [(by) = "second_user_uid | user_uid | deleted_uid"];
 }
 
 message EnrichmentBoundWithFieldsSeparatedWithSpaces {
-    string user_google_uid = 1 [(by) = "  spine.test.event.TaskAdded.project_id   | spine.test.event.user.permission.PermissionGrantedEvent.user_uid "];
+    option (enrichment_for) =
+        "spine.test.event.TaskAdded,"
+        "spine.test.event.user.permission.PermissionGrantedEvent";
+
+    string user_google_uid = 1 [(by) = "  project_id   | user_uid "];
 }
