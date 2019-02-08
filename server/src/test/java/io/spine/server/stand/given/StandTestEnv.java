@@ -122,7 +122,8 @@ public class StandTestEnv {
          * {@code SubscriptionUpdate}.
          */
         @SuppressWarnings({"SwitchStatementWithoutDefaultBranch",
-                "EnumSwitchStatementWhichMissesCases"})
+                "EnumSwitchStatementWhichMissesCases",
+                "MissingCasesInEnumSwitch"})
         // OK for this test class.
         @Override
         public void accept(SubscriptionUpdate update) {
