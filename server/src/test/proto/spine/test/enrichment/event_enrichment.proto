@@ -36,20 +36,6 @@ message ProjectCreatedEnrichmentAnotherPackage {
     string project_name = 1 [(by) = "project_id"];
 }
 
-//TODO:2019-02-07:alexander.yevsyukov: Remove this type. It used to have type reference in (by) only.
-message ProjectCreatedEnrichmentAnotherPackageFqn {
-    option (enrichment_for) = "spine.test.event.ProjectCreated";
-
-    string project_name = 1 [(by) = "project_id"];
-}
-
-//TODO:2019-02-07:alexander.yevsyukov: Remove this type. It used to combine types from `enrichment_for` and `by`.
-message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
-    option (enrichment_for) = "spine.test.event.ProjectCreated";
-
-    string project_name = 1 [(by) = "project_id"];
-}
-
 // The enrichment for all the events declared in the "spine.test.event.user" package.
 //
 // See `EnrichmentMapTest` for details.
@@ -103,15 +89,6 @@ message EnrichmentBoundWithFieldsWithDifferentNames {
            "spine.test.event.user.permission.PermissionGrantedEvent";
 
     int32 user_google_uid = 1 [(by) = "second_user_uid | user_uid"];
-}
-
-//TODO:2019-02-07:alexander.yevsyukov: Rename this type. It no longer does what it's named after.
-message EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames {
-    option (enrichment_for) =
-        "spine.test.event.user.sharing.SharingRequestApproved,"
-        "spine.test.event.user.permission.PermissionGrantedEvent";
-    int32 user_google_uid = 1
-        [(by) = "second_user_uid|user_uid"];
 }
 
 message EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes {
