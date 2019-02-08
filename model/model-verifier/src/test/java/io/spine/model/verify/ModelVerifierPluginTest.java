@@ -22,6 +22,7 @@ package io.spine.model.verify;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
@@ -73,6 +74,7 @@ class ModelVerifierPluginTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("halt build on duplicate command handling methods")
     void rejectDuplicateHandlingMethods() {
         BuildResult result = newProjectWithJava(
