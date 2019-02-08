@@ -32,41 +32,38 @@ import "spine/core/user_id.proto";
 import "spine/test/event/project.proto";
 
 message ProjectCreatedEnrichment {
-    option (enrichment_for) = "spine.test.event.ProjectCreated";
+    option (enrichment_for) = "ProjectCreated";
 
     string project_name = 1 [(by) = "project_id"];
     core.UserId owner_id = 2 [(by) = "project_id"];
 }
 
 message ProjectStartedEnrichment {
-    option (enrichment_for) = "spine.test.event.ProjectStarted";
+    option (enrichment_for) = "ProjectStarted";
 
     string project_name = 1 [(by) = "project_id", (required) = true];
 }
 
 message ProjectCreatedSeparateEnrichment {
-    option (enrichment_for) = "spine.test.event.ProjectCreated";
+    option (enrichment_for) = "ProjectCreated";
 
     string project_name = 1 [(by) = "project_id"];
 }
 
 message ProjectCreatedDynamicallyConfiguredEnrichment {
-    option (enrichment_for) = "spine.test.event.ProjectCreated";
+    option (enrichment_for) = "ProjectCreated";
 
     int32 max_member_count = 1 [(by) = "project_id"];
 }
 
 message EnrichmentForSeveralEvents {
-    option (enrichment_for) =
-        "spine.test.event.ProjectCreated,"
-        "spine.test.event.ProjectStarted,"
-        "spine.test.event.TaskAdded";
+    option (enrichment_for) = "ProjectCreated, ProjectStarted, TaskAdded";
 
     string project_name = 1 [(by) = "project_id"];
 }
 
 message EnrichmentByContextFields {
-    option (enrichment_for) = "spine.test.event.ProjectCreated";
+    option (enrichment_for) = "ProjectCreated";
 
     string by_timestamp = 1 [(by) = "context.timestamp"];
 
@@ -80,9 +77,7 @@ message EnrichmentByContextFields {
 }
 
 message SeparateEnrichmentForMultipleProjectEvents {
-    option (enrichment_for) =
-           "spine.test.event.ProjectStarred,"
-           "spine.test.event.ProjectCompleted";
+    option (enrichment_for) = "ProjectStarred, ProjectCompleted";
 
     string project_name = 1 [(by) = "project_id"];
 }
