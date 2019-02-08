@@ -24,8 +24,10 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.test.event.EnrichmentByContextFields;
 import io.spine.test.event.EnrichmentForSeveralEvents;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectCreatedEnrichment;
 import io.spine.test.event.ProjectCreatedSeparateEnrichment;
 import io.spine.test.event.ProjectStarted;
+import io.spine.test.event.ProjectStartedEnrichment;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.enrichment.EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
@@ -73,7 +75,7 @@ class EnrichmentMapTest {
         @Test
         @DisplayName("ProjectCreatedEnrichment")
         void byProjectCreatedEnrichment() {
-            _assert(ProjectCreated.Enrichment.class)
+            _assert(ProjectCreatedEnrichment.class)
                     .enrichesOnly(ProjectCreated.class);
         }
 
@@ -108,7 +110,7 @@ class EnrichmentMapTest {
         @Test
         @DisplayName("ProjectStartedEnrichment")
         void byProjectStartedEnrichment() {
-            _assert(ProjectStarted.Enrichment.class)
+            _assert(ProjectStartedEnrichment.class)
                     .enrichesOnly(ProjectStarted.class);
         }
 

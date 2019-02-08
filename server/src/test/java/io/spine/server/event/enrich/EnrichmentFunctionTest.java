@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.server.event.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectCreatedEnrichment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,19 +43,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EnrichmentFunction should")
 class EnrichmentFunctionTest {
 
-    private BiFunction<ProjectCreated, EventContext, ProjectCreated.Enrichment> function;
-    private FieldEnrichment<ProjectCreated, EventContext, ProjectCreated.Enrichment> fieldEnrichment;
+    private BiFunction<ProjectCreated, EventContext, ProjectCreatedEnrichment> function;
+    private FieldEnrichment<ProjectCreated, EventContext, ProjectCreatedEnrichment> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
         this.function = (event, context) ->
-                ProjectCreated.Enrichment
+                ProjectCreatedEnrichment
                         .newBuilder()
                         .setProjectName(event.getProjectId()
                                              .getId())
                         .build();
         this.fieldEnrichment = FieldEnrichment.of(ProjectCreated.class,
-                                                  ProjectCreated.Enrichment.class,
+                                                  ProjectCreatedEnrichment.class,
                                                   function);
     }
 
@@ -77,14 +78,14 @@ class EnrichmentFunctionTest {
     @Test
     @DisplayName("return target class")
     void returnTarget() {
-        assertEquals(ProjectCreated.Enrichment.class, fieldEnrichment.targetClass());
+        assertEquals(ProjectCreatedEnrichment.class, fieldEnrichment.targetClass());
     }
 
     @Test
     @DisplayName("create custom instances")
     void createCustomInstances() {
         assertEquals(fieldEnrichment, FieldEnrichment.of(ProjectCreated.class,
-                                                         ProjectCreated.Enrichment.class,
+                                                         ProjectCreatedEnrichment.class,
                                                          function));
     }
 
@@ -93,7 +94,7 @@ class EnrichmentFunctionTest {
     void applyEnrichment() {
         ProjectCreated event = GivenEventMessage.projectCreated();
 
-        ProjectCreated.Enrichment enriched =
+        ProjectCreatedEnrichment enriched =
                 fieldEnrichment.apply(event, EventContext.getDefaultInstance());
 
         assertNotNull(enriched);
@@ -112,15 +113,15 @@ class EnrichmentFunctionTest {
     void haveToString() {
         String str = fieldEnrichment.toString();
         assertTrue(str.contains(ProjectCreated.class.getName()));
-        assertTrue(str.contains(ProjectCreated.Enrichment.class.getName()));
+        assertTrue(str.contains(ProjectCreatedEnrichment.class.getName()));
     }
 
     @Test
     @DisplayName("support equality")
     void haveSmartEquals() {
-        FieldEnrichment<ProjectCreated, EventContext, ProjectCreated.Enrichment> anotherEnricher =
+        FieldEnrichment<ProjectCreated, EventContext, ProjectCreatedEnrichment> anotherEnricher =
                 FieldEnrichment.of(ProjectCreated.class,
-                                   ProjectCreated.Enrichment.class,
+                                   ProjectCreatedEnrichment.class,
                                    function);
         new EqualsTester().addEqualityGroup(fieldEnrichment, anotherEnricher)
                           .testEquals();

@@ -20,6 +20,9 @@
 
 package io.spine.server.event.enrich;
 
+import com.google.common.truth.BooleanSubject;
+import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -33,10 +36,12 @@ import io.spine.server.event.given.EventEnricherTestEnv.GivenEvent;
 import io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectCreatedEnrichment;
 import io.spine.test.event.ProjectCreatedSeparateEnrichment;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectStarred;
 import io.spine.test.event.ProjectStarted;
+import io.spine.test.event.ProjectStartedEnrichment;
 import io.spine.test.event.SeparateEnrichmentForMultipleProjectEvents;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.junit.jupiter.api.AfterEach;
@@ -47,6 +52,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.core.given.GivenEvent.arbitrary;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
@@ -60,10 +66,9 @@ import static io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage
 import static io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage.projectStarred;
 import static io.spine.server.event.given.EventEnricherTestEnv.createEvent;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Enricher should")
 public class EnricherTest {
@@ -182,16 +187,28 @@ public class EnricherTest {
             EventEnvelope sharingRequestApproved =
                     EventEnvelope.of(GivenEvent.sharingRequestApproved());
 
-            assertTrue(enricher.canBeEnriched(permissionGranted));
-            assertTrue(enricher.canBeEnriched(permissionRevoked));
-            assertTrue(enricher.canBeEnriched(sharingRequestApproved));
+            assertCanBeEnriched(permissionGranted);
+            assertCanBeEnriched(permissionRevoked);
+            assertCanBeEnriched(sharingRequestApproved);
         }
+    }
+
+    void assertCanBeEnriched(EventEnvelope e) {
+        assertThatCanBeEnriched(e).isTrue();
+    }
+
+    void assertCannotBeEnriched(EventEnvelope e) {
+        assertThatCanBeEnriched(e).isFalse();
+    }
+
+    private BooleanSubject assertThatCanBeEnriched(EventEnvelope e) {
+        return assertThat(enricher.canBeEnriched(e));
     }
 
     @Test
     @DisplayName("state event can be enriched if its enrichment is registered")
     void stateEventEnrichable() {
-        assertTrue(enricher.canBeEnriched(EventEnvelope.of(projectStarted())));
+        assertCanBeEnriched(EventEnvelope.of(projectStarted()));
     }
 
     @Nested
@@ -203,7 +220,7 @@ public class EnricherTest {
         void withoutEnrichment() {
             EventEnvelope dummyEvent = EventEnvelope.of(arbitrary());
 
-            assertFalse(enricher.canBeEnriched(dummyEvent));
+            assertCannotBeEnriched(dummyEvent);
         }
 
         @Test
@@ -223,7 +240,7 @@ public class EnricherTest {
                          .build()
             );
 
-            assertFalse(enricher.canBeEnriched(notEnrichableEvent));
+            assertCannotBeEnriched(notEnrichableEvent);
         }
     }
 
@@ -233,12 +250,12 @@ public class EnricherTest {
      * <p>This class is a part of assert checking, and as such it is not placed under the test
      * {@linkplain io.spine.server.event.given.EventEnricherTestEnv environment class} .
      */
-    @SuppressWarnings({"OptionalGetWithoutIsPresent", "InstanceVariableNamingConvention", "unused"})
+    @SuppressWarnings("InstanceVariableNamingConvention")
     private static class TestEventSubscriber extends AbstractEventSubscriber {
 
-        private ProjectCreated.Enrichment projectCreatedEnrichment;
+        private ProjectCreatedEnrichment projectCreatedEnrichment;
         private ProjectCreatedSeparateEnrichment projectCreatedSeparateEnrichment;
-        private ProjectStarted.Enrichment projectStartedEnrichment;
+        private ProjectStartedEnrichment projectStartedEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectCompletedEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectStarredEnrichment;
         private ProjectCreatedEnrichmentAnotherPackage projectCreatedAnotherPackEnrichment;
@@ -246,29 +263,39 @@ public class EnricherTest {
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             this.projectCreatedEnrichment =
-                    getEnrichment(ProjectCreated.Enrichment.class, context).get();
+                    get(ProjectCreatedEnrichment.class, event, context);
             this.projectCreatedSeparateEnrichment =
-                    getEnrichment(ProjectCreatedSeparateEnrichment.class, context).get();
+                    get(ProjectCreatedSeparateEnrichment.class, event, context);
             this.projectCreatedAnotherPackEnrichment =
-                    getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
+                    get(ProjectCreatedEnrichmentAnotherPackage.class, event, context);
         }
 
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
-            this.projectStartedEnrichment =
-                    getEnrichment(ProjectStarted.Enrichment.class, context).get();
+            this.projectStartedEnrichment = get(ProjectStartedEnrichment.class, event, context);
         }
 
         @Subscribe
         public void on(ProjectCompleted event, EventContext context) {
             this.projectCompletedEnrichment =
-                    getEnrichment(SeparateEnrichmentForMultipleProjectEvents.class, context).get();
+                    get(SeparateEnrichmentForMultipleProjectEvents.class, event, context);
         }
 
         @Subscribe
         public void on(ProjectStarred event, EventContext context) {
             this.projectStarredEnrichment =
-                    getEnrichment(SeparateEnrichmentForMultipleProjectEvents.class, context).get();
+                    get(SeparateEnrichmentForMultipleProjectEvents.class, event, context);
+        }
+
+        private static <E extends Message>
+        E get(Class<E> enrichmentClass, EventMessage e, EventContext ctx) {
+            return getEnrichment(enrichmentClass, ctx).orElseThrow(
+                    () -> newIllegalStateException(
+                            "Unable to obtain enrichment of class `%s`" +
+                                    " from the event of class `%s`",
+                            enrichmentClass.getCanonicalName(), e.getClass().getCanonicalName()
+                    )
+            );
         }
     }
 }
