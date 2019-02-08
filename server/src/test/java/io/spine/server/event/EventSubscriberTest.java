@@ -22,6 +22,7 @@ package io.spine.server.event;
 
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.logging.Logging;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
 import io.spine.test.event.FailRequested;
 import io.spine.testing.logging.MuteLogging;
@@ -29,7 +30,12 @@ import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.event.SubstituteLoggingEvent;
+import org.slf4j.helpers.SubstituteLogger;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,8 +56,8 @@ class EventSubscriberTest {
     }
 
     @Test
-    @DisplayName("catch exceptions caused by methods")
     @MuteLogging
+    @DisplayName("catch exceptions caused by methods")
     void catchMethodExceptions() {
         // Create event which should fail.
         EventEnvelope eventEnvelope = createEvent(false);
@@ -78,7 +84,6 @@ class EventSubscriberTest {
         assertNull(sub.getLastException());
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("have log")
     void haveLog() {

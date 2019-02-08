@@ -55,6 +55,7 @@ import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.PmDispatcher;
@@ -106,6 +107,7 @@ class CommandHandlerMethodTest {
     }
 
     @Nested
+    @MuteLogging
     @DisplayName("invoke handler method which returns")
     class InvokeHandlerMethod {
 
@@ -201,6 +203,7 @@ class CommandHandlerMethodTest {
     }
 
     @Nested
+    @MuteLogging
     @DisplayName("consider handler valid with")
     class ConsiderHandlerValidWith {
 

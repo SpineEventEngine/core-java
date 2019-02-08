@@ -206,6 +206,7 @@ class SubscriptionServiceTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("not subscribe to a system event")
     void notSubscribeToSystemEvent() {
         BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
@@ -323,11 +324,11 @@ class SubscriptionServiceTest {
     }
 
     @Nested
-    @MuteLogging
     @DisplayName("handle exceptions and call observer error callback for")
     class HandleExceptionsOf {
 
         @Test
+        @MuteLogging
         @DisplayName("subscription process")
         void subscription() {
             BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
@@ -345,6 +346,7 @@ class SubscriptionServiceTest {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("activation process")
         void activation() {
             BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
@@ -362,6 +364,7 @@ class SubscriptionServiceTest {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("cancellation process")
         void cancellation() {
             BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());

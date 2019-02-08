@@ -70,6 +70,7 @@ import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
@@ -774,6 +775,7 @@ class StandTest extends TenantAwareTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("handle mistakes in query silently")
     void handleMistakesInQuery() {
         StandTestProjectionRepository repository = new StandTestProjectionRepository();

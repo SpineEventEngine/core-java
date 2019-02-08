@@ -30,10 +30,7 @@ import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.TaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class EventSubscriberTestEnv {
+public final class EventSubscriberTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private EventSubscriberTestEnv() {
@@ -65,7 +62,7 @@ public class EventSubscriberTestEnv {
         }
 
         @Subscribe(external = true)
-        void on(TaskAdded message) {
+        public void on(TaskAdded message) {
             // Do nothing. Just expose the method.
         }
 

@@ -83,21 +83,21 @@ public class IgTestAggregate
     }
 
     @Apply
-    private void event(AggProjectCreated event) {
+    void event(AggProjectCreated event) {
         getBuilder()
                 .setId(event.getProjectId())
                 .setStatus(Status.CREATED);
     }
 
     @Apply
-    private void event(AggProjectStarted event) {
+    void event(AggProjectStarted event) {
         getBuilder()
                 .setId(event.getProjectId())
                 .setStatus(Status.STARTED);
     }
 
     @Apply
-    private void event(AggProjectArchived event) {
+    void event(AggProjectArchived event) {
         setArchived(true);
     }
 }
