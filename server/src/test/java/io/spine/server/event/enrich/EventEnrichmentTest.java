@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.server.event.given.EventMessageEnricherTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectCreatedEnrichment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @DisplayName("MessageEnrichment should")
 class EventEnrichmentTest {
 
-    private EventEnrichment<ProjectCreated, ProjectCreated.Enrichment> enrichment;
+    private EventEnrichment<ProjectCreated, ProjectCreatedEnrichment> enrichment;
 
     @BeforeEach
     void setUp() {
@@ -44,7 +45,7 @@ class EventEnrichmentTest {
         this.enrichment = EventEnrichment.create(
                 enricher,
                 ProjectCreated.class,
-                ProjectCreated.Enrichment.class);
+                ProjectCreatedEnrichment.class);
     }
 
     @Test

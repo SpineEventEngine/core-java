@@ -37,4 +37,3 @@ message InvalidProjectName {
 message MissingOwner {
     ProjectId project_id = 1;
 }
-

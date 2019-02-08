@@ -35,62 +35,16 @@ import "spine/test/event/team.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;
-
     EvTeamId team_id = 2;
-
-    message Enrichment {
-        string project_name = 1 [(by) = "project_id"];
-
-        core.UserId owner_id = 2 [(by) = "project_id"];
-    }
-}
-
-message ProjectCreatedSeparateEnrichment {
-    option (enrichment_for) = "ProjectCreated";
-
-    string project_name = 1 [(by) = "project_id"];
-}
-
-message ProjectCreatedDynamicallyConfiguredEnrichment {
-    option (enrichment_for) = "ProjectCreated";
-
-    int32 max_member_count = 1 [(by) = "project_id"];
 }
 
 message TaskAdded {
     ProjectId project_id = 1;
-
     Task task = 2;
 }
 
 message ProjectStarted {
     ProjectId project_id = 1;
-
-    message Enrichment {
-        string project_name = 1 [(by) = "project_id", (required) = true];
-    }
-}
-
-message EnrichmentForSeveralEvents {
-    option (enrichment_for) = "ProjectCreated,"
-                              "ProjectStarted,"
-                              "TaskAdded";
-
-    string project_name = 1 [(by) = "project_id"];
-}
-
-message EnrichmentByContextFields {
-    option (enrichment_for) = "ProjectCreated";
-
-    string by_timestamp = 1 [(by) = "context.timestamp"];
-
-    string by_command_context = 2 [(by) = "context.command_context"];
-
-    string by_producer_id = 3 [(by) = "context.producer_id"];
-
-    string by_version = 4 [(by) = "context.version"];
-
-    string by_event_field = 5 [(by) = "project_id"];
 }
 
 message ProjectCompleted {
@@ -101,45 +55,28 @@ message ProjectStarred {
     ProjectId project_id = 1;
 }
 
-message SeparateEnrichmentForMultipleProjectEvents {
-    option (enrichment_for) = "ProjectStarred,ProjectCompleted";
-
-    string project_name = 1 [(by) = "*.project_id"];
-}
-
-
 message EvTeamProjectAdded {
-
     EvTeamId team_id = 1;
-
     ProjectId project_id = 2;
 }
 
 message EvTeamCreated {
-
     EvTeamId team_id = 1;
-
     repeated EvMember member = 2;
 }
 
 message EvTeamMemberAdded {
-
     EvTeamId team_id = 1;
-
     EvMember member = 2;
 }
 
 message EvTeamMemberInvited {
-
     EvTeamId team_id = 1;
-
     spine.net.EmailAddress email = 2;
 }
 
 message EvInvitationAccepted {
-
     spine.core.UserId user_id = 1;
-
     EvMemberInvitation invitation = 2;
 }
 
@@ -148,20 +85,15 @@ message EBProjectCreated {
 }
 
 message EBProjectArchived {
-
     ProjectId project_id = 1;
-
     string reason = 2 [(required) = true];
 }
 
 message EBTaskAdded {
-
     ProjectId project_id = 1;
-
     Task task = 2 [(required) = true];
 }
 
 message ProjectFinished {
-
     ProjectId project_id = 1;
 }

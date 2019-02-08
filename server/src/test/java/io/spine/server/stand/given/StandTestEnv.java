@@ -121,10 +121,6 @@ public class StandTestEnv {
          * <p>Currently there is always exactly one {@code EntityStateUpdate} in a
          * {@code SubscriptionUpdate}.
          */
-        @SuppressWarnings({"SwitchStatementWithoutDefaultBranch",
-                "EnumSwitchStatementWhichMissesCases",
-                "MissingCasesInEnumSwitch"})
-        // OK for this test class.
         @Override
         public void accept(SubscriptionUpdate update) {
             switch (update.getUpdateCase()) {
@@ -138,6 +134,9 @@ public class StandTestEnv {
                     newEvent = update.getEventUpdates()
                                      .getEventsList()
                                      .get(0);
+                    break;
+                default:
+                    // Do nothing.
             }
         }
 
