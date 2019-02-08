@@ -26,15 +26,9 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
 option java_package = "io.spine.test.rejection";
-// Keep all the rejections under the same outer class called `ProjectRejections`.
 
-import "spine/test/rejection/project.proto";
+message ProjectInfo {
+    option (enrichment_for) = "spine.test.rejection.InvalidProjectName";
 
-message InvalidProjectName {
-    ProjectId project_id = 1;
+    string project_name = 1 [(by) = "spine.test.rejection.InvalidProjectName.project_id"];
 }
-
-message MissingOwner {
-    ProjectId project_id = 1;
-}
-
