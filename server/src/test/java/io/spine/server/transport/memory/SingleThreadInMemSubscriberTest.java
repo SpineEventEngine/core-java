@@ -46,8 +46,8 @@ class SingleThreadInMemSubscriberTest {
 
     @SuppressWarnings("unchecked") // OK for testing mocks.
     @Test
-    @DisplayName("not halt after observer throws an error")
     @MuteLogging
+    @DisplayName("not halt after observer throws an error")
     void recoverFromObserverError() {
         SingleThreadInMemSubscriber subscriber =
                 new SingleThreadInMemSubscriber(ChannelId.getDefaultInstance());
