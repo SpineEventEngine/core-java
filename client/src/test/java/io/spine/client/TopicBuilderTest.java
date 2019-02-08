@@ -28,8 +28,10 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.test.queries.ProjectId;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -55,21 +57,20 @@ import static io.spine.client.Filters.ge;
 import static io.spine.client.Filters.gt;
 import static io.spine.client.Filters.le;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
-import static io.spine.client.given.TopicBuilderTestEnv.TEST_ENTITY_TYPE;
-import static io.spine.client.given.TopicBuilderTestEnv.TEST_ENTITY_TYPE_URL;
-import static io.spine.client.given.TopicBuilderTestEnv.findByName;
-import static io.spine.client.given.TopicBuilderTestEnv.newMessageId;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -79,7 +80,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings("DuplicateStringLiteralInspection")
 class TopicBuilderTest {
 
+    private static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
+    private static final TypeUrl TEST_ENTITY_TYPE_URL = TypeUrl.of(TEST_ENTITY_TYPE);
     private TopicFactory factory;
+
+    static TestEntityId newMessageId() {
+        return TestEntityId.newBuilder()
+                           .setValue(current().nextInt(-1000, 1000))
+                           .build();
+    }
+
+    static Filter findByName(Iterable<Filter> filters, String name) {
+        for (Filter filter : filters) {
+            if (filter.getFieldPath()
+                      .getFieldName(0)
+                      .equals(name)) {
+                return filter;
+            }
+        }
+        fail(format("No Filter found for %s. field", name));
+        // avoid returning `null`
+        throw new RuntimeException("never happens unless JUnit is broken");
+    }
 
     @BeforeEach
     void createFactory() {
