@@ -34,6 +34,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -145,30 +146,47 @@ public final class Field {
                 Class<?> enumClass = typeUrl.getJavaClass();
                 return enumClass;
             case MESSAGE:
-                if (field.isMapField()) {
-                    /*
-                       Even though, we obtain the name of the type of the field is `MESSAGE` and
-                       there is a type name obtained via `field.messageType`, the name of the type
-                       is synthetic (and is composed using camel case for the field name with the
-                       "Entry" suffix. There is no Java class that corresponds to this name.
-                       Because of this, `KnownTypes` do not have the entry for this type.
-                     */
-                    throw newIllegalStateException(
-                            "Unable to obtain Java class for a map field `%s`." +
-                            " The descriptor of the field type (`%s`) is synthetic," +
-                            " and does not have a corresponding generated Java class.",
-                            field.getFullName(),
-                            field.getMessageType()
-                                 .getFullName()
-                    );
-                }
-                typeUrl = TypeUrl.from(field.getMessageType());
-                Class<? extends Message> msgClass = typeUrl.getMessageClass();
-                return msgClass;
+                return messageFieldClass(field);
             default:
                 throw newIllegalArgumentException("Unknown field type discovered: %s",
                                                    field.getFullName());
         }
+    }
+
+    /**
+     * Obtains a class of a message field.
+     *
+     * @throws IllegalStateException
+     *         if the passed field is a map
+     * @implNote This method cannot obtain a class for a map field because of the following.
+     *         Map fields are implemented using synthetic descriptors. Even if a field type is
+     *         {@link FieldDescriptor.Type#MESSAGE)}, it may mean that it represents a map or
+     *         a repeatable field.
+     *
+     *         <p>For maps, the full descriptor name obtained via
+     *         {@link FieldDescriptor#getMessageType()}, is synthetic and is composed using camel
+     *         case for the field name with the {@code "Entry"} suffix.
+     *
+     *         <p>There is no generated Java class that corresponds to this type name.
+     *         Because of this, {@link io.spine.type.KnownTypes} do not have the entry for this
+     *         type, and we cannot speak about a message type for this field.
+     */
+    private static Class<?> messageFieldClass(FieldDescriptor field) {
+        checkArgument(field.getType() == FieldDescriptor.Type.MESSAGE);
+        TypeUrl typeUrl;
+        if (field.isMapField()) {
+            throw newIllegalStateException(
+                    "Unable to obtain Java class for a map field `%s`." +
+                    " The descriptor of the field type (`%s`) is synthetic," +
+                    " and does not have a corresponding generated Java class.",
+                    field.getFullName(),
+                    field.getMessageType()
+                         .getFullName()
+            );
+        }
+        typeUrl = TypeUrl.from(field.getMessageType());
+        Class<? extends Message> msgClass = typeUrl.getMessageClass();
+        return msgClass;
     }
 
     /**
