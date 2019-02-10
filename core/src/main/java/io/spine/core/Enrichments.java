@@ -76,7 +76,7 @@ public final class Enrichments {
         return getFromContainer(enrichmentClass, container.get());
     }
 
-    private static <E extends Message>
+    static <E extends Message>
     Optional<E> getFromContainer(Class<E> enrichmentClass, Enrichment.Container enrichments) {
         String typeName = TypeName.of(enrichmentClass)
                                   .value();
