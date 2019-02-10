@@ -106,16 +106,6 @@ abstract class EnrichmentFunction<S, C extends Message, T> {
      */
     abstract boolean isActive();
 
-    /**
-     * A helper predicate to filter the active functions only.
-     */
-    static Predicate<EnrichmentFunction<?, ?, ?>> activeOnly() {
-        return input -> {
-            checkNotNull(input);
-            return input.isActive();
-        };
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(sourceClass, targetClass);
@@ -161,9 +151,10 @@ abstract class EnrichmentFunction<S, C extends Message, T> {
     static Optional<EnrichmentFunction<?, ?, ?>>
     firstThat(Iterable<EnrichmentFunction<?, ?, ?>> functions,
               Predicate<? super EnrichmentFunction<?, ?, ?>> predicate) {
-        Optional<EnrichmentFunction<?, ?, ?>> optional = Streams.stream(functions)
-                                                                .filter(predicate)
-                                                                .findFirst();
+        Optional<EnrichmentFunction<?, ?, ?>> optional =
+                Streams.stream(functions)
+                       .filter(predicate)
+                       .findFirst();
         return optional;
     }
 }

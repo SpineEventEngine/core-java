@@ -31,7 +31,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.toMultimap;
-import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
 import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
 
 /**
@@ -61,7 +60,7 @@ final class Schema {
         LinkedListMultimap<? extends Class<?>, ? extends EnrichmentFunction<?, ?, ?>> compacted =
                 multimap.values()
                         .stream()
-                        .filter(activeOnly())
+                        .filter(EnrichmentFunction::isActive)
                         .collect(toMultimap(EnrichmentFunction::sourceClass,
                                             e -> e,
                                             LinkedListMultimap::create));
