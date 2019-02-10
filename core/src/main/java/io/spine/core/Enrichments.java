@@ -36,7 +36,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
 public final class Enrichments {
 
     /** Prevents instantiation of this utility class. */
-    private Enrichments() {}
+    private Enrichments() {
+    }
 
     /**
      * Returns all enrichments from the context.
@@ -44,7 +45,7 @@ public final class Enrichments {
      * @param context a context to get enrichments from
      * @return an optional of enrichments
      */
-    public static Optional<Enrichment.Container> getEnrichments(EventContext context) {
+    static Optional<Enrichment.Container> getEnrichments(EventContext context) {
         checkNotNull(context);
         Enrichment enrichment = context.getEnrichment();
         return getContainer(enrichment);

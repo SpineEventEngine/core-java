@@ -41,7 +41,6 @@ import java.util.Map;
  *    CommandContext context = builder.build();
  *    Long value = attr.getValue(context);
  * }</pre>
- * @author Alexander Yevsyukov
  */
 public abstract class CommandAttribute<T>
         extends Attribute<T, CommandContext, CommandContext.Builder> {
