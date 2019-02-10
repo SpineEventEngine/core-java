@@ -70,7 +70,7 @@ public final class Enrichments {
         return result;
     }
 
-    private static Optional<Container> container(Enrichment enrichment) {
+    static Optional<Container> container(Enrichment enrichment) {
         if (enrichment.getModeCase() == Enrichment.ModeCase.CONTAINER) {
             return Optional.of(enrichment.getContainer());
         }
@@ -100,7 +100,7 @@ public final class Enrichments {
         return result;
     }
 
-    private static <E extends EnrichmentMessage>
+    static <E extends EnrichmentMessage>
     Optional<E> find(Class<E> enrichmentClass, Container enrichments) {
         String typeName = TypeName.of(enrichmentClass)
                                   .value();

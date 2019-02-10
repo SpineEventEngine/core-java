@@ -21,7 +21,7 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.truth.BooleanSubject;
-import com.google.protobuf.Message;
+import io.spine.base.EnrichmentMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
@@ -287,7 +287,7 @@ public class EnricherTest {
                     get(SeparateEnrichmentForMultipleProjectEvents.class, event, context);
         }
 
-        private static <E extends Message>
+        private static <E extends EnrichmentMessage>
         E get(Class<E> enrichmentClass, EventMessage e, EventContext ctx) {
             return getEnrichment(enrichmentClass, ctx).orElseThrow(
                     () -> newIllegalStateException(
