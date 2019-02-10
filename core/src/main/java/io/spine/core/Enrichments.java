@@ -23,6 +23,7 @@ package io.spine.core;
 import com.google.protobuf.Any;
 import io.spine.base.EnrichmentMessage;
 import io.spine.core.Enrichment.Container;
+import io.spine.core.Enrichment.ModeCase;
 import io.spine.type.TypeName;
 
 import java.util.Map;
@@ -45,9 +46,7 @@ public final class Enrichments {
      *
      * @param context a context to get enrichments from
      * @return an optional of enrichments
-     * @deprecated
-     * To verify having enrichments at all, please use {@link #hasEnrichments(EventContext)}.
-     * To obtain an enrichment please use {@link io.spine.base.EnrichmentContainer}.
+     * @deprecated please use {@link EventContext#find(Class)}
      */
     @Deprecated
     public static Optional<Container> getEnrichments(EventContext context) {
@@ -57,21 +56,13 @@ public final class Enrichments {
     }
 
     /**
-     * Verifies if the passed event context has at least one enrichment.
+     * Obtains the container of enrichments from the passed enclosing instance,
+     * if it its {@link ModeCase} allows for having enrichments.
+     *
+     * <p>Otherwise, empty {@code Optional} is returned.
      */
-    public static boolean hasEnrichments(EventContext context) {
-        Optional<Container> optional = container(context.getEnrichment());
-        if (!optional.isPresent()) {
-            return false;
-        }
-        Container container = optional.get();
-        boolean result = !container.getItemsMap()
-                                   .isEmpty();
-        return result;
-    }
-
     static Optional<Container> container(Enrichment enrichment) {
-        if (enrichment.getModeCase() == Enrichment.ModeCase.CONTAINER) {
+        if (enrichment.getModeCase() == ModeCase.CONTAINER) {
             return Optional.of(enrichment.getContainer());
         }
         return Optional.empty();
@@ -95,6 +86,9 @@ public final class Enrichments {
         return result;
     }
 
+    /**
+     * Obtains enrichment from the passed container.
+     */
     static <E extends EnrichmentMessage>
     Optional<E> find(Class<E> enrichmentClass, Container enrichments) {
         String typeName = TypeName.of(enrichmentClass)

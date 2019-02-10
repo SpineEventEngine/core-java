@@ -39,9 +39,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.Enrichments.hasEnrichments;
+import static io.spine.core.Enrichments.container;
 import static io.spine.core.given.GivenEvent.context;
 import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -169,5 +171,19 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
         );
         assertEnrichment(context, EtProjectInfo.class)
               .isEmpty();
+    }
+
+    /**
+     * Verifies if the passed event context has at least one enrichment.
+     */
+    private static boolean hasEnrichments(EventContext context) {
+        Optional<Container> optional = container(context.getEnrichment());
+        if (!optional.isPresent()) {
+            return false;
+        }
+        Container container = optional.get();
+        boolean result = !container.getItemsMap()
+                                   .isEmpty();
+        return result;
     }
 }
