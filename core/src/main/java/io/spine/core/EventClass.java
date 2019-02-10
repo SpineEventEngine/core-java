@@ -35,8 +35,6 @@ import static io.spine.core.Events.ensureMessage;
 
 /**
  * A value object holding a class of events.
- *
- * @author Alexander Yevsyukov
  */
 public class EventClass extends MessageClass<EventMessage> {
 

@@ -28,8 +28,6 @@ import static io.spine.core.Events.ensureMessage;
 
 /**
  * A value object holding a class of a business rejection.
- *
- * @author Alex Tymchenko
  */
 public class RejectionClass extends MessageClass<RejectionMessage> {
 

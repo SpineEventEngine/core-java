@@ -25,8 +25,6 @@ import io.spine.type.MessageClass;
 
 /**
  * The class of an {@link Empty} message.
- *
- * @author Dmytro Dashenkov
  */
 public final class EmptyClass extends MessageClass<Empty> {
 
