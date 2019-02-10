@@ -20,15 +20,18 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.base.EnrichmentMessage;
 import io.spine.code.proto.MessageType;
+import io.spine.code.proto.Type;
 import io.spine.code.proto.TypeSet;
+import io.spine.code.proto.ref.EnrichmentForOption;
 import io.spine.code.proto.ref.TypeRef;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
+
+import java.util.List;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
@@ -37,12 +40,21 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 final class EnrichmentMap {
 
-    /** A multi-map from enrichment class name to enriched message class names. */
-    private final ImmutableMultimap<String, String> enrichmentsMap;
+    private final ImmutableSet<TypeName> enrichments;
 
     /** Creates new instance loading the map from resources. */
     private EnrichmentMap() {
-        this.enrichmentsMap = EnrichmentFileSet.loadFromResources();
+        this.enrichments = allKnownEnrichments();
+    }
+
+    private static ImmutableSet<TypeName> allKnownEnrichments() {
+        return KnownTypes.instance()
+                         .asTypeSet()
+                         .messageTypes()
+                         .stream()
+                         .filter(t -> EnrichmentMessage.class.isAssignableFrom(t.javaClass()))
+                         .map(Type::name)
+                         .collect(toImmutableSet());
     }
 
     /** Loads the map from resources. */
@@ -51,10 +63,7 @@ final class EnrichmentMap {
     }
 
     ImmutableSet<TypeName> enrichmentTypes() {
-        return enrichmentsMap.keySet()
-                             .stream()
-                             .map(TypeName::of)
-                             .collect(toImmutableSet());
+        return enrichments;
     }
 
     ImmutableSet<Class<Message>> sourceClasses(TypeName enrichmentType) {
@@ -71,13 +80,16 @@ final class EnrichmentMap {
      */
     ImmutableSet<TypeName> sourceTypes(TypeName enrichmentType) {
         KnownTypes knownTypes = KnownTypes.instance();
-        ImmutableCollection<String> sourceRefs = enrichmentsMap.get(enrichmentType.value());
+        List<String> sourceRefs =
+                EnrichmentForOption.parse(enrichmentType.getMessageDescriptor()
+                                                        .toProto());
         TypeSet.Builder builder = TypeSet.newBuilder();
         for (String ref : sourceRefs) {
             TypeRef typeRef = TypeRef.parse(ref);
             ImmutableSet<MessageType> matchingRef = knownTypes.allMatching(typeRef);
             builder.addAll(matchingRef);
         }
+        //TODO:2019-02-11:alexander.yevsyukov: Filter types that do not match `by` spec.
         TypeSet sourceTypes = builder.build();
         ImmutableSet<TypeName> result =
                 sourceTypes.messageTypes()

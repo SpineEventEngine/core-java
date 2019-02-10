@@ -139,7 +139,8 @@ final class Linker implements Logging {
 
         FieldDescriptor.Type basicType = null;
         Descriptor messageType = null;
-        boolean strict = refCount == 1;
+        //TODO:2019-02-11:alexander.yevsyukov: Revise the `strict` thing after migrating to KnownTypes.
+        boolean strict = false; //refCount == 1;
         for (FieldRef ref : references) {
             FieldDescriptor field = findSourceField(ref, enrichmentField, strict);
             if (field == null) {
