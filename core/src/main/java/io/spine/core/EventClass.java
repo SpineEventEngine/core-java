@@ -36,11 +36,11 @@ import static io.spine.core.Events.ensureMessage;
 /**
  * A value object holding a class of events.
  */
-public class EventClass extends MessageClass<EventMessage> {
+public final class EventClass extends MessageClass<EventMessage> {
 
     private static final long serialVersionUID = 0L;
 
-    EventClass(Class<? extends EventMessage> value) {
+    private EventClass(Class<? extends EventMessage> value) {
         super(value);
     }
 

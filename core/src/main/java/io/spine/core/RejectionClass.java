@@ -29,11 +29,11 @@ import static io.spine.core.Events.ensureMessage;
 /**
  * A value object holding a class of a business rejection.
  */
-public class RejectionClass extends MessageClass<RejectionMessage> {
+public final class RejectionClass extends MessageClass<RejectionMessage> {
 
     private static final long serialVersionUID = 0L;
 
-    protected RejectionClass(Class<? extends RejectionMessage> value) {
+    private RejectionClass(Class<? extends RejectionMessage> value) {
         super(value);
     }
 
