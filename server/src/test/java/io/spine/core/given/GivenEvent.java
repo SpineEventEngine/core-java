@@ -27,7 +27,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventsTest;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.test.core.given.GivenProjectCreated;
+import io.spine.test.core.given.EtProjectCreated;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
@@ -80,7 +80,7 @@ public final class GivenEvent {
     }
 
     public static EventMessage message() {
-        return GivenProjectCreated
+        return EtProjectCreated
                 .newBuilder()
                 .setId(newUuid())
                 .build();

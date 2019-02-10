@@ -33,7 +33,7 @@ import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
-import io.spine.test.core.given.GivenProjectCreated;
+import io.spine.test.core.given.EtProjectCreated;
 import io.spine.testing.Tests;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -169,7 +169,7 @@ public class EventsTest extends UtilityClassTest<Events> {
             TypeName typeName = EventEnvelope.of(event)
                                              .getTypeName();
             assertNotNull(typeName);
-            assertEquals(GivenProjectCreated.class.getSimpleName(), typeName.getSimpleName());
+            assertEquals(EtProjectCreated.class.getSimpleName(), typeName.getSimpleName());
         }
 
         private Event newEvent(CommandEnvelope command) {

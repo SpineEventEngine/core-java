@@ -45,8 +45,7 @@ import static java.lang.reflect.Modifier.isStatic;
 /**
  * Utilities for working with methods.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Random duplication of simple strings.
-class Methods {
+final class Methods {
 
     /**
      * One of the possible getter prefixes - {@code get-}.
@@ -58,8 +57,9 @@ class Methods {
      *
      * <p>Allowed for {@code boolean} and {@link Boolean} entity columns.
      *
-     * <p>Package-private access to enable the common usage of this prefix in the column lookup
-     * {@linkplain ColumnReader#isBooleanWrapperProperty()} code}.
+     * <p>Package-private access to enable the common usage of this prefix in the column
+     * lookup code.
+     * @see ColumnReader
      */
     static final String IS_PREFIX = "is";
 

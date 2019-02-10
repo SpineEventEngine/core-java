@@ -32,8 +32,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Information about a scheduled command.
- *
- * @author Dmytro Dashenkov
  */
 final class ScheduledCommand
         extends Projection<CommandId, ScheduledCommandRecord, ScheduledCommandRecordVBuilder> {
