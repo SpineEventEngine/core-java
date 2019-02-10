@@ -39,11 +39,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.core.Enrichments.hasEnrichments;
 import static io.spine.core.given.GivenEvent.context;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -139,14 +136,17 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
                 .isFalse();
     }
 
+    private static
+    OptionalSubject assertEnrichment(EventContext ctx, Class<? extends EnrichmentMessage> cls) {
+        return Truth8.assertThat(ctx.find(cls));
+    }
+
     @Test
     @DisplayName("obtain specific event enrichment from context")
     void obtainSpecificEnrichment() {
         EventContext context = givenContextEnrichedWith(projectInfo);
-        Optional<? extends EnrichmentMessage> enrichment =
-                getEnrichment(projectInfo.getClass(), context);
 
-        OptionalSubject assertEnrichment = Truth8.assertThat(enrichment);
+        OptionalSubject assertEnrichment = assertEnrichment(context, projectInfo.getClass());
         assertEnrichment.isPresent();
         assertEnrichment.hasValue(projectInfo);
     }
@@ -154,7 +154,8 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
     @Test
     @DisplayName("return absent if there are no enrichments in context when searching for one")
     void returnAbsentOnNoEnrichmentsSearch() {
-        assertFalse(getEnrichment(EtProjectInfo.class, context).isPresent());
+        assertEnrichment(context, EtProjectInfo.class)
+                .isEmpty();
     }
 
     @Test
@@ -166,7 +167,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
                 .setLogoUrl("https://spine.io/img/spine-logo-white.svg")
                 .build()
         );
-        Truth8.assertThat(getEnrichment(EtProjectInfo.class, context))
+        assertEnrichment(context, EtProjectInfo.class)
               .isEmpty();
     }
 }

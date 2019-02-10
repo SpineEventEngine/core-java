@@ -84,19 +84,14 @@ public final class Enrichments {
      * @param  context         a context to get an enrichment from
      * @param  <E>             a type of the event enrichment
      * @return an optional of the enrichment
+     * @deprecated please use {@link EventContext#find(Class)}
      */
+    @Deprecated
     public static <E extends EnrichmentMessage>
     Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
         checkNotNull(enrichmentClass);
         checkNotNull(context);
-        if (!hasEnrichments(context)) {
-            return Optional.empty();
-        }
-        Optional<Container> container = container(context.getEnrichment());
-        if (!container.isPresent()) {
-            return Optional.empty();
-        }
-        Optional<E> result = find(enrichmentClass, container.get());
+        Optional<E> result = context.find(enrichmentClass);
         return result;
     }
 

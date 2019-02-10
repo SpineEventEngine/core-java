@@ -53,7 +53,6 @@ import org.junit.jupiter.api.Test;
 import java.util.function.BiFunction;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.core.given.GivenEvent.arbitrary;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
@@ -289,13 +288,13 @@ public class EnricherTest {
 
         private static <E extends EnrichmentMessage>
         E get(Class<E> enrichmentClass, EventMessage e, EventContext ctx) {
-            return getEnrichment(enrichmentClass, ctx).orElseThrow(
-                    () -> newIllegalStateException(
-                            "Unable to obtain enrichment of class `%s`" +
-                                    " from the event of class `%s`",
-                            enrichmentClass.getCanonicalName(), e.getClass().getCanonicalName()
-                    )
-            );
+            return ctx.find(enrichmentClass)
+                      .orElseThrow(() -> newIllegalStateException(
+                              "Unable to obtain enrichment of class `%s`" +
+                                      " from the event of class `%s`",
+                              enrichmentClass.getCanonicalName(), e.getClass()
+                                                                   .getCanonicalName())
+                      );
         }
     }
 }

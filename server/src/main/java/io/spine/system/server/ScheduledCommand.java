@@ -26,8 +26,8 @@ import io.spine.core.CommandId;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
+import io.spine.type.TypeName;
 
-import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -43,8 +43,10 @@ final class ScheduledCommand
     @Subscribe
     public void on(CommandScheduled event, EventContext context) {
         CommandEnrichment enrichment =
-                getEnrichment(CommandEnrichment.class, context)
-                .orElseThrow(() -> newIllegalStateException("Command enrichment must be present."));
+                context.find(CommandEnrichment.class)
+                       .orElseThrow(() -> newIllegalStateException(
+                               "`%s` must be present.", TypeName.of(CommandEnrichment.class))
+                       );
 
         Command commandWithSchedule = withSchedule(enrichment.getCommand(), event.getSchedule());
         getBuilder().setId(event.getId())
