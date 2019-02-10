@@ -124,7 +124,7 @@ final class EnrichmentFileSet {
         String packageName = eventsPackage.substring(0, lastSignificantCharPos);
         Set<String> boundFields = getBoundFields(enrichmentType);
         Collection<TypeUrl> eventTypes = KnownTypes.instance()
-                                                   .getAllFromPackage(packageName);
+                                                   .allFromPackage(packageName);
         for (TypeUrl type : eventTypes) {
             if (hasOneOfTargetFields(type.toName(), boundFields)) {
                 String typeQualifier = type.getTypeName();
@@ -135,7 +135,7 @@ final class EnrichmentFileSet {
 
     private static Set<String> getBoundFields(String enrichmentType) {
         Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
-                                                              .getMessageDescriptor();
+                                                  .getMessageDescriptor();
         Set<String> result = newHashSet();
         for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
             String extension = field.getOptions()

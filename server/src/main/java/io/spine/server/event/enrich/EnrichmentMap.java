@@ -20,9 +20,14 @@
 
 package io.spine.server.event.enrich;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.code.proto.MessageType;
+import io.spine.code.proto.TypeSet;
+import io.spine.code.proto.ref.TypeRef;
+import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -61,10 +66,24 @@ final class EnrichmentMap {
         return result;
     }
 
+    /**
+     * Obtains source types enriched by the passed enrichment type.
+     */
     ImmutableSet<TypeName> sourceTypes(TypeName enrichmentType) {
-        return enrichmentsMap.get(enrichmentType.value())
-                             .stream()
-                             .map(TypeName::of)
-                             .collect(toImmutableSet());
+        KnownTypes knownTypes = KnownTypes.instance();
+        ImmutableCollection<String> sourceRefs = enrichmentsMap.get(enrichmentType.value());
+        TypeSet.Builder builder = TypeSet.newBuilder();
+        for (String ref : sourceRefs) {
+            TypeRef typeRef = TypeRef.parse(ref);
+            ImmutableSet<MessageType> matchingRef = knownTypes.allMatching(typeRef);
+            builder.addAll(matchingRef);
+        }
+        TypeSet sourceTypes = builder.build();
+        ImmutableSet<TypeName> result =
+                sourceTypes.messageTypes()
+                           .stream()
+                           .map(MessageType::name)
+                           .collect(toImmutableSet());
+        return result;
     }
 }

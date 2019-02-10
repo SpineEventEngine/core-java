@@ -159,7 +159,7 @@ public abstract class MessageHandlerTest<I,
         repository = createRepository();
         assertNotNull(repository);
 
-        Set<CommandClass> commandClasses = getAllCommandClasses();
+        Set<CommandClass> commandClasses = allCommandClasses();
         boundedContext.registerCommandDispatcher(new VoidCommandDispatcher(commandClasses));
     }
 
@@ -180,10 +180,10 @@ public abstract class MessageHandlerTest<I,
         }
     }
 
-    private static Set<CommandClass> getAllCommandClasses() {
+    private static Set<CommandClass> allCommandClasses() {
         return KnownTypes
                 .instance()
-                .getAllUrls()
+                .allUrls()
                 .stream()
                 .flatMap(MessageHandlerTest::commandOfType)
                 .collect(toSet());
