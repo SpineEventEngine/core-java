@@ -91,7 +91,7 @@ message Command {
 
 // Meta-information about the command and the environment, which generated the command.
 message CommandContext {
-    option (is) = {java_type: "io.spine.core.MessageContext" generate: true};
+    option (is).java_type = "io.spine.core.MessageContext";
 
     // Information about the environment of the user who created the command.
     ActorContext actor_context = 1 [(required) = true];

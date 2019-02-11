@@ -104,6 +104,7 @@ subprojects {
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java-library'
     apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'pmd'
     apply plugin: spineProtobufPluginId
 
     apply from: deps.scripts.javacArgs
@@ -242,6 +243,8 @@ subprojects {
     if (shouldPublishJavadoc(project)) {
         apply from: updateDocsPlugin
     }
+    
+    apply from: deps.scripts.pmd
 }
 
 apply from: publishPlugin

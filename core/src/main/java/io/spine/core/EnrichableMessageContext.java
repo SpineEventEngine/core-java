@@ -20,45 +20,27 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Any;
-import io.spine.protobuf.Attribute;
+import io.spine.base.EnrichmentContainer;
+import io.spine.base.EnrichmentMessage;
 
-import java.util.Map;
+import java.util.Optional;
 
 /**
- * Abstract base for attributes extending {@link CommandContext}.
- *
- * <p>Example of usage:
- * <pre>{@code
- *    // Init attribute.
- *    CommandAttribute<Long> attr = new CommandAttribute<Long>("attrName") {};
- *
- *    // Setting value.
- *    CommandContext.Builder builder = ...;
- *    attr.setValue(builder, 100L);
- *
- *    // Getting value.
- *    CommandContext context = builder.build();
- *    Long value = attr.getValue(context);
- * }</pre>
+ * A common interface for message contexts that hold enrichments.
  */
-public abstract class CommandAttribute<T>
-        extends Attribute<T, CommandContext, CommandContext.Builder> {
+public interface EnrichableMessageContext extends EnrichmentContainer, MessageContext {
 
-    /**
-     * Creates a new instance for the passed name.
-     */
-    public CommandAttribute(String name) {
-        super(name);
-    }
+    @SuppressWarnings("override") // in generated code.
+    Enrichment getEnrichment();
 
     @Override
-    protected final Map<String, Any> getMap(CommandContext context) {
-        return context.getAttributesMap();
-    }
-
-    @Override
-    protected MapModifier<CommandContext.Builder> getMapModifier(CommandContext.Builder builder) {
-        return builder::putAttributes;
+    default <E extends EnrichmentMessage> Optional<E> find(Class<E> cls) {
+        Enrichment enrichment = getEnrichment();
+        if (enrichment.getModeCase() != Enrichment.ModeCase.CONTAINER) {
+            return Optional.empty();
+        }
+        Enrichment.Container container = enrichment.getContainer();
+        Optional<E> result = Enrichments.getFromContainer(cls, container);
+        return result;
     }
 }

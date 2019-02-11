@@ -22,7 +22,6 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.core.ActorContext;
@@ -43,8 +42,9 @@ import static io.spine.validate.Validate.checkValid;
  * such as the actor, the tenant, etc.
  *
  * <p>The command messages passed to the factory are
- * {@linkplain io.spine.validate.Validate#checkValid(Message) validated} according to their
- * Proto definitions. If a given message is invalid, a {@link ValidationException} is thrown.
+ * {@linkplain io.spine.validate.Validate#checkValid(com.google.protobuf.Message) validated}
+ * according to their Proto definitions. If a given message is invalid,
+ * a {@link ValidationException} is thrown.
  *
  * @see ActorRequestFactory#command()
  */

@@ -24,10 +24,11 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.test.event.EnrichmentByContextFields;
 import io.spine.test.event.EnrichmentForSeveralEvents;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectCreatedEnrichment;
 import io.spine.test.event.ProjectCreatedSeparateEnrichment;
 import io.spine.test.event.ProjectStarted;
+import io.spine.test.event.ProjectStartedEnrichment;
 import io.spine.test.event.TaskAdded;
-import io.spine.test.event.enrichment.EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsWithDifferentNames;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes;
@@ -35,8 +36,6 @@ import io.spine.test.event.enrichment.EnrichmentBoundWithMultipleFieldsWithDiffe
 import io.spine.test.event.enrichment.GranterEventsEnrichment;
 import io.spine.test.event.enrichment.MultiplePackageEnrichment;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
-import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
-import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
 import io.spine.test.event.enrichment.SelectiveComplexEnrichment;
 import io.spine.test.event.enrichment.UserPackageEventsEnrichment;
 import io.spine.test.event.user.UserDeletedEvent;
@@ -73,7 +72,7 @@ class EnrichmentMapTest {
         @Test
         @DisplayName("ProjectCreatedEnrichment")
         void byProjectCreatedEnrichment() {
-            _assert(ProjectCreated.Enrichment.class)
+            _assert(ProjectCreatedEnrichment.class)
                     .enrichesOnly(ProjectCreated.class);
         }
 
@@ -92,23 +91,9 @@ class EnrichmentMapTest {
         }
 
         @Test
-        @DisplayName("ProjectCreatedEnrichmentAnotherPackageFqn")
-        void byProjectCreatedEnrichmentAnotherPackageFqn() {
-            _assert(ProjectCreatedEnrichmentAnotherPackageFqn.class)
-                    .enrichesOnly(ProjectCreated.class);
-        }
-
-        @Test
-        @DisplayName("ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt")
-        void byProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt() {
-            _assert(ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class)
-                    .enrichesOnly(ProjectCreated.class);
-        }
-
-        @Test
         @DisplayName("ProjectStartedEnrichment")
         void byProjectStartedEnrichment() {
-            _assert(ProjectStarted.Enrichment.class)
+            _assert(ProjectStartedEnrichment.class)
                     .enrichesOnly(ProjectStarted.class);
         }
 
@@ -189,14 +174,6 @@ class EnrichmentMapTest {
         @DisplayName("with two arguments")
         void withTwoArgs() {
             _assert(EnrichmentBoundWithFieldsWithDifferentNames.class)
-                    .enrichesOnly(SharingRequestApproved.class,
-                                  PermissionGrantedEvent.class);
-        }
-
-        @Test
-        @DisplayName("with two fqn arguments")
-        void withTwoFqnArgs() {
-            _assert(EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class)
                     .enrichesOnly(SharingRequestApproved.class,
                                   PermissionGrantedEvent.class);
         }
