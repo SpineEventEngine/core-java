@@ -122,7 +122,7 @@ class EventApplierTest {
         }
 
         @Test
-        @MuteLogging
+        @MuteLogging // Mute the warning about signature mismatch as it's expected.
         @DisplayName("it's not package-private")
         void isNotPrivate() {
             Method method = new ValidApplierButNotPackagePrivate().getMethod();

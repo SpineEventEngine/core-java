@@ -28,8 +28,6 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
  * Provides a method which accepts one parameter.
- *
- * @author Alexander Yevsyukov
  */
 public class ValidHandlerOneParam extends TestCommandHandler {
     @Assign

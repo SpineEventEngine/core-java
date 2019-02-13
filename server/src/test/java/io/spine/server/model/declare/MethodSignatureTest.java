@@ -46,6 +46,7 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
 
     @DisplayName("create handlers from valid methods")
     @MuteLogging
+    // Mute the warning about signature mismatch as it's expected for some of the methods.
     @ParameterizedTest
     @MethodSource("validMethods")
     protected final void testValid(Method method) {

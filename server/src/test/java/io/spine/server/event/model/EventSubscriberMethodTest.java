@@ -118,7 +118,7 @@ class EventSubscriberMethodTest {
         }
 
         @Test
-        @MuteLogging
+        @MuteLogging // Mute the warning about signature mismatch as it's expected.
         @DisplayName("non-public access")
         void nonPublicAccess() {
             Method method = new ValidButPrivate().getMethod();
