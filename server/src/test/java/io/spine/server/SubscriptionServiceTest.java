@@ -208,7 +208,7 @@ class SubscriptionServiceTest {
     @Test
     @MuteLogging
     @DisplayName("receive IAE in observer error callback on subscribing to system event")
-    void notSubscribeToSystemEvent() {
+    void failOnSystemEventSubscribe() {
         BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
         SubscriptionService subscriptionService = SubscriptionService
                 .newBuilder()
