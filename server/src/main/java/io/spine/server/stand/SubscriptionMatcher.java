@@ -36,7 +36,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.function.Predicate;
 
-import static io.spine.protobuf.FieldPaths.fieldAt;
+import static io.spine.base.FieldPaths.fieldAt;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.join;

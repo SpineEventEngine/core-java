@@ -36,7 +36,7 @@ import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
-import static io.spine.protobuf.FieldPaths.fieldAt;
+import static io.spine.base.FieldPaths.fieldAt;
 import static io.spine.protobuf.TypeConverter.toObject;
 
 /**

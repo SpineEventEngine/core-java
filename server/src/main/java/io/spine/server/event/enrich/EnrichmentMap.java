@@ -25,13 +25,9 @@ import com.google.protobuf.Message;
 import io.spine.base.EnrichmentMessage;
 import io.spine.code.proto.MessageType;
 import io.spine.code.proto.Type;
-import io.spine.code.proto.TypeSet;
-import io.spine.code.proto.ref.EnrichmentForOption;
-import io.spine.code.proto.ref.TypeRef;
+import io.spine.code.proto.enrichment.EnrichmentType;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
-
-import java.util.List;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
@@ -79,23 +75,13 @@ final class EnrichmentMap {
      * Obtains source types enriched by the passed enrichment type.
      */
     ImmutableSet<TypeName> sourceTypes(TypeName enrichmentType) {
-        KnownTypes knownTypes = KnownTypes.instance();
-        List<String> sourceRefs =
-                EnrichmentForOption.parse(enrichmentType.getMessageDescriptor()
-                                                        .toProto());
-        TypeSet.Builder builder = TypeSet.newBuilder();
-        for (String ref : sourceRefs) {
-            TypeRef typeRef = TypeRef.parse(ref);
-            ImmutableSet<MessageType> matchingRef = knownTypes.allMatching(typeRef);
-            builder.addAll(matchingRef);
-        }
-        //TODO:2019-02-11:alexander.yevsyukov: Filter types that do not match `by` spec.
-        TypeSet sourceTypes = builder.build();
+        MessageType mt = MessageType.of(enrichmentType.getMessageDescriptor());
+        EnrichmentType enrichment = EnrichmentType.from(mt);
         ImmutableSet<TypeName> result =
-                sourceTypes.messageTypes()
-                           .stream()
-                           .map(MessageType::name)
-                           .collect(toImmutableSet());
+                enrichment.knownSources()
+                          .stream()
+                          .map(Type::name)
+                          .collect(toImmutableSet());
         return result;
     }
 }
