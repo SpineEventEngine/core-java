@@ -39,6 +39,7 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -120,6 +121,9 @@ public class SubscriptionService
     private BoundedContext selectBoundedContext(Target target) {
         TypeUrl type = TypeUrl.parse(target.getType());
         BoundedContext result = typeToContextMap.get(type);
+        if (result == null) {
+            throw newIllegalArgumentException("Trying to subscribe to an unknown type: %s", type);
+        }
         return result;
     }
 

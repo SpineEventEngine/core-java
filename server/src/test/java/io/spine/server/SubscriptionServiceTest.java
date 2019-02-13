@@ -207,7 +207,7 @@ class SubscriptionServiceTest {
 
     @Test
     @MuteLogging
-    @DisplayName("not subscribe to a system event")
+    @DisplayName("receive IAE in observer error callback on subscribing to system event")
     void notSubscribeToSystemEvent() {
         BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
         SubscriptionService subscriptionService = SubscriptionService
@@ -220,12 +220,9 @@ class SubscriptionServiceTest {
 
         subscriptionService.subscribe(topic, observer);
 
-        assertThat(observer.responses())
-                .isEmpty();
-        assertThat(observer.isCompleted())
-                .isFalse();
-        assertThat(observer.getError())
-                .isNotNull();
+        assertThat(observer.responses()).isEmpty();
+        assertThat(observer.isCompleted()).isFalse();
+        assertThat(observer.getError()).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
