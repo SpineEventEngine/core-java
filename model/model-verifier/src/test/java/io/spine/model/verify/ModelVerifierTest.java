@@ -102,7 +102,6 @@ class ModelVerifierTest {
     }
 
     @Test
-    @MuteLogging
     @DisplayName("verify model from classpath")
     void verifyModel() {
         ModelVerifier verifier = new ModelVerifier(project);
