@@ -45,7 +45,7 @@ import static io.spine.testing.client.grpc.TableSide.RIGHT;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@MuteLogging
+@MuteLogging // Mute technical logs about starting the server, etc.
 class TestClientTest {
 
     private Server server;
