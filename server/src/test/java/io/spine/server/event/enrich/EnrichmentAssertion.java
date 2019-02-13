@@ -21,9 +21,13 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
+import java.util.stream.Stream;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 
 /**
@@ -31,7 +35,7 @@ import static com.google.common.truth.Truth.assertThat;
  */
 final class EnrichmentAssertion {
 
-    private static final EnrichmentMap INSTANCE = EnrichmentMap.load();
+    private static final EnrichmentMap MAP = EnrichmentMap.load();
 
     private final TypeName enrichmentType;
 
@@ -48,12 +52,7 @@ final class EnrichmentAssertion {
      */
     @SafeVarargs
     final void enriches(Class<? extends Message>... expectedClasses) {
-        ImmutableSet<TypeName> sourceEvents = map().sourceTypes(enrichmentType);
-
-        for (Class<? extends Message> eventClass : expectedClasses) {
-            TypeName eventType = TypeName.of(eventClass);
-            assertThat(sourceEvents).contains(eventType);
-        }
+        assertEnriches(false, expectedClasses);
     }
 
     /**
@@ -61,14 +60,26 @@ final class EnrichmentAssertion {
      */
     @SafeVarargs
     final void enrichesOnly(Class<? extends Message>... expectedClasses) {
+        assertEnriches(true, expectedClasses);
+    }
 
-        ImmutableSet<Class<Message>> actual = map().sourceClasses(enrichmentType);
-        assertThat(actual)
-                .hasSize(expectedClasses.length);
-        enriches(expectedClasses);
+    @SafeVarargs
+    private final void assertEnriches(boolean strict, Class<? extends Message>... expectedClasses) {
+        ImmutableSet<TypeName> sourceTypes = map().sourceTypes(enrichmentType);
+        ImmutableSet<TypeName> expectedTypes =
+                Stream.of(expectedClasses)
+                      .map(TypeName::of)
+                      .collect(toImmutableSet());
+
+        IterableSubject assertThat = assertThat(sourceTypes);
+        if (strict) {
+            assertThat.containsExactlyElementsIn(expectedTypes);
+        } else {
+            assertThat.containsAllIn(expectedTypes);
+        }
     }
 
     private static EnrichmentMap map() {
-        return INSTANCE;
+        return MAP;
     }
 }
