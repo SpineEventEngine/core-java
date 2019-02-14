@@ -107,8 +107,7 @@ class CommandHandlerMethodTest {
     }
 
     @Nested
-    @MuteLogging
-    // Mute the warning about signature mismatch as broader access modifier is necessary for test.
+    @MuteLogging /* Signature mismatch warnings are expected. */
     @DisplayName("invoke handler method which returns")
     class InvokeHandlerMethod {
 
@@ -216,9 +215,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @MuteLogging
-        // Mute the warning about signature mismatch as broader access modifier is necessary for
-        // test.
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("one Message param and `List` return type")
         void messageParamAndListReturn() {
             Method handler = new ValidHandlerOneParamReturnsList().getHandler();
@@ -227,9 +224,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @MuteLogging
-        // Mute the warning about signature mismatch as broader access modifier is necessary for
-        // test.
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("Message and Context params")
         void messageAndContextParam() {
             Method handler = new ValidHandlerTwoParams().getHandler();
@@ -246,9 +241,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @MuteLogging
-        // Mute the warning about signature mismatch as non-matching access modifier is expected
-        // in this test.
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("non-public access")
         void nonPublicAccess() {
             Method method = new ValidHandlerButPrivate().getHandler();
