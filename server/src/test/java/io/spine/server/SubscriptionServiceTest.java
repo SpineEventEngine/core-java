@@ -293,7 +293,7 @@ class SubscriptionServiceTest {
                 .add(boundedContext)
                 .build();
 
-        // Try activate a subscription to `Customer` entity which is not present in BC.
+        // Try activating a subscription to `Customer` entity which is not present in BC.
         Topic invalidTopic = requestFactory.topic()
                                            .allOf(Customer.class);
         Subscription invalidSubscription = Subscription
@@ -366,7 +366,7 @@ class SubscriptionServiceTest {
                 .add(boundedContext)
                 .build();
 
-        // Try cancel a subscription to `Customer` entity which is not present in BC.
+        // Try cancelling a subscription to `Customer` entity which is not present in BC.
         Topic invalidTopic = requestFactory.topic()
                                            .allOf(Customer.class);
         Subscription invalidSubscription = Subscription
