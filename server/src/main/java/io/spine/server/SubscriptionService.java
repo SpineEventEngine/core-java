@@ -72,7 +72,7 @@ public class SubscriptionService
             Target target = topic.getTarget();
             Optional<BoundedContext> selected = selectBoundedContext(target);
             BoundedContext context = selected.orElseThrow(
-                    () -> newIllegalArgumentException("Trying subscribe to an unknown type: %s",
+                    () -> newIllegalArgumentException("Trying to subscribe to an unknown type: %s",
                                                       target.getType())
             );
             Stand stand = context.getStand();
