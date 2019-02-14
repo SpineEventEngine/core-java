@@ -132,14 +132,15 @@ public class SubscriptionService
     private Optional<BoundedContext> selectBoundedContext(Subscription subscription) {
         Target target = subscription.getTopic()
                                     .getTarget();
-        Optional<BoundedContext> context = selectBoundedContext(target);
-        return context;
+        Optional<BoundedContext> result = selectBoundedContext(target);
+        return result;
     }
 
     private Optional<BoundedContext> selectBoundedContext(Target target) {
         TypeUrl type = TypeUrl.parse(target.getType());
         BoundedContext selected = typeToContextMap.get(type);
-        return Optional.ofNullable(selected);
+        Optional<BoundedContext> result = Optional.ofNullable(selected);
+        return result;
     }
 
     public static class Builder {
