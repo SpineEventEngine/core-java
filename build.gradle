@@ -158,6 +158,7 @@ subprojects {
         testImplementation deps.test.guavaTestlib
         testImplementation deps.test.junit5Api
         testImplementation deps.test.junit5Runner
+        testImplementation "io.spine.tools:spine-mute-logging:$spineBaseVersion"
     }
 
     forceConfiguration(project)

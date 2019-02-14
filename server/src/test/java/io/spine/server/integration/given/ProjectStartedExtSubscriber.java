@@ -33,7 +33,7 @@ public class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
     private static ItgProjectStarted externalEvent = null;
 
     @Subscribe(external = true)
-    void on(ItgProjectStarted msg) {
+    public void on(ItgProjectStarted msg) {
         externalEvent = msg;
     }
 

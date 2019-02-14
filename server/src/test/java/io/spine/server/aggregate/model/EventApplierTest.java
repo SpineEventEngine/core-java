@@ -34,6 +34,7 @@ import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -121,6 +122,7 @@ class EventApplierTest {
         }
 
         @Test
+        @MuteLogging // Mute the warning about signature mismatch as it's expected.
         @DisplayName("it's not package-private")
         void isNotPrivate() {
             Method method = new ValidApplierButNotPackagePrivate().getMethod();

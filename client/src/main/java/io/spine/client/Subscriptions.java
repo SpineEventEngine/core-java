@@ -35,6 +35,11 @@ public final class Subscriptions {
      */
     private static final String SUBSCRIPTION_ID_FORMAT = "s-%s";
 
+    /**
+     * The format for convenient subscription printing in logs and error messages.
+     */
+    private static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
+
     /** Prevents the utility class instantiation. */
     private Subscriptions() {
     }
@@ -63,5 +68,23 @@ public final class Subscriptions {
         return SubscriptionId.newBuilder()
                              .setValue(value)
                              .build();
+    }
+
+    /**
+     * Obtains a short printable form of subscription.
+     *
+     * <p>Standard {@link Subscription#toString()} includes all subscription data and thus its
+     * output is too huge to use in short log messages and stack traces.
+     *
+     * @return a printable {@code String} with core subscription data
+     */
+    public static String toShortString(Subscription subscription) {
+        String id = subscription.getId()
+                                .getValue();
+        String type = subscription.getTopic()
+                                  .getTarget()
+                                  .getType();
+        String result = format(SUBSCRIPTION_PRINT_FORMAT, id, type);
+        return result;
     }
 }

@@ -41,6 +41,7 @@ import io.spine.server.event.model.given.subscriber.ValidTwoParams;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.model.given.Given;
 import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -117,6 +118,7 @@ class EventSubscriberMethodTest {
         }
 
         @Test
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("non-public access")
         void nonPublicAccess() {
             Method method = new ValidButPrivate().getMethod();

@@ -55,6 +55,7 @@ import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.PmDispatcher;
@@ -106,6 +107,7 @@ class CommandHandlerMethodTest {
     }
 
     @Nested
+    @MuteLogging /* Signature mismatch warnings are expected. */
     @DisplayName("invoke handler method which returns")
     class InvokeHandlerMethod {
 
@@ -213,6 +215,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("one Message param and `List` return type")
         void messageParamAndListReturn() {
             Method handler = new ValidHandlerOneParamReturnsList().getHandler();
@@ -221,6 +224,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("Message and Context params")
         void messageAndContextParam() {
             Method handler = new ValidHandlerTwoParams().getHandler();
@@ -237,6 +241,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("non-public access")
         void nonPublicAccess() {
             Method method = new ValidHandlerButPrivate().getHandler();
