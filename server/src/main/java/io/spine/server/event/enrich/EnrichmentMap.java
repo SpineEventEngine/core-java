@@ -22,7 +22,6 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.EnrichmentMessage;
 import io.spine.code.proto.MessageType;
 import io.spine.code.proto.Type;
 import io.spine.code.proto.enrichment.EnrichmentType;
@@ -45,10 +44,8 @@ final class EnrichmentMap {
 
     private static ImmutableSet<TypeName> allKnownEnrichments() {
         return KnownTypes.instance()
-                         .asTypeSet()
-                         .messageTypes()
+                         .enrichments()
                          .stream()
-                         .filter(t -> EnrichmentMessage.class.isAssignableFrom(t.javaClass()))
                          .map(Type::name)
                          .collect(toImmutableSet());
     }
