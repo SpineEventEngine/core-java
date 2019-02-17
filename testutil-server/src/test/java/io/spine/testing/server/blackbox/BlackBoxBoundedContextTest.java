@@ -298,7 +298,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     private static Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
         ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
         repos.forEach(repository -> builder.add(repository.getEntityStateType()
-                                                          .toName()));
+                                                          .toTypeName()));
         return builder.build();
     }
 
