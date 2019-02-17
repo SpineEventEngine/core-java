@@ -22,6 +22,7 @@ package io.spine.core;
 
 import io.spine.base.EnrichmentContainer;
 import io.spine.base.EnrichmentMessage;
+import io.spine.base.MessageContext;
 import io.spine.core.Enrichment.Container;
 
 import java.util.Optional;

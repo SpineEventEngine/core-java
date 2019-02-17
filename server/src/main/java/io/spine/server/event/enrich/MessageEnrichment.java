@@ -22,7 +22,7 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
-import io.spine.core.MessageContext;
+import io.spine.base.MessageContext;
 import io.spine.server.reflect.Field;
 
 import java.util.Collection;
