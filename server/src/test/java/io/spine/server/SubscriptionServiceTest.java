@@ -30,6 +30,7 @@ import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.logging.Logging;
 import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.Entity;
@@ -39,6 +40,7 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.commandservice.customer.Customer;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
@@ -46,7 +48,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.event.SubstituteLoggingEvent;
+import org.slf4j.helpers.SubstituteLogger;
 
+import java.util.ArrayDeque;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -59,6 +64,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.slf4j.event.Level.WARN;
 
 @SuppressWarnings("deprecation")
 // The deprecated `Stand.post()` method will become test-only in the future.
@@ -206,8 +212,9 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    @DisplayName("not subscribe to a system event")
-    void notSubscribeToSystemEvent() {
+    @MuteLogging
+    @DisplayName("receive IAE in observer error callback on subscribing to system event")
+    void failOnSystemEventSubscribe() {
         BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
         SubscriptionService subscriptionService = SubscriptionService
                 .newBuilder()
@@ -219,12 +226,9 @@ class SubscriptionServiceTest {
 
         subscriptionService.subscribe(topic, observer);
 
-        assertThat(observer.responses())
-                .isEmpty();
-        assertThat(observer.isCompleted())
-                .isFalse();
-        assertThat(observer.getError())
-                .isNotNull();
+        assertThat(observer.responses()).isEmpty();
+        assertThat(observer.isCompleted()).isFalse();
+        assertThat(observer.getError()).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -278,6 +282,35 @@ class SubscriptionServiceTest {
     }
 
     @Test
+    @MuteLogging
+    @DisplayName("receive IAE in error callback when activating non-existent subscription")
+    void failOnActivatingNonExistent() {
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        BoundedContext boundedContext = boundedContextWith(repository);
+
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
+
+        // Try activating a subscription to `Customer` entity which is not present in BC.
+        Topic invalidTopic = requestFactory.topic()
+                                           .allOf(Customer.class);
+        Subscription invalidSubscription = Subscription
+                .newBuilder()
+                .setTopic(invalidTopic)
+                .build();
+
+        MemoizingObserver<SubscriptionUpdate> activationObserver = new MemoizingObserver<>();
+        subscriptionService.activate(invalidSubscription, activationObserver);
+
+        // Check observer is not completed and contains an error.
+        assertThat(activationObserver.responses()).isEmpty();
+        assertThat(activationObserver.isCompleted()).isFalse();
+        assertThat(activationObserver.getError()).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     @DisplayName("cancel subscription")
     void cancelSubscription() {
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
@@ -322,12 +355,49 @@ class SubscriptionServiceTest {
         verify(activateSubscription, never()).onCompleted();
     }
 
+    @Test
+    @DisplayName("produce a warning and complete silently on cancelling non-existent subscription")
+    void warnOnCancellingNonExistent() {
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        BoundedContext boundedContext = boundedContextWith(repository);
+
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
+
+        // Try cancelling a subscription to `Customer` entity which is not present in BC.
+        Topic invalidTopic = requestFactory.topic()
+                                           .allOf(Customer.class);
+        Subscription invalidSubscription = Subscription
+                .newBuilder()
+                .setTopic(invalidTopic)
+                .build();
+
+        // Redirect `SubscriptionService` logging so we can check it.
+        SubstituteLogger serviceLogger = (SubstituteLogger) Logging.get(SubscriptionService.class);
+        ArrayDeque<SubstituteLoggingEvent> loggedMessages = new ArrayDeque<>();
+        Logging.redirect(serviceLogger, loggedMessages);
+
+        MemoizingObserver<Response> cancellationObserver = new MemoizingObserver<>();
+        subscriptionService.cancel(invalidSubscription, cancellationObserver);
+
+        // Check observer is completed and contains nothing.
+        assertThat(cancellationObserver.isCompleted()).isTrue();
+        assertThat(cancellationObserver.responses()).isEmpty();
+        assertThat(cancellationObserver.getError()).isNull();
+
+        // Check the last logged message is a warning.
+        SubstituteLoggingEvent lastMessage = loggedMessages.getLast();
+        assertThat(lastMessage.getLevel()).isEqualTo(WARN);
+    }
+
     @Nested
-    @MuteLogging
     @DisplayName("handle exceptions and call observer error callback for")
     class HandleExceptionsOf {
 
         @Test
+        @MuteLogging
         @DisplayName("subscription process")
         void subscription() {
             BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
@@ -345,6 +415,7 @@ class SubscriptionServiceTest {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("activation process")
         void activation() {
             BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
@@ -362,6 +433,7 @@ class SubscriptionServiceTest {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("cancellation process")
         void cancellation() {
             BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());

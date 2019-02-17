@@ -38,10 +38,11 @@ import static io.spine.base.Time.getCurrentTime;
  *
  * <p>All the commands in the system (except the commands in the {@code System} bounded context)
  * have an associated {@code CommandLifecycle}.
- *
- * @author Dmytro Dashenkov
  */
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an aggregate class.
+@SuppressWarnings({
+        "OverlyCoupledClass"  /* OK for an aggregate class. */,
+        "PMD.MissingStaticMethodInNonInstantiatableClass" /* Instantiated via reflection. */
+})
 final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 

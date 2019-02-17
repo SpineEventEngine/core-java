@@ -20,7 +20,6 @@
 
 package io.spine.server.command.model.given.handler;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
@@ -33,13 +32,10 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
  * Provides a method with two parameters which returns a list of event messages.
- *
- * @author Alexander Yevsyukov
  */
 public class ValidHandlerTwoParamsReturnsList extends TestCommandHandler {
     @Assign
-    @VisibleForTesting
-    public List<Message> handleTest(RefCreateProject cmd, CommandContext context) {
+    List<Message> handleTest(RefCreateProject cmd, CommandContext context) {
         List<Message> result = newLinkedList();
         result.add(projectCreated(cmd.getProjectId()));
         return result;

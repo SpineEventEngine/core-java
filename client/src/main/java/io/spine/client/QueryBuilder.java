@@ -105,6 +105,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         return self();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")  /* See https://github.com/pmd/pmd/issues/770. */
     private static void checkLimit(Number count) {
         checkArgument(count.longValue() > 0, "A Query limit must be more than 0.");
     }

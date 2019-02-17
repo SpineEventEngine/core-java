@@ -22,6 +22,7 @@ package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.model.given.MethodAccessCheckerTestEnv.StubMethodContainer;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +51,7 @@ class MethodAccessCheckerTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("log warning on incorrect access modifier")
     void warnOnIncorrectAccess() {
         Method method = getMethod("protectedMethod");
