@@ -143,7 +143,7 @@ public final class Field {
                 return ByteString.class;
             case ENUM:
                 typeUrl = TypeUrl.from(field.getEnumType());
-                Class<?> enumClass = typeUrl.getJavaClass();
+                Class<?> enumClass = typeUrl.toJavaClass();
                 return enumClass;
             case MESSAGE:
                 return messageFieldClass(field);

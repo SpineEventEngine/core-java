@@ -82,7 +82,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
         Set<EventClass> classes = super.getMessageClasses();
         Optional<String> invalidEventTypeName =
                 classes.stream()
-                       .map(EventClass::getTypeName)
+                       .map(EventClass::typeName)
                        .map(TypeName::value)
                        .filter(typeName -> !typeName.startsWith(SYSTEM_TYPE_PACKAGE))
                        .findAny();

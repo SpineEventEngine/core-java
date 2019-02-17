@@ -66,7 +66,7 @@ final class EnrichmentMap {
         ImmutableSet<Class<Message>> result =
                 sourceTypes(enrichmentType)
                         .stream()
-                        .map(TypeName::getMessageClass)
+                        .map(TypeName::toMessageClass)
                         .collect(toImmutableSet());
         return result;
     }
@@ -75,7 +75,7 @@ final class EnrichmentMap {
      * Obtains source types enriched by the passed enrichment type.
      */
     ImmutableSet<TypeName> sourceTypes(TypeName enrichmentType) {
-        MessageType mt = MessageType.of(enrichmentType.getMessageDescriptor());
+        MessageType mt = MessageType.of(enrichmentType.messageDescriptor());
         EnrichmentType enrichment = EnrichmentType.from(mt);
         ImmutableSet<TypeName> result =
                 enrichment.knownSources()

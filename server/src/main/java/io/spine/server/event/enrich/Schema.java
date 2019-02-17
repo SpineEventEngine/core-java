@@ -138,7 +138,7 @@ final class Schema {
         }
 
         private void addEventEnrichment(Class<? extends Message> sourceClass, TypeName enrichment) {
-            Class<Message> enrichmentClass = enrichment.getMessageClass();
+            Class<Message> enrichmentClass = enrichment.toMessageClass();
             @SuppressWarnings("unchecked") /* It is relatively safe to cast since currently
             only event enrichment is available via proto definitions, and the source types loaded by
             EnrichmentMap are all event messages. Schema composition should be extended with

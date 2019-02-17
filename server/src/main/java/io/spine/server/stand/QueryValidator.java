@@ -69,6 +69,6 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
     @Override
     protected String errorMessage(Query request) {
         TypeUrl targetType = getTypeOf(request.getTarget());
-        return format("The query target type is not supported: %s", targetType.getTypeName());
+        return format("The query target type is not supported: %s", targetType.toTypeName());
     }
 }

@@ -388,7 +388,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             Any idAsAny = input.getId();
 
             TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-            Class messageClass = typeUrl.getJavaClass();
+            Class messageClass = typeUrl.toJavaClass();
             checkIdClass(messageClass);
 
             Message idAsMessage = unpack(idAsAny);

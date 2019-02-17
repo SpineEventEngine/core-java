@@ -75,7 +75,7 @@ final class TopicValidator extends AbstractTargetValidator<Topic> {
     @Override
     protected String errorMessage(Topic request) {
         TypeUrl targetType = getTypeOf(request.getTarget());
-        return format("The topic target type is not supported: %s", targetType.getTypeName());
+        return format("The topic target type is not supported: %s", targetType.toTypeName());
     }
 
     private boolean eventRegistryContains(Target target) {
