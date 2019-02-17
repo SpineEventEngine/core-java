@@ -80,7 +80,7 @@ message MultiplePackageEnrichment {
            "spine.test.event.user.permission.*,"
            "spine.test.event.user.sharing.*";
 
-    int32 sharing_type = 1[(by) = "user_uid"];
+    int32 sharing_type = 1 [(by) = "user_uid"];
 }
 
 message EnrichmentBoundWithFieldsWithDifferentNames {
