@@ -36,7 +36,7 @@ import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
-import static io.spine.base.FieldPaths.fieldAt;
+import static io.spine.base.FieldPaths.getValue;
 import static io.spine.protobuf.TypeConverter.toObject;
 
 /**
@@ -102,7 +102,7 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
 
     private static boolean match(EventMessage event, MessageFilter filter) {
         FieldPath path = filter.getField();
-        Object valueOfField = fieldAt(event, path);
+        Object valueOfField = getValue(path, event);
         Any value = filter.getValue();
         Object expectedValue = toObject(value, valueOfField.getClass());
         boolean filterMatches = valueOfField.equals(expectedValue);
