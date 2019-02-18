@@ -22,14 +22,15 @@ package io.spine.core;
 import com.google.protobuf.Message;
 import io.spine.base.RejectionMessage;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.ensureMessage;
+import static io.spine.core.Events.typeUrl;
 
 /**
  * A value object holding a class of a business rejection.
- *
- * @author Alex Tymchenko
  */
 public class RejectionClass extends MessageClass<RejectionMessage> {
 
@@ -47,6 +48,20 @@ public class RejectionClass extends MessageClass<RejectionMessage> {
      */
     public static RejectionClass of(Class<? extends RejectionMessage> value) {
         return new RejectionClass(checkNotNull(value));
+    }
+
+    @SuppressWarnings("unchecked") // Checked logically.
+    public static RejectionClass from(TypeUrl typeUrl) {
+        Class<Message> messageClass = typeUrl.getMessageClass();
+        checkArgument(RejectionMessage.class.isAssignableFrom(messageClass),
+                      "Rejection class is constructed from non-RejectionMessage type URL: %s",
+                      typeUrl.value());
+        return of((Class<? extends RejectionMessage>) messageClass);
+    }
+
+    public static RejectionClass from(Event rejection) {
+        TypeUrl typeUrl = typeUrl(rejection);
+        return from(typeUrl);
     }
 
     /**

@@ -42,13 +42,16 @@ import static com.google.common.collect.Sets.union;
 /**
  * Provides message handling information on a process manager class.
  *
- * @param <P> the type of process managers
+ * @param <P>
+ *         the type of process managers
  */
 public final class ProcessManagerClass<P extends ProcessManager>
         extends CommandHandlingEntityClass<P>
         implements ReactingClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;
+
+    private final Lifecycle lifecycle;
 
     private final ReactorClassDelegate<P> reactorDelegate;
     private final CommanderClass<P> commanderDelegate;
@@ -57,6 +60,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
         super(cls);
         this.reactorDelegate = new ReactorClassDelegate<>(cls);
         this.commanderDelegate = CommanderClass.delegateFor(cls);
+        this.lifecycle = Lifecycle.of(getStateClass());
     }
 
     /**
@@ -133,5 +137,9 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     public boolean producesCommandsOn(EventClass eventClass) {
         return commanderDelegate.producesCommandsOn(eventClass);
+    }
+
+    public Lifecycle lifecycle() {
+        return lifecycle;
     }
 }

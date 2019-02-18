@@ -70,6 +70,7 @@ abstract class PmEndpoint<I,
     protected List<Event> runTransactionFor(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
         List<Event> events = invokeDispatcher(processManager, envelope());
+        processManager.updateLifecycle(events);
         tx.commit();
         return events;
     }

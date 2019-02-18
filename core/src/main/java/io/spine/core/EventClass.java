@@ -28,10 +28,13 @@ import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.core.Events.ensureMessage;
+import static io.spine.core.Events.typeUrl;
 
 /**
  * A value object holding a class of events.
@@ -66,9 +69,19 @@ public class EventClass extends MessageClass<EventMessage> {
     public static EventClass from(TypeUrl typeUrl) {
         Class<? extends Message> messageClass = typeUrl.getMessageClass();
         checkArgument(EventMessage.class.isAssignableFrom(messageClass),
-                      "Event class constructed from non-EventMessage type URL: %s",
+                      "Event class is constructed from non-EventMessage type URL: %s",
                       typeUrl.value());
         return from((Class<? extends EventMessage>) messageClass);
+    }
+
+    /**
+     * ...
+     *
+     * <p> Named {@code from} to avoid collision with {@link #of(Message)}.
+     */
+    public static EventClass from(Event event) {
+        TypeUrl typeUrl = typeUrl(event);
+        return from(typeUrl);
     }
 
     /**
@@ -101,5 +114,13 @@ public class EventClass extends MessageClass<EventMessage> {
     @SafeVarargs
     public static ImmutableSet<EventClass> setOf(Class<? extends EventMessage>... classes) {
         return setOf(Arrays.asList(classes));
+    }
+
+    public static ImmutableSet<EventClass> setFrom(Collection<Event> events) {
+        ImmutableSet<EventClass> result = events
+                .stream()
+                .map(EventClass::from)
+                .collect(toImmutableSet());
+        return result;
     }
 }

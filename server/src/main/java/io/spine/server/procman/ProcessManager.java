@@ -22,6 +22,7 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
@@ -84,6 +85,9 @@ public abstract class ProcessManager<I,
     /** The Command Bus to post routed commands. */
     private volatile @MonotonicNonNull CommandBus commandBus;
 
+    @LazyInit
+    private @MonotonicNonNull PmLifecycle lifecycle;
+
     /**
      * Creates a new instance.
      *
@@ -120,7 +124,7 @@ public abstract class ProcessManager<I,
      *         or a command handler
      * @apiNote Marked {@link VisibleForTesting} to allow package-local use of this method in tests.
      *          It does not affect the visibility for inheritors, which stays {@code protected}
-     *          {@linkplain io.spine.server.entity.TransactionalEntity#getBuilder() as originally 
+     *          {@linkplain io.spine.server.entity.TransactionalEntity#getBuilder() as originally
      *          defined in parents}.
      *          See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
      *          for reason behind the warning.
@@ -214,6 +218,23 @@ public abstract class ProcessManager<I,
                         " nor produced commands.",
                 this, event.getId(), eventClass
         );
+    }
+
+    void updateLifecycle(Iterable<Event> events) {
+        if (lifecycle == null) {
+            lifecycle = PmLifecycle.of(this);
+        }
+        lifecycle.updateBasedOn(events);
+    }
+
+    @Override
+    protected void setArchived(boolean archived) {
+        super.setArchived(archived);
+    }
+
+    @Override
+    protected void setDeleted(boolean deleted) {
+        super.setDeleted(deleted);
     }
 
     private static List<Event> noEvents() {
