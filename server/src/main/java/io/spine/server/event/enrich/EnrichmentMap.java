@@ -39,15 +39,11 @@ final class EnrichmentMap {
 
     /** Creates new instance loading the map from resources. */
     private EnrichmentMap() {
-        this.enrichments = allKnownEnrichments();
-    }
-
-    private static ImmutableSet<TypeName> allKnownEnrichments() {
-        return KnownTypes.instance()
-                         .enrichments()
-                         .stream()
-                         .map(Type::name)
-                         .collect(toImmutableSet());
+        this.enrichments = KnownTypes.instance()
+                                     .enrichments()
+                                     .stream()
+                                     .map(Type::name)
+                                     .collect(toImmutableSet());
     }
 
     /** Loads the map from resources. */
