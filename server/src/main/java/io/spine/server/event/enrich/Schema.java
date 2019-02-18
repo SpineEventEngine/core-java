@@ -28,6 +28,7 @@ import io.spine.base.EventMessage;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.toMultimap;
@@ -62,7 +63,7 @@ final class Schema {
                         .stream()
                         .filter(EnrichmentFunction::isActive)
                         .collect(toMultimap(EnrichmentFunction::sourceClass,
-                                            e -> e,
+                                            Function.identity(),
                                             LinkedListMultimap::create));
         multimap = ImmutableMultimap.copyOf(compacted);
     }
