@@ -106,7 +106,7 @@ final class Action {
     private void checkResult(@Nullable Message enriched, EnrichmentFunction function) {
         checkNotNull(
             enriched,
-            "EnrichmentFunction %s produced `null` for the source message %s",
+            "EnrichmentFunction `%s` produced `null` for the source message `%s`.",
             function, envelope.getMessage()
         );
     }
