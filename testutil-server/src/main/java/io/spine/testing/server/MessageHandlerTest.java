@@ -159,7 +159,7 @@ public abstract class MessageHandlerTest<I,
         repository = createRepository();
         assertNotNull(repository);
 
-        Set<CommandClass> commandClasses = getAllCommandClasses();
+        Set<CommandClass> commandClasses = allCommandClasses();
         boundedContext.registerCommandDispatcher(new VoidCommandDispatcher(commandClasses));
     }
 
@@ -180,17 +180,17 @@ public abstract class MessageHandlerTest<I,
         }
     }
 
-    private static Set<CommandClass> getAllCommandClasses() {
+    private static Set<CommandClass> allCommandClasses() {
         return KnownTypes
                 .instance()
-                .getAllUrls()
+                .allUrls()
                 .stream()
                 .flatMap(MessageHandlerTest::commandOfType)
                 .collect(toSet());
     }
 
     private static Stream<CommandClass> commandOfType(TypeUrl type) {
-        Class<?> cls = type.getJavaClass();
+        Class<?> cls = type.toJavaClass();
         if (CommandMessage.class.isAssignableFrom(cls)) {
             @SuppressWarnings("unchecked")
             Class<? extends CommandMessage> messageType = (Class<? extends CommandMessage>) cls;

@@ -21,7 +21,7 @@
 package io.spine.server.event.enrich;
 
 import com.google.common.truth.BooleanSubject;
-import com.google.protobuf.Message;
+import io.spine.base.EnrichmentMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
@@ -53,7 +53,6 @@ import org.junit.jupiter.api.Test;
 import java.util.function.BiFunction;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.core.given.GivenEvent.arbitrary;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
@@ -287,15 +286,15 @@ public class EnricherTest {
                     get(SeparateEnrichmentForMultipleProjectEvents.class, event, context);
         }
 
-        private static <E extends Message>
+        private static <E extends EnrichmentMessage>
         E get(Class<E> enrichmentClass, EventMessage e, EventContext ctx) {
-            return getEnrichment(enrichmentClass, ctx).orElseThrow(
-                    () -> newIllegalStateException(
-                            "Unable to obtain enrichment of class `%s`" +
-                                    " from the event of class `%s`",
-                            enrichmentClass.getCanonicalName(), e.getClass().getCanonicalName()
-                    )
-            );
+            return ctx.find(enrichmentClass)
+                      .orElseThrow(() -> newIllegalStateException(
+                              "Unable to obtain enrichment of class `%s`" +
+                                      " from the event of class `%s`",
+                              enrichmentClass.getCanonicalName(), e.getClass()
+                                                                   .getCanonicalName())
+                      );
         }
     }
 }

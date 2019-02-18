@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
  * @param <I> the type of the message ID
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
- * @author Alexander Yevsyukov
  */
 public interface ActorMessageEnvelope<I extends Message, T, C extends Message>
         extends MessageEnvelope<I, T, C> {

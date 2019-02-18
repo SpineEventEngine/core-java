@@ -28,13 +28,11 @@ import static java.lang.String.format;
 
 /**
  * Utilities for working with {@link Version}.
- *
- * @author Alexander Yevsyukov
  */
 public final class Versions {
 
+    /** Prevent instantiation of this utility class. */
     private Versions() {
-        // Prevent instantiation of this utility class.
     }
 
     private static Version create(int number, Timestamp timestamp) {

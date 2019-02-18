@@ -20,9 +20,12 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.code.proto.MessageType;
+import io.spine.code.proto.Type;
+import io.spine.code.proto.enrichment.EnrichmentType;
+import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -32,12 +35,19 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 final class EnrichmentMap {
 
-    /** A multi-map from enrichment class name to enriched message class names. */
-    private final ImmutableMultimap<String, String> enrichmentsMap;
+    private final ImmutableSet<TypeName> enrichments;
 
     /** Creates new instance loading the map from resources. */
     private EnrichmentMap() {
-        this.enrichmentsMap = EnrichmentFileSet.loadFromResources();
+        this.enrichments = allKnownEnrichments();
+    }
+
+    private static ImmutableSet<TypeName> allKnownEnrichments() {
+        return KnownTypes.instance()
+                         .enrichments()
+                         .stream()
+                         .map(Type::name)
+                         .collect(toImmutableSet());
     }
 
     /** Loads the map from resources. */
@@ -46,25 +56,29 @@ final class EnrichmentMap {
     }
 
     ImmutableSet<TypeName> enrichmentTypes() {
-        return enrichmentsMap.keySet()
-                             .stream()
-                             .map(TypeName::of)
-                             .collect(toImmutableSet());
+        return enrichments;
     }
 
     ImmutableSet<Class<Message>> sourceClasses(TypeName enrichmentType) {
         ImmutableSet<Class<Message>> result =
                 sourceTypes(enrichmentType)
                         .stream()
-                        .map(TypeName::getMessageClass)
+                        .map(TypeName::toMessageClass)
                         .collect(toImmutableSet());
         return result;
     }
 
+    /**
+     * Obtains source types enriched by the passed enrichment type.
+     */
     ImmutableSet<TypeName> sourceTypes(TypeName enrichmentType) {
-        return enrichmentsMap.get(enrichmentType.value())
-                             .stream()
-                             .map(TypeName::of)
-                             .collect(toImmutableSet());
+        MessageType mt = MessageType.of(enrichmentType.messageDescriptor());
+        EnrichmentType enrichment = EnrichmentType.from(mt);
+        ImmutableSet<TypeName> result =
+                enrichment.knownSources()
+                          .stream()
+                          .map(Type::name)
+                          .collect(toImmutableSet());
+        return result;
     }
 }

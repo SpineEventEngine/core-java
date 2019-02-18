@@ -26,8 +26,6 @@ import io.spine.annotation.Internal;
  * An interface for the {@link MessageRejection} types which report a message being invalid.
  *
  * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface MessageInvalid extends MessageRejection {

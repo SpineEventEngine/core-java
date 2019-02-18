@@ -22,25 +22,29 @@ package io.spine.core;
 
 import io.spine.base.EnrichmentContainer;
 import io.spine.base.EnrichmentMessage;
+import io.spine.base.MessageContext;
+import io.spine.core.Enrichment.Container;
 
 import java.util.Optional;
+
+import static io.spine.core.Enrichments.container;
 
 /**
  * A common interface for message contexts that hold enrichments.
  */
 public interface EnrichableMessageContext extends EnrichmentContainer, MessageContext {
 
+    /**
+     * Obtains an instance of {@link Enrichment} from the context of the message.
+     */
     @SuppressWarnings("override") // in generated code.
     Enrichment getEnrichment();
 
     @Override
     default <E extends EnrichmentMessage> Optional<E> find(Class<E> cls) {
         Enrichment enrichment = getEnrichment();
-        if (enrichment.getModeCase() != Enrichment.ModeCase.CONTAINER) {
-            return Optional.empty();
-        }
-        Enrichment.Container container = enrichment.getContainer();
-        Optional<E> result = Enrichments.getFromContainer(cls, container);
+        Optional<Container> container = container(enrichment);
+        Optional<E> result = container.flatMap(c -> Enrichments.find(cls, c));
         return result;
     }
 }

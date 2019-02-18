@@ -75,7 +75,7 @@ final class SubscriptionRecordFactory {
 
     private static boolean isEventSubscription(Subscription subscription) {
         TypeUrl type = getSubscriptionType(subscription);
-        Class<?> javaClass = type.getJavaClass();
+        Class<?> javaClass = type.toJavaClass();
         boolean result = EventMessage.class.isAssignableFrom(javaClass);
         return result;
     }

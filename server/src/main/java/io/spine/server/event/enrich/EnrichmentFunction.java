@@ -22,7 +22,7 @@ package io.spine.server.event.enrich;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Streams;
-import com.google.protobuf.Message;
+import io.spine.base.MessageContext;
 import io.spine.server.event.EventBus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -51,7 +51,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * function when building the {@link Enricher}.
  * @see EnricherBuilder#add(Class, Class, java.util.function.BiFunction)
  */
-abstract class EnrichmentFunction<S, C extends Message, T> {
+abstract class EnrichmentFunction<S, C extends MessageContext, T> {
 
     private final Class<S> sourceClass;
     private final Class<T> targetClass;
@@ -106,16 +106,6 @@ abstract class EnrichmentFunction<S, C extends Message, T> {
      */
     abstract boolean isActive();
 
-    /**
-     * A helper predicate to filter the active functions only.
-     */
-    static Predicate<EnrichmentFunction<?, ?, ?>> activeOnly() {
-        return input -> {
-            checkNotNull(input);
-            return input.isActive();
-        };
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(sourceClass, targetClass);
@@ -161,9 +151,10 @@ abstract class EnrichmentFunction<S, C extends Message, T> {
     static Optional<EnrichmentFunction<?, ?, ?>>
     firstThat(Iterable<EnrichmentFunction<?, ?, ?>> functions,
               Predicate<? super EnrichmentFunction<?, ?, ?>> predicate) {
-        Optional<EnrichmentFunction<?, ?, ?>> optional = Streams.stream(functions)
-                                                                .filter(predicate)
-                                                                .findFirst();
+        Optional<EnrichmentFunction<?, ?, ?>> optional =
+                Streams.stream(functions)
+                       .filter(predicate)
+                       .findFirst();
         return optional;
     }
 }
