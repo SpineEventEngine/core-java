@@ -133,7 +133,7 @@ public final class VisibilityGuard {
         Set<TypeName> entityTypes =
                 repos.stream()
                      .map(input -> input.repository.getEntityStateType()
-                                                   .toName())
+                                                   .toTypeName())
                      .collect(toImmutableSet());
         return entityTypes;
     }

@@ -38,14 +38,12 @@ import static io.spine.core.Events.typeUrl;
 
 /**
  * A value object holding a class of events.
- *
- * @author Alexander Yevsyukov
  */
-public class EventClass extends MessageClass<EventMessage> {
+public final class EventClass extends MessageClass<EventMessage> {
 
     private static final long serialVersionUID = 0L;
 
-    EventClass(Class<? extends EventMessage> value) {
+    private EventClass(Class<? extends EventMessage> value) {
         super(value);
     }
 

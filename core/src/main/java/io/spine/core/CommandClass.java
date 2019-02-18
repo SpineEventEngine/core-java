@@ -33,8 +33,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A value object for class type references.
- *
- * @author Alexander Yevsyukov
  */
 public final class CommandClass extends MessageClass<CommandMessage> {
 

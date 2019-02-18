@@ -32,9 +32,6 @@ import static io.spine.core.Enrichments.createEnrichment;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
- *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
 public final class EventEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>

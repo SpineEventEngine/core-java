@@ -26,6 +26,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.base.FieldFilter;
+import io.spine.code.proto.FieldName;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
@@ -33,17 +34,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.isDefault;
 
 /**
  * Provides information and dynamic access to a field of a {@code Message}.
- *
- * @author Alexander Yevsyukov
  */
 public final class Field {
+
+    private static final String ACCESSOR_METHOD_PREFIX = "get";
 
     /**
      * The name of the field as declared in the proto type.
@@ -91,8 +94,8 @@ public final class Field {
      * @return an {@code Field} wrapped into {@code Optional} or
      * {@code Optional.empty()} if there is no such field in the passed message class
      */
-    public static Optional<Field> forFilter(Class<? extends Message> messageClass,
-                                            FieldFilter filter) {
+    public static
+    Optional<Field> forFilter(Class<? extends Message> messageClass, FieldFilter filter) {
         checkNotNull(messageClass);
         checkNotNull(filter);
         String fieldName = getFieldName(filter);
@@ -140,16 +143,50 @@ public final class Field {
                 return ByteString.class;
             case ENUM:
                 typeUrl = TypeUrl.from(field.getEnumType());
-                Class<?> enumClass = typeUrl.getJavaClass();
+                Class<?> enumClass = typeUrl.toJavaClass();
                 return enumClass;
             case MESSAGE:
-                typeUrl = TypeUrl.from(field.getMessageType());
-                Class<? extends Message> msgClass = typeUrl.getMessageClass();
-                return msgClass;
+                return messageFieldClass(field);
             default:
                 throw newIllegalArgumentException("Unknown field type discovered: %s",
                                                    field.getFullName());
         }
+    }
+
+    /**
+     * Obtains a class of a message field.
+     *
+     * @throws IllegalStateException
+     *         if the passed field is a map
+     * @implNote This method cannot obtain a class for a map field because of the following.
+     *         Map fields are implemented using synthetic descriptors. Even if a field type is
+     *         {@link FieldDescriptor.Type#MESSAGE)}, it may mean that it represents a map or
+     *         a repeatable field.
+     *
+     *         <p>For maps, the full descriptor name obtained via
+     *         {@link FieldDescriptor#getMessageType()}, is synthetic and is composed using camel
+     *         case for the field name with the {@code "Entry"} suffix.
+     *
+     *         <p>There is no generated Java class that corresponds to this type name.
+     *         Because of this, {@link io.spine.type.KnownTypes} do not have the entry for this
+     *         type, and we cannot speak about a message type for this field.
+     */
+    private static Class<?> messageFieldClass(FieldDescriptor field) {
+        checkArgument(field.getType() == FieldDescriptor.Type.MESSAGE);
+        TypeUrl typeUrl;
+        if (field.isMapField()) {
+            throw newIllegalStateException(
+                    "Unable to obtain Java class for a map field `%s`." +
+                    " The descriptor of the field type (`%s`) is synthetic," +
+                    " and does not have a corresponding generated Java class.",
+                    field.getFullName(),
+                    field.getMessageType()
+                         .getFullName()
+            );
+        }
+        typeUrl = TypeUrl.from(field.getMessageType());
+        Class<? extends Message> msgClass = typeUrl.getMessageClass();
+        return msgClass;
     }
 
     /**
@@ -167,9 +204,10 @@ public final class Field {
         checkNotNull(cls);
         checkNotNull(fieldName);
 
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        String fieldGetterName = "get" + fieldName.substring(0, 1)
-                                                  .toUpperCase() + fieldName.substring(1);
+        String fieldGetterName =
+                ACCESSOR_METHOD_PREFIX +
+                        FieldName.of(fieldName)
+                                 .toCamelCase();
         Method fieldGetter = cls.getMethod(fieldGetterName);
         return fieldGetter;
     }

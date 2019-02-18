@@ -80,7 +80,7 @@ message MultiplePackageEnrichment {
            "spine.test.event.user.permission.*,"
            "spine.test.event.user.sharing.*";
 
-    int32 sharing_type = 1[(by) = "user_uid"];
+    int32 sharing_type = 1 [(by) = "user_uid"];
 }
 
 message EnrichmentBoundWithFieldsWithDifferentNames {
@@ -96,7 +96,7 @@ message EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes {
            "spine.test.event.user.sharing.SharingRequestApproved,"
            "spine.test.event.user.permission.*";
 
-    int32 user_google_uid = 1 [(by) = "SharingRequestApproved.second_user_uid|user_uid"];
+    int32 user_google_uid = 1 [(by) = "second_user_uid | user_uid"];
 }
 
 message EnrichmentBoundWithMultipleFieldsWithDifferentNames {

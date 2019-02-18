@@ -21,7 +21,9 @@
 package io.spine.core;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import io.spine.base.EnrichmentMessage;
+import io.spine.core.Enrichment.Container;
+import io.spine.core.Enrichment.ModeCase;
 import io.spine.type.TypeName;
 
 import java.util.Map;
@@ -44,15 +46,23 @@ public final class Enrichments {
      *
      * @param context a context to get enrichments from
      * @return an optional of enrichments
+     * @deprecated please use {@link EventContext#find(Class)}
      */
-    static Optional<Enrichment.Container> getEnrichments(EventContext context) {
+    @Deprecated
+    public static Optional<Container> getEnrichments(EventContext context) {
         checkNotNull(context);
         Enrichment enrichment = context.getEnrichment();
-        return getContainer(enrichment);
+        return container(enrichment);
     }
 
-    private static Optional<Enrichment.Container> getContainer(Enrichment enrichment) {
-        if (enrichment.getModeCase() == Enrichment.ModeCase.CONTAINER) {
+    /**
+     * Obtains the container of enrichments from the passed enclosing instance,
+     * if it its {@link ModeCase} allows for having enrichments.
+     *
+     * <p>Otherwise, empty {@code Optional} is returned.
+     */
+    static Optional<Container> container(Enrichment enrichment) {
+        if (enrichment.getModeCase() == ModeCase.CONTAINER) {
             return Optional.of(enrichment.getContainer());
         }
         return Optional.empty();
@@ -65,19 +75,22 @@ public final class Enrichments {
      * @param  context         a context to get an enrichment from
      * @param  <E>             a type of the event enrichment
      * @return an optional of the enrichment
+     * @deprecated please use {@link EventContext#find(Class)}
      */
-    public static <E extends Message>
+    @Deprecated
+    public static <E extends EnrichmentMessage>
     Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
         checkNotNull(enrichmentClass);
-        Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
-        if (!container.isPresent()) {
-            return Optional.empty();
-        }
-        return getFromContainer(enrichmentClass, container.get());
+        checkNotNull(context);
+        Optional<E> result = context.find(enrichmentClass);
+        return result;
     }
 
-    static <E extends Message>
-    Optional<E> getFromContainer(Class<E> enrichmentClass, Enrichment.Container enrichments) {
+    /**
+     * Obtains enrichment from the passed container.
+     */
+    static <E extends EnrichmentMessage>
+    Optional<E> find(Class<E> enrichmentClass, Container enrichments) {
         String typeName = TypeName.of(enrichmentClass)
                                   .value();
         Any any = enrichments.getItemsMap()
@@ -93,8 +106,8 @@ public final class Enrichments {
     static Enrichment createEnrichment(Map<String, Any> enrichments) {
         Enrichment.Builder enrichment =
                 Enrichment.newBuilder()
-                          .setContainer(Enrichment.Container.newBuilder()
-                                                            .putAllItems(enrichments));
+                          .setContainer(Container.newBuilder()
+                                                 .putAllItems(enrichments));
         return enrichment.build();
     }
 }

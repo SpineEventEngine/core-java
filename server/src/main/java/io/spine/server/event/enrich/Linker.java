@@ -23,7 +23,7 @@ package io.spine.server.event.enrich;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
-import io.spine.code.proto.ref.FieldRef;
+import io.spine.code.proto.enrichment.FieldRef;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import io.spine.server.reflect.Field;
@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
-import static io.spine.code.proto.ref.FieldRef.allFrom;
+import static io.spine.code.proto.enrichment.FieldRef.allFrom;
 import static io.spine.protobuf.Messages.defaultInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -193,7 +193,7 @@ final class Linker implements Logging {
     private @Nullable FieldDescriptor
     findSourceField(FieldRef ref, FieldDescriptor enrichmentField, boolean strict) {
         Descriptor srcMessage = sourceDescriptor(ref);
-        if (ref.hasType() && !ref.matchesType(srcMessage)) {
+        if (ref.isContext() && !ref.matchesType(srcMessage)) {
             return null;
         }
         Optional<FieldDescriptor> field = ref.find(srcMessage);
@@ -242,7 +242,7 @@ final class Linker implements Logging {
     }
 
     private void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
-        _debug("There is no enrichment function for translating {} into {}",
+        _debug("There is no enrichment function for translating `{}` into `{}`.",
                sourceFieldClass, targetFieldClass);
     }
 }

@@ -112,7 +112,7 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     protected abstract Object[] arrangeArguments(Message entityState, EventEnvelope event);
 
     private static Optional<EntityOption> getEntityOption(TypeName messageType) {
-        Descriptors.Descriptor descriptor = messageType.getMessageDescriptor();
+        Descriptors.Descriptor descriptor = messageType.messageDescriptor();
         Optional<EntityOption> entityOption = option(descriptor, OptionsProto.entity);
         return entityOption;
     }

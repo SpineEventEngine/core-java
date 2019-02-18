@@ -20,7 +20,7 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.protobuf.Message;
+import io.spine.base.MessageContext;
 
 import java.util.function.BiFunction;
 
@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <T> the type of the field in the target enrichment message
  * @param <C> the type of the event context
  */
-final class FieldEnrichment<S, C extends Message, T>
+final class FieldEnrichment<S, C extends MessageContext, T>
         extends EnrichmentFunction<S, C, T> {
 
     /** A function, which performs the translation. */
@@ -55,7 +55,7 @@ final class FieldEnrichment<S, C extends Message, T>
      *         a conversion function
      * @return a new instance
      */
-    static <S, T, C extends Message>
+    static <S, T, C extends MessageContext>
     FieldEnrichment<S, C, T> of(Class<S> source, Class<T> target, BiFunction<S, C, T> func) {
         return new FieldEnrichment<>(source, target, func);
     }

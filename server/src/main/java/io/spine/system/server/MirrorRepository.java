@@ -91,8 +91,8 @@ final class MirrorRepository
     }
 
     private static boolean shouldMirror(TypeUrl type) {
-        Descriptor descriptor = type.toName()
-                                    .getMessageDescriptor();
+        Descriptor descriptor = type.toTypeName()
+                                    .messageDescriptor();
         Optional<EntityOption> option = option(descriptor, entity);
         Kind kind = option.map(EntityOption::getKind)
                           .orElse(KIND_UNKNOWN);

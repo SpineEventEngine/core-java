@@ -28,10 +28,10 @@ import io.spine.base.EventMessage;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.toMultimap;
-import static io.spine.server.event.enrich.EnrichmentFunction.activeOnly;
 import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
 
 /**
@@ -61,9 +61,9 @@ final class Schema {
         LinkedListMultimap<? extends Class<?>, ? extends EnrichmentFunction<?, ?, ?>> compacted =
                 multimap.values()
                         .stream()
-                        .filter(activeOnly())
+                        .filter(EnrichmentFunction::isActive)
                         .collect(toMultimap(EnrichmentFunction::sourceClass,
-                                            e -> e,
+                                            Function.identity(),
                                             LinkedListMultimap::create));
         multimap = ImmutableMultimap.copyOf(compacted);
     }
@@ -139,7 +139,7 @@ final class Schema {
         }
 
         private void addEventEnrichment(Class<? extends Message> sourceClass, TypeName enrichment) {
-            Class<Message> enrichmentClass = enrichment.getMessageClass();
+            Class<Message> enrichmentClass = enrichment.toMessageClass();
             @SuppressWarnings("unchecked") /* It is relatively safe to cast since currently
             only event enrichment is available via proto definitions, and the source types loaded by
             EnrichmentMap are all event messages. Schema composition should be extended with

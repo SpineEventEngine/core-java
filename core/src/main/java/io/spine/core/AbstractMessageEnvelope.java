@@ -68,6 +68,6 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
 
     @Override
     public String toString() {
-        return format("%s(%s)", getClass().getSimpleName(), getMessageClass().getTypeName());
+        return format("%s(%s)", getClass().getSimpleName(), getMessageClass().typeName());
     }
 }

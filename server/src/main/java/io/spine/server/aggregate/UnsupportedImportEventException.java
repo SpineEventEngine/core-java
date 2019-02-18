@@ -50,7 +50,7 @@ public final class UnsupportedImportEventException
 
     private static String messageFormat(EventEnvelope envelope) {
         EventClass eventClass = envelope.getMessageClass();
-        TypeName typeName = eventClass.getTypeName();
+        TypeName typeName = eventClass.typeName();
         String result = format(
             "None of the aggregates declare importing appliers for " +
                     "the event of the class: `%s` (proto type: `%s`).",

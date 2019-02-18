@@ -24,8 +24,8 @@ import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.FieldPath;
+import io.spine.base.FieldPaths;
 import io.spine.client.CompositeFilter.CompositeOperator;
-import io.spine.protobuf.FieldPaths;
 
 import java.util.Collection;
 
