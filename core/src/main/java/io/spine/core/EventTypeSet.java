@@ -49,7 +49,7 @@ public final class EventTypeSet {
         return new EventTypeSet(eventClasses, rejectionClasses);
     }
 
-    public boolean matchesAnyOf(Iterable<Event> events) {
+    public boolean containsAnyOf(Iterable<Event> events) {
         return matchesAnyEvent(events) || matchesAnyRejection(events);
     }
 

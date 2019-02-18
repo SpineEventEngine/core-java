@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventTypeSet;
 
 /**
- * Process manager lifecycle as represented in the domain model.
+ * Lifecycle of a process manager class as represented in the domain model.
  */
 @Internal
 public final class Lifecycle {
@@ -44,10 +44,10 @@ public final class Lifecycle {
     }
 
     public boolean archivesOn(Iterable<Event> events) {
-        return archiveOn.matchesAnyOf(events);
+        return archiveOn.containsAnyOf(events);
     }
 
     public boolean deletesOn(Iterable<Event> events) {
-        return deleteOn.matchesAnyOf(events);
+        return deleteOn.containsAnyOf(events);
     }
 }

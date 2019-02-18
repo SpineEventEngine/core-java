@@ -51,10 +51,10 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     private static final long serialVersionUID = 0L;
 
-    private final Lifecycle lifecycle;
-
     private final ReactorClassDelegate<P> reactorDelegate;
     private final CommanderClass<P> commanderDelegate;
+
+    private final Lifecycle lifecycle;
 
     private ProcessManagerClass(Class<P> cls) {
         super(cls);
