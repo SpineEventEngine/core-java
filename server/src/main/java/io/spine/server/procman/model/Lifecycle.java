@@ -31,6 +31,8 @@ import io.spine.option.LifecycleOption;
 import java.io.Serializable;
 import java.util.Optional;
 
+import static io.spine.code.proto.Lifecycle.lifecycleOf;
+
 /**
  * Lifecycle of a process manager class as represented in the domain model.
  */
@@ -53,18 +55,22 @@ public final class Lifecycle implements Serializable {
     }
 
     static Lifecycle from(LifecycleOption lifecycleOption) {
-        EventClassSet.parse(lifecycleOption.getArchiveUpon());
-        EventClassSet.parse(lifecycleOption.getDeleteUpon());
-        return null;
+        EventClassSet archiveOn = EventClassSet.parse(lifecycleOption.getArchiveUpon());
+        EventClassSet deleteOn = EventClassSet.parse(lifecycleOption.getDeleteUpon());
+        return new Lifecycle(archiveOn, deleteOn);
+    }
+
+    public static Lifecycle of(MessageType type) {
+        Optional<LifecycleOption> option = lifecycleOf(type);
+        Lifecycle result = option.map(Lifecycle::from)
+                                 .orElseGet(Lifecycle::empty);
+        return result;
+
     }
 
     public static Lifecycle of(Class<? extends Message> stateClass) {
         MessageType type = MessageType.of(stateClass);
-        Optional<LifecycleOption> option = io.spine.code.proto.Lifecycle.lifecycleOf(type);
-        if (option.isPresent()) {
-            return from(option.get());
-        }
-        return empty();
+        return of(type);
     }
 
     public boolean archivesOn(Iterable<Event> events) {

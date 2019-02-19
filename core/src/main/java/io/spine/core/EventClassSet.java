@@ -22,6 +22,9 @@ package io.spine.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.code.proto.MessageType;
+import io.spine.code.proto.ref.TypeRef;
+import io.spine.type.KnownTypes;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -59,7 +62,10 @@ public final class EventClassSet implements Serializable {
                                  ImmutableSet.copyOf(rejectionClasses));
     }
 
-    public static EventClassSet parse(String typeRefs) {
+    public static EventClassSet parse(String typeRef) {
+        TypeRef ref = TypeRef.parse(typeRef);
+        ImmutableSet<MessageType> types = KnownTypes.instance()
+                                                    .findAll(ref);
         return empty();
     }
 

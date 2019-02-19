@@ -75,7 +75,8 @@ final class ModelVerifier implements Logging {
     }
 
     private void verifyProtoDeclarations() {
-
+        EntityLifecycle entityLifecycle = EntityLifecycle.ofKnownTypes();
+        entityLifecycle.verify();
     }
 
     /**
