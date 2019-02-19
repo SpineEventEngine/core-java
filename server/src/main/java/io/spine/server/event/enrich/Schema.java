@@ -22,10 +22,12 @@ package io.spine.server.event.enrich;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.type.TypeName;
+import io.spine.code.proto.enrichment.EnrichmentType;
+import io.spine.type.KnownTypes;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -131,15 +133,17 @@ final class Schema {
         }
 
         private void loadEventEnrichments() {
-            EnrichmentMap map = EnrichmentMap.load();
-            for (TypeName enrichment : map.enrichmentTypes()) {
-                map.sourceClasses(enrichment)
-                   .forEach(sourceClass -> addEventEnrichment(sourceClass, enrichment));
-            }
+            ImmutableSet<EnrichmentType> enrichments =
+                    KnownTypes.instance()
+                              .enrichments();
+            enrichments.forEach(
+                    e -> e.sourceClasses()
+                          .forEach(sourceClass -> addEventEnrichment(sourceClass, e.javaClass()))
+            );
         }
 
-        private void addEventEnrichment(Class<? extends Message> sourceClass, TypeName enrichment) {
-            Class<Message> enrichmentClass = enrichment.toMessageClass();
+        private void addEventEnrichment(Class<? extends Message> sourceClass,
+                                        Class<? extends Message> enrichmentClass) {
             @SuppressWarnings("unchecked") /* It is relatively safe to cast since currently
             only event enrichment is available via proto definitions, and the source types loaded by
             EnrichmentMap are all event messages. Schema composition should be extended with
