@@ -20,14 +20,12 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
+import io.spine.code.proto.enrichment.EnrichmentType;
 import io.spine.type.TypeName;
 
-import java.util.stream.Stream;
-
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 
 /**
@@ -35,12 +33,12 @@ import static com.google.common.truth.Truth.assertThat;
  */
 final class EnrichmentAssertion {
 
-    private static final EnrichmentMap MAP = EnrichmentMap.load();
-
-    private final TypeName enrichmentType;
+    private final EnrichmentType enrichmentType;
 
     private EnrichmentAssertion(Class<? extends Message> cls) {
-        enrichmentType = TypeName.of(cls);
+        Descriptor descriptor = TypeName.of(cls)
+                                        .messageDescriptor();
+        enrichmentType = new EnrichmentType(descriptor);
     }
 
     static EnrichmentAssertion _assert(Class<? extends Message> cls) {
@@ -65,21 +63,11 @@ final class EnrichmentAssertion {
 
     @SafeVarargs
     private final void assertEnriches(boolean strict, Class<? extends Message>... expectedClasses) {
-        ImmutableSet<TypeName> sourceTypes = map().sourceTypes(enrichmentType);
-        ImmutableSet<TypeName> expectedTypes =
-                Stream.of(expectedClasses)
-                      .map(TypeName::of)
-                      .collect(toImmutableSet());
-
-        IterableSubject assertThat = assertThat(sourceTypes);
+        IterableSubject assertThat = assertThat(enrichmentType.sourceClasses());
         if (strict) {
-            assertThat.containsExactlyElementsIn(expectedTypes);
+            assertThat.containsExactlyElementsIn(expectedClasses);
         } else {
-            assertThat.containsAllIn(expectedTypes);
+            assertThat.containsAllIn(expectedClasses);
         }
-    }
-
-    private static EnrichmentMap map() {
-        return MAP;
     }
 }
