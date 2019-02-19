@@ -23,6 +23,7 @@ package io.spine.server.event.enrich;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
+import io.spine.code.proto.enrichment.ByOption;
 import io.spine.code.proto.enrichment.FieldRef;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
@@ -38,7 +39,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
-import static io.spine.code.proto.enrichment.FieldRef.allFrom;
 import static io.spine.protobuf.Messages.defaultInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -123,7 +123,7 @@ final class Linker implements Logging {
     }
 
     private Set<FieldDescriptor> toSourceFields(FieldDescriptor enrichmentField) {
-        ImmutableList<FieldRef> fieldReferences = allFrom(enrichmentField.toProto());
+        ImmutableList<FieldRef> fieldReferences = ByOption.allFrom(enrichmentField);
         checkState(!fieldReferences.isEmpty(),
                    "Unable to get source field information from the enrichment field `%s`",
                    enrichmentField.getFullName());
