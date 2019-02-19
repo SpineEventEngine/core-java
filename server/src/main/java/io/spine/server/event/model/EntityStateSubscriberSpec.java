@@ -28,7 +28,6 @@ import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.option.EntityOption;
-import io.spine.option.OptionsProto;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeName;
