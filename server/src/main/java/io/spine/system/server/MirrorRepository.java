@@ -39,8 +39,6 @@ import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
-import static io.spine.option.Options.option;
-import static io.spine.option.OptionsProto.entity;
 import static io.spine.system.server.Mirror.ID_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
 import static io.spine.system.server.MirrorProjection.buildFilters;
@@ -93,7 +91,8 @@ final class MirrorRepository
     private static boolean shouldMirror(TypeUrl type) {
         Descriptor descriptor = type.toTypeName()
                                     .messageDescriptor();
-        Optional<EntityOption> option = option(descriptor, entity);
+        // TODO:2019-02-19:serhii.lekariev: same as EntityStateSubscriberSpec#getEntityOption
+        Optional<EntityOption> option = io.spine.code.proto.EntityOption.valueOf(descriptor);
         Kind kind = option.map(EntityOption::getKind)
                           .orElse(KIND_UNKNOWN);
         boolean aggregate = kind == AGGREGATE;

@@ -41,7 +41,6 @@ import static com.google.common.collect.Sets.immutableEnumSet;
 import static io.spine.option.EntityOption.Visibility.FULL;
 import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 import static io.spine.option.EntityOption.Visibility.VISIBILITY_UNKNOWN;
-import static io.spine.option.Options.option;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 
@@ -111,10 +110,12 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     protected abstract Object[] arrangeArguments(Message entityState, EventEnvelope event);
 
+    // TODO:2019-02-19:serhii.lekariev: https://github.com/SpineEventEngine/base/pull/333#discussion_r258035256
+    // see how this resolves and change accordingly
     private static Optional<EntityOption> getEntityOption(TypeName messageType) {
         Descriptors.Descriptor descriptor = messageType.messageDescriptor();
-        Optional<EntityOption> entityOption = option(descriptor, OptionsProto.entity);
-        return entityOption;
+        Optional<EntityOption> result = io.spine.code.proto.EntityOption.valueOf(descriptor);
+        return result;
     }
 
     private static boolean visibleForSubscription(EntityOption entity) {
