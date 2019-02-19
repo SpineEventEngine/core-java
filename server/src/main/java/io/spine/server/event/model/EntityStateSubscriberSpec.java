@@ -22,9 +22,10 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.code.proto.EntityStateOption;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.option.EntityOption;
@@ -109,11 +110,9 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     protected abstract Object[] arrangeArguments(Message entityState, EventEnvelope event);
 
-    // TODO:2019-02-19:serhii.lekariev: https://github.com/SpineEventEngine/base/pull/333#discussion_r258035256
-    // see how this resolves and change accordingly
     private static Optional<EntityOption> getEntityOption(TypeName messageType) {
-        Descriptors.Descriptor descriptor = messageType.messageDescriptor();
-        Optional<EntityOption> result = io.spine.code.proto.EntityOption.valueOf(descriptor);
+        Descriptor descriptor = messageType.messageDescriptor();
+        Optional<EntityOption> result = EntityStateOption.valueOf(descriptor);
         return result;
     }
 

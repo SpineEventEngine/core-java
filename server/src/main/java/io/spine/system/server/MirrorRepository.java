@@ -27,6 +27,7 @@ import com.google.protobuf.FieldMask;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
+import io.spine.code.proto.EntityStateOption;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.type.TypeUrl;
@@ -91,8 +92,7 @@ final class MirrorRepository
     private static boolean shouldMirror(TypeUrl type) {
         Descriptor descriptor = type.toTypeName()
                                     .messageDescriptor();
-        // TODO:2019-02-19:serhii.lekariev: same as EntityStateSubscriberSpec#getEntityOption
-        Optional<EntityOption> option = io.spine.code.proto.EntityOption.valueOf(descriptor);
+        Optional<EntityOption> option = EntityStateOption.valueOf(descriptor);
         Kind kind = option.map(EntityOption::getKind)
                           .orElse(KIND_UNKNOWN);
         boolean aggregate = kind == AGGREGATE;
