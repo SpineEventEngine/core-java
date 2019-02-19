@@ -52,7 +52,7 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
 
     @SuppressWarnings("unchecked") // Checked logically.
     public static RejectionClass from(TypeUrl typeUrl) {
-        Class<Message> messageClass = typeUrl.getMessageClass();
+        Class<? extends Message> messageClass = typeUrl.getMessageClass();
         checkArgument(RejectionMessage.class.isAssignableFrom(messageClass),
                       "Rejection class is constructed from non-RejectionMessage type URL: %s",
                       typeUrl.value());

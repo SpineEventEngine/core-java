@@ -20,27 +20,51 @@
 
 package io.spine.server.procman.model;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.code.proto.MessageType;
 import io.spine.core.Event;
-import io.spine.core.EventTypeSet;
+import io.spine.core.EventClassSet;
+import io.spine.option.LifecycleOption;
+
+import java.io.Serializable;
+import java.util.Optional;
 
 /**
  * Lifecycle of a process manager class as represented in the domain model.
  */
 @Internal
-public final class Lifecycle {
+@Immutable
+public final class Lifecycle implements Serializable {
 
-    private final EventTypeSet archiveOn;
-    private final EventTypeSet deleteOn;
+    private static final long serialVersionUID = 0L;
 
-    private Lifecycle(EventTypeSet archiveOn, EventTypeSet deleteOn) {
+    private final EventClassSet archiveOn;
+    private final EventClassSet deleteOn;
+
+    private Lifecycle(EventClassSet archiveOn, EventClassSet deleteOn) {
         this.archiveOn = archiveOn;
         this.deleteOn = deleteOn;
     }
 
-    static Lifecycle of(Class<? extends Message> stateClass) {
+    private static Lifecycle empty() {
+        return new Lifecycle(EventClassSet.empty(), EventClassSet.empty());
+    }
+
+    static Lifecycle from(LifecycleOption lifecycleOption) {
+        EventClassSet.parse(lifecycleOption.getArchiveUpon());
+        EventClassSet.parse(lifecycleOption.getDeleteUpon());
         return null;
+    }
+
+    public static Lifecycle of(Class<? extends Message> stateClass) {
+        MessageType type = MessageType.of(stateClass);
+        Optional<LifecycleOption> option = io.spine.code.proto.Lifecycle.lifecycleOf(type);
+        if (option.isPresent()) {
+            return from(option.get());
+        }
+        return empty();
     }
 
     public boolean archivesOn(Iterable<Event> events) {

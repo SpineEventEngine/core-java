@@ -22,8 +22,6 @@ package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.logging.Logging;
-import io.spine.model.CommandHandlers;
-import io.spine.server.command.model.DuplicateHandlerCheck;
 import io.spine.server.model.Model;
 import io.spine.tools.gradle.ProjectHierarchy;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,6 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -65,17 +64,18 @@ final class ModelVerifier implements Logging {
         this.projectClassLoader = createClassLoader(project);
     }
 
-    /**
-     * Verifies Spine model upon the given Gradle project.
-     *
-     * @param handlers the listing of the Spine model classes
-     */
-    void verify(CommandHandlers handlers) {
-        ClassSet classSet = new ClassSet(projectClassLoader,
-                                         handlers.getCommandHandlingTypesList());
-        classSet.reportNotFoundIfAny(log());
-        DuplicateHandlerCheck.newInstance()
-                             .check(classSet.elements());
+    void verifyModel(Path modelPath) {
+        verifyModelClasses(modelPath);
+        verifyProtoDeclarations();
+    }
+
+    private void verifyModelClasses(Path modelPath) {
+        CommandHandlerSet commandHandlerSet = CommandHandlerSet.parse(modelPath);
+        commandHandlerSet.verifyAgainst(projectClassLoader);
+    }
+
+    private void verifyProtoDeclarations() {
+
     }
 
     /**

@@ -21,7 +21,9 @@
 package io.spine.core;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,29 +33,41 @@ import static io.spine.core.Events.isRejection;
 /**
  * A set of combined event and rejection classes.
  */
-public final class EventTypeSet {
+@Immutable
+public final class EventClassSet implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     private final ImmutableSet<EventClass> eventClasses;
     private final ImmutableSet<RejectionClass> rejectionClasses;
 
-    private EventTypeSet(ImmutableSet<EventClass> eventClasses,
-                         ImmutableSet<RejectionClass> rejectionClasses) {
+    private EventClassSet(ImmutableSet<EventClass> eventClasses,
+                          ImmutableSet<RejectionClass> rejectionClasses) {
         this.eventClasses = eventClasses;
         this.rejectionClasses = rejectionClasses;
     }
 
-    public static EventTypeSet of(ImmutableSet<EventClass> eventClasses,
-                                  ImmutableSet<RejectionClass> rejectionClasses) {
+    public static EventClassSet empty() {
+        return new EventClassSet(ImmutableSet.of(), ImmutableSet.of());
+    }
+
+    public static EventClassSet of(ImmutableSet<EventClass> eventClasses,
+                                   ImmutableSet<RejectionClass> rejectionClasses) {
         checkNotNull(eventClasses);
         checkNotNull(rejectionClasses);
-        return new EventTypeSet(eventClasses, rejectionClasses);
+        return new EventClassSet(ImmutableSet.copyOf(eventClasses),
+                                 ImmutableSet.copyOf(rejectionClasses));
+    }
+
+    public static EventClassSet parse(String typeRefs) {
+        return empty();
     }
 
     public boolean containsAnyOf(Iterable<Event> events) {
-        return matchesAnyEvent(events) || matchesAnyRejection(events);
+        return containsAnyEvent(events) || containsAnyRejection(events);
     }
 
-    private boolean matchesAnyEvent(Iterable<Event> events) {
+    private boolean containsAnyEvent(Iterable<Event> events) {
         Optional<EventClass> matchedEvent =
                 stream(events)
                         .filter(event -> !isRejection(event))
@@ -63,7 +77,7 @@ public final class EventTypeSet {
         return matchedEvent.isPresent();
     }
 
-    private boolean matchesAnyRejection(Iterable<Event> events) {
+    private boolean containsAnyRejection(Iterable<Event> events) {
         Optional<RejectionClass> matchedRejection =
                 stream(events)
                         .filter(Events::isRejection)
