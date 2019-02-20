@@ -70,3 +70,11 @@ message PmIterationPlanned {
     // If `false` the iteration won't be started.
     bool budget_allocated = 2;
 }
+
+message PmProcessArchived {
+    ProjectId project_id = 1;
+}
+
+message PmProcessDeleted {
+    ProjectId project_id = 1;
+}

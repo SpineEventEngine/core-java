@@ -46,13 +46,14 @@ import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
+import io.spine.test.procman.event.PmProcessArchived;
+import io.spine.test.procman.event.PmProcessDeleted;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 
 import java.util.List;
 
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testdata.Sample.builderForType;
 
 public class TestProcessManager
@@ -130,17 +131,23 @@ public class TestProcessManager
     }
 
     @Assign
-    Nothing handle(PmArchiveProcess command) {
+    PmProcessArchived handle(PmArchiveProcess command) {
         keep(command);
-        setArchived(true);
-        return nothing();
+        PmProcessArchived event = PmProcessArchived
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
+        return event;
     }
 
     @Assign
-    Nothing handle(PmDeleteProcess command) {
+    PmProcessDeleted handle(PmDeleteProcess command) {
         keep(command);
-        setDeleted(true);
-        return nothing();
+        PmProcessDeleted event = PmProcessDeleted
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
+        return event;
     }
 
     @Assign

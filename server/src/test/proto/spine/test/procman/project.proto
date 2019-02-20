@@ -32,6 +32,9 @@ message ProjectId {
 }
 
 message Project {
+    option (lifecycle).archive_upon = "spine.test.procman.event.PmProcessArchived";
+    option (lifecycle).delete_upon = "spine.test.procman.event.PmProcessDeleted";
+
     ProjectId id = 1;
     string name = 2;
     repeated Task task = 3;
