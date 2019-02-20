@@ -23,15 +23,12 @@ package io.spine.server.procman.model;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.code.proto.EntityLifecycleOption;
 import io.spine.code.proto.MessageType;
 import io.spine.core.Event;
 import io.spine.core.EventClassSet;
-import io.spine.option.LifecycleOption;
 
 import java.io.Serializable;
-import java.util.Optional;
-
-import static io.spine.code.proto.Lifecycle.lifecycleOf;
 
 /**
  * Lifecycle of a process manager class as represented in the domain model.
@@ -50,22 +47,18 @@ public final class Lifecycle implements Serializable {
         this.deleteOn = deleteOn;
     }
 
-    private static Lifecycle empty() {
-        return new Lifecycle(EventClassSet.empty(), EventClassSet.empty());
-    }
-
-    private static Lifecycle from(LifecycleOption lifecycleOption) {
-        EventClassSet archiveOn = EventClassSet.parse(lifecycleOption.getArchiveUpon());
-        EventClassSet deleteOn = EventClassSet.parse(lifecycleOption.getDeleteUpon());
-        return new Lifecycle(archiveOn, deleteOn);
-    }
-
     public static Lifecycle of(MessageType type) {
-        Optional<LifecycleOption> option = lifecycleOf(type);
-        Lifecycle result = option.map(Lifecycle::from)
-                                 .orElseGet(Lifecycle::empty);
-        return result;
+        EntityLifecycleOption option = new EntityLifecycleOption();
+        EventClassSet archiveUpon =
+                option.archiveUpon(type)
+                      .map(EventClassSet::parse)
+                      .orElseGet(EventClassSet::empty);
 
+        EventClassSet deleteUpon =
+                option.deleteUpon(type)
+                      .map(EventClassSet::parse)
+                      .orElseGet(EventClassSet::empty);
+        return new Lifecycle(archiveUpon, deleteUpon);
     }
 
     public static Lifecycle of(Class<? extends Message> stateClass) {
@@ -73,11 +66,11 @@ public final class Lifecycle implements Serializable {
         return of(type);
     }
 
-    public boolean archivesOn(Iterable<Event> events) {
+    public boolean archivesUpon(Iterable<Event> events) {
         return archiveOn.containsAnyOf(events);
     }
 
-    public boolean deletesOn(Iterable<Event> events) {
+    public boolean deletesUpon(Iterable<Event> events) {
         return deleteOn.containsAnyOf(events);
     }
 }

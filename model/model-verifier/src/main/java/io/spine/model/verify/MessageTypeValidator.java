@@ -18,22 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package io.spine.model.verify;
 
-def final SPINE_VERSION = '1.0.0-SNAPSHOT'
+import io.spine.code.proto.MessageType;
+import io.spine.server.model.InsufficientMessageTypeError;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+import java.util.function.Predicate;
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = SPINE_VERSION
+final class MessageTypeValidator {
 
-    // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = SPINE_VERSION
+    private final Predicate<MessageType> predicate;
+    private final String errorMessage;
+
+    MessageTypeValidator(Predicate<MessageType> predicate, String errorMessage) {
+        this.predicate = predicate;
+        this.errorMessage = errorMessage;
+    }
+
+    void check(MessageType type) {
+        if (!predicate.test(type)) {
+            throwNonMatchError(type);
+        }
+    }
+
+    private void throwNonMatchError(MessageType type) {
+        throw new InsufficientMessageTypeError(errorMessage, type);
+    }
 }

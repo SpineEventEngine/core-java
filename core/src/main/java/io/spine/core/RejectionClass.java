@@ -21,6 +21,7 @@ package io.spine.core;
 
 import com.google.protobuf.Message;
 import io.spine.base.RejectionMessage;
+import io.spine.code.proto.MessageType;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
@@ -78,5 +79,9 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
         RejectionMessage message = (RejectionMessage) ensureMessage(rejectionOrMessage);
         RejectionClass result = of(message.getClass());
         return result;
+    }
+
+    public static RejectionClass of(MessageType type) {
+        return from(type.url());
     }
 }

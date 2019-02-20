@@ -18,22 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package io.spine.server.model;
 
-def final SPINE_VERSION = '1.0.0-SNAPSHOT'
+import io.spine.code.proto.ref.TypeRef;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+import static java.lang.String.format;
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = SPINE_VERSION
+public final class UnknownReferencedTypeError extends ModelError {
 
-    // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = SPINE_VERSION
+    private static final long serialVersionUID = 0L;
+
+    public UnknownReferencedTypeError(TypeRef typeRef) {
+        super(format("Type ref (`%s`) references unknown types", typeRef));
+    }
 }

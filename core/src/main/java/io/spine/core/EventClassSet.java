@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.core.Events.isRejection;
 
@@ -62,11 +63,24 @@ public final class EventClassSet implements Serializable {
                                  ImmutableSet.copyOf(rejectionClasses));
     }
 
-    public static EventClassSet parse(String typeRef) {
-        TypeRef ref = TypeRef.parse(typeRef);
+    public static EventClassSet parse(TypeRef typeRef) {
         ImmutableSet<MessageType> types = KnownTypes.instance()
-                                                    .findAll(ref);
-        return empty();
+                                                    .findAll(typeRef);
+        return new EventClassSet(events(types), rejections(types));
+    }
+
+    private static ImmutableSet<EventClass> events(ImmutableSet<MessageType> types) {
+        return types.stream()
+                    .filter(MessageType::isEvent)
+                    .map(EventClass::of)
+                    .collect(toImmutableSet());
+    }
+
+    private static ImmutableSet<RejectionClass> rejections(ImmutableSet<MessageType> types) {
+        return types.stream()
+                    .filter(MessageType::isRejection)
+                    .map(RejectionClass::of)
+                    .collect(toImmutableSet());
     }
 
     public boolean containsAnyOf(Iterable<Event> events) {

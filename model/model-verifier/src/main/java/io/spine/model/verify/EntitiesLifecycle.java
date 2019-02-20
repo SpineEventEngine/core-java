@@ -20,33 +20,43 @@
 
 package io.spine.model.verify;
 
-import com.google.common.collect.ImmutableMap;
-import io.spine.code.proto.Lifecycle;
+import com.google.common.collect.ImmutableSet;
+import io.spine.code.proto.EntityLifecycleOption;
+import io.spine.code.proto.EntityStateOption;
 import io.spine.code.proto.MessageType;
 import io.spine.code.proto.ref.TypeRef;
-import io.spine.option.LifecycleOption;
+import io.spine.option.EntityOption;
+import io.spine.server.model.InsufficientMessageTypeError;
 import io.spine.type.KnownTypes;
 
-import static io.spine.code.proto.Lifecycle.lifecycleOf;
+import java.util.Optional;
+import java.util.function.Predicate;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 
 final class EntitiesLifecycle {
 
-    private final ImmutableMap<MessageType, LifecycleOption> entityLifecycle;
+    private final ImmutableSet<MessageType> entitiesWithLifecycle;
 
-    private EntitiesLifecycle(ImmutableMap<MessageType, LifecycleOption> entityLifecycle) {
-        this.entityLifecycle = entityLifecycle;
+    private EntitiesLifecycle(ImmutableSet<MessageType> entityTypes) {
+        this.entitiesWithLifecycle = entityTypes;
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked logically.
     static EntitiesLifecycle ofKnownTypes() {
-        ImmutableMap.Builder<MessageType, LifecycleOption> map = new ImmutableMap.Builder<>();
-        KnownTypes.instance()
-                  .asTypeSet()
-                  .messageTypes()
-                  .stream()
-                  .filter(Lifecycle::hasOption)
-                  .forEach(type -> map.put(type, lifecycleOf(type).get()));
-        return new EntitiesLifecycle(map.build());
+        ImmutableSet<MessageType> entityTypes =
+                KnownTypes.instance()
+                          .asTypeSet()
+                          .messageTypes()
+                          .stream()
+                          .filter(EntitiesLifecycle::hasLifecycle)
+                          .collect(toImmutableSet());
+        return new EntitiesLifecycle(entityTypes);
+    }
+
+    private static boolean hasLifecycle(MessageType type) {
+        EntityLifecycleOption option = new EntityLifecycleOption();
+        return option.hasLifecycle(type);
     }
 
     void verify() {
@@ -59,19 +69,43 @@ final class EntitiesLifecycle {
      * {@linkplain io.spine.option.EntityOption.Kind#PROCESS_MANAGER kind}.
      */
     private void verifyMessageTypes() {
+        entitiesWithLifecycle.forEach(EntitiesLifecycle::checkIsProcessManager);
+    }
 
+    private static void checkIsProcessManager(MessageType type) {
+        Optional<EntityOption> optionValue = EntityStateOption.valueOf(type.descriptor());
+        boolean isProcessManager =
+                optionValue.map(EntityOption::getKind)
+                           .filter(kind -> kind == PROCESS_MANAGER)
+                           .isPresent();
+        if (!isProcessManager) {
+            throw new InsufficientMessageTypeError(
+                    "Only entities of process manager kind can have `lifecycle` option", type
+            );
+        }
     }
 
     /**
-     * Verifies that all specified entity lifecycle triggers are valid Protobuf types.
+     * Verifies that all specified entity lifecycle triggers are valid event types.
      */
     private void verifyTriggerTypes() {
-        entityLifecycle.values()
-                       .forEach(this::checkLifecycleTriggers);
+        entitiesWithLifecycle.forEach(EntitiesLifecycle::checkLifecycleTriggers);
     }
 
-    private void checkLifecycleTriggers(LifecycleOption lifecycleOption) {
-        String archiveUpon = lifecycleOption.getArchiveUpon();
-        TypeRef parse = TypeRef.parse(archiveUpon);
+    private static void checkLifecycleTriggers(MessageType messageType) {
+        EntityLifecycleOption option = new EntityLifecycleOption();
+        Optional<TypeRef> archiveUpon = option.archiveUpon(messageType);
+        archiveUpon.ifPresent(EntitiesLifecycle::checkLifecycleTrigger);
+    }
+
+    private static void checkLifecycleTrigger(TypeRef typeRef) {
+        Predicate<MessageType> isEvent = MessageType::isEvent;
+        Predicate<MessageType> predicate = isEvent.or(MessageType::isRejection);
+        MessageTypeValidator validator =
+                new MessageTypeValidator(predicate,
+                                         "Only event or rejection types can be referenced in " +
+                                                 "the `lifecycle` option");
+        TypeRefChecker checker = TypeRefChecker.withValidator(typeRef, validator);
+        checker.check();
     }
 }

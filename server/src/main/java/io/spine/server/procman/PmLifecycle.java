@@ -46,13 +46,13 @@ final class PmLifecycle {
     }
 
     private void archiveIfNecessary(Iterable<Event> events) {
-        if (lifecycle.archivesOn(events)) {
+        if (lifecycle.archivesUpon(events)) {
             processManager.setArchived(true);
         }
     }
 
     private void deleteIfNecessary(Iterable<Event> events) {
-        if (lifecycle.deletesOn(events)) {
+        if (lifecycle.deletesUpon(events)) {
             processManager.setDeleted(true);
         }
     }

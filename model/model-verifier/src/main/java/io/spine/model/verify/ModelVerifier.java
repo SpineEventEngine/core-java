@@ -69,7 +69,8 @@ final class ModelVerifier implements Logging {
         verifyEntitiesLifecycle();
     }
 
-    private void verifyCommandHandlers(Path modelPath) {
+    @VisibleForTesting
+    void verifyCommandHandlers(Path modelPath) {
         _debug("Checking command handlers assembled in the Model");
         CommandHandlerSet commandHandlerSet = CommandHandlerSet.parse(modelPath);
         commandHandlerSet.checkAgainst(projectClassLoader);

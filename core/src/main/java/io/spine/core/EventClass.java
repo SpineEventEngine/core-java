@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.code.proto.MessageType;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
@@ -75,7 +76,7 @@ public final class EventClass extends MessageClass<EventMessage> {
     /**
      * ...
      *
-     * <p> Named {@code from} to avoid collision with {@link #of(Message)}.
+     * <p>Named {@code from} to avoid collision with {@link #of(Message)}.
      */
     public static EventClass from(Event event) {
         TypeUrl typeUrl = typeUrl(event);
@@ -97,6 +98,10 @@ public final class EventClass extends MessageClass<EventMessage> {
     public static EventClass of(Message eventOrMessage) {
         EventMessage eventMessage = ensureMessage(eventOrMessage);
         return from(eventMessage.getClass());
+    }
+
+    public static EventClass of(MessageType type) {
+        return from(type.url());
     }
 
     /** Creates immutable set of {@code EventClass} from the passed set. */
