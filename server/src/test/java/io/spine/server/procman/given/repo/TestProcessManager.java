@@ -54,6 +54,7 @@ import io.spine.test.procman.event.PmTaskAdded;
 
 import java.util.List;
 
+import static io.spine.base.Identifier.pack;
 import static io.spine.testdata.Sample.builderForType;
 
 public class TestProcessManager

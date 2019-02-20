@@ -343,11 +343,11 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("command")
         void command() {
-            PmDeleteProcess deleteProcess = deleteProcess();
-            testDispatchCommand(deleteProcess);
-            ProjectId projectId = deleteProcess.getProjectId();
+            PmArchiveProcess archiveProcess = archiveProcess();
+            testDispatchCommand(archiveProcess);
+            ProjectId projectId = archiveProcess.getProjectId();
             TestProcessManager processManager = repository().findOrCreate(projectId);
-            assertTrue(processManager.isDeleted());
+            assertTrue(processManager.isArchived());
 
             // Dispatch a command to the deleted process manager.
             testDispatchCommand(addTask());
@@ -357,7 +357,7 @@ class ProcessManagerRepositoryTest
             assertFalse(addedTasks.isEmpty());
 
             // Check that the process manager was not re-created before dispatching.
-            assertTrue(processManager.isDeleted());
+            assertTrue(processManager.isArchived());
         }
 
         @Test
@@ -388,11 +388,11 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("command")
         void command() {
-            PmArchiveProcess archiveProcess = archiveProcess();
-            testDispatchCommand(archiveProcess);
-            ProjectId projectId = archiveProcess.getProjectId();
+            PmDeleteProcess deleteProcess = deleteProcess();
+            testDispatchCommand(deleteProcess);
+            ProjectId projectId = deleteProcess.getProjectId();
             TestProcessManager processManager = repository().findOrCreate(projectId);
-            assertTrue(processManager.isArchived());
+            assertTrue(processManager.isDeleted());
 
             // Dispatch a command to the archived process manager.
             testDispatchCommand(addTask());
@@ -402,7 +402,7 @@ class ProcessManagerRepositoryTest
             assertFalse(addedTasks.isEmpty());
 
             // Check that the process manager was not re-created before dispatching.
-            assertTrue(processManager.isArchived());
+            assertTrue(processManager.isDeleted());
         }
 
         @Test
