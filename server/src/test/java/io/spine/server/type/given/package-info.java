@@ -18,36 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
-
-import com.google.protobuf.Empty;
-import io.spine.type.MessageClass;
-
 /**
- * The class of an {@link Empty} message.
+ * Test environment for the {@link io.spine.base} package.
  */
-public final class EmptyClass extends MessageClass<Empty> {
 
-    private static final long serialVersionUID = 0L;
-    private static final EmptyClass INSTANCE = new EmptyClass();
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.type.given;
 
-    private EmptyClass() {
-        super(Empty.class);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    /**
-     * Return the single instance of the {@code EmptyClass}.
-     */
-    public static EmptyClass instance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String toString() {
-        return "EmptyClass.instance()";
-    }
-
-    private Object readResolve() {
-        return INSTANCE;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

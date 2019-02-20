@@ -22,8 +22,8 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 

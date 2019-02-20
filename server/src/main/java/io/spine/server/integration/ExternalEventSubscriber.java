@@ -19,10 +19,10 @@
  */
 package io.spine.server.integration;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 

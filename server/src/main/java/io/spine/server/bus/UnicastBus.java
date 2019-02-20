@@ -22,7 +22,7 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import static java.lang.String.format;

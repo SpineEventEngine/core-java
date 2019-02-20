@@ -18,9 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
 import io.spine.base.CommandMessage;
+import io.spine.core.ActorContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.Commands;
+import io.spine.core.EventContext;
+import io.spine.core.TenantId;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;

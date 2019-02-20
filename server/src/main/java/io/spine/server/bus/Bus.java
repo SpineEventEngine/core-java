@@ -24,7 +24,7 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;

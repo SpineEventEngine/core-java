@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 

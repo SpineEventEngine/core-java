@@ -21,14 +21,14 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.test.shared.StringEntity;
 import io.spine.server.test.shared.StringEntityVBuilder;
+import io.spine.server.type.EventEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.given.GivenEvent.arbitrary;
+import static io.spine.server.type.given.GivenEvent.arbitrary;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;

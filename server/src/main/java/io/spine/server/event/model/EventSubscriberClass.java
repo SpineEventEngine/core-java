@@ -21,12 +21,12 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EmptyClass;
-import io.spine.core.EventClass;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;

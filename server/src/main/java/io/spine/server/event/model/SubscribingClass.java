@@ -20,9 +20,9 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;

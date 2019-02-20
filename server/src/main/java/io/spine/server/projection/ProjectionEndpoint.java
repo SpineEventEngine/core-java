@@ -26,11 +26,11 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 

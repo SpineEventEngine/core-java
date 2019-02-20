@@ -21,8 +21,8 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
 import io.spine.server.entity.Repository;
+import io.spine.server.type.EventClass;
 import io.spine.type.TypeUrl;
 
 import java.util.concurrent.ConcurrentHashMap;

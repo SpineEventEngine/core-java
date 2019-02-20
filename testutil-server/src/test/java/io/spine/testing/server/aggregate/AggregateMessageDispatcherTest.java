@@ -21,8 +21,8 @@
 package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.aggregate.given.agg.TuMessageLog;
@@ -38,10 +38,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("AggregateMessageDispatcher should")
 class AggregateMessageDispatcherTest {
 
@@ -55,7 +51,7 @@ class AggregateMessageDispatcherTest {
     @Test
     @DisplayName("dispatch command")
     void dispatchCommand() {
-        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
         int messageValue = 2017_07_28;
         LogInteger message = LogInteger.newBuilder()
                                        .setValue(messageValue)

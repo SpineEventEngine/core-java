@@ -22,9 +22,6 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.event.model.EventSubscriberClass;
@@ -33,6 +30,9 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.tenant.EventOperation;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Optional;

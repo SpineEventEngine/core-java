@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
+package io.spine.server.type.given;
 
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
@@ -26,8 +26,8 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 
-import static io.spine.core.given.GivenEvent.message;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.type.given.GivenEvent.message;
 
 public class EventsTestEnv {
 

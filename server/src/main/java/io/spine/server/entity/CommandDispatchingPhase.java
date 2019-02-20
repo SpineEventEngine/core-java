@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ import java.util.List;
  * <p>The result of such dispatch is always a {@link List} of {@linkplain Event events} as
  * described in the {@code CommandHandlingEntity}
  * {@linkplain
- * io.spine.server.command.CommandHandlingEntity#dispatchCommand(io.spine.core.CommandEnvelope)
+ * io.spine.server.command.CommandHandlingEntity#dispatchCommand(CommandEnvelope)
  * contract}.
  *
  * @param <I>

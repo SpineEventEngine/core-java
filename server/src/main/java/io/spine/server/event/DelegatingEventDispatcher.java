@@ -22,11 +22,11 @@ package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
 import java.util.Set;

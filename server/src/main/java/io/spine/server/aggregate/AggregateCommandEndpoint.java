@@ -20,11 +20,11 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 

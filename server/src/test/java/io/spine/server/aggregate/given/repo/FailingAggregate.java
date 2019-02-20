@@ -32,6 +32,7 @@ import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.StringAggregate;
 import io.spine.server.test.shared.StringAggregateVBuilder;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.test.aggregate.number.DoNothing;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.NumberPassed;
@@ -47,7 +48,7 @@ import static java.util.Collections.emptyList;
  *
  * <p>Normally aggregates should reject commands via command rejections. This class is test
  * environment for testing of now
- * {@linkplain io.spine.server.aggregate.AggregateRepository#logError(String, io.spine.core.MessageEnvelope, RuntimeException)
+ * {@linkplain io.spine.server.aggregate.AggregateRepository#logError(String, MessageEnvelope, RuntimeException)
  * logs errors}.
  *
  * @see FailingAggregateRepository

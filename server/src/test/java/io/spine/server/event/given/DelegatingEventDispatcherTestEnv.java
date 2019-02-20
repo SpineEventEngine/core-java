@@ -21,9 +21,9 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EvTeamCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

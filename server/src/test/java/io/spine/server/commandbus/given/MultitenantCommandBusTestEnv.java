@@ -22,10 +22,10 @@ package io.spine.server.commandbus.given;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.test.command.CmdAddTask;
 
 import java.util.Set;

@@ -25,9 +25,9 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.type.CommandEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -44,9 +44,6 @@ import static java.util.Optional.empty;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
- *
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
 public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 

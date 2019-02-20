@@ -29,7 +29,6 @@ import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
@@ -40,6 +39,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.test.command.CmdCreateProject;
@@ -187,8 +187,8 @@ abstract class AbstractCommandBusTestSuite {
                 .build();
         requestFactory =
                 multitenant
-                ? TestActorRequestFactory.newInstance(getClass(), newUuid())
-                : TestActorRequestFactory.newInstance(getClass());
+                ? new TestActorRequestFactory(getClass(), newUuid())
+                : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = memoizingObserver();
     }

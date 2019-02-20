@@ -21,8 +21,8 @@
 package io.spine.server.event;
 
 import io.spine.annotation.Internal;
-import io.spine.core.EventEnvelope;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.function.BiFunction;
 

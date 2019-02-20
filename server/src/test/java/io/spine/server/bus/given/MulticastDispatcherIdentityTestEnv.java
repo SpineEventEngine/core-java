@@ -21,8 +21,8 @@
 package io.spine.server.bus.given;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Set;

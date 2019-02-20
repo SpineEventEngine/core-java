@@ -24,9 +24,9 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;
@@ -36,8 +36,6 @@ import static java.lang.String.format;
  *
  * <p>A command is considered a duplicate when its ID matches the ID of a command which was
  * already dispatched emitting events in a target aggregate.
- *
- * @author Mykhailo Drachuk
  */
 public class DuplicateCommandException extends CommandException implements MessageInvalid {
 

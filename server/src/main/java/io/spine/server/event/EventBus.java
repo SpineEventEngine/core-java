@@ -31,9 +31,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusBuilder;
@@ -43,6 +41,8 @@ import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.enrich.Enricher;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

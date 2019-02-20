@@ -20,11 +20,11 @@
 package io.spine.server.integration;
 
 import com.google.protobuf.Message;
-import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.AbstractMessageEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;

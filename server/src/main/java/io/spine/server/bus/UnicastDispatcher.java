@@ -20,7 +20,7 @@
 
 package io.spine.server.bus;
 
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 /**
@@ -29,7 +29,6 @@ import io.spine.type.MessageClass;
  * @param <C> the type of dispatched messages
  * @param <E> the type of envelopes for dispatched objects that contain messages
  * @param <I> the type of the entity ID
- * @author Alexander Yevsyukov
  */
 public interface UnicastDispatcher<C extends MessageClass, E extends MessageEnvelope, I>
         extends MessageDispatcher<C, E, I> {

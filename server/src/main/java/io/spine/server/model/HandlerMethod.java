@@ -22,7 +22,7 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.PostConstruct;

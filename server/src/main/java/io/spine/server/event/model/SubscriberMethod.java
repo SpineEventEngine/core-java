@@ -24,15 +24,15 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
-import io.spine.core.EmptyClass;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 

@@ -20,10 +20,10 @@
 
 package io.spine.server.event;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
 import io.spine.server.integration.ExternalDispatcherFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
+package io.spine.server.type.given;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;

@@ -23,12 +23,12 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 

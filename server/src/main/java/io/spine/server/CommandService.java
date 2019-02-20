@@ -28,10 +28,10 @@ import io.spine.base.Error;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
+import io.spine.server.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;

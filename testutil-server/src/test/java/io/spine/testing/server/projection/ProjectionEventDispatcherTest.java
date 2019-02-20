@@ -20,7 +20,7 @@
 
 package io.spine.testing.server.projection;
 
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.given.entity.TuEventLog;
 import io.spine.testing.server.given.entity.TuProjectId;

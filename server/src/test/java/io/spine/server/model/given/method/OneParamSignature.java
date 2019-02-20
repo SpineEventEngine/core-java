@@ -21,10 +21,10 @@
 package io.spine.server.model.given.method;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

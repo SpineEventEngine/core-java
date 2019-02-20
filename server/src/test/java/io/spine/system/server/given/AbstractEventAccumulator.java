@@ -24,10 +24,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;

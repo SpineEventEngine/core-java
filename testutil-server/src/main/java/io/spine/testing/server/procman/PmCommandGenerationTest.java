@@ -23,8 +23,8 @@ package io.spine.testing.server.procman;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.server.MessageHandlerTest;
 import io.spine.testing.server.expected.CommanderExpected;
 

@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 

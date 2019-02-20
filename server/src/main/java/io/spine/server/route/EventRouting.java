@@ -23,8 +23,8 @@ package io.spine.server.route;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.server.type.EventClass;
 import io.spine.system.server.EntityStateChanged;
 
 import java.util.Optional;
@@ -155,7 +155,6 @@ public final class EventRouting<I>
     public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
         Optional<? extends Route<EventMessage, EventContext, Set<I>>> optional = doGet(eventClass);
         if (optional.isPresent()) {
-            @SuppressWarnings("unchecked") // Cast to external API.
             EventRoute<I, M> route = (EventRoute<I, M>) optional.get();
             return Optional.of(route);
         }

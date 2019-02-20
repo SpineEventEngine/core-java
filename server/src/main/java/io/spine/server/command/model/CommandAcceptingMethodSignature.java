@@ -24,13 +24,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.lang.annotation.Annotation;
 

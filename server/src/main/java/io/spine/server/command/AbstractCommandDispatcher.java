@@ -21,12 +21,12 @@
 package io.spine.server.command;
 
 import com.google.protobuf.Any;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.function.Supplier;
 

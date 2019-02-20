@@ -42,7 +42,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Versions.newVersion;
-import static io.spine.core.given.GivenEvent.withMessage;
+import static io.spine.server.type.given.GivenEvent.withMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -261,7 +261,7 @@ public abstract class TransactionTest<I,
         assertEquals(modifiedVersion, tx.getVersion());
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions"})  // OK for a test method.
+    @SuppressWarnings("unchecked")  // OK for a test method.
     @Test
     @DisplayName("notify listener during transaction execution")
     void notifyListenerDuringExecution() {

@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
+import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public abstract class EntityMessageEndpoint<I,
      * during dispatching.
      *
      * <p>Error handling is delegated to
-     * {@link #onError(io.spine.core.ActorMessageEnvelope, RuntimeException)
+     * {@link #onError(ActorMessageEnvelope, RuntimeException)
      * onError(envelope, exception)} method.
      *
      * @param entityId the ID of the entity which to dispatch the message to

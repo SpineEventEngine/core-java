@@ -30,8 +30,8 @@ import io.spine.client.EntityUpdatesVBuilder;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionUpdateVBuilder;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Responses;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityStateChanged;
 
 /**

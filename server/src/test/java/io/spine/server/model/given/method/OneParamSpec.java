@@ -22,8 +22,8 @@ package io.spine.server.model.given.method;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 

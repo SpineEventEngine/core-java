@@ -21,9 +21,10 @@
 package io.spine.server.route;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Truth8;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.commands.CmdCreateProject;
 import io.spine.test.route.RegisterUser;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.random;
@@ -39,14 +41,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass"
-        /* OK as custom routes do not refer to the test suite. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
+/* OK as custom routes do not refer to the test suite. */
+@SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
 @DisplayName("CommandRouting should")
 class CommandRoutingTest {
+
+    private static final TestActorRequestFactory requestFactory =
+            new TestActorRequestFactory(CommandRoutingTest.class);
 
     /** Default result of the command routing function. */
     private static final long DEFAULT_ANSWER = 42L;
@@ -110,10 +111,12 @@ class CommandRoutingTest {
     @Test
     @DisplayName("add custom route")
     void addCustomRoute() {
-        assertEquals(commandRouting, commandRouting.route(RegisterUser.class, customRoute));
+        // Assert the result of the adding routing call. It modifies the routing.
+        assertThat(commandRouting.route(RegisterUser.class, customRoute))
+                .isEqualTo(commandRouting);
 
-        assertEquals(customRoute, commandRouting.get(RegisterUser.class)
-                                                .get());
+        Truth8.assertThat(commandRouting.get(RegisterUser.class))
+              .hasValue(customRoute);
     }
 
     @Test
@@ -140,8 +143,6 @@ class CommandRoutingTest {
     @Test
     @DisplayName("apply default route")
     void applyDefaultRoute() {
-        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
-
         // Replace the default route since we have custom command message.
         commandRouting.replaceDefault(customDefault)
                       // Have custom route too.
@@ -151,7 +152,7 @@ class CommandRoutingTest {
                 .newBuilder()
                 .setId(newUuid())
                 .build();
-        CommandEnvelope command = CommandEnvelope.of(factory.createCommand(cmd));
+        CommandEnvelope command = CommandEnvelope.of(requestFactory.createCommand(cmd));
 
         long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
 
@@ -161,11 +162,11 @@ class CommandRoutingTest {
     @Test
     @DisplayName("apply custom route")
     void applyCustomRoute() {
-        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
-
-        CommandEnvelope command = factory.createEnvelope(RegisterUser.newBuilder()
-                                                                     .setId(random(1, 100))
-                                                                     .build());
+        CommandEnvelope command = CommandEnvelope.of(
+                requestFactory.createCommand(RegisterUser.newBuilder()
+                                                         .setId(random(1, 100))
+                                                         .build())
+        );
         // Have custom route.
         commandRouting.route(RegisterUser.class, customRoute);
 

@@ -24,10 +24,10 @@ import com.google.protobuf.Any;
 import io.spine.base.FieldPath;
 import io.spine.base.FieldPaths;
 import io.spine.core.ByField;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 

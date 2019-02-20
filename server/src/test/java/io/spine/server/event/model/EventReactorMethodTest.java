@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.UserId;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.given.reactor.RcIterableReturn;
@@ -42,6 +41,7 @@ import io.spine.server.event.model.given.reactor.RcWrongSecondParam;
 import io.spine.server.event.model.given.reactor.TestEventReactor;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.model.declare.SignatureMismatchException;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.event.RefProjectAssigned;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -53,6 +53,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -313,11 +314,11 @@ class EventReactorMethodTest {
         return result;
     }
 
-    @SuppressWarnings("ConstantConditions") // It's OK for tests
     private static EventReactorMethod createMethod(Method method) {
-        return signature.create(method).get();
+        Optional<EventReactorMethod> found = signature.create(method);
+        assertTrue(found.isPresent());
+        return found.get();
     }
-
 
     private static EventEnvelope envelope(Message eventMessage) {
         Any cmd = pack(eventMessage);

@@ -21,10 +21,6 @@
 package io.spine.server.command;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -32,6 +28,10 @@ import io.spine.server.command.model.CommandingMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 

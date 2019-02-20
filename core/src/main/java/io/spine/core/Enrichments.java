@@ -26,7 +26,6 @@ import io.spine.core.Enrichment.Container;
 import io.spine.core.Enrichment.ModeCase;
 import io.spine.type.TypeName;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -65,16 +64,5 @@ final class Enrichments {
         Optional<E> result = Optional.ofNullable(any)
                                      .map(packed -> unpack(packed, enrichmentClass));
         return result;
-    }
-
-    /**
-     * Creates a new {@link Enrichment} instance from the passed map.
-     */
-    static Enrichment createEnrichment(Map<String, Any> enrichments) {
-        Enrichment.Builder enrichment =
-                Enrichment.newBuilder()
-                          .setContainer(Container.newBuilder()
-                                                 .putAllItems(enrichments));
-        return enrichment.build();
     }
 }

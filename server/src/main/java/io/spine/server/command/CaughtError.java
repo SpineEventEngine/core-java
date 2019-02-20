@@ -21,8 +21,8 @@
 package io.spine.server.command;
 
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Optional;
 

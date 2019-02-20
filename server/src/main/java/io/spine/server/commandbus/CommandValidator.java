@@ -25,11 +25,11 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageInvalid;
 import io.spine.core.TenantId;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.route.DefaultCommandRoute;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 

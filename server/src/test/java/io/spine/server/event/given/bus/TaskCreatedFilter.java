@@ -24,9 +24,9 @@ import com.google.protobuf.Any;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Task;
 

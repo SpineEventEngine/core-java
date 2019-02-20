@@ -22,10 +22,6 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.SeveralCommands;
 import io.spine.server.commandbus.SingleCommand;
@@ -33,6 +29,10 @@ import io.spine.server.commandbus.Split;
 import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodResult;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.List;

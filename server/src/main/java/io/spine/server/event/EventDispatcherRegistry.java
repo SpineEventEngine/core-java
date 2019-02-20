@@ -20,9 +20,9 @@
 
 package io.spine.server.event;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.bus.DispatcherRegistry;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 

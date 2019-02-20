@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.test.core.ProjectCreated;

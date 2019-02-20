@@ -18,27 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
-import com.google.protobuf.Message;
+import com.google.protobuf.Empty;
+import io.spine.type.MessageClass;
 
 /**
- * A common interface for messages sent by an actor.
- *
- * @param <I> the type of the message ID
- * @param <T> the type of the object that wraps a message
- * @param <C> the type of the message context
+ * The class of an {@link Empty} message.
  */
-public interface ActorMessageEnvelope<I extends Message, T, C extends Message>
-        extends MessageEnvelope<I, T, C> {
+public final class EmptyClass extends MessageClass<Empty> {
+
+    private static final long serialVersionUID = 0L;
+    private static final EmptyClass INSTANCE = new EmptyClass();
+
+    private EmptyClass() {
+        super(Empty.class);
+    }
 
     /**
-     * Obtains ID of the tenant in which context the actor works.
+     * Return the single instance of the {@code EmptyClass}.
      */
-    TenantId getTenantId();
+    public static EmptyClass instance() {
+        return INSTANCE;
+    }
 
-    /**
-     * Obtains an actor context for the wrapped message.
-     */
-    ActorContext getActorContext();
+    @Override
+    public String toString() {
+        return "EmptyClass.instance()";
+    }
+
+    private Object readResolve() {
+        return INSTANCE;
+    }
 }

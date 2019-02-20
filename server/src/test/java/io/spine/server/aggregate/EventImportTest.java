@@ -21,13 +21,13 @@
 package io.spine.server.aggregate;
 
 import io.spine.base.EventMessage;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.given.klasse.EngineId;
 import io.spine.server.aggregate.given.klasse.EngineRepository;
 import io.spine.server.aggregate.given.klasse.event.EngineStopped;
 import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;

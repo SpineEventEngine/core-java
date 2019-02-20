@@ -18,14 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Test environment for the {@link io.spine.base} package.
- */
+package io.spine.server.type;
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.core.given;
+import com.google.common.testing.SerializableTester;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+@DisplayName("EmptyClass should")
+class EmptyClassTest {
+
+    @Test
+    @DisplayName("be serializable")
+    void serialize() {
+        SerializableTester.reserializeAndAssert(EmptyClass.instance());
+    }
+
+    @Test
+    @DisplayName("return the same instance")
+    void sameInstance() {
+        assertSame(EmptyClass.instance(), EmptyClass.instance());
+    }
+}

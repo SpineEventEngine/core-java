@@ -32,7 +32,7 @@ ext {
     versionToPublish = '1.0.0-SNAPSHOT'
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = SPINE_VERSION
+    spineBaseVersion = '1.0.0-SNAPSHOT'
 
     // Depend on `time` for `ZoneOffset` and other date/time types and utilities.
     spineTimeVersion = SPINE_VERSION

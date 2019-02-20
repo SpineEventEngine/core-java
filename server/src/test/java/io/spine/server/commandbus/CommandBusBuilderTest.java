@@ -21,11 +21,11 @@
 package io.spine.server.commandbus;
 
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.testing.Tests;
@@ -46,9 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandBus Builder should")
 class CommandBusBuilderTest

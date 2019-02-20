@@ -22,8 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.Streams;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
@@ -33,6 +31,8 @@ import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.bus.UnicastBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
 

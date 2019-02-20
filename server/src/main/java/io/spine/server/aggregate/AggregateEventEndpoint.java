@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * Abstract base for endpoints that dispatch events to aggregates.

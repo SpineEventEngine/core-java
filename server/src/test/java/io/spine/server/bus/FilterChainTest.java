@@ -20,15 +20,12 @@
 
 package io.spine.server.bus;
 
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("FilterChain should")
 class FilterChainTest {
 

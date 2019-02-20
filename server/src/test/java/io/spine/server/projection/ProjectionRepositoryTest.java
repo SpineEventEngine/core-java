@@ -27,13 +27,9 @@ import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
@@ -45,6 +41,10 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDepri
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.projection.given.TestProjection;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.test.projection.Project;
@@ -102,7 +102,7 @@ class ProjectionRepositoryTest
 
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
         TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(ProjectionRepositoryTest.class, tenantId);
+                new TestActorRequestFactory(ProjectionRepositoryTest.class, tenantId);
         return newInstance(producerId, requestFactory);
     }
 

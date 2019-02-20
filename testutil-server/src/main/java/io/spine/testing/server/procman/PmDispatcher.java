@@ -23,15 +23,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
 
 import java.util.List;
@@ -44,14 +44,11 @@ import static org.mockito.Mockito.when;
 
 /**
  * A test utility for dispatching commands and events to a {@code ProcessManager} in test purposes.
- *
- * @author Alex Tymchenko
  */
 @VisibleForTesting
 @CanIgnoreReturnValue
 public final class PmDispatcher {
 
-    @SuppressWarnings("unchecked") // casts are ensured by type matching in key-value pairs
     private static final
     ImmutableMap<Class<? extends MessageEnvelope>, EndpointFn> endpoints =
             ImmutableMap.<Class<? extends MessageEnvelope>, EndpointFn>

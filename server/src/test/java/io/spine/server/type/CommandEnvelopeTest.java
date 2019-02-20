@@ -18,28 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.envelope;
+package io.spine.server.type;
 
+import io.spine.base.CommandMessage;
+import io.spine.base.Identifier;
+import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.MessageEnvelopeTest;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.client.command.TestCommandMessage;
+import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Similar test cases to RejectionEnvelopeTest.
 @DisplayName("CommandEnvelope should")
 class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandEnvelopeTest.class);
+            new TestActorRequestFactory(CommandEnvelopeTest.class);
 
     @Override
     protected Command outerObject() {
@@ -73,5 +73,35 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
 
         assertEquals(command.getContext()
                             .getActorContext(), envelope.getActorContext());
+    }
+
+    @Test
+    @DisplayName("obtain type of given command")
+    void getCommandType() {
+        Command command = requestFactory.generateCommand();
+
+        TypeName typeName = CommandEnvelope.of(command)
+                                           .getTypeName();
+        assertNotNull(typeName);
+        assertEquals(TypeName.of(TestCommandMessage.class), typeName);
+    }
+
+    @Test
+    @DisplayName("obtain type url of given command")
+    void getCommandTypeUrl() {
+        ActorRequestFactory factory =
+                new TestActorRequestFactory(CommandEnvelopeTest.class);
+        CommandMessage message = TestCommandMessage
+                .newBuilder()
+                .setId(Identifier.newUuid())
+                .build();
+        Command command = factory.command()
+                                 .create(message);
+
+        TypeUrl typeUrl = CommandEnvelope.of(command)
+                                         .getTypeName()
+                                         .toUrl();
+
+        assertEquals(TypeUrl.of(TestCommandMessage.class), typeUrl);
     }
 }

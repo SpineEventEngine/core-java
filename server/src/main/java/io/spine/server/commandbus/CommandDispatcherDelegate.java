@@ -20,8 +20,9 @@
 package io.spine.server.commandbus;
 
 import io.spine.annotation.Internal;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Set;
 
@@ -43,7 +44,7 @@ import java.util.Set;
  * returned.
  *
  * <p>The same interference takes place in attempt to implement
- * {@link io.spine.server.bus.UnicastDispatcher#dispatch(io.spine.core.MessageEnvelope)
+ * {@link io.spine.server.bus.UnicastDispatcher#dispatch(MessageEnvelope)
  * UnicastDispatcher.dispatch(MessageEnvelope)} method with the different types of
  * {@code MessageEnvelope}s dispatches simultaneously.
  *

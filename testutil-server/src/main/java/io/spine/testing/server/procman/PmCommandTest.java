@@ -22,10 +22,10 @@ package io.spine.testing.server.procman;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Events;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.server.CommandHandlerTest;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 

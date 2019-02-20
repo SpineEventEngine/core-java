@@ -20,8 +20,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * A utility class providing various test-only methods, which in production mode are allowed

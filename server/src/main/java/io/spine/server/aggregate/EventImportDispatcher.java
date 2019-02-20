@@ -23,11 +23,11 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
 import java.util.Set;

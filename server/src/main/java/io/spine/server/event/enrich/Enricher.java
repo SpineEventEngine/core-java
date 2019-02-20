@@ -21,7 +21,7 @@
 package io.spine.server.event.enrich;
 
 import io.spine.annotation.SPI;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * Enriches events <em>after</em> they are stored, and <em>before</em> they are dispatched.

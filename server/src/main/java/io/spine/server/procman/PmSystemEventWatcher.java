@@ -21,14 +21,14 @@
 package io.spine.server.procman;
 
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CommandDispatchedToHandler;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.HistoryRejections;

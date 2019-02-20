@@ -23,13 +23,13 @@ package io.spine.server.event.model;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

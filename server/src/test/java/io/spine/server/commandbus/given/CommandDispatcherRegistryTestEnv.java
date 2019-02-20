@@ -25,9 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
@@ -36,6 +34,8 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdStartProject;
@@ -50,11 +50,6 @@ import io.spine.test.command.event.CmdTaskAdded;
 import java.util.Collections;
 import java.util.Set;
 
-// Test data imports
-
-/**
- * @author Alexander Yevsyukov
- */
 public class CommandDispatcherRegistryTestEnv {
 
     private CommandDispatcherRegistryTestEnv() {

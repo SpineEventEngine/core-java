@@ -23,13 +23,13 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -98,7 +98,6 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
         return Optional.empty();
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

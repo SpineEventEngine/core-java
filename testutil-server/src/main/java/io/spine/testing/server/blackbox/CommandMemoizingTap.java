@@ -25,9 +25,9 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 import java.util.Map;

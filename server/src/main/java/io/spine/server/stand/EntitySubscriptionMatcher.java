@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.client.Subscription;
-import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeUrl;
 

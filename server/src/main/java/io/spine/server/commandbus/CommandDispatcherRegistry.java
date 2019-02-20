@@ -21,9 +21,9 @@
 package io.spine.server.commandbus;
 
 import com.google.common.collect.Maps;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.DispatcherRegistry;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Map;
 import java.util.Optional;

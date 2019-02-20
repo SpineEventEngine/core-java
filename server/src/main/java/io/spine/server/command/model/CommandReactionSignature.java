@@ -27,12 +27,12 @@ import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Optional;

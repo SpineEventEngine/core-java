@@ -26,13 +26,13 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.given.CommandHandlerTestEnv.EventCatcher;
 import io.spine.server.event.given.CommandHandlerTestEnv.TestCommandHandler;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -56,6 +56,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandHandler should")
 class CommandHandlerTest {
+
+    private static final TestActorRequestFactory requestFactory =
+            new TestActorRequestFactory(CommandHandlerTest.class);
 
     private CommandBus commandBus;
     private EventBus eventBus;
@@ -84,7 +87,7 @@ class CommandHandlerTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(CommandEnvelope.class, givenCommandEnvelope())
+                .setDefault(CommandEnvelope.class, generate())
                 .testAllPublicInstanceMethods(handler);
     }
 
@@ -183,7 +186,7 @@ class CommandHandlerTest {
     @Test
     @DisplayName("log errors")
     void logErrors() {
-        CommandEnvelope commandEnvelope = givenCommandEnvelope();
+        CommandEnvelope commandEnvelope = generate();
 
         // Since we're in the tests mode `Environment` returns `SubstituteLogger` instance.
         SubstituteLogger log = (SubstituteLogger) handler.log();
@@ -204,8 +207,7 @@ class CommandHandlerTest {
         assertEquals(exception, handler.getLastException());
     }
 
-    private CommandEnvelope givenCommandEnvelope() {
-        return TestActorRequestFactory.newInstance(getClass())
-                                      .generateEnvelope();
+    private static CommandEnvelope generate() {
+        return CommandEnvelope.of(requestFactory.generateCommand());
     }
 }

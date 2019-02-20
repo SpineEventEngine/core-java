@@ -26,8 +26,8 @@ import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionUpdateVBuilder;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Responses;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * Updates an event subscription based on the incoming event.

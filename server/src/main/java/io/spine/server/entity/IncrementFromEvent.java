@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * A version increment which sets the new version from the given event.

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
@@ -34,8 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * An abstract test suite for all the tests of {@link MessageEnvelope} implementations.
- *
- * @author Dmytro Dashenkov
  */
 public abstract class MessageEnvelopeTest<O extends Message,
                                           E extends MessageEnvelope<?, O, ?>,

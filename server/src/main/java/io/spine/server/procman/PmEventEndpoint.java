@@ -22,7 +22,7 @@ package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 

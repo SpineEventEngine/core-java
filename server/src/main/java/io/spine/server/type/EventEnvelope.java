@@ -18,17 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
 import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
+import io.spine.core.ActorContext;
+import io.spine.core.Enrichment;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventId;
+import io.spine.core.Events;
+import io.spine.core.RejectionEventContext;
+import io.spine.core.TenantId;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Enrichments.createEnrichment;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
@@ -56,6 +63,17 @@ public final class EventEnvelope
     public static EventEnvelope of(Event event) {
         checkNotNull(event);
         return new EventEnvelope(event);
+    }
+
+    /**
+     * Creates a new {@link Enrichment} instance from the passed map.
+     */
+    public static Enrichment createEnrichment(Map<String, Any> enrichments) {
+        Enrichment.Builder enrichment =
+                Enrichment.newBuilder()
+                          .setContainer(Enrichment.Container.newBuilder()
+                                                            .putAllItems(enrichments));
+        return enrichment.build();
     }
 
     /**
@@ -173,8 +191,6 @@ public final class EventEnvelope
 
     /**
      * Verifies if the enrichment of the message is enabled.
-     *
-     * @see Enrichment.Builder#setDoNotEnrich(boolean)
      */
     public final boolean isEnrichmentEnabled() {
         boolean result = getEnrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;

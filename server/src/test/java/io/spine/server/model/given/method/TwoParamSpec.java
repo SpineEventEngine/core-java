@@ -23,8 +23,8 @@ package io.spine.server.model.given.method;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 

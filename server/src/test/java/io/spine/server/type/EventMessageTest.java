@@ -18,12 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.core.ProjectId;
 import io.spine.test.core.TaskAssigned;
@@ -35,9 +38,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.validate.Validate.checkValid;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Event message should")
 class EventMessageTest {
 

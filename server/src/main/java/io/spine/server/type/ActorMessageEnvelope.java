@@ -18,29 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
-import com.google.common.testing.SerializableTester;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertSame;
+import com.google.protobuf.Message;
+import io.spine.core.ActorContext;
+import io.spine.core.TenantId;
 
 /**
- * @author Alexander Yevsyukov
+ * A common interface for messages sent by an actor.
+ *
+ * @param <I> the type of the message ID
+ * @param <T> the type of the object that wraps a message
+ * @param <C> the type of the message context
  */
-@DisplayName("EmptyClass should")
-class EmptyClassTest {
+public interface ActorMessageEnvelope<I extends Message, T, C extends Message>
+        extends MessageEnvelope<I, T, C> {
 
-    @Test
-    @DisplayName("be serializable")
-    void serialize() {
-        SerializableTester.reserializeAndAssert(EmptyClass.instance());
-    }
+    /**
+     * Obtains ID of the tenant in which context the actor works.
+     */
+    TenantId getTenantId();
 
-    @Test
-    @DisplayName("return the same instance")
-    void sameInstance() {
-        assertSame(EmptyClass.instance(), EmptyClass.instance());
-    }
+    /**
+     * Obtains an actor context for the wrapped message.
+     */
+    ActorContext getActorContext();
 }

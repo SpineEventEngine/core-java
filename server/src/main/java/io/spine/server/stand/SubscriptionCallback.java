@@ -22,8 +22,8 @@ package io.spine.server.stand;
 
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.core.EventEnvelope;
 import io.spine.server.stand.Stand.NotifySubscriptionAction;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 

@@ -20,9 +20,9 @@
 
 package io.spine.server.procman.given.repo;
 
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;

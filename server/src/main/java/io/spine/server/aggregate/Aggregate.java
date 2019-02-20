@@ -26,9 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -42,6 +40,8 @@ import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.EventsResult;
 import io.spine.server.model.ReactorMethodResult;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;

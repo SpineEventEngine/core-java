@@ -26,9 +26,9 @@ import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.code.java.ClassName;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageRejection;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 
 import java.util.Map;

@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -36,8 +36,6 @@ import java.util.Set;
  *            the IDs of entity that receives a dispatched message.
  *            For {@linkplain MulticastDispatcher multicast dispatching} is the type of the set
  *            of entity IDs.
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  */
 public interface MessageDispatcher<C extends MessageClass, E extends MessageEnvelope, R> {
 

@@ -21,10 +21,10 @@
 package io.spine.server.event.given.bus;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCreated;
 
 import java.util.Optional;

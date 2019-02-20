@@ -23,13 +23,13 @@ package io.spine.server.event.store;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.EventVBuilder;
 import io.spine.core.Events;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.Subscription;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
 /**

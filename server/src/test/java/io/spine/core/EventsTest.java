@@ -27,11 +27,13 @@ import io.spine.base.Identifier;
 import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.base.Time;
-import io.spine.core.given.EventsTestEnv;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventFactory;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.EventsTestEnv;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.string.Stringifiers;
 import io.spine.test.core.given.EtProjectCreated;
 import io.spine.testing.Tests;
@@ -54,9 +56,9 @@ import static io.spine.core.Events.getProducer;
 import static io.spine.core.Events.getTimestamp;
 import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
-import static io.spine.core.given.EventsTestEnv.tenantId;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.type.given.EventsTestEnv.tenantId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -74,7 +76,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class EventsTest extends UtilityClassTest<Events> {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventsTest.class);
+            new TestActorRequestFactory(EventsTest.class);
 
     private EventFactory eventFactory;
 
@@ -87,12 +89,15 @@ public class EventsTest extends UtilityClassTest<Events> {
 
     @BeforeEach
     void setUp() {
-        TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(getClass());
-        CommandEnvelope cmd = requestFactory.generateEnvelope();
+        CommandEnvelope cmd = generate();
         StringValue producerId = StringValue.of(getClass().getSimpleName());
         eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(GivenEvent.message(), null);
         context = event.getContext();
+    }
+
+    private static CommandEnvelope generate() {
+        return CommandEnvelope.of(requestFactory.generateCommand());
     }
 
     @Override
@@ -154,7 +159,7 @@ public class EventsTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("root command ID")
         void rootCommandId() {
-            CommandEnvelope command = requestFactory.generateEnvelope();
+            CommandEnvelope command = generate();
             Event event = newEvent(command);
 
             assertEquals(command.getId(), Events.getRootCommandId(event));
@@ -163,7 +168,7 @@ public class EventsTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("type name")
         void typeName() {
-            CommandEnvelope command = requestFactory.generateEnvelope();
+            CommandEnvelope command = generate();
             Event event = newEvent(command);
 
             TypeName typeName = EventEnvelope.of(event)

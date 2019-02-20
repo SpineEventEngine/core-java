@@ -29,8 +29,8 @@ import io.spine.client.EntityId;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.system.server.IncompleteAudio;
 import io.spine.test.system.server.LocalizedVideo;
 import io.spine.test.system.server.Photo;
@@ -84,7 +84,7 @@ class MirrorRepositoryTest {
         repository = (MirrorRepository) systemContext
                 .findRepository(Mirror.class)
                 .orElseGet(() -> fail("MirrorRepository must be registered."));
-        queries = TestActorRequestFactory.newInstance(MirrorRepositoryTest.class).query();
+        queries = new TestActorRequestFactory(MirrorRepositoryTest.class).query();
 
         givenPhotos = givenPhotos();
         prepareAggregates(givenPhotos);

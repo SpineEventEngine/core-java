@@ -20,8 +20,6 @@
 
 package io.spine.server.command;
 
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.command.model.CommandHandlerClass;
@@ -29,6 +27,8 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerMethod.Result;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 import java.util.Set;

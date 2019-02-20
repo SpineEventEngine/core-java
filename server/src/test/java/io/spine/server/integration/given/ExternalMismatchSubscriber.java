@@ -20,9 +20,9 @@
 
 package io.spine.server.integration.given;
 
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.integration.command.ItgStartProject;
 import io.spine.test.integration.rejection.IntegrationRejections;
 

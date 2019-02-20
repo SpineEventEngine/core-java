@@ -23,11 +23,11 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.security.InvocationGuard;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.List;
 

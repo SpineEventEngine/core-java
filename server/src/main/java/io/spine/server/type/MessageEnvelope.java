@@ -18,9 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
 import com.google.protobuf.Message;
+import io.spine.core.EventContext;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 

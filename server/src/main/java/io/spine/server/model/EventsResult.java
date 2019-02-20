@@ -22,10 +22,10 @@ package io.spine.server.model;
 
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.EventProducer;
 import io.spine.server.event.EventFactory;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.List;
 import java.util.function.Function;
@@ -35,8 +35,6 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for method results that generate events.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class EventsResult extends MethodResult<EventMessage> {
 

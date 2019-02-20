@@ -21,10 +21,10 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 

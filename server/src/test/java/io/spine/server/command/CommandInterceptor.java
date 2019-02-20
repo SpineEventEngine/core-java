@@ -22,13 +22,13 @@ package io.spine.server.command;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Set;
 
-import static io.spine.core.CommandClass.setOf;
+import static io.spine.server.type.CommandClass.setOf;
 
 /**
  * Utility class that remembers all commands issued by a commander class.

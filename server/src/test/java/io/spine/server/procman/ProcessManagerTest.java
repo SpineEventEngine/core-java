@@ -26,12 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
@@ -46,6 +41,11 @@ import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.test.shared.AnyProcess;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
@@ -129,7 +129,7 @@ class ProcessManagerTest {
     private final TestEventFactory eventFactory =
             TestEventFactory.newInstance(Identifier.pack(TestProcessManager.ID), getClass());
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+            new TestActorRequestFactory(getClass());
 
     private BoundedContext context;
     private TestProcessManager processManager;

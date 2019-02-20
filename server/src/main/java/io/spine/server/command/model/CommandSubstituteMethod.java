@@ -20,11 +20,11 @@
 
 package io.spine.server.command.model;
 
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandReceiver;
 import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.lang.reflect.Method;
 

@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -37,8 +37,6 @@ import static io.spine.server.bus.Buses.reject;
 /**
  * The {@link BusFilter} preventing the messages that have no dispatchers from being posted to
  * the bus.
- *
- * @author Dmytro Dashenkov
  */
 final class DeadMessageFilter<T extends Message,
                               E extends MessageEnvelope<?, T, ?>,

@@ -24,12 +24,12 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionEndpoint;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -91,15 +91,15 @@ public class ProjectionEventDispatcher {
             TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(envelope);
             endpoint.runTransactionFor(projection);
         }
-    }
 
-    @SuppressWarnings("unchecked") // It is OK when mocking
-    private static <I, P extends Projection<I, S, ?>, S extends Message>
-    ProjectionRepository<I, P, S> mockRepository() {
-        TestProjectionRepository mockedRepo = mock(TestProjectionRepository.class);
-        when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-        when(mockedRepo.getIdClass()).thenReturn(Object.class);
-        return mockedRepo;
+        @SuppressWarnings("unchecked") // It is OK when mocking
+        private static <I, P extends Projection<I, S, ?>, S extends Message>
+        ProjectionRepository<I, P, S> mockRepository() {
+            TestProjectionRepository mockedRepo = mock(TestProjectionRepository.class);
+            when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
+            when(mockedRepo.getIdClass()).thenReturn(Object.class);
+            return mockedRepo;
+        }
     }
 
     /**

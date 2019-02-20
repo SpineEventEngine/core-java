@@ -21,8 +21,8 @@
 package io.spine.server.event;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.FailRequested;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;

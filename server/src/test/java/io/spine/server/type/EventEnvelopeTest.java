@@ -18,18 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
 import com.google.protobuf.Message;
+import io.spine.core.ActorContext;
+import io.spine.core.CommandContext;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.given.EventEnvelopeTestEnv.actorContext;
-import static io.spine.core.given.EventEnvelopeTestEnv.commandContext;
-import static io.spine.core.given.EventEnvelopeTestEnv.event;
-import static io.spine.core.given.EventEnvelopeTestEnv.eventContext;
-import static io.spine.core.given.EventEnvelopeTestEnv.eventMessage;
+import static io.spine.server.type.given.EventEnvelopeTestEnv.actorContext;
+import static io.spine.server.type.given.EventEnvelopeTestEnv.commandContext;
+import static io.spine.server.type.given.EventEnvelopeTestEnv.event;
+import static io.spine.server.type.given.EventEnvelopeTestEnv.eventContext;
+import static io.spine.server.type.given.EventEnvelopeTestEnv.eventMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("EventEnvelope should")
