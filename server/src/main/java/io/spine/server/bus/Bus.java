@@ -47,9 +47,6 @@ import static java.util.Collections.singleton;
  * @param <E> the type of envelopes for outer objects used by this bus
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Bus<T extends Message,
