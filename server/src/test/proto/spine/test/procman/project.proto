@@ -38,8 +38,7 @@ message Project {
     option (lifecycle).delete_upon = "spine.test.procman.event.PmProcessDeleted";
 
     // Normally entity IDs are `required` and `set_once`, but as record based repository test is
-    // performing very complex manipulations and checks on its entities, we need to set these to
-    // `false`.
+    // performing very complex manipulations on its entities, we need to set these to `false`.
     ProjectId id = 1 [(required) = false, (set_once) = false];
 
     string name = 2;
