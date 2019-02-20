@@ -29,30 +29,15 @@ import io.spine.type.TypeName;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Utility class for working with event enrichments.
  */
-public final class Enrichments {
+final class Enrichments {
 
     /** Prevents instantiation of this utility class. */
     private Enrichments() {
-    }
-
-    /**
-     * Returns all enrichments from the context.
-     *
-     * @param context a context to get enrichments from
-     * @return an optional of enrichments
-     * @deprecated please use {@link EventContext#find(Class)}
-     */
-    @Deprecated
-    public static Optional<Container> getEnrichments(EventContext context) {
-        checkNotNull(context);
-        Enrichment enrichment = context.getEnrichment();
-        return container(enrichment);
     }
 
     /**
@@ -66,24 +51,6 @@ public final class Enrichments {
             return Optional.of(enrichment.getContainer());
         }
         return Optional.empty();
-    }
-
-    /**
-     * Return a specific enrichment from the context.
-     *
-     * @param  enrichmentClass a class of the event enrichment
-     * @param  context         a context to get an enrichment from
-     * @param  <E>             a type of the event enrichment
-     * @return an optional of the enrichment
-     * @deprecated please use {@link EventContext#find(Class)}
-     */
-    @Deprecated
-    public static <E extends EnrichmentMessage>
-    Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
-        checkNotNull(enrichmentClass);
-        checkNotNull(context);
-        Optional<E> result = context.find(enrichmentClass);
-        return result;
     }
 
     /**

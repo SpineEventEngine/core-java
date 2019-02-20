@@ -20,7 +20,6 @@
 
 package io.spine.server.event.enrich;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.test.event.EnrichmentByContextFields;
 import io.spine.test.event.EnrichmentForSeveralEvents;
 import io.spine.test.event.ProjectCreated;
@@ -46,24 +45,13 @@ import io.spine.test.event.user.permission.PermissionGrantedEvent;
 import io.spine.test.event.user.permission.PermissionRevokedEvent;
 import io.spine.test.event.user.sharing.SharingRequestApproved;
 import io.spine.test.event.user.sharing.SharingRequestSent;
-import io.spine.type.TypeName;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.enrich.EnrichmentAssertion._assert;
 
-@DisplayName("EnrichmentsMap should")
-class EnrichmentMapTest {
-
-    @Test
-    @DisplayName("return map instance")
-    void returnMapInstance() {
-        ImmutableSet<TypeName> typeNames = EnrichmentMap.load()
-                                                        .enrichmentTypes();
-        assertThat(typeNames).isNotEmpty();
-    }
+class EnrichmentIntegrationTest {
 
     @Nested
     @DisplayName("contain ProjectCreated by")
