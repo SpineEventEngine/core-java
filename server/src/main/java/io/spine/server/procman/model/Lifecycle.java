@@ -54,7 +54,7 @@ public final class Lifecycle implements Serializable {
         return new Lifecycle(EventClassSet.empty(), EventClassSet.empty());
     }
 
-    static Lifecycle from(LifecycleOption lifecycleOption) {
+    private static Lifecycle from(LifecycleOption lifecycleOption) {
         EventClassSet archiveOn = EventClassSet.parse(lifecycleOption.getArchiveUpon());
         EventClassSet deleteOn = EventClassSet.parse(lifecycleOption.getDeleteUpon());
         return new Lifecycle(archiveOn, deleteOn);

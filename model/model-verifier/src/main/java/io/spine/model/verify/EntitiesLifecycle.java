@@ -29,16 +29,16 @@ import io.spine.type.KnownTypes;
 
 import static io.spine.code.proto.Lifecycle.lifecycleOf;
 
-final class EntityLifecycle {
+final class EntitiesLifecycle {
 
     private final ImmutableMap<MessageType, LifecycleOption> entityLifecycle;
 
-    private EntityLifecycle(ImmutableMap<MessageType, LifecycleOption> entityLifecycle) {
+    private EntitiesLifecycle(ImmutableMap<MessageType, LifecycleOption> entityLifecycle) {
         this.entityLifecycle = entityLifecycle;
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked logically.
-    static EntityLifecycle ofKnownTypes() {
+    static EntitiesLifecycle ofKnownTypes() {
         ImmutableMap.Builder<MessageType, LifecycleOption> map = new ImmutableMap.Builder<>();
         KnownTypes.instance()
                   .asTypeSet()
@@ -46,7 +46,7 @@ final class EntityLifecycle {
                   .stream()
                   .filter(Lifecycle::hasOption)
                   .forEach(type -> map.put(type, lifecycleOf(type).get()));
-        return new EntityLifecycle(map.build());
+        return new EntitiesLifecycle(map.build());
     }
 
     void verify() {

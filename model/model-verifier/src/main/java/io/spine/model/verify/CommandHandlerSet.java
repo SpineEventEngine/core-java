@@ -44,7 +44,7 @@ final class CommandHandlerSet implements Logging {
         return new CommandHandlerSet(handlers);
     }
 
-    void verifyAgainst(ClassLoader classLoader) {
+    void checkAgainst(ClassLoader classLoader) {
         ClassSet classSet = new ClassSet(classLoader,
                                          handlers.getCommandHandlingTypesList());
         classSet.reportNotFoundIfAny(log());

@@ -65,18 +65,20 @@ final class ModelVerifier implements Logging {
     }
 
     void verifyModel(Path modelPath) {
-        verifyModelClasses(modelPath);
-        verifyProtoDeclarations();
+        verifyCommandHandlers(modelPath);
+        verifyEntitiesLifecycle();
     }
 
-    private void verifyModelClasses(Path modelPath) {
+    private void verifyCommandHandlers(Path modelPath) {
+        _debug("Checking command handlers assembled in the Model");
         CommandHandlerSet commandHandlerSet = CommandHandlerSet.parse(modelPath);
-        commandHandlerSet.verifyAgainst(projectClassLoader);
+        commandHandlerSet.checkAgainst(projectClassLoader);
     }
 
-    private void verifyProtoDeclarations() {
-        EntityLifecycle entityLifecycle = EntityLifecycle.ofKnownTypes();
-        entityLifecycle.verify();
+    private void verifyEntitiesLifecycle() {
+        _debug("Checking entities lifecycle from the Model proto definitions");
+        EntitiesLifecycle entitiesLifecycle = EntitiesLifecycle.ofKnownTypes();
+        entitiesLifecycle.verify();
     }
 
     /**
