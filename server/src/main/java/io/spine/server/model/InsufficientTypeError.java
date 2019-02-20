@@ -20,15 +20,15 @@
 
 package io.spine.server.model;
 
-import io.spine.code.proto.MessageType;
+import io.spine.code.proto.Type;
 
 import static java.lang.String.format;
 
-public final class InsufficientMessageTypeError extends ModelError {
+public final class InsufficientTypeError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    public InsufficientMessageTypeError(String message, MessageType type) {
-        super(format("%s, received type: %s", message, type));
+    public InsufficientTypeError(String message, Type<?, ?> type) {
+        super(format("%s, received type: %s", message, type.javaClassName()));
     }
 }

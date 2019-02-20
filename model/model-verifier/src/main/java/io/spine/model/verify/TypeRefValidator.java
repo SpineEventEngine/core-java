@@ -32,14 +32,15 @@ import java.util.Collection;
 final class TypeRefValidator {
 
     private final TypeRef typeRef;
-    private final MessageTypeValidator typeValidator;
+    private final TypeValidator<MessageType> typeValidator;
 
-    private TypeRefValidator(TypeRef typeRef, MessageTypeValidator typeValidator) {
+    private TypeRefValidator(TypeRef typeRef, TypeValidator<MessageType> typeValidator) {
         this.typeRef = typeRef;
         this.typeValidator = typeValidator;
     }
 
-    static TypeRefValidator withTypeValidator(TypeRef ref, MessageTypeValidator typeValidator) {
+    static TypeRefValidator withTypeValidator(TypeRef ref,
+                                              TypeValidator<MessageType> typeValidator) {
         return new TypeRefValidator(ref, typeValidator);
     }
 
@@ -69,10 +70,6 @@ final class TypeRefValidator {
     }
 
     private void checkAgainstValidator(Iterable<MessageType> types) {
-        types.forEach(this::checkAgainstValidator);
-    }
-
-    private void checkAgainstValidator(MessageType type) {
-        typeValidator.check(type);
+        types.forEach(typeValidator::check);
     }
 }

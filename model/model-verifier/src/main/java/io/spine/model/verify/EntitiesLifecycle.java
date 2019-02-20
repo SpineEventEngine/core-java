@@ -26,7 +26,7 @@ import io.spine.code.proto.EntityStateOption;
 import io.spine.code.proto.MessageType;
 import io.spine.code.proto.ref.TypeRef;
 import io.spine.option.EntityOption;
-import io.spine.server.model.InsufficientMessageTypeError;
+import io.spine.server.model.InsufficientTypeError;
 import io.spine.type.KnownTypes;
 
 import java.util.Optional;
@@ -79,8 +79,9 @@ final class EntitiesLifecycle {
                            .filter(kind -> kind == PROCESS_MANAGER)
                            .isPresent();
         if (!isProcessManager) {
-            throw new InsufficientMessageTypeError(
-                    "Only entities of process manager kind can have `lifecycle` option", type
+            throw new InsufficientTypeError(
+                    "Only entity state messages of process manager kind can have `lifecycle` " +
+                            "option", type
             );
         }
     }
@@ -101,10 +102,10 @@ final class EntitiesLifecycle {
     private static void checkLifecycleTrigger(TypeRef typeRef) {
         Predicate<MessageType> isEvent = MessageType::isEvent;
         Predicate<MessageType> predicate = isEvent.or(MessageType::isRejection);
-        MessageTypeValidator typeValidator =
-                new MessageTypeValidator(predicate,
-                                         "Only event or rejection types can be referenced in " +
-                                                 "the `lifecycle` option");
+        TypeValidator<MessageType> typeValidator =
+                new TypeValidator<>(predicate,
+                                    "Only event or rejection types can be referenced in " +
+                                            "the `lifecycle` option");
         TypeRefValidator validator = TypeRefValidator.withTypeValidator(typeRef, typeValidator);
         validator.validate();
     }

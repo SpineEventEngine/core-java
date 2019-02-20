@@ -20,28 +20,28 @@
 
 package io.spine.model.verify;
 
-import io.spine.code.proto.MessageType;
-import io.spine.server.model.InsufficientMessageTypeError;
+import io.spine.code.proto.Type;
+import io.spine.server.model.InsufficientTypeError;
 
 import java.util.function.Predicate;
 
-final class MessageTypeValidator {
+final class TypeValidator<T extends Type<?, ?>> {
 
-    private final Predicate<MessageType> predicate;
+    private final Predicate<T> predicate;
     private final String errorMessage;
 
-    MessageTypeValidator(Predicate<MessageType> predicate, String errorMessage) {
+    TypeValidator(Predicate<T> predicate, String errorMessage) {
         this.predicate = predicate;
         this.errorMessage = errorMessage;
     }
 
-    void check(MessageType type) {
+    void check(T type) {
         if (!predicate.test(type)) {
             throwNonMatchError(type);
         }
     }
 
-    private void throwNonMatchError(MessageType type) {
-        throw new InsufficientMessageTypeError(errorMessage, type);
+    private void throwNonMatchError(T type) {
+        throw new InsufficientTypeError(errorMessage, type);
     }
 }
