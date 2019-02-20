@@ -101,11 +101,11 @@ final class EntitiesLifecycle {
     private static void checkLifecycleTrigger(TypeRef typeRef) {
         Predicate<MessageType> isEvent = MessageType::isEvent;
         Predicate<MessageType> predicate = isEvent.or(MessageType::isRejection);
-        MessageTypeValidator validator =
+        MessageTypeValidator typeValidator =
                 new MessageTypeValidator(predicate,
                                          "Only event or rejection types can be referenced in " +
                                                  "the `lifecycle` option");
-        TypeRefChecker checker = TypeRefChecker.withValidator(typeRef, validator);
-        checker.check();
+        TypeRefValidator validator = TypeRefValidator.withTypeValidator(typeRef, typeValidator);
+        validator.validate();
     }
 }

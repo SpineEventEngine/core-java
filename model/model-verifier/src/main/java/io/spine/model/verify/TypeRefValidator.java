@@ -29,21 +29,21 @@ import io.spine.type.KnownTypes;
 
 import java.util.Collection;
 
-final class TypeRefChecker {
+final class TypeRefValidator {
 
     private final TypeRef typeRef;
     private final MessageTypeValidator typeValidator;
 
-    private TypeRefChecker(TypeRef typeRef, MessageTypeValidator typeValidator) {
+    private TypeRefValidator(TypeRef typeRef, MessageTypeValidator typeValidator) {
         this.typeRef = typeRef;
         this.typeValidator = typeValidator;
     }
 
-    static TypeRefChecker withValidator(TypeRef ref, MessageTypeValidator typeValidator) {
-        return new TypeRefChecker(ref, typeValidator);
+    static TypeRefValidator withTypeValidator(TypeRef ref, MessageTypeValidator typeValidator) {
+        return new TypeRefValidator(ref, typeValidator);
     }
 
-    void check() {
+    void validate() {
         ImmutableSet<MessageType> referencedTypes = KnownTypes.instance()
                                                               .findAll(typeRef);
         verifyTypeCount(referencedTypes);
