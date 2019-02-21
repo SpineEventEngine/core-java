@@ -134,8 +134,9 @@ public final class ModelVerifierPlugin extends SpinePlugin {
          * @param project the Gradle project to process the model upon
          */
         private void verifyModel(Project project) {
-            ModelVerifier verifier = new ModelVerifier(project);
-            verifier.verifyModel(rawModelPath);
+            Model model = Model.parse(rawModelPath);
+            ProjectClassLoader projectClassLoader = new ProjectClassLoader(project);
+            model.verifyAgainst(projectClassLoader.get());
         }
 
         @Override

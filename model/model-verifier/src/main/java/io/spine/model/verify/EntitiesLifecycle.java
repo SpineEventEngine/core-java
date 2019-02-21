@@ -59,16 +59,16 @@ final class EntitiesLifecycle {
         return option.hasLifecycle(type);
     }
 
-    void verify() {
-        verifyMessageTypes();
-        verifyTriggerTypes();
+    void checkLifecycleDeclarations() {
+        checkLifecycleTargets();
+        checkLifecycleTriggers();
     }
 
     /**
      * Verifies that lifecycle option is specified only for entities of process manager
      * {@linkplain io.spine.option.EntityOption.Kind#PROCESS_MANAGER kind}.
      */
-    private void verifyMessageTypes() {
+    private void checkLifecycleTargets() {
         entitiesWithLifecycle.forEach(EntitiesLifecycle::checkIsProcessManager);
     }
 
@@ -87,9 +87,9 @@ final class EntitiesLifecycle {
     }
 
     /**
-     * Verifies that all specified entity lifecycle triggers are valid event types.
+     * Verifies that all specified lifecycle triggers are valid event types.
      */
-    private void verifyTriggerTypes() {
+    private void checkLifecycleTriggers() {
         entitiesWithLifecycle.forEach(EntitiesLifecycle::checkLifecycleTriggers);
     }
 

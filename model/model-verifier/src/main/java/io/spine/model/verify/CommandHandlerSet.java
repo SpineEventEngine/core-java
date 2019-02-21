@@ -20,6 +20,7 @@
 
 package io.spine.model.verify;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.model.DuplicateHandlerCheck;
@@ -35,7 +36,8 @@ final class CommandHandlerSet implements Logging {
 
     private final CommandHandlers handlers;
 
-    private CommandHandlerSet(CommandHandlers handlers) {
+    @VisibleForTesting
+    CommandHandlerSet(CommandHandlers handlers) {
         this.handlers = handlers;
     }
 

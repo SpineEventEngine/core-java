@@ -21,9 +21,10 @@
 package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.logging.Logging;
-import io.spine.server.model.Model;
 import io.spine.tools.gradle.ProjectHierarchy;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.compile.JavaCompile;
@@ -33,7 +34,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -43,56 +43,34 @@ import static java.lang.String.format;
 import static java.util.Arrays.deepToString;
 import static java.util.stream.Collectors.toList;
 
-/**
- * A utility for verifying Spine model.
- *
- * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
- *           string literal for security check.
- */
-final class ModelVerifier implements Logging {
+final class ProjectClassLoader implements Logging {
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
-    private final URLClassLoader projectClassLoader;
+    private final Project project;
 
-    /**
-     * Creates a new instance of the {@code ModelVerifier}.
-     *
-     * @param project the Gradle project to verify the model upon
-     */
-    ModelVerifier(Project project) {
-        this.projectClassLoader = createClassLoader(project);
+    @LazyInit
+    private @MonotonicNonNull ClassLoader classLoader;
+
+    ProjectClassLoader(Project project) {
+        this.project = project;
     }
 
-    void verifyModel(Path modelPath) {
-        verifyCommandHandlers(modelPath);
-        verifyEntitiesLifecycle();
+    ClassLoader get() {
+        if (classLoader == null) {
+            classLoader = createClassLoader();
+        }
+        return classLoader;
     }
 
-    @VisibleForTesting
-    void verifyCommandHandlers(Path modelPath) {
-        _debug("Checking command handlers assembled in the Model");
-        CommandHandlerSet commandHandlerSet = CommandHandlerSet.parse(modelPath);
-        commandHandlerSet.checkAgainst(projectClassLoader);
-    }
-
-    private void verifyEntitiesLifecycle() {
-        _debug("Checking entities lifecycle from the Model proto definitions");
-        EntitiesLifecycle entitiesLifecycle = EntitiesLifecycle.ofKnownTypes();
-        entitiesLifecycle.verify();
-    }
-
-    /**
-     * Creates a ClassLoader for the passed project.
-     */
-    private URLClassLoader createClassLoader(Project project) {
-        Collection<JavaCompile> tasks = allJavaCompile(project);
+    @SuppressWarnings("ClassLoaderInstantiation") // Caught exception.
+    private URLClassLoader createClassLoader() {
+        Collection<JavaCompile> tasks = allJavaCompile();
         URL[] compiledCodePath = extractDestinationDirs(tasks);
         log().debug("Initializing ClassLoader for URLs: {}", deepToString(compiledCodePath));
         try {
             ClassLoader projectClassloader = project.getBuildscript()
                                                     .getClassLoader();
-            @SuppressWarnings("ClassLoaderInstantiation") // Caught exception.
             URLClassLoader result = new URLClassLoader(compiledCodePath, projectClassloader);
             return result;
         } catch (SecurityException e) {
@@ -101,7 +79,7 @@ final class ModelVerifier implements Logging {
         }
     }
 
-    private static Collection<JavaCompile> allJavaCompile(Project project) {
+    private Collection<JavaCompile> allJavaCompile() {
         Collection<JavaCompile> tasks = newArrayList();
         ProjectHierarchy.applyToAll(project.getRootProject(),
                                     p -> tasks.addAll(javaCompile(p)));
