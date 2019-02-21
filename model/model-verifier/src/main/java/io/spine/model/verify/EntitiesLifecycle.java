@@ -97,6 +97,9 @@ final class EntitiesLifecycle {
         EntityLifecycleOption option = new EntityLifecycleOption();
         Optional<TypeRef> archiveUpon = option.archiveUpon(messageType);
         archiveUpon.ifPresent(EntitiesLifecycle::checkLifecycleTrigger);
+
+        Optional<TypeRef> deleteUpon = option.deleteUpon(messageType);
+        deleteUpon.ifPresent(EntitiesLifecycle::checkLifecycleTrigger);
     }
 
     private static void checkLifecycleTrigger(TypeRef typeRef) {
