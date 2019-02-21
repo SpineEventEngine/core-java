@@ -50,8 +50,8 @@ class CommandHandlerSet implements Logging {
         return new CommandHandlerSet(handlers);
     }
 
-    void checkAgainst(ClassLoader classLoader) {
-        ClassSet classSet = new ClassSet(classLoader,
+    void checkAgainst(ProjectClassLoader classLoader) {
+        ClassSet classSet = new ClassSet(classLoader.get(),
                                          handlers.getCommandHandlingTypesList());
         classSet.reportNotFoundIfAny(log());
         DuplicateHandlerCheck.newInstance()

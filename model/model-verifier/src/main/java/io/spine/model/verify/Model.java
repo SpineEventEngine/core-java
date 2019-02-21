@@ -25,7 +25,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.nio.file.Path;
 
 /**
- * Spine model elements that are subject to verification.
+ * Spine Model elements that are subject to verification.
  */
 final class Model {
 
@@ -44,7 +44,7 @@ final class Model {
         return new Model(commandHandlers, entitiesLifecycle);
     }
 
-    void verifyAgainst(ClassLoader classLoader) {
+    void verifyAgainst(ProjectClassLoader classLoader) {
         commandHandlers.checkAgainst(classLoader);
         entitiesLifecycle.checkLifecycleDeclarations();
     }
