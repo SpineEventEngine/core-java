@@ -22,11 +22,15 @@ package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.code.proto.EntityLifecycleOption;
 import io.spine.code.proto.EntityStateOption;
 import io.spine.code.proto.MessageType;
 import io.spine.code.proto.ref.TypeRef;
 import io.spine.option.EntityOption;
+import io.spine.option.EntityOption.Kind;
+import io.spine.server.model.EntityKindMismatchError;
 import io.spine.server.model.TypeMismatchError;
 import io.spine.type.KnownTypes;
 
@@ -34,6 +38,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 
 final class EntitiesLifecycle {
@@ -68,23 +73,18 @@ final class EntitiesLifecycle {
 
     /**
      * Verifies that lifecycle option is specified only for entities of process manager
-     * {@linkplain io.spine.option.EntityOption.Kind#PROCESS_MANAGER kind}.
+     * {@linkplain Kind#PROCESS_MANAGER kind}.
      */
     private void checkLifecycleTargets() {
         entitiesWithLifecycle.forEach(EntitiesLifecycle::checkIsProcessManager);
     }
 
     private static void checkIsProcessManager(MessageType type) {
-        Optional<EntityOption> optionValue = EntityStateOption.valueOf(type.descriptor());
-        boolean isProcessManager =
-                optionValue.map(EntityOption::getKind)
-                           .filter(kind -> kind == PROCESS_MANAGER)
-                           .isPresent();
-        if (!isProcessManager) {
-            throw new TypeMismatchError(
-                    "Only entity state messages of process manager kind can have `lifecycle` " +
-                            "option", type
-            );
+        Optional<Kind> entityKind = EntityStateOption.valueOf(type.descriptor())
+                                                     .map(EntityOption::getKind);
+        Kind actual = entityKind.orElse(KIND_UNKNOWN);
+        if (actual != PROCESS_MANAGER) {
+            throw new EntityKindMismatchError(actual, PROCESS_MANAGER);
         }
     }
 
@@ -105,12 +105,27 @@ final class EntitiesLifecycle {
     }
 
     private static void checkLifecycleTrigger(TypeRef typeRef) {
+        checkExists(typeRef);
+        checkReferencedTypes(typeRef);
+    }
+
+    private static void checkExists(TypeRef typeRef) {
+        KnownTypes.instance()
+                  .validate(typeRef);
+    }
+
+    private static void checkReferencedTypes(TypeRef typeRef) {
+        ImmutableSet<MessageType> referencedTypes = KnownTypes.instance()
+                                                              .resolve(typeRef);
         Predicate<MessageType> isEvent = MessageType::isEvent;
         Predicate<MessageType> predicate = isEvent.or(MessageType::isRejection);
-        TypeRefValidator validator =
-                TypeRefValidator.withPredicate(predicate,
-                                               "Only event or rejection types can be referenced " +
-                                                       "in the `lifecycle` option");
-        validator.check(typeRef);
+        referencedTypes.forEach(
+                type -> {
+                    if (!predicate.test(type)) {
+                        throw new TypeMismatchError(type,
+                                                    EventMessage.class, RejectionMessage.class);
+                    }
+                }
+        );
     }
 }

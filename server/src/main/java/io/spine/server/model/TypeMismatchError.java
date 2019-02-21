@@ -20,7 +20,9 @@
 
 package io.spine.server.model;
 
-import io.spine.code.proto.Type;
+import io.spine.code.proto.MessageType;
+
+import java.util.Arrays;
 
 import static java.lang.String.format;
 
@@ -28,7 +30,9 @@ public final class TypeMismatchError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    public TypeMismatchError(String message, Type<?, ?> type) {
-        super(format("%s, received type: %s", message, type.javaClassName()));
+    private static final String MESSAGE_FORMAT = "Received type %s, expected one of: %s";
+
+    public TypeMismatchError(MessageType received, Class... expected) {
+        super(format(MESSAGE_FORMAT, received, Arrays.toString(expected)));
     }
 }

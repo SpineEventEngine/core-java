@@ -20,15 +20,19 @@
 
 package io.spine.server.model;
 
-import io.spine.code.proto.ref.TypeRef;
+import io.spine.option.EntityOption.Kind;
+
+import java.util.Arrays;
 
 import static java.lang.String.format;
 
-public final class UnknownReferencedTypeError extends ModelError {
+public final class EntityKindMismatchError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    public UnknownReferencedTypeError(TypeRef typeRef) {
-        super(format("Type ref (`%s`) references unknown types", typeRef));
+    private static final String MESSAGE_FORMAT = "Received entity kind %s, expected one of: %s";
+
+    public EntityKindMismatchError(Kind received, Kind... expected) {
+        super(format(MESSAGE_FORMAT, received, Arrays.toString(expected)));
     }
 }

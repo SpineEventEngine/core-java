@@ -33,14 +33,15 @@ import io.spine.model.verify.given.RenameProcMan;
 import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
+import io.spine.server.model.EntityKindMismatchError;
 import io.spine.server.model.TypeMismatchError;
-import io.spine.server.model.UnknownReferencedTypeError;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.test.model.verify.command.UploadPhoto;
 import io.spine.test.model.verify.given.ArchiveState;
 import io.spine.test.model.verify.given.DeleteState;
 import io.spine.test.model.verify.given.RenameState;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.type.UnresolvedReferenceException;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.tasks.TaskCollection;
@@ -75,7 +76,7 @@ class ModelVerificationTest {
 
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
-    private ClassLoader projectClassLoader;
+    private ProjectClassLoader projectClassLoader;
 
     @SuppressWarnings("unchecked") // OK for test mocks.
     @BeforeEach
@@ -94,8 +95,7 @@ class ModelVerificationTest {
         when(tasks.withType(any(Class.class))).thenReturn(emptyTaskCollection);
         when(project.getTasks()).thenReturn(tasks);
 
-        ProjectClassLoader classLoader = new ProjectClassLoader(project);
-        projectClassLoader = classLoader.get();
+        projectClassLoader = new ProjectClassLoader(project);
     }
 
     @Test
@@ -204,12 +204,12 @@ class ModelVerificationTest {
 
     @Test
     @MuteLogging
-    @DisplayName("fail with `TypeMismatchError` when lifecycle is declared for non-PM type")
+    @DisplayName("fail with `EntityKindMismatchError` when lifecycle is declared for non-PM type")
     void failOnNonPmLifecycle() {
         MessageType nonPmType = MessageType.of(UploadPhoto.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
         Model model = modelWith(lifecycle);
-        assertThrows(TypeMismatchError.class, () -> model.verifyAgainst(projectClassLoader));
+        assertThrows(EntityKindMismatchError.class, () -> model.verifyAgainst(projectClassLoader));
     }
 
     @Test
@@ -218,7 +218,7 @@ class ModelVerificationTest {
         MessageType nonPmType = MessageType.of(ArchiveState.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
         Model model = modelWith(lifecycle);
-        assertThrows(UnknownReferencedTypeError.class,
+        assertThrows(UnresolvedReferenceException.class,
                      () -> model.verifyAgainst(projectClassLoader));
     }
 
