@@ -27,9 +27,9 @@ import io.spine.code.proto.ref.TypeRef;
 import io.spine.type.KnownTypes;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.core.Events.isRejection;
@@ -55,28 +55,20 @@ public final class EventClassSet implements Serializable {
         return new EventClassSet(ImmutableSet.of(), ImmutableSet.of());
     }
 
-    public static EventClassSet of(ImmutableSet<EventClass> eventClasses,
-                                   ImmutableSet<RejectionClass> rejectionClasses) {
-        checkNotNull(eventClasses);
-        checkNotNull(rejectionClasses);
-        return new EventClassSet(ImmutableSet.copyOf(eventClasses),
-                                 ImmutableSet.copyOf(rejectionClasses));
-    }
-
     public static EventClassSet parse(TypeRef typeRef) {
         ImmutableSet<MessageType> types = KnownTypes.instance()
                                                     .findAll(typeRef);
         return new EventClassSet(events(types), rejections(types));
     }
 
-    private static ImmutableSet<EventClass> events(ImmutableSet<MessageType> types) {
+    private static ImmutableSet<EventClass> events(Collection<MessageType> types) {
         return types.stream()
                     .filter(MessageType::isEvent)
                     .map(EventClass::of)
                     .collect(toImmutableSet());
     }
 
-    private static ImmutableSet<RejectionClass> rejections(ImmutableSet<MessageType> types) {
+    private static ImmutableSet<RejectionClass> rejections(Collection<MessageType> types) {
         return types.stream()
                     .filter(MessageType::isRejection)
                     .map(RejectionClass::of)
