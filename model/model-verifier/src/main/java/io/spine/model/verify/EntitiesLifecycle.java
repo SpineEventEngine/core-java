@@ -20,6 +20,7 @@
 
 package io.spine.model.verify;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.code.proto.EntityLifecycleOption;
 import io.spine.code.proto.EntityStateOption;
@@ -39,7 +40,8 @@ final class EntitiesLifecycle {
 
     private final ImmutableSet<MessageType> entitiesWithLifecycle;
 
-    private EntitiesLifecycle(ImmutableSet<MessageType> entityTypes) {
+    @VisibleForTesting
+    EntitiesLifecycle(ImmutableSet<MessageType> entityTypes) {
         this.entitiesWithLifecycle = entityTypes;
     }
 
@@ -105,11 +107,11 @@ final class EntitiesLifecycle {
     private static void checkLifecycleTrigger(TypeRef typeRef) {
         Predicate<MessageType> isEvent = MessageType::isEvent;
         Predicate<MessageType> predicate = isEvent.or(MessageType::isRejection);
-        TypeValidator<MessageType> typeValidator =
-                new TypeValidator<>(predicate,
-                                    "Only event or rejection types can be referenced in " +
+        TypeChecker<MessageType> typeChecker =
+                new TypeChecker<>(predicate,
+                                  "Only event or rejection types can be referenced in " +
                                             "the `lifecycle` option");
-        TypeRefValidator validator = TypeRefValidator.withTypeValidator(typeRef, typeValidator);
+        TypeRefValidator validator = TypeRefValidator.withTypeChecker(typeRef, typeChecker);
         validator.validate();
     }
 }

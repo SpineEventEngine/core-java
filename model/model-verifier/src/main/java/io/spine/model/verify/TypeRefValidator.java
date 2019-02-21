@@ -32,26 +32,26 @@ import java.util.Collection;
 final class TypeRefValidator {
 
     private final TypeRef typeRef;
-    private final TypeValidator<MessageType> typeValidator;
+    private final TypeChecker<MessageType> typeChecker;
 
-    private TypeRefValidator(TypeRef typeRef, TypeValidator<MessageType> typeValidator) {
+    private TypeRefValidator(TypeRef typeRef, TypeChecker<MessageType> typeChecker) {
         this.typeRef = typeRef;
-        this.typeValidator = typeValidator;
+        this.typeChecker = typeChecker;
     }
 
-    static TypeRefValidator withTypeValidator(TypeRef ref,
-                                              TypeValidator<MessageType> typeValidator) {
-        return new TypeRefValidator(ref, typeValidator);
+    static TypeRefValidator withTypeChecker(TypeRef ref,
+                                            TypeChecker<MessageType> typeChecker) {
+        return new TypeRefValidator(ref, typeChecker);
     }
 
     void validate() {
         ImmutableSet<MessageType> referencedTypes = KnownTypes.instance()
                                                               .findAll(typeRef);
-        verifyTypeCount(referencedTypes);
-        checkAgainstValidator(referencedTypes);
+        checkAllTypesResolved(referencedTypes);
+        verifyAgainstChecker(referencedTypes);
     }
 
-    private void verifyTypeCount(Collection<MessageType> referenced) {
+    private void checkAllTypesResolved(Collection<MessageType> referenced) {
         if (!typeCountMatches(referenced)) {
             throwNonexistentTypeError();
         }
@@ -69,7 +69,7 @@ final class TypeRefValidator {
         throw new UnknownReferencedTypeError(typeRef);
     }
 
-    private void checkAgainstValidator(Iterable<MessageType> types) {
-        types.forEach(typeValidator::check);
+    private void verifyAgainstChecker(Iterable<MessageType> types) {
+        types.forEach(typeChecker::check);
     }
 }

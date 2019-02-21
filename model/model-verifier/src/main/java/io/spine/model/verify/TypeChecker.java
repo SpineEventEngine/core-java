@@ -25,23 +25,23 @@ import io.spine.server.model.TypeMismatchError;
 
 import java.util.function.Predicate;
 
-final class TypeValidator<T extends Type<?, ?>> {
+final class TypeChecker<T extends Type<?, ?>> {
 
     private final Predicate<T> predicate;
     private final String errorMessage;
 
-    TypeValidator(Predicate<T> predicate, String errorMessage) {
+    TypeChecker(Predicate<T> predicate, String errorMessage) {
         this.predicate = predicate;
         this.errorMessage = errorMessage;
     }
 
     void check(T type) {
         if (!predicate.test(type)) {
-            throwNonMatchError(type);
+            throwMismatchError(type);
         }
     }
 
-    private void throwNonMatchError(T type) {
+    private void throwMismatchError(T type) {
         throw new TypeMismatchError(errorMessage, type);
     }
 }
