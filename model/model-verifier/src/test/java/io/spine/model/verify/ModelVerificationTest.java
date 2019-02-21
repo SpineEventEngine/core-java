@@ -70,7 +70,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@DisplayName("Model elements that are subject to verification should")
+@DisplayName("Model elements verification should")
 class ModelVerificationTest {
 
     private static final Object[] EMPTY_ARRAY = new Object[0];
@@ -99,8 +99,8 @@ class ModelVerificationTest {
     }
 
     @Test
-    @DisplayName("be verified against classpath")
-    void verifyAgainstClasspath() {
+    @DisplayName("pass against valid classpath")
+    void passAgainstValidClasspath() {
         String commandHandlerTypeName = UploadCommandHandler.class.getName();
         String aggregateTypeName = EditAggregate.class.getName();
         String procManTypeName = RenameProcMan.class.getName();
