@@ -41,7 +41,28 @@ message RenameState {
 
     option (entity).kind = PROCESS_MANAGER;
 
+    option (lifecycle).delete_upon = "PhotoDeleted";
+
     string id = 1 [(required) = true];
 
     string editor = 2;
+}
+
+message ArchiveState {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    option (lifecycle).archive_upon = "NonExistentType";
+
+    string id = 1 [(required) = true];
+
+}
+
+message DeleteState {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    option (lifecycle).delete_upon = "ChangeTitle";
+
+    string id = 1 [(required) = true];
 }

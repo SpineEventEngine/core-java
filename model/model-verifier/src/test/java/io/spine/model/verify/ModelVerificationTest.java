@@ -20,6 +20,8 @@
 
 package io.spine.model.verify;
 
+import com.google.common.collect.ImmutableSet;
+import io.spine.code.proto.MessageType;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.given.DuplicateCommandHandler;
@@ -31,7 +33,13 @@ import io.spine.model.verify.given.RenameProcMan;
 import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
+import io.spine.server.model.TypeMismatchError;
+import io.spine.server.model.UnknownReferencedTypeError;
 import io.spine.server.model.declare.SignatureMismatchException;
+import io.spine.test.model.verify.command.UploadPhoto;
+import io.spine.test.model.verify.given.ArchiveState;
+import io.spine.test.model.verify.given.DeleteState;
+import io.spine.test.model.verify.given.RenameState;
 import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.dsl.ScriptHandler;
@@ -62,8 +70,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@DisplayName("Model should")
-class ModelTest {
+@DisplayName("Model elements that are subject to verification should")
+class ModelVerificationTest {
 
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
@@ -74,7 +82,7 @@ class ModelTest {
     void setUp() {
         Project project = mock(Project.class);
         ScriptHandler buildScript = mock(ScriptHandler.class);
-        when(buildScript.getClassLoader()).thenReturn(ModelTest.class.getClassLoader());
+        when(buildScript.getClassLoader()).thenReturn(ModelVerificationTest.class.getClassLoader());
         when(project.getSubprojects()).thenReturn(emptySet());
         when(project.getRootProject()).thenReturn(project);
         when(project.getBuildscript()).thenReturn(buildScript);
@@ -91,8 +99,8 @@ class ModelTest {
     }
 
     @Test
-    @DisplayName("verify itself against classpath")
-    void verifyModel() {
+    @DisplayName("be verified against classpath")
+    void verifyAgainstClasspath() {
         String commandHandlerTypeName = UploadCommandHandler.class.getName();
         String aggregateTypeName = EditAggregate.class.getName();
         String procManTypeName = RenameProcMan.class.getName();
@@ -104,14 +112,14 @@ class ModelTest {
                 .build();
 
         CommandHandlerSet handlerSet = spy(new CommandHandlerSet(commandHandlers));
-        Model model = new Model(handlerSet, EntitiesLifecycle.ofKnownTypes());
+        Model model = new Model(handlerSet, validLifecycle());
         model.verifyAgainst(projectClassLoader);
 
         verify(handlerSet, times(1)).checkAgainst(projectClassLoader);
     }
 
     @ParameterizedTest
-    @DisplayName("throw SignatureMismatchException on invalid command handler")
+    @DisplayName("fail with `SignatureMismatchException` on invalid command handler")
     @MethodSource("getBadHandlers")
     void throwOnSignatureMismatch(String badHandlerName) {
         CommandHandlers handlers = CommandHandlers
@@ -130,7 +138,7 @@ class ModelTest {
     }
 
     @Test
-    @DisplayName("throw DuplicateCommandHandlerError on duplicate command handlers")
+    @DisplayName("fail with `DuplicateCommandHandlerError` on duplicate command handlers")
     void failOnDuplicateHandlers() {
         String firstType = UploadCommandHandler.class.getName();
         String secondType = DuplicateCommandHandler.class.getName();
@@ -147,7 +155,7 @@ class ModelTest {
 
     @Test
     @DisplayName("produce a warning on private command handling methods")
-    void warnOnPrivateHandlers(){
+    void warnOnPrivateHandlers() {
         Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging();
         CommandHandlers handlers = CommandHandlers
                 .newBuilder()
@@ -163,13 +171,14 @@ class ModelTest {
     /** Redirects logging produced by model verifier to a {@code Queue} that is returned. */
     private static Queue<SubstituteLoggingEvent> redirectLogging() {
         Queue<SubstituteLoggingEvent> loggedMessages = new ArrayDeque<>();
-        Logging.redirect((SubstituteLogger) Logging.get(CommandHandlerSignature.class), loggedMessages);
+        Logging.redirect((SubstituteLogger) Logging.get(CommandHandlerSignature.class),
+                         loggedMessages);
         return loggedMessages;
     }
 
     @Test
     @MuteLogging
-    @DisplayName("ignore invalid class names")
+    @DisplayName("pass the verification with invalid class names")
     void ignoreInvalidClassNames() {
         String invalidClassname = "non.existing.class.Name";
         CommandHandlers handlers = CommandHandlers
@@ -181,9 +190,9 @@ class ModelTest {
     }
 
     @Test
-    @DisplayName("throw IllegalArgumentException on non-CommandHandler types")
+    @DisplayName("fail with `IllegalArgumentException` on non-`CommandHandler` types")
     void rejectNonHandlerTypes() {
-        String invalidClassname = ModelTest.class.getName();
+        String invalidClassname = ModelVerificationTest.class.getName();
         CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(invalidClassname)
@@ -193,9 +202,59 @@ class ModelTest {
                      () -> model.verifyAgainst(projectClassLoader));
     }
 
+    @Test
+    @MuteLogging
+    @DisplayName("fail with `TypeMismatchError` when lifecycle is declared for non-PM type")
+    void failOnNonPmLifecycle() {
+        MessageType nonPmType = MessageType.of(UploadPhoto.class);
+        EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
+        Model model = modelWith(lifecycle);
+        assertThrows(TypeMismatchError.class, () -> model.verifyAgainst(projectClassLoader));
+    }
+
+    @Test
+    @DisplayName("fail with `UnknownReferencedTypeError` when option references unknown types")
+    void failOnUnknownLifecycleTriggers() {
+        MessageType nonPmType = MessageType.of(ArchiveState.class);
+        EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
+        Model model = modelWith(lifecycle);
+        assertThrows(UnknownReferencedTypeError.class,
+                     () -> model.verifyAgainst(projectClassLoader));
+    }
+
+    @Test
+    @DisplayName("fail with `TypeMismatchError` when option references non-event types")
+    void failOnNonEventTriggers() {
+        MessageType nonPmType = MessageType.of(DeleteState.class);
+        EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
+        Model model = modelWith(lifecycle);
+        assertThrows(TypeMismatchError.class,
+                     () -> model.verifyAgainst(projectClassLoader));
+    }
+
     private static Model modelWith(CommandHandlers handlers) {
         CommandHandlerSet handlerSet = new CommandHandlerSet(handlers);
-        Model result = new Model(handlerSet, EntitiesLifecycle.ofKnownTypes());
+        EntitiesLifecycle lifecycle = validLifecycle();
+        Model result = new Model(handlerSet, lifecycle);
         return result;
+    }
+
+    private static Model modelWith(EntitiesLifecycle lifecycle) {
+        CommandHandlers handlers = CommandHandlers
+                .newBuilder()
+                .build();
+        CommandHandlerSet handlerSet = new CommandHandlerSet(handlers);
+        Model result = new Model(handlerSet, lifecycle);
+        return result;
+    }
+
+    /**
+     * Provides a valid lifecycle as entity lifecycle in {@link io.spine.type.KnownTypes} is
+     * invalid due to {@link io.spine.test.model.verify.given.ArchiveState} and
+     * {@link io.spine.test.model.verify.given.DeleteState}.
+     */
+    private static EntitiesLifecycle validLifecycle() {
+        MessageType validPmType = MessageType.of(RenameState.class);
+        return new EntitiesLifecycle(ImmutableSet.of(validPmType));
     }
 }
