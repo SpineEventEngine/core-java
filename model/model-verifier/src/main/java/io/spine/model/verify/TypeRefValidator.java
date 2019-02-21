@@ -20,56 +20,61 @@
 
 package io.spine.model.verify;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.code.proto.MessageType;
 import io.spine.code.proto.ref.CompositeTypeRef;
 import io.spine.code.proto.ref.TypeRef;
+import io.spine.server.model.TypeMismatchError;
 import io.spine.server.model.UnknownReferencedTypeError;
 import io.spine.type.KnownTypes;
 
-import java.util.Collection;
+import java.util.function.Predicate;
 
 final class TypeRefValidator {
 
-    private final TypeRef typeRef;
-    private final TypeChecker<MessageType> typeChecker;
+    private final Predicate<MessageType> predicate;
+    private final String errorMessage;
 
-    private TypeRefValidator(TypeRef typeRef, TypeChecker<MessageType> typeChecker) {
-        this.typeRef = typeRef;
-        this.typeChecker = typeChecker;
+    private TypeRefValidator(Predicate<MessageType> predicate, String errorMessage) {
+        this.predicate = predicate;
+        this.errorMessage = errorMessage;
     }
 
-    static TypeRefValidator withTypeChecker(TypeRef ref,
-                                            TypeChecker<MessageType> typeChecker) {
-        return new TypeRefValidator(ref, typeChecker);
+    static TypeRefValidator withPredicate(Predicate<MessageType> predicate, String errorMessage) {
+        return new TypeRefValidator(predicate, errorMessage);
     }
 
-    void validate() {
-        ImmutableSet<MessageType> referencedTypes = KnownTypes.instance()
-                                                              .findAll(typeRef);
-        checkAllTypesResolved(referencedTypes);
-        verifyAgainstChecker(referencedTypes);
-    }
-
-    private void checkAllTypesResolved(Collection<MessageType> referenced) {
-        if (!typeCountMatches(referenced)) {
-            throwNonexistentTypeError();
-        }
-    }
-
-    private boolean typeCountMatches(Collection<MessageType> referenced) {
+    void check(TypeRef typeRef) {
         if (typeRef instanceof CompositeTypeRef) {
             CompositeTypeRef composite = (CompositeTypeRef) typeRef;
-            return composite.refCount() <= referenced.size();
+            ImmutableList<TypeRef> elements = composite.elements();
+            elements.forEach(this::doCheck);
+        } else {
+            doCheck(typeRef);
         }
-        return !referenced.isEmpty();
     }
 
-    private void throwNonexistentTypeError() {
+    private void doCheck(TypeRef typeRef) {
+        ImmutableSet<MessageType> types = KnownTypes.instance()
+                                                    .resolve(typeRef);
+        if (types.isEmpty()) {
+            throwUnresolvedRefError(typeRef);
+        }
+        types.forEach(this::checkAgainstPredicate);
+    }
+
+    private static void throwUnresolvedRefError(TypeRef typeRef) {
         throw new UnknownReferencedTypeError(typeRef);
     }
 
-    private void verifyAgainstChecker(Iterable<MessageType> types) {
-        types.forEach(typeChecker::check);
+    private void checkAgainstPredicate(MessageType type) {
+        if (!predicate.test(type)) {
+            throwTypeMismatchError(type);
+        }
+    }
+
+    private void throwTypeMismatchError(MessageType type) {
+        throw new TypeMismatchError(errorMessage, type);
     }
 }
