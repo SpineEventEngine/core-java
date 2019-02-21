@@ -32,8 +32,10 @@ import io.spine.server.test.shared.AnyProcessVBuilder;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmArchiveProcess;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
@@ -44,6 +46,8 @@ import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmIterationStarted;
 import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
+import io.spine.test.procman.event.PmProcessArchived;
+import io.spine.test.procman.event.PmProcessDeleted;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -124,6 +128,24 @@ public class TestProcessManager
     PmIterationStarted handle(PmStartIteration command) {
         remember(command);
         return PmIterationStarted
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
+    }
+
+    @Assign
+    PmProcessArchived handle(PmArchiveProcess command) {
+        remember(command);
+        return PmProcessArchived
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
+    }
+
+    @Assign
+    PmProcessDeleted handle(PmDeleteProcess command) {
+        remember(command);
+        return PmProcessDeleted
                 .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();

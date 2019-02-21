@@ -60,6 +60,8 @@ import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmIterationStarted;
 import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
+import io.spine.test.procman.event.PmProcessArchived;
+import io.spine.test.procman.event.PmProcessDeleted;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -91,8 +93,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.pm.GivenMessages.addTask;
+import static io.spine.server.procman.given.pm.GivenMessages.archiveProcess;
 import static io.spine.server.procman.given.pm.GivenMessages.cancelIteration;
 import static io.spine.server.procman.given.pm.GivenMessages.createProject;
+import static io.spine.server.procman.given.pm.GivenMessages.deleteProcess;
 import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
 import static io.spine.server.procman.given.pm.GivenMessages.iterationPlanned;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
@@ -113,6 +117,7 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static io.spine.testing.server.procman.PmDispatcher.dispatch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -545,8 +550,26 @@ class ProcessManagerTest {
                     PmTaskAdded.class,
                     PmNotificationSent.class,
                     PmIterationPlanned.class,
-                    PmIterationStarted.class
+                    PmIterationStarted.class,
+                    PmProcessArchived.class,
+                    PmProcessDeleted.class
             ));
         }
+    }
+
+    @Test
+    @DisplayName("archive self according to the lifecycle")
+    void archiveSelf() {
+        assertFalse(processManager.isArchived());
+        testDispatchCommand(archiveProcess());
+        assertTrue(processManager.isArchived());
+    }
+
+    @Test
+    @DisplayName("delete self according to the lifecycle")
+    void deleteSelf() {
+        assertFalse(processManager.isDeleted());
+        testDispatchCommand(deleteProcess());
+        assertTrue(processManager.isDeleted());
     }
 }

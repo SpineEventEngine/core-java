@@ -29,8 +29,10 @@ import io.spine.server.commandbus.Given;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmArchiveProcess;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmOwnerChanged;
@@ -72,6 +74,18 @@ public class GivenMessages {
                 .newBuilder()
                 .setProjectId(ID)
                 .build();
+    }
+
+    public static PmArchiveProcess archiveProcess() {
+        return PmArchiveProcess.newBuilder()
+                               .setProjectId(ID)
+                               .build();
+    }
+
+    public static PmDeleteProcess deleteProcess() {
+        return PmDeleteProcess.newBuilder()
+                              .setProjectId(ID)
+                              .build();
     }
 
     public static PmIterationPlanned iterationPlanned(boolean budgetAllocated) {
