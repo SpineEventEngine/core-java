@@ -22,7 +22,6 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
@@ -41,6 +40,7 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
+import io.spine.server.procman.model.Lifecycle;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -84,9 +84,6 @@ public abstract class ProcessManager<I,
 
     /** The Command Bus to post routed commands. */
     private volatile @MonotonicNonNull CommandBus commandBus;
-
-    @LazyInit
-    private @MonotonicNonNull PmLifecycle lifecycle;
 
     /**
      * Creates a new instance.
@@ -221,20 +218,22 @@ public abstract class ProcessManager<I,
     }
 
     void updateLifecycle(Iterable<Event> events) {
-        if (lifecycle == null) {
-            lifecycle = PmLifecycle.of(this);
+        archiveIfNecessary(events);
+        deleteIfNecessary(events);
+    }
+
+    private void archiveIfNecessary(Iterable<Event> events) {
+        Lifecycle lifecycle = thisClass().lifecycle();
+        if (lifecycle.archivesUpon(events)) {
+            setArchived(true);
         }
-        lifecycle.updateBasedOn(events);
     }
 
-    @Override
-    protected void setArchived(boolean archived) {
-        super.setArchived(archived);
-    }
-
-    @Override
-    protected void setDeleted(boolean deleted) {
-        super.setDeleted(deleted);
+    private void deleteIfNecessary(Iterable<Event> events) {
+        Lifecycle lifecycle = thisClass().lifecycle();
+        if (lifecycle.deletesUpon(events)) {
+            setDeleted(true);
+        }
     }
 
     private static List<Event> noEvents() {
