@@ -32,7 +32,11 @@ import java.nio.file.StandardOpenOption;
 
 import static java.nio.file.Files.newInputStream;
 
-final class CommandHandlerSet implements Logging {
+/**
+ * ...
+ * <p>The class is non-{@code final} to enable testing mocks.
+ */
+class CommandHandlerSet implements Logging {
 
     private final CommandHandlers handlers;
 

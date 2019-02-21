@@ -20,10 +20,8 @@
 
 package io.spine.model.verify;
 
-import com.google.common.io.Files;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
-import io.spine.model.verify.ModelVerifier.GetDestinationDir;
 import io.spine.model.verify.given.DuplicateCommandHandler;
 import io.spine.model.verify.given.EditAggregate;
 import io.spine.model.verify.given.InvalidDeleteAggregate;
@@ -32,59 +30,51 @@ import io.spine.model.verify.given.InvalidRestoreAggregate;
 import io.spine.model.verify.given.RenameProcMan;
 import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.server.model.DuplicateCommandHandlerError;
+import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
-import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.event.Level;
 import org.slf4j.event.SubstituteLoggingEvent;
 import org.slf4j.helpers.SubstituteLogger;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
 import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@DisplayName("ModelVerifier should")
-class ModelVerifierTest {
+@DisplayName("Model should")
+class ModelTest {
 
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
-    private Project project = null;
-
-    static Project actualProject() {
-        Project result = ProjectBuilder.builder().build();
-        result.getPluginManager().apply("java");
-        return result;
-    }
+    private ClassLoader projectClassLoader;
 
     @SuppressWarnings("unchecked") // OK for test mocks.
     @BeforeEach
     void setUp() {
-        project = mock(Project.class);
+        Project project = mock(Project.class);
         ScriptHandler buildScript = mock(ScriptHandler.class);
-        when(buildScript.getClassLoader()).thenReturn(ModelVerifierTest.class.getClassLoader());
+        when(buildScript.getClassLoader()).thenReturn(ModelTest.class.getClassLoader());
         when(project.getSubprojects()).thenReturn(emptySet());
         when(project.getRootProject()).thenReturn(project);
         when(project.getBuildscript()).thenReturn(buildScript);
@@ -95,37 +85,42 @@ class ModelVerifierTest {
         when(emptyTaskCollection.toArray()).thenReturn(EMPTY_ARRAY);
         when(tasks.withType(any(Class.class))).thenReturn(emptyTaskCollection);
         when(project.getTasks()).thenReturn(tasks);
+
+        ProjectClassLoader classLoader = new ProjectClassLoader(project);
+        projectClassLoader = classLoader.get();
     }
 
     @Test
-    @DisplayName("verify model from classpath")
+    @DisplayName("verify itself against classpath")
     void verifyModel() {
-        ModelVerifier verifier = new ModelVerifier(project);
-
-        verify(project).getSubprojects();
-
         String commandHandlerTypeName = UploadCommandHandler.class.getName();
         String aggregateTypeName = EditAggregate.class.getName();
         String procManTypeName = RenameProcMan.class.getName();
-        CommandHandlers spineModel = CommandHandlers
+        CommandHandlers commandHandlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(commandHandlerTypeName)
                 .addCommandHandlingTypes(aggregateTypeName)
                 .addCommandHandlingTypes(procManTypeName)
                 .build();
-//        verifier.verify(spineModel);
+
+        CommandHandlerSet handlerSet = spy(new CommandHandlerSet(commandHandlers));
+        Model model = new Model(handlerSet, EntitiesLifecycle.ofKnownTypes());
+        model.verifyAgainst(projectClassLoader);
+
+        verify(handlerSet, times(1)).checkAgainst(projectClassLoader);
     }
 
     @ParameterizedTest
-    @DisplayName("throw when attempting to verify a model that declares an invalid command handler")
+    @DisplayName("throw SignatureMismatchException on invalid command handler")
     @MethodSource("getBadHandlers")
     void throwOnSignatureMismatch(String badHandlerName) {
-        ModelVerifier verifier = new ModelVerifier(project);
-        CommandHandlers model = CommandHandlers
+        CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(badHandlerName)
                 .build();
-//        assertThrows(SignatureMismatchException.class, () -> verifier.verify(model));
+        Model model = modelWith(handlers);
+        assertThrows(SignatureMismatchException.class,
+                     () -> model.verifyAgainst(projectClassLoader));
     }
 
     private static Stream<Arguments> getBadHandlers() {
@@ -135,33 +130,34 @@ class ModelVerifierTest {
     }
 
     @Test
-    @DisplayName("fail on duplicate command handlers")
+    @DisplayName("throw DuplicateCommandHandlerError on duplicate command handlers")
     void failOnDuplicateHandlers() {
-        ModelVerifier verifier = new ModelVerifier(project);
         String firstType = UploadCommandHandler.class.getName();
         String secondType = DuplicateCommandHandler.class.getName();
 
-        CommandHandlers spineModel = CommandHandlers
+        CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(firstType)
                 .addCommandHandlingTypes(secondType)
                 .build();
-//        assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
+        Model model = modelWith(handlers);
+        assertThrows(DuplicateCommandHandlerError.class,
+                     () -> model.verifyAgainst(projectClassLoader));
     }
 
     @Test
     @DisplayName("produce a warning on private command handling methods")
     void warnOnPrivateHandlers(){
-        ModelVerifier verifier = new ModelVerifier(project);
         Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging();
-        CommandHandlers model = CommandHandlers
+        CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(InvalidRestoreAggregate.class.getName())
                 .build();
-//        verifier.verify(model);
-//        assertEquals(1, loggedMessages.size());
-//        SubstituteLoggingEvent event = loggedMessages.poll();
-//        assertEquals(event.getLevel(), Level.WARN);
+        Model model = modelWith(handlers);
+        model.verifyAgainst(projectClassLoader);
+        assertEquals(1, loggedMessages.size());
+        SubstituteLoggingEvent event = loggedMessages.poll();
+        assertEquals(event.getLevel(), Level.WARN);
     }
 
     /** Redirects logging produced by model verifier to a {@code Queue} that is returned. */
@@ -176,43 +172,30 @@ class ModelVerifierTest {
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
         String invalidClassname = "non.existing.class.Name";
-        CommandHandlers spineModel = CommandHandlers
+        CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(invalidClassname)
                 .build();
-//        new ModelVerifier(project).verify(spineModel);
+        Model model = modelWith(handlers);
+        model.verifyAgainst(projectClassLoader);
     }
 
     @Test
-    @DisplayName("not accept non-CommandHandler types")
+    @DisplayName("throw IllegalArgumentException on non-CommandHandler types")
     void rejectNonHandlerTypes() {
-        String invalidClassname = ModelVerifierTest.class.getName();
-        CommandHandlers spineModel = CommandHandlers
+        String invalidClassname = ModelTest.class.getName();
+        CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(invalidClassname)
                 .build();
-//        assertThrows(IllegalArgumentException.class,
-//                     () -> new ModelVerifier(project).verifyCommandHandlers(spineModel));
+        Model model = modelWith(handlers);
+        assertThrows(IllegalArgumentException.class,
+                     () -> model.verifyAgainst(projectClassLoader));
     }
 
-    @Test
-    @DisplayName("retrieve compilation destination directory from task")
-    void getCompilationDestDir() throws MalformedURLException {
-        JavaCompile compileTask = actualProject().getTasks()
-                                                 .withType(JavaCompile.class)
-                                                 .getByName(COMPILE_JAVA.getValue());
-        File dest = Files.createTempDir();
-        compileTask.setDestinationDir(dest);
-        Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
-        URL destUrl = dest.toURI().toURL();
-        assertEquals(destUrl, func.apply(compileTask));
-    }
-
-    @Test
-    @DisplayName("retrieve null if destination directory is null")
-    void getNullDestDir() {
-        JavaCompile compileTask = mock(JavaCompile.class);
-        Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
-        assertNull(func.apply(compileTask));
+    private static Model modelWith(CommandHandlers handlers) {
+        CommandHandlerSet handlerSet = new CommandHandlerSet(handlers);
+        Model result = new Model(handlerSet, EntitiesLifecycle.ofKnownTypes());
+        return result;
     }
 }
