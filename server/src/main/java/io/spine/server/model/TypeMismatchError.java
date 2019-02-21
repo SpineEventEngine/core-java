@@ -24,11 +24,11 @@ import io.spine.code.proto.Type;
 
 import static java.lang.String.format;
 
-public final class InsufficientTypeError extends ModelError {
+public final class TypeMismatchError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    public InsufficientTypeError(String message, Type<?, ?> type) {
+    public TypeMismatchError(String message, Type<?, ?> type) {
         super(format("%s, received type: %s", message, type.javaClassName()));
     }
 }

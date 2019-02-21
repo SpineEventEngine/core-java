@@ -21,7 +21,7 @@
 package io.spine.model.verify;
 
 import io.spine.code.proto.Type;
-import io.spine.server.model.InsufficientTypeError;
+import io.spine.server.model.TypeMismatchError;
 
 import java.util.function.Predicate;
 
@@ -42,6 +42,6 @@ final class TypeValidator<T extends Type<?, ?>> {
     }
 
     private void throwNonMatchError(T type) {
-        throw new InsufficientTypeError(errorMessage, type);
+        throw new TypeMismatchError(errorMessage, type);
     }
 }

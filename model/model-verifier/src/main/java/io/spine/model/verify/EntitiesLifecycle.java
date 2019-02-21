@@ -26,7 +26,7 @@ import io.spine.code.proto.EntityStateOption;
 import io.spine.code.proto.MessageType;
 import io.spine.code.proto.ref.TypeRef;
 import io.spine.option.EntityOption;
-import io.spine.server.model.InsufficientTypeError;
+import io.spine.server.model.TypeMismatchError;
 import io.spine.type.KnownTypes;
 
 import java.util.Optional;
@@ -79,7 +79,7 @@ final class EntitiesLifecycle {
                            .filter(kind -> kind == PROCESS_MANAGER)
                            .isPresent();
         if (!isProcessManager) {
-            throw new InsufficientTypeError(
+            throw new TypeMismatchError(
                     "Only entity state messages of process manager kind can have `lifecycle` " +
                             "option", type
             );

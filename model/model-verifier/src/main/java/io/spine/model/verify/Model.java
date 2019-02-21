@@ -25,7 +25,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.nio.file.Path;
 
 /**
- * Spine model elements that require verification.
+ * Spine model elements that are subject to verification.
  */
 final class Model {
 
