@@ -40,7 +40,6 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
-import io.spine.server.procman.model.Lifecycle;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -218,29 +217,23 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Updates the process lifecycle according to the given events.
+     * {@inheritDoc}
      *
-     * <p>This method should only be called in the scope of active transaction.
-     *
-     * @see io.spine.option.LifecycleOption
+     * <p>Overridden to expose the method to the {@code procman} package.
      */
-    void updateLifecycle(Iterable<Event> events) {
-        archiveIfNecessary(events);
-        deleteIfNecessary(events);
+    @Override
+    protected void setArchived(boolean archived) {
+        super.setArchived(archived);
     }
 
-    private void archiveIfNecessary(Iterable<Event> events) {
-        Lifecycle lifecycle = thisClass().lifecycle();
-        if (lifecycle.archivesUpon(events)) {
-            setArchived(true);
-        }
-    }
-
-    private void deleteIfNecessary(Iterable<Event> events) {
-        Lifecycle lifecycle = thisClass().lifecycle();
-        if (lifecycle.deletesUpon(events)) {
-            setDeleted(true);
-        }
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose the method to the {@code procman} package.
+     */
+    @Override
+    protected void setDeleted(boolean deleted) {
+        super.setDeleted(deleted);
     }
 
     private static List<Event> noEvents() {

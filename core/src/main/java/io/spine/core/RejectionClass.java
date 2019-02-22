@@ -21,6 +21,7 @@ package io.spine.core;
 
 import com.google.protobuf.Message;
 import io.spine.base.RejectionMessage;
+import io.spine.base.ThrowableMessage;
 import io.spine.code.proto.MessageType;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -76,6 +77,14 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
     public static RejectionClass from(Event rejection) {
         TypeUrl typeUrl = typeUrl(rejection);
         return from(typeUrl);
+    }
+
+    /**
+     * Creates a new instance from the given {@code ThrowableMessage}.
+     */
+    public static RejectionClass of(ThrowableMessage rejection) {
+        RejectionMessage rejectionMessage = rejection.getMessageThrown();
+        return of(rejectionMessage);
     }
 
     /**

@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
@@ -34,9 +35,12 @@ import io.spine.server.entity.Phase;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
+import io.spine.server.procman.model.Lifecycle;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
+
+import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.
@@ -73,7 +77,7 @@ public class PmTransaction<I,
         VersionIncrement versionIncrement = createVersionIncrement();
         Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(dispatch, versionIncrement);
         List<Event> events = propagate(phase);
-        getEntity().updateLifecycle(events);
+        entityLifecycle().update(events);
         return events;
     }
 
@@ -92,8 +96,28 @@ public class PmTransaction<I,
                 versionIncrement
         );
         List<Event> events = propagate(phase);
-        getEntity().updateLifecycle(events);
+        entityLifecycle().update(events);
         return events;
+    }
+
+    /**
+     * Updates the process manager lifecycle according to the thrown rejection.
+     */
+    @Override
+    protected void onBeforeRollback(Throwable cause) {
+        super.onBeforeRollback(cause);
+        Throwable rootCause = getRootCause(cause);
+        if (rootCause instanceof ThrowableMessage) {
+            entityLifecycle().update((ThrowableMessage) rootCause);
+            commitAttributeChanges();
+        }
+    }
+
+    private PmLifecycle entityLifecycle() {
+        Lifecycle lifecycleRules = getEntity().thisClass()
+                                              .lifecycle();
+        PmLifecycle result = new PmLifecycle(getEntity(), lifecycleRules);
+        return result;
     }
 
     /**

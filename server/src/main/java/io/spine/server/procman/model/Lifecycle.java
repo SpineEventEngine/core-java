@@ -22,6 +22,7 @@ package io.spine.server.procman.model;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.base.ThrowableMessage;
 import io.spine.code.proto.EntityLifecycleOption;
 import io.spine.code.proto.MessageType;
 import io.spine.core.Event;
@@ -36,6 +37,8 @@ import java.io.Serializable;
  * <p>Lists events and rejections which are "terminal" for the process, causing the process manager
  * to become {@linkplain LifecycleFlags#getArchived()} archived} or
  * {@linkplain LifecycleFlags#getDeleted()} deleted}.
+ *
+ * @see io.spine.option.LifecycleOption
  */
 @Immutable
 public final class Lifecycle implements Serializable {
@@ -90,5 +93,21 @@ public final class Lifecycle implements Serializable {
      */
     public boolean deletesUpon(Iterable<Event> events) {
         return deleteOn.containsAnyOf(events);
+    }
+
+    /**
+     * Checks if the process manager should become archived when the given {@code rejection} is
+     * thrown.
+     */
+    public boolean archivesUpon(ThrowableMessage rejection) {
+        return archiveOn.contains(rejection);
+    }
+
+    /**
+     * Checks if the process manager should become deleted when the given {@code rejection} is
+     * thrown.
+     */
+    public boolean deletesUpon(ThrowableMessage rejection) {
+        return deleteOn.contains(rejection);
     }
 }

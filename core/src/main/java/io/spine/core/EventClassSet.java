@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.base.ThrowableMessage;
 import io.spine.code.proto.MessageType;
 import io.spine.code.proto.ref.TypeRef;
 import io.spine.type.KnownTypes;
@@ -90,7 +91,7 @@ public final class EventClassSet implements Serializable {
     }
 
     /**
-     * Checks if any of the specified events and rejections are contained in this set.
+     * Checks if any of the specified events or rejections are contained in this set.
      */
     public boolean containsAnyOf(Iterable<Event> events) {
         return containsAnyEvent(events) || containsAnyRejection(events);
@@ -114,5 +115,14 @@ public final class EventClassSet implements Serializable {
                         .filter(rejectionClasses::contains)
                         .findAny();
         return matchedRejection.isPresent();
+    }
+
+    /**
+     * Checks if rejection's enclosed message type is contained among the {@code rejectionClasses}.
+     */
+    public boolean contains(ThrowableMessage rejection) {
+        RejectionClass rejectionClass = RejectionClass.of(rejection);
+        boolean result = rejectionClasses.contains(rejectionClass);
+        return result;
     }
 }
