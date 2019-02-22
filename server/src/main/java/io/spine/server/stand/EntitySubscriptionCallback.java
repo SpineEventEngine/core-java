@@ -49,7 +49,7 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
      */
     @Override
     protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
-        EntityStateChanged theEvent = (EntityStateChanged) event.getMessage();
+        EntityStateChanged theEvent = (EntityStateChanged) event.message();
         EntityUpdates updates = extractEntityUpdates(theEvent);
         SubscriptionUpdate result = SubscriptionUpdateVBuilder
                 .newBuilder()

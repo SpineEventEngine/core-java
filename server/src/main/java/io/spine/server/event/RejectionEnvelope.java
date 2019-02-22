@@ -65,7 +65,7 @@ public final class RejectionEnvelope
     private final EventEnvelope event;
 
     private RejectionEnvelope(EventEnvelope event) {
-        super(event.getOuterObject());
+        super(event.outerObject());
         this.event = event;
     }
 
@@ -79,7 +79,7 @@ public final class RejectionEnvelope
      */
     public static RejectionEnvelope from(EventEnvelope event) {
         checkNotNull(event);
-        checkArgument(event.isRejection(), "%s is not a rejection", event.getMessageClass());
+        checkArgument(event.isRejection(), "%s is not a rejection", event.messageClass());
         return new RejectionEnvelope(event);
     }
 
@@ -120,7 +120,7 @@ public final class RejectionEnvelope
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
         RejectionMessage thrownMessage = throwableMessage.getMessageThrown();
-        RejectionEventContext context = rejectionContext(origin.getMessage(), throwableMessage);
+        RejectionEventContext context = rejectionContext(origin.message(), throwableMessage);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
     }
@@ -141,13 +141,13 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public RejectionMessage getMessage() {
-        return (RejectionMessage) event.getMessage();
+    public RejectionMessage message() {
+        return (RejectionMessage) event.message();
     }
 
     @Override
-    public RejectionClass getMessageClass() {
-        EventClass eventClass = event.getMessageClass();
+    public RejectionClass messageClass() {
+        EventClass eventClass = event.messageClass();
         @SuppressWarnings("unchecked") // Checked at runtime.
         Class<? extends RejectionMessage> value =
                 (Class<? extends RejectionMessage>) eventClass.value();
@@ -156,8 +156,8 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public EventContext getMessageContext() {
-        return event.getMessageContext();
+    public EventContext messageContext() {
+        return event.messageContext();
     }
 
     @Override
@@ -176,8 +176,8 @@ public final class RejectionEnvelope
      * @return the rejected command
      */
     public DispatchedCommand getOrigin() {
-        EventContext context = getMessageContext();
-        RejectionEventContext rejectionContext = getMessageContext().getRejection();
+        EventContext context = messageContext();
+        RejectionEventContext rejectionContext = messageContext().getRejection();
         Any commandMessage = rejectionContext.getCommandMessage();
         CommandContext commandContext = context.getCommandContext();
         DispatchedCommand result = DispatchedCommand
@@ -194,7 +194,7 @@ public final class RejectionEnvelope
      * @return the rejected command message
      */
     public Message getOriginMessage() {
-        RejectionEventContext context = getMessageContext().getRejection();
+        RejectionEventContext context = messageContext().getRejection();
         Any commandMessage = context.getCommandMessage();
         return unpack(commandMessage);
     }

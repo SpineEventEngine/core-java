@@ -163,7 +163,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
 
     private C classOf(E envelope) {
         @SuppressWarnings("unchecked") // Logically valid.
-                C messageClass = (C) envelope.getMessageClass();
+                C messageClass = (C) envelope.messageClass();
         return messageClass;
     }
 

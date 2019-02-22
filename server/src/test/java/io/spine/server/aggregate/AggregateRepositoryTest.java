@@ -647,7 +647,7 @@ public class AggregateRepositoryTest {
                                                                      .setNumber(-412.0f)
                                                                      .build()));
         boundedContext().getEventBus()
-                        .post(envelope.getOuterObject());
+                        .post(envelope.outerObject());
 
         assertTrue(repository.isErrorLogged());
         RuntimeException lastException = repository.getLastException();
@@ -656,13 +656,13 @@ public class AggregateRepositoryTest {
         HandlerMethodFailedException methodFailedException =
                 (HandlerMethodFailedException) lastException;
 
-        assertEquals(envelope.getMessage(), methodFailedException.getDispatchedMessage());
+        assertEquals(envelope.message(), methodFailedException.getDispatchedMessage());
         assertEquals(envelope.getEventContext(), methodFailedException.getMessageContext());
 
         MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
         assertNotNull(lastErrorEnvelope);
         assertTrue(lastErrorEnvelope instanceof EventEnvelope);
-        assertEquals(envelope.getMessage(), lastErrorEnvelope.getMessage());
+        assertEquals(envelope.message(), lastErrorEnvelope.message());
     }
 
     @Test

@@ -30,10 +30,11 @@ import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
+import io.spine.server.enrich.EnrichmentService;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 
-import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -66,22 +67,11 @@ public final class EventEnvelope
     }
 
     /**
-     * Creates a new {@link Enrichment} instance from the passed map.
-     */
-    public static Enrichment createEnrichment(Map<String, Any> enrichments) {
-        Enrichment.Builder enrichment =
-                Enrichment.newBuilder()
-                          .setContainer(Enrichment.Container.newBuilder()
-                                                            .putAllItems(enrichments));
-        return enrichment.build();
-    }
-
-    /**
      * Obtains the event ID.
      */
     @Override
     public EventId getId() {
-        EventId result = getOuterObject().getId();
+        EventId result = outerObject().getId();
         return result;
     }
 
@@ -97,7 +87,7 @@ public final class EventEnvelope
      * Obtains the event message.
      */
     @Override
-    public EventMessage getMessage() {
+    public EventMessage message() {
         return this.eventMessage;
     }
 
@@ -105,18 +95,18 @@ public final class EventEnvelope
      * Obtains the class of the event.
      */
     @Override
-    public EventClass getMessageClass() {
+    public EventClass messageClass() {
         return this.eventClass;
     }
 
     @Override
-    public EventContext getMessageContext() {
+    public EventContext messageContext() {
         return getEventContext();
     }
 
     @Override
     public ActorContext getActorContext() {
-        return Events.getActorContext(getOuterObject());
+        return Events.getActorContext(outerObject());
     }
 
     /**
@@ -189,6 +179,16 @@ public final class EventEnvelope
         return external;
     }
 
+    public EventEnvelope toEnriched(EnrichmentService service) {
+        if (!isEnrichmentEnabled()) {
+            return this;
+        }
+        Optional<Enrichment> enrichment = service.createEnrichment(message(), messageContext());
+        EventEnvelope result = enrichment.map(this::withEnrichment)
+                                         .orElse(this);
+        return result;
+    }
+
     /**
      * Verifies if the enrichment of the message is enabled.
      */
@@ -201,25 +201,12 @@ public final class EventEnvelope
         return getEventContext().getEnrichment();
     }
 
-    /**
-     * Creates a new version of the message with the enrichments applied.
-     *
-     * @param enrichments the enrichments to apply
-     * @return new enriched envelope
-     */
-    public EventEnvelope toEnriched(Map<String, Any> enrichments) {
-        checkNotNull(enrichments);
-        Enrichment enrichment = createEnrichment(enrichments);
-        EventEnvelope result = enrich(enrichment);
-        return result;
-    }
-
-    private EventEnvelope enrich(Enrichment enrichment) {
-        EventContext context = getMessageContext().toBuilder()
-                                                  .setEnrichment(enrichment)
-                                                  .build();
-        Event.Builder enrichedCopy = getOuterObject().toBuilder()
-                                                     .setContext(context);
+    private EventEnvelope withEnrichment(Enrichment enrichment) {
+        EventContext context = messageContext().toBuilder()
+                                               .setEnrichment(enrichment)
+                                               .build();
+        Event.Builder enrichedCopy = outerObject().toBuilder()
+                                                  .setContext(context);
         return of(enrichedCopy.build());
     }
 }

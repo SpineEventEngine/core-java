@@ -23,10 +23,9 @@ package io.spine.server.enrich;
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
-import io.spine.core.EventContext;
+import io.spine.core.EnrichableMessageContext;
+import io.spine.core.Enrichment;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -40,10 +39,8 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 final class Action {
 
-    /**
-     * The envelope with the event to enrich.
-     */
-    private final EventEnvelope envelope;
+    private final Message message;
+    private final EnrichableMessageContext context;
 
     /**
      * Active functions applicable to the enriched event.
@@ -56,10 +53,10 @@ final class Action {
      */
     private final Map<String, Any> enrichments = newHashMap();
 
-    Action(Enricher parent, EventEnvelope envelope) {
-        this.envelope = envelope;
-        Class<? extends Message> sourceClass = envelope.getMessageClass()
-                                                       .value();
+    Action(Enricher parent, Message message, EnrichableMessageContext context) {
+        this.message = message;
+        this.context = context;
+        Class<? extends Message> sourceClass = message.getClass();
         this.functions = parent.schema()
                                .get(sourceClass);
     }
@@ -67,16 +64,15 @@ final class Action {
     /**
      * Creates new envelope with the enriched version of the event.
      */
-    EventEnvelope perform() {
+    Enrichment perform() {
         createEnrichments();
-        EventEnvelope enriched = envelope.toEnriched(enrichments);
-        return enriched;
+        Enrichment result = createEnrichment();
+        return result;
     }
 
     private void createEnrichments() {
-        EventMessage event = envelope.getMessage();
         for (EnrichmentFunction function : functions) {
-            Message enrichment = apply(function, event, envelope.getEventContext());
+            Message enrichment = apply(function, message, context);
             checkResult(enrichment, function);
             put(enrichment);
         }
@@ -98,8 +94,10 @@ final class Action {
      * </ol>
      */
     @SuppressWarnings("unchecked")
-    private static Message apply(EnrichmentFunction fn, EventMessage event, EventContext context) {
-        Message result = (Message) fn.apply(event, context);
+    private static Message apply(EnrichmentFunction fn,
+                                 Message message,
+                                 EnrichableMessageContext context) {
+        Message result = (Message) fn.apply(message, context);
         return result;
     }
 
@@ -107,7 +105,18 @@ final class Action {
         checkNotNull(
             enriched,
             "EnrichmentFunction `%s` produced `null` for the source message `%s`.",
-            function, envelope.getMessage()
+            function, message
         );
+    }
+
+    /**
+     * Creates a new {@link Enrichment} instance from the passed map.
+     */
+    private Enrichment createEnrichment() {
+        Enrichment.Builder enrichment =
+                Enrichment.newBuilder()
+                          .setContainer(Enrichment.Container.newBuilder()
+                                                            .putAllItems(enrichments));
+        return enrichment.build();
     }
 }

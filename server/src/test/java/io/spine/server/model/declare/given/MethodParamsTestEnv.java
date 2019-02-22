@@ -92,7 +92,7 @@ public class MethodParamsTestEnv {
 
             @Override
             public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.getMessage(), envelope.getCommandContext()};
+                return new Object[]{envelope.message(), envelope.getCommandContext()};
             }
         }
     }

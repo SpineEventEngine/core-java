@@ -63,14 +63,14 @@ public abstract class MessageEnvelopeTest<O extends Message,
     void getOuterObject() {
         O obj = outerObject();
         E envelope = toEnvelope(obj);
-        assertEquals(obj, envelope.getOuterObject());
+        assertEquals(obj, envelope.outerObject());
     }
 
     @Test
     @DisplayName("extract message")
     void extractMessage() {
         E envelope = toEnvelope(outerObject());
-        Message commandMessage = envelope.getMessage();
+        Message commandMessage = envelope.message();
         assertNotNull(commandMessage);
         assertFalse(isDefault(commandMessage));
     }
@@ -80,7 +80,7 @@ public abstract class MessageEnvelopeTest<O extends Message,
     void getMessageClass() {
         O obj = outerObject();
         E envelope = toEnvelope(obj);
-        assertEquals(getMessageClass(obj), envelope.getMessageClass());
+        assertEquals(getMessageClass(obj), envelope.messageClass());
     }
 
     @Test

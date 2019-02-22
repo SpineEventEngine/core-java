@@ -52,22 +52,22 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
     /**
      * Obtains the object which contains the message of interest.
      */
-    T getOuterObject();
+    T outerObject();
 
     /**
      * Obtains the message.
      */
-    Message getMessage();
+    Message message();
 
     /**
      * Obtains the message class.
      */
-    MessageClass getMessageClass();
+    MessageClass messageClass();
 
     /**
      * Obtains the context of the message.
      */
-    C getMessageContext();
+    C messageContext();
 
     /**
      * Sets the origin fields of the event context being built using the data of the enclosed 

@@ -69,7 +69,7 @@ public final class CommandEnvelope
      * Obtains the enclosed command object.
      */
     public Command getCommand() {
-        return getOuterObject();
+        return outerObject();
     }
 
     /**
@@ -92,7 +92,7 @@ public final class CommandEnvelope
      * Obtains the command message.
      */
     @Override
-    public CommandMessage getMessage() {
+    public CommandMessage message() {
         return commandMessage;
     }
 
@@ -100,12 +100,12 @@ public final class CommandEnvelope
      * Obtains the command class.
      */
     @Override
-    public CommandClass getMessageClass() {
+    public CommandClass messageClass() {
         return commandClass;
     }
 
     @Override
-    public CommandContext getMessageContext() {
+    public CommandContext messageContext() {
         return getCommandContext();
     }
 
@@ -141,7 +141,7 @@ public final class CommandEnvelope
      * Obtains the command context.
      */
     public CommandContext getCommandContext() {
-        return getOuterObject().getContext();
+        return outerObject().getContext();
     }
 
     /**

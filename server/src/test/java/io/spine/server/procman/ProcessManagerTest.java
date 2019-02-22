@@ -287,7 +287,7 @@ class ProcessManagerTest {
         void rejectionMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
             dispatch(processManager, rejection.getEvent());
-            assertReceived(rejection.getOuterObject()
+            assertReceived(rejection.outerObject()
                                     .getMessage());
         }
 

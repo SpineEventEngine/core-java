@@ -56,7 +56,7 @@ final class IdempotencyGuard {
      */
     void check(CommandEnvelope envelope) {
         if (didHandleRecently(envelope)) {
-            Command command = envelope.getOuterObject();
+            Command command = envelope.outerObject();
             throw DuplicateCommandException.of(command);
         }
     }
@@ -71,7 +71,7 @@ final class IdempotencyGuard {
      */
     void check(EventEnvelope envelope) {
         if (didHandleRecently(envelope)) {
-            Event event = envelope.getOuterObject();
+            Event event = envelope.outerObject();
             throw new DuplicateEventException(event);
         }
     }

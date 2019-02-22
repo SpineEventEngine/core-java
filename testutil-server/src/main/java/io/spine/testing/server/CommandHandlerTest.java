@@ -105,7 +105,7 @@ public abstract class CommandHandlerTest<I,
         try {
             events = dispatchTo(entity);
         } catch (RuntimeException e) {
-            rejection = rejection(e).getMessage();
+            rejection = rejection(e).message();
         }
         return new CommandHandlerExpected<>(events, rejection, initialState,
                                             entity.getState(), interceptedCommands());

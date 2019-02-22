@@ -44,12 +44,12 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
     public Optional<MessageInvalid> validate(EventEnvelope envelope) {
         checkNotNull(envelope);
 
-        Event event = envelope.getOuterObject();
+        Event event = envelope.outerObject();
         MessageInvalid result = null;
         MessageValidator validator = MessageValidator.newInstance(event);
         List<ConstraintViolation> violations = validator.validate();
         if (!violations.isEmpty()) {
-            EventMessage message = envelope.getMessage();
+            EventMessage message = envelope.message();
             result = onConstraintViolations(message, violations);
         }
         return ofNullable(result);

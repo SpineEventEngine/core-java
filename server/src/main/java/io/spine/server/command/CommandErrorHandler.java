@@ -99,7 +99,7 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private CaughtError handleNewRuntimeError(CommandEnvelope cmd, RuntimeException exception) {
-        String commandTypeName = cmd.getMessage()
+        String commandTypeName = cmd.message()
                                     .getClass()
                                     .getName();
         String commandId = cmd.idAsString();
@@ -125,7 +125,7 @@ public final class CommandErrorHandler implements Logging {
     public void handle(CommandEnvelope cmd, RuntimeException exception, Consumer<Event> consumer) {
         CaughtError error = handle(cmd, exception);
         error.asRejection()
-             .map(RejectionEnvelope::getOuterObject)
+             .map(RejectionEnvelope::outerObject)
              .ifPresent(consumer);
         error.rethrowOnce();
     }
@@ -162,7 +162,7 @@ public final class CommandErrorHandler implements Logging {
         CommandRejected systemEvent = CommandRejected
                 .newBuilder()
                 .setId(commandId)
-                .setRejectionEvent(rejection.getOuterObject())
+                .setRejectionEvent(rejection.outerObject())
                 .build();
         postSystem(systemEvent);
     }

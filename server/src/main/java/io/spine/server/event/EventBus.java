@@ -222,7 +222,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         EventEnvelope enrichedEnvelope = enrich(envelope);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", envelope.getMessage()));
+                   format("Message %s has no dispatchers.", envelope.message()));
     }
 
     @Override
@@ -454,10 +454,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         @Override
         public UnsupportedEventException handle(EventEnvelope envelope) {
 
-            Event event = envelope.getOuterObject();
+            Event event = envelope.outerObject();
             store(ImmutableSet.of(event));
 
-            EventMessage message = envelope.getMessage();
+            EventMessage message = envelope.message();
             UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }

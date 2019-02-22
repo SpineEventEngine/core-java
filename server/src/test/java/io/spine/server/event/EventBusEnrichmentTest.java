@@ -82,7 +82,7 @@ class EventBusEnrichmentTest {
         RememberingSubscriber subscriber = new RememberingSubscriber();
         eventBus.register(subscriber);
 
-        eventBus.post(event.getOuterObject());
+        eventBus.post(event.outerObject());
 
         MapSubject assertMap =
                 assertThat(subscriber.getEventContext()

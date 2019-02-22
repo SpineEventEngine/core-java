@@ -92,7 +92,7 @@ public final class ExternalMessageEnvelope
      * @return the instance of origin message
      */
     @Override
-    public Message getMessage() {
+    public Message message() {
         return message;
     }
 
@@ -101,16 +101,16 @@ public final class ExternalMessageEnvelope
      * {@code io.spine.sample.TaskCreated} class.
      *
      * @return the event message
-     * @see #getMessage()
+     * @see #message()
      * @see #of(ExternalMessage, Message)
      */
     @Override
-    public MessageClass getMessageClass() {
+    public MessageClass messageClass() {
         return messageClass;
     }
 
     @Override
-    public ActorContext getMessageContext() {
+    public ActorContext messageContext() {
         return actorContext;
     }
 
@@ -118,7 +118,7 @@ public final class ExternalMessageEnvelope
      * Converts this instance to an envelope of the external event.
      */
     public EventEnvelope toEventEnvelope() {
-        ExternalMessage externalMessage = getOuterObject();
+        ExternalMessage externalMessage = outerObject();
         Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
         EventEnvelope result = EventEnvelope.of(event);
         return result;

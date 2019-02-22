@@ -89,7 +89,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
         checkNotNull(exception);
         _error(exception,
                "Error handling command (class: `{}` id: `{}`).",
-               envelope.getMessageClass(),
+               envelope.messageClass(),
                envelope.idAsString());
     }
 

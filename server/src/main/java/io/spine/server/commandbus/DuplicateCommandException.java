@@ -53,7 +53,7 @@ public class DuplicateCommandException extends CommandException implements Messa
      */
     public static DuplicateCommandException of(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        Message commandMessage = envelope.getMessage();
+        Message commandMessage = envelope.message();
         String errorMessage = aggregateErrorMessage(envelope);
         Error error = error(commandMessage, errorMessage);
         return new DuplicateCommandException(errorMessage, command, error);
@@ -85,10 +85,10 @@ public class DuplicateCommandException extends CommandException implements Messa
         return format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched to a "
                         + "single entity twice.",
-                envelope.getMessageClass()
+                envelope.messageClass()
                         .value()
                         .getName(),
-                TypeName.of(envelope.getMessage()),
+                TypeName.of(envelope.message()),
                 Identifier.toString(envelope.getId()));
     }
 }

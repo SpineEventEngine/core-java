@@ -142,7 +142,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateMessage() {
-            CommandMessage message = command.getMessage();
+            CommandMessage message = command.message();
             if (isDefault(message)) {
                 addViolation("Non-default command message must be set.");
             }
@@ -158,7 +158,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateTargetId() {
-            CommandMessage message = command.getMessage();
+            CommandMessage message = command.message();
             Optional<?> targetId = DefaultCommandRoute.asOptional(message);
             if (targetId.isPresent()) {
                 String targetIdString = Identifier.toString(targetId.get());

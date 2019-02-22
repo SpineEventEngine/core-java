@@ -95,7 +95,7 @@ class AggregateCommandEndpointTest {
     @DisplayName("store aggregate on command dispatching")
     void storeAggregateOnCommandDispatching() {
         CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        AggCreateProject msg = (AggCreateProject) cmd.getMessage();
+        AggCreateProject msg = (AggCreateProject) cmd.message();
 
         ProjectId id = repository.dispatch(cmd);
         assertEquals(projectId, id);

@@ -69,7 +69,7 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
     @CanIgnoreReturnValue
     @Override
     public final Set<String> dispatch(EventEnvelope envelope) {
-        Message event = envelope.getMessage();
+        Message event = envelope.message();
         remember(event);
         return singleton(id);
     }

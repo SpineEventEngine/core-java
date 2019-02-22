@@ -92,7 +92,7 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         String entityClass = aggregate.getClass()
                                       .getName();
         String commandId = cmd.idAsString();
-        CommandClass commandClass = cmd.getMessageClass();
+        CommandClass commandClass = cmd.messageClass();
         throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
     }
 }

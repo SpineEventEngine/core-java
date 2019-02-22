@@ -25,15 +25,13 @@ import io.spine.server.bus.DeadMessageHandler;
 /**
  * Produces an {@link UnsupportedExternalMessageException} upon capturing an external message,
  * which has no targets to be dispatched to.
- *
- * @author Alex Tymchenko
  */
 enum DeadExternalMessageHandler implements DeadMessageHandler<ExternalMessageEnvelope> {
     INSTANCE;
 
     @Override
     public UnsupportedExternalMessageException handle(ExternalMessageEnvelope envelope) {
-        Message message = envelope.getMessage();
+        Message message = envelope.message();
         UnsupportedExternalMessageException exception =
                 new UnsupportedExternalMessageException(message);
         return exception;

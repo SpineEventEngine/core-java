@@ -94,7 +94,7 @@ public abstract class EventDispatchingRepository<I,
 
     private Set<I> doDispatch(EventEnvelope envelope) {
         Set<I> targets = route(envelope);
-        Event event = envelope.getOuterObject();
+        Event event = envelope.outerObject();
         targets.forEach(id -> dispatchTo(id, event));
         return targets;
     }
@@ -117,7 +117,7 @@ public abstract class EventDispatchingRepository<I,
      */
     private Set<I> route(EventEnvelope envelope) {
         EventRouting<I> routing = getEventRouting();
-        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        Set<I> targets = routing.apply(envelope.message(), envelope.getEventContext());
         return targets;
     }
 

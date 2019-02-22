@@ -63,7 +63,7 @@ abstract class SubscriptionCallback {
     protected void run(EventEnvelope event) {
         checkState(isActive(),
                    "Dispatched an event of type %s to the non-active subscription with ID %s",
-                   TypeUrl.of(event.getMessage()), subscription.getId().getValue());
+                   TypeUrl.of(event.message()), subscription.getId().getValue());
 
         SubscriptionUpdate update = createSubscriptionUpdate(event);
         notifyAction.accept(update);

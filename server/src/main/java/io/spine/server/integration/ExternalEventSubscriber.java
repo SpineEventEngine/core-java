@@ -61,7 +61,7 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
         EventEnvelope eventEnvelope = envelope.toEventEnvelope();
         checkArgument(eventEnvelope.isExternal(),
                       "External event expected, but got %s",
-                      Stringifiers.toString(eventEnvelope.getOuterObject()));
+                      Stringifiers.toString(eventEnvelope.outerObject()));
         return delegate.dispatch(eventEnvelope);
     }
 
@@ -70,7 +70,7 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
         checkNotNull(envelope);
         checkNotNull(exception);
 
-        MessageClass messageClass = envelope.getMessageClass();
+        MessageClass messageClass = envelope.messageClass();
         String messageId = envelope.idAsString();
         String errorMessage =
                 format("Error handling external event subscription (class: %s id: %s).",

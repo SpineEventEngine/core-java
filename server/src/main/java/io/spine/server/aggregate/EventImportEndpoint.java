@@ -54,7 +54,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected List<Event> invokeDispatcher(A aggregate, EventEnvelope envelope) {
-        Event event = envelope.getOuterObject();
+        Event event = envelope.outerObject();
         return ImmutableList.of(event);
     }
 
@@ -65,7 +65,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected void onDispatched(A aggregate, EventEnvelope envelope, List<Event> producedEvents) {
         super.onDispatched(aggregate, envelope, producedEvents);
-        repository().onEventImported(aggregate.getId(), envelope.getOuterObject());
+        repository().onEventImported(aggregate.getId(), envelope.outerObject());
     }
 
     @Override
@@ -79,10 +79,10 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
         _error(exception,
                "Error importing event of class `{}` into repository `{}`. " +
                        "Event message: `{}` context: `{}` id: `{}`",
-               envelope.getMessageClass(),
+               envelope.messageClass(),
                repository(),
-               envelope.getMessage(),
-               envelope.getMessageClass(),
+               envelope.message(),
+               envelope.messageClass(),
                envelope.idAsString());
     }
 }

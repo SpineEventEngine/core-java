@@ -213,7 +213,7 @@ public class CommandBus extends UnicastBus<Command,
     private void onError(CommandEnvelope envelope, RuntimeException exception) {
         Optional<Event> rejection = errorHandler.handle(envelope, exception)
                                                 .asRejection()
-                                                .map(RejectionEnvelope::getOuterObject);
+                                                .map(RejectionEnvelope::outerObject);
         rejection.ifPresent(eventBus::post);
     }
 

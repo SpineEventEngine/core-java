@@ -95,7 +95,7 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
         if (fieldPath.getFieldNameList().isEmpty()) {
             return true;
         } else {
-            EventMessage event = envelope.getMessage();
+            EventMessage event = envelope.message();
             return match(event, filter);
         }
     }

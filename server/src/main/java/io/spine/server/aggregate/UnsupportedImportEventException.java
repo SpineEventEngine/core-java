@@ -43,11 +43,11 @@ public final class UnsupportedImportEventException
 
     UnsupportedImportEventException(EventEnvelope envelope) {
         super(messageFormat(envelope));
-        this.error = unsupportedImportEvent(envelope.getMessage(), getMessage());
+        this.error = unsupportedImportEvent(envelope.message(), getMessage());
     }
 
     private static String messageFormat(EventEnvelope envelope) {
-        EventClass eventClass = envelope.getMessageClass();
+        EventClass eventClass = envelope.messageClass();
         TypeName typeName = eventClass.typeName();
         String result = format(
             "None of the aggregates declare importing appliers for " +

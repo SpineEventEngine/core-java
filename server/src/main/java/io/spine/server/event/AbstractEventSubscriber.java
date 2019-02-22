@@ -68,7 +68,7 @@ public abstract class AbstractEventSubscriber
      */
     @Override
     public final Set<String> dispatch(EventEnvelope envelope) {
-        EventOperation op = new EventOperation(envelope.getOuterObject()) {
+        EventOperation op = new EventOperation(envelope.outerObject()) {
             @Override
             public void run() {
                 handle(envelope);
@@ -104,7 +104,7 @@ public abstract class AbstractEventSubscriber
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        MessageClass messageClass = envelope.getMessageClass();
+        MessageClass messageClass = envelope.messageClass();
         String messageId = envelope.idAsString();
         String errorMessage =
                 format("Error handling event subscription (class: %s id: %s) in %s.",
@@ -169,7 +169,7 @@ public abstract class AbstractEventSubscriber
         private void logError(String msgFormat,
                               MessageEnvelope envelope,
                               RuntimeException exception) {
-            MessageClass messageClass = envelope.getMessageClass();
+            MessageClass messageClass = envelope.messageClass();
             String messageId = envelope.idAsString();
             String errorMessage = format(msgFormat, messageClass, messageId);
             _error(errorMessage, exception);

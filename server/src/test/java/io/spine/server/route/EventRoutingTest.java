@@ -181,7 +181,7 @@ class EventRoutingTest {
                 .build();
         EventEnvelope event = EventEnvelope.of(GivenEvent.withMessage(eventMessage));
 
-        Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
+        Set<Long> ids = eventRouting.apply(event.message(), event.getEventContext());
         assertEquals(CUSTOM_ROUTE, ids);
     }
 }

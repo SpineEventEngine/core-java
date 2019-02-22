@@ -446,9 +446,9 @@ class ProjectionRepositoryTest
 
         assertThat(lastMessage)
                 .isInstanceOf(EventEnvelope.class);
-        assertThat(lastMessage.getMessage())
+        assertThat(lastMessage.message())
                 .isEqualTo(getMessage(event));
-        assertThat(lastMessage.getOuterObject())
+        assertThat(lastMessage.outerObject())
                 .isEqualTo(event);
 
         // It must be "illegal argument type" since projections of this repository

@@ -54,7 +54,7 @@ final class EventSubscriptionCallback extends SubscriptionCallback {
     }
 
     private static EventUpdates extractEventUpdates(EventEnvelope event) {
-        Event eventObject = event.getOuterObject();
+        Event eventObject = event.outerObject();
         EventUpdates result = EventUpdatesVBuilder
                 .newBuilder()
                 .addEvents(eventObject)

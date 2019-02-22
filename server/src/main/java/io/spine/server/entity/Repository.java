@@ -316,7 +316,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     protected void logError(String msgFormat,
                             MessageEnvelope envelope,
                             RuntimeException exception) {
-        MessageClass messageClass = envelope.getMessageClass();
+        MessageClass messageClass = envelope.messageClass();
         String stateType = getEntityStateType().value();
         String errorMessage = format(msgFormat, messageClass, envelope.idAsString(), stateType);
         _error(errorMessage, exception);

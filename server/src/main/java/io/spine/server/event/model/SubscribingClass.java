@@ -44,7 +44,7 @@ public interface SubscribingClass extends Logging {
      */
     default Optional<SubscriberMethod> getSubscriber(EventEnvelope event) {
         Collection<SubscriberMethod> subscribers =
-                getSubscribers(event.getMessageClass(), event.getOriginClass());
+                getSubscribers(event.messageClass(), event.getOriginClass());
         Comparator<SubscriberMethod> methodOrder = comparing(
                 (SubscriberMethod subscriber) -> subscriber.filter().getField().getFieldNameCount()
         ).reversed();
@@ -59,7 +59,7 @@ public interface SubscribingClass extends Logging {
             _debug("None of the subscriber methods could handle %s event." +
                            "%n  Methods: %s" +
                            "%n  Event message: %s.",
-                   event.getMessageClass(), subscribers, event.getMessage());
+                   event.messageClass(), subscribers, event.message());
             return Optional.empty();
         }
     }

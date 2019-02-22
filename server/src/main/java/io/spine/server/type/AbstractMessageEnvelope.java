@@ -45,7 +45,7 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
     }
 
     @Override
-    public T getOuterObject() {
+    public T outerObject() {
         return object;
     }
 
@@ -68,6 +68,6 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
 
     @Override
     public String toString() {
-        return format("%s(%s)", getClass().getSimpleName(), getMessageClass().typeName());
+        return format("%s(%s)", getClass().getSimpleName(), messageClass().typeName());
     }
 }

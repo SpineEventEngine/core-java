@@ -63,7 +63,7 @@ public abstract class AbstractCommander
     @CanIgnoreReturnValue
     @Override
     public String dispatch(CommandEnvelope command) {
-        CommandSubstituteMethod method = thisClass.getHandler(command.getMessageClass());
+        CommandSubstituteMethod method = thisClass.getHandler(command.messageClass());
         CommandingMethod.Result result = method.invoke(this, command);
         result.transformOrSplitAndPost(command, commandBus);
         return getId();
@@ -81,7 +81,7 @@ public abstract class AbstractCommander
 
     @Override
     public Set<String> dispatchEvent(EventEnvelope event) {
-        CommandReactionMethod method = thisClass.getCommander(event.getMessageClass());
+        CommandReactionMethod method = thisClass.getCommander(event.messageClass());
         CommandingMethod.Result result = method.invoke(this, event);
         result.produceAndPost(event, commandBus);
         return identity();
@@ -93,7 +93,7 @@ public abstract class AbstractCommander
         checkNotNull(exception);
         _error(exception,
                "Unable to create a command from event (class: `{}` id: `{}`).",
-               envelope.getMessageClass(),
+               envelope.messageClass(),
                envelope.idAsString());
     }
 }

@@ -45,7 +45,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected TypeUrl extractType(EventEnvelope event) {
-        TypeUrl result = TypeUrl.of(event.getMessage());
+        TypeUrl result = TypeUrl.of(event.message());
         return result;
     }
 
@@ -68,7 +68,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected Message extractMessage(EventEnvelope event) {
-        EventMessage result = event.getMessage();
+        EventMessage result = event.message();
         return result;
     }
 }

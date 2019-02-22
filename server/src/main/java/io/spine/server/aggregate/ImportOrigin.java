@@ -63,22 +63,22 @@ public final class ImportOrigin implements MessageEnvelope<Empty, Empty, Empty> 
     }
 
     @Override
-    public Empty getOuterObject() {
+    public Empty outerObject() {
         return Empty.getDefaultInstance();
     }
 
     @Override
-    public Message getMessage() {
+    public Message message() {
         return Empty.getDefaultInstance();
     }
 
     @Override
-    public MessageClass getMessageClass() {
+    public MessageClass messageClass() {
         return EmptyClass.instance();
     }
 
     @Override
-    public Empty getMessageContext() {
+    public Empty messageContext() {
         return Empty.getDefaultInstance();
     }
 }

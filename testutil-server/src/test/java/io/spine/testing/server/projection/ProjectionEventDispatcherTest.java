@@ -62,9 +62,9 @@ class ProjectionEventDispatcherTest {
 
         EventEnvelope firstEnvelope = EventEnvelope.of(factory.createEvent(firstEvent));
         EventEnvelope secondEnvelope = EventEnvelope.of(factory.createEvent(secondEvent));
-        ProjectionEventDispatcher.dispatch(projection, firstEnvelope.getMessage(),
+        ProjectionEventDispatcher.dispatch(projection, firstEnvelope.message(),
                                            firstEnvelope.getEventContext());
-        ProjectionEventDispatcher.dispatch(projection, secondEnvelope.getMessage(),
+        ProjectionEventDispatcher.dispatch(projection, secondEnvelope.message(),
                                            secondEnvelope.getEventContext());
 
         TuEventLog state = projection.getState();

@@ -81,7 +81,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
     }
 
     private static EntityStateChanged getEventMessage(EventEnvelope event) {
-        EventMessage message = event.getMessage();
+        EventMessage message = event.message();
         EntityStateChanged result = (EntityStateChanged) message;
         return result;
     }

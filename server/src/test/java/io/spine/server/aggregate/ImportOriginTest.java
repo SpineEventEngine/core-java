@@ -61,9 +61,9 @@ class ImportOriginTest {
     void emptyValues() {
         Empty empty = Empty.getDefaultInstance();
         assertEquals(empty, origin.getId());
-        assertEquals(empty, origin.getOuterObject());
-        assertEquals(empty, origin.getMessage());
-        assertEquals(empty, origin.getMessageContext());
-        assertEquals(EmptyClass.instance(), origin.getMessageClass());
+        assertEquals(empty, origin.outerObject());
+        assertEquals(empty, origin.message());
+        assertEquals(empty, origin.messageContext());
+        assertEquals(EmptyClass.instance(), origin.messageClass());
     }
 }

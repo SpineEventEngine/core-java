@@ -45,8 +45,8 @@ public class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
     @Override
     public Optional<Ack> accept(EventEnvelope envelope) {
-        if (TASK_ADDED_CLASS.equals(envelope.getMessageClass())) {
-            EBTaskAdded message = (EBTaskAdded) envelope.getMessage();
+        if (TASK_ADDED_CLASS.equals(envelope.messageClass())) {
+            EBTaskAdded message = (EBTaskAdded) envelope.message();
             Task task = message.getTask();
             if (task.getDone()) {
                 Error error = error();

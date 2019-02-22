@@ -39,6 +39,6 @@ public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
 
     @Override
     public Object[] extractArguments(EventEnvelope envelope) {
-        return new Object[]{envelope.getMessage()};
+        return new Object[]{envelope.message()};
     }
 }

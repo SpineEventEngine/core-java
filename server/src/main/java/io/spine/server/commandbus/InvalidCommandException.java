@@ -75,7 +75,7 @@ public class InvalidCommandException extends CommandException implements Message
      */
     public static InvalidCommandException missingTenantId(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        Message commandMessage = envelope.getMessage();
+        Message commandMessage = envelope.message();
         String errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to " +
                 "multitenant Command Bus, but has no `tenant_id` attribute in the context.",
@@ -105,15 +105,15 @@ public class InvalidCommandException extends CommandException implements Message
 
     public static InvalidCommandException inapplicableTenantId(Command command) {
         CommandEnvelope cmd = CommandEnvelope.of(command);
-        TypeName typeName = TypeName.of(cmd.getMessage());
+        TypeName typeName = TypeName.of(cmd.message());
         String errMsg = format(
                 "The command (class: %s, type: %s, id: %s) was posted to single-tenant " +
                 "CommandBus, but has tenant_id: %s attribute set in the command context.",
-                cmd.getMessageClass(),
+                cmd.messageClass(),
                 typeName,
                 cmd.getId(),
                 cmd.getTenantId());
-        Error error = inapplicableTenantError(cmd.getMessage(), errMsg);
+        Error error = inapplicableTenantError(cmd.message(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 

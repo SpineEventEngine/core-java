@@ -230,8 +230,8 @@ public abstract class AbstractHandlerMethod<T,
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            Message message = envelope.getMessage();
-            Message context = envelope.getMessageContext();
+            Message message = envelope.message();
+            Message context = envelope.messageContext();
             throw new HandlerMethodFailedException(target, message, context, e);
         }
     }

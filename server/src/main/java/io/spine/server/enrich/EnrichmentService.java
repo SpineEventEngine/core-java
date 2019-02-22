@@ -18,28 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.method;
+package io.spine.server.enrich;
 
-import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
-import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.type.EventEnvelope;
+import io.spine.core.EnrichableMessageContext;
+import io.spine.core.Enrichment;
 
-import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
+import java.util.Optional;
 
-@Immutable
-public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
+/**
+ * Creates enrichments for messages.
+ */
+public interface EnrichmentService {
 
-    INSTANCE;
-
-    @Override
-    public boolean matches(Class<?>[] methodParams) {
-        return consistsOfTwo(methodParams, Message.class, EventContext.class);
-    }
-
-    @Override
-    public Object[] extractArguments(EventEnvelope envelope) {
-        return new Object[]{envelope.message(), envelope.getEventContext()};
-    }
+    /**
+     * Creates an enrichment for the passed message.
+     *
+     * @param message
+     *         the enrichable message
+     * @param context
+     *         the context of the enrichable message
+     * @return an instance with all available enrichments for the passed message, or
+     *         empty {@code Optional} if the passed message cannot be enriched
+     */
+    Optional<Enrichment> createEnrichment(Message message, EnrichableMessageContext context);
 }

@@ -20,8 +20,13 @@
 
 package io.spine.server.enrich;
 
+import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
+import io.spine.core.EnrichableMessageContext;
+import io.spine.core.Enrichment;
 import io.spine.server.type.EventEnvelope;
+
+import java.util.Optional;
 
 /**
  * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
@@ -38,7 +43,7 @@ import io.spine.server.type.EventEnvelope;
  * </pre>
  */
 @SPI
-public final class Enricher {
+public final class Enricher implements EnrichmentService {
 
     /** Enrichment schema used by this enricher. */
     private final Schema schema;
@@ -88,24 +93,28 @@ public final class Enricher {
      *         if the passed message cannot be enriched
      */
     public EventEnvelope enrich(EventEnvelope source) {
-        if (!canBeEnriched(source)) {
-            return source;
-        }
-        Action action = new Action(this, source);
-        EventEnvelope result = action.perform();
-        return result;
+        EventEnvelope result = source.toEnriched(this);
+        return  result;
     }
 
     /**
      * Verifies if the passed message can be enriched.
      */
     boolean canBeEnriched(EventEnvelope message) {
-        boolean supported = schema.supports(message.getMessageClass()
+        boolean supported = schema.supports(message.messageClass()
                                                    .value());
-        if (!supported) {
-            return false;
+        return supported;
+    }
+
+    @Override
+    public Optional<Enrichment> createEnrichment(Message message,
+                                                 EnrichableMessageContext context) {
+        if (!schema.supports(message.getClass())) {
+            return Optional.empty();
         }
-        boolean enrichmentEnabled = message.isEnrichmentEnabled();
-        return enrichmentEnabled;
+
+        Action action = new Action(this, message, context);
+        Enrichment result = action.perform();
+        return Optional.of(result);
     }
 }

@@ -77,7 +77,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     @CanIgnoreReturnValue
     @Override
     protected List<Event> invokeDispatcher(P projection, EventEnvelope event) {
-        projection.play(event.getOuterObject());
+        projection.play(event.outerObject());
         return ImmutableList.of();
     }
 

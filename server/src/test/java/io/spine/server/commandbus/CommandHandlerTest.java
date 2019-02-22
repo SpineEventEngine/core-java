@@ -129,7 +129,7 @@ class CommandHandlerTest {
         List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
         for (int i = 0; i < expectedMessages.size(); i++) {
             Message expected = expectedMessages.get(i);
-            Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
+            Message actual = Events.getMessage(actualEvents.get(i).outerObject());
             assertEquals(expected, actual);
         }
     }

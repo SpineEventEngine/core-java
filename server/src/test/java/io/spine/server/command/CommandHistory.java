@@ -48,7 +48,7 @@ public class CommandHistory {
     }
 
     public void add(CommandEnvelope e) {
-        add(e.getMessage(), e.getCommandContext());
+        add(e.message(), e.getCommandContext());
     }
 
     public boolean contains(Command command) {

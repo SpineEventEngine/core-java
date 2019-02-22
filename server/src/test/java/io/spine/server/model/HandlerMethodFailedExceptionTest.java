@@ -44,7 +44,7 @@ class HandlerMethodFailedExceptionTest {
         commandEnvelope = CommandEnvelope.of(factory.generateCommand());
         cause = new IllegalStateException(newUuid());
 
-        exception = new HandlerMethodFailedException(this, commandEnvelope.getMessage(),
+        exception = new HandlerMethodFailedException(this, commandEnvelope.message(),
                                                      commandEnvelope.getCommandContext(),
                                                      cause);
     }
@@ -59,7 +59,7 @@ class HandlerMethodFailedExceptionTest {
     @Test
     @DisplayName("return DispatchedMessage")
     void returnDispatchedMessage() {
-        assertEquals(commandEnvelope.getMessage(), exception.getDispatchedMessage());
+        assertEquals(commandEnvelope.message(), exception.getDispatchedMessage());
     }
 
     @Test

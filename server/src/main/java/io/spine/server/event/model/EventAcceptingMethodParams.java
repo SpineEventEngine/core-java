@@ -45,21 +45,21 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
     MESSAGE(ImmutableList.of(EventMessage.class), false) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
-            return new Object[] {envelope.getMessage()};
+            return new Object[] {envelope.message()};
         }
     },
 
     MESSAGE_EVENT_CTX(ImmutableList.of(EventMessage.class, EventContext.class), false) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
-            return new Object[] {envelope.getMessage(), envelope.getEventContext()};
+            return new Object[] {envelope.message(), envelope.getEventContext()};
         }
     },
 
     MESSAGE_COMMAND_CTX(ImmutableList.of(RejectionMessage.class, CommandContext.class), false) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
-            Message message = envelope.getMessage();
+            Message message = envelope.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
             CommandContext context = rejection.getOrigin()
                                               .getContext();
@@ -70,7 +70,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
     MESSAGE_COMMAND_MSG(ImmutableList.of(RejectionMessage.class, CommandMessage.class), true) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
-            Message message = envelope.getMessage();
+            Message message = envelope.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
             Message commandMessage = rejection.getOriginMessage();
             return new Object[] {message, commandMessage};
@@ -83,7 +83,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
                                     true) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
-            Message message = envelope.getMessage();
+            Message message = envelope.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
             DispatchedCommand origin = rejection.getOrigin();
             Message commandMessage = unpack(origin.getMessage());
