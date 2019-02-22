@@ -40,7 +40,7 @@ import static io.spine.core.Events.isRejection;
  * <p>In the {@link io.spine.type.MessageClass} hierarchy events and rejections are independent,
  * but in Spine Model {@linkplain io.spine.base.EventMessage event messages} include both of these.
  *
- * <p>This class thus offers convenient methods for working with a combined event and rejection
+ * <p>This class thus offers a convenient way for working with a combined event and rejection
  * set.
  */
 @Immutable

@@ -55,7 +55,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
     private final CommanderClass<P> commanderDelegate;
 
     /**
-     * This lifecycle rules gathered from the domain model.
+     * The lifecycle rules gathered from the domain model.
      */
     private final Lifecycle lifecycle;
 

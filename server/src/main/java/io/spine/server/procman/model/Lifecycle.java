@@ -34,8 +34,8 @@ import java.io.Serializable;
  * Lifecycle of a process manager class as represented in the domain model.
  *
  * <p>Lists events and rejections which are "terminal" for the process, causing the process manager
- * to become {@linkplain LifecycleFlags#getArchived()} () archived} or
- * {@linkplain LifecycleFlags#getDeleted()} () deleted}.
+ * to become {@linkplain LifecycleFlags#getArchived()} archived} or
+ * {@linkplain LifecycleFlags#getDeleted()} deleted}.
  */
 @Immutable
 public final class Lifecycle implements Serializable {
@@ -77,14 +77,16 @@ public final class Lifecycle implements Serializable {
     }
 
     /**
-     * Checks if process manager should become archived when the given {@code events} occur.
+     * Checks if the process manager should become archived when the given {@code events} are
+     * emitted.
      */
     public boolean archivesUpon(Iterable<Event> events) {
         return archiveOn.containsAnyOf(events);
     }
 
     /**
-     * Checks if process manager should become deleted when the given {@code events} occur.
+     * Checks if the process manager should become deleted when the given {@code events} are
+     * emitted.
      */
     public boolean deletesUpon(Iterable<Event> events) {
         return deleteOn.containsAnyOf(events);

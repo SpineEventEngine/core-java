@@ -33,7 +33,7 @@ public final class TypeMismatchError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String MESSAGE_FORMAT = "Received type %s, expected one of: %s";
+    private static final String MESSAGE_FORMAT = "Observed type: %s, expected one of: %s";
 
     /**
      * Creates an error with a predefined message format.

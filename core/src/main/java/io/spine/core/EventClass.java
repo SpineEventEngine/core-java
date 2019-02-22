@@ -74,8 +74,7 @@ public final class EventClass extends MessageClass<EventMessage> {
     /**
      * Creates a new {@code EventClass} from the given event.
      *
-     * <p>Named {@code from} (instead of more appropriate {@code of}) to avoid collision with
-     * {@link #of(Message)}.
+     * <p>Named {@code from} to avoid collision with {@link #of(Message)}.
      */
     public static EventClass from(Event event) {
         TypeUrl typeUrl = typeUrl(event);

@@ -250,7 +250,7 @@ class ModelVerifierTest {
     /**
      * Provides a valid lifecycle as entity lifecycle in {@link io.spine.type.KnownTypes} is
      * invalid due to {@link io.spine.test.model.verify.given.ArchiveState} and
-     * {@link io.spine.test.model.verify.given.DeleteState}.
+     * {@link io.spine.test.model.verify.given.DeleteState} messages.
      */
     private static EntitiesLifecycle validLifecycle() {
         MessageType validPmType = MessageType.of(RenameState.class);

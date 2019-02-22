@@ -41,7 +41,7 @@ import static java.nio.file.Files.newInputStream;
 class CommandHandlerSet implements Logging {
 
     /**
-     * The parsed handler methods data.
+     * The enclosed command handler data.
      */
     private final CommandHandlers handlers;
 
@@ -51,7 +51,7 @@ class CommandHandlerSet implements Logging {
     }
 
     /**
-     * Reads previously serialized {@code CommandHandlers} from the binary file.
+     * Reads previously serialized {@link CommandHandlers} from the binary file.
      *
      * <p>All I/O errors during operation are wrapped as {@link IllegalStateException}.
      */
@@ -63,7 +63,7 @@ class CommandHandlerSet implements Logging {
     /**
      * Checks the command handler data against the project class loader.
      *
-     * <p>Checks that all handler types are resolved and do not contain duplicate handlers.
+     * <p>Checks that all handler types are resolved and do not contain duplicate handler methods.
      *
      * @throws io.spine.server.model.declare.SignatureMismatchException
      *         on invalid command handler declaration

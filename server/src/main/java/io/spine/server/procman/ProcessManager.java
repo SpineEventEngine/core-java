@@ -222,7 +222,7 @@ public abstract class ProcessManager<I,
      *
      * <p>This method should only be called in the scope of active transaction.
      *
-     * @see io.spine.code.proto.EntityLifecycleOption
+     * @see io.spine.option.LifecycleOption
      */
     void updateLifecycle(Iterable<Event> events) {
         archiveIfNecessary(events);

@@ -58,7 +58,7 @@ final class EntitiesLifecycle {
     }
 
     /**
-     * Collects all entities with lifecycle declared from {@link KnownTypes}.
+     * Collects all entities with lifecycle options from {@link KnownTypes}.
      */
     static EntitiesLifecycle ofKnownTypes() {
         ImmutableSet<MessageType> entityTypes =
@@ -77,7 +77,7 @@ final class EntitiesLifecycle {
     }
 
     /**
-     * Check entity lifecycle declarations correctness.
+     * Checks entity lifecycle declarations correctness.
      *
      * <p>Checks that:
      * <ol>

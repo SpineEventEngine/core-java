@@ -70,7 +70,7 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
     /**
      * Creates a new instance from the rejection message enclosed by the given {@code Event}.
      *
-     * <p>If the event stores non-rejection message, but an ordinary event, an
+     * <p>If the event stores not a rejection message but an ordinary event, an
      * {@link IllegalArgumentException} is thrown.
      */
     public static RejectionClass from(Event rejection) {
