@@ -217,6 +217,13 @@ public abstract class ProcessManager<I,
         );
     }
 
+    /**
+     * Updates the process lifecycle according to the given events.
+     *
+     * <p>This method should only be called in the scope of active transaction.
+     *
+     * @see io.spine.code.proto.EntityLifecycleOption
+     */
     void updateLifecycle(Iterable<Event> events) {
         archiveIfNecessary(events);
         deleteIfNecessary(events);

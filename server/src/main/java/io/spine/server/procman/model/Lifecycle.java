@@ -22,18 +22,21 @@ package io.spine.server.procman.model;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.code.proto.EntityLifecycleOption;
 import io.spine.code.proto.MessageType;
 import io.spine.core.Event;
 import io.spine.core.EventClassSet;
+import io.spine.server.entity.LifecycleFlags;
 
 import java.io.Serializable;
 
 /**
  * Lifecycle of a process manager class as represented in the domain model.
+ *
+ * <p>Lists events and rejections which are "terminal" for the process, causing the process manager
+ * to become {@linkplain LifecycleFlags#getArchived()} () archived} or
+ * {@linkplain LifecycleFlags#getDeleted()} () deleted}.
  */
-@Internal
 @Immutable
 public final class Lifecycle implements Serializable {
 
@@ -47,6 +50,10 @@ public final class Lifecycle implements Serializable {
         this.deleteOn = deleteOn;
     }
 
+    /**
+     * Parses the lifecycle {@linkplain io.spine.option.LifecycleOption options} of a process
+     * manager type to create a new {@code Lifecycle} instance.
+     */
     public static Lifecycle of(MessageType type) {
         EntityLifecycleOption option = new EntityLifecycleOption();
         EventClassSet archiveUpon =
@@ -61,15 +68,24 @@ public final class Lifecycle implements Serializable {
         return new Lifecycle(archiveUpon, deleteUpon);
     }
 
+    /**
+     * Creates a new {@code Lifecycle} instance for the given process manager state class.
+     */
     public static Lifecycle of(Class<? extends Message> stateClass) {
         MessageType type = MessageType.of(stateClass);
         return of(type);
     }
 
+    /**
+     * Checks if process manager should become archived when the given {@code events} occur.
+     */
     public boolean archivesUpon(Iterable<Event> events) {
         return archiveOn.containsAnyOf(events);
     }
 
+    /**
+     * Checks if process manager should become deleted when the given {@code events} occur.
+     */
     public boolean deletesUpon(Iterable<Event> events) {
         return deleteOn.containsAnyOf(events);
     }
