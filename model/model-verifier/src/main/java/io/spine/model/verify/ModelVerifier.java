@@ -24,24 +24,21 @@ import com.google.common.annotations.VisibleForTesting;
 
 import java.nio.file.Path;
 
-/**
- * Spine Model elements that are subject to verification.
- */
-final class Model {
+final class ModelVerifier {
 
     private final CommandHandlerSet commandHandlers;
     private final EntitiesLifecycle entitiesLifecycle;
 
     @VisibleForTesting
-    Model(CommandHandlerSet commandHandlers, EntitiesLifecycle entitiesLifecycle) {
+    ModelVerifier(CommandHandlerSet commandHandlers, EntitiesLifecycle entitiesLifecycle) {
         this.commandHandlers = commandHandlers;
         this.entitiesLifecycle = entitiesLifecycle;
     }
 
-    static Model parse(Path modelPath) {
+    static ModelVerifier forModel(Path modelPath) {
         CommandHandlerSet commandHandlers = CommandHandlerSet.parse(modelPath);
         EntitiesLifecycle entitiesLifecycle = EntitiesLifecycle.ofKnownTypes();
-        return new Model(commandHandlers, entitiesLifecycle);
+        return new ModelVerifier(commandHandlers, entitiesLifecycle);
     }
 
     void verifyAgainst(ProjectClassLoader classLoader) {

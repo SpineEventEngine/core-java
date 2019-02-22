@@ -71,8 +71,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@DisplayName("Model elements verification should")
-class ModelVerificationTest {
+@DisplayName("ModelVerifier should")
+class ModelVerifierTest {
 
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
@@ -83,7 +83,7 @@ class ModelVerificationTest {
     void setUp() {
         Project project = mock(Project.class);
         ScriptHandler buildScript = mock(ScriptHandler.class);
-        when(buildScript.getClassLoader()).thenReturn(ModelVerificationTest.class.getClassLoader());
+        when(buildScript.getClassLoader()).thenReturn(ModelVerifierTest.class.getClassLoader());
         when(project.getSubprojects()).thenReturn(emptySet());
         when(project.getRootProject()).thenReturn(project);
         when(project.getBuildscript()).thenReturn(buildScript);
@@ -99,7 +99,7 @@ class ModelVerificationTest {
     }
 
     @Test
-    @DisplayName("pass against valid classpath")
+    @DisplayName("verify model against valid classpath")
     void passAgainstValidClasspath() {
         String commandHandlerTypeName = UploadCommandHandler.class.getName();
         String aggregateTypeName = EditAggregate.class.getName();
@@ -112,23 +112,23 @@ class ModelVerificationTest {
                 .build();
 
         CommandHandlerSet handlerSet = spy(new CommandHandlerSet(commandHandlers));
-        Model model = new Model(handlerSet, validLifecycle());
-        model.verifyAgainst(projectClassLoader);
+        ModelVerifier modelVerifier = new ModelVerifier(handlerSet, validLifecycle());
+        modelVerifier.verifyAgainst(projectClassLoader);
 
         verify(handlerSet, times(1)).checkAgainst(projectClassLoader);
     }
 
     @ParameterizedTest
-    @DisplayName("fail with `SignatureMismatchException` on invalid command handler")
+    @DisplayName("throw `SignatureMismatchException` on invalid command handler")
     @MethodSource("getBadHandlers")
     void throwOnSignatureMismatch(String badHandlerName) {
         CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(badHandlerName)
                 .build();
-        Model model = modelWith(handlers);
+        ModelVerifier modelVerifier = modelVerifierWith(handlers);
         assertThrows(SignatureMismatchException.class,
-                     () -> model.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyAgainst(projectClassLoader));
     }
 
     private static Stream<Arguments> getBadHandlers() {
@@ -138,8 +138,8 @@ class ModelVerificationTest {
     }
 
     @Test
-    @DisplayName("fail with `DuplicateCommandHandlerError` on duplicate command handlers")
-    void failOnDuplicateHandlers() {
+    @DisplayName("throw `DuplicateCommandHandlerError` on duplicate command handlers")
+    void throwOnDuplicateHandlers() {
         String firstType = UploadCommandHandler.class.getName();
         String secondType = DuplicateCommandHandler.class.getName();
 
@@ -148,9 +148,9 @@ class ModelVerificationTest {
                 .addCommandHandlingTypes(firstType)
                 .addCommandHandlingTypes(secondType)
                 .build();
-        Model model = modelWith(handlers);
+        ModelVerifier modelVerifier = modelVerifierWith(handlers);
         assertThrows(DuplicateCommandHandlerError.class,
-                     () -> model.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyAgainst(projectClassLoader));
     }
 
     @Test
@@ -161,8 +161,8 @@ class ModelVerificationTest {
                 .newBuilder()
                 .addCommandHandlingTypes(InvalidRestoreAggregate.class.getName())
                 .build();
-        Model model = modelWith(handlers);
-        model.verifyAgainst(projectClassLoader);
+        ModelVerifier modelVerifier = modelVerifierWith(handlers);
+        modelVerifier.verifyAgainst(projectClassLoader);
         assertEquals(1, loggedMessages.size());
         SubstituteLoggingEvent event = loggedMessages.poll();
         assertEquals(event.getLevel(), Level.WARN);
@@ -178,73 +178,73 @@ class ModelVerificationTest {
 
     @Test
     @MuteLogging
-    @DisplayName("pass the verification with invalid class names")
+    @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
         String invalidClassname = "non.existing.class.Name";
         CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(invalidClassname)
                 .build();
-        Model model = modelWith(handlers);
-        model.verifyAgainst(projectClassLoader);
+        ModelVerifier modelVerifier = modelVerifierWith(handlers);
+        modelVerifier.verifyAgainst(projectClassLoader);
     }
 
     @Test
-    @DisplayName("fail with `IllegalArgumentException` on non-`CommandHandler` types")
-    void rejectNonHandlerTypes() {
-        String invalidClassname = ModelVerificationTest.class.getName();
+    @DisplayName("throw `IllegalArgumentException` on non-`CommandHandler` types")
+    void throwNonHandlerTypes() {
+        String invalidClassname = ModelVerifierTest.class.getName();
         CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(invalidClassname)
                 .build();
-        Model model = modelWith(handlers);
+        ModelVerifier modelVerifier = modelVerifierWith(handlers);
         assertThrows(IllegalArgumentException.class,
-                     () -> model.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyAgainst(projectClassLoader));
     }
 
     @Test
     @MuteLogging
-    @DisplayName("fail with `EntityKindMismatchError` when lifecycle is declared for non-PM type")
-    void failOnNonPmLifecycle() {
+    @DisplayName("throw `EntityKindMismatchError` when lifecycle is declared for non-PM type")
+    void throwOnNonPmLifecycle() {
         MessageType nonPmType = MessageType.of(UploadPhoto.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
-        Model model = modelWith(lifecycle);
-        assertThrows(EntityKindMismatchError.class, () -> model.verifyAgainst(projectClassLoader));
+        ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
+        assertThrows(EntityKindMismatchError.class, () -> modelVerifier.verifyAgainst(projectClassLoader));
     }
 
     @Test
-    @DisplayName("fail with `UnknownReferencedTypeError` when option references unknown types")
-    void failOnUnknownLifecycleTriggers() {
+    @DisplayName("throw `UnknownReferencedTypeError` when option references unknown types")
+    void throwOnUnknownLifecycleTriggers() {
         MessageType nonPmType = MessageType.of(ArchiveState.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
-        Model model = modelWith(lifecycle);
+        ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
         assertThrows(UnresolvedReferenceException.class,
-                     () -> model.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyAgainst(projectClassLoader));
     }
 
     @Test
-    @DisplayName("fail with `TypeMismatchError` when option references non-event types")
-    void failOnNonEventTriggers() {
+    @DisplayName("throw `TypeMismatchError` when option references non-event types")
+    void throwOnNonEventTriggers() {
         MessageType nonPmType = MessageType.of(DeleteState.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
-        Model model = modelWith(lifecycle);
+        ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
         assertThrows(TypeMismatchError.class,
-                     () -> model.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyAgainst(projectClassLoader));
     }
 
-    private static Model modelWith(CommandHandlers handlers) {
+    private static ModelVerifier modelVerifierWith(CommandHandlers handlers) {
         CommandHandlerSet handlerSet = new CommandHandlerSet(handlers);
         EntitiesLifecycle lifecycle = validLifecycle();
-        Model result = new Model(handlerSet, lifecycle);
+        ModelVerifier result = new ModelVerifier(handlerSet, lifecycle);
         return result;
     }
 
-    private static Model modelWith(EntitiesLifecycle lifecycle) {
+    private static ModelVerifier modelVerifierWith(EntitiesLifecycle lifecycle) {
         CommandHandlers handlers = CommandHandlers
                 .newBuilder()
                 .build();
         CommandHandlerSet handlerSet = new CommandHandlerSet(handlers);
-        Model result = new Model(handlerSet, lifecycle);
+        ModelVerifier result = new ModelVerifier(handlerSet, lifecycle);
         return result;
     }
 
