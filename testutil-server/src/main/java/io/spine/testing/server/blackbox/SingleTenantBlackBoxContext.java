@@ -35,7 +35,7 @@ public final class SingleTenantBlackBoxContext
         extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(SingleTenantBlackBoxContext.class);
+            new TestActorRequestFactory(SingleTenantBlackBoxContext.class);
 
     SingleTenantBlackBoxContext(Enricher enricher) {
         super(false, enricher);

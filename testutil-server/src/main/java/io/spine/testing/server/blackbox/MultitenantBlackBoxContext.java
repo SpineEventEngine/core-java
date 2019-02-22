@@ -107,7 +107,7 @@ public final class MultitenantBlackBoxContext
      * @return a new request factory instance
      */
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(MultitenantBlackBoxContext.class, tenantId);
+        return new TestActorRequestFactory(MultitenantBlackBoxContext.class, tenantId);
     }
 
     /**
