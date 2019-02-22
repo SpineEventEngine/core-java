@@ -18,14 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.enrich;
+
+import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
+
 /**
- * This package contains classes and interfaces related to enrichment of events.
+ * A function which enriches an event message.
  */
+final class EventEnrichment<S extends EventMessage, T extends Message>
+        extends MessageEnrichment<S, EventContext, T> {
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.event.enrich;
+    private EventEnrichment(Enricher enricher, Class<S> sourceClass, Class<T> enrichmentClass) {
+        super(enricher, sourceClass, enrichmentClass);
+    }
 
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    /** Creates a new message enricher instance. */
+    static <S extends EventMessage, T extends Message>
+    EventEnrichment<S, T> create(Enricher parent, Class<S> messageClass, Class<T> enrichmentClass) {
+        return new EventEnrichment<>(parent, messageClass, enrichmentClass);
+    }
+}

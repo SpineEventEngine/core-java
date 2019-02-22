@@ -24,7 +24,7 @@ import com.google.common.truth.MapSubject;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
-import io.spine.server.event.enrich.Enricher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;

@@ -18,23 +18,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.enrich;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+import io.spine.core.EventContext;
+import io.spine.server.event.given.EventMessageEnricherTestEnv.Enrichment;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectCreatedEnrichment;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@DisplayName("SupportsFieldConversion should")
-class SupportsFieldConversionTest {
+@DisplayName("MessageEnrichment should")
+class EventEnrichmentTest {
+
+    private EventEnrichment<ProjectCreated, ProjectCreatedEnrichment> enrichment;
+
+    @BeforeEach
+    void setUp() {
+        Enricher enricher = Enrichment.newEventEnricher();
+        this.enrichment = EventEnrichment.create(
+                enricher,
+                ProjectCreated.class,
+                ProjectCreatedEnrichment.class);
+    }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        SupportsFieldConversion predicate = supportsConversion(StringValue.class, String.class);
-        new NullPointerTester().testAllPublicInstanceMethods(predicate);
+        new NullPointerTester()
+                .setDefault(Message.class, Empty.getDefaultInstance())
+                .setDefault(EventContext.class, EventContext.getDefaultInstance())
+                .testAllPublicInstanceMethods(enrichment);
+    }
+
+    @Test
+    @DisplayName("be inactive when created")
+    void beInactiveWhenCreated() {
+        assertFalse(enrichment.isActive());
     }
 }

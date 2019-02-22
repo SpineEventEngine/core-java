@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Any;

@@ -29,7 +29,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.enrich.Enricher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.event.given.bus.BareDispatcher;
 import io.spine.server.event.given.bus.EBExternalTaskAddedSubscriber;
 import io.spine.server.event.given.bus.EBProjectArchivedSubscriber;

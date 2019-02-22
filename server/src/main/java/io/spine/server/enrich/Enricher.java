@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.enrich;
 
 import io.spine.annotation.SPI;
 import io.spine.server.type.EventEnvelope;
 
 /**
- * Enriches events <em>after</em> they are stored, and <em>before</em> they are dispatched.
+ * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
  *
  * <p>Enrichment schema is constructed like this:
  * <pre>

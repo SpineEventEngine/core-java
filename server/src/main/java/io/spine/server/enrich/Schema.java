@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
@@ -34,7 +34,7 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.toMultimap;
-import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
+import static io.spine.server.enrich.SupportsFieldConversion.supportsConversion;
 
 /**
  * Provides enrichment functions for a {@linkplain #get(Class) source message Java class}.

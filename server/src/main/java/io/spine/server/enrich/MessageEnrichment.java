@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static io.spine.protobuf.Messages.defaultInstance;
-import static io.spine.server.event.enrich.SupportsFieldConversion.supportsConversion;
+import static io.spine.server.enrich.SupportsFieldConversion.supportsConversion;
 
 /**
  * The default mechanism for enriching messages based on {@code FieldOptions}
@@ -75,13 +75,13 @@ abstract class MessageEnrichment<S extends Message, C extends MessageContext, T 
     }
 
     @Override
-    public T apply(S eventMsg, C context) {
-        checkNotNull(eventMsg);
+    public T apply(S msg, C context) {
+        checkNotNull(msg);
         checkNotNull(context);
         ensureActive();
         verifyState();
 
-        Helper<S, C, T> helper = new Helper<>(this, eventMsg, context);
+        Helper<S, C, T> helper = new Helper<>(this, msg, context);
         T result = helper.createEnrichment();
         return result;
     }

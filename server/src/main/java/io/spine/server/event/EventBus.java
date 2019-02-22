@@ -38,7 +38,7 @@ import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
-import io.spine.server.event.enrich.Enricher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;

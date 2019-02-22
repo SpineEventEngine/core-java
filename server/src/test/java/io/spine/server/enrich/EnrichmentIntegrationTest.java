@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.enrich;
+package io.spine.server.enrich;
 
 import io.spine.test.event.EnrichmentByContextFields;
 import io.spine.test.event.EnrichmentForSeveralEvents;
@@ -49,7 +49,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.event.enrich.EnrichmentAssertion._assert;
+import static io.spine.server.enrich.EnrichmentAssertion._assert;
 
 class EnrichmentIntegrationTest {
 

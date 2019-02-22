@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environment for {@link io.spine.server.event.enrich.LinkerTest}.
+ * Test environment for {@link io.spine.server.enrich.LinkerTest}.
  */
 
 @CheckReturnValue
