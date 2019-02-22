@@ -21,12 +21,23 @@
 package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.gradle.api.Project;
 
 import java.nio.file.Path;
 
+/**
+ * A utility for verifying Spine Model elements.
+ */
 final class ModelVerifier {
 
+    /**
+     * Command handler declarations to verify.
+     */
     private final CommandHandlerSet commandHandlers;
+
+    /**
+     * Entity lifecycle declarations to verify.
+     */
     private final EntitiesLifecycle entitiesLifecycle;
 
     @VisibleForTesting
@@ -35,13 +46,29 @@ final class ModelVerifier {
         this.entitiesLifecycle = entitiesLifecycle;
     }
 
+    /**
+     * Creates a new {@code ModelVerifier} for the model located at the given path.
+     *
+     * <p>Entity lifecycle declarations are gathered from the Spine options of the
+     * {@linkplain io.spine.type.KnownTypes known types}.
+     *
+     * @param modelPath
+     *         the path with serialized Spine Model
+     */
     static ModelVerifier forModel(Path modelPath) {
         CommandHandlerSet commandHandlers = CommandHandlerSet.parse(modelPath);
         EntitiesLifecycle entitiesLifecycle = EntitiesLifecycle.ofKnownTypes();
         return new ModelVerifier(commandHandlers, entitiesLifecycle);
     }
 
-    void verifyAgainst(ProjectClassLoader classLoader) {
+    /**
+     * Verifies Spine model upon the given Gradle project.
+     *
+     * @param project
+     *         the project to gather classpath from
+     */
+    void verifyUpon(Project project) {
+        ProjectClassLoader classLoader = new ProjectClassLoader(project);
         commandHandlers.checkAgainst(classLoader);
         entitiesLifecycle.checkLifecycleDeclarations();
     }

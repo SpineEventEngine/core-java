@@ -28,8 +28,6 @@ import static java.lang.String.format;
 
 /**
  * Creates a set of classes by their names using the specified {@code ClassLoader}.
- *
- * @author Alexander Yevsyukov
  */
 class ClassSet {
 

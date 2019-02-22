@@ -33,11 +33,16 @@ import java.nio.file.StandardOpenOption;
 import static java.nio.file.Files.newInputStream;
 
 /**
- * ...
+ * The checker of command handler data {@linkplain io.spine.model.assemble.AssignLookup gathered}
+ * from the Spine Model.
+ *
  * <p>The class is non-{@code final} to enable testing mocks.
  */
 class CommandHandlerSet implements Logging {
 
+    /**
+     * The parsed handler methods data.
+     */
     private final CommandHandlers handlers;
 
     @VisibleForTesting
@@ -45,11 +50,28 @@ class CommandHandlerSet implements Logging {
         this.handlers = handlers;
     }
 
+    /**
+     * Reads previously serialized {@code CommandHandlers} from the binary file.
+     *
+     * <p>All I/O errors during operation are wrapped as {@link IllegalStateException}.
+     */
     static CommandHandlerSet parse(Path modelPath) {
         CommandHandlers handlers = readCommandHandlers(modelPath);
         return new CommandHandlerSet(handlers);
     }
 
+    /**
+     * Checks the command handler data against the project class loader.
+     *
+     * <p>Checks that all handler types are resolved and do not contain duplicate handlers.
+     *
+     * @throws io.spine.server.model.declare.SignatureMismatchException
+     *         on invalid command handler declaration
+     * @throws io.spine.server.model.DuplicateCommandHandlerError
+     *         on duplicate handler methods
+     * @throws IllegalArgumentException
+     *         on declaring command-handler methods in non-command-handling class
+     */
     void checkAgainst(ProjectClassLoader classLoader) {
         ClassSet classSet = new ClassSet(classLoader.get(),
                                          handlers.getCommandHandlingTypesList());

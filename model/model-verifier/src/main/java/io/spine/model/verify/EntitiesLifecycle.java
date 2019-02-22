@@ -41,8 +41,15 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 
+/**
+ * The checker of lifecycle {@linkplain io.spine.option.LifecycleOption declarations} of the Spine
+ * Model entities.
+ */
 final class EntitiesLifecycle {
 
+    /**
+     * A list of entity types that have lifecycle-impacting events and rejections.
+     */
     private final ImmutableSet<MessageType> entitiesWithLifecycle;
 
     @VisibleForTesting
@@ -50,6 +57,9 @@ final class EntitiesLifecycle {
         this.entitiesWithLifecycle = entityTypes;
     }
 
+    /**
+     * Collects all entities with lifecycle declared from {@link KnownTypes}.
+     */
     static EntitiesLifecycle ofKnownTypes() {
         ImmutableSet<MessageType> entityTypes =
                 KnownTypes.instance()
@@ -66,16 +76,30 @@ final class EntitiesLifecycle {
         return option.hasLifecycle(type);
     }
 
+    /**
+     * Check entity lifecycle declarations correctness.
+     *
+     * <p>Checks that:
+     * <ol>
+     *     <li>The lifecycle target is an entity of a process manager
+     *         {@linkplain Kind#PROCESS_MANAGER kind}.
+     *     <li>All types stated as lifecycle triggers are valid {@linkplain EventMessage events} or
+     *         {@linkplain RejectionMessage rejections}.
+     * </ol>
+     *
+     * @throws EntityKindMismatchError
+     *         if the lifecycle target is not a process manager
+     * @throws io.spine.type.UnresolvedReferenceException
+     *         if one or more lifecycle trigger types cannot be resolved
+     * @throws TypeMismatchError
+     *         if one or more lifecycle trigger types are not valid events or entities
+     */
     void checkLifecycleDeclarations() {
-        checkLifecycleTargets();
+        checkTargets();
         checkLifecycleTriggers();
     }
 
-    /**
-     * Verifies that lifecycle option is specified only for entities of process manager
-     * {@linkplain Kind#PROCESS_MANAGER kind}.
-     */
-    private void checkLifecycleTargets() {
+    private void checkTargets() {
         entitiesWithLifecycle.forEach(EntitiesLifecycle::checkIsProcessManager);
     }
 
@@ -88,9 +112,6 @@ final class EntitiesLifecycle {
         }
     }
 
-    /**
-     * Verifies that all specified lifecycle triggers are valid event types.
-     */
     private void checkLifecycleTriggers() {
         entitiesWithLifecycle.forEach(EntitiesLifecycle::checkLifecycleTriggers);
     }

@@ -43,12 +43,21 @@ import static java.lang.String.format;
 import static java.util.Arrays.deepToString;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * The class loader of the Gradle project.
+ */
 final class ProjectClassLoader implements Logging {
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
+    /**
+     * The enclosed project instance.
+     */
     private final Project project;
 
+    /**
+     * The class loader, lazily created for the project.
+     */
     @LazyInit
     private @MonotonicNonNull ClassLoader classLoader;
 
@@ -63,6 +72,13 @@ final class ProjectClassLoader implements Logging {
         return classLoader;
     }
 
+    /**
+     * Creates a class loader for the Gradle project searching through the output dirs of its
+     * {@link JavaCompile} tasks.
+     *
+     * @throws IllegalStateException
+     *         if the class loader cannot be initialized due to security issues
+     */
     @SuppressWarnings("ClassLoaderInstantiation") // Caught exception.
     private URLClassLoader createClassLoader() {
         Collection<JavaCompile> tasks = allJavaCompile();

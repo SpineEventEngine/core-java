@@ -71,17 +71,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("OverlyCoupledClass")
 @DisplayName("ModelVerifier should")
 class ModelVerifierTest {
 
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
-    private ProjectClassLoader projectClassLoader;
+    private Project project;
 
     @SuppressWarnings("unchecked") // OK for test mocks.
     @BeforeEach
     void setUp() {
-        Project project = mock(Project.class);
+        project = mock(Project.class);
         ScriptHandler buildScript = mock(ScriptHandler.class);
         when(buildScript.getClassLoader()).thenReturn(ModelVerifierTest.class.getClassLoader());
         when(project.getSubprojects()).thenReturn(emptySet());
@@ -94,8 +95,6 @@ class ModelVerifierTest {
         when(emptyTaskCollection.toArray()).thenReturn(EMPTY_ARRAY);
         when(tasks.withType(any(Class.class))).thenReturn(emptyTaskCollection);
         when(project.getTasks()).thenReturn(tasks);
-
-        projectClassLoader = new ProjectClassLoader(project);
     }
 
     @Test
@@ -113,9 +112,9 @@ class ModelVerifierTest {
 
         CommandHandlerSet handlerSet = spy(new CommandHandlerSet(commandHandlers));
         ModelVerifier modelVerifier = new ModelVerifier(handlerSet, validLifecycle());
-        modelVerifier.verifyAgainst(projectClassLoader);
+        modelVerifier.verifyUpon(project);
 
-        verify(handlerSet, times(1)).checkAgainst(projectClassLoader);
+        verify(handlerSet, times(1)).checkAgainst(any(ProjectClassLoader.class));
     }
 
     @ParameterizedTest
@@ -128,7 +127,7 @@ class ModelVerifierTest {
                 .build();
         ModelVerifier modelVerifier = modelVerifierWith(handlers);
         assertThrows(SignatureMismatchException.class,
-                     () -> modelVerifier.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyUpon(project));
     }
 
     private static Stream<Arguments> getBadHandlers() {
@@ -150,7 +149,7 @@ class ModelVerifierTest {
                 .build();
         ModelVerifier modelVerifier = modelVerifierWith(handlers);
         assertThrows(DuplicateCommandHandlerError.class,
-                     () -> modelVerifier.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyUpon(project));
     }
 
     @Test
@@ -162,7 +161,7 @@ class ModelVerifierTest {
                 .addCommandHandlingTypes(InvalidRestoreAggregate.class.getName())
                 .build();
         ModelVerifier modelVerifier = modelVerifierWith(handlers);
-        modelVerifier.verifyAgainst(projectClassLoader);
+        modelVerifier.verifyUpon(project);
         assertEquals(1, loggedMessages.size());
         SubstituteLoggingEvent event = loggedMessages.poll();
         assertEquals(event.getLevel(), Level.WARN);
@@ -186,7 +185,7 @@ class ModelVerifierTest {
                 .addCommandHandlingTypes(invalidClassname)
                 .build();
         ModelVerifier modelVerifier = modelVerifierWith(handlers);
-        modelVerifier.verifyAgainst(projectClassLoader);
+        modelVerifier.verifyUpon(project);
     }
 
     @Test
@@ -199,7 +198,7 @@ class ModelVerifierTest {
                 .build();
         ModelVerifier modelVerifier = modelVerifierWith(handlers);
         assertThrows(IllegalArgumentException.class,
-                     () -> modelVerifier.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyUpon(project));
     }
 
     @Test
@@ -209,17 +208,17 @@ class ModelVerifierTest {
         MessageType nonPmType = MessageType.of(UploadPhoto.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
         ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
-        assertThrows(EntityKindMismatchError.class, () -> modelVerifier.verifyAgainst(projectClassLoader));
+        assertThrows(EntityKindMismatchError.class, () -> modelVerifier.verifyUpon(project));
     }
 
     @Test
-    @DisplayName("throw `UnknownReferencedTypeError` when option references unknown types")
+    @DisplayName("throw `UnresolvedReferenceException` when option references unknown types")
     void throwOnUnknownLifecycleTriggers() {
         MessageType nonPmType = MessageType.of(ArchiveState.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
         ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
         assertThrows(UnresolvedReferenceException.class,
-                     () -> modelVerifier.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyUpon(project));
     }
 
     @Test
@@ -229,7 +228,7 @@ class ModelVerifierTest {
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
         ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
         assertThrows(TypeMismatchError.class,
-                     () -> modelVerifier.verifyAgainst(projectClassLoader));
+                     () -> modelVerifier.verifyUpon(project));
     }
 
     private static ModelVerifier modelVerifierWith(CommandHandlers handlers) {

@@ -135,8 +135,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
          */
         private void verifyModel(Project project) {
             ModelVerifier modelVerifier = ModelVerifier.forModel(rawModelPath);
-            ProjectClassLoader projectClassLoader = new ProjectClassLoader(project);
-            modelVerifier.verifyAgainst(projectClassLoader);
+            modelVerifier.verifyUpon(project);
         }
 
         @Override
