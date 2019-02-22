@@ -26,8 +26,6 @@ import io.spine.server.type.EventEnvelope;
 /**
  * A utility class providing various test-only methods, which in production mode are allowed
  * with the transactions only.
- *
- * @author Alex Tymchenko
  */
 public class TestTransaction {
 

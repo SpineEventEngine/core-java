@@ -32,10 +32,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.entity.DefaultEntityStorageConverter.forAllFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("DefaultEntityStorageConverter should")
 class DefaultEntityStorageConverterTest {
 

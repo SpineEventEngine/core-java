@@ -58,8 +58,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 /**
  * Base class for testing the {@linkplain Transaction transactions} for different
  * {@linkplain TransactionalEntity TransactionalEntity} implementations.
- *
- * @author Alex Tymchenko
  */
 @SuppressWarnings({"unused" /* JUnit nested classes. */, "ClassWithTooManyMethods"})
 public abstract class TransactionTest<I,

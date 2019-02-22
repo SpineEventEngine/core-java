@@ -39,10 +39,6 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("EventBlackList should")
 class EventBlackListTest {
 
