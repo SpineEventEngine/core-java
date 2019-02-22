@@ -100,6 +100,7 @@ import static io.spine.server.procman.given.pm.GivenMessages.deleteProcess;
 import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
 import static io.spine.server.procman.given.pm.GivenMessages.iterationPlanned;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
+import static io.spine.server.procman.given.pm.GivenMessages.startProcess;
 import static io.spine.server.procman.given.pm.GivenMessages.startProject;
 import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
@@ -571,5 +572,18 @@ class ProcessManagerTest {
         assertFalse(processManager.isDeleted());
         testDispatchCommand(deleteProcess());
         assertTrue(processManager.isDeleted());
+    }
+
+    @Test
+    @DisplayName("update own lifecycle when a rejection is thrown")
+    void updateLifecycleOnRejection() {
+        assertFalse(processManager.isArchived());
+
+        try {
+            // The test PM always throws a rejection on a `PmStartProcess` command.
+            testDispatchCommand(startProcess());
+        } catch (Throwable ignored) {
+        }
+        assertTrue(processManager.isArchived());
     }
 }

@@ -40,6 +40,7 @@ import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartIteration;
+import io.spine.test.procman.command.PmStartProcess;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationCompleted;
 import io.spine.test.procman.event.PmIterationPlanned;
@@ -51,6 +52,7 @@ import io.spine.test.procman.event.PmProcessDeleted;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.procman.rejection.PmCannotStartProcess;
 
 import java.util.Optional;
 
@@ -131,6 +133,15 @@ public class TestProcessManager
                 .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
+    }
+
+    @Assign
+    Nothing handle(PmStartProcess command) throws PmCannotStartProcess {
+        PmCannotStartProcess rejection = PmCannotStartProcess
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
+        throw rejection;
     }
 
     @Assign

@@ -33,6 +33,7 @@ import io.spine.test.procman.command.PmArchiveProcess;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmDeleteProcess;
+import io.spine.test.procman.command.PmStartProcess;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmOwnerChanged;
@@ -74,6 +75,12 @@ public class GivenMessages {
                 .newBuilder()
                 .setProjectId(ID)
                 .build();
+    }
+
+    public static PmStartProcess startProcess() {
+        return PmStartProcess.newBuilder()
+                             .setProjectId(ID)
+                             .build();
     }
 
     public static PmArchiveProcess archiveProcess() {

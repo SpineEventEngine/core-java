@@ -57,6 +57,10 @@ message PmThrowEntityAlreadyArchived {
     ProjectId project_id = 1;
 }
 
+message PmStartProcess {
+    ProjectId project_id = 1;
+}
+
 message PmArchiveProcess {
     ProjectId project_id = 1;
 }
