@@ -26,12 +26,18 @@ import java.util.Arrays;
 
 import static java.lang.String.format;
 
+/**
+ * An error thrown on entity {@linkplain Kind kind} mismatch in the Spine Model.
+ */
 public final class EntityKindMismatchError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
     private static final String MESSAGE_FORMAT = "Received entity kind %s, expected one of: %s";
 
+    /**
+     * Creates an error with a predefined message format.
+     */
     public EntityKindMismatchError(Kind received, Kind... expected) {
         super(format(MESSAGE_FORMAT, received, Arrays.toString(expected)));
     }
