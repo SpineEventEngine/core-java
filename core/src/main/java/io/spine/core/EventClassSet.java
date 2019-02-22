@@ -36,6 +36,12 @@ import static io.spine.core.Events.isRejection;
 
 /**
  * A set of combined event and rejection classes.
+ *
+ * <p>In the {@link io.spine.type.MessageClass} hierarchy events and rejections are independent,
+ * but in Spine Model {@linkplain io.spine.base.EventMessage event messages} include both of these.
+ *
+ * <p>This class thus offers convenient methods for working with a combined event and rejection
+ * set.
  */
 @Immutable
 public final class EventClassSet implements Serializable {
@@ -51,10 +57,18 @@ public final class EventClassSet implements Serializable {
         this.rejectionClasses = rejectionClasses;
     }
 
+    /**
+     * Creates an empty instance of {@code EventClassSet}.
+     */
     public static EventClassSet empty() {
         return new EventClassSet(ImmutableSet.of(), ImmutableSet.of());
     }
 
+    /**
+     * Creates an instance from the types referenced by a given {@code TypeRef}.
+     *
+     * <p>Non-event or rejection types are ignored.
+     */
     public static EventClassSet parse(TypeRef typeRef) {
         ImmutableSet<MessageType> types = KnownTypes.instance()
                                                     .allMatching(typeRef);
@@ -75,6 +89,9 @@ public final class EventClassSet implements Serializable {
                     .collect(toImmutableSet());
     }
 
+    /**
+     * Checks if any of the specified events and rejections are contained in this set.
+     */
     public boolean containsAnyOf(Iterable<Event> events) {
         return containsAnyEvent(events) || containsAnyRejection(events);
     }

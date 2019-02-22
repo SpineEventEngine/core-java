@@ -29,11 +29,9 @@ import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.core.Events.ensureMessage;
 import static io.spine.core.Events.typeUrl;
 
@@ -74,9 +72,10 @@ public final class EventClass extends MessageClass<EventMessage> {
     }
 
     /**
-     * ...
+     * Creates a new {@code EventClass} from the given event.
      *
-     * <p>Named {@code from} to avoid collision with {@link #of(Message)}.
+     * <p>Named {@code from} (instead of more appropriate {@code of}) to avoid collision with
+     * {@link #of(Message)}.
      */
     public static EventClass from(Event event) {
         TypeUrl typeUrl = typeUrl(event);
@@ -100,6 +99,12 @@ public final class EventClass extends MessageClass<EventMessage> {
         return from(eventMessage.getClass());
     }
 
+    /**
+     * Creates a new instance from the given {@code MessageType}.
+     *
+     * @throws IllegalArgumentException
+     *         if the message type represents a non-{@link EventMessage} Protobuf type
+     */
     public static EventClass of(MessageType type) {
         return from(type.url());
     }
@@ -117,13 +122,5 @@ public final class EventClass extends MessageClass<EventMessage> {
     @SafeVarargs
     public static ImmutableSet<EventClass> setOf(Class<? extends EventMessage>... classes) {
         return setOf(Arrays.asList(classes));
-    }
-
-    public static ImmutableSet<EventClass> setFrom(Collection<Event> events) {
-        ImmutableSet<EventClass> result = events
-                .stream()
-                .map(EventClass::from)
-                .collect(toImmutableSet());
-        return result;
     }
 }

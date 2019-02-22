@@ -44,13 +44,20 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
     /**
      * Creates a new instance of the rejection class.
      *
-     * @param value a value to hold
+     * @param value
+     *         a value to hold
      * @return new instance
      */
     public static RejectionClass of(Class<? extends RejectionMessage> value) {
         return new RejectionClass(checkNotNull(value));
     }
 
+    /**
+     * Creates a new instance from the given type URL.
+     *
+     * @throws IllegalArgumentException
+     *         if the type URL does not represent a rejection type
+     */
     @SuppressWarnings("unchecked") // Checked logically.
     public static RejectionClass from(TypeUrl typeUrl) {
         Class<? extends Message> messageClass = typeUrl.getMessageClass();
@@ -60,6 +67,12 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
         return of((Class<? extends RejectionMessage>) messageClass);
     }
 
+    /**
+     * Creates a new instance from the rejection message enclosed by the given {@code Event}.
+     *
+     * <p>If the event stores non-rejection message, but an ordinary event, an
+     * {@link IllegalArgumentException} is thrown.
+     */
     public static RejectionClass from(Event rejection) {
         TypeUrl typeUrl = typeUrl(rejection);
         return from(typeUrl);
@@ -72,7 +85,8 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
      * passed to this method, enclosing rejection message will be un-wrapped to determine
      * the class of the rejection.
      *
-     * @param rejectionOrMessage a rejection instance
+     * @param rejectionOrMessage
+     *         a rejection instance
      * @return new instance
      */
     public static RejectionClass of(Message rejectionOrMessage) {
@@ -81,6 +95,12 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
         return result;
     }
 
+    /**
+     * Creates a new instance from the given {@code MessageType}.
+     *
+     * @throws IllegalArgumentException
+     *         if the message type represents a non-{@link RejectionMessage} Protobuf type
+     */
     public static RejectionClass of(MessageType type) {
         return from(type.url());
     }
