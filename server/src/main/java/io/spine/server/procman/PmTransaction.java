@@ -73,6 +73,7 @@ public class PmTransaction<I,
         VersionIncrement versionIncrement = createVersionIncrement();
         Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(dispatch, versionIncrement);
         List<Event> events = propagate(phase);
+        getEntity().updateLifecycle(events);
         return events;
     }
 
@@ -91,6 +92,7 @@ public class PmTransaction<I,
                 versionIncrement
         );
         List<Event> events = propagate(phase);
+        getEntity().updateLifecycle(events);
         return events;
     }
 
