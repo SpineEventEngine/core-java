@@ -57,7 +57,7 @@ public final class EventClassSet implements Serializable {
 
     public static EventClassSet parse(TypeRef typeRef) {
         ImmutableSet<MessageType> types = KnownTypes.instance()
-                                                    .resolve(typeRef);
+                                                    .allMatching(typeRef);
         return new EventClassSet(events(types), rejections(types));
     }
 

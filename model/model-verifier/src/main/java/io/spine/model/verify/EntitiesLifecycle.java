@@ -105,21 +105,12 @@ final class EntitiesLifecycle {
     }
 
     private static void checkLifecycleTrigger(TypeRef typeRef) {
-        checkExists(typeRef);
-        checkReferencedTypes(typeRef);
-    }
-
-    private static void checkExists(TypeRef typeRef) {
-        KnownTypes.instance()
-                  .validate(typeRef);
-    }
-
-    private static void checkReferencedTypes(TypeRef typeRef) {
-        ImmutableSet<MessageType> referencedTypes = KnownTypes.instance()
-                                                              .resolve(typeRef);
+        ImmutableSet<MessageType> referenced =
+                KnownTypes.instance()
+                          .resolveAndValidate(typeRef);
         Predicate<MessageType> isEvent = MessageType::isEvent;
         Predicate<MessageType> predicate = isEvent.or(MessageType::isRejection);
-        referencedTypes.forEach(
+        referenced.forEach(
                 type -> {
                     if (!predicate.test(type)) {
                         throw new TypeMismatchError(type,
