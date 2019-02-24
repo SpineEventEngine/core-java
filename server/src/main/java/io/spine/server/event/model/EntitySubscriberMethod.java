@@ -77,7 +77,7 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     }
 
     private Class<? extends Message> entityType() {
-        return getFirstParamType(getRawMethod());
+        return getFirstParamType(rawMethod());
     }
 
     @Override

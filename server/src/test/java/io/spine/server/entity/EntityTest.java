@@ -86,18 +86,18 @@ class EntityTest {
         @Test
         @DisplayName("for single entity")
         void forSingleEntity() {
-            Project state = entityNew.getDefaultState();
+            Project state = entityNew.defaultState();
             assertEquals(Project.getDefaultInstance(), state);
         }
 
         @Test
         @DisplayName("for different entities")
         void forDifferentEntities() {
-            assertEquals(Project.getDefaultInstance(), entityNew.getDefaultState());
+            assertEquals(Project.getDefaultInstance(), entityNew.defaultState());
 
             EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
             StringValue expected = StringValue.getDefaultInstance();
-            assertEquals(expected, entityWithMessageId.getDefaultState());
+            assertEquals(expected, entityWithMessageId.defaultState());
         }
     }
 
@@ -145,7 +145,7 @@ class EntityTest {
     @Test
     @DisplayName("have default state after construction")
     void defaultState() {
-        assertEquals(entityNew.getDefaultState(), entityNew.state());
+        assertEquals(entityNew.defaultState(), entityNew.state());
     }
 
     @Test

@@ -33,8 +33,6 @@ import static com.google.common.collect.Sets.intersection;
 
 /**
  * Maps a Java class to its {@link ModelClass}.
- *
- * @author Alexander Yevsyukov
  */
 final class ClassMap {
 

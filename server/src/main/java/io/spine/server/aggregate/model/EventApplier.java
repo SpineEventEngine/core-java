@@ -80,6 +80,6 @@ public final class EventApplier
     }
 
     boolean allowsImport() {
-        return getAttributes().contains(AllowImportAttribute.ALLOW);
+        return attributes().contains(AllowImportAttribute.ALLOW);
     }
 }

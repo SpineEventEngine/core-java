@@ -80,7 +80,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("return method")
     void returnMethod() {
-        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getRawMethod());
+        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.rawMethod());
     }
 
     @Nested
@@ -103,7 +103,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
-        assertEquals(ModProjectStarted.class, getFirstParamType(oneParamMethod.getRawMethod()));
+        assertEquals(ModProjectStarted.class, getFirstParamType(oneParamMethod.rawMethod()));
     }
 
     @Nested

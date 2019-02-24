@@ -47,7 +47,7 @@ public final class EventSubscriberMethod extends SubscriberMethod {
 
     @Override
     public MessageFilter filter() {
-        Subscribe annotation = getRawMethod().getAnnotation(Subscribe.class);
+        Subscribe annotation = rawMethod().getAnnotation(Subscribe.class);
         ByField byFieldFilter = annotation.filter();
         String rawFieldPath = byFieldFilter.path();
         if (rawFieldPath.isEmpty()) {

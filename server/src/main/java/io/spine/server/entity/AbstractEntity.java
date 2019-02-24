@@ -59,7 +59,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Lazily initialized reference to the model class of this entity.
      *
      * @see #thisClass()
-     * @see #getModelClass()
+     * @see #modelClass()
      */
     @LazyInit
     private volatile @MonotonicNonNull EntityClass<?> thisClass;
@@ -74,7 +74,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * The state of the entity.
      *
-     * <p>Lazily initialized to the {@linkplain #getDefaultState() default state},
+     * <p>Lazily initialized to the {@linkplain #defaultState() default state},
      * if {@linkplain #state() accessed} before {@linkplain #setState(Message)}
      * initialization}.
      */
@@ -126,7 +126,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * {@inheritDoc}
      *
      * <p>If the state of the entity was not initialized, it is set to
-     * {@linkplain #getDefaultState() default value} and returned.
+     * {@linkplain #defaultState() default value} and returned.
      *
      * @return the current state or default state value
      */
@@ -137,7 +137,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             synchronized (this) {
                 result = state;
                 if (result == null) {
-                    state = getDefaultState();
+                    state = defaultState();
                     result = state;
                 }
             }
@@ -154,7 +154,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             synchronized (this) {
                 result = thisClass;
                 if (result == null) {
-                    thisClass = getModelClass();
+                    thisClass = modelClass();
                     result = thisClass;
                 }
             }
@@ -166,7 +166,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Obtains the model class.
      */
     @Internal
-    protected EntityClass<?> getModelClass() {
+    protected EntityClass<?> modelClass() {
         return EntityClass.asEntityClass(getClass());
     }
 
@@ -180,7 +180,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Obtains the default state of the entity.
      */
-    protected final S getDefaultState() {
+    protected final S defaultState() {
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
         S result = (S) thisClass().defaultState();

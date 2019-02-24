@@ -33,8 +33,6 @@ import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * Signals that invocation of a message handling method failed with an exception.
- *
- * @author Alexander Yevsyukov
  */
 public class HandlerMethodFailedException extends RuntimeException {
 

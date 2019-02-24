@@ -172,7 +172,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Method getRawMethod() {
+    public Method rawMethod() {
         return method;
     }
 
@@ -185,7 +185,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<P> getProducedMessages() {
+    public Set<P> producedMessages() {
         return producedTypes.typeSet();
     }
 
@@ -208,7 +208,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<MethodAttribute<?>> getAttributes() {
+    public Set<MethodAttribute<?>> attributes() {
         return attributes;
     }
 

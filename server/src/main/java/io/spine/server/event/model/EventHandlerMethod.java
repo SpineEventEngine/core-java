@@ -71,7 +71,7 @@ public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends
         if (!getParameterSpec().isAwareOfCommandType()) {
             return createId(eventClass);
         } else {
-            Class<?>[] parameters = getRawMethod().getParameterTypes();
+            Class<?>[] parameters = rawMethod().getParameterTypes();
             Class<? extends CommandMessage> commandMessageClass =
                     castClass(parameters[1], CommandMessage.class);
             CommandClass commandClass = CommandClass.from(commandMessageClass);

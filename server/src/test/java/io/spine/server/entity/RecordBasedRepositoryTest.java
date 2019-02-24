@@ -416,7 +416,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
 
         private FieldMask createFirstFieldOnlyMask(List<E> entities) {
             E firstEntity = entities.get(0);
-            FieldMask fieldMask = fromFieldNumbers(firstEntity.getDefaultState()
+            FieldMask fieldMask = fromFieldNumbers(firstEntity.defaultState()
                                                               .getClass(), 1);
             return fieldMask;
         }

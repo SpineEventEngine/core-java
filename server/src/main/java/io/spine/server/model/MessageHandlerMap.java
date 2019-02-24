@@ -124,7 +124,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         ImmutableSet<P> result = map
                 .values()
                 .stream()
-                .map(HandlerMethod::getProducedMessages)
+                .map(HandlerMethod::producedMessages)
                 .flatMap(Set::stream)
                 .collect(toImmutableSet());
         return result;

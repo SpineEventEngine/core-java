@@ -39,8 +39,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>If such check fails, the {@link IllegalStateException} will be thrown. If the check passes,
  * no action is performed.
- *
- * @author Dmytro Kuzmin
  */
 @Internal
 public final class MethodExceptionChecker {

@@ -53,7 +53,7 @@ public final class EventReactorMethod
     protected ReactorMethodResult toResult(EventReactor target, @Nullable Object rawMethodOutput) {
         checkNotNull(rawMethodOutput,
                      "Event reactor method %s returned null.",
-                     getRawMethod());
+                     rawMethod());
         return new ReactorMethodResult(target, rawMethodOutput);
     }
 }
