@@ -62,8 +62,7 @@ class ExecutorCommandSchedulerTest {
     private static final int WAIT_FOR_PROPAGATION_MS = 300;
 
     private final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerTest.class)
-                                   .command();
+            new TestActorRequestFactory(ExecutorCommandSchedulerTest.class).command();
 
     private CommandBus commandBus;
     private CommandScheduler scheduler;

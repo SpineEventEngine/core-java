@@ -87,7 +87,7 @@ public class Given {
                                                  .setValue(newUuid())
                                                  .build();
             TestActorRequestFactory factory =
-                    TestActorRequestFactory.newInstance(userId, generatedTenantId);
+                    new TestActorRequestFactory(userId, generatedTenantId);
             Command result = factory.createCommand(command, when);
             return result;
         }
@@ -142,8 +142,7 @@ public class Given {
 
             CmdCreateProject projectMessage = CommandMessage.createProjectMessage();
             CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
-            CommandFactory commandFactory = TestActorRequestFactory.newInstance(ACommand.class)
-                                                                   .command();
+            CommandFactory commandFactory = new TestActorRequestFactory(ACommand.class).command();
             Command cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
             return cmd;
         }

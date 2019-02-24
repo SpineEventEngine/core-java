@@ -54,10 +54,10 @@ public class EventBusTestEnv {
     static final ProjectId PROJECT_ID = projectId();
 
     public static final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventBusTest.class, TENANT_ID);
+            new TestActorRequestFactory(EventBusTest.class, TENANT_ID);
 
+    /** Prevent instantiation of this utility class. */
     private EventBusTestEnv() {
-        // Prevent instantiation.
     }
 
     private static ProjectId projectId() {

@@ -129,7 +129,7 @@ public class Given {
                                                  .setValue(newUuid())
                                                  .build();
             TestActorRequestFactory factory =
-                    TestActorRequestFactory.newInstance(userId, generatedTenantId);
+                    new TestActorRequestFactory(userId, generatedTenantId);
             Command result = factory.createCommand(command, when);
             return result;
         }
@@ -187,7 +187,7 @@ public class Given {
     static class AQuery {
 
         private static final ActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(AQuery.class);
+                new TestActorRequestFactory(AQuery.class);
 
         private AQuery() {
         }

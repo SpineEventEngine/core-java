@@ -23,7 +23,6 @@ package io.spine.server.enrich;
 import com.google.common.truth.BooleanSubject;
 import io.spine.base.EnrichmentMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
@@ -220,26 +219,6 @@ public class EnricherTest {
             EventEnvelope dummyEvent = EventEnvelope.of(arbitrary());
 
             assertCannotBeEnriched(dummyEvent);
-        }
-
-        @Test
-        @DisplayName("if its enrichment is disabled")
-        void withDisabledEnrichment() {
-            Event event = createEvent(projectStarred());
-            Enrichment.Builder enrichment = event.getContext()
-                                                 .getEnrichment()
-                                                 .toBuilder()
-                                                 .setDoNotEnrich(true);
-            EventContext.Builder context = event.getContext()
-                                                .toBuilder()
-                                                .setEnrichment(enrichment);
-            EventEnvelope notEnrichableEvent = EventEnvelope.of(
-                    event.toBuilder()
-                         .setContext(context)
-                         .build()
-            );
-
-            assertCannotBeEnriched(notEnrichableEvent);
         }
     }
 

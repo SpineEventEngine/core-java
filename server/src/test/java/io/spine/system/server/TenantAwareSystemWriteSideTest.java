@@ -24,7 +24,6 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.TenantId;
 import io.spine.testdata.Sample;
-import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,15 +32,11 @@ import org.junit.jupiter.api.Test;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("TenantAwareSystemWriteSide should")
 class TenantAwareSystemWriteSideTest {
 
     private static final String POST_COMMANDS = "post system commands";
     private static final String POST_EVENTS = "post system events";
-
-    private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(TenantAwareSystemWriteSideTest.class);
 
     private MemoizingWriteSide delegate;
 

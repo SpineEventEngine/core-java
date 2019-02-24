@@ -86,7 +86,7 @@ public class AggregateRepositoryTestEnv {
 
     private static TestActorRequestFactory newRequestFactory() {
         TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(AggregateRepositoryTest.class);
+                new TestActorRequestFactory(AggregateRepositoryTest.class);
         return requestFactory;
     }
 
