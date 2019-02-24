@@ -379,7 +379,7 @@
     <inspection_tool class="JavaLangImport" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="JavaLangReflect" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="JavadocHtmlLint" enabled="true" level="ERROR" enabled_by_default="true" />
-    <inspection_tool class="JavadocReference" enabled="true" level="ERROR" enabled_by_default="true">
+    <inspection_tool class="JavadocReference" enabled="true" level="TYPO" enabled_by_default="true">
       <scope name="Tests" level="ERROR" enabled="false" />
     </inspection_tool>
     <inspection_tool class="LabeledStatement" enabled="true" level="WARNING" enabled_by_default="true" />
