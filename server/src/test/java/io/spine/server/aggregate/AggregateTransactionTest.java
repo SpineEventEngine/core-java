@@ -148,7 +148,7 @@ class AggregateTransactionTest
     protected void breakEntityValidation(
             Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder().setShouldThrow(toThrow);
+        entity.builder().setShouldThrow(toThrow);
     }
 
     @Test
@@ -194,7 +194,7 @@ class AggregateTransactionTest
                     .setId(event.getProjectId())
                     .setName(event.getName())
                     .build();
-            getBuilder().mergeFrom(newState);
+            builder().mergeFrom(newState);
         }
 
         @Apply

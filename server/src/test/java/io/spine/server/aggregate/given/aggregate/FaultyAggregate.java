@@ -66,7 +66,6 @@ public class FaultyAggregate
         if (brokenApplier) {
             throw new IllegalStateException(BROKEN_APPLIER);
         }
-
-        getBuilder().setStatus(Status.CREATED);
+        builder().setStatus(Status.CREATED);
     }
 }

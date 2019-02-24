@@ -29,18 +29,18 @@ import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectVBuilder;
 import io.spine.testing.server.blackbox.BbTask;
-import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbAddTask;
+import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeAddedVBuilder;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
+import io.spine.testing.server.blackbox.event.BbAssigneeRemovedVBuilder;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbProjectStarted;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
-import io.spine.testing.server.blackbox.event.BbAssigneeRemovedVBuilder;
 import io.spine.testing.server.blackbox.rejection.BbProjectAlreadyStarted;
 import io.spine.testing.server.blackbox.rejection.BbTaskCreatedInCompletedProject;
 
@@ -128,29 +128,30 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
 
     @Apply
     void on(BbProjectCreated event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(CREATED);
+        builder().setId(event.getProjectId())
+                 .setStatus(CREATED);
     }
 
     @Apply
     void on(BbProjectStarted event) {
-        getBuilder().setStatus(STARTED);
+        builder().setStatus(STARTED);
     }
 
     @Apply
     void on(BbTaskAdded event) {
-        getBuilder().addTask(event.getTask());
+        builder().addTask(event.getTask());
     }
 
     @Apply
     void on(BbAssigneeAdded event) {
-        getBuilder().addAssignee(event.getUserId());
+        builder().addAssignee(event.getUserId());
     }
 
     @Apply
     void on(BbAssigneeRemoved event) {
-        List<UserId> assignees = getBuilder().getAssignee();
+        BbProjectVBuilder builder = builder();
+        List<UserId> assignees = builder.getAssignee();
         int index = assignees.indexOf(event.getUserId());
-        getBuilder().removeAssignee(index);
+        builder.removeAssignee(index);
     }
 }

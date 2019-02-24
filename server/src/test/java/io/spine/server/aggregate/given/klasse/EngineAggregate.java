@@ -159,10 +159,10 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     }
 
     private void setStarted() {
-        getBuilder().setStatus(STARTED);
+        builder().setStatus(STARTED);
     }
 
     private void setStopped() {
-        getBuilder().setStatus(STOPPED);
+        builder().setStatus(STOPPED);
     }
 }

@@ -50,8 +50,7 @@ class OrderAggregate extends Aggregate<OrderId, Order, OrderVBuilder> {
 
     @Apply
     void event(OrderCreated event) {
-        getBuilder()
-                .mergeFrom(event.getOrder());
+        builder().mergeFrom(event.getOrder());
     }
 
     @Assign
@@ -65,6 +64,6 @@ class OrderAggregate extends Aggregate<OrderId, Order, OrderVBuilder> {
 
     @Apply
     void event(ItemAdded event) {
-        getBuilder().addItem(event.getItem());
+        builder().addItem(event.getItem());
     }
 }

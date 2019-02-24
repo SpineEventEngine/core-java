@@ -153,7 +153,7 @@ class ProjectionTransactionTest
     protected void breakEntityValidation(
             Projection<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder()
+        entity.builder()
               .setShouldThrow(toThrow);
     }
 

@@ -87,7 +87,7 @@ public class PmTransaction<I,
     List<Event> dispatchEvent(EventEnvelope event) {
         VersionIncrement versionIncrement = createVersionIncrement();
         Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
-                new EventDispatch<>(this::dispatch, getEntity(), event),
+                new EventDispatch<>(this::dispatch, entity(), event),
                 versionIncrement
         );
         List<Event> events = propagate(phase);

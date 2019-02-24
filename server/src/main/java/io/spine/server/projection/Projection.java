@@ -76,10 +76,22 @@ public abstract class Projection<I,
      * {@inheritDoc}
      *
      * <p>Overridden to expose into the {@code io.spine.server.projection} package.
+     * @deprecated use {@link #builder()}
      */
     @Override
+    @Deprecated
     protected B getBuilder() {
-        return super.getBuilder();
+        return builder();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose the method to the package.
+     */
+    @Override
+    protected final B builder() {
+        return super.builder();
     }
 
     @Override

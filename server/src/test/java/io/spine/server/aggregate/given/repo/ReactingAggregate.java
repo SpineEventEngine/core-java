@@ -82,11 +82,11 @@ public class ReactingAggregate
 
     @Apply
     void apply(AggProjectArchived event) {
-        getBuilder().setValue(PROJECT_ARCHIVED);
+        builder().setValue(PROJECT_ARCHIVED);
     }
 
     @Apply
     void apply(AggProjectDeleted event) {
-        getBuilder().setValue(PROJECT_DELETED);
+        builder().setValue(PROJECT_DELETED);
     }
 }

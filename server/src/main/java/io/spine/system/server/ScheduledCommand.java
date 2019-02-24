@@ -49,9 +49,9 @@ final class ScheduledCommand
                        );
 
         Command commandWithSchedule = withSchedule(enrichment.getCommand(), event.getSchedule());
-        getBuilder().setId(event.getId())
-                    .setCommand(commandWithSchedule)
-                    .setSchedulingTime(context.getTimestamp());
+        builder().setId(event.getId())
+                 .setCommand(commandWithSchedule)
+                 .setSchedulingTime(context.getTimestamp());
     }
 
     private static Command withSchedule(Command source, CommandContext.Schedule schedule) {

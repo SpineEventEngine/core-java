@@ -60,6 +60,6 @@ public class RejectionReactingAggregate
 
     @Apply
     void event(AggProjectArchived event) {
-        getBuilder().setValue(PARENT_ARCHIVED);
+        builder().setValue(PARENT_ARCHIVED);
     }
 }

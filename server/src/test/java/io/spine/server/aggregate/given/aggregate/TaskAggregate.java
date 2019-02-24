@@ -135,12 +135,12 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
 
     @Apply
     void event(AggTaskCreated event) {
-        getBuilder().setId(event.getTaskId());
+        builder().setId(event.getTaskId());
     }
 
     @Apply
     void event(AggTaskAssigned event) {
-        getBuilder().setAssignee(event.getNewAssignee());
+        builder().setAssignee(event.getNewAssignee());
     }
 
     @React

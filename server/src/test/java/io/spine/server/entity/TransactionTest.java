@@ -138,16 +138,16 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
             assertNotNull(tx);
 
-            assertEquals(entity, tx.getEntity());
+            assertEquals(entity, tx.entity());
             // Not possible to compare `Message.Builder` instances via `equals`, so trigger `build()`.
-            assertEquals(expectedBuilder.build(), tx.getBuilder()
+            assertEquals(expectedBuilder.build(), tx.builder()
                                                     .build());
-            assertEquals(expectedVersion, tx.getVersion());
-            assertEquals(expectedLifecycleFlags, tx.getLifecycleFlags());
+            assertEquals(expectedVersion, tx.version());
+            assertEquals(expectedLifecycleFlags, tx.lifecycleFlags());
 
             assertTrue(tx.isActive());
 
-            assertTrue(tx.getPhases()
+            assertTrue(tx.phases()
                          .isEmpty());
         }
 
@@ -163,9 +163,9 @@ public abstract class TransactionTest<I,
 
             Transaction<I, E, S, B> tx = createTxWithState(entity, newState, newVersion);
 
-            assertEquals(newState, tx.getBuilder()
+            assertEquals(newState, tx.builder()
                                      .build());
-            assertEquals(newVersion, tx.getVersion());
+            assertEquals(newVersion, tx.version());
             assertNotEquals(entity.state(), newState);
             assertNotEquals(entity.getVersion(), newVersion);
 
@@ -197,9 +197,9 @@ public abstract class TransactionTest<I,
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
 
-        assertEquals(1, tx.getPhases()
+        assertEquals(1, tx.phases()
                           .size());
-        Phase<I, ?> phase = tx.getPhases()
+        Phase<I, ?> phase = tx.phases()
                               .get(0);
         assertTrue(checkPhase(event, phase));
     }
@@ -252,11 +252,11 @@ public abstract class TransactionTest<I,
 
         Version ctxVersion = event.getContext()
                                   .getVersion();
-        assertNotEquals(tx.getVersion(), ctxVersion);
+        assertNotEquals(tx.version(), ctxVersion);
 
         applyEvent(tx, event);
-        Version modifiedVersion = tx.getVersion();
-        assertEquals(modifiedVersion, tx.getVersion());
+        Version modifiedVersion = tx.version();
+        assertEquals(modifiedVersion, tx.version());
     }
 
     @SuppressWarnings("unchecked")  // OK for a test method.
@@ -393,13 +393,13 @@ public abstract class TransactionTest<I,
     protected final void advanceVersionFromEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
-        assertEquals(entity.getVersion(), tx.getVersion());
+        assertEquals(entity.getVersion(), tx.version());
 
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
         Version versionFromEvent = event.getContext()
                                         .getVersion();
-        assertEquals(versionFromEvent, tx.getVersion());
+        assertEquals(versionFromEvent, tx.version());
         tx.commit();
         assertEquals(versionFromEvent, entity.getVersion());
     }

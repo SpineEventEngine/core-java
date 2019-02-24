@@ -68,7 +68,7 @@ class TransactionalEventPlayerTest {
         EventPlayingTransaction tx = spy(mock(EventPlayingTransaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
-        when(tx.getEntity()).thenReturn(entity);
+        when(tx.entity()).thenReturn(entity);
 
         entity.injectTransaction(tx);
         return entity;

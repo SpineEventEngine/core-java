@@ -108,9 +108,9 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateV
 
     @Apply
     void apply(NumberPassed event) {
-        getBuilder().setValue(state().getValue()
-                                      + System.lineSeparator()
-                                      + Timestamps.toString(event.getWhen()));
+        builder().setValue(state().getValue()
+                                   + System.lineSeparator()
+                                   + Timestamps.toString(event.getWhen()));
     }
 
     private static NumberPassed now() {

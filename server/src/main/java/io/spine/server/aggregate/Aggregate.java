@@ -100,7 +100,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * event message it handles and returns {@code void}.
  *
  * <p>The modification of the state is done via a builder instance obtained
- * from {@link #getBuilder()}.
+ * from {@link #builder()}.
  *
  * <p>An {@code Aggregate} class must have applier methods for
  * <em>all</em> types of the events that it produces.
@@ -191,10 +191,24 @@ public abstract class Aggregate<I,
      * <p>In {@code Aggregate}, this method must be called only from within an event applier.
      *
      * @throws IllegalStateException if the method is called from outside an event applier
+     * @deprecated use {@link #builder()}
      */
+    @Deprecated
     @Override
     protected B getBuilder() {
-        return super.getBuilder();
+        return builder();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>In {@code Aggregate}, this method must be called only from within an event applier.
+     *
+     * @throws IllegalStateException if the method is called from outside an event applier
+     */
+    @Override
+    protected final B builder() {
+        return super.builder();
     }
 
     /**
@@ -322,7 +336,7 @@ public abstract class Aggregate<I,
      *
      * <p>If this method is called during a {@linkplain #play(AggregateHistory) replay}
      * (because the snapshot was encountered) the method uses the state
-     * {@linkplain #getBuilder() builder}, which is used during the replay.
+     * {@linkplain #builder() builder}, which is used during the replay.
      *
      * <p>If not in replay, the method sets the state and version directly to the aggregate.
      *

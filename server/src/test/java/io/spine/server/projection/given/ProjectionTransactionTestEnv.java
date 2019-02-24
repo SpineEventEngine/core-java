@@ -36,17 +36,12 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 
-/**
- * @author Alex Tymchenko
- * @author Dmytro Kuzmin
- */
 public class ProjectionTransactionTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private ProjectionTransactionTestEnv() {
     }
 
-    @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
     public static class TestProjection
             extends Projection<ProjectId, Project, PatchedProjectBuilder> {
 
@@ -76,7 +71,7 @@ public class ProjectionTransactionTestEnv {
             Project newState = Project.newBuilder(state())
                                       .setId(event.getProjectId())
                                       .build();
-            getBuilder().mergeFrom(newState);
+            builder().mergeFrom(newState);
         }
 
         @Subscribe

@@ -53,6 +53,6 @@ public class TaskPart
 
     @Apply
     void apply(AggTaskAdded event) {
-        getBuilder().setDescription(TASK_DESCRIPTION);
+        builder().setDescription(TASK_DESCRIPTION);
     }
 }

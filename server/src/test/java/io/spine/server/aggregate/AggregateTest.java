@@ -635,7 +635,7 @@ public class AggregateTest {
     @Test
     @DisplayName("not allow getting state builder from outside event applier")
     void notGetStateBuilderOutsideOfApplier() {
-        assertThrows(IllegalStateException.class, () -> new IntAggregate(100).getBuilder());
+        assertThrows(IllegalStateException.class, () -> new IntAggregate(100).builder());
     }
 
     @Nested

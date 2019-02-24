@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  *         as the only parameter.
  * </ul>
  *
- * <p>In order to update the state of the aggregate, the {@link Aggregate#getBuilder()} method
+ * <p>In order to update the state of the aggregate, the {@link Aggregate#builder()} method
  * should be used.
  *
  * <p>If the annotation comes with the attribute {@link #allowImport() allowImport} set to

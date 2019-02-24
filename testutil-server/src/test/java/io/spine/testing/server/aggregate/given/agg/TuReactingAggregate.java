@@ -64,6 +64,6 @@ public final class TuReactingAggregate
 
     @Apply
     void on(@SuppressWarnings("unused") TuProjectAssigned event) {
-        getBuilder().setTimestamp(fromMillis(123456));
+        builder().setTimestamp(fromMillis(123456));
     }
 }

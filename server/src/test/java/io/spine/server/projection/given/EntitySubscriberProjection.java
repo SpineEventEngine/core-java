@@ -48,10 +48,10 @@ public final class EntitySubscriberProjection
                                                .stream()
                                                .map(Task::getTitle)
                                                .collect(toList());
-        getBuilder().setProjectId(aggregateState.getId())
-                    .setProjectName(aggregateState.getName())
-                    .clearTaskName()
-                    .addAllTaskName(taskNames);
+        builder().setProjectId(aggregateState.getId())
+                 .setProjectName(aggregateState.getName())
+                 .clearTaskName()
+                 .addAllTaskName(taskNames);
     }
 
     public static final class Repository

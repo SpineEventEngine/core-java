@@ -78,9 +78,9 @@ final class CommandLifecycleAggregate
                 .newBuilder()
                 .setWhenReceived(getCurrentTime())
                 .build();
-        getBuilder().setId(event.getId())
-                    .setCommand(event.getPayload())
-                    .setStatus(status);
+        builder().setId(event.getId())
+                 .setCommand(event.getPayload())
+                 .setStatus(status);
     }
 
     /**
@@ -90,11 +90,11 @@ final class CommandLifecycleAggregate
      * {@linkplain io.spine.server.bus.BusFilter bus filters} successfully;
      */
     @Apply(allowImport = true)
-    void on(CommandAcknowledged event) {
+    void on(@SuppressWarnings("unused") CommandAcknowledged event) {
         CommandTimeline status = statusBuilder()
                 .setWhenAcknowledged(getCurrentTime())
                 .build();
-        getBuilder().setStatus(status);
+        builder().setStatus(status);
     }
 
     @Apply(allowImport = true)
@@ -103,8 +103,8 @@ final class CommandLifecycleAggregate
         CommandTimeline status = statusBuilder()
                 .setWhenScheduled(getCurrentTime())
                 .build();
-        getBuilder().setCommand(updatedCommand)
-                    .setStatus(status);
+        builder().setCommand(updatedCommand)
+                 .setStatus(status);
     }
 
     /**
@@ -113,11 +113,11 @@ final class CommandLifecycleAggregate
      * <p>The event is generated when the command is passed to a dispatcher after acknowledgement.
      */
     @Apply(allowImport = true)
-    void on(CommandDispatched event) {
+    void on(@SuppressWarnings("unused") CommandDispatched event) {
         CommandTimeline status = statusBuilder()
                 .setWhenDispatched(getCurrentTime())
                 .build();
-        getBuilder().setStatus(status);
+        builder().setStatus(status);
     }
 
     /**
@@ -128,14 +128,14 @@ final class CommandLifecycleAggregate
     @Apply(allowImport = true)
     void on(TargetAssignedToCommand event) {
         CommandTarget target = event.getTarget();
-        CommandTimeline status = getBuilder()
-                .getStatus()
-                .toBuilder()
-                .setWhenTargetAssgined(getCurrentTime())
-                .build();
-        getBuilder()
-                .setStatus(status)
-                .setTarget(target);
+        CommandLifecycleVBuilder builder = builder();
+        CommandTimeline status =
+                builder.getStatus()
+                       .toBuilder()
+                       .setWhenTargetAssgined(getCurrentTime())
+                       .build();
+        builder.setStatus(status)
+               .setTarget(target);
     }
 
     /**
@@ -144,7 +144,7 @@ final class CommandLifecycleAggregate
      * <p>The event is generated after a command is successfully handled.
      */
     @Apply(allowImport = true)
-    void on(CommandHandled event) {
+    void on(@SuppressWarnings("unused") CommandHandled event) {
         setStatus(Responses.statusOk());
     }
 
@@ -185,7 +185,7 @@ final class CommandLifecycleAggregate
                 state().getStatus()
                        .toBuilder()
                        .setSubstitued(substituted);
-        getBuilder().setStatus(newStatus.build());
+        builder().setStatus(newStatus.build());
     }
 
     @Apply(allowImport = true)
@@ -198,11 +198,11 @@ final class CommandLifecycleAggregate
                 state().getStatus()
                        .toBuilder()
                        .setSubstitued(substituted);
-        getBuilder().setStatus(newStatus.build());
+        builder().setStatus(newStatus.build());
     }
 
     private Command updateSchedule(Schedule schedule) {
-        Command command = getBuilder().getCommand();
+        Command command = builder().getCommand();
         CommandContext updatedContext =
                 command.getContext()
                        .toBuilder()
@@ -216,8 +216,8 @@ final class CommandLifecycleAggregate
     }
 
     private CommandTimeline.Builder statusBuilder() {
-        return getBuilder().getStatus()
-                           .toBuilder();
+        return builder().getStatus()
+                        .toBuilder();
     }
 
     private void setStatus(Status status) {
@@ -225,6 +225,6 @@ final class CommandLifecycleAggregate
                 .setWhenHandled(getCurrentTime())
                 .setHowHandled(status)
                 .build();
-        getBuilder().setStatus(commandStatus);
+        builder().setStatus(commandStatus);
     }
 }

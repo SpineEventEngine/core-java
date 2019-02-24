@@ -92,13 +92,13 @@ public class TestProjection
                                   .setStatus(Project.Status.CREATED)
                                   .setName(event.getName())
                                   .build();
-        getBuilder().mergeFrom(newState);
+        builder().mergeFrom(newState);
     }
 
     @Subscribe
     public void on(PrjTaskAdded event) {
         keep(event);
-        getBuilder().addTask(event.getTask());
+        builder().addTask(event.getTask());
     }
 
     /**
@@ -117,7 +117,7 @@ public class TestProjection
         Project newState = state().toBuilder()
                                   .setStatus(Project.Status.STARTED)
                                   .build();
-        getBuilder().mergeFrom(newState);
+        builder().mergeFrom(newState);
     }
 
     @Subscribe

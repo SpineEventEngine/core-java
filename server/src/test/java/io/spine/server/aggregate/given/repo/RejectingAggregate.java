@@ -54,7 +54,7 @@ class RejectingAggregate
 
     @Apply
     void event(AggProjectCreated event) {
-        getBuilder().addAllItem(event.getChildProjectIdList());
+        builder().addAllItem(event.getChildProjectIdList());
     }
 
     @Assign

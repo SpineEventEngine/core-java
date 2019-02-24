@@ -152,7 +152,7 @@ class PmTransactionTest
     protected void breakEntityValidation(
             ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder()
+        entity.builder()
               .setShouldThrow(toThrow);
     }
 }

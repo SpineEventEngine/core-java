@@ -107,8 +107,9 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
 
         private EEntity create() {
             Event eventWithoutEnrichments = clearEnrichments(event);
-            EEntity entity = getEntity();
-            entity.getBuilder().mergeFrom(eventWithoutEnrichments);
+            EEntity entity = entity();
+            entity.builder()
+                  .mergeFrom(eventWithoutEnrichments);
             commit();
             return entity;
         }

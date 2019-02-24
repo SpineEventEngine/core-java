@@ -36,7 +36,7 @@ public final class GroupNameProjection
 
     @Subscribe(external = true)
     public void onUpdate(Organization organization) {
-        getBuilder()
+        builder()
                 .setId(id())
                 .setName(organization.getName());
     }

@@ -104,7 +104,7 @@ public class TestTransaction {
         }
 
         private void dispatchForTest() {
-            doDispatch(getEntity(), null);
+            doDispatch(entity(), null);
         }
     }
 
@@ -116,7 +116,7 @@ public class TestTransaction {
 
         @Override
         protected Version nextVersion() {
-            return transaction().getVersion();
+            return transaction().version();
         }
     }
 }

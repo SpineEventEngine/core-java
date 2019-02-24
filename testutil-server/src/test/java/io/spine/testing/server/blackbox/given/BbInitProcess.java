@@ -40,8 +40,8 @@ public class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbInitVBu
 
     @Assign
     Nothing on(BbInitProject cmd) {
-        getBuilder().setId(cmd.getProjectId())
-                    .setInitialized(true);
+        builder().setId(cmd.getProjectId())
+                 .setInitialized(true);
         setDeleted(true);
         return nothing();
     }

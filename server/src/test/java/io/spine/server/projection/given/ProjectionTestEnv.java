@@ -51,20 +51,20 @@ public class ProjectionTestEnv {
         @Subscribe
         public void on(StringImported event) {
             SavedString newState = createNewState("stringState", event.getValue());
-            getBuilder().mergeFrom(newState);
+            builder().mergeFrom(newState);
         }
 
         @Subscribe
         public void on(Int32Imported event) {
             SavedString newState = createNewState("integerState",
                                                   String.valueOf(event.getValue()));
-            getBuilder().mergeFrom(newState);
+            builder().mergeFrom(newState);
         }
 
         private SavedString createNewState(String type, String value) {
             // Get the current state within the transaction.
-            String currentState = getBuilder().internalBuild()
-                                              .getValue();
+            String currentState = builder().internalBuild()
+                                           .getValue();
             String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
             return SavedString.newBuilder()
@@ -86,17 +86,17 @@ public class ProjectionTestEnv {
 
         @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = SET_A))
         public void onReserved(StringImported event) {
-            getBuilder().setValue("A");
+            builder().setValue("A");
         }
 
         @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = SET_B))
         public void onSecret(StringImported event) {
-            getBuilder().setValue("B");
+            builder().setValue("B");
         }
 
         @Subscribe
         public void on(StringImported event) {
-            getBuilder().setValue(event.getValue());
+            builder().setValue(event.getValue());
         }
     }
 
@@ -111,7 +111,7 @@ public class ProjectionTestEnv {
 
         @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = ACCEPTED_VALUE))
         public void on(StringImported event) {
-            getBuilder().setValue(event.getValue());
+            builder().setValue(event.getValue());
         }
     }
 
