@@ -168,8 +168,8 @@ public class AggregateRepositoryTest {
 
             ProjectAggregate actual = assertFound(id);
 
-            assertEquals(expected.getId(), actual.getId());
-            assertEquals(expected.getState(), actual.getState());
+            assertEquals(expected.id(), actual.id());
+            assertEquals(expected.state(), actual.state());
         }
 
         @Test
@@ -181,9 +181,9 @@ public class AggregateRepositoryTest {
             repository().store(expected);
             ProjectAggregate actual = assertFound(id);
 
-            assertTrue(isNotDefault(actual.getState()));
-            assertEquals(expected.getId(), actual.getId());
-            assertEquals(expected.getState(), actual.getState());
+            assertTrue(isNotDefault(actual.state()));
+            assertEquals(expected.id(), actual.id());
+            assertEquals(expected.state(), actual.state());
         }
 
         private ProjectAggregate assertFound(ProjectId id) {
@@ -224,7 +224,7 @@ public class AggregateRepositoryTest {
 
         private AggregateHistory readRecord(ProjectAggregate aggregate) {
             AggregateReadRequest<ProjectId> request =
-                    new AggregateReadRequest<>(aggregate.getId(), DEFAULT_SNAPSHOT_TRIGGER);
+                    new AggregateReadRequest<>(aggregate.id(), DEFAULT_SNAPSHOT_TRIGGER);
             Optional<AggregateHistory> optional = repository().aggregateStorage()
                                                               .read(request);
             assertTrue(optional.isPresent());
@@ -360,7 +360,7 @@ public class AggregateRepositoryTest {
             tx.commit();
             repository().store(aggregate);
 
-            assertTrue(repository().find(aggregate.getId())
+            assertTrue(repository().find(aggregate.id())
                                    .isPresent());
         }
 
@@ -375,7 +375,7 @@ public class AggregateRepositoryTest {
 
             repository().store(aggregate);
 
-            assertTrue(repository().find(aggregate.getId())
+            assertTrue(repository().find(aggregate.id())
                                    .isPresent());
         }
     }
@@ -451,7 +451,7 @@ public class AggregateRepositoryTest {
             // The proper method was called, which we check by the state the aggregate got.
             assertEquals(ReactingAggregate.PROJECT_ARCHIVED,
                          optional.get()
-                                 .getState()
+                                 .state()
                                  .getValue());
         }
 
@@ -497,7 +497,7 @@ public class AggregateRepositoryTest {
                 // 2. produced the state the event;
                 // 3. applied the event.
                 String value = optional.get()
-                                       .getState()
+                                       .state()
                                        .getValue();
                 assertEquals(RejectionReactingAggregate.PARENT_ARCHIVED, value);
             }
@@ -604,15 +604,15 @@ public class AggregateRepositoryTest {
         ProjectAggregate parent = givenStoredAggregate();
         ProjectAggregate child = givenStoredAggregate();
 
-        assertTrue(repository().find(parent.getId())
+        assertTrue(repository().find(parent.id())
                                .isPresent());
-        assertTrue(repository().find(child.getId())
+        assertTrue(repository().find(child.id())
                                .isPresent());
 
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
         AggProjectArchived msg = AggProjectArchived.newBuilder()
-                                                   .setProjectId(parent.getId())
-                                                   .addChildProjectId(child.getId())
+                                                   .setProjectId(parent.id())
+                                                   .addChildProjectId(child.id())
                                                    .build();
         Event event = factory.createEvent(msg);
 
@@ -620,13 +620,13 @@ public class AggregateRepositoryTest {
                         .post(event);
 
         // Check that the child aggregate was archived.
-        Optional<ProjectAggregate> childAfterArchive = repository().find(child.getId());
+        Optional<ProjectAggregate> childAfterArchive = repository().find(child.id());
         assertTrue(childAfterArchive.isPresent());
         assertTrue(childAfterArchive.get()
                                     .isArchived());
         // The parent should not be archived since the dispatch route uses only
         // child aggregates from the `ProjectArchived` event.
-        Optional<ProjectAggregate> parentAfterArchive = repository().find(parent.getId());
+        Optional<ProjectAggregate> parentAfterArchive = repository().find(parent.id());
         assertTrue(parentAfterArchive.isPresent());
         assertFalse(parentAfterArchive.get()
                                       .isArchived());
@@ -657,7 +657,7 @@ public class AggregateRepositoryTest {
                 (HandlerMethodFailedException) lastException;
 
         assertEquals(envelope.message(), methodFailedException.getDispatchedMessage());
-        assertEquals(envelope.getEventContext(), methodFailedException.getMessageContext());
+        assertEquals(envelope.eventContext(), methodFailedException.getMessageContext());
 
         MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
         assertNotNull(lastErrorEnvelope);

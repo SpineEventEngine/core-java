@@ -59,7 +59,7 @@ class AggregateMessageDispatcherTest {
         CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
         List<? extends Message> eventMessages =
                 AggregateMessageDispatcher.dispatchCommand(aggregate, commandEnvelope);
-        assertTrue(aggregate.getState()
+        assertTrue(aggregate.state()
                             .getValue()
                             .contains(String.valueOf(messageValue)));
         assertEquals(1, eventMessages.size());
@@ -77,7 +77,7 @@ class AggregateMessageDispatcherTest {
         EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
         List<? extends Message> eventMessages =
                 AggregateMessageDispatcher.dispatchEvent(aggregate, eventEnvelope);
-        assertTrue(aggregate.getState()
+        assertTrue(aggregate.state()
                             .getValue()
                             .contains(String.valueOf(messageValue)));
         assertEquals(1, eventMessages.size());

@@ -85,8 +85,8 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
 
     @Override
     protected EntityRecord doForward(E entity) {
-        Any entityId = Identifier.pack(entity.getId());
-        Any stateAny = pack(entity.getState());
+        Any entityId = Identifier.pack(entity.id());
+        Any stateAny = pack(entity.state());
         EntityRecord.Builder builder = EntityRecord
                 .newBuilder()
                 .setEntityId(entityId)

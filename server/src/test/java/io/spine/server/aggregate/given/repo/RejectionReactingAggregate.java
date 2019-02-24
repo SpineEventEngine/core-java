@@ -48,9 +48,9 @@ public class RejectionReactingAggregate
     @React
     Optional<AggProjectArchived> on(Rejections.AggCannotStartArchivedProject rejection) {
         List<ProjectId> childIdList = rejection.getChildProjectIdList();
-        if (childIdList.contains(getId())) {
+        if (childIdList.contains(id())) {
             AggProjectArchived event = AggProjectArchived.newBuilder()
-                                                         .setProjectId(getId())
+                                                         .setProjectId(id())
                                                          .build();
             return Optional.of(event);
         } else {

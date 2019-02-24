@@ -195,7 +195,7 @@ class ProjectionRepositoryTest
     }
 
     private static String entityName(TestProjection entity) {
-        return entity.getState()
+        return entity.state()
                      .getName();
     }
 
@@ -273,7 +273,7 @@ class ProjectionRepositoryTest
             assertFalse(allItems.hasNext());
 
             // Check that the stored instance has the same ID as the instance handling the event.
-            assertEquals(storedProjection.getId(), receiverId);
+            assertEquals(storedProjection.id(), receiverId);
         }
 
         @Test
@@ -297,7 +297,7 @@ class ProjectionRepositoryTest
             // Dispatch an event to the archived projection.
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             projection = repository().findOrCreate(projectId);
-            List<Task> addedTasks = projection.getState()
+            List<Task> addedTasks = projection.state()
                                               .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -318,7 +318,7 @@ class ProjectionRepositoryTest
             // Dispatch an event to the deleted projection.
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             projection = repository().findOrCreate(projectId);
-            List<Task> addedTasks = projection.getState()
+            List<Task> addedTasks = projection.state()
                                               .getTaskList();
             assertTrue(projection.isDeleted());
 
@@ -338,7 +338,7 @@ class ProjectionRepositoryTest
             TestProjection project = new TestProjection(id);
             dispatch(project, eventFactory.createEvent(projectCreated));
             dispatch(project, eventFactory.createEvent(taskAdded));
-            Any newState = pack(project.getState());
+            Any newState = pack(project.state());
             EntityHistoryId historyId = EntityHistoryId
                     .newBuilder()
                     .setTypeUrl(newState.getTypeUrl())
@@ -365,7 +365,7 @@ class ProjectionRepositoryTest
                     .build();
             Optional<EntitySubscriberProjection> projection = repository.find(id);
             assertTrue(projection.isPresent());
-            assertEquals(expectedValue, projection.get().getState());
+            assertEquals(expectedValue, projection.get().state());
 
             context.close();
         }

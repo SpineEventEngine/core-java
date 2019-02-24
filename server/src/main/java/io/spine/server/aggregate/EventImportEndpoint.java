@@ -65,7 +65,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected void onDispatched(A aggregate, EventEnvelope envelope, List<Event> producedEvents) {
         super.onDispatched(aggregate, envelope, producedEvents);
-        repository().onEventImported(aggregate.getId(), envelope.outerObject());
+        repository().onEventImported(aggregate.id(), envelope.outerObject());
     }
 
     @Override

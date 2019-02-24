@@ -38,7 +38,7 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
     @Subscribe(external = true)
     public void on(Organization organization, EventContext systemContext) {
         Timestamp updateTime = systemContext.getTimestamp();
-        getBuilder().setId(getId())
+        getBuilder().setId(id())
                     .setName(organization.getName() + updateTime)
                     .addAllParticipants(organization.getMembersList())
                     .addParticipants(organization.getHead());

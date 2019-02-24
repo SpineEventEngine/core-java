@@ -72,8 +72,8 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
      */
     @Column
     public Timestamp getCreated() {
-        return getState().getContext()
-                         .getTimestamp();
+        return state().getContext()
+                      .getTimestamp();
     }
 
     /**
@@ -87,8 +87,8 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
     @Column
     public String getType() {
         if (typeName == null) {
-            typeName = EventEnvelope.of(getState())
-                                    .getTypeName();
+            typeName = EventEnvelope.of(state())
+                                    .messageTypeName();
         }
         return typeName.value();
     }

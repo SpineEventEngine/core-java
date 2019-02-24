@@ -121,7 +121,7 @@ class CommandRoutingRejectionTest {
         commandBus.post(commandToReject, observer);
         Optional<Log> foundLog = logRepository.find(Log.ID);
         assertTrue(foundLog.isPresent());
-        LogState log = foundLog.get().getState();
+        LogState log = foundLog.get().state();
         assertTrue(log.containsCounters(switchmanName));
         assertTrue(log.getMissingSwitchmanList()
                       .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));

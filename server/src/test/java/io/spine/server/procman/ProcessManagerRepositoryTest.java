@@ -180,7 +180,7 @@ class ProcessManagerRepositoryTest
     }
 
     private static String entityName(TestProcessManager entity) {
-        return entity.getState()
+        return entity.state()
                      .getName();
     }
 
@@ -351,7 +351,7 @@ class ProcessManagerRepositoryTest
             // Dispatch a command to the deleted process manager.
             testDispatchCommand(addTask());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.getState()
+            List<Task> addedTasks = processManager.state()
                                                   .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -371,7 +371,7 @@ class ProcessManagerRepositoryTest
             // Dispatch an event to the archived process manager.
             testDispatchEvent(taskAdded());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.getState()
+            List<Task> addedTasks = processManager.state()
                                                   .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -396,7 +396,7 @@ class ProcessManagerRepositoryTest
             // Dispatch a command to the archived process manager.
             testDispatchCommand(addTask());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.getState()
+            List<Task> addedTasks = processManager.state()
                                                   .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -416,7 +416,7 @@ class ProcessManagerRepositoryTest
             // Dispatch an event to the deleted process manager.
             testDispatchEvent(taskAdded());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.getState()
+            List<Task> addedTasks = processManager.state()
                                                   .getTaskList();
             assertFalse(addedTasks.isEmpty());
 

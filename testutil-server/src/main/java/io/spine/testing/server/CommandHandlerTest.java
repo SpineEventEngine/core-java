@@ -99,7 +99,7 @@ public abstract class CommandHandlerTest<I,
 
     @Override
     protected CommandHandlerExpected<S> expectThat(E entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         Message rejection = null;
         List<? extends Message> events = emptyList();
         try {
@@ -108,7 +108,7 @@ public abstract class CommandHandlerTest<I,
             rejection = rejection(e).message();
         }
         return new CommandHandlerExpected<>(events, rejection, initialState,
-                                            entity.getState(), interceptedCommands());
+                                            entity.state(), interceptedCommands());
     }
 
     private RejectionEnvelope rejection(RuntimeException wrapped) {

@@ -69,7 +69,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
 
     @Subscribe
     public void on(EntityStateChanged event) {
-        getBuilder().setId(getId())
+        getBuilder().setId(id())
                     .setState(event.getNewState());
     }
 
@@ -80,7 +80,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
                 .toBuilder()
                 .setArchived(true)
                 .build();
-        getBuilder().setId(getId())
+        getBuilder().setId(id())
                     .setLifecycle(flags);
         setArchived(true);
     }
@@ -92,7 +92,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
                 .toBuilder()
                 .setDeleted(true)
                 .build();
-        getBuilder().setId(getId())
+        getBuilder().setId(id())
                     .setLifecycle(flags);
         setDeleted(true);
     }
@@ -104,7 +104,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
                 .toBuilder()
                 .setArchived(false)
                 .build();
-        getBuilder().setId(getId())
+        getBuilder().setId(id())
                     .setLifecycle(flags);
         setArchived(false);
     }
@@ -116,7 +116,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
                 .toBuilder()
                 .setDeleted(false)
                 .build();
-        getBuilder().setId(getId())
+        getBuilder().setId(id())
                     .setLifecycle(flags);
         setDeleted(false);
     }
@@ -214,6 +214,6 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     private Any aggregateState() {
-        return getState().getState();
+        return state().getState();
     }
 }

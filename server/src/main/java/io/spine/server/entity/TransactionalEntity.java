@@ -189,7 +189,7 @@ public abstract class TransactionalEntity<I,
 
     B builderFromState() {
         B builder = newBuilderInstance();
-        builder.setOriginalState(getState());
+        builder.setOriginalState(state());
         return builder;
     }
 

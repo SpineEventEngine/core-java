@@ -52,7 +52,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
     MESSAGE_EVENT_CTX(ImmutableList.of(EventMessage.class, EventContext.class), false) {
         @Override
         public Object[] extractArguments(EventEnvelope envelope) {
-            return new Object[] {envelope.message(), envelope.getEventContext()};
+            return new Object[] {envelope.message(), envelope.eventContext()};
         }
     },
 

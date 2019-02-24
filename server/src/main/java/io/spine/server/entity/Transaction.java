@@ -158,7 +158,7 @@ public abstract class Transaction<I,
 
         this.entity = entity;
         this.builder = entity.builderFromState();
-        this.version = entity.getVersion();
+        this.version = entity.version();
         this.lifecycleFlags = entity.getLifecycleFlags();
         this.active = true;
 
@@ -301,10 +301,10 @@ public abstract class Transaction<I,
      * <p>This method is called when none of the transaction phases has changed the entity state.
      */
     private void commitUnchangedState() {
-        S unchanged = getEntity().getState();
+        S unchanged = getEntity().state();
         Version pendingVersion = getVersion();
         beforeCommit(unchanged, pendingVersion);
-        if(!pendingVersion.equals(entity.getVersion())) {
+        if(!pendingVersion.equals(entity.version())) {
             entity.updateState(unchanged, pendingVersion);
         }
         commitAttributeChanges();
@@ -351,9 +351,9 @@ public abstract class Transaction<I,
      */
     private EntityRecord createRecord() {
         E entity = getEntity();
-        Any entityId = Identifier.pack(entity.getId());
-        Version version = entity.getVersion();
-        Any state = pack(entity.getState());
+        Any entityId = Identifier.pack(entity.id());
+        Version version = entity.version();
+        Any state = pack(entity.state());
         LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
         return EntityRecord
                 .newBuilder()

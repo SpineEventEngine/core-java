@@ -63,11 +63,11 @@ class ProjectionEventDispatcherTest {
         EventEnvelope firstEnvelope = EventEnvelope.of(factory.createEvent(firstEvent));
         EventEnvelope secondEnvelope = EventEnvelope.of(factory.createEvent(secondEvent));
         ProjectionEventDispatcher.dispatch(projection, firstEnvelope.message(),
-                                           firstEnvelope.getEventContext());
+                                           firstEnvelope.eventContext());
         ProjectionEventDispatcher.dispatch(projection, secondEnvelope.message(),
-                                           secondEnvelope.getEventContext());
+                                           secondEnvelope.eventContext());
 
-        TuEventLog state = projection.getState();
+        TuEventLog state = projection.state();
         assertEquals(2, state.getEventCount());
         assertTrue(unpack(state.getEvent(0)) instanceof TuProjectCreated);
         assertTrue(unpack(state.getEvent(1)) instanceof TuProjectAssigned);

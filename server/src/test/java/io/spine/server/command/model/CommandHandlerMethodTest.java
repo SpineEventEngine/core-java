@@ -336,7 +336,7 @@ class CommandHandlerMethodTest {
             try {
                 AggregateMessageDispatcher.dispatchCommand(entity, cmd);
             } catch (HandlerMethodFailedException e) {
-                assertCauseAndId(e, entity.getId());
+                assertCauseAndId(e, entity.id());
             }
         }
 

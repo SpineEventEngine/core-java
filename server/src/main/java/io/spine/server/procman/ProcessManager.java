@@ -194,7 +194,7 @@ public abstract class ProcessManager<I,
         ProcessManagerClass<?> thisClass = thisClass();
         EventClass eventClass = event.messageClass();
         if (thisClass.reactsOnEvent(eventClass)) {
-            EventReactorMethod method = thisClass.getReactor(eventClass, event.getOriginClass());
+            EventReactorMethod method = thisClass.getReactor(eventClass, event.originClass());
             ReactorMethodResult methodResult = method.invoke(this, event);
             List<Event> result = methodResult.produceEvents(event);
             return result;

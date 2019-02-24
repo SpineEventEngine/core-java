@@ -85,7 +85,7 @@ class ColumnMemoizedValueTest {
 
         MemoizedValue valueB = columnB.memoizeFor(entity);
 
-        MemoizedValue valueC = new MemoizedValue(columnC, entity.getState());
+        MemoizedValue valueC = new MemoizedValue(columnC, entity.state());
 
         new EqualsTester().addEqualityGroup(valueA1, valueA2, valueA3)
                           .addEqualityGroup(valueAMutated)

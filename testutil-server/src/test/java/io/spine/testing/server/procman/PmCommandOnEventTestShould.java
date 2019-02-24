@@ -60,7 +60,7 @@ class PmCommandOnEventTestShould {
         CommanderExpected<TuPmState> expected = pmCommandingTest.expectThat(testPm);
         expected.producesCommand(
                 TuAssignProject.class,
-                c -> assertEquals(c.getId(), testPm.getId())
+                c -> assertEquals(c.getId(), testPm.id())
         );
     }
 }

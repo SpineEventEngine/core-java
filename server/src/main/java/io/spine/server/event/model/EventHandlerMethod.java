@@ -102,7 +102,7 @@ public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends
      */
     @Override
     protected void checkAttributesMatch(EventEnvelope envelope) {
-        boolean external = envelope.getEventContext()
+        boolean external = envelope.eventContext()
                                    .getExternal();
         ensureExternalMatch(external);
     }

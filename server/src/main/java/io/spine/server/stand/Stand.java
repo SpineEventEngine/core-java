@@ -159,8 +159,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     @Deprecated
     public void post(Entity entity, EntityLifecycle lifecycle) {
-        Any id = Identifier.pack(entity.getId());
-        Any state = AnyPacker.pack(entity.getState());
+        Any id = Identifier.pack(entity.id());
+        Any state = AnyPacker.pack(entity.state());
         EntityRecord record = EntityRecordVBuilder
                 .newBuilder()
                 .setEntityId(id)

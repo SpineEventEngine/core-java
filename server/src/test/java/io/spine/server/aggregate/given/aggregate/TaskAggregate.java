@@ -98,7 +98,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
     AggTaskAssigned handle(AggAssignTask command) {
         AggTaskId id = command.getTaskId();
         UserId newAssignee = command.getAssignee();
-        UserId previousAssignee = getState().getAssignee();
+        UserId previousAssignee = state().getAssignee();
 
         AggTaskAssigned event = taskAssigned(id, previousAssignee, newAssignee);
         return event;
@@ -109,7 +109,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
             throws AggCannotReassignUnassignedTask {
         AggTaskId id = command.getTaskId();
         UserId newAssignee = command.getAssignee();
-        UserId previousAssignee = getState().getAssignee();
+        UserId previousAssignee = state().getAssignee();
 
         if (previousAssignee.equals(EMPTY_USER_ID)) {
             throw AggCannotReassignUnassignedTask

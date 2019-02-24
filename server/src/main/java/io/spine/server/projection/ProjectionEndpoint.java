@@ -92,7 +92,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         ProjectionRepository<I, P, ?> repository = repository();
         repository.store(projection);
 
-        EventContext eventContext = envelope().getEventContext();
+        EventContext eventContext = envelope().eventContext();
         Timestamp eventTime = eventContext.getTimestamp();
         repository.projectionStorage()
                   .writeLastHandledEventTime(eventTime);

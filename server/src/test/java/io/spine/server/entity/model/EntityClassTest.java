@@ -76,11 +76,11 @@ class EntityClassTest {
         // The interval with a much earlier start to allow non-zero interval on faster computers.
         Range<Instant> whileWeCreate = Range.closed(toInstant(before), toInstant(after));
 
-        assertEquals(id, entity.getId());
-        assertEquals(0, entity.getVersion()
+        assertEquals(id, entity.id());
+        assertEquals(0, entity.version()
                               .getNumber());
         assertTrue(whileWeCreate.contains(toInstant(entity.whenModified())));
-        assertEquals(StringValue.getDefaultInstance(), entity.getState());
+        assertEquals(StringValue.getDefaultInstance(), entity.state());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());
     }

@@ -74,6 +74,6 @@ class AggregatePartClassTest {
         AnAggregatePart part = partClass.createEntity(root);
 
         assertNotNull(part);
-        assertEquals(root.getId(), part.getId());
+        assertEquals(root.getId(), part.id());
     }
 }

@@ -40,6 +40,6 @@ public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
 
     @Override
     public Object[] extractArguments(EventEnvelope envelope) {
-        return new Object[]{envelope.message(), envelope.getEventContext()};
+        return new Object[]{envelope.message(), envelope.eventContext()};
     }
 }

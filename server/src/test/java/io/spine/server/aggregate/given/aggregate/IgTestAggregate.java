@@ -67,8 +67,8 @@ public class IgTestAggregate
 
     @React
     Optional<AggProjectStarted> reactOn(AggTaskStarted event) {
-        if (getState().getStatus() == Status.CREATED) {
-            return Optional.of(projectStarted(getId()));
+        if (state().getStatus() == Status.CREATED) {
+            return Optional.of(projectStarted(id()));
         } else {
             return Optional.empty();
         }

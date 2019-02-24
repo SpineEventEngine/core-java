@@ -57,7 +57,7 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
         Predicate<Event> predicate = new MatchesStreamQuery(query);
         Iterator<Event> result =
                 Streams.stream(entities)
-                       .map(EEntity::getState)
+                       .map(EEntity::state)
                        .filter(predicate)
                        .sorted(eventComparator())
                        .iterator();

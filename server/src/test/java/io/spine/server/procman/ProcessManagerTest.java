@@ -171,7 +171,7 @@ class ProcessManagerTest {
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
-        Any pmState = processManager.getState()
+        Any pmState = processManager.state()
                                     .getAny();
         Any expected = pack(eventMessage);
         assertEquals(expected, pmState);
@@ -183,7 +183,7 @@ class ProcessManagerTest {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
-        assertEquals(pack(commandMsg), processManager.getState()
+        assertEquals(pack(commandMsg), processManager.state()
                                                      .getAny());
         return events;
     }
@@ -250,18 +250,18 @@ class ProcessManagerTest {
         }
 
         private void checkIncrementsOnCommand(CommandMessage commandMessage) {
-            assertEquals(VERSION, processManager.getVersion()
+            assertEquals(VERSION, processManager.version()
                                                 .getNumber());
             testDispatchCommand(commandMessage);
-            assertEquals(VERSION + 1, processManager.getVersion()
+            assertEquals(VERSION + 1, processManager.version()
                                                     .getNumber());
         }
 
         private void checkIncrementsOnEvent(EventMessage eventMessage) {
-            assertEquals(VERSION, processManager.getVersion()
+            assertEquals(VERSION, processManager.version()
                                                 .getNumber());
             testDispatchEvent(eventMessage);
-            assertEquals(VERSION + 1, processManager.getVersion()
+            assertEquals(VERSION + 1, processManager.version()
                                                     .getNumber());
         }
     }
@@ -301,7 +301,7 @@ class ProcessManagerTest {
         }
 
         private void assertReceived(Any expected) {
-            assertEquals(expected, processManager.getState()
+            assertEquals(expected, processManager.state()
                                                  .getAny());
         }
     }

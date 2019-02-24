@@ -117,7 +117,7 @@ public abstract class EventDispatchingRepository<I,
      */
     private Set<I> route(EventEnvelope envelope) {
         EventRouting<I> routing = eventRouting();
-        Set<I> targets = routing.apply(envelope.message(), envelope.getEventContext());
+        Set<I> targets = routing.apply(envelope.message(), envelope.eventContext());
         return targets;
     }
 

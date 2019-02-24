@@ -46,7 +46,7 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected List<Event> invokeDispatcher(A aggregate, CommandEnvelope envelope) {
-        EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.getId());
+        EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();
     }

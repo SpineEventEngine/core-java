@@ -73,19 +73,19 @@ class AggregateBuilderTest {
     @Test
     @DisplayName("ID")
     void id() {
-        assertEquals(id, aggregate.getId());
+        assertEquals(id, aggregate.id());
     }
 
     @Test
     @DisplayName("state")
     void state() {
-        assertEquals(state, aggregate.getState());
+        assertEquals(state, aggregate.state());
     }
 
     @Test
     @DisplayName("version")
     void version() {
-        assertEquals(version, aggregate.getVersion().getNumber());
+        assertEquals(version, aggregate.version().getNumber());
     }
 
     @Test

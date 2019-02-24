@@ -182,9 +182,9 @@ final class CommandLifecycleAggregate
                 .newBuilder()
                 .setCommand(event.getId());
         CommandTimeline.Builder newStatus =
-                getState().getStatus()
-                          .toBuilder()
-                          .setSubstitued(substituted);
+                state().getStatus()
+                       .toBuilder()
+                       .setSubstitued(substituted);
         getBuilder().setStatus(newStatus.build());
     }
 
@@ -195,9 +195,9 @@ final class CommandLifecycleAggregate
                 .setSequence(Sequence.newBuilder()
                                      .addAllItem(event.getProducedList()));
         CommandTimeline.Builder newStatus =
-                getState().getStatus()
-                          .toBuilder()
-                          .setSubstitued(substituted);
+                state().getStatus()
+                       .toBuilder()
+                       .setSubstitued(substituted);
         getBuilder().setStatus(newStatus.build());
     }
 

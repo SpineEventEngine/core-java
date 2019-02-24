@@ -69,7 +69,7 @@ public final class TuAggregate
     TuProjectAssigned handle(TuAssignProject command) throws TuFailedToAssignProject {
         throw TuFailedToAssignProject
                 .newBuilder()
-                .setId(getId())
+                .setId(id())
                 .build();
     }
 

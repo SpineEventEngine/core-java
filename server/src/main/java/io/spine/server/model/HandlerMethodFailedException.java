@@ -93,7 +93,7 @@ public class HandlerMethodFailedException extends RuntimeException {
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static Any idOf(Object target) {
         if (target instanceof Entity) {
-            Object entityId = ((Entity) target).getId();
+            Object entityId = ((Entity) target).id();
             return Identifier.pack(entityId);
         }
 

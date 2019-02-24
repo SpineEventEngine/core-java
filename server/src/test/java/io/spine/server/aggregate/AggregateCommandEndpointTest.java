@@ -104,9 +104,9 @@ class AggregateCommandEndpointTest {
         assertTrue(optional.isPresent());
 
         ProjectAggregate aggregate = optional.get();
-        assertEquals(projectId, aggregate.getId());
+        assertEquals(projectId, aggregate.id());
 
-        assertEquals(msg.getName(), aggregate.getState()
+        assertEquals(msg.getName(), aggregate.state()
                                              .getName());
     }
 

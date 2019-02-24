@@ -102,7 +102,7 @@ public final class EventEnvelope
 
     @Override
     public EventContext messageContext() {
-        return getEventContext();
+        return eventContext();
     }
 
     @Override
@@ -125,7 +125,7 @@ public final class EventEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        EventContext context = getEventContext();
+        EventContext context = eventContext();
         builder.setEventContext(context)
                .setRootCommandId(context.getRootCommandId())
                .setEventId(id());
@@ -134,14 +134,14 @@ public final class EventEnvelope
     /**
      * Obtains the context of the event.
      */
-    public EventContext getEventContext() {
+    public EventContext eventContext() {
         return this.eventContext;
     }
 
     /**
      * Obtains the type of the event message.
      */
-    public TypeName getTypeName() {
+    public TypeName messageTypeName() {
         TypeName result = TypeName.of(eventMessage);
         return result;
     }
@@ -155,7 +155,7 @@ public final class EventEnvelope
      * @return the class of origin message or {@link EmptyClass} if the origin message type is
      * unknown
      */
-    public MessageClass getOriginClass() {
+    public MessageClass originClass() {
         if (isRejection()) {
             RejectionEventContext rejection = eventContext.getRejection();
             Any commandMessage = rejection.getCommandMessage();
@@ -176,7 +176,7 @@ public final class EventEnvelope
      * Returns {@code true} is the wrapped event is external, {@code false} otherwise.
      */
     public boolean isExternal() {
-        boolean external = Events.isExternal(getEventContext());
+        boolean external = Events.isExternal(eventContext());
         return external;
     }
 
@@ -195,12 +195,12 @@ public final class EventEnvelope
      * Verifies if the enrichment of the message is enabled.
      */
     public final boolean isEnrichmentEnabled() {
-        boolean result = getEnrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
+        boolean result = enrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
         return result;
     }
 
-    public Enrichment getEnrichment() {
-        return getEventContext().getEnrichment();
+    private Enrichment enrichment() {
+        return eventContext().getEnrichment();
     }
 
     private EventEnvelope withEnrichment(Enrichment enrichment) {

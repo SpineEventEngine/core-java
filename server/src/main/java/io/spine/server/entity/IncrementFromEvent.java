@@ -47,7 +47,7 @@ public class IncrementFromEvent extends VersionIncrement {
 
     @Override
     protected Version nextVersion() {
-        Version result = event.getEventContext()
+        Version result = event.eventContext()
                               .getVersion();
         return result;
     }

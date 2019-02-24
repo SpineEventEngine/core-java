@@ -121,7 +121,7 @@ class ProjectionShould {
                 .setValue(newUuid())
                 .build();
         dispatch(projection, stringEvent, EventContext.getDefaultInstance());
-        assertTrue(projection.getState()
+        assertTrue(projection.state()
                              .getValue()
                              .contains(stringEvent.getValue()));
         assertTrue(projection.isChanged());
@@ -131,7 +131,7 @@ class ProjectionShould {
                 .setValue(42)
                 .build();
         dispatch(projection, integerEvent, EventContext.getDefaultInstance());
-        assertTrue(projection.getState()
+        assertTrue(projection.state()
                              .getValue()
                              .contains(valueOf(integerEvent.getValue())));
         assertTrue(projection.isChanged());
@@ -174,7 +174,7 @@ class ProjectionShould {
                 .build();
         EntitySubscriberProjection projection = new EntitySubscriberProjection(id);
         dispatch(projection, withMessage(systemEvent));
-        assertThat(projection.getState())
+        assertThat(projection.state())
                 .isEqualTo(ProjectTaskNames
                                    .newBuilder()
                                    .setProjectId(id)
@@ -214,13 +214,13 @@ class ProjectionShould {
                 .newBuilder()
                 .setValue(123)
                 .build();
-        Version nextVersion = Versions.increment(projection.getVersion());
+        Version nextVersion = Versions.increment(projection.version());
         Event e1 = eventFactory.createEvent(stringImported, nextVersion);
         Event e2 = eventFactory.createEvent(integerImported, Versions.increment(nextVersion));
 
         boolean projectionChanged = Projection.playOn(projection, ImmutableList.of(e1, e2));
 
-        String projectionState = projection.getState().getValue();
+        String projectionState = projection.state().getValue();
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(stringImported.getValue()));
         assertTrue(projectionState.contains(valueOf(integerImported.getValue())));
@@ -249,13 +249,13 @@ class ProjectionShould {
                      .withState(SavedString.getDefaultInstance())
                      .build();
         dispatch(projection, eventFactory.createEvent(setB));
-        assertThat(projection.getState().getValue()).isEqualTo("B");
+        assertThat(projection.state().getValue()).isEqualTo("B");
 
         dispatch(projection, eventFactory.createEvent(setA));
-        assertThat(projection.getState().getValue()).isEqualTo("A");
+        assertThat(projection.state().getValue()).isEqualTo("A");
 
         dispatch(projection, eventFactory.createEvent(setText));
-        assertThat(projection.getState().getValue()).isEqualTo(setText.getValue());
+        assertThat(projection.state().getValue()).isEqualTo(setText.getValue());
     }
 
     @Test
@@ -276,14 +276,14 @@ class ProjectionShould {
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
-        assertThat(projection.getState()).isEqualTo(SavedString.getDefaultInstance());
+        assertThat(projection.state()).isEqualTo(SavedString.getDefaultInstance());
 
         StringImported dispatched = StringImported
                 .newBuilder()
                 .setValue(ACCEPTED_VALUE)
                 .build();
         dispatch(projection, eventFactory.createEvent(dispatched));
-        assertThat(projection.getState().getValue()).isEqualTo(ACCEPTED_VALUE);
+        assertThat(projection.state().getValue()).isEqualTo(ACCEPTED_VALUE);
     }
 
     @Test

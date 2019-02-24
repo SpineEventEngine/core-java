@@ -171,7 +171,7 @@ class ProjectionEndToEndTest {
         GroupProjection singleGroup = allGroups.next();
         assertFalse(allGroups.hasNext());
 
-        Group actualGroup = singleGroup.getState();
+        Group actualGroup = singleGroup.state();
         assertEquals(actualGroup.getName(), organizationName + producedAt);
         IterableSubject assertParticipants = assertThat(actualGroup.getParticipantsList());
         assertParticipants.containsAllIn(newState.getMembersList());

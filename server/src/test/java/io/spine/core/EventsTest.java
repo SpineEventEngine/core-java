@@ -172,7 +172,7 @@ public class EventsTest extends UtilityClassTest<Events> {
             Event event = newEvent(command);
 
             TypeName typeName = EventEnvelope.of(event)
-                                             .getTypeName();
+                                             .messageTypeName();
             assertNotNull(typeName);
             assertEquals(EtProjectCreated.class.getSimpleName(), typeName.simpleName());
         }

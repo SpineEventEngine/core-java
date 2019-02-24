@@ -72,9 +72,9 @@ public abstract class AggregateEventImportTest<I,
 
     @Override
     protected EventApplierExpected<S> expectThat(A entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         dispatchTo(entity);
-        return new EventApplierExpected<>(initialState, entity.getState());
+        return new EventApplierExpected<>(initialState, entity.state());
     }
 
     /**

@@ -350,7 +350,7 @@ public class EventRootCommandIdTestEnv {
         private EvTeamMemberAdded memberAdded(EvMember member) {
             return EvTeamMemberAdded
                     .newBuilder()
-                    .setTeamId(getId())
+                    .setTeamId(id())
                     .setMember(member)
                     .build();
         }
@@ -358,7 +358,7 @@ public class EventRootCommandIdTestEnv {
         private EvTeamMemberInvited teamMemberInvited(EmailAddress email) {
             return EvTeamMemberInvited
                     .newBuilder()
-                    .setTeamId(getId())
+                    .setTeamId(id())
                     .setEmail(email)
                     .build();
         }
@@ -396,7 +396,7 @@ public class EventRootCommandIdTestEnv {
             return EvInvitationAccepted
                     .newBuilder()
                     .setInvitation(invitation)
-                    .setUserId(getId())
+                    .setUserId(id())
                     .build();
         }
     }

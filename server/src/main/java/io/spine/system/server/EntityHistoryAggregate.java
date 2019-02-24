@@ -163,7 +163,7 @@ final class EntityHistoryAggregate
         if (duplicate) {
             throw CannotDispatchEventTwice
                     .newBuilder()
-                    .setReceiver(getId())
+                    .setReceiver(id())
                     .setPayload(event)
                     .setWhenDispatched(now())
                     .build();
@@ -176,7 +176,7 @@ final class EntityHistoryAggregate
         if (duplicate) {
             throw CannotDispatchCommandTwice
                     .newBuilder()
-                    .setReceiver(getId())
+                    .setReceiver(id())
                     .setPayload(command)
                     .setWhenDispatched(now())
                     .build();

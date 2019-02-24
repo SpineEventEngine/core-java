@@ -118,7 +118,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public void store(E entity) {
         EntityRecordWithColumns record = toRecord(entity);
         RecordStorage<I> storage = recordStorage();
-        storage.write(entity.getId(), record);
+        storage.write(entity.id(), record);
     }
 
     @Override
@@ -145,7 +145,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
         for (E entity : entities) {
             EntityRecordWithColumns recordWithColumns = toRecord(entity);
-            records.put(entity.getId(), recordWithColumns);
+            records.put(entity.id(), recordWithColumns);
         }
         recordStorage().write(records);
     }

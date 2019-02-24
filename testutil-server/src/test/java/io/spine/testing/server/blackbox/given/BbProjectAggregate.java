@@ -69,7 +69,7 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     @Assign
     BbProjectStarted handle(BbStartProject command) throws BbProjectAlreadyStarted {
         BbProjectId projectId = command.getProjectId();
-        if (getState().getStatus() != CREATED) {
+        if (state().getStatus() != CREATED) {
             throw BbProjectAlreadyStarted
                     .newBuilder()
                     .setProjectId(projectId)
@@ -85,7 +85,7 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     BbTaskAdded handle(BbAddTask command) throws BbTaskCreatedInCompletedProject {
         BbProjectId projectId = command.getProjectId();
         BbTask task = command.getTask();
-        if (getState().getStatus() == COMPLETED) {
+        if (state().getStatus() == COMPLETED) {
             throw BbTaskCreatedInCompletedProject
                     .newBuilder()
                     .setProjectId(projectId)
@@ -103,14 +103,14 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     BbAssigneeAdded handle(BbAssignProject command) {
         return BbAssigneeAddedVBuilder
                 .newBuilder()
-                .setId(getId())
+                .setId(id())
                 .setUserId(command.getUserId())
                 .build();
     }
 
     @React(external = true)
     Optional<BbAssigneeRemoved> on(BbUserDeleted event) {
-        List<UserId> assignees = getState().getAssigneeList();
+        List<UserId> assignees = state().getAssigneeList();
         UserId user = event.getId();
         if (!assignees.contains(user)) {
             return empty();
@@ -121,7 +121,7 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     private BbAssigneeRemoved userUnassigned(UserId user) {
         return BbAssigneeRemovedVBuilder
                 .newBuilder()
-                .setId(getId())
+                .setId(id())
                 .setUserId(user)
                 .build();
     }

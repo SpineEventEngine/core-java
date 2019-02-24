@@ -102,7 +102,7 @@ class EntityBuilderTest {
                 .build();
 
         assertEquals(TestEntity.class, entity.getClass());
-        assertEquals(id, entity.getId());
+        assertEquals(id, entity.id());
     }
 
     @Test
@@ -111,9 +111,9 @@ class EntityBuilderTest {
         Entity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
-        assertEquals(0L, entity.getId());
-        assertEquals(StringValue.of(""), entity.getState());
-        assertEquals(0, entity.getVersion().getNumber());
+        assertEquals(0L, entity.id());
+        assertEquals(StringValue.of(""), entity.state());
+        assertEquals(0, entity.version().getNumber());
     }
 
     @SuppressWarnings("CheckReturnValue") // Method called to throw exception.
@@ -152,6 +152,6 @@ class EntityBuilderTest {
                 .withState(user)
                 .build();
 
-        assertEquals(user, aggregate.getState());
+        assertEquals(user, aggregate.state());
     }
 }

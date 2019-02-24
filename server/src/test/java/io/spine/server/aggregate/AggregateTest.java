@@ -199,11 +199,11 @@ public class AggregateTest {
         @DisplayName("current state")
         void currentState() {
             dispatchCommand(aggregate, env(createProject));
-            assertEquals(Status.CREATED, aggregate.getState()
+            assertEquals(Status.CREATED, aggregate.state()
                                                   .getStatus());
 
             dispatchCommand(aggregate, env(startProject));
-            assertEquals(Status.STARTED, aggregate.getState()
+            assertEquals(Status.STARTED, aggregate.state()
                                                   .getStatus());
         }
 
@@ -291,8 +291,8 @@ public class AggregateTest {
         List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
 
-        assertEquals(this.aggregate.getVersion(), event.getContext()
-                                                       .getVersion());
+        assertEquals(this.aggregate.version(), event.getContext()
+                                                    .getVersion());
     }
 
     @Test
@@ -367,7 +367,7 @@ public class AggregateTest {
         void updatedUponCommandHandled() {
             dispatchCommand(aggregate, env(createProject));
 
-            Project state = aggregate.getState();
+            Project state = aggregate.state();
 
             assertEquals(ID, state.getId());
             assertEquals(Status.CREATED, state.getStatus());
@@ -414,7 +414,7 @@ public class AggregateTest {
 
         Snapshot snapshot = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.getId());
+        Aggregate anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.play(AggregateHistory.newBuilder()
@@ -519,26 +519,26 @@ public class AggregateTest {
 
         Snapshot snapshotNewProject = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.getId());
+        Aggregate anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.restore(snapshotNewProject);
         tx.commit();
 
-        assertEquals(aggregate.getState(), anotherAggregate.getState());
-        assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
+        assertEquals(aggregate.state(), anotherAggregate.state());
+        assertEquals(aggregate.version(), anotherAggregate.version());
         assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
     }
 
     @Test
     @DisplayName("increment version upon state changing event applied")
     void incrementVersionOnEventApplied() {
-        int version = aggregate.getVersion()
+        int version = aggregate.version()
                                .getNumber();
         // Dispatch two commands that cause events that modify aggregate state.
         aggregate.dispatchCommands(command(createProject), command(startProject));
 
-        assertEquals(version + 2, aggregate.getVersion()
+        assertEquals(version + 2, aggregate.version()
                                            .getNumber());
     }
 

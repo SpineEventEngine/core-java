@@ -227,7 +227,7 @@ public abstract class Aggregate<I,
     List<Event> reactOn(EventEnvelope event) {
         idempotencyGuard.check(event);
         EventReactorMethod method =
-                thisClass().getReactor(event.messageClass(), event.getOriginClass());
+                thisClass().getReactor(event.messageClass(), event.originClass());
         ReactorMethodResult result =
                 method.invoke(this, event);
         return result.produceEvents(event);
@@ -305,7 +305,7 @@ public abstract class Aggregate<I,
      * @see #apply(List)
      */
     private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents) {
-        Version currentVersion = getVersion();
+        Version currentVersion = version();
 
         Stream<Version> versions = Stream.iterate(currentVersion, Versions::increment)
                                          .skip(1) // Skip current version
@@ -370,11 +370,11 @@ public abstract class Aggregate<I,
      * @return new snapshot
      */
     Snapshot toSnapshot() {
-        Any state = AnyPacker.pack(getState());
+        Any state = AnyPacker.pack(state());
         Snapshot.Builder builder = Snapshot
                 .newBuilder()
                 .setState(state)
-                .setVersion(getVersion())
+                .setVersion(version())
                 .setTimestamp(getCurrentTime());
         return builder.build();
     }

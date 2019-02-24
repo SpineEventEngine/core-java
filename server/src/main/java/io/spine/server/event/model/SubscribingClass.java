@@ -44,7 +44,7 @@ public interface SubscribingClass extends Logging {
      */
     default Optional<SubscriberMethod> getSubscriber(EventEnvelope event) {
         Collection<SubscriberMethod> subscribers =
-                getSubscribers(event.messageClass(), event.getOriginClass());
+                getSubscribers(event.messageClass(), event.originClass());
         Comparator<SubscriberMethod> methodOrder = comparing(
                 (SubscriberMethod subscriber) -> subscriber.filter().getField().getFieldNameCount()
         ).reversed();

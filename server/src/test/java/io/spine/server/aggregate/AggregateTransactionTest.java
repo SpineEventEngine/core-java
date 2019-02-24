@@ -190,7 +190,7 @@ class AggregateTransactionTest
         void event(AggProjectCreated event) {
             receivedEvents.add(event);
             Project newState = Project
-                    .newBuilder(getState())
+                    .newBuilder(state())
                     .setId(event.getProjectId())
                     .setName(event.getName())
                     .build();

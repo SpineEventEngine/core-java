@@ -130,7 +130,7 @@ class ScheduledCommandTest {
     private void checkScheduled(Command scheduled) {
         Optional<ScheduledCommand> found = repository.find(scheduled.getId());
         assertTrue(found.isPresent());
-        ScheduledCommandRecord scheduledCommand = found.get().getState();
+        ScheduledCommandRecord scheduledCommand = found.get().state();
 
         assertFalse(isDefault(scheduledCommand.getSchedulingTime()));
         Command savedCommand = scheduledCommand.getCommand();

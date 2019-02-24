@@ -51,7 +51,7 @@ public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportV
     BbTaskAddedToReport on(BbTaskAdded event) {
         return BbTaskAddedToReport
                 .newBuilder()
-                .setReportId(getId())
+                .setReportId(id())
                 .setProjectId(event.getProjectId())
                 .setTask(event.getTask())
                 .build();

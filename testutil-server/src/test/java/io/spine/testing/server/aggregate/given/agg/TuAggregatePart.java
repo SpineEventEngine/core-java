@@ -71,7 +71,7 @@ public final class TuAggregatePart
     TuCommentRemoved handle(TuRemoveComment command) throws TuFailedToRemoveComment {
         throw TuFailedToRemoveComment
                 .newBuilder()
-                .setId(getId())
+                .setId(id())
                 .build();
     }
 
@@ -84,7 +84,7 @@ public final class TuAggregatePart
     @Apply(allowImport = true)
     void on(TuCommentReceivedByEmail event) {
         getBuilder().setId(event.getId())
-                    .setCommentsReceivedByEmail(getState().getCommentsReceivedByEmail() + 1)
+                    .setCommentsReceivedByEmail(state().getCommentsReceivedByEmail() + 1)
                     .setTimestamp(fromMillis(1234567));
     }
 }

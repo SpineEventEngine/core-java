@@ -57,7 +57,7 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     @Override
     public I getEntityId() {
         return dispatch.entity()
-                       .getId();
+                       .id();
     }
 
     @Override

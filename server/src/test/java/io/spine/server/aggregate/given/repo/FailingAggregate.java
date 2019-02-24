@@ -80,7 +80,7 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateV
         if (value.getNumber() < 0L) {
             throw CannotModifyArchivedEntity
                     .newBuilder()
-                    .setEntityId(Identifier.pack(getId()))
+                    .setEntityId(Identifier.pack(id()))
                     .build();
         }
         return now();
@@ -99,7 +99,7 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateV
             long longValue = toId(value);
             // Complain only if the passed value represents ID of this aggregate.
             // This would allow other aggregates react on this message.
-            if (longValue == getId()) {
+            if (longValue == id()) {
                 throw new IllegalArgumentException("Negative floating point value passed");
             }
         }
@@ -108,7 +108,7 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateV
 
     @Apply
     void apply(NumberPassed event) {
-        getBuilder().setValue(getState().getValue()
+        getBuilder().setValue(state().getValue()
                                       + System.lineSeparator()
                                       + Timestamps.toString(event.getWhen()));
     }

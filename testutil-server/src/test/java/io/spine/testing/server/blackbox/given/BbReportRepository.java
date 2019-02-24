@@ -57,12 +57,12 @@ public class BbReportRepository extends AggregateRepository<BbReportId, BbReport
         return aggregates
                 .stream()
                 .filter(report -> reportContainsProject(report, projectId))
-                .map(AbstractEntity::getId)
+                .map(AbstractEntity::id)
                 .collect(toSet());
     }
 
     private static boolean reportContainsProject(BbReportAggregate report, BbProjectId projectId) {
-        return report.getState()
+        return report.state()
                      .getProjectIdsList()
                      .contains(projectId);
     }

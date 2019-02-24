@@ -44,13 +44,13 @@ public class Dot extends Aggregate<ObjectId, Point, PointVBuilder> {
         return Moved.newBuilder()
                     .setObject(command.getObject())
                     .setDirection(command.getDirection())
-                    .setCurrentPosition(move(getState(), command.getDirection()))
+                    .setCurrentPosition(move(state(), command.getDirection()))
                     .build();
     }
 
     @Apply(allowImport = true)
     void event(Moved event) {
-        Point newPosition = move(getState(), event.getDirection());
+        Point newPosition = move(state(), event.getDirection());
         getBuilder().setX(newPosition.getX())
                     .setY(newPosition.getY());
     }
