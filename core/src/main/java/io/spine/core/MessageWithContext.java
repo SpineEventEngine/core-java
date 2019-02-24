@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 /**
  * Base interfaces for outer objects of messages with contexts.
  */
-@SuppressWarnings("override") // generated code is not annotated as overriding
 public interface MessageWithContext extends Message {
 
     Message getId();
