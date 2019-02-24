@@ -224,8 +224,8 @@ abstract class AbstractCommandBusTestSuite {
         verify(spy, times(2)).dispatch(postingCaptor.capture());
         List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
         assertThat(postingArgs).hasSize(commands.size());
-        assertEquals(commands.get(0), postingArgs.get(0).getCommand());
-        assertEquals(commands.get(1), postingArgs.get(1).getCommand());
+        assertEquals(commands.get(0), postingArgs.get(0).command());
+        assertEquals(commands.get(1), postingArgs.get(1).command());
 
         commandBus.unregister(createProjectHandler);
     }

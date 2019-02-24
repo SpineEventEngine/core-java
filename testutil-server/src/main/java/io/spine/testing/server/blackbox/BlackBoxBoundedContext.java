@@ -216,7 +216,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     @VisibleForTesting
     EventBus getEventBus() {
-        return boundedContext.getEventBus();
+        return boundedContext.eventBus();
     }
 
     /**
@@ -567,7 +567,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     protected EmittedEvents emittedEvents() {
         MemoizingObserver<Event> queryObserver = memoizingObserver();
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .getEventStore()
                       .read(allEventsQuery(), queryObserver);
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();

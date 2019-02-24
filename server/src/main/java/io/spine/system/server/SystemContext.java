@@ -102,7 +102,7 @@ public final class SystemContext extends BoundedContext {
      * a {@link NoOpSystemWriteSide} instance.
      */
     @Override
-    public NoOpSystemClient getSystemClient() {
+    public NoOpSystemClient systemClient() {
         return NoOpSystemClient.INSTANCE;
     }
 }

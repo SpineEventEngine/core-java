@@ -66,6 +66,6 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     @Override
     public Message getMessageId() {
         return dispatch.command()
-                       .getId();
+                       .id();
     }
 }

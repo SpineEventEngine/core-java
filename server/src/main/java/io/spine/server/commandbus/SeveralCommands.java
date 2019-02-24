@@ -50,7 +50,7 @@ public class SeveralCommands
      * Creates an empty sequence for creating two or more commands in response to the passed event.
      */
     public static SeveralCommands respondMany(EventEnvelope event) {
-        return new SeveralCommands(event.getId(), event.getActorContext());
+        return new SeveralCommands(event.id(), event.actorContext());
     }
 
     @CanIgnoreReturnValue

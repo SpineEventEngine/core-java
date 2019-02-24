@@ -56,9 +56,9 @@ public class IntegrationBusTestEnv {
     public static BoundedContext contextWithExternalSubscribers(TransportFactory transportFactory) {
         BoundedContext boundedContext = contextWithTransport(transportFactory);
         AbstractEventSubscriber eventSubscriber = new ProjectEventsSubscriber();
-        boundedContext.getIntegrationBus()
+        boundedContext.integrationBus()
                       .register(eventSubscriber);
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .register(eventSubscriber);
         boundedContext.register(new ProjectCountAggregateRepository());
         boundedContext.register(new ProjectWizardRepository());
@@ -76,14 +76,14 @@ public class IntegrationBusTestEnv {
 
     public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory) {
         BoundedContext result = contextWithTransport(factory);
-        result.getIntegrationBus()
+        result.integrationBus()
               .register(new ProjectEventsSubscriber());
         return result;
     }
 
     public static BoundedContext contextWithProjectStartedNeeds(TransportFactory factory) {
         BoundedContext result = contextWithTransport(factory);
-        result.getIntegrationBus()
+        result.integrationBus()
               .register(new ProjectStartedExtSubscriber());
         return result;
     }

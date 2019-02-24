@@ -66,7 +66,7 @@ class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventC
             CommandContext commandContext = commandContext();
             EventContext context = eventContext(commandContext);
             EventEnvelope envelope = envelope(context);
-            assertEquals(commandContext.getActorContext(), envelope.getActorContext());
+            assertEquals(commandContext.getActorContext(), envelope.actorContext());
         }
 
         @Test
@@ -76,7 +76,7 @@ class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventC
             EventContext originContext = eventContext(commandContext);
             EventContext context = eventContext(originContext);
             EventEnvelope envelope = envelope(context);
-            assertEquals(commandContext.getActorContext(), envelope.getActorContext());
+            assertEquals(commandContext.getActorContext(), envelope.actorContext());
         }
 
         @Test
@@ -85,7 +85,7 @@ class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventC
             EventContext context = eventContext(actorContext());
             EventEnvelope envelope = envelope(context);
             ActorContext expectedImportContext = context.getImportContext();
-            assertEquals(expectedImportContext, envelope.getActorContext());
+            assertEquals(expectedImportContext, envelope.actorContext());
         }
 
         private EventEnvelope envelope(EventContext context) {

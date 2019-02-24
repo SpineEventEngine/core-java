@@ -47,7 +47,7 @@ public abstract class UnicastBus<T extends Message,
     }
 
     private static IllegalStateException noDispatcherFound(MessageEnvelope envelope) {
-        String id = Identifier.toString(envelope.getId());
+        String id = Identifier.toString(envelope.id());
         String msg = format("No dispatcher found for the command (class: %s id: %s).",
                             envelope.messageClass(),
                             id);

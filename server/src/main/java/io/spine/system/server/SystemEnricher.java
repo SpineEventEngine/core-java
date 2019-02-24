@@ -34,8 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A factory of {@link Enricher} instances for the system bounded context.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 final class SystemEnricher {

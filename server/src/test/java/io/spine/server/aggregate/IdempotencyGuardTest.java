@@ -131,7 +131,7 @@ class IdempotencyGuardTest {
         }
 
         private void post(Command command) {
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(command, noOpObserver);
         }
@@ -148,7 +148,7 @@ class IdempotencyGuardTest {
 
         @BeforeEach
         void setUp() {
-            boundedContext.getCommandBus()
+            boundedContext.commandBus()
                           .post(command(createProject(projectId)), noOpObserver());
         }
 
@@ -192,7 +192,7 @@ class IdempotencyGuardTest {
             Event taskEvent = event(taskStarted(projectId));
             Event projectEvent = event(projectPaused(projectId));
 
-            EventBus eventBus = boundedContext.getEventBus();
+            EventBus eventBus = boundedContext.eventBus();
             eventBus.post(taskEvent);
 
             IgTestAggregate aggregate = repository.loadAggregate(projectId);
@@ -202,7 +202,7 @@ class IdempotencyGuardTest {
         }
 
         private void post(Event event) {
-            boundedContext.getEventBus()
+            boundedContext.eventBus()
                           .post(event);
         }
 

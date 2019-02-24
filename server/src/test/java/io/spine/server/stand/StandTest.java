@@ -197,7 +197,7 @@ class StandTest extends TenantAwareTest {
             BoundedContext boundedContext = BoundedContext.newBuilder()
                                                           .setMultitenant(multitenant)
                                                           .build();
-            Stand stand = boundedContext.getStand();
+            Stand stand = boundedContext.stand();
 
             checkTypesEmpty(stand);
 
@@ -222,7 +222,7 @@ class StandTest extends TenantAwareTest {
         void aggregateRepositories() {
             BoundedContext boundedContext = BoundedContext.newBuilder()
                                                           .build();
-            Stand stand = boundedContext.getStand();
+            Stand stand = boundedContext.stand();
 
             checkTypesEmpty(stand);
 
@@ -250,7 +250,7 @@ class StandTest extends TenantAwareTest {
                                                       .setStand(Stand.newBuilder()
                                                                      .setCallbackExecutor(executor))
                                                       .build();
-        Stand stand = boundedContext.getStand();
+        Stand stand = boundedContext.stand();
 
         StandTestProjectionRepository repository = new StandTestProjectionRepository();
         boundedContext.register(repository);
@@ -554,7 +554,7 @@ class StandTest extends TenantAwareTest {
 
             CommandContext eventOrigin = event.getContext()
                                               .getCommandContext();
-            assertThat(eventOrigin).isEqualTo(cmd.getCommandContext());
+            assertThat(eventOrigin).isEqualTo(cmd.commandContext());
             Any packedMessage = event.getMessage();
             CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
 

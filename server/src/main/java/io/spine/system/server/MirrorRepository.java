@@ -68,7 +68,7 @@ final class MirrorRepository
     }
 
     private void prepareRouting() {
-        getEventRouting()
+        eventRouting()
                 .route(EntityStateChanged.class,
                        (message, context) -> targetsFrom(message.getId()))
                 .route(EntityArchived.class,

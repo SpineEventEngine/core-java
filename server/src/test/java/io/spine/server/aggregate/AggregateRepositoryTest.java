@@ -438,7 +438,7 @@ public class AggregateRepositoryTest {
             Event event = factory.createEvent(msg);
 
             // Posting this event should archive the aggregate.
-            boundedContext().getEventBus()
+            boundedContext().eventBus()
                             .post(event);
 
             // Check that the aggregate marked itself as `archived`, and therefore became invisible
@@ -468,7 +468,7 @@ public class AggregateRepositoryTest {
             ProjectId childId3 = givenAggregateId("acceptingChild-3");
 
             StreamObserver<Ack> observer = StreamObservers.noOpObserver();
-            CommandBus commandBus = boundedContext().getCommandBus();
+            CommandBus commandBus = boundedContext().commandBus();
 
             // Create the parent project.
             ImmutableSet<ProjectId> childProjects = ImmutableSet.of(childId1, childId2, childId3);
@@ -616,7 +616,7 @@ public class AggregateRepositoryTest {
                                                    .build();
         Event event = factory.createEvent(msg);
 
-        boundedContext().getEventBus()
+        boundedContext().eventBus()
                         .post(event);
 
         // Check that the child aggregate was archived.
@@ -646,7 +646,7 @@ public class AggregateRepositoryTest {
                 EventEnvelope.of(factory.createEvent(FloatEncountered.newBuilder()
                                                                      .setNumber(-412.0f)
                                                                      .build()));
-        boundedContext().getEventBus()
+        boundedContext().eventBus()
                         .post(envelope.outerObject());
 
         assertTrue(repository.isErrorLogged());
@@ -676,8 +676,8 @@ public class AggregateRepositoryTest {
                 requestFactory().createCommand(RejectNegativeLong.newBuilder()
                                                                  .setNumber(-100_000_000L)
                                                                  .build()));
-        boundedContext().getCommandBus()
-                        .post(ce.getCommand(), StreamObservers.noOpObserver());
+        boundedContext().commandBus()
+                        .post(ce.command(), StreamObservers.noOpObserver());
 
         assertFalse(repository.isErrorLogged());
     }

@@ -38,8 +38,8 @@ import static com.google.common.base.Preconditions.checkState;
 public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
 
     private Split(CommandEnvelope command) {
-        super(command.getId(), command.getCommandContext()
-                                      .getActorContext());
+        super(command.id(), command.commandContext()
+                                   .getActorContext());
     }
 
     /**

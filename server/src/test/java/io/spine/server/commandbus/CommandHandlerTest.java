@@ -70,8 +70,8 @@ class CommandHandlerTest {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setMultitenant(true)
                                                       .build();
-        commandBus = boundedContext.getCommandBus();
-        eventBus = boundedContext.getEventBus();
+        commandBus = boundedContext.commandBus();
+        eventBus = boundedContext.eventBus();
         handler = new TestCommandHandler(eventBus);
 
         commandBus.register(handler);

@@ -61,8 +61,8 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     void getCommandContext() {
         Command command = outerObject();
         CommandEnvelope envelope = toEnvelope(command);
-        assertEquals(command.getContext(), envelope.getCommandContext());
-        assertSame(envelope.getCommandContext(), envelope.messageContext());
+        assertEquals(command.getContext(), envelope.commandContext());
+        assertSame(envelope.commandContext(), envelope.messageContext());
     }
 
     @Test
@@ -72,7 +72,7 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
         CommandEnvelope envelope = toEnvelope(command);
 
         assertEquals(command.getContext()
-                            .getActorContext(), envelope.getActorContext());
+                            .getActorContext(), envelope.actorContext());
     }
 
     @Test
@@ -81,7 +81,7 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
         Command command = requestFactory.generateCommand();
 
         TypeName typeName = CommandEnvelope.of(command)
-                                           .getTypeName();
+                                           .messageTypeName();
         assertNotNull(typeName);
         assertEquals(TypeName.of(TestCommandMessage.class), typeName);
     }
@@ -99,7 +99,7 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
                                  .create(message);
 
         TypeUrl typeUrl = CommandEnvelope.of(command)
-                                         .getTypeName()
+                                         .messageTypeName()
                                          .toUrl();
 
         assertEquals(TypeUrl.of(TestCommandMessage.class), typeUrl);

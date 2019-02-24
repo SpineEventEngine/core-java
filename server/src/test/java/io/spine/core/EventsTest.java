@@ -162,7 +162,7 @@ public class EventsTest extends UtilityClassTest<Events> {
             CommandEnvelope command = generate();
             Event event = newEvent(command);
 
-            assertEquals(command.getId(), Events.getRootCommandId(event));
+            assertEquals(command.id(), Events.getRootCommandId(event));
         }
 
         @Test

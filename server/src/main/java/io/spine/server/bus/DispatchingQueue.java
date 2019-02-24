@@ -73,7 +73,7 @@ class DispatchingQueue<E extends MessageEnvelope> {
         checkNotNull(envelope);
         checkNotNull(observer);
 
-        observer.onNext(acknowledge(envelope.getId()));
+        observer.onNext(acknowledge(envelope.id()));
         queue.add(envelope);
 
         if (!dispatchingInProgress()) {

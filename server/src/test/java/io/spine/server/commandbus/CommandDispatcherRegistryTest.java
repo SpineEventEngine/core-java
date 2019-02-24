@@ -69,7 +69,7 @@ class CommandDispatcherRegistryTest {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setName(getClass().getSimpleName())
                                                       .build();
-        eventBus = boundedContext.getEventBus();
+        eventBus = boundedContext.eventBus();
         registry = new CommandDispatcherRegistry();
     }
 

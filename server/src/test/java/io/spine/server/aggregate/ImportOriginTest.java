@@ -60,7 +60,7 @@ class ImportOriginTest {
     @DisplayName("return Empty in other methods")
     void emptyValues() {
         Empty empty = Empty.getDefaultInstance();
-        assertEquals(empty, origin.getId());
+        assertEquals(empty, origin.id());
         assertEquals(empty, origin.outerObject());
         assertEquals(empty, origin.message());
         assertEquals(empty, origin.messageContext());

@@ -38,8 +38,8 @@ public final class Transform
         extends OnCommand<CommandTransformed, CommandTransformed.Builder, Transform> {
 
     private Transform(CommandEnvelope command) {
-        super(command.getId(), command.getCommandContext()
-                                      .getActorContext());
+        super(command.id(), command.commandContext()
+                                   .getActorContext());
     }
 
     /**

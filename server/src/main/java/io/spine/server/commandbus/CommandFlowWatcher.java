@@ -53,9 +53,9 @@ final class CommandFlowWatcher {
     void onDispatchCommand(CommandEnvelope command) {
         CommandDispatched systemEvent = CommandDispatched
                 .newBuilder()
-                .setId(command.getId())
+                .setId(command.id())
                 .build();
-        postSystemEvent(systemEvent, command.getTenantId());
+        postSystemEvent(systemEvent, command.tenantId());
     }
 
     /**
@@ -64,14 +64,14 @@ final class CommandFlowWatcher {
      * @param command the scheduled command
      */
     void onScheduled(CommandEnvelope command) {
-        CommandContext context = command.getCommandContext();
+        CommandContext context = command.commandContext();
         CommandContext.Schedule schedule = context.getSchedule();
         ScheduleCommand systemCommand = ScheduleCommand
                 .newBuilder()
-                .setId(command.getId())
+                .setId(command.id())
                 .setSchedule(schedule)
                 .build();
-        postSystemCommand(systemCommand, command.getTenantId());
+        postSystemCommand(systemCommand, command.tenantId());
     }
 
     private void postSystemEvent(EventMessage systemEvent, TenantId tenantId) {

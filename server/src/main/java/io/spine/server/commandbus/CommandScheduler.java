@@ -79,10 +79,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        Command command = envelope.getCommand();
+        Command command = envelope.command();
         if (isScheduled(command)) {
-            schedule(envelope.getCommand());
-            return Optional.of(acknowledge(envelope.getId()));
+            schedule(envelope.command());
+            return Optional.of(acknowledge(envelope.id()));
         }
         return empty();
     }

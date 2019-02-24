@@ -70,7 +70,7 @@ public final class EventEnvelope
      * Obtains the event ID.
      */
     @Override
-    public EventId getId() {
+    public EventId id() {
         EventId result = outerObject().getId();
         return result;
     }
@@ -79,8 +79,8 @@ public final class EventEnvelope
      * Obtains tenant ID of the event.
      */
     @Override
-    public TenantId getTenantId() {
-        return getActorContext().getTenantId();
+    public TenantId tenantId() {
+        return actorContext().getTenantId();
     }
 
     /**
@@ -105,7 +105,7 @@ public final class EventEnvelope
     }
 
     @Override
-    public ActorContext getActorContext() {
+    public ActorContext actorContext() {
         return Events.getActorContext(outerObject());
     }
 
@@ -127,7 +127,7 @@ public final class EventEnvelope
         EventContext context = getEventContext();
         builder.setEventContext(context)
                .setRootCommandId(context.getRootCommandId())
-               .setEventId(getId());
+               .setEventId(id());
     }
 
     /**

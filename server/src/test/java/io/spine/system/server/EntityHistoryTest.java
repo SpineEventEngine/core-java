@@ -99,7 +99,7 @@ class EntityHistoryTest {
         @BeforeEach
         void setUp() {
             eventAccumulator = new HistoryEventWatcher();
-            system.getEventBus()
+            system.eventBus()
                   .register(eventAccumulator);
             id = Identifier.generate(PersonId.class);
         }
@@ -388,7 +388,7 @@ class EntityHistoryTest {
 
         private void postCommand(CommandMessage commandMessage) {
             Command command = requestFactory.createCommand(commandMessage);
-            context.getCommandBus()
+            context.commandBus()
                    .post(command, noOpObserver());
         }
     }

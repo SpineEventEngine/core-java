@@ -50,7 +50,7 @@ public class TaskCreatedFilter implements BusFilter<EventEnvelope> {
             Task task = message.getTask();
             if (task.getDone()) {
                 Error error = error();
-                Any packedId = Identifier.pack(envelope.getId());
+                Any packedId = Identifier.pack(envelope.id());
                 Ack result = reject(packedId, error);
                 return Optional.of(result);
             }

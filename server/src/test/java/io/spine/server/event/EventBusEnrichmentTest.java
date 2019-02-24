@@ -57,7 +57,7 @@ class EventBusEnrichmentTest {
 
         ProjectRepository projectRepository = new ProjectRepository();
         bc.register(projectRepository);
-        eventBus = bc.getEventBus();
+        eventBus = bc.eventBus();
     }
 
     @AfterEach

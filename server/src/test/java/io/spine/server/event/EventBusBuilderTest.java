@@ -65,7 +65,7 @@ class EventBusBuilderTest
                 .newBuilder()
                 .setMultitenant(true)
                 .build();
-        this.storageFactory = bc.getStorageFactory();
+        this.storageFactory = bc.storageFactory();
     }
 
     @Nested

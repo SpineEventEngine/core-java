@@ -37,7 +37,7 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
     /**
      * The ID of the message.
      */
-    I getId();
+    I id();
 
     /**
      * Obtains string representation of the message identifier.
@@ -46,7 +46,7 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
      *          form in debug and error messages.
      */
     default String idAsString() {
-        return Stringifiers.toString(getId());
+        return Stringifiers.toString(id());
     }
 
     /**

@@ -141,7 +141,7 @@ class ProcessManagerTest {
                 .newBuilder()
                 .setMultitenant(true)
                 .build();
-        StorageFactory storageFactory = context.getStorageFactory();
+        StorageFactory storageFactory = context.storageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
         EventBus eventBus = EventBus.newBuilder()

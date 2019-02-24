@@ -66,7 +66,7 @@ public class StandTestEnv {
                 .setMultitenant(multitenant)
                 .setStand(standBuilder)
                 .build();
-        Stand stand = boundedContext.getStand();
+        Stand stand = boundedContext.stand();
         for (Repository repository : repositories) {
             boundedContext.register(repository);
         }

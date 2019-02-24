@@ -83,7 +83,7 @@ public class EnricherTest {
     void setUp() {
         enricher = newEventEnricher();
         boundedContext = newBoundedContext(enricher);
-        eventBus = boundedContext.getEventBus();
+        eventBus = boundedContext.eventBus();
         subscriber = new TestEventSubscriber();
         eventBus.register(subscriber);
     }

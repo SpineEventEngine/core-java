@@ -96,7 +96,7 @@ class AbstractEventSubscriberTest {
                 .setNewState(pack(state))
                 .build();
         SystemBoundedContexts.systemOf(groupsContext)
-                             .getEventBus()
+                             .eventBus()
                              .post(GivenEvent.withMessage(event));
         Optional<Group> receivedState = subscriber.domestic();
         assertTrue(receivedState.isPresent());
@@ -122,7 +122,7 @@ class AbstractEventSubscriberTest {
                 .setNewState(pack(state))
                 .build();
         SystemBoundedContexts.systemOf(organizationsContext)
-                             .getEventBus()
+                             .eventBus()
                              .post(GivenEvent.withMessage(event));
         Optional<Organization> receivedState = subscriber.external();
         assertTrue(receivedState.isPresent());

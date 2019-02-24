@@ -37,10 +37,10 @@ public interface ActorMessageEnvelope<I extends Message, T, C extends Message>
     /**
      * Obtains ID of the tenant in which context the actor works.
      */
-    TenantId getTenantId();
+    TenantId tenantId();
 
     /**
      * Obtains an actor context for the wrapped message.
      */
-    ActorContext getActorContext();
+    ActorContext actorContext();
 }

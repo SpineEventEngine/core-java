@@ -85,7 +85,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
     EventStore getEventStore() {
-        return getBoundedContext().getEventBus()
+        return getBoundedContext().eventBus()
                                   .getEventStore();
     }
 
@@ -166,7 +166,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
      */
     protected final Stand getStand() {
-        return getBoundedContext().getStand();
+        return getBoundedContext().stand();
     }
 
     /**

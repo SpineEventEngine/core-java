@@ -83,7 +83,7 @@ public final class DispatchCommand<I> {
      */
     public List<Event> perform() {
         List<Event> result = entity.dispatchCommand(command);
-        onCommandResult(command.getCommand(), result);
+        onCommandResult(command.command(), result);
         return result;
     }
 

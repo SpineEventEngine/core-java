@@ -174,7 +174,7 @@ public abstract class ProcessManager<I,
         throw newIllegalStateException(
                 "ProcessManager `%s` neither handled nor transformed the command " +
                         "(id: `%s` class: `%s`).",
-                this, command.getId(), commandClass
+                this, command.id(), commandClass
         );
     }
 
@@ -212,7 +212,7 @@ public abstract class ProcessManager<I,
         throw newIllegalStateException(
                 "ProcessManager `%s` neither reacted on the event (id: `%s` class: `%s`)," +
                         " nor produced commands.",
-                this, event.getId(), eventClass
+                this, event.id(), eventClass
         );
     }
 

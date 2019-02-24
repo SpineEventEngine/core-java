@@ -52,8 +52,8 @@ final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        CommandReceived systemEvent = systemEvent(envelope.getCommand());
-        TenantId tenantId = envelope.getTenantId();
+        CommandReceived systemEvent = systemEvent(envelope.command());
+        TenantId tenantId = envelope.tenantId();
         SystemWriteSide writeSide = writeSideFunction.get(tenantId);
         writeSide.postEvent(systemEvent);
         return Optional.empty();

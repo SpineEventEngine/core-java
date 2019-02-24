@@ -214,20 +214,20 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I target = with(command.getTenantId()).evaluate(() -> doDispatch(command));
+        I target = with(command.tenantId()).evaluate(() -> doDispatch(command));
         return target;
     }
 
     private I doDispatch(CommandEnvelope command) {
         I target = route(command);
-        lifecycleOf(target).onDispatchCommand(command.getCommand());
+        lifecycleOf(target).onDispatchCommand(command.command());
         return target;
     }
 
     private I route(CommandEnvelope envelope) {
         CommandRouting<I> routing = getCommandRouting();
-        I target = routing.apply(envelope.message(), envelope.getCommandContext());
-        lifecycleOf(target).onTargetAssignedToCommand(envelope.getId());
+        I target = routing.apply(envelope.message(), envelope.commandContext());
+        lifecycleOf(target).onTargetAssignedToCommand(envelope.id());
         return target;
     }
 
@@ -285,7 +285,7 @@ public abstract class ProcessManagerRepository<I,
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = getBoundedContext().getEventBus();
+        EventBus bus = getBoundedContext().eventBus();
         bus.post(filteredEvents);
     }
 
@@ -313,7 +313,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected P findOrCreate(I id) {
         P result = super.findOrCreate(id);
-        CommandBus commandBus = getBoundedContext().getCommandBus();
+        CommandBus commandBus = getBoundedContext().commandBus();
         result.setCommandBus(commandBus);
         return result;
     }

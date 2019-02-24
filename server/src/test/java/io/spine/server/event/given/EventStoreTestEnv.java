@@ -56,7 +56,7 @@ public class EventStoreTestEnv {
                                           .setMultitenant(false)
                                           .build();
         return EventStore.newBuilder()
-                         .setStorageFactory(bc.getStorageFactory())
+                         .setStorageFactory(bc.storageFactory())
                          .setStreamExecutor(MoreExecutors.directExecutor())
                          .withDefaultLogger()
                          .build();

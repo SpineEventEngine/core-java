@@ -147,7 +147,7 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private void markErrored(CommandEnvelope command, Error error) {
-        CommandId commandId = command.getId();
+        CommandId commandId = command.id();
         CommandErrored systemEvent = CommandErrored
                 .newBuilder()
                 .setId(commandId)
@@ -157,7 +157,7 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private void markRejected(CommandEnvelope command, RejectionEnvelope rejection) {
-        CommandId commandId = command.getId();
+        CommandId commandId = command.id();
 
         CommandRejected systemEvent = CommandRejected
                 .newBuilder()

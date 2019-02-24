@@ -395,7 +395,7 @@ public class CommandBus extends UnicastBus<Command,
 
         @Override
         public UnsupportedCommandException handle(CommandEnvelope message) {
-            Command command = message.getCommand();
+            Command command = message.command();
             UnsupportedCommandException exception = new UnsupportedCommandException(command);
             return exception;
         }

@@ -61,6 +61,6 @@ public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
     @Override
     public Message getMessageId() {
         return dispatch.event()
-                       .getId();
+                       .id();
     }
 }

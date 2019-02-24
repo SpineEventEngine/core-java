@@ -57,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ScheduledCommandTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(ScheduledCommandTest.class);
+            new TestActorRequestFactory(ScheduledCommandTest.class);
 
     private RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> repository;
     private BoundedContext context;
@@ -168,7 +168,7 @@ class ScheduledCommandTest {
     }
 
     private void post(Command command) {
-        context.getCommandBus()
+        context.commandBus()
                .post(command, noOpObserver());
     }
 

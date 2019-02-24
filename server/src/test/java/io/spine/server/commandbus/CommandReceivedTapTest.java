@@ -94,7 +94,7 @@ class CommandReceivedTapTest {
 
         CommandReceived systemEvent = (CommandReceived) writeSide.lastSeenEvent()
                                                                  .message();
-        assertEquals(envelope.getId(), systemEvent.getId());
+        assertEquals(envelope.id(), systemEvent.getId());
     }
 
     private static TenantId tenantId() {

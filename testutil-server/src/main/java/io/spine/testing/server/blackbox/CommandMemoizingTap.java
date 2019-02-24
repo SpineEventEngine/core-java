@@ -62,8 +62,8 @@ public final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        commandMessages.put(envelope.getId(), envelope.message());
-        commands.add(envelope.getCommand());
+        commandMessages.put(envelope.id(), envelope.message());
+        commands.add(envelope.command());
         return Optional.empty();
     }
 

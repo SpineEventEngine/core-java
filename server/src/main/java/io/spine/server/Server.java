@@ -95,7 +95,7 @@ public final class Server implements Logging {
             try {
                 context.close();
             } catch (Exception e) {
-                String contextName = context.getName()
+                String contextName = context.name()
                                             .getValue();
                 _error(e, "Unable to close Bounded Context {}.", contextName);
             }

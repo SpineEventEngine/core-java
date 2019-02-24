@@ -121,7 +121,7 @@ class ProjectionRepositoryTest
                                  .getActorContext()
                                  .getTenantId();
         if (boundedContext.isMultitenant()) {
-            boundedContext.getTenantIndex()
+            boundedContext.tenantIndex()
                           .keep(tenantId);
         }
     }

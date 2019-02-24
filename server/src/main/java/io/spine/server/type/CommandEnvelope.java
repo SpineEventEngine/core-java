@@ -68,7 +68,7 @@ public final class CommandEnvelope
     /**
      * Obtains the enclosed command object.
      */
-    public Command getCommand() {
+    public Command command() {
         return outerObject();
     }
 
@@ -76,15 +76,15 @@ public final class CommandEnvelope
      * Obtains the tenant ID of the command.
      */
     @Override
-    public TenantId getTenantId() {
-        return Commands.getTenantId(getCommand());
+    public TenantId tenantId() {
+        return Commands.getTenantId(command());
     }
 
     /**
      * Obtains the command ID.
      */
     @Override
-    public CommandId getId() {
+    public CommandId id() {
         return commandId;
     }
 
@@ -106,15 +106,15 @@ public final class CommandEnvelope
 
     @Override
     public CommandContext messageContext() {
-        return getCommandContext();
+        return commandContext();
     }
 
     /**
      * Obtains the actor context of the enclosed command.
      */
     @Override
-    public ActorContext getActorContext() {
-        return getCommandContext().getActorContext();
+    public ActorContext actorContext() {
+        return commandContext().getActorContext();
     }
 
     /**
@@ -132,22 +132,22 @@ public final class CommandEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        builder.setCommandContext(getCommandContext())
-               .setRootCommandId(getId())
-               .setCommandId(getId());
+        builder.setCommandContext(commandContext())
+               .setRootCommandId(id())
+               .setCommandId(id());
     }
 
     /**
      * Obtains the command context.
      */
-    public CommandContext getCommandContext() {
+    public CommandContext commandContext() {
         return outerObject().getContext();
     }
 
     /**
      * Obtains {@link TypeName} of the command message.
      */
-    public TypeName getTypeName() {
+    public TypeName messageTypeName() {
         return TypeName.of(commandMessage);
     }
 }

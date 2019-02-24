@@ -209,7 +209,7 @@ public class EventRootCommandIdTest {
 
     private void postCommand(Command command) {
         StreamObserver<Ack> observer = noOpObserver();
-        boundedContext.getCommandBus()
+        boundedContext.commandBus()
                       .post(command, observer);
     }
 
@@ -222,7 +222,7 @@ public class EventRootCommandIdTest {
         TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
-                boundedContext.getEventBus()
+                boundedContext.eventBus()
                               .getEventStore()
                               .read(allEventsQuery(), observer);
             }

@@ -60,7 +60,7 @@ public abstract class EventDispatchingRepository<I,
      * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
      * of event targets.
      */
-    protected final EventRouting<I> getEventRouting() {
+    protected final EventRouting<I> eventRouting() {
         return eventRouting;
     }
 
@@ -87,7 +87,7 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public final Set<I> dispatch(EventEnvelope envelope) {
         checkNotNull(envelope);
-        Set<I> targets = with(envelope.getTenantId())
+        Set<I> targets = with(envelope.tenantId())
                 .evaluate(() -> doDispatch(envelope));
         return targets;
     }
@@ -116,7 +116,7 @@ public abstract class EventDispatchingRepository<I,
      * @return a set of IDs of projections to dispatch the given event to
      */
     private Set<I> route(EventEnvelope envelope) {
-        EventRouting<I> routing = getEventRouting();
+        EventRouting<I> routing = eventRouting();
         Set<I> targets = routing.apply(envelope.message(), envelope.getEventContext());
         return targets;
     }

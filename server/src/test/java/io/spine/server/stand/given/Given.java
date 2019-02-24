@@ -60,7 +60,7 @@ public class Given {
 
         public StandTestProjectionRepository() {
             super();
-            getEventRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
+            eventRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
         }
 
         @Override

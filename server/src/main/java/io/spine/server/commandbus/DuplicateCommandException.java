@@ -89,6 +89,6 @@ public class DuplicateCommandException extends CommandException implements Messa
                         .value()
                         .getName(),
                 TypeName.of(envelope.message()),
-                Identifier.toString(envelope.getId()));
+                Identifier.toString(envelope.id()));
     }
 }

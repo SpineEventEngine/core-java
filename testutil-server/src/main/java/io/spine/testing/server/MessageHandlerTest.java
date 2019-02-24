@@ -255,7 +255,7 @@ public abstract class MessageHandlerTest<I,
 
         @Override
         public Optional<Ack> accept(CommandEnvelope envelope) {
-            interceptedCommands.add(unpack(envelope.getCommand()
+            interceptedCommands.add(unpack(envelope.command()
                                                    .getMessage()));
             return empty();
         }

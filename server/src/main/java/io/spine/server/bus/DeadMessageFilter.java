@@ -60,7 +60,7 @@ final class DeadMessageFilter<T extends Message,
         if (dispatchers.isEmpty()) {
             MessageUnhandled report = deadMessageHandler.handle(envelope);
             Error error = report.asError();
-            Any packedId = Identifier.pack(envelope.getId());
+            Any packedId = Identifier.pack(envelope.id());
             Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {

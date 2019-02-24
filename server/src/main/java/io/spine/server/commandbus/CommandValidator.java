@@ -74,9 +74,9 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     }
 
     private Optional<MessageInvalid> isTenantIdValid(CommandEnvelope envelope) {
-        TenantId tenantId = envelope.getTenantId();
+        TenantId tenantId = envelope.tenantId();
         boolean tenantSpecified = !isDefault(tenantId);
-        Command command = envelope.getCommand();
+        Command command = envelope.command();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
                 MessageInvalid report = missingTenantId(command);
@@ -92,7 +92,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     }
 
     private static Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
-        Command command = envelope.getCommand();
+        Command command = envelope.command();
         List<ConstraintViolation> violations = inspect(envelope);
         InvalidCommandException exception = null;
         if (!violations.isEmpty()) {
@@ -135,7 +135,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateId() {
-            String commandId = Identifier.toString(command.getId());
+            String commandId = Identifier.toString(command.id());
             if (commandId.equals(EMPTY_ID)) {
                 addViolation("Command ID cannot be empty or blank.");
             }
@@ -152,7 +152,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateContext() {
-            if (isDefault(command.getCommandContext())) {
+            if (isDefault(command.commandContext())) {
                 addViolation("Non-default command context must be set.");
             }
         }

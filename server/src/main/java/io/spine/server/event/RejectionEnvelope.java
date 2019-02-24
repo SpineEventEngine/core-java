@@ -126,18 +126,18 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public TenantId getTenantId() {
-        return event.getTenantId();
+    public TenantId tenantId() {
+        return event.tenantId();
     }
 
     @Override
-    public ActorContext getActorContext() {
-        return event.getActorContext();
+    public ActorContext actorContext() {
+        return event.actorContext();
     }
 
     @Override
-    public EventId getId() {
-        return event.getId();
+    public EventId id() {
+        return event.id();
     }
 
     @Override

@@ -66,7 +66,7 @@ class AggregateCommandEndpointTest {
 
         // Create a subscriber of ProjectCreated event.
         subscriber = new Subscriber();
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .register(subscriber);
 
         repository = new ProjectAggregateRepository();

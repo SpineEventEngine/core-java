@@ -83,7 +83,7 @@ public class InvalidCommandException extends CommandException implements Message
                             .value()
                             .getName(),
                 TypeName.of(commandMessage),
-                Identifier.toString(envelope.getId()));
+                Identifier.toString(envelope.id()));
         Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
@@ -111,8 +111,8 @@ public class InvalidCommandException extends CommandException implements Message
                 "CommandBus, but has tenant_id: %s attribute set in the command context.",
                 cmd.messageClass(),
                 typeName,
-                cmd.getId(),
-                cmd.getTenantId());
+                cmd.id(),
+                cmd.tenantId());
         Error error = inapplicableTenantError(cmd.message(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }

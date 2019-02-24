@@ -103,8 +103,8 @@ public class EventBusTest {
         ProjectRepository projectRepository = new ProjectRepository();
         bc.register(projectRepository);
 
-        this.commandBus = bc.getCommandBus();
-        this.eventBus = bc.getEventBus();
+        this.commandBus = bc.commandBus();
+        this.eventBus = bc.eventBus();
     }
 
     @BeforeEach

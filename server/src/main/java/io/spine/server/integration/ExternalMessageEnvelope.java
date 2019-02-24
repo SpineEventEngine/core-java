@@ -80,7 +80,7 @@ public final class ExternalMessageEnvelope
     }
 
     @Override
-    public Message getId() {
+    public Message id() {
         return id;
     }
 

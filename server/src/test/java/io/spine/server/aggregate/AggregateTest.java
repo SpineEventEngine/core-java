@@ -651,7 +651,7 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(addTaskCommand, noOpObserver);
@@ -679,7 +679,7 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(startCommand, noOpObserver);

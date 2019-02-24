@@ -67,7 +67,7 @@ class RepositoryTest {
                                        .setMultitenant(true)
                                        .build();
         repository = new TestRepo();
-        storageFactory = boundedContext.getStorageFactory();
+        storageFactory = boundedContext.storageFactory();
         tenantId = newUuid();
     }
 

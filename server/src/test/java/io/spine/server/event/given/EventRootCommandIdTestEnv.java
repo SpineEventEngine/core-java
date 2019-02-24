@@ -76,7 +76,7 @@ public class EventRootCommandIdTestEnv {
     public static final TenantId TENANT_ID = tenantId();
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventRootCommandIdTest.class, TENANT_ID);
+            new TestActorRequestFactory(EventRootCommandIdTest.class, TENANT_ID);
 
     private EventRootCommandIdTestEnv() {
         // Prevent instantiation.
@@ -212,7 +212,7 @@ public class EventRootCommandIdTestEnv {
             extends ProcessManagerRepository<EvTeamId, TeamCreationProcessManager, EvTeamCreation> {
 
         public TeamCreationRepository() {
-            getEventRouting()
+            eventRouting()
                     .route(EvInvitationAccepted.class,
                            new EventRoute<EvTeamId, EvInvitationAccepted>() {
                                private static final long serialVersionUID = 0L;
@@ -290,7 +290,7 @@ public class EventRootCommandIdTestEnv {
         }
 
         @React
-        EvTeamProjectAdded on(ProjectCreated command, EventContext ctx) {
+        EvTeamProjectAdded on(ProjectCreated command) {
             EvTeamProjectAdded event = projectAdded(command);
             return event;
         }
@@ -341,7 +341,7 @@ public class EventRootCommandIdTestEnv {
         }
 
         @React
-        EvTeamMemberAdded on(EvInvitationAccepted event, EventContext ctx) {
+        EvTeamMemberAdded on(EvInvitationAccepted event) {
             EvMember member = member(event.getUserId());
             EvTeamMemberAdded newEvent = memberAdded(member);
             return newEvent;

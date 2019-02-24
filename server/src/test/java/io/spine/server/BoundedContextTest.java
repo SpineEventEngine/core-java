@@ -111,7 +111,7 @@ class BoundedContextTest {
     @AfterEach
     void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.getEventBus()
+            boundedContext.eventBus()
                           .unregister(subscriber);
         }
         boundedContext.close();
@@ -121,7 +121,7 @@ class BoundedContextTest {
     private void registerAll() {
         ProjectAggregateRepository repo = new ProjectAggregateRepository();
         boundedContext.register(repo);
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .register(subscriber);
         handlersRegistered = true;
     }
@@ -133,19 +133,19 @@ class BoundedContextTest {
         @Test
         @DisplayName("EventBus")
         void eventBus() {
-            assertNotNull(boundedContext.getEventBus());
+            assertNotNull(boundedContext.eventBus());
         }
 
         @Test
         @DisplayName("IntegrationBus")
         void integrationBus() {
-            assertNotNull(boundedContext.getIntegrationBus());
+            assertNotNull(boundedContext.integrationBus());
         }
 
         @Test
         @DisplayName("CommandDispatcher")
         void commandDispatcher() {
-            assertNotNull(boundedContext.getCommandBus());
+            assertNotNull(boundedContext.commandBus());
         }
 
         @Test
@@ -191,7 +191,7 @@ class BoundedContextTest {
     void propagateRepositoriesToStand() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
-        Stand stand = boundedContext.getStand();
+        Stand stand = boundedContext.stand();
         assertTrue(stand.getExposedTypes().isEmpty());
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
@@ -209,7 +209,7 @@ class BoundedContextTest {
                                                       .build();
         boundedContext.register(new ProjectAggregateRepository());
         verify(eventBusMock, times(1))
-                .register(eq(boundedContext.getStand()));
+                .register(eq(boundedContext.stand()));
     }
 
     @ParameterizedTest
@@ -280,7 +280,7 @@ class BoundedContextTest {
         BoundedContext bc = BoundedContext.newBuilder()
                                           .setEventBus(EventBus.newBuilder())
                                           .build();
-        assertNotNull(bc.getEventBus());
+        assertNotNull(bc.eventBus());
     }
 
     @Test
@@ -291,7 +291,7 @@ class BoundedContextTest {
                                           .setEventBus(EventBus.newBuilder()
                                                                .setEventStore(eventStore))
                                           .build();
-        assertEquals(eventStore, bc.getEventBus()
+        assertEquals(eventStore, bc.eventBus()
                                    .getEventStore());
     }
 
@@ -333,14 +333,14 @@ class BoundedContextTest {
                                               .setMultitenant(true)
                                               .build();
 
-            assertEquals(bc.isMultitenant(), bc.getCommandBus()
+            assertEquals(bc.isMultitenant(), bc.commandBus()
                                                .isMultitenant());
 
             bc = BoundedContext.newBuilder()
                                .setMultitenant(false)
                                .build();
 
-            assertEquals(bc.isMultitenant(), bc.getCommandBus()
+            assertEquals(bc.isMultitenant(), bc.commandBus()
                                                .isMultitenant());
         }
 
@@ -351,14 +351,14 @@ class BoundedContextTest {
                                               .setMultitenant(true)
                                               .build();
 
-            assertEquals(bc.isMultitenant(), bc.getStand()
+            assertEquals(bc.isMultitenant(), bc.stand()
                                                .isMultitenant());
 
             bc = BoundedContext.newBuilder()
                                .setMultitenant(false)
                                .build();
 
-            assertEquals(bc.isMultitenant(), bc.getStand()
+            assertEquals(bc.isMultitenant(), bc.stand()
                                                .isMultitenant());
         }
     }
@@ -412,7 +412,7 @@ class BoundedContextTest {
                     @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
                     @Internal
                     @Override
-                    public SystemClient getSystemClient() {
+                    public SystemClient systemClient() {
                         return null;
                     }
                 }

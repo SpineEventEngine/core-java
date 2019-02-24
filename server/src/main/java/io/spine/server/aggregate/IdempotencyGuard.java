@@ -89,7 +89,7 @@ final class IdempotencyGuard {
      * @return {@code true} if the event was handled since last snapshot, {@code false} otherwise
      */
     private boolean didHandleRecently(EventEnvelope envelope) {
-        EventId eventId = envelope.getId();
+        EventId eventId = envelope.id();
         Iterator<Event> iterator = aggregate.historyBackward();
         while (iterator.hasNext()) {
             Event event = iterator.next();
@@ -114,7 +114,7 @@ final class IdempotencyGuard {
      * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
      */
     private boolean didHandleRecently(CommandEnvelope envelope) {
-        CommandId newCommandId = envelope.getId();
+        CommandId newCommandId = envelope.id();
         Iterator<Event> iterator = aggregate.historyBackward();
         while (iterator.hasNext()) {
             Event event = iterator.next();

@@ -127,7 +127,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         boundedContext.registerCommandDispatcher(this);
         boundedContext.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {
-            boundedContext.getImportBus()
+            boundedContext.importBus()
                           .register(EventImportDispatcher.of(this));
         }
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
@@ -202,22 +202,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
-        I target = with(cmd.getTenantId())
+        I target = with(cmd.tenantId())
                 .evaluate(() -> doDispatch(cmd));
         return target;
     }
 
     private I doDispatch(CommandEnvelope cmd) {
         I target = route(cmd);
-        lifecycleOf(target).onDispatchCommand(cmd.getCommand());
+        lifecycleOf(target).onDispatchCommand(cmd.command());
         dispatchTo(target, cmd);
         return target;
     }
 
     private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = getCommandRouting();
-        I target = routing.apply(cmd.message(), cmd.getCommandContext());
-        onCommandTargetSet(target, cmd.getId());
+        I target = routing.apply(cmd.message(), cmd.commandContext());
+        onCommandTargetSet(target, cmd.id());
         return target;
     }
 
@@ -284,7 +284,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
-        Set<I> targets = with(event.getTenantId())
+        Set<I> targets = with(event.tenantId())
                 .evaluate(() -> doDispatch(event));
         return targets;
     }
@@ -311,7 +311,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     I importEvent(EventEnvelope event) {
         checkNotNull(event);
-        I target = with(event.getTenantId()).evaluate(() -> doImport(event));
+        I target = with(event.tenantId()).evaluate(() -> doImport(event));
         return target;
     }
 
@@ -397,7 +397,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = getBoundedContext().getEventBus();
+        EventBus bus = getBoundedContext().eventBus();
         bus.post(filteredEvents);
     }
 

@@ -50,8 +50,6 @@ import static com.google.protobuf.util.Timestamps.compare;
  *
  * <p>This aggregate belongs to the {@code System} bounded context. This aggregate doesn't have
  * an entity history of its own.
- *
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an Aggregate class.
 final class EntityHistoryAggregate

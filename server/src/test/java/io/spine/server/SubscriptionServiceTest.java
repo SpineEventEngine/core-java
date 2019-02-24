@@ -267,7 +267,7 @@ class SubscriptionServiceTest {
         int version = 1;
 
         Entity entity = newEntity(projectId, projectState, version);
-        boundedContext.getStand()
+        boundedContext.stand()
                       .post(entity, repository.lifecycleOf(projectId));
 
         // `isCompleted` set to false since we don't expect
@@ -347,7 +347,7 @@ class SubscriptionServiceTest {
                 .build();
         int version = 1;
         Entity entity = newEntity(projectId, projectState, version);
-        boundedContext.getStand()
+        boundedContext.stand()
                       .post(entity, repository.lifecycleOf(projectId));
 
         // The update must not be handled by the observer.

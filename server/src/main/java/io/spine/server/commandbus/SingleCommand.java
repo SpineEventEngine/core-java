@@ -50,7 +50,7 @@ public class SingleCommand
      * Creates an empty sequence for creating a command in response to the passed event.
      */
     public static SingleCommand inResponseTo(EventEnvelope event) {
-        return new SingleCommand(event.getId(), event.getActorContext());
+        return new SingleCommand(event.id(), event.actorContext());
     }
 
     public SingleCommand produce(CommandMessage commandMessage) {

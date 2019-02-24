@@ -189,7 +189,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     public final void setBoundedContext(BoundedContext boundedContext) {
         this.boundedContext = boundedContext;
         if (!isStorageAssigned()) {
-            initStorage(boundedContext.getStorageFactory());
+            initStorage(boundedContext.storageFactory());
         }
     }
 
@@ -220,7 +220,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
-        getBoundedContext().getStand()
+        getBoundedContext().stand()
                            .registerTypeSupplier(this);
     }
 
@@ -335,7 +335,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         TypeUrl stateType = getEntityStateType();
-        SystemWriteSide writeSide = getBoundedContext().getSystemClient()
+        SystemWriteSide writeSide = getBoundedContext().systemClient()
                                                        .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle

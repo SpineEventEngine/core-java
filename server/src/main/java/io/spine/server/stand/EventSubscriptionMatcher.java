@@ -56,7 +56,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected Any extractId(EventEnvelope event) {
-        EventId eventId = event.getId();
+        EventId eventId = event.id();
         Any result = Identifier.pack(eventId);
         return result;
     }

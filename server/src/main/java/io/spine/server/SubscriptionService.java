@@ -75,7 +75,7 @@ public class SubscriptionService
                     () -> newIllegalArgumentException("Trying to subscribe to an unknown type: %s",
                                                       target.getType())
             );
-            Stand stand = context.getStand();
+            Stand stand = context.stand();
 
             stand.subscribe(topic, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
@@ -99,7 +99,7 @@ public class SubscriptionService
                 checkNotNull(update);
                 observer.onNext(update);
             };
-            Stand targetStand = context.getStand();
+            Stand targetStand = context.stand();
 
             targetStand.activate(subscription, notifyAction, forwardErrorsOnly(observer));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
@@ -121,7 +121,7 @@ public class SubscriptionService
         }
         try {
             BoundedContext context = selected.get();
-            Stand stand = context.getStand();
+            Stand stand = context.stand();
             stand.cancel(subscription, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error(e, "Error processing cancel subscription request");
@@ -186,7 +186,7 @@ public class SubscriptionService
 
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
-            Stand stand = boundedContext.getStand();
+            Stand stand = boundedContext.stand();
             Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, boundedContext);
             stand.getExposedTypes()
                  .forEach(putIntoMap);

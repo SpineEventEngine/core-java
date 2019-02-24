@@ -45,7 +45,7 @@ class HandlerMethodFailedExceptionTest {
         cause = new IllegalStateException(newUuid());
 
         exception = new HandlerMethodFailedException(this, commandEnvelope.message(),
-                                                     commandEnvelope.getCommandContext(),
+                                                     commandEnvelope.commandContext(),
                                                      cause);
     }
 
@@ -65,7 +65,7 @@ class HandlerMethodFailedExceptionTest {
     @Test
     @DisplayName("return MessageContext")
     void returnMessageContext() {
-        assertEquals(commandEnvelope.getCommandContext(), exception.getMessageContext());
+        assertEquals(commandEnvelope.commandContext(), exception.getMessageContext());
     }
 
     @Test
