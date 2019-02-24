@@ -20,11 +20,13 @@
 
 package io.spine.server.enrich;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.EnrichableMessageContext;
 import io.spine.core.Enrichment;
-import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.EnrichableMessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
@@ -92,15 +94,16 @@ public final class Enricher implements EnrichmentService {
      * @throws IllegalArgumentException
      *         if the passed message cannot be enriched
      */
-    public EventEnvelope enrich(EventEnvelope source) {
-        EventEnvelope result = source.toEnriched(this);
+    public <E extends EnrichableMessageEnvelope<?, ?, ?, E>> E enrich(E source) {
+        E result = source.toEnriched(this);
         return  result;
     }
 
     /**
      * Verifies if the passed message can be enriched.
      */
-    boolean canBeEnriched(EventEnvelope message) {
+    @VisibleForTesting
+    boolean canBeEnriched(MessageEnvelope message) {
         boolean supported = schema.supports(message.messageClass()
                                                    .value());
         return supported;
