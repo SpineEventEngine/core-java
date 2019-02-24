@@ -35,7 +35,6 @@ import io.spine.string.StringifierRegistry;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getStackTraceAsString;
@@ -78,11 +77,7 @@ public final class Events {
      * @return new UUID-based event ID
      */
     public static EventId generateId() {
-        String value = UUID.randomUUID()
-                           .toString();
-        return EventId.newBuilder()
-                      .setValue(value)
-                      .build();
+        return Identifier.generate(EventId.class);
     }
 
     /**
