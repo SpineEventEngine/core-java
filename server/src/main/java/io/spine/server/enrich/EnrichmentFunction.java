@@ -23,7 +23,6 @@ package io.spine.server.enrich;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Streams;
 import io.spine.base.MessageContext;
-import io.spine.server.event.EventBus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -37,8 +36,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * Defines how an instance of a source class can be transformed into an instance
  * of the target class.
  *
- * <p>{@code EnrichmentFunction}s are used by an {@link Enricher} to augment events
- * passed to {@link EventBus}.
+ * <p>{@code EnrichmentFunction}s are used by an {@link Enricher} to add enrichments to the
+ * context of enrichable messages before they are dispatched.
  *
  * @param <S>
  *         a type of the source object to enrich
@@ -93,8 +92,9 @@ abstract class EnrichmentFunction<S, C extends MessageContext, T> {
      * <p>If an activation cannot be performed flawlessly, the {@code IllegalStateException}
      * should be thrown. In this case {@link #isActive()} should return {@code false}.
      *
-     * @throws IllegalStateException if the function cannot perform the conversion in its
-     *                               current state or because of the state of its environment
+     * @throws IllegalStateException
+     *         if the function cannot perform the conversion in its current state or because of
+     *         the state of its environment
      */
     abstract void activate();
 
