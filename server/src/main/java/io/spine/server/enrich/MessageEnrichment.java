@@ -23,6 +23,7 @@ package io.spine.server.enrich;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import io.spine.base.MessageContext;
+import io.spine.core.EnrichableMessageContext;
 import io.spine.server.reflect.Field;
 
 import java.util.Collection;
@@ -41,7 +42,9 @@ import static io.spine.server.enrich.SupportsFieldConversion.supportsConversion;
  * @param <T> a type of the target enrichment message
  * @param <C> the type of the source message context
  */
-abstract class MessageEnrichment<S extends Message, C extends MessageContext, T extends Message>
+abstract class MessageEnrichment<S extends Message,
+                                 C extends EnrichableMessageContext,
+                                 T extends Message>
         extends EnrichmentFunction<S, C, T> {
 
     /** A parent instance holding this instance and its siblings. */
@@ -110,7 +113,7 @@ abstract class MessageEnrichment<S extends Message, C extends MessageContext, T 
      * @param <C> the type of the source message context
      */
     private static final
-    class Helper<S extends Message, C extends MessageContext, T extends Message> {
+    class Helper<S extends Message, C extends EnrichableMessageContext, T extends Message> {
 
         /** The parent enrichment instance. */
         private final MessageEnrichment<S, C, T> enrichment;

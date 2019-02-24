@@ -52,10 +52,10 @@ final class SystemEnricher {
      */
     public static Enricher create(CommandLifecycleRepository commandRepository) {
         checkNotNull(commandRepository);
-        Enricher enricher = Enricher.newBuilder()
-                                    .add(CommandId.class, Command.class,
-                                         commandLookup(commandRepository))
-                                    .build();
+        Enricher enricher = Enricher
+                .newBuilder()
+                .add(CommandId.class, Command.class, commandLookup(commandRepository))
+                .build();
         return enricher;
     }
 

@@ -22,7 +22,7 @@ package io.spine.server.enrich;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Streams;
-import io.spine.base.MessageContext;
+import io.spine.core.EnrichableMessageContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -50,7 +50,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * function when building the {@link Enricher}.
  * @see EnricherBuilder#add(Class, Class, java.util.function.BiFunction)
  */
-abstract class EnrichmentFunction<S, C extends MessageContext, T> {
+abstract class EnrichmentFunction<S, C extends EnrichableMessageContext, T> {
 
     private final Class<S> sourceClass;
     private final Class<T> targetClass;

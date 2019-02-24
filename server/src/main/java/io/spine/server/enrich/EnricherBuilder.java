@@ -22,7 +22,7 @@ package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import io.spine.core.EventContext;
+import io.spine.core.EnrichableMessageContext;
 
 import java.util.Optional;
 import java.util.Set;
@@ -47,17 +47,17 @@ public final class EnricherBuilder {
     /**
      * Adds a new field enrichment function.
      *
-     * @param  sourceFieldClass
+     * @param sourceFieldClass
      *         a class of the field in the source message
-     * @param  enrichmentFieldClass
+     * @param enrichmentFieldClass
      *         a class of the field in the enrichment message
-     * @param  func
+     * @param func
      *         a function which converts fields
      * @return the builder instance
      */
     public <S, T> EnricherBuilder add(Class<S> sourceFieldClass,
                                       Class<T> enrichmentFieldClass,
-                                      BiFunction<S, EventContext, T> func) {
+                                      BiFunction<S, ? extends EnrichableMessageContext, T> func) {
         checkNotNull(sourceFieldClass);
         checkNotNull(enrichmentFieldClass);
         checkNotNull(func);
