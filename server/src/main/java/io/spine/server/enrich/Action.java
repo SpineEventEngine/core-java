@@ -20,103 +20,95 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.protobuf.Any;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.EnrichableMessageContext;
 import io.spine.core.Enrichment;
+import io.spine.core.Enrichment.Container;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Map;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
- * Performs enrichment operation for an event.
+ * Performs enrichment operation for an enrichable message.
  */
 final class Action {
 
+    /** The message to be enriched. */
     private final Message message;
+
+    /** The context of the enrichable message. */
     private final EnrichableMessageContext context;
 
-    /**
-     * Active functions applicable to the enriched event.
-     */
-    private final ImmutableCollection<EnrichmentFunction<?, ?, ?>> functions;
+    /** Active functions applicable to the enrichable message. */
+    private final ImmutableList<MessageEnrichment> functions;
 
-    /**
-     * A map from the type name of an enrichment to its packed instance, in the form
-     * it is used in the enriched event context.
-     */
-    private final Map<String, Any> enrichments = newHashMap();
+    /** The builder of the container of produced enrichments. */
+    private final Container.Builder container = Container.newBuilder();
 
     Action(Enricher parent, Message message, EnrichableMessageContext context) {
         this.message = message;
         this.context = context;
         Class<? extends Message> sourceClass = message.getClass();
         this.functions = parent.schema()
-                               .get(sourceClass);
+                               .get(sourceClass)
+                               .stream()
+                               .map(MessageEnrichment.class::cast)
+                               .collect(toImmutableList());
     }
 
     /**
-     * Creates new envelope with the enriched version of the event.
+     * Creates a new instance of {@code Enrichment} containing all enrichments of the passed
+     * message.
      */
     Enrichment perform() {
         createEnrichments();
-        Enrichment result = createEnrichment();
+        Enrichment result = wrap();
         return result;
     }
 
+    /**
+     * Creates enrichments by invoking all the {@link #functions}, and puts the created enrichment
+     * messages into the {@link #container}.
+     */
     private void createEnrichments() {
-        for (EnrichmentFunction function : functions) {
-            Message enrichment = apply(function, message, context);
+        for (MessageEnrichment function : functions) {
+            @SuppressWarnings("unchecked") // OK since we cast to most common interface.
+            Message enrichment = function.apply(message, context);
             checkResult(enrichment, function);
             put(enrichment);
         }
     }
 
+    /**
+     * Puts the passed enrichment message into the {@link #container}.
+     */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private void put(Message enrichment) {
         String typeName = TypeName.of(enrichment)
                                   .value();
-        enrichments.put(typeName, AnyPacker.pack(enrichment));
+        container.putItems(typeName, AnyPacker.pack(enrichment));
     }
 
-    /**
-     * Applies the passed function to the message.
-     *
-     * <p>We suppress the {@code "unchecked"} because we ensure types when we...
-     * <ol>
-     *      <li>create enrichments,
-     *      <li>put them into {@link Enricher} by their message class.
-     * </ol>
-     */
-    @SuppressWarnings("unchecked")
-    private static Message apply(EnrichmentFunction fn,
-                                 Message message,
-                                 EnrichableMessageContext context) {
-        Message result = (Message) fn.apply(message, context);
-        return result;
-    }
-
-    private void checkResult(@Nullable Message enriched, EnrichmentFunction function) {
+    private void checkResult(@Nullable Message enriched, MessageEnrichment function) {
         checkNotNull(
             enriched,
-            "EnrichmentFunction `%s` produced `null` for the source message `%s`.",
+            "MessageEnrichment `%s` produced `null` for the source message `%s`.",
             function, message
         );
     }
 
     /**
-     * Creates a new {@link Enrichment} instance from the passed map.
+     * Creates a new {@link Enrichment} instance wrapping recently created enrichments.
      */
-    private Enrichment createEnrichment() {
-        Enrichment.Builder enrichment =
-                Enrichment.newBuilder()
-                          .setContainer(Enrichment.Container.newBuilder()
-                                                            .putAllItems(enrichments));
-        return enrichment.build();
+    private Enrichment wrap() {
+        Enrichment result = Enrichment
+                .newBuilder()
+                .setContainer(container)
+                .build();
+        return result;
     }
 }
