@@ -115,7 +115,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
      *         of this watcher
      */
     private boolean producerOfCorrectType(EventEnvelope event) {
-        EventContext context = event.eventContext();
+        EventContext context = event.context();
         Any anyId = context.getProducerId();
         Object producerId = Identifier.unpack(anyId);
         EntityHistoryId historyId = (EntityHistoryId) producerId;

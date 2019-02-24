@@ -96,8 +96,8 @@ abstract class CommandAcceptingMethodSignature
             }
 
             @Override
-            public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.message(), envelope.commandContext()};
+            public Object[] extractArguments(CommandEnvelope cmd) {
+                return new Object[]{cmd.message(), cmd.context()};
             }
         }
     }

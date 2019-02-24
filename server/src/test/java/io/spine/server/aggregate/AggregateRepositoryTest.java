@@ -657,7 +657,7 @@ public class AggregateRepositoryTest {
                 (HandlerMethodFailedException) lastException;
 
         assertEquals(envelope.message(), methodFailedException.getDispatchedMessage());
-        assertEquals(envelope.eventContext(), methodFailedException.getMessageContext());
+        assertEquals(envelope.context(), methodFailedException.getMessageContext());
 
         MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
         assertNotNull(lastErrorEnvelope);

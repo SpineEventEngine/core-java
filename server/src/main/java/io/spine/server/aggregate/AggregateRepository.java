@@ -216,7 +216,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = getCommandRouting();
-        I target = routing.apply(cmd.message(), cmd.commandContext());
+        I target = routing.apply(cmd.message(), cmd.context());
         onCommandTargetSet(target, cmd.id());
         return target;
     }
@@ -297,7 +297,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private Set<I> route(EventEnvelope event) {
         EventRouting<I> routing = getEventRouting();
-        Set<I> targets = routing.apply(event.message(), event.eventContext());
+        Set<I> targets = routing.apply(event.message(), event.context());
         return targets;
     }
 
@@ -323,12 +323,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private I routeImport(EventEnvelope event) {
-        Set<I> ids = getEventImportRouting().apply(event.message(), event.eventContext());
+        Set<I> ids = getEventImportRouting().apply(event.message(), event.context());
         int numberOfTargets = ids.size();
         checkState(
                 numberOfTargets > 0,
                 "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
-                event.eventContext(),
+                event.context(),
                 event.messageClass()
         );
         checkState(
@@ -337,7 +337,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 String.valueOf(numberOfTargets),
                 ids,
                 event.messageClass(),
-                event.eventContext()
+                event.context()
         );
         I id = ids.stream()
                   .findFirst()

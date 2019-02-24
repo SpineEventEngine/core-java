@@ -38,7 +38,7 @@ public final class Transform
         extends OnCommand<CommandTransformed, CommandTransformed.Builder, Transform> {
 
     private Transform(CommandEnvelope command) {
-        super(command.id(), command.commandContext()
+        super(command.id(), command.context()
                                    .getActorContext());
     }
 

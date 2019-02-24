@@ -102,7 +102,7 @@ public final class EventEnvelope
 
     @Override
     public EventContext messageContext() {
-        return eventContext();
+        return context();
     }
 
     @Override
@@ -125,7 +125,7 @@ public final class EventEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        EventContext context = eventContext();
+        EventContext context = context();
         builder.setEventContext(context)
                .setRootCommandId(context.getRootCommandId())
                .setEventId(id());
@@ -134,7 +134,7 @@ public final class EventEnvelope
     /**
      * Obtains the context of the event.
      */
-    public EventContext eventContext() {
+    public EventContext context() {
         return this.eventContext;
     }
 
@@ -176,7 +176,7 @@ public final class EventEnvelope
      * Returns {@code true} is the wrapped event is external, {@code false} otherwise.
      */
     public boolean isExternal() {
-        boolean external = Events.isExternal(eventContext());
+        boolean external = Events.isExternal(context());
         return external;
     }
 
@@ -200,7 +200,7 @@ public final class EventEnvelope
     }
 
     private Enrichment enrichment() {
-        return eventContext().getEnrichment();
+        return context().getEnrichment();
     }
 
     private EventEnvelope withEnrichment(Enrichment enrichment) {

@@ -101,9 +101,9 @@ public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends
      * @see io.spine.server.event.React#external()
      */
     @Override
-    protected void checkAttributesMatch(EventEnvelope envelope) {
-        boolean external = envelope.eventContext()
-                                   .getExternal();
+    protected void checkAttributesMatch(EventEnvelope event) {
+        boolean external = event.context()
+                                .getExternal();
         ensureExternalMatch(external);
     }
 

@@ -60,7 +60,7 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     MESSAGE_AND_EVENT_CONTEXT(ImmutableList.of(Message.class, EventContext.class)) {
         @Override
         protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
-            return new Object[]{entityState, event.eventContext()};
+            return new Object[]{entityState, event.context()};
         }
     };
 

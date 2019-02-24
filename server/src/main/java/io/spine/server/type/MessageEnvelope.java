@@ -21,6 +21,7 @@
 package io.spine.server.type;
 
 import com.google.protobuf.Message;
+import io.spine.base.MessageContext;
 import io.spine.core.EventContext;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
@@ -32,7 +33,7 @@ import io.spine.type.MessageClass;
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
  */
-public interface MessageEnvelope<I extends Message, T, C extends Message> {
+public interface MessageEnvelope<I extends Message, T, C extends MessageContext> {
 
     /**
      * The ID of the message.

@@ -152,7 +152,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateContext() {
-            if (isDefault(command.commandContext())) {
+            if (isDefault(command.context())) {
                 addViolation("Non-default command context must be set.");
             }
         }

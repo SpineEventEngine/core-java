@@ -154,7 +154,7 @@ class CommandRoutingTest {
                 .build();
         CommandEnvelope command = CommandEnvelope.of(requestFactory.createCommand(cmd));
 
-        long id = commandRouting.apply(command.message(), command.commandContext());
+        long id = commandRouting.apply(command.message(), command.context());
 
         assertEquals(DEFAULT_ANSWER, id);
     }
@@ -170,7 +170,7 @@ class CommandRoutingTest {
         // Have custom route.
         commandRouting.route(RegisterUser.class, customRoute);
 
-        long id = commandRouting.apply(command.message(), command.commandContext());
+        long id = commandRouting.apply(command.message(), command.context());
 
         assertEquals(CUSTOM_ANSWER, id);
     }

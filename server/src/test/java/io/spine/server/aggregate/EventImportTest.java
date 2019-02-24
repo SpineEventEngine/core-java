@@ -113,7 +113,7 @@ class EventImportTest {
         private void assertRouted(EventEnvelope event) {
             Set<EngineId> targets =
                     repository.getEventImportRouting()
-                              .apply(event.message(), event.eventContext());
+                              .apply(event.message(), event.context());
 
             assertThat(targets).hasSize(1);
             assertThat(targets).containsExactly(engineId);

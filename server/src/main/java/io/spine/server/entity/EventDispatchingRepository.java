@@ -115,9 +115,9 @@ public abstract class EventDispatchingRepository<I,
      * @param envelope the event to find targets for
      * @return a set of IDs of projections to dispatch the given event to
      */
-    private Set<I> route(EventEnvelope envelope) {
+    private Set<I> route(EventEnvelope event) {
         EventRouting<I> routing = eventRouting();
-        Set<I> targets = routing.apply(envelope.message(), envelope.eventContext());
+        Set<I> targets = routing.apply(event.message(), event.context());
         return targets;
     }
 

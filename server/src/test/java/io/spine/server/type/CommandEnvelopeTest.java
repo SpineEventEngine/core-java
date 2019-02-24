@@ -61,8 +61,8 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     void getCommandContext() {
         Command command = outerObject();
         CommandEnvelope envelope = toEnvelope(command);
-        assertEquals(command.getContext(), envelope.commandContext());
-        assertSame(envelope.commandContext(), envelope.messageContext());
+        assertEquals(command.getContext(), envelope.context());
+        assertSame(envelope.context(), envelope.messageContext());
     }
 
     @Test

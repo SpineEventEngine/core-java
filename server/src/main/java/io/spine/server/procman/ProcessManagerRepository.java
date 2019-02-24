@@ -224,10 +224,10 @@ public abstract class ProcessManagerRepository<I,
         return target;
     }
 
-    private I route(CommandEnvelope envelope) {
+    private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = getCommandRouting();
-        I target = routing.apply(envelope.message(), envelope.commandContext());
-        lifecycleOf(target).onTargetAssignedToCommand(envelope.id());
+        I target = routing.apply(cmd.message(), cmd.context());
+        lifecycleOf(target).onTargetAssignedToCommand(cmd.id());
         return target;
     }
 

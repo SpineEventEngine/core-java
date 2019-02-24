@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class CommandEnvelope
         extends AbstractMessageEnvelope<CommandId, Command, CommandContext>
-        implements ActorMessageEnvelope<CommandId, Command, CommandContext>{
+        implements ActorMessageEnvelope<CommandId, Command, CommandContext> {
 
     // The below fields are calculated from the command.
 
@@ -106,7 +106,7 @@ public final class CommandEnvelope
 
     @Override
     public CommandContext messageContext() {
-        return commandContext();
+        return context();
     }
 
     /**
@@ -114,7 +114,7 @@ public final class CommandEnvelope
      */
     @Override
     public ActorContext actorContext() {
-        return commandContext().getActorContext();
+        return context().getActorContext();
     }
 
     /**
@@ -132,7 +132,7 @@ public final class CommandEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        builder.setCommandContext(commandContext())
+        builder.setCommandContext(context())
                .setRootCommandId(id())
                .setCommandId(id());
     }
@@ -140,7 +140,7 @@ public final class CommandEnvelope
     /**
      * Obtains the command context.
      */
-    public CommandContext commandContext() {
+    public CommandContext context() {
         return outerObject().getContext();
     }
 

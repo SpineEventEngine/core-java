@@ -21,6 +21,7 @@
 package io.spine.server.type;
 
 import com.google.protobuf.Message;
+import io.spine.base.MessageContext;
 import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
 
@@ -31,7 +32,7 @@ import io.spine.core.TenantId;
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
  */
-public interface ActorMessageEnvelope<I extends Message, T, C extends Message>
+public interface ActorMessageEnvelope<I extends Message, T, C extends MessageContext>
         extends MessageEnvelope<I, T, C> {
 
     /**

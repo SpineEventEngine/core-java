@@ -64,7 +64,7 @@ final class CommandFlowWatcher {
      * @param command the scheduled command
      */
     void onScheduled(CommandEnvelope command) {
-        CommandContext context = command.commandContext();
+        CommandContext context = command.context();
         CommandContext.Schedule schedule = context.getSchedule();
         ScheduleCommand systemCommand = ScheduleCommand
                 .newBuilder()

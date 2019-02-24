@@ -554,7 +554,7 @@ class StandTest extends TenantAwareTest {
 
             CommandContext eventOrigin = event.getContext()
                                               .getCommandContext();
-            assertThat(eventOrigin).isEqualTo(cmd.commandContext());
+            assertThat(eventOrigin).isEqualTo(cmd.context());
             Any packedMessage = event.getMessage();
             CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
 
