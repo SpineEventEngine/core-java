@@ -34,15 +34,16 @@ import java.util.Optional;
  * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
  *
  * <p>Enrichment schema is constructed like this:
- * <pre>
- *     {@code
- *     Enricher enricher = Enricher.newBuilder()
- *         .add(ProjectId.class, String.class, new BiFunction<ProjectId, String> { ... } )
- *         .add(ProjectId.class, UserId.class, new BiFunction<ProjectId, UserId> { ... } )
- *         ...
- *         .build();
- *     }
- * </pre>
+ * <pre>{@code
+ *   Enricher enricher = Enricher
+ *       .newBuilder()
+ *       .add(ProjectId.class, String.class,
+ *            new BiFunction<ProjectId, EventContext, String> { ... } )
+ *       .add(ProjectId.class, UserId.class,
+ *            new BiFunction<ProjectId, EventContext, UserId> { ... } )
+ *       ...
+ *       .build();
+ * }</pre>
  */
 @SPI
 public final class Enricher implements EnrichmentService {
