@@ -35,6 +35,7 @@ import io.spine.string.StringifierRegistry;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getStackTraceAsString;
@@ -75,9 +76,16 @@ public final class Events {
      * Creates a new {@link EventId} based on random UUID.
      *
      * @return new UUID-based event ID
+     * @implNote This method does not use the {@link Identifier#generate(Class)} API because
+     *         {@code EventId} does not conform to the contract of {@link io.spine.base.UuidValue}.
+     *         This is done so for being able to have event identifiers with non-UUID values.
      */
     public static EventId generateId() {
-        return Identifier.generate(EventId.class);
+        String value = UUID.randomUUID()
+                           .toString();
+        return EventId.newBuilder()
+                      .setValue(value)
+                      .build();
     }
 
     /**

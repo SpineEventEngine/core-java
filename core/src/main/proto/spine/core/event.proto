@@ -40,7 +40,10 @@ import "spine/core/enrichment.proto";
 // Event identifier.
 message EventId {
 
-    // A random UUID string value.
+    // A value of the event identifier.
+    //
+    // In most cases it would be a generated UUID-based string.
+    //
     string value = 1;
 }
 
@@ -68,6 +71,7 @@ message EventId {
 // See `EventContext.rejection` to determine the event kind.
 //
 message Event {
+    option (is).java_type = "io.spine.core.MessageWithContext";
 
     // The ID of the event.
     EventId id = 1 [(required) = true];

@@ -55,6 +55,7 @@ message CommandId {
 // There should be one and only one command handler associated with the type of the command.
 //
 message Command {
+    option (is).java_type = "io.spine.core.MessageWithContext";
 
     // The ID of the command.
     CommandId id = 1 [(required) = true];
