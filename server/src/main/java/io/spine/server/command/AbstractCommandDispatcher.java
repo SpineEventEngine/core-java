@@ -67,7 +67,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     /**
      * Obtains {@linkplain #getId() ID} packed into {@code Any} for being used in generated events.
      */
-    public Any getProducerId() {
+    public Any producerId() {
         return producerId.get();
     }
 

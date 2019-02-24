@@ -124,7 +124,7 @@ public class Columns {
         checkNotNull(entityClass);
         checkNotNull(columnName);
         throw new IllegalArgumentException(
-                format("Could not find an EntityColumn description for %s.%s.",
+                format("Could not find an `EntityColumn` description for `%s.%s`.",
                         entityClass.getCanonicalName(),
                         columnName));
     }

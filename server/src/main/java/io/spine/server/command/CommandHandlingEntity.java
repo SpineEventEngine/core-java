@@ -57,7 +57,7 @@ class CommandHandlingEntity<I,
     }
 
     @Override
-    public Any getProducerId() {
+    public Any producerId() {
         return idAsAny;
     }
 

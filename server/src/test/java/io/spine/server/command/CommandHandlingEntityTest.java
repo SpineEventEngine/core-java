@@ -43,7 +43,7 @@ class CommandHandlingEntityTest {
     @Test
     @DisplayName("assign own version to created mismatches")
     void assignVersionToMismatches() {
-        int version = entity.version().getNumber();
+        int version = entity.getVersion().getNumber();
 
         assertEquals(version, entity.expectedDefault(msg(), msg()).getVersion());
         assertEquals(version, entity.expectedNotDefault(msg()).getVersion());

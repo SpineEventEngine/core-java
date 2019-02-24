@@ -603,7 +603,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     public <I, S extends Message, P extends ProcessManager<I, S, ?>>
     PmSubject<S, P> assertThat(Class<? extends P> pmClass, I id) {
-        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).getStateClass();
+        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).stateClass();
         Repository repo = repositoryOf(stateClass);
         @SuppressWarnings("unchecked")
         ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;

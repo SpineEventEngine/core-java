@@ -125,7 +125,7 @@ public abstract class TransactionalEntity<I,
      */
     private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
-            throw new IllegalStateException(getMissingTxMessage());
+            throw new IllegalStateException(missingTxMessage());
         }
         return transaction;
     }
@@ -134,7 +134,7 @@ public abstract class TransactionalEntity<I,
      * Provides error message text for the case of not having an active transaction when a state
      * modification call is made.
      */
-    protected String getMissingTxMessage() {
+    protected String missingTxMessage() {
         return "Cannot modify entity state: transaction is not available.";
     }
 

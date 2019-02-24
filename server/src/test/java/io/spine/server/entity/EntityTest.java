@@ -156,7 +156,7 @@ class EntityTest {
         entityNew.updateState(state, ver);
 
         assertEquals(state, entityNew.state());
-        assertEquals(ver, entityNew.version());
+        assertEquals(ver, entityNew.getVersion());
     }
 
     @Test
@@ -185,7 +185,7 @@ class EntityTest {
     @Test
     @DisplayName("have zero version by default")
     void haveZeroVersionByDefault() {
-        assertEquals(0, entityNew.version()
+        assertEquals(0, entityNew.getVersion()
                                  .getNumber());
     }
 
@@ -205,7 +205,7 @@ class EntityTest {
         void whenUpdatingState() {
             entityNew.incrementState(state);
 
-            assertEquals(1, entityNew.version()
+            assertEquals(1, entityNew.getVersion()
                                      .getNumber());
         }
     }
@@ -285,7 +285,7 @@ class EntityTest {
         @DisplayName("entities with different states are not equal")
         void notEqualToDifferentState() {
             TestEntity another = TestEntity.withStateOf(entityWithState);
-            another.updateState(Sample.messageOfType(Project.class), another.version());
+            another.updateState(Sample.messageOfType(Project.class), another.getVersion());
 
             assertNotEquals(entityWithState.state(), another.state());
             assertNotEquals(entityWithState, another);

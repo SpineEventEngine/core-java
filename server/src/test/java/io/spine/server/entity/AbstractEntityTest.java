@@ -126,7 +126,7 @@ class AbstractEntityTest {
     void supportEquality() {
         AvEntity entity = new AvEntity(88L);
         AvEntity another = new AvEntity(88L);
-        another.updateState(entity.state(), entity.version());
+        another.updateState(entity.state(), entity.getVersion());
 
         new EqualsTester().addEqualityGroup(entity, another)
                           .addEqualityGroup(new AvEntity(42L))

@@ -83,7 +83,7 @@ public abstract class Projection<I,
     }
 
     @Override
-    protected String getMissingTxMessage() {
+    protected String missingTxMessage() {
         return "Projection modification is not available this way. " +
                 "Please modify the state from an event subscribing method.";
     }

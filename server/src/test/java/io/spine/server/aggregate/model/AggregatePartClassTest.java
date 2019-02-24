@@ -57,7 +57,7 @@ class AggregatePartClassTest {
     @Test
     @DisplayName("obtain aggregate part constructor")
     void getAggregatePartConstructor() {
-        assertNotNull(partClass.getConstructor());
+        assertNotNull(partClass.constructor());
     }
 
     @Test
@@ -65,7 +65,7 @@ class AggregatePartClassTest {
     void throwOnNoProperCtorAvailable() {
         AggregatePartClass<WrongAggregatePart> wrongPartClass =
                 asAggregatePartClass(WrongAggregatePart.class);
-        assertThrows(ModelError.class, wrongPartClass::getConstructor);
+        assertThrows(ModelError.class, wrongPartClass::constructor);
     }
 
     @Test

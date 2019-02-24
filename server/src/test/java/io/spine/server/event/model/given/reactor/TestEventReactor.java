@@ -33,8 +33,6 @@ import java.lang.reflect.Method;
  *
  * <p>The derived classes must declare a method named {@link #REACTOR_METHOD_NAME "react()"}
  * with appropriate arguments.
- *
- * @author Alexander Yevsyukov
  */
 public class TestEventReactor implements EventReactor {
 
@@ -43,7 +41,7 @@ public class TestEventReactor implements EventReactor {
     private final Any producerId = Identifier.pack(getClass().getName());
 
     @Override
-    public Any getProducerId() {
+    public Any producerId() {
         return producerId;
     }
 

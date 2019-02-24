@@ -305,7 +305,7 @@ public abstract class Aggregate<I,
      * @see #apply(List)
      */
     private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents) {
-        Version currentVersion = version();
+        Version currentVersion = getVersion();
 
         Stream<Version> versions = Stream.iterate(currentVersion, Versions::increment)
                                          .skip(1) // Skip current version
@@ -359,7 +359,7 @@ public abstract class Aggregate<I,
      * Instructs to modify the state of an aggregate only within an event applier method.
      */
     @Override
-    protected String getMissingTxMessage() {
+    protected String missingTxMessage() {
         return "Modification of aggregate state or its lifecycle flags is not available this way." +
                 " Make sure to modify those only from an event applier method.";
     }
@@ -374,7 +374,7 @@ public abstract class Aggregate<I,
         Snapshot.Builder builder = Snapshot
                 .newBuilder()
                 .setState(state)
-                .setVersion(version())
+                .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
         return builder.build();
     }

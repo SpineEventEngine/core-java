@@ -126,7 +126,7 @@ final class Write<I> {
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
         aggregate.setEventCountAfterLastSnapshot(eventCount);
         if (aggregate.lifecycleFlagsChanged()) {
-            storage.writeLifecycleFlags(aggregate.id(), aggregate.getLifecycleFlags());
+            storage.writeLifecycleFlags(aggregate.id(), aggregate.lifecycleFlags());
         }
     }
 }

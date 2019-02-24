@@ -171,13 +171,13 @@ class ProjectionTransactionTest
     @DisplayName("increment version on event")
     void incrementVersionOnEvent() {
         Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
-        Version oldVersion = entity.version();
+        Version oldVersion = entity.getVersion();
         Event event = GivenEvent.withMessage(createEventMessage());
         Projection.playOn(entity, Collections.singleton(event));
         Version expected = Versions.increment(oldVersion);
-        assertEquals(expected.getNumber(), entity.version()
+        assertEquals(expected.getNumber(), entity.getVersion()
                                                  .getNumber());
         assertNotEquals(event.getContext()
-                             .getVersion(), entity.version());
+                             .getVersion(), entity.getVersion());
     }
 }

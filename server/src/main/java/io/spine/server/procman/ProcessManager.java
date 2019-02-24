@@ -221,7 +221,7 @@ public abstract class ProcessManager<I,
     }
 
     @Override
-    protected String getMissingTxMessage() {
+    protected String missingTxMessage() {
         return "ProcessManager modification is not available this way. " +
                 "Please modify the state from a command handling or event reacting method.";
     }

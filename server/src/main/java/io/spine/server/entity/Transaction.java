@@ -158,7 +158,7 @@ public abstract class Transaction<I,
 
         this.entity = entity;
         this.builder = entity.builderFromState();
-        this.version = entity.version();
+        this.version = entity.getVersion();
         this.lifecycleFlags = entity.getLifecycleFlags();
         this.active = true;
 
@@ -304,7 +304,7 @@ public abstract class Transaction<I,
         S unchanged = getEntity().state();
         Version pendingVersion = getVersion();
         beforeCommit(unchanged, pendingVersion);
-        if(!pendingVersion.equals(entity.version())) {
+        if(!pendingVersion.equals(entity.getVersion())) {
             entity.updateState(unchanged, pendingVersion);
         }
         commitAttributeChanges();
@@ -352,7 +352,7 @@ public abstract class Transaction<I,
     private EntityRecord createRecord() {
         E entity = getEntity();
         Any entityId = Identifier.pack(entity.id());
-        Version version = entity.version();
+        Version version = entity.getVersion();
         Any state = pack(entity.state());
         LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
         return EntityRecord

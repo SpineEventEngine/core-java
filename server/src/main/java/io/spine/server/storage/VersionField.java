@@ -21,7 +21,7 @@
 package io.spine.server.storage;
 
 /**
- * Fields used to store {@linkplain io.spine.server.entity.Entity#version version}
+ * Fields used to store {@linkplain io.spine.server.entity.Entity#getVersion version}
  * information of an entity.
  *
  * @see StorageField

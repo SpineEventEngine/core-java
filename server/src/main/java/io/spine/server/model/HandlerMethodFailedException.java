@@ -98,7 +98,7 @@ public class HandlerMethodFailedException extends RuntimeException {
         }
 
         if (target instanceof EventProducer) {
-            return ((EventProducer) target).getProducerId();
+            return ((EventProducer) target).producerId();
         }
 
         return Identifier.pack(target.toString());

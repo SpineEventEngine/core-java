@@ -52,7 +52,7 @@ public class TestEntity extends AbstractEntity<String, Project> {
                 .setResultClass(TestEntity.class)
                 .withId(entity.id())
                 .withState(entity.state())
-                .withVersion(entity.version()
+                .withVersion(entity.getVersion()
                                    .getNumber())
                 .build();
         return result;

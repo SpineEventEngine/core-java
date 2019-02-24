@@ -32,7 +32,7 @@ public interface EventProducer {
     /**
      * The object identity packed into {@link Any}.
      */
-    Any getProducerId();
+    Any producerId();
 
     /**
      * The version of the object to be put into events.

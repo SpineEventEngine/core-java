@@ -291,8 +291,8 @@ public class AggregateTest {
         List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
 
-        assertEquals(this.aggregate.version(), event.getContext()
-                                                    .getVersion());
+        assertEquals(this.aggregate.getVersion(), event.getContext()
+                                                       .getVersion());
     }
 
     @Test
@@ -526,19 +526,19 @@ public class AggregateTest {
         tx.commit();
 
         assertEquals(aggregate.state(), anotherAggregate.state());
-        assertEquals(aggregate.version(), anotherAggregate.version());
+        assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
         assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
     }
 
     @Test
     @DisplayName("increment version upon state changing event applied")
     void incrementVersionOnEventApplied() {
-        int version = aggregate.version()
+        int version = aggregate.getVersion()
                                .getNumber();
         // Dispatch two commands that cause events that modify aggregate state.
         aggregate.dispatchCommands(command(createProject), command(startProject));
 
-        assertEquals(version + 2, aggregate.version()
+        assertEquals(version + 2, aggregate.getVersion()
                                            .getNumber());
     }
 

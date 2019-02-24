@@ -113,7 +113,7 @@ class EntityBuilderTest {
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.id());
         assertEquals(StringValue.of(""), entity.state());
-        assertEquals(0, entity.version().getNumber());
+        assertEquals(0, entity.getVersion().getNumber());
     }
 
     @SuppressWarnings("CheckReturnValue") // Method called to throw exception.

@@ -49,12 +49,12 @@ abstract class AggregateEndpoint<I,
     @Override
     protected final void dispatchInTx(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
-        LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
+        LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
 
         List<Event> produced = runTransactionWith(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
-        LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
+        LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
         if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
             storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }

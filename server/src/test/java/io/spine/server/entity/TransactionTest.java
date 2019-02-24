@@ -132,7 +132,7 @@ public abstract class TransactionTest<I,
         void fromEntity() {
             E entity = createEntity();
             B expectedBuilder = entity.builderFromState();
-            Version expectedVersion = entity.version();
+            Version expectedVersion = entity.getVersion();
             LifecycleFlags expectedLifecycleFlags = entity.getLifecycleFlags();
 
             Transaction<I, E, S, B> tx = createTx(entity);
@@ -159,7 +159,7 @@ public abstract class TransactionTest<I,
             Version newVersion = someVersion();
 
             assertNotEquals(entity.state(), newState);
-            assertNotEquals(entity.version(), newVersion);
+            assertNotEquals(entity.getVersion(), newVersion);
 
             Transaction<I, E, S, B> tx = createTxWithState(entity, newState, newVersion);
 
@@ -167,12 +167,12 @@ public abstract class TransactionTest<I,
                                      .build());
             assertEquals(newVersion, tx.getVersion());
             assertNotEquals(entity.state(), newState);
-            assertNotEquals(entity.version(), newVersion);
+            assertNotEquals(entity.getVersion(), newVersion);
 
             tx.commit();
 
             assertEquals(entity.state(), newState);
-            assertEquals(entity.version(), newVersion);
+            assertEquals(entity.getVersion(), newVersion);
         }
     }
 
@@ -214,11 +214,11 @@ public abstract class TransactionTest<I,
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
         S stateBeforeCommit = entity.state();
-        Version versionBeforeCommit = entity.version();
+        Version versionBeforeCommit = entity.getVersion();
         tx.commit();
 
         S modifiedState = entity.state();
-        Version modifiedVersion = entity.version();
+        Version modifiedVersion = entity.getVersion();
         assertNotEquals(stateBeforeCommit, modifiedState);
         assertNotEquals(versionBeforeCommit, modifiedVersion);
     }
@@ -233,11 +233,11 @@ public abstract class TransactionTest<I,
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
         S stateBeforeRollback = entity.state();
-        Version versionBeforeRollback = entity.version();
+        Version versionBeforeRollback = entity.getVersion();
         tx.rollback(new RuntimeException("that triggers rollback"));
 
         S stateAfterRollback = entity.state();
-        Version versionAfterRollback = entity.version();
+        Version versionAfterRollback = entity.getVersion();
         assertEquals(stateBeforeRollback, stateAfterRollback);
         assertEquals(versionBeforeRollback, versionAfterRollback);
     }
@@ -330,7 +330,7 @@ public abstract class TransactionTest<I,
         void ifPhaseFailed() {
             E entity = createEntity();
             S originalState = entity.state();
-            Version originalVersion = entity.version();
+            Version originalVersion = entity.getVersion();
 
             Transaction<I, E, S, B> tx = createTx(entity);
 
@@ -348,7 +348,7 @@ public abstract class TransactionTest<I,
         void ifCommitFailed() {
             E entity = createEntity(someViolations());
             S originalState = entity.state();
-            Version originalVersion = entity.version();
+            Version originalVersion = entity.getVersion();
 
             S newState = createNewState();
             Version version = someVersion();
@@ -365,7 +365,7 @@ public abstract class TransactionTest<I,
         private void checkRollback(E entity, S originalState, Version originalVersion) {
             assertNull(entity.getTransaction());
             assertEquals(originalState, entity.state());
-            assertEquals(originalVersion, entity.version());
+            assertEquals(originalVersion, entity.getVersion());
         }
     }
 
@@ -393,7 +393,7 @@ public abstract class TransactionTest<I,
     protected final void advanceVersionFromEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
-        assertEquals(entity.version(), tx.getVersion());
+        assertEquals(entity.getVersion(), tx.getVersion());
 
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
@@ -401,7 +401,7 @@ public abstract class TransactionTest<I,
                                         .getVersion();
         assertEquals(versionFromEvent, tx.getVersion());
         tx.commit();
-        assertEquals(versionFromEvent, entity.version());
+        assertEquals(versionFromEvent, entity.getVersion());
     }
 
     private ArgumentMatcher<Phase<I, ?>> matchesSuccessfulPhaseFor(Event event) {

@@ -183,7 +183,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     protected final S getDefaultState() {
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        S result = (S) thisClass().getDefaultState();
+        S result = (S) thisClass().defaultState();
         return result;
     }
 
@@ -392,7 +392,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Obtains the version number of the entity.
      */
     protected int versionNumber() {
-        int result = version().getNumber();
+        int result = getVersion().getNumber();
         return result;
     }
 
@@ -428,7 +428,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     @Override
-    public final Version version() {
+    public final Version getVersion() {
         return version;
     }
 
@@ -437,7 +437,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     private Version incrementedVersion() {
-        return Versions.increment(version());
+        return Versions.increment(getVersion());
     }
 
     /**
@@ -468,12 +468,12 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         AbstractEntity<?, ?> that = (AbstractEntity<?, ?>) o;
         return Objects.equals(id(), that.id()) &&
                 Objects.equals(state(), that.state()) &&
-                Objects.equals(version(), that.version()) &&
+                Objects.equals(getVersion(), that.getVersion()) &&
                 Objects.equals(getLifecycleFlags(), that.getLifecycleFlags());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id(), state(), version(), getLifecycleFlags());
+        return Objects.hash(id(), state(), getVersion(), getLifecycleFlags());
     }
 }
