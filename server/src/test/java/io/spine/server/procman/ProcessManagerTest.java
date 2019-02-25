@@ -60,9 +60,7 @@ import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmIterationStarted;
 import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
-import io.spine.test.procman.event.PmProjectArchived;
 import io.spine.test.procman.event.PmProjectCreated;
-import io.spine.test.procman.event.PmProjectDeleted;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.test.procman.quiz.PmQuestionId;
@@ -544,9 +542,7 @@ class ProcessManagerTest {
                     PmTaskAdded.class,
                     PmNotificationSent.class,
                     PmIterationPlanned.class,
-                    PmIterationStarted.class,
-                    PmProjectArchived.class,
-                    PmProjectDeleted.class
+                    PmIterationStarted.class
             ));
         }
     }
