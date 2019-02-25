@@ -20,20 +20,17 @@
 
 package io.spine.server.type;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.Immutable;
+import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
-import io.spine.code.proto.ref.TypeRef;
 import io.spine.core.Event;
 import io.spine.core.Events;
-import io.spine.type.KnownTypes;
-import io.spine.type.MessageType;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.core.Events.isRejection;
 
@@ -46,50 +43,28 @@ import static io.spine.core.Events.isRejection;
  * <p>This class thus offers a convenient way for working with a combined event and rejection
  * set.
  */
-@Immutable
 public final class EventClassSet implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableSet<EventClass> eventClasses;
-    private final ImmutableSet<RejectionClass> rejectionClasses;
+    private final Set<EventClass> eventClasses;
+    private final Set<RejectionClass> rejectionClasses;
 
-    private EventClassSet(ImmutableSet<EventClass> eventClasses,
-                          ImmutableSet<RejectionClass> rejectionClasses) {
-        this.eventClasses = eventClasses;
-        this.rejectionClasses = rejectionClasses;
+    public EventClassSet() {
+        this.eventClasses = new HashSet<>();
+        this.rejectionClasses = new HashSet<>();
     }
 
-    /**
-     * Creates an empty instance of {@code EventClassSet}.
-     */
-    public static EventClassSet empty() {
-        return new EventClassSet(ImmutableSet.of(), ImmutableSet.of());
-    }
-
-    /**
-     * Creates an instance from the types referenced by a given {@code TypeRef}.
-     *
-     * <p>Non-event or rejection types are ignored.
-     */
-    public static EventClassSet parse(TypeRef typeRef) {
-        ImmutableSet<MessageType> types = KnownTypes.instance()
-                                                    .allMatching(typeRef);
-        return new EventClassSet(events(types), rejections(types));
-    }
-
-    private static ImmutableSet<EventClass> events(Collection<MessageType> types) {
-        return types.stream()
-                    .filter(MessageType::isEvent)
-                    .map(EventClass::of)
-                    .collect(toImmutableSet());
-    }
-
-    private static ImmutableSet<RejectionClass> rejections(Collection<MessageType> types) {
-        return types.stream()
-                    .filter(MessageType::isRejection)
-                    .map(RejectionClass::of)
-                    .collect(toImmutableSet());
+    public void addAll(Iterable<Class<? extends EventMessage>> classes) {
+        stream(classes)
+                .filter(cls -> !RejectionMessage.class.isAssignableFrom(cls))
+                .map(EventClass::from)
+                .forEach(eventClasses::add);
+        stream(classes)
+                .filter(RejectionMessage.class::isAssignableFrom)
+                .map(RejectionMessage.class::cast)
+                .map(RejectionClass::of)
+                .forEach(rejectionClasses::add);
     }
 
     /**

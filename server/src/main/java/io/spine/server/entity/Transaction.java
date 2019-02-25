@@ -336,7 +336,7 @@ public abstract class Transaction<I,
      *         the reason of the rollback
      */
     void rollback(Throwable cause) {
-        onBeforeRollback(cause);
+        beforeRollback(cause);
         S currentState = currentBuilderState();
         TransactionListener<I, E, S, B> listener = getListener();
         listener.onTransactionFailed(cause, entity(), currentState, version(), lifecycleFlags());
@@ -349,7 +349,7 @@ public abstract class Transaction<I,
      */
     @SuppressWarnings("NoopMethodInAbstractClass")
     // Do not force descendants to override the method.
-    protected void onBeforeRollback(Throwable cause) {
+    protected void beforeRollback(Throwable cause) {
         // NO-OP.
     }
 

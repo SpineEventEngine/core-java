@@ -33,7 +33,6 @@ import io.spine.server.entity.Phase;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
-import io.spine.server.procman.model.Lifecycle;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
@@ -45,9 +44,12 @@ import static com.google.common.base.Throwables.getRootCause;
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.
  *
- * @param <I> the type of process manager IDs
- * @param <S> the type of process manager state
- * @param <B> the type of a {@code ValidatingBuilder} for the process manager state
+ * @param <I>
+ *         the type of process manager IDs
+ * @param <S>
+ *         the type of process manager state
+ * @param <B>
+ *         the type of a {@code ValidatingBuilder} for the process manager state
  */
 @Internal
 public class PmTransaction<I,
@@ -55,14 +57,21 @@ public class PmTransaction<I,
                            B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
+    private final Lifecycle lifecycle;
+
     @VisibleForTesting
-    PmTransaction(ProcessManager<I, S, B> processManager) {
+    PmTransaction(ProcessManager<I, S, B> processManager, Lifecycle lifecycle) {
         super(processManager);
+        this.lifecycle = lifecycle;
     }
 
     @VisibleForTesting
-    protected PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
+    protected PmTransaction(ProcessManager<I, S, B> processManager,
+                            S state,
+                            Version version,
+                            Lifecycle lifecycle) {
         super(processManager, state, version);
+        this.lifecycle = lifecycle;
     }
 
     /**
@@ -76,8 +85,7 @@ public class PmTransaction<I,
     List<Event> perform(DispatchCommand<I> dispatch) {
         VersionIncrement versionIncrement = createVersionIncrement();
         Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(dispatch, versionIncrement);
-        List<Event> events = propagate(phase);
-        entityLifecycle().update(events);
+        List<Event> events = doPropagate(phase);
         return events;
     }
 
@@ -95,29 +103,29 @@ public class PmTransaction<I,
                 new EventDispatch<>(this::dispatch, entity(), event),
                 versionIncrement
         );
-        List<Event> events = propagate(phase);
-        entityLifecycle().update(events);
+        List<Event> events = doPropagate(phase);
         return events;
     }
 
     /**
-     * Updates the process manager lifecycle according to the thrown rejection.
+     * Propagates the phase and updates the process lifecycle after success.
      */
-    @Override
-    protected void onBeforeRollback(Throwable cause) {
-        super.onBeforeRollback(cause);
-        Throwable rootCause = getRootCause(cause);
-        if (rootCause instanceof ThrowableMessage) {
-            entityLifecycle().update((ThrowableMessage) rootCause);
-            commitAttributeChanges();
-        }
+    private List<Event> doPropagate(Phase<I, List<Event>> phase) {
+        List<Event> events = propagate(phase);
+        updateLifecycle(events);
+        return events;
     }
 
-    private PmLifecycle entityLifecycle() {
-        Lifecycle lifecycleRules = entity().thisClass()
-                                           .lifecycle();
-        PmLifecycle result = new PmLifecycle(entity(), lifecycleRules);
-        return result;
+    /**
+     * Updates the process lifecycle on a transaction failure.
+     */
+    @Override
+    protected void beforeRollback(Throwable cause) {
+        super.beforeRollback(cause);
+        Throwable rootCause = getRootCause(cause);
+        if (rootCause instanceof ThrowableMessage) {
+            updateLifecycle((ThrowableMessage) rootCause);
+        }
     }
 
     /**
@@ -134,19 +142,45 @@ public class PmTransaction<I,
     /**
      * Creates a new transaction for a given {@code ProcessManager}.
      *
-     * @param  processManager the {@code ProcessManager} instance to start the transaction for
+     * @param  processManager
+     *          the {@code ProcessManager} instance to start the transaction for
      * @return the new transaction instance
      */
     static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
-        PmTransaction<I, S, B> tx = new PmTransaction<>(processManager);
+    PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager, Lifecycle lifecycle) {
+        PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, lifecycle);
         return tx;
     }
 
     private List<Event> dispatch(ProcessManager<I, S, B> processManager, EventEnvelope event) {
         return processManager.dispatchEvent(event);
+    }
+
+    /**
+     * Updates the process lifecycle based on a successful phase propagation result.
+     */
+    private void updateLifecycle(Iterable<Event> events) {
+        if (lifecycle.archivesOn(events)) {
+            setArchived(true);
+        }
+        if (lifecycle.deletesOn(events)) {
+            setDeleted(true);
+        }
+    }
+
+    /**
+     * Updates the process lifecycle after a rejection is thrown.
+     */
+    private void updateLifecycle(ThrowableMessage rejection) {
+        if (lifecycle.archivesOn(rejection)) {
+            setArchived(true);
+        }
+        if (lifecycle.deletesOn(rejection)) {
+            setDeleted(true);
+        }
+        commitAttributeChanges();
     }
 
     private VersionIncrement createVersionIncrement() {

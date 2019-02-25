@@ -54,16 +54,10 @@ public final class ProcessManagerClass<P extends ProcessManager>
     private final ReactorClassDelegate<P> reactorDelegate;
     private final CommanderClass<P> commanderDelegate;
 
-    /**
-     * The lifecycle rules gathered from the domain model.
-     */
-    private final Lifecycle lifecycle;
-
     private ProcessManagerClass(Class<P> cls) {
         super(cls);
         this.reactorDelegate = new ReactorClassDelegate<>(cls);
         this.commanderDelegate = CommanderClass.delegateFor(cls);
-        this.lifecycle = Lifecycle.of(stateClass());
     }
 
     /**
@@ -140,9 +134,5 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     public boolean producesCommandsOn(EventClass eventClass) {
         return commanderDelegate.producesCommandsOn(eventClass);
-    }
-
-    public Lifecycle lifecycle() {
-        return lifecycle;
     }
 }

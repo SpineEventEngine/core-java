@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.server.procman.Lifecycle;
 import io.spine.server.procman.PmTransaction;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.server.entity.EntityBuilder;
@@ -73,7 +74,7 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
 
         private TestPmTransaction(ProcessManager<I, S, B> processManager, S state,
                                   Version version) {
-            super(processManager, state, version);
+            super(processManager, state, version, new Lifecycle());
         }
 
         @Override

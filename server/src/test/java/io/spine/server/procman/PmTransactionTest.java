@@ -58,7 +58,7 @@ class PmTransactionTest
             PatchedProjectBuilder
             >
     createTx(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity) {
-        return new PmTransaction<>(entity);
+        return new PmTransaction<>(entity, new Lifecycle());
     }
 
     @Override
@@ -71,7 +71,7 @@ class PmTransactionTest
     createTxWithState(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
                       Project state,
                       Version version) {
-        return new PmTransaction<>(entity, state, version);
+        return new PmTransaction<>(entity, state, version, new Lifecycle());
     }
 
     @Override
@@ -90,7 +90,7 @@ class PmTransactionTest
                     PatchedProjectBuilder
                     > listener) {
         PmTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
-                new PmTransaction<>(entity);
+                new PmTransaction<>(entity, new Lifecycle());
         transaction.setListener(listener);
         return transaction;
     }

@@ -89,11 +89,14 @@ public abstract class ProcessManagerRepository<I,
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
+    private final Lifecycle lifecycle;
+
     /**
      * Creates a new instance with the event routing by the first message field.
      */
     protected ProcessManagerRepository() {
         super(EventRoute.byFirstMessageField());
+        this.lifecycle = new Lifecycle();
     }
 
     /**
@@ -197,6 +200,10 @@ public abstract class ProcessManagerRepository<I,
         return commandRouting;
     }
 
+    public final Lifecycle lifecycle() {
+        return lifecycle;
+    }
+
     @Override
     public ImmutableSet<EventClass> producibleEventClasses() {
         Set<EventClass> eventClasses = processManagerClass().getProducedEvents();
@@ -274,7 +281,8 @@ public abstract class ProcessManagerRepository<I,
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
     PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        PmTransaction<I, S, ?> tx = PmTransaction.start((ProcessManager<I, S, ?>) manager);
+        PmTransaction<I, S, ?> tx =
+                PmTransaction.start((ProcessManager<I, S, ?>) manager, lifecycle());
         TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
         tx.setListener(listener);
         return tx;
