@@ -75,7 +75,7 @@ public final class Lifecycle implements Serializable {
      * Creates a new {@code Lifecycle} instance for the given process manager state class.
      */
     public static Lifecycle of(Class<? extends Message> stateClass) {
-        MessageType type = MessageType.of(stateClass);
+        MessageType type = new MessageType(stateClass);
         return of(type);
     }
 

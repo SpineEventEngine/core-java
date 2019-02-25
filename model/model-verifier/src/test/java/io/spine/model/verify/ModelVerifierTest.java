@@ -21,6 +21,7 @@
 package io.spine.model.verify;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.code.proto.MessageType;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
@@ -205,7 +206,7 @@ class ModelVerifierTest {
     @MuteLogging
     @DisplayName("throw `EntityKindMismatchError` when lifecycle is declared for non-PM type")
     void throwOnNonPmLifecycle() {
-        MessageType nonPmType = MessageType.of(UploadPhoto.class);
+        MessageType nonPmType = typeOf(UploadPhoto.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
         ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
         assertThrows(EntityKindMismatchError.class, () -> modelVerifier.verifyUpon(project));
@@ -214,7 +215,7 @@ class ModelVerifierTest {
     @Test
     @DisplayName("throw `UnresolvedReferenceException` when option references unknown types")
     void throwOnUnknownLifecycleTriggers() {
-        MessageType nonPmType = MessageType.of(ArchiveState.class);
+        MessageType nonPmType = typeOf(ArchiveState.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
         ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
         assertThrows(UnresolvedReferenceException.class,
@@ -224,7 +225,7 @@ class ModelVerifierTest {
     @Test
     @DisplayName("throw `TypeMismatchError` when option references non-event types")
     void throwOnNonEventTriggers() {
-        MessageType nonPmType = MessageType.of(DeleteState.class);
+        MessageType nonPmType = typeOf(DeleteState.class);
         EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
         ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
         assertThrows(TypeMismatchError.class,
@@ -253,7 +254,12 @@ class ModelVerifierTest {
      * {@link io.spine.test.model.verify.given.DeleteState} messages.
      */
     private static EntitiesLifecycle validLifecycle() {
-        MessageType validPmType = MessageType.of(RenameState.class);
+        MessageType validPmType = typeOf(RenameState.class);
         return new EntitiesLifecycle(ImmutableSet.of(validPmType));
+    }
+
+    private static MessageType typeOf(Class<? extends Message> messageClass) {
+        MessageType result = new MessageType(messageClass);
+        return result;
     }
 }
