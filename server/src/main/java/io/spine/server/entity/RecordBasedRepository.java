@@ -91,7 +91,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-        RecordStorage<I> storage = (RecordStorage<I>) getStorage();
+        RecordStorage<I> storage = (RecordStorage<I>) storage();
         return storage;
     }
 
@@ -130,7 +130,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
+        RecordStorage<I> result = factory.createRecordStorage(entityClass());
         return result;
     }
 

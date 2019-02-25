@@ -44,7 +44,7 @@ class DefaultEntityStorageConverterTest {
         RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
         bc.register(repository);
 
-        TypeUrl stateType = repository.entityClass()
+        TypeUrl stateType = repository.entityModelClass()
                                       .stateType();
         converter = forAllFields(stateType, repository.entityFactory());
     }

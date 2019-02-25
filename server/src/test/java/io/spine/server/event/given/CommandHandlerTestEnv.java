@@ -68,7 +68,7 @@ public class CommandHandlerTestEnv {
         private final List<EventEnvelope> dispatched = newLinkedList();
 
         @Override
-        public Set<EventClass> getMessageClasses() {
+        public Set<EventClass> messageClasses() {
             return EventClass.setOf(
                     CmdProjectStarted.class,
                     CmdTaskAssigned.class,
@@ -77,7 +77,7 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
-        public Set<EventClass> getExternalEventClasses() {
+        public Set<EventClass> externalEventClasses() {
             return ImmutableSet.of();
         }
 

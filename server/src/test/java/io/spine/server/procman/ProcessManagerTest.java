@@ -250,18 +250,18 @@ class ProcessManagerTest {
         }
 
         private void checkIncrementsOnCommand(CommandMessage commandMessage) {
-            assertEquals(VERSION, processManager.getVersion()
+            assertEquals(VERSION, processManager.version()
                                                 .getNumber());
             testDispatchCommand(commandMessage);
-            assertEquals(VERSION + 1, processManager.getVersion()
+            assertEquals(VERSION + 1, processManager.version()
                                                     .getNumber());
         }
 
         private void checkIncrementsOnEvent(EventMessage eventMessage) {
-            assertEquals(VERSION, processManager.getVersion()
+            assertEquals(VERSION, processManager.version()
                                                 .getNumber());
             testDispatchEvent(eventMessage);
-            assertEquals(VERSION + 1, processManager.getVersion()
+            assertEquals(VERSION + 1, processManager.version()
                                                     .getNumber());
         }
     }

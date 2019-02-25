@@ -78,7 +78,7 @@ public abstract class Bus<T extends Message,
      *
      * @param dispatcher the dispatcher to register
      * @throws IllegalArgumentException
-     *         if the set of message classes {@linkplain MessageDispatcher#getMessageClasses()
+     *         if the set of message classes {@linkplain MessageDispatcher#messageClasses()
      *         exposed} by the dispatcher is empty
      */
     public void register(D dispatcher) {

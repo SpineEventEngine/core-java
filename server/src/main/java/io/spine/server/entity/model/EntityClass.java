@@ -138,7 +138,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     private static <I> Class<I> idClass(Class<? extends Entity> cls) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.getArgumentIn(cls);
+        Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.argumentIn(cls);
         try {
             Identifier.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
@@ -156,7 +156,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     private static <S extends Message> Class<S> stateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
+        Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
         return result;
     }
 

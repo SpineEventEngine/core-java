@@ -65,9 +65,9 @@ class DelegatingEventDispatcherTest {
     @Test
     @DisplayName("delegate `onError`")
     void delegateOnError() {
-        EventEnvelope envelope = EventEnvelope.of(GivenEvent.arbitrary());
+        EventEnvelope event = EventEnvelope.of(GivenEvent.arbitrary());
         RuntimeException exception = new RuntimeException("test delegating onError");
-        delegatingDispatcher.onError(envelope, exception);
+        delegatingDispatcher.onError(event, exception);
 
         assertTrue(delegate.onErrorCalled());
         assertEquals(exception, delegate.getLastException());

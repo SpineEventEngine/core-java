@@ -100,7 +100,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
      *
      * @return if the passed {@code CommandHandler} handles the same
      * set of command classes.
-     * @see #getMessageClasses()
+     * @see #messageClasses()
      */
     @Override
     public boolean equals(Object o) {

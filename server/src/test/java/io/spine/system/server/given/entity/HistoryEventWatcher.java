@@ -34,7 +34,7 @@ import java.util.Set;
 public class HistoryEventWatcher extends AbstractEventAccumulator {
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return ModelInfo.eventLifecycle()
                         .getStateEventClasses();
     }

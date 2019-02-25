@@ -98,7 +98,7 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
     Version getVersion();
 
     /**
-     * Obtains the version information of the entity.
+     * Obtains the version of the entity.
      */
     default Version version() {
         return getVersion();

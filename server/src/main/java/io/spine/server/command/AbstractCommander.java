@@ -56,7 +56,7 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return thisClass.getCommands();
     }
 
@@ -70,12 +70,12 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return thisClass.getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return thisClass.getExternalEventClasses();
     }
 

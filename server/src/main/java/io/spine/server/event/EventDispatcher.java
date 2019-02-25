@@ -38,26 +38,26 @@ public interface EventDispatcher<I>
     /**
      * Obtains classes of domestic events processed by this dispatcher.
      */
-    default Set<EventClass> getEventClasses() {
-        return getMessageClasses();
+    default Set<EventClass> eventClasses() {
+        return messageClasses();
     }
 
     /**
      * Obtains classes of external events processed by this dispatcher.
      */
-    Set<EventClass> getExternalEventClasses();
+    Set<EventClass> externalEventClasses();
 
     /**
      * Verifies if this instance dispatches at least one domestic event.
      */
     default boolean dispatchesEvents() {
-        return !getEventClasses().isEmpty();
+        return !eventClasses().isEmpty();
     }
 
     /**
      * Verifies if this instance dispatches at least one external event.
      */
     default boolean dispatchesExternalEvents() {
-        return !getExternalEventClasses().isEmpty();
+        return !externalEventClasses().isEmpty();
     }
 }

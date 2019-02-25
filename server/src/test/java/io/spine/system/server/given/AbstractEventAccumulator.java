@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.type.EventClass;
@@ -68,19 +69,19 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
      */
     @CanIgnoreReturnValue
     @Override
-    public final Set<String> dispatch(EventEnvelope envelope) {
-        Message event = envelope.message();
-        remember(event);
+    public final Set<String> dispatch(EventEnvelope event) {
+        EventMessage msg = event.message();
+        remember(msg);
         return singleton(id);
     }
 
     @Override
-    public final Set<EventClass> getMessageClasses() {
-        return getEventClasses();
+    public final Set<EventClass> messageClasses() {
+        return eventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

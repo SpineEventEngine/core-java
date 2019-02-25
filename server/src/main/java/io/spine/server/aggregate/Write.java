@@ -67,7 +67,7 @@ final class Write<I> {
         checkNotNull(aggregate);
 
         AggregateStorage<I> storage = repository.aggregateStorage();
-        int snapshotTrigger = repository.getSnapshotTrigger();
+        int snapshotTrigger = repository.snapshotTrigger();
         I id = aggregate.id();
         return new Write<>(storage, aggregate, id, snapshotTrigger);
     }

@@ -40,7 +40,7 @@ class EventDispatcherRegistry
     @Override
     public void register(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
-        Set<EventClass> eventClasses = dispatcher.getMessageClasses();
+        Set<EventClass> eventClasses = dispatcher.messageClasses();
         checkNotEmpty(dispatcher, eventClasses);
 
         super.register(dispatcher);
@@ -49,7 +49,7 @@ class EventDispatcherRegistry
     @Override
     public void unregister(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
-        Set<EventClass> eventClasses = dispatcher.getMessageClasses();
+        Set<EventClass> eventClasses = dispatcher.messageClasses();
         checkNotEmpty(dispatcher, eventClasses);
 
         super.unregister(dispatcher);

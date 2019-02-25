@@ -128,7 +128,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class EmptyDispatcher implements CommandDispatcher<Message> {
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return Collections.emptySet();
         }
 
@@ -151,7 +151,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class AllCommandDispatcher implements CommandDispatcher<Message> {
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdCreateProject.class,
                                       CmdStartProject.class,
                                       CmdAddTask.class);
@@ -171,7 +171,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdCreateProject.class);
         }
 
@@ -189,7 +189,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdAddTask.class);
         }
 
@@ -250,7 +250,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return ImmutableSet.of();
         }
     }

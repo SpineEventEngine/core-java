@@ -121,7 +121,7 @@ public class EventBusTestEnv {
         TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
-                eventBus.getEventStore()
+                eventBus.eventStore()
                         .read(allEventsQuery(), observer);
             }
         };

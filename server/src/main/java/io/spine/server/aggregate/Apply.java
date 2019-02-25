@@ -57,7 +57,7 @@ public @interface Apply {
      * defined as the first parameter of the annotated method.
      *
      * @see ImportBus
-     * @see AggregateRepository#getEventImportRouting()
+     * @see AggregateRepository#eventImportRouting()
      */
     boolean allowImport() default false;
 }

@@ -77,7 +77,7 @@ class EntityClassTest {
         Range<Instant> whileWeCreate = Range.closed(toInstant(before), toInstant(after));
 
         assertEquals(id, entity.id());
-        assertEquals(0, entity.getVersion()
+        assertEquals(0, entity.version()
                               .getNumber());
         assertTrue(whileWeCreate.contains(toInstant(entity.whenModified())));
         assertEquals(StringValue.getDefaultInstance(), entity.state());

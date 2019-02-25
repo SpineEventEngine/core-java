@@ -40,7 +40,7 @@ public interface EventProducer {
      * <p>If {@linkplain Version#getDefaultInstance() empty}, no version will be added to
      * the generated events.
      */
-    Version getVersion();
+    Version version();
 
     /**
      * Obtains the {@link io.spine.server.model.Nothing} event message.

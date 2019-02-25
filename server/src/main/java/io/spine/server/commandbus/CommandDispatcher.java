@@ -35,6 +35,6 @@ public interface CommandDispatcher<I> extends UnicastDispatcher<CommandClass, Co
      * Verifies if this instance dispatches at least one command.
      */
     default boolean dispatchesCommands() {
-        return !getMessageClasses().isEmpty();
+        return !messageClasses().isEmpty();
     }
 }

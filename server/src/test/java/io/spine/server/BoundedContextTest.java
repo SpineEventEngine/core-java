@@ -195,7 +195,7 @@ class BoundedContextTest {
         assertTrue(stand.getExposedTypes().isEmpty());
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
-        assertThat(stand.getExposedTypes(), contains(repository.getEntityStateType()));
+        assertThat(stand.getExposedTypes(), contains(repository.entityStateType()));
     }
 
     @Test
@@ -292,7 +292,7 @@ class BoundedContextTest {
                                                                .setEventStore(eventStore))
                                           .build();
         assertEquals(eventStore, bc.eventBus()
-                                   .getEventStore());
+                                   .eventStore());
     }
 
     @Nested
@@ -373,12 +373,12 @@ class BoundedContextTest {
     @Test
     @DisplayName("obtain entity types by visibility")
     void getEntityTypesByVisibility() {
-        assertTrue(boundedContext.getEntityStateTypes(EntityOption.Visibility.FULL)
+        assertTrue(boundedContext.entityStateTypes(EntityOption.Visibility.FULL)
                                  .isEmpty());
 
         registerAll();
 
-        assertFalse(boundedContext.getEntityStateTypes(EntityOption.Visibility.FULL)
+        assertFalse(boundedContext.entityStateTypes(EntityOption.Visibility.FULL)
                                   .isEmpty());
     }
 

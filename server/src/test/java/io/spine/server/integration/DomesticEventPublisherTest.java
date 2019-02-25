@@ -78,7 +78,7 @@ class DomesticEventPublisherTest {
         DomesticEventPublisher publisher = new DomesticEventPublisher(
                 assumingTests(), publisherHub, TARGET_EVENT_CLASS
         );
-        Set<EventClass> classes = publisher.getMessageClasses();
+        Set<EventClass> classes = publisher.messageClasses();
         assertThat(classes).containsExactly(TARGET_EVENT_CLASS);
     }
 
@@ -88,7 +88,7 @@ class DomesticEventPublisherTest {
         DomesticEventPublisher publisher = new DomesticEventPublisher(
                 assumingTests(), publisherHub, TARGET_EVENT_CLASS
         );
-        Set<EventClass> classes = publisher.getExternalEventClasses();
+        Set<EventClass> classes = publisher.externalEventClasses();
         assertThat(classes).isEmpty();
         Optional<?> externalDispatcher = publisher.createExternalDispatcher();
         assertFalse(externalDispatcher.isPresent());

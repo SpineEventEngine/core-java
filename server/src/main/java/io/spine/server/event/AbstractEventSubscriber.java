@@ -120,12 +120,12 @@ public abstract class AbstractEventSubscriber
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return thisClass.getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return thisClass.getExternalEventClasses();
     }
 
@@ -140,8 +140,8 @@ public abstract class AbstractEventSubscriber
     private final class ExternalDispatcher implements ExternalMessageDispatcher<String>, Logging {
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
-            return ExternalMessageClass.fromEventClasses(getExternalEventClasses());
+        public Set<ExternalMessageClass> messageClasses() {
+            return ExternalMessageClass.fromEventClasses(externalEventClasses());
         }
 
         @CanIgnoreReturnValue

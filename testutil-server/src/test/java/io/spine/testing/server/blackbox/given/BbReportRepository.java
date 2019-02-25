@@ -42,7 +42,7 @@ public class BbReportRepository extends AggregateRepository<BbReportId, BbReport
     private final List<BbReportAggregate> aggregates = newArrayList();
 
     public BbReportRepository() {
-        getEventRouting().route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
+        eventRouting().route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
                 (event, context) -> getReportsContainingProject(event.getProjectId()));
     }
 

@@ -55,7 +55,7 @@ public class DelegatingCommandDispatcher<I> implements CommandDispatcher<I> {
     }
 
     @Override
-    public final Set<CommandClass> getMessageClasses() {
+    public final Set<CommandClass> messageClasses() {
         return delegate.getCommandClasses();
     }
 

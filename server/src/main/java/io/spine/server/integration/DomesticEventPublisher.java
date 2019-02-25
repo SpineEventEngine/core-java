@@ -63,7 +63,7 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField")     // Returning an immutable impl.
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return eventClasses;
     }
 
@@ -89,7 +89,7 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

@@ -78,8 +78,8 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     }
 
     @Override
-    public final Set<EventClass> getMessageClasses() {
-        Set<EventClass> classes = super.getMessageClasses();
+    public final Set<EventClass> messageClasses() {
+        Set<EventClass> classes = super.messageClasses();
         Optional<String> invalidEventTypeName =
                 classes.stream()
                        .map(EventClass::typeName)
@@ -96,8 +96,8 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     }
 
     @Override
-    public final Set<EventClass> getExternalEventClasses() {
-        Set<EventClass> classes = super.getExternalEventClasses();
+    public final Set<EventClass> externalEventClasses() {
+        Set<EventClass> classes = super.externalEventClasses();
         checkState(classes.isEmpty(),
                    "A %s subclass cannot subscribe to external events.",
                    SystemEventWatcher.class.getSimpleName());

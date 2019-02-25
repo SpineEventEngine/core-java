@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <E> the type of envelopes which are handled by the local bus, which is being adapted
  * @param <D> the type of dispatchers suitable for the local bus, which is being adapted
- * @author Alex Tymchenko
  */
 abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
                           D extends MessageDispatcher<?, E, ?>> {

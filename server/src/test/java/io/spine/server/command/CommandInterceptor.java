@@ -56,7 +56,7 @@ public class CommandInterceptor extends AbstractCommandHandler {
     }
 
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return intercept;
     }
 

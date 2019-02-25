@@ -27,6 +27,7 @@ import io.spine.server.bus.DeadMessageHandler;
  * which has no targets to be dispatched to.
  */
 enum DeadExternalMessageHandler implements DeadMessageHandler<ExternalMessageEnvelope> {
+
     INSTANCE;
 
     @Override

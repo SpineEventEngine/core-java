@@ -48,7 +48,7 @@ public class FailingAggregateRepository
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public FailingAggregateRepository() {
         super();
-        getCommandRouting().replaceDefault(
+        commandRouting().replaceDefault(
                 // Simplistic routing function that takes absolute value as ID.
                 new CommandRoute<Long, CommandMessage>() {
                     private static final long serialVersionUID = 0L;
@@ -64,7 +64,7 @@ public class FailingAggregateRepository
                 }
         );
 
-        getEventRouting().replaceDefault(
+        eventRouting().replaceDefault(
                 new EventRoute<Long, EventMessage>() {
                     private static final long serialVersionUID = 0L;
 

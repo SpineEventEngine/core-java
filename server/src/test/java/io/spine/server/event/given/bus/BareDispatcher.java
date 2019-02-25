@@ -41,12 +41,12 @@ public class BareDispatcher implements EventDispatcher<String> {
     private boolean dispatchCalled = false;
 
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return ImmutableSet.of(EventClass.from(ProjectCreated.class));
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

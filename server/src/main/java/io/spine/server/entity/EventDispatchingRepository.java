@@ -73,7 +73,7 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public void onRegistered() {
         super.onRegistered();
-        getBoundedContext().registerEventDispatcher(this);
+        boundedContext().registerEventDispatcher(this);
     }
 
     /**

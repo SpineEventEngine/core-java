@@ -46,7 +46,7 @@ public class TestEventReactor implements EventReactor {
     }
 
     @Override
-    public Version getVersion() {
+    public Version version() {
         return Version.getDefaultInstance();
     }
 

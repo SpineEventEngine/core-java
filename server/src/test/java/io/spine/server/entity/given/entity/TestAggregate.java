@@ -42,7 +42,7 @@ public class TestAggregate
                      .withId(entity.id())
                      .withState(entity.state())
                      .modifiedOn(entity.whenModified())
-                     .withVersion(entity.getVersion()
+                     .withVersion(entity.version()
                                         .getNumber())
                      .build();
         return result;

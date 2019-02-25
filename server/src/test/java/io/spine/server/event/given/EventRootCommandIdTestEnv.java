@@ -189,7 +189,7 @@ public class EventRootCommandIdTestEnv {
             extends AggregateRepository<EvTeamId, TeamAggregate> {
 
         public TeamAggregateRepository() {
-            getEventRouting()
+            eventRouting()
                     .route(ProjectCreated.class,
                            new EventRoute<EvTeamId, ProjectCreated>() {
                                private static final long serialVersionUID = 0L;

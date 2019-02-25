@@ -167,7 +167,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     /** Returns {@link EventStore} associated with the bus. */
-    public EventStore getEventStore() {
+    public EventStore eventStore() {
         return eventStore;
     }
 
@@ -218,11 +218,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     @Override
-    protected void dispatch(EventEnvelope envelope) {
-        EventEnvelope enrichedEnvelope = enrich(envelope);
+    protected void dispatch(EventEnvelope event) {
+        EventEnvelope enrichedEnvelope = enrich(event);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", envelope.message()));
+                   format("Message %s has no dispatchers.", event.message()));
     }
 
     @Override
@@ -452,12 +452,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      */
     private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
-        public UnsupportedEventException handle(EventEnvelope envelope) {
+        public UnsupportedEventException handle(EventEnvelope event) {
+            store(ImmutableSet.of(event.outerObject()));
 
-            Event event = envelope.outerObject();
-            store(ImmutableSet.of(event));
-
-            EventMessage message = envelope.message();
+            EventMessage message = event.message();
             UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }

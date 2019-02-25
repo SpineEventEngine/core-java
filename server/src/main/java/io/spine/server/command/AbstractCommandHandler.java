@@ -97,7 +97,7 @@ public abstract class AbstractCommandHandler
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return thisClass.getCommands();
     }
 
@@ -105,7 +105,7 @@ public abstract class AbstractCommandHandler
      * Always returns {@linkplain Version#getDefaultInstance() empty} version.
      */
     @Override
-    public Version getVersion() {
+    public Version version() {
         return Version.getDefaultInstance();
     }
 }

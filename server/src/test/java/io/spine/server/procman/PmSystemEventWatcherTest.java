@@ -72,7 +72,7 @@ class PmSystemEventWatcherTest {
     @BeforeEach
     void setUp() {
         repository = mock(ProcessManagerRepository.class);
-        when(repository.getEntityStateType()).thenReturn(REPOSITORY_TYPE);
+        when(repository.entityStateType()).thenReturn(REPOSITORY_TYPE);
 
         watcher = new PmSystemEventWatcher<>(repository);
     }

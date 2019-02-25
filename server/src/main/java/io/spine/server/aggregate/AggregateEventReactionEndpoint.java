@@ -39,14 +39,14 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope envelope) {
-        repository().onDispatchEvent(aggregate.id(), envelope.outerObject());
-        return aggregate.reactOn(envelope);
+    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope event) {
+        repository().onDispatchEvent(aggregate.id(), event.outerObject());
+        return aggregate.reactOn(event);
     }
 
     @Override
-    protected void onError(EventEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
+    protected void onError(EventEnvelope event, RuntimeException exception) {
+        repository().onError(event, exception);
     }
 
     /**
@@ -54,7 +54,7 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
      * updated upon reacting on an event.
      */
     @Override
-    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
+    protected void onEmptyResult(A aggregate, EventEnvelope event) {
         // Do nothing.
     }
 }

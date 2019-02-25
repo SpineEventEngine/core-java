@@ -46,7 +46,7 @@ public class MultitenantCommandBusTestEnv {
         private boolean dispatcherInvoked = false;
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdAddTask.class);
         }
 

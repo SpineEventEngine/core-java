@@ -42,7 +42,7 @@ import java.util.Set;
 public class TestProcessManagerDispatcher implements CommandDispatcher<Message> {
 
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return CommandClass.setOf(PmAddTask.class,
                                   PmReviewBacklog.class,
                                   PmScheduleRetrospective.class,

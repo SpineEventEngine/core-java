@@ -191,7 +191,7 @@ class EventBusBuilderTest
             EventBus build = builder()
                     .setStorageFactory(storageFactory)
                     .build();
-            Executor streamExecutor = build.getEventStore()
+            Executor streamExecutor = build.eventStore()
                                            .getStreamExecutor();
             ensureExecutorDirect(streamExecutor);
         }
@@ -206,7 +206,7 @@ class EventBusBuilderTest
             EventBus.Builder builder = builder().setStorageFactory(storageFactory)
                                                 .setEventStoreStreamExecutor(simpleExecutor);
             EventBus build = builder.build();
-            Executor streamExecutor = build.getEventStore()
+            Executor streamExecutor = build.eventStore()
                                            .getStreamExecutor();
             streamExecutor.execute(mock(Runnable.class));
             try {

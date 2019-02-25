@@ -100,12 +100,12 @@ public abstract class ProcessManagerRepository<I,
      * Obtains class information of process managers managed by this repository.
      */
     private ProcessManagerClass<P> processManagerClass() {
-        return (ProcessManagerClass<P>) entityClass();
+        return (ProcessManagerClass<P>) entityModelClass();
     }
 
     @Internal
     @Override
-    protected final ProcessManagerClass<P> getModelClass(Class<P> cls) {
+    protected final ProcessManagerClass<P> toModelClass(Class<P> cls) {
         return asProcessManagerClass(cls);
     }
 
@@ -133,7 +133,7 @@ public abstract class ProcessManagerRepository<I,
     public void onRegistered() {
         super.onRegistered();
 
-        BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = boundedContext();
         boundedContext.registerCommandDispatcher(this);
 
         checkNotDeaf();
@@ -163,7 +163,7 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return processManagerClass().getEventClasses();
     }
 
@@ -175,7 +175,7 @@ public abstract class ProcessManagerRepository<I,
      *         external events
      */
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return processManagerClass().getExternalEventClasses();
     }
 
@@ -198,7 +198,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public ImmutableSet<EventClass> getProducedEvents() {
+    public ImmutableSet<EventClass> producibleEventClasses() {
         Set<EventClass> eventClasses = processManagerClass().getProducedEvents();
         return ImmutableSet.copyOf(eventClasses);
     }
@@ -285,7 +285,7 @@ public abstract class ProcessManagerRepository<I,
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = getBoundedContext().eventBus();
+        EventBus bus = boundedContext().eventBus();
         bus.post(filteredEvents);
     }
 
@@ -313,7 +313,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected P findOrCreate(I id) {
         P result = super.findOrCreate(id);
-        CommandBus commandBus = getBoundedContext().commandBus();
+        CommandBus commandBus = boundedContext().commandBus();
         result.setCommandBus(commandBus);
         return result;
     }
@@ -356,8 +356,8 @@ public abstract class ProcessManagerRepository<I,
     private class PmExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
-            ProcessManagerClass<?> pmClass = asProcessManagerClass(getEntityClass());
+        public Set<ExternalMessageClass> messageClasses() {
+            ProcessManagerClass<?> pmClass = asProcessManagerClass(entityClass());
             Set<EventClass> eventClasses = pmClass.getExternalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }

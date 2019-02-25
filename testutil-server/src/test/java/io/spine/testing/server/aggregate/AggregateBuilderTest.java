@@ -85,7 +85,7 @@ class AggregateBuilderTest {
     @Test
     @DisplayName("version")
     void version() {
-        assertEquals(version, aggregate.getVersion().getNumber());
+        assertEquals(version, aggregate.version().getNumber());
     }
 
     @Test

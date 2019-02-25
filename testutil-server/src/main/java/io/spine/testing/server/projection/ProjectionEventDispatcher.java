@@ -97,7 +97,7 @@ public class ProjectionEventDispatcher {
         ProjectionRepository<I, P, S> mockRepository() {
             TestProjectionRepository mockedRepo = mock(TestProjectionRepository.class);
             when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-            when(mockedRepo.getIdClass()).thenReturn(Object.class);
+            when(mockedRepo.idClass()).thenReturn(Object.class);
             return mockedRepo;
         }
     }

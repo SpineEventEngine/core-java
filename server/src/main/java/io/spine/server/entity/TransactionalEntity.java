@@ -297,7 +297,7 @@ public abstract class TransactionalEntity<I,
         checkNotNull(entityClass);
         @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
         Class<B> builderClass = (Class<B>)
-                    GenericParameter.STATE_BUILDER.getArgumentIn(entityClass);
+                    GenericParameter.STATE_BUILDER.argumentIn(entityClass);
         return builderClass;
     }
 }

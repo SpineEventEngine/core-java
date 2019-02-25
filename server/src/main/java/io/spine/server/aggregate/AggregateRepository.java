@@ -123,7 +123,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         super.onRegistered();
 
-        BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = boundedContext();
         boundedContext.registerCommandDispatcher(this);
         boundedContext.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {
@@ -155,11 +155,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** Obtains class information of aggregates managed by this repository. */
     protected final AggregateClass<A> aggregateClass() {
-        return (AggregateClass<A>) entityClass();
+        return (AggregateClass<A>) entityModelClass();
     }
 
     @Override
-    protected AggregateClass<A> getModelClass(Class<A> cls) {
+    protected AggregateClass<A> toModelClass(Class<A> cls) {
         return asAggregateClass(cls);
     }
 
@@ -167,7 +167,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Stores the passed aggregate and commits its uncommitted events.
      */
     @Override
-    protected void store(A aggregate) {
+    protected final void store(A aggregate) {
         Write<I> operation = Write.operationFor(this, aggregate);
         operation.perform();
     }
@@ -180,12 +180,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected Storage<I, ?, ?> createStorage(StorageFactory factory) {
-        Storage<I, ?, ?> result = factory.createAggregateStorage(getEntityClass());
+        Storage<I, ?, ?> result = factory.createAggregateStorage(entityClass());
         return result;
     }
 
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return aggregateClass().getCommands();
     }
 
@@ -215,7 +215,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private I route(CommandEnvelope cmd) {
-        CommandRouting<I> routing = getCommandRouting();
+        CommandRouting<I> routing = commandRouting();
         I target = routing.apply(cmd.message(), cmd.context());
         onCommandTargetSet(target, cmd.id());
         return target;
@@ -243,19 +243,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return aggregateClass().getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return aggregateClass().getExternalEventClasses();
     }
 
     /**
      * Obtains classes of events that can be imported by aggregates of this repository.
      */
-    public Set<EventClass> getImportableEventClasses() {
+    public Set<EventClass> importableEventClasses() {
         return aggregateClass().getImportableEventClasses();
     }
 
@@ -269,9 +269,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * aggregates.
      */
     @Override
-    public ImmutableSet<EventClass> getProducedEvents() {
+    public ImmutableSet<EventClass> producibleEventClasses() {
         SetView<EventClass> eventClasses =
-                union(aggregateClass().getProducedEvents(), getImportableEventClasses());
+                union(aggregateClass().getProducedEvents(), importableEventClasses());
         return ImmutableSet.copyOf(eventClasses);
     }
 
@@ -296,7 +296,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private Set<I> route(EventEnvelope event) {
-        EventRouting<I> routing = getEventRouting();
+        EventRouting<I> routing = eventRouting();
         Set<I> targets = routing.apply(event.message(), event.context());
         return targets;
     }
@@ -323,7 +323,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private I routeImport(EventEnvelope event) {
-        Set<I> ids = getEventImportRouting().apply(event.message(), event.context());
+        Set<I> ids = eventImportRouting().apply(event.message(), event.context());
         int numberOfTargets = ids.size();
         checkState(
                 numberOfTargets > 0,
@@ -356,14 +356,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Obtains command routing instance used by this repository.
      */
-    protected final CommandRouting<I> getCommandRouting() {
+    protected final CommandRouting<I> commandRouting() {
         return commandRouting;
     }
 
     /**
      * Obtains event routing instance used by this repository.
      */
-    protected final EventRouting<I> getEventRouting() {
+    protected final EventRouting<I> eventRouting() {
         return eventRouting;
     }
 
@@ -388,7 +388,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * Consider adding this code to the constructor of your {@code AggregateRepository} class.
      */
-    protected final EventRouting<I> getEventImportRouting() {
+    protected final EventRouting<I> eventImportRouting() {
         return eventImportRoute;
     }
 
@@ -397,7 +397,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = getBoundedContext().eventBus();
+        EventBus bus = boundedContext().eventBus();
         bus.post(filteredEvents);
     }
 
@@ -407,7 +407,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return a positive integer value
      * @see #DEFAULT_SNAPSHOT_TRIGGER
      */
-    protected int getSnapshotTrigger() {
+    protected int snapshotTrigger() {
         return this.snapshotTrigger;
     }
 
@@ -431,7 +431,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
+        AggregateStorage<I> result = (AggregateStorage<I>) storage();
         return result;
     }
 
@@ -477,7 +477,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The method loads only the recent history of the aggregate.
      * The maximum depth of the read operation is defined as the greater number between
      * the {@linkplain AggregateStorage#readEventCountAfterLastSnapshot(Object) event count after
-     * the last snapshot} and the {@linkplain #getSnapshotTrigger() snapshot trigger}, plus one.
+     * the last snapshot} and the {@linkplain #snapshotTrigger() snapshot trigger}, plus one.
      * This way, we secure the read operation from:
      * <ol>
      *     <li>snapshot trigger decrease;

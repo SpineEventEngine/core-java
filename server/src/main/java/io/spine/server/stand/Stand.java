@@ -209,7 +209,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Also receives {@link EntityStateChanged} event class to enable entity subscriptions.
      */
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);
         Set<EventClass> result =
                 union(eventRegistry.eventClasses(), singleton(entityStateChanged));
@@ -222,7 +222,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Stand does not consume external events.
      */
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

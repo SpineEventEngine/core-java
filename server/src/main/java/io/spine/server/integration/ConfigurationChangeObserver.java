@@ -36,8 +36,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * An observer, which reacts to the configuration update messages sent by
  * external entities (such as {@code IntegrationBus}es of other bounded contexts).
- *
- * @author Alex Tymchenko
  */
 final class ConfigurationChangeObserver extends AbstractChannelObserver implements AutoCloseable {
 

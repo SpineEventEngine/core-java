@@ -214,7 +214,7 @@ class ProjectionShould {
                 .newBuilder()
                 .setValue(123)
                 .build();
-        Version nextVersion = Versions.increment(projection.getVersion());
+        Version nextVersion = Versions.increment(projection.version());
         Event e1 = eventFactory.createEvent(stringImported, nextVersion);
         Event e2 = eventFactory.createEvent(integerImported, Versions.increment(nextVersion));
 

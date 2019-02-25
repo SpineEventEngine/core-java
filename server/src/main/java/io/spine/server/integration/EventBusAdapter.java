@@ -39,7 +39,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
 
-    EventBusAdapter(Builder builder) {
+    private EventBusAdapter(Builder builder) {
         super(builder);
     }
 

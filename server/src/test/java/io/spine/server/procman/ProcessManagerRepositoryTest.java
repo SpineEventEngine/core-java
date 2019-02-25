@@ -462,7 +462,7 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("events")
         void event() {
-            Set<EventClass> eventClasses = repository().getMessageClasses();
+            Set<EventClass> eventClasses = repository().messageClasses();
 
             assertEventClasses(
                     eventClasses,

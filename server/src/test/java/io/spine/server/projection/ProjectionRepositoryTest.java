@@ -465,7 +465,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("processed event classes")
         void eventClasses() {
-            Set<EventClass> eventClasses = repository().getMessageClasses();
+            Set<EventClass> eventClasses = repository().messageClasses();
             assertEventClasses(eventClasses,
                                PrjProjectCreated.class,
                                PrjTaskAdded.class,
@@ -536,25 +536,14 @@ class ProjectionRepositoryTest
     class ExposeToPackage {
 
         /**
-         * Ensures that {@link ProjectionRepository#getEventStore()} which is used by the catch-up
+         * Ensures that {@link ProjectionRepository#eventStore()} which is used by the catch-up
          * functionality is exposed to the package.
          */
         @Test
         @DisplayName("event store")
         void eventStore() {
             ProjectionRepository<?, ?, ?> repository = repository();
-            assertNotNull(repository.getEventStore());
-        }
-
-        /**
-         * Ensures that {@link ProjectionRepository#boundedContext()} which is used by the catch-up
-         * functionality is exposed to the package.
-         */
-        @Test
-        @DisplayName("bounded context")
-        void boundedContext() {
-            ProjectionRepository<?, ?, ?> repository = repository();
-            assertNotNull(repository.boundedContext());
+            assertNotNull(repository.eventStore());
         }
     }
 

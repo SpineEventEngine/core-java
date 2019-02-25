@@ -91,7 +91,7 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
         @Override
         public void onRegistered() {
             super.onRegistered();
-            getEventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
+            eventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
         }
     }
 }

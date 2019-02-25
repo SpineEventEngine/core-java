@@ -313,7 +313,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
         IntegrationBus integrationBus = this;
-        Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
+        Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass imClass : transformed) {
             ChannelId channelId = toId(imClass);
             Subscriber subscriber = subscriberHub.get(channelId);
@@ -325,7 +325,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     private void unsubscribeFromIncoming(ExternalMessageDispatcher<?> dispatcher) {
         IntegrationBus integrationBus = this;
-        Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
+        Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass imClass : transformed) {
             ChannelId channelId = toId(imClass);
             Subscriber subscriber = subscriberHub.get(channelId);

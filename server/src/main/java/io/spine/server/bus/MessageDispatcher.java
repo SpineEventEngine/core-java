@@ -44,7 +44,7 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      *
      * @return non-empty set of message classes
      */
-    Set<C> getMessageClasses();
+    Set<C> messageClasses();
 
     /**
      * Dispatches the message contained in the passed envelope.
@@ -67,7 +67,7 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      * Checks if this dispatcher can dispatch the given message.
      *
      * <p>This method does not check that the type of the message is one of
-     * the {@linkplain #getMessageClasses() dispatched message classes}. Instead, it validates
+     * the {@linkplain #messageClasses() dispatched message classes}. Instead, it validates
      * the message upon some custom rules of this dispatcher.
      *
      * <p>Extend this method to forbid messages from being dispatched to this instance.

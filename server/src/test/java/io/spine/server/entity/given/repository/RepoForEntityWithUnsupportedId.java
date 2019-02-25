@@ -44,7 +44,7 @@ public class RepoForEntityWithUnsupportedId extends Repository<Exception, Entity
     }
 
     @Override
-    protected void store(EntityWithUnsupportedId obj) {
+    protected final void store(EntityWithUnsupportedId obj) {
     }
 
     @Override

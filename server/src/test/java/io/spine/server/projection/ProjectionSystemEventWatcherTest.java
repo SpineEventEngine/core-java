@@ -62,7 +62,7 @@ class ProjectionSystemEventWatcherTest {
     @BeforeEach
     void setUp() {
         repository = mock(ProjectionRepository.class);
-        when(repository.getEntityStateType()).thenReturn(REPOSITORY_TYPE);
+        when(repository.entityStateType()).thenReturn(REPOSITORY_TYPE);
     }
 
     @Test

@@ -38,7 +38,7 @@ import java.util.Set;
  * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} child interfaces
  * (such as {@link io.spine.server.commandbus.CommandDispatcher CommandDispatcher} or
  * {@link io.spine.server.event.EventDispatcher EventDispatcher}). However, it is impossible
- * to implement the same {@link io.spine.server.bus.MessageDispatcher#getMessageClasses()
+ * to implement the same {@link io.spine.server.bus.MessageDispatcher#messageClasses()
  * getMessageClasses()} method several times with the different types of {@code MessageClass}es
  * returned.
  *

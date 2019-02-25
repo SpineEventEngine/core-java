@@ -45,12 +45,12 @@ public interface EventDispatcherDelegate<I> {
     /**
      * Obtains event classes dispatched by this delegate.
      */
-    Set<EventClass> getEventClasses();
+    Set<EventClass> eventClasses();
 
     /**
      * Obtains external event classes dispatched by this delegate.
      */
-    Set<EventClass> getExternalEventClasses();
+    Set<EventClass> externalEventClasses();
 
     /**
      * Dispatches the event.
@@ -82,13 +82,13 @@ public interface EventDispatcherDelegate<I> {
      * Verifies if this instance dispatches at least one domestic event.
      */
     default boolean dispatchesEvents() {
-        return !getEventClasses().isEmpty();
+        return !eventClasses().isEmpty();
     }
 
     /**
      * Verifies if this instance dispatches at least one external event.
      */
     default boolean dispatchesExternalEvents() {
-        return !getExternalEventClasses().isEmpty();
+        return !externalEventClasses().isEmpty();
     }
 }

@@ -71,7 +71,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Model class of entities managed by this repository.
      *
-     * <p>This field is null if {@link #entityClass()} is never called.
+     * <p>This field is null if {@link #entityModelClass()} is never called.
      */
     private volatile @MonotonicNonNull EntityClass<E> entityClass;
 
@@ -131,11 +131,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains model class for the entities managed by this repository.
      */
-    protected final EntityClass<E> entityClass() {
+    protected final EntityClass<E> entityModelClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            Class<E> cast = (Class<E>) GenericParameter.ENTITY.getArgumentIn(getClass());
-            entityClass = getModelClass(cast);
+            Class<E> cast = (Class<E>) GenericParameter.ENTITY.argumentIn(getClass());
+            entityClass = toModelClass(cast);
         }
         return entityClass;
     }
@@ -144,28 +144,28 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Obtains a model class for the passed entity class value.
      */
     @Internal
-    protected EntityClass<E> getModelClass(Class<E> cls) {
+    protected EntityClass<E> toModelClass(Class<E> cls) {
         return asEntityClass(cls);
     }
 
     /** Returns the class of IDs used by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public Class<I> getIdClass() {
-        return (Class<I>) entityClass().idClass();
+    public Class<I> idClass() {
+        return (Class<I>) entityModelClass().idClass();
     }
 
     /** Returns the class of entities managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public Class<E> getEntityClass() {
-        return (Class<E>) entityClass().value();
+    public Class<E> entityClass() {
+        return (Class<E>) entityModelClass().value();
     }
 
     /**
      * Obtains the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository.
      */
-    public TypeUrl getEntityStateType() {
-        return entityClass().stateType();
+    public TypeUrl entityStateType() {
+        return entityModelClass().stateType();
     }
 
     /**
@@ -174,7 +174,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>For convenience, the default version returns empty collection. This method should be
      * overridden by repositories which actually produce events.
      */
-    public ImmutableSet<EventClass> getProducedEvents() {
+    public ImmutableSet<EventClass> producibleEventClasses() {
         return ImmutableSet.of();
     }
 
@@ -204,10 +204,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Obtains {@code BoundedContext} to which this repository belongs.
      *
      * @return parent {@code BoundedContext}
-     * @throws IllegalStateException if the repository is not registered {@linkplain
-     *                               BoundedContext#register(Repository) registered} yet
+     * @throws IllegalStateException
+     *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
+     *         registered} yet
      */
-    protected final BoundedContext getBoundedContext() {
+    protected final BoundedContext boundedContext() {
         checkState(boundedContext != null,
                    "The repository (class: %s) is not registered with a BoundedContext.",
                    getClass().getName());
@@ -220,8 +221,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
-        getBoundedContext().stand()
-                           .registerTypeSupplier(this);
+        boundedContext().stand()
+                        .registerTypeSupplier(this);
     }
 
     /**
@@ -246,7 +247,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * @throws IllegalStateException if the storage is not assigned
      */
-    protected final Storage<I, ?, ?> getStorage() {
+    protected final Storage<I, ?, ?> storage() {
         return checkStorage(this.storage);
     }
 
@@ -317,7 +318,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
                             MessageEnvelope envelope,
                             RuntimeException exception) {
         MessageClass messageClass = envelope.messageClass();
-        String stateType = getEntityStateType().value();
+        String stateType = entityStateType().value();
         String errorMessage = format(msgFormat, messageClass, envelope.idAsString(), stateType);
         _error(errorMessage, exception);
     }
@@ -334,9 +335,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     @Internal
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
-        TypeUrl stateType = getEntityStateType();
-        SystemWriteSide writeSide = getBoundedContext().systemClient()
-                                                       .writeSide();
+        TypeUrl stateType = entityStateType();
+        SystemWriteSide writeSide = boundedContext().systemClient()
+                                                    .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
@@ -404,7 +405,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
         private EntityIterator(Repository<I, E> repository) {
             this.repository = repository;
-            this.index = repository.getStorage()
+            this.index = repository.storage()
                                    .index();
         }
 

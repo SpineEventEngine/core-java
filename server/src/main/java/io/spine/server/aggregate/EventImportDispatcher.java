@@ -65,15 +65,15 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
     }
 
     @Override
-    public Set<EventClass> getMessageClasses() {
-        return repository.getImportableEventClasses();
+    public Set<EventClass> messageClasses() {
+        return repository.importableEventClasses();
     }
 
     /**
      * Always returns empty set because external events cannot be imported.
      */
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

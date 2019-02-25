@@ -41,7 +41,7 @@ public class MulticastDispatcherIdentityTestEnv {
         public static final String ID = newUuid();
 
         @Override
-        public Set<MessageClass> getMessageClasses() {
+        public Set<MessageClass> messageClasses() {
             return ImmutableSet.of();
         }
 

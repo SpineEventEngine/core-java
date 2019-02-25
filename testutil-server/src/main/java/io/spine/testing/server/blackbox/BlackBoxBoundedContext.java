@@ -209,7 +209,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
             if (visibility == Visibility.VISIBILITY_UNKNOWN) {
                 continue;
             }
-            result.addAll(boundedContext.getEntityStateTypes(visibility));
+            result.addAll(boundedContext.entityStateTypes(visibility));
         }
         return result.build();
     }
@@ -568,7 +568,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     protected EmittedEvents emittedEvents() {
         MemoizingObserver<Event> queryObserver = memoizingObserver();
         boundedContext.eventBus()
-                      .getEventStore()
+                      .eventStore()
                       .read(allEventsQuery(), queryObserver);
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         List<Event> responses = queryObserver.responses()

@@ -90,14 +90,14 @@ class EventSubscriberTest {
     @Test
     @DisplayName("expose handled message classes")
     void exposeMessageClasses() {
-        assertEquals(3, subscriber.getMessageClasses()
+        assertEquals(3, subscriber.messageClasses()
                                   .size());
     }
 
     @Test
     @DisplayName("expose handled external message classes")
     void exposeExternalClasses() {
-        assertEquals(1, subscriber.getExternalEventClasses()
+        assertEquals(1, subscriber.externalEventClasses()
                                   .size());
     }
 

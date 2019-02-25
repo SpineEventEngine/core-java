@@ -228,7 +228,7 @@ public abstract class MessageHandlerTest<I,
         }
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return newHashSet(expectedCommands);
         }
 

@@ -41,7 +41,7 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     private final ProjectionRepository<I, ?, ?> repository;
 
     ProjectionSystemEventWatcher(ProjectionRepository<I, ?, ?> repository) {
-        super(repository.getEntityStateType());
+        super(repository.entityStateType());
         this.repository = repository;
     }
 

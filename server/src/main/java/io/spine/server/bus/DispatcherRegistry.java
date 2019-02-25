@@ -59,7 +59,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
 
     public void register(D dispatcher) {
         checkDispatcher(dispatcher);
-        Set<C> messageClasses = dispatcher.getMessageClasses();
+        Set<C> messageClasses = dispatcher.messageClasses();
         for (C messageClass : messageClasses) {
             dispatchers.put(messageClass, dispatcher);
         }
@@ -69,7 +69,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
         checkNotNull(dispatcher);
         checkNotEmpty(dispatcher);
 
-        Set<C> messageClasses = dispatcher.getMessageClasses();
+        Set<C> messageClasses = dispatcher.messageClasses();
         for (C messageClass : messageClasses) {
             dispatchers.remove(messageClass, dispatcher);
         }
@@ -170,7 +170,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     /**
      * Ensures that the passed dispatcher is valid.
      *
-     * <p>The passed dispatcher must {@linkplain MessageDispatcher#getMessageClasses() expose}
+     * <p>The passed dispatcher must {@linkplain MessageDispatcher#messageClasses() expose}
      * at least one message class.
      *
      * @param dispatcher
@@ -184,7 +184,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     }
 
     private static <D extends MessageDispatcher> void checkNotEmpty(D dispatcher) {
-        Set<?> messageClasses = dispatcher.getMessageClasses();
+        Set<?> messageClasses = dispatcher.messageClasses();
         checkArgument(!messageClasses.isEmpty(),
                       "The dispatcher (%s) has empty message class set.",
                       dispatcher);

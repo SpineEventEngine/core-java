@@ -319,7 +319,7 @@ public abstract class Aggregate<I,
      * @see #apply(List)
      */
     private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents) {
-        Version currentVersion = getVersion();
+        Version currentVersion = version();
 
         Stream<Version> versions = Stream.iterate(currentVersion, Versions::increment)
                                          .skip(1) // Skip current version
@@ -388,7 +388,7 @@ public abstract class Aggregate<I,
         Snapshot.Builder builder = Snapshot
                 .newBuilder()
                 .setState(state)
-                .setVersion(getVersion())
+                .setVersion(version())
                 .setTimestamp(getCurrentTime());
         return builder.build();
     }
@@ -423,7 +423,7 @@ public abstract class Aggregate<I,
      */
     @Override
     @VisibleForTesting
-    protected int versionNumber() {
+    protected final int versionNumber() {
         return super.versionNumber();
     }
 

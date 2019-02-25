@@ -28,10 +28,8 @@ import io.spine.grpc.StreamObservers;
  *
  * <p>Responsible of receiving those from the transport layer and posting those to the local
  * instance of {@code IntegrationBus}.
- *
- * @author Alex Tymchenko
  */
-class ExternalMessageObserver extends AbstractChannelObserver {
+final class ExternalMessageObserver extends AbstractChannelObserver {
 
     private final IntegrationBus integrationBus;
 

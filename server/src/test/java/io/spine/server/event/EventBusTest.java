@@ -131,7 +131,7 @@ public class EventBusTest {
         EventBus result = EventBus.newBuilder()
                                   .setEventStore(eventStore)
                                   .build();
-        assertEquals(eventStore, result.getEventStore());
+        assertEquals(eventStore, result.eventStore());
     }
 
     @Test

@@ -70,7 +70,7 @@ class EventImportTest {
     @Test
     @DisplayName("Obtain importable event classes")
     void importableEventClasses() {
-        Set<EventClass> importableEventClasses = repository.getImportableEventClasses();
+        Set<EventClass> importableEventClasses = repository.importableEventClasses();
         Set<EventClass> exposedByAggregateClass = repository.aggregateClass()
                                                             .getImportableEventClasses();
         assertThat(importableEventClasses).isEqualTo(exposedByAggregateClass);
@@ -112,7 +112,7 @@ class EventImportTest {
          */
         private void assertRouted(EventEnvelope event) {
             Set<EngineId> targets =
-                    repository.getEventImportRouting()
+                    repository.eventImportRouting()
                               .apply(event.message(), event.context());
 
             assertThat(targets).hasSize(1);

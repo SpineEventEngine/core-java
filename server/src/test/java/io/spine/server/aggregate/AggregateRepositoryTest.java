@@ -128,7 +128,7 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("aggregate class")
         void aggregateClass() {
-            assertEquals(ProjectAggregate.class, repository().getEntityClass());
+            assertEquals(ProjectAggregate.class, repository().entityClass());
         }
 
         @Test
@@ -137,7 +137,7 @@ public class AggregateRepositoryTest {
             Set<CommandClass> aggregateCommands =
                     asAggregateClass(ProjectAggregate.class)
                             .getCommands();
-            Set<CommandClass> exposedByRepository = repository().getMessageClasses();
+            Set<CommandClass> exposedByRepository = repository().messageClasses();
 
             assertTrue(exposedByRepository.containsAll(aggregateCommands));
         }
@@ -145,7 +145,7 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("event classes on which aggregate reacts")
         void aggregateEventClasses() {
-            Set<EventClass> eventClasses = repository().getEventClasses();
+            Set<EventClass> eventClasses = repository().eventClasses();
             assertTrue(eventClasses.contains(EventClass.from(AggProjectArchived.class)));
             assertTrue(eventClasses.contains(EventClass.from(AggProjectDeleted.class)));
         }
@@ -239,7 +239,7 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("set to default value initially")
         void setToDefault() {
-            assertEquals(DEFAULT_SNAPSHOT_TRIGGER, repository().getSnapshotTrigger());
+            assertEquals(DEFAULT_SNAPSHOT_TRIGGER, repository().snapshotTrigger());
         }
 
         @Test
@@ -249,7 +249,7 @@ public class AggregateRepositoryTest {
 
             repository().setSnapshotTrigger(newSnapshotTrigger);
 
-            assertEquals(newSnapshotTrigger, repository().getSnapshotTrigger());
+            assertEquals(newSnapshotTrigger, repository().snapshotTrigger());
         }
 
         @Test
@@ -287,7 +287,7 @@ public class AggregateRepositoryTest {
 
             AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
             assertEquals(id, passedRequest.getRecordId());
-            assertEquals(repositorySpy.getSnapshotTrigger() + 1, passedRequest.getBatchSize());
+            assertEquals(repositorySpy.snapshotTrigger() + 1, passedRequest.getBatchSize());
         }
 
         @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
@@ -327,7 +327,7 @@ public class AggregateRepositoryTest {
             AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
             when(repositorySpy.aggregateStorage())
                     .thenReturn(storageSpy);
-            int snapshotTrigger = repositorySpy.getSnapshotTrigger();
+            int snapshotTrigger = repositorySpy.snapshotTrigger();
             int eventCount = snapshotTrigger * 2;
             when(storageSpy.readEventCountAfterLastSnapshot(any(ProjectId.class)))
                     .thenReturn(eventCount);

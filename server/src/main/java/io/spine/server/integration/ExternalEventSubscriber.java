@@ -39,8 +39,6 @@ import static java.lang.String.format;
  *
  * <p>Allows to register {@code EventSubscriber}s as dispatchers of
  * {@code IntegrationBus}.
- *
- * @author Alex Tymchenko
  */
 final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>, Logging {
 
@@ -51,8 +49,8 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
     }
 
     @Override
-    public Set<ExternalMessageClass> getMessageClasses() {
-        Set<EventClass> extSubscriptions = delegate.getExternalEventClasses();
+    public Set<ExternalMessageClass> messageClasses() {
+        Set<EventClass> extSubscriptions = delegate.externalEventClasses();
         return ExternalMessageClass.fromEventClasses(extSubscriptions);
     }
 

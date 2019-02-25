@@ -77,7 +77,7 @@ public abstract class EventsResult extends MethodResult<EventMessage> {
 
         private ToEvent(EventProducer producer, MessageEnvelope origin) {
             this.eventFactory = EventFactory.on(origin, producer.producerId());
-            this.version = producer.getVersion();
+            this.version = producer.version();
         }
 
         @Override

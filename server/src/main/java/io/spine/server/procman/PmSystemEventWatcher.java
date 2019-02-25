@@ -42,7 +42,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
     private final ProcessManagerRepository<I, ?, ?> repository;
 
     PmSystemEventWatcher(ProcessManagerRepository<I, ?, ?> repository) {
-        super(repository.getEntityStateType());
+        super(repository.entityStateType());
         this.repository = repository;
     }
 

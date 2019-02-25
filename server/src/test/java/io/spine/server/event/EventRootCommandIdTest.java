@@ -223,7 +223,7 @@ public class EventRootCommandIdTest {
             @Override
             public void run() {
                 boundedContext.eventBus()
-                              .getEventStore()
+                              .eventStore()
                               .read(allEventsQuery(), observer);
             }
         };

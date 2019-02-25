@@ -392,7 +392,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Obtains the version number of the entity.
      */
     protected int versionNumber() {
-        int result = getVersion().getNumber();
+        int result = version().getNumber();
         return result;
     }
 
@@ -437,7 +437,18 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     private Version incrementedVersion() {
-        return Versions.increment(getVersion());
+        return Versions.increment(version());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to simplify implementation of entities implementing
+     * {@link io.spine.server.EventProducer}.
+     */
+    @Override
+    public Version version() {
+        return getVersion();
     }
 
     /**
@@ -468,12 +479,12 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         AbstractEntity<?, ?> that = (AbstractEntity<?, ?>) o;
         return Objects.equals(id(), that.id()) &&
                 Objects.equals(state(), that.state()) &&
-                Objects.equals(getVersion(), that.getVersion()) &&
+                Objects.equals(version(), that.version()) &&
                 Objects.equals(getLifecycleFlags(), that.getLifecycleFlags());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id(), state(), getVersion(), getLifecycleFlags());
+        return Objects.hash(id(), state(), version(), getLifecycleFlags());
     }
 }
