@@ -24,15 +24,20 @@ import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
+import io.spine.core.Version;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.entity.EntityLifecycleMonitor;
+import io.spine.server.entity.TransactionListener;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
+import io.spine.server.procman.PmTransaction;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -142,6 +147,7 @@ public final class PmDispatcher {
         TestPmRepository mockedRepo = mock(TestPmRepository.class);
         when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
         when(mockedRepo.idClass()).thenReturn(Object.class);
+        when(mockedRepo.beginTransactionFor(any())).thenCallRealMethod();
         return mockedRepo;
     }
 
@@ -151,9 +157,39 @@ public final class PmDispatcher {
     private static class TestPmRepository<I, P extends ProcessManager<I, S, ?>, S extends Message>
             extends ProcessManagerRepository<I, P, S> {
 
+        @SuppressWarnings("unchecked") // OK for this test repository.
+        @Override
+        protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
+            PmTransaction<?, ?, ?> tx = new TestPmTransaction(manager);
+            TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
+            tx.setListener(listener);
+            return tx;
+        }
+
         @Override
         protected EntityLifecycle lifecycleOf(I id) {
             return NoOpLifecycle.instance();
+        }
+    }
+
+    /**
+     * A test-only implementation of a {@link PmTransaction} that can set the given
+     * {@code state} and {@code version} as a starting point for the transaction.
+     */
+    static final class TestPmTransaction<I, S extends Message, B extends ValidatingBuilder<S, ?>>
+            extends PmTransaction<I, S, B> {
+
+        TestPmTransaction(ProcessManager<I, S, B> processManager) {
+            super(processManager);
+        }
+
+        TestPmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
+            super(processManager, state, version);
+        }
+
+        @Override
+        protected void commit() {
+            super.commit();
         }
     }
 }

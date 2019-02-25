@@ -33,10 +33,8 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmArchiveProject;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
@@ -47,12 +45,9 @@ import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmIterationStarted;
 import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
-import io.spine.test.procman.event.PmProjectArchived;
 import io.spine.test.procman.event.PmProjectCreated;
-import io.spine.test.procman.event.PmProjectDeleted;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.test.procman.rejection.PmCannotStartArchivedProject;
 
 import java.util.Optional;
 
@@ -141,38 +136,13 @@ public class TestProcessManager
                 .build();
     }
 
-    @Assign
-    PmProjectArchived handle(PmArchiveProject command) {
-        remember(command);
-        return PmProjectArchived
-                .newBuilder()
-                .setProjectId(command.getProjectId())
-                .build();
-    }
-
-    @Assign
-    PmProjectDeleted handle(PmDeleteProject command) {
-        remember(command);
-        return PmProjectDeleted
-                .newBuilder()
-                .setProjectId(command.getProjectId())
-                .build();
-    }
-
     /*
      * Command generation
      *************************************/
 
     @Command
-    PmAddTask transform(PmStartProject command) throws PmCannotStartArchivedProject {
+    PmAddTask transform(PmStartProject command) {
         remember(command);
-        if (getLifecycleFlags().getArchived()) {
-            PmCannotStartArchivedProject rejection = PmCannotStartArchivedProject
-                    .newBuilder()
-                    .setProjectId(command.getProjectId())
-                    .build();
-            throw rejection;
-        }
         PmAddTask addTask = ((PmAddTask.Builder)
                 builderForType(PmAddTask.class))
                 .setProjectId(command.getProjectId())

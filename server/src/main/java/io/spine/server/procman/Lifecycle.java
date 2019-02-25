@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EventMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
@@ -58,8 +59,10 @@ public final class Lifecycle implements Serializable {
     }
 
     @SafeVarargs
-    public final void archiveOn(Class<? extends EventMessage>... messageClasses) {
+    @CanIgnoreReturnValue
+    public final Lifecycle archiveOn(Class<? extends EventMessage>... messageClasses) {
         archiveOn.addAll(asList(messageClasses));
+        return this;
     }
 
     /**
@@ -82,8 +85,10 @@ public final class Lifecycle implements Serializable {
     }
 
     @SafeVarargs
-    public final void deleteOn(Class<? extends EventMessage>... messageClasses) {
+    @CanIgnoreReturnValue
+    public final Lifecycle deleteOn(Class<? extends EventMessage>... messageClasses) {
         deleteOn.addAll(asList(messageClasses));
+        return this;
     }
 
     /**

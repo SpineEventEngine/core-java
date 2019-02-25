@@ -62,9 +62,12 @@ abstract class PmEndpoint<I,
     protected void dispatchInTx(I id) {
         ProcessManagerRepository<I, P, ?> repository = repository();
         P manager = repository.findOrCreate(id);
-        List<Event> events = runTransactionFor(manager);
-        store(manager);
-        repository.postEvents(events);
+        try {
+            List<Event> events = runTransactionFor(manager);
+            repository.postEvents(events);
+        } finally {
+            store(manager);
+        }
     }
 
     protected List<Event> runTransactionFor(P processManager) {

@@ -61,9 +61,12 @@ import io.spine.test.procman.command.PmCreateProjectVBuilder;
 import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
+import io.spine.test.procman.event.PmProjectArchived;
 import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectDeleted;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -126,6 +129,9 @@ class ProcessManagerRepositoryTest
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
         TestProcessManagerRepository repo = new TestProcessManagerRepository();
+        repo.lifecycle()
+            .archiveOn(PmProjectArchived.class)
+            .deleteOn(PmProjectDeleted.class, PmCannotStartArchivedProject.class);
         return repo;
     }
 
@@ -546,5 +552,51 @@ class ProcessManagerRepositoryTest
                 .with(new EventDiscardingProcManRepository())
                 .receivesCommand(command)
                 .assertThat(emittedEvent(count(0)));
+    }
+
+    @Nested
+    @DisplayName("follow process lifecycle rules")
+    class FollowLifecycleRules {
+
+        @Test
+        @DisplayName("and archive the entity")
+        void andArchive() {
+            PmArchiveProject archiveProject = archiveProject();
+            ProjectId id = archiveProject.getProjectId();
+            assertFalse(processManager(id).isArchived());
+            testDispatchCommand(archiveProject);
+            assertTrue(processManager(id).isArchived());
+        }
+
+        @Test
+        @DisplayName("and delete the entity")
+        void andDelete() {
+            PmDeleteProject deleteProject = deleteProject();
+            ProjectId id = deleteProject.getProjectId();
+            assertFalse(processManager(id).isDeleted());
+            testDispatchCommand(deleteProject);
+            assertTrue(processManager(id).isDeleted());
+        }
+
+        @Test
+        @DisplayName("and delete the entity after rejection is thrown")
+        void andDeleteAfterRejection() {
+            PmArchiveProject archiveProject = archiveProject();
+            ProjectId id = archiveProject.getProjectId();
+            testDispatchCommand(archiveProject);
+
+            assertTrue(processManager(id).isArchived());
+            assertFalse(processManager(id).isDeleted());
+
+            // Test PM will now throw `CannotStartArchivedProject` rejection on a start command.
+            testDispatchCommand(startProject());
+
+            assertTrue(processManager(id).isDeleted());
+        }
+
+        private TestProcessManager processManager(ProjectId id) {
+            TestProcessManager result = repository().findOrCreate(id);
+            return result;
+        }
     }
 }

@@ -59,19 +59,27 @@ public class PmTransaction<I,
 
     private final Lifecycle lifecycle;
 
-    @VisibleForTesting
-    PmTransaction(ProcessManager<I, S, B> processManager, Lifecycle lifecycle) {
+    private PmTransaction(ProcessManager<I, S, B> processManager, Lifecycle lifecycle) {
         super(processManager);
         this.lifecycle = lifecycle;
     }
 
-    @VisibleForTesting
-    protected PmTransaction(ProcessManager<I, S, B> processManager,
-                            S state,
-                            Version version,
-                            Lifecycle lifecycle) {
+    private PmTransaction(ProcessManager<I, S, B> processManager,
+                          S state,
+                          Version version,
+                          Lifecycle lifecycle) {
         super(processManager, state, version);
         this.lifecycle = lifecycle;
+    }
+
+    @VisibleForTesting
+    protected PmTransaction(ProcessManager<I, S, B> processManager) {
+        this(processManager, new Lifecycle());
+    }
+
+    @VisibleForTesting
+    protected PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
+        this(processManager, state, version, new Lifecycle());
     }
 
     /**
@@ -117,7 +125,7 @@ public class PmTransaction<I,
     }
 
     /**
-     * Updates the process lifecycle on a transaction failure.
+     * Updates and commits the process manager lifecycle flags.
      */
     @Override
     protected void beforeRollback(Throwable cause) {

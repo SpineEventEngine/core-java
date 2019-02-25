@@ -51,6 +51,7 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectDeleted;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.procman.rejection.PmCannotStartArchivedProject;
 
 import java.util.List;
 
@@ -121,8 +122,17 @@ public class TestProcessManager
     }
 
     @Command
-    Pair<PmAddTask, PmDoNothing> handle(PmStartProject command, CommandContext context) {
+    Pair<PmAddTask, PmDoNothing> handle(PmStartProject command, CommandContext context)
+            throws PmCannotStartArchivedProject {
         keep(command);
+
+        if (getLifecycleFlags().getArchived()) {
+            PmCannotStartArchivedProject rejection = PmCannotStartArchivedProject
+                    .newBuilder()
+                    .setProjectId(command.getProjectId())
+                    .build();
+            throw rejection;
+        }
         ProjectId projectId = command.getProjectId();
         PmAddTask.Builder addTask = builderForType(PmAddTask.class);
         addTask.setProjectId(projectId);

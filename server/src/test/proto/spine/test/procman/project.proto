@@ -32,15 +32,7 @@ message ProjectId {
 }
 
 message Project {
-    option (entity).kind = PROCESS_MANAGER;
-
-    option (lifecycle).archive_upon = "spine.test.procman.event.PmProjectArchived";
-    option (lifecycle).delete_upon = "spine.test.procman.event.PmProjectDeleted,"
-                                     "spine.test.procman.rejection.PmCannotStartArchivedProject";
-
-    // Normally entity IDs are `required` and `set_once`, but as record based repository test is
-    // performing very complex manipulations on its entities, we need to set these to `false`.
-    ProjectId id = 1 [(required) = false, (set_once) = false];
+    ProjectId id = 1;
 
     string name = 2;
 

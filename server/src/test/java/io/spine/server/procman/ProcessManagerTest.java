@@ -40,7 +40,6 @@ import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.test.shared.AnyProcess;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -94,10 +93,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.pm.GivenMessages.addTask;
-import static io.spine.server.procman.given.pm.GivenMessages.archiveProject;
 import static io.spine.server.procman.given.pm.GivenMessages.cancelIteration;
 import static io.spine.server.procman.given.pm.GivenMessages.createProject;
-import static io.spine.server.procman.given.pm.GivenMessages.deleteProject;
 import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
 import static io.spine.server.procman.given.pm.GivenMessages.iterationPlanned;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
@@ -118,7 +115,6 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static io.spine.testing.server.procman.PmDispatcher.dispatch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -553,36 +549,5 @@ class ProcessManagerTest {
                     PmProjectDeleted.class
             ));
         }
-    }
-
-    @Test
-    @DisplayName("archive self according to the lifecycle")
-    void archiveSelf() {
-        assertFalse(processManager.isArchived());
-        testDispatchCommand(archiveProject());
-        assertTrue(processManager.isArchived());
-    }
-
-    @Test
-    @DisplayName("delete self according to the lifecycle")
-    void deleteSelf() {
-        assertFalse(processManager.isDeleted());
-        testDispatchCommand(deleteProject());
-        assertTrue(processManager.isDeleted());
-    }
-
-    @Test
-    @DisplayName("update own lifecycle when a rejection is thrown")
-    void updateLifecycleOnRejection() {
-        assertFalse(processManager.isDeleted());
-
-        try {
-            testDispatchCommand(archiveProject());
-
-            // The PM should throw `CannotStartArchivedProject` rejection.
-            testDispatchCommand(startProject());
-        } catch (Throwable ignored) {
-        }
-        assertTrue(processManager.isDeleted());
     }
 }

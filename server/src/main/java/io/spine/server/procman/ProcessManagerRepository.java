@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
@@ -89,14 +90,13 @@ public abstract class ProcessManagerRepository<I,
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
-    private final Lifecycle lifecycle;
+    private final Lifecycle lifecycle = new Lifecycle();
 
     /**
      * Creates a new instance with the event routing by the first message field.
      */
     protected ProcessManagerRepository() {
         super(EventRoute.byFirstMessageField());
-        this.lifecycle = new Lifecycle();
     }
 
     /**
@@ -280,7 +280,8 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
-    PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
+    @VisibleForTesting
+    protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
         PmTransaction<I, S, ?> tx =
                 PmTransaction.start((ProcessManager<I, S, ?>) manager, lifecycle());
         TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
