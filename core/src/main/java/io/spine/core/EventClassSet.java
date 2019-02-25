@@ -23,9 +23,9 @@ package io.spine.core;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.ThrowableMessage;
-import io.spine.code.proto.MessageType;
 import io.spine.code.proto.ref.TypeRef;
 import io.spine.type.KnownTypes;
+import io.spine.type.MessageType;
 
 import java.io.Serializable;
 import java.util.Collection;

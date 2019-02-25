@@ -22,8 +22,8 @@ package io.spine.core;
 import com.google.protobuf.Message;
 import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
-import io.spine.code.proto.MessageType;
 import io.spine.type.MessageClass;
+import io.spine.type.MessageType;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkArgument;

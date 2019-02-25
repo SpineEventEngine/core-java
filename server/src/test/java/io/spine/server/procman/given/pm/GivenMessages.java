@@ -29,11 +29,10 @@ import io.spine.server.commandbus.Given;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmArchiveProcess;
+import io.spine.test.procman.command.PmArchiveProject;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmDeleteProcess;
-import io.spine.test.procman.command.PmStartProcess;
+import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmOwnerChanged;
@@ -77,20 +76,14 @@ public class GivenMessages {
                 .build();
     }
 
-    public static PmStartProcess startProcess() {
-        return PmStartProcess.newBuilder()
-                             .setProjectId(ID)
-                             .build();
-    }
-
-    public static PmArchiveProcess archiveProcess() {
-        return PmArchiveProcess.newBuilder()
+    public static PmArchiveProject archiveProject() {
+        return PmArchiveProject.newBuilder()
                                .setProjectId(ID)
                                .build();
     }
 
-    public static PmDeleteProcess deleteProcess() {
-        return PmDeleteProcess.newBuilder()
+    public static PmDeleteProject deleteProject() {
+        return PmDeleteProject.newBuilder()
                               .setProjectId(ID)
                               .build();
     }

@@ -69,7 +69,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
     private Class<? extends AggregateRoot> rootClass() {
         if (rootClass == null) {
-            rootClass = (Class<? extends AggregateRoot>) AGGREGATE_ROOT.getArgumentIn(value());
+            rootClass = (Class<? extends AggregateRoot>) AGGREGATE_ROOT.argumentIn(value());
         }
         return rootClass;
     }

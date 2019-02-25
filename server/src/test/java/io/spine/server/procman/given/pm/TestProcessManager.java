@@ -20,6 +20,7 @@
 
 package io.spine.server.procman.given.pm;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
@@ -27,32 +28,31 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.test.shared.AnyProcess;
-import io.spine.server.test.shared.AnyProcessVBuilder;
 import io.spine.server.tuple.Pair;
+import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
+import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmArchiveProcess;
+import io.spine.test.procman.command.PmArchiveProject;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmDeleteProcess;
+import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartIteration;
-import io.spine.test.procman.command.PmStartProcess;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationCompleted;
 import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmIterationStarted;
 import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
-import io.spine.test.procman.event.PmProcessArchived;
-import io.spine.test.procman.event.PmProcessDeleted;
+import io.spine.test.procman.event.PmProjectArchived;
 import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectDeleted;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.test.procman.rejection.PmCannotStartProcess;
+import io.spine.test.procman.rejection.PmCannotStartArchivedProject;
 
 import java.util.Optional;
 
@@ -61,12 +61,14 @@ import static io.spine.testdata.Sample.builderForType;
 import static io.spine.testdata.Sample.messageOfType;
 
 /**
- * A test Process Manager which remembers past message as its state.
+ * A test Process Manager which remembers the last received message.
  */
 public class TestProcessManager
-        extends ProcessManager<ProjectId, AnyProcess, AnyProcessVBuilder> {
+        extends ProcessManager<ProjectId, Project, ProjectVBuilder> {
 
     public static final ProjectId ID = messageOfType(ProjectId.class);
+
+    private Any lastReceivedMessage;
 
     public TestProcessManager(ProjectId id) {
         super(id);
@@ -74,7 +76,11 @@ public class TestProcessManager
 
     /** Updates the state with putting incoming message.*/
     private void remember(Message incoming) {
-        getBuilder().setAny(pack(incoming));
+        lastReceivedMessage = pack(incoming);
+    }
+
+    public Any lastReceivedMessage() {
+        return lastReceivedMessage;
     }
 
     /*
@@ -136,27 +142,18 @@ public class TestProcessManager
     }
 
     @Assign
-    Nothing handle(PmStartProcess command) throws PmCannotStartProcess {
-        PmCannotStartProcess rejection = PmCannotStartProcess
-                .newBuilder()
-                .setProjectId(command.getProjectId())
-                .build();
-        throw rejection;
-    }
-
-    @Assign
-    PmProcessArchived handle(PmArchiveProcess command) {
+    PmProjectArchived handle(PmArchiveProject command) {
         remember(command);
-        return PmProcessArchived
+        return PmProjectArchived
                 .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
 
     @Assign
-    PmProcessDeleted handle(PmDeleteProcess command) {
+    PmProjectDeleted handle(PmDeleteProject command) {
         remember(command);
-        return PmProcessDeleted
+        return PmProjectDeleted
                 .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
@@ -167,8 +164,15 @@ public class TestProcessManager
      *************************************/
 
     @Command
-    PmAddTask transform(PmStartProject command) {
+    PmAddTask transform(PmStartProject command) throws PmCannotStartArchivedProject {
         remember(command);
+        if (getLifecycleFlags().getArchived()) {
+            PmCannotStartArchivedProject rejection = PmCannotStartArchivedProject
+                    .newBuilder()
+                    .setProjectId(command.getProjectId())
+                    .build();
+            throw rejection;
+        }
         PmAddTask addTask = ((PmAddTask.Builder)
                 builderForType(PmAddTask.class))
                 .setProjectId(command.getProjectId())

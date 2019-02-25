@@ -31,7 +31,3 @@ import "spine/test/procman/project.proto";
 message PmCannotStartArchivedProject {
     ProjectId project_id = 1;
 }
-
-message PmCannotStartProcess {
-    ProjectId project_id = 1;
-}

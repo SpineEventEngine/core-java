@@ -26,13 +26,13 @@ import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.code.proto.EntityLifecycleOption;
 import io.spine.code.proto.EntityStateOption;
-import io.spine.code.proto.MessageType;
 import io.spine.code.proto.ref.TypeRef;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.server.model.EntityKindMismatchError;
 import io.spine.server.model.TypeMismatchError;
 import io.spine.type.KnownTypes;
+import io.spine.type.MessageType;
 
 import java.util.Optional;
 import java.util.function.Predicate;

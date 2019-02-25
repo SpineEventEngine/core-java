@@ -21,9 +21,9 @@
 package io.spine.server.procman.given.pm;
 
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.test.shared.AnyProcess;
+import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 
 public class TestProcessManagerRepo
-        extends ProcessManagerRepository<ProjectId, TestProcessManager, AnyProcess> {
+        extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 }

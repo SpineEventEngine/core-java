@@ -55,10 +55,10 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
-import io.spine.test.procman.command.PmArchiveProcess;
+import io.spine.test.procman.command.PmArchiveProject;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmCreateProjectVBuilder;
-import io.spine.test.procman.command.PmDeleteProcess;
+import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
@@ -89,9 +89,9 @@ import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
-import static io.spine.server.procman.given.repo.GivenCommandMessage.archiveProcess;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.archiveProject;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.createProject;
-import static io.spine.server.procman.given.repo.GivenCommandMessage.deleteProcess;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.deleteProject;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.doNothing;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.projectCreated;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.projectStarted;
@@ -343,9 +343,9 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("command")
         void command() {
-            PmArchiveProcess archiveProcess = archiveProcess();
-            testDispatchCommand(archiveProcess);
-            ProjectId projectId = archiveProcess.getProjectId();
+            PmArchiveProject archiveProject = archiveProject();
+            testDispatchCommand(archiveProject);
+            ProjectId projectId = archiveProject.getProjectId();
             TestProcessManager processManager = repository().findOrCreate(projectId);
             assertTrue(processManager.isArchived());
 
@@ -363,9 +363,9 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("event")
         void event() {
-            PmArchiveProcess archiveProcess = archiveProcess();
-            testDispatchCommand(archiveProcess);
-            ProjectId projectId = archiveProcess.getProjectId();
+            PmArchiveProject archiveProject = archiveProject();
+            testDispatchCommand(archiveProject);
+            ProjectId projectId = archiveProject.getProjectId();
             TestProcessManager processManager = repository().findOrCreate(projectId);
             assertTrue(processManager.isArchived());
 
@@ -388,9 +388,9 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("command")
         void command() {
-            PmDeleteProcess deleteProcess = deleteProcess();
-            testDispatchCommand(deleteProcess);
-            ProjectId projectId = deleteProcess.getProjectId();
+            PmDeleteProject deleteProject = deleteProject();
+            testDispatchCommand(deleteProject);
+            ProjectId projectId = deleteProject.getProjectId();
             TestProcessManager processManager = repository().findOrCreate(projectId);
             assertTrue(processManager.isDeleted());
 
@@ -408,9 +408,9 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("event")
         void event() {
-            PmDeleteProcess deleteProcess = deleteProcess();
-            testDispatchCommand(deleteProcess);
-            ProjectId projectId = deleteProcess.getProjectId();
+            PmDeleteProject deleteProject = deleteProject();
+            testDispatchCommand(deleteProject);
+            ProjectId projectId = deleteProject.getProjectId();
             TestProcessManager processManager = repository().findOrCreate(projectId);
             assertTrue(processManager.isDeleted());
 

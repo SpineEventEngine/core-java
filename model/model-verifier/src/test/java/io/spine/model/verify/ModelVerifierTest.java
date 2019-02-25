@@ -22,7 +22,6 @@ package io.spine.model.verify;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.code.proto.MessageType;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.given.DuplicateCommandHandler;
@@ -42,6 +41,7 @@ import io.spine.test.model.verify.given.ArchiveState;
 import io.spine.test.model.verify.given.DeleteState;
 import io.spine.test.model.verify.given.RenameState;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.type.MessageType;
 import io.spine.type.UnresolvedReferenceException;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.dsl.ScriptHandler;

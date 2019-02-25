@@ -40,15 +40,15 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmArchiveProcess;
+import io.spine.test.procman.command.PmArchiveProject;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmDeleteProcess;
+import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
-import io.spine.test.procman.event.PmProcessArchived;
-import io.spine.test.procman.event.PmProcessDeleted;
+import io.spine.test.procman.event.PmProjectArchived;
 import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectDeleted;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 
@@ -132,9 +132,9 @@ public class TestProcessManager
     }
 
     @Assign
-    PmProcessArchived handle(PmArchiveProcess command) {
+    PmProjectArchived handle(PmArchiveProject command) {
         keep(command);
-        PmProcessArchived event = PmProcessArchived
+        PmProjectArchived event = PmProjectArchived
                 .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
@@ -142,9 +142,9 @@ public class TestProcessManager
     }
 
     @Assign
-    PmProcessDeleted handle(PmDeleteProcess command) {
+    PmProjectDeleted handle(PmDeleteProject command) {
         keep(command);
-        PmProcessDeleted event = PmProcessDeleted
+        PmProjectDeleted event = PmProjectDeleted
                 .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();

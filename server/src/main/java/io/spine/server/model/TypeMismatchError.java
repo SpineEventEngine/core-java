@@ -20,7 +20,7 @@
 
 package io.spine.server.model;
 
-import io.spine.code.proto.MessageType;
+import io.spine.type.MessageType;
 
 import java.util.Arrays;
 

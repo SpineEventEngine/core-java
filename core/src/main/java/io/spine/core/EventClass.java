@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.code.proto.MessageType;
 import io.spine.type.MessageClass;
+import io.spine.type.MessageType;
 import io.spine.type.TypeUrl;
 
 import java.util.Arrays;

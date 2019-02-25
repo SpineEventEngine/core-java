@@ -45,9 +45,9 @@ import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.test.shared.AnyProcess;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
+import io.spine.test.procman.Project;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmPlanIteration;
@@ -60,9 +60,9 @@ import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmIterationStarted;
 import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
-import io.spine.test.procman.event.PmProcessArchived;
-import io.spine.test.procman.event.PmProcessDeleted;
+import io.spine.test.procman.event.PmProjectArchived;
 import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectDeleted;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.test.procman.quiz.PmQuestionId;
@@ -93,14 +93,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.pm.GivenMessages.addTask;
-import static io.spine.server.procman.given.pm.GivenMessages.archiveProcess;
+import static io.spine.server.procman.given.pm.GivenMessages.archiveProject;
 import static io.spine.server.procman.given.pm.GivenMessages.cancelIteration;
 import static io.spine.server.procman.given.pm.GivenMessages.createProject;
-import static io.spine.server.procman.given.pm.GivenMessages.deleteProcess;
+import static io.spine.server.procman.given.pm.GivenMessages.deleteProject;
 import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
 import static io.spine.server.procman.given.pm.GivenMessages.iterationPlanned;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
-import static io.spine.server.procman.given.pm.GivenMessages.startProcess;
 import static io.spine.server.procman.given.pm.GivenMessages.startProject;
 import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
@@ -161,7 +160,7 @@ class ProcessManagerTest {
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
-                              .withState(AnyProcess.getDefaultInstance())
+                              .withState(Project.getDefaultInstance())
                               .build();
         commandBus.register(new TestProcessManagerDispatcher());
         InjectCommandBus.of(commandBus)
@@ -177,8 +176,7 @@ class ProcessManagerTest {
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
-        Any pmState = processManager.getState()
-                                    .getAny();
+        Any pmState = processManager.lastReceivedMessage();
         Any expected = pack(eventMessage);
         assertEquals(expected, pmState);
         return result;
@@ -189,8 +187,7 @@ class ProcessManagerTest {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
-        assertEquals(pack(commandMsg), processManager.getState()
-                                                     .getAny());
+        assertEquals(pack(commandMsg), processManager.lastReceivedMessage());
         return events;
     }
 
@@ -307,8 +304,7 @@ class ProcessManagerTest {
         }
 
         private void assertReceived(Any expected) {
-            assertEquals(expected, processManager.getState()
-                                                 .getAny());
+            assertEquals(expected, processManager.lastReceivedMessage());
         }
     }
 
@@ -552,8 +548,8 @@ class ProcessManagerTest {
                     PmNotificationSent.class,
                     PmIterationPlanned.class,
                     PmIterationStarted.class,
-                    PmProcessArchived.class,
-                    PmProcessDeleted.class
+                    PmProjectArchived.class,
+                    PmProjectDeleted.class
             ));
         }
     }
@@ -562,7 +558,7 @@ class ProcessManagerTest {
     @DisplayName("archive self according to the lifecycle")
     void archiveSelf() {
         assertFalse(processManager.isArchived());
-        testDispatchCommand(archiveProcess());
+        testDispatchCommand(archiveProject());
         assertTrue(processManager.isArchived());
     }
 
@@ -570,20 +566,22 @@ class ProcessManagerTest {
     @DisplayName("delete self according to the lifecycle")
     void deleteSelf() {
         assertFalse(processManager.isDeleted());
-        testDispatchCommand(deleteProcess());
+        testDispatchCommand(deleteProject());
         assertTrue(processManager.isDeleted());
     }
 
     @Test
     @DisplayName("update own lifecycle when a rejection is thrown")
     void updateLifecycleOnRejection() {
-        assertFalse(processManager.isArchived());
+        assertFalse(processManager.isDeleted());
 
         try {
-            // The test PM always throws a rejection on a `PmStartProcess` command.
-            testDispatchCommand(startProcess());
+            testDispatchCommand(archiveProject());
+
+            // The PM should throw `CannotStartArchivedProject` rejection.
+            testDispatchCommand(startProject());
         } catch (Throwable ignored) {
         }
-        assertTrue(processManager.isArchived());
+        assertTrue(processManager.isDeleted());
     }
 }
