@@ -26,9 +26,9 @@ import com.google.common.truth.Truth8;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.enrich.Enricher;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
@@ -297,7 +297,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
      */
     private static Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
         ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
-        repos.forEach(repository -> builder.add(repository.getEntityStateType()
+        repos.forEach(repository -> builder.add(repository.entityStateType()
                                                           .toTypeName()));
         return builder.build();
     }

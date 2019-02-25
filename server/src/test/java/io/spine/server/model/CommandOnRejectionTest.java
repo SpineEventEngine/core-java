@@ -43,7 +43,7 @@ class CommandOnRejectionTest {
     void receive() {
         BoundedContext context = TasksContext.newInstance();
         TaskId proposedId = Identifier.generate(TaskId.class);
-        context.getEventBus()
+        context.eventBus()
                .post(eventFactory.createEvent(TaskAlreadyExists
                                                       .newBuilder()
                                                       .setId(proposedId)

@@ -21,14 +21,12 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
- *
- * @author Dmytro Dashenkov
  */
 final class TransactionalEventPlayer implements EventPlayer {
 

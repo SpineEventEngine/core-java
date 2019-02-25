@@ -32,6 +32,7 @@ import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.StringAggregate;
 import io.spine.server.test.shared.StringAggregateVBuilder;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.test.aggregate.number.DoNothing;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.NumberPassed;
@@ -47,7 +48,7 @@ import static java.util.Collections.emptyList;
  *
  * <p>Normally aggregates should reject commands via command rejections. This class is test
  * environment for testing of now
- * {@linkplain io.spine.server.aggregate.AggregateRepository#logError(String, io.spine.core.MessageEnvelope, RuntimeException)
+ * {@linkplain io.spine.server.aggregate.AggregateRepository#logError(String, MessageEnvelope, RuntimeException)
  * logs errors}.
  *
  * @see FailingAggregateRepository
@@ -79,7 +80,7 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateV
         if (value.getNumber() < 0L) {
             throw CannotModifyArchivedEntity
                     .newBuilder()
-                    .setEntityId(Identifier.pack(getId()))
+                    .setEntityId(Identifier.pack(id()))
                     .build();
         }
         return now();
@@ -98,7 +99,7 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateV
             long longValue = toId(value);
             // Complain only if the passed value represents ID of this aggregate.
             // This would allow other aggregates react on this message.
-            if (longValue == getId()) {
+            if (longValue == id()) {
                 throw new IllegalArgumentException("Negative floating point value passed");
             }
         }
@@ -107,9 +108,9 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateV
 
     @Apply
     void apply(NumberPassed event) {
-        getBuilder().setValue(getState().getValue()
-                                      + System.lineSeparator()
-                                      + Timestamps.toString(event.getWhen()));
+        builder().setValue(state().getValue()
+                                   + System.lineSeparator()
+                                   + Timestamps.toString(event.getWhen()));
     }
 
     private static NumberPassed now() {

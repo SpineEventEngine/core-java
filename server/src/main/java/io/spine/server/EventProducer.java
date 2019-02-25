@@ -32,7 +32,7 @@ public interface EventProducer {
     /**
      * The object identity packed into {@link Any}.
      */
-    Any getProducerId();
+    Any producerId();
 
     /**
      * The version of the object to be put into events.
@@ -40,7 +40,7 @@ public interface EventProducer {
      * <p>If {@linkplain Version#getDefaultInstance() empty}, no version will be added to
      * the generated events.
      */
-    Version getVersion();
+    Version version();
 
     /**
      * Obtains the {@link io.spine.server.model.Nothing} event message.

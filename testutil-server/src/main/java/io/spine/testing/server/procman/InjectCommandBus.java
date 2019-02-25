@@ -56,7 +56,7 @@ public class InjectCommandBus {
      */
     public static InjectCommandBus of(BoundedContext boundedContext) {
         checkNotNull(boundedContext);
-        CommandBus bus = boundedContext.getCommandBus();
+        CommandBus bus = boundedContext.commandBus();
         checkNotNull(bus);
         return of(bus);
     }

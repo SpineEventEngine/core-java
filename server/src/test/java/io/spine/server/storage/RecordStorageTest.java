@@ -269,11 +269,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         archive(archivedEntity);
         delete(deletedEntity);
 
-        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.getState(),
+        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.state(),
                                                        activeEntity.getLifecycleFlags());
-        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState(),
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.state(),
                                                          archivedEntity.getLifecycleFlags());
-        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState(),
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.getLifecycleFlags());
 
         RecordStorage<ProjectId> storage = getStorage();
@@ -310,11 +310,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         archive(archivedEntity);
         delete(deletedEntity);
 
-        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.getState(),
+        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.state(),
                                                        activeEntity.getLifecycleFlags());
-        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState(),
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.state(),
                                                          archivedEntity.getLifecycleFlags());
-        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState(),
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.getLifecycleFlags());
 
         RecordStorage<ProjectId> storage = getStorage();
@@ -352,11 +352,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         archive(archivedEntity);
         delete(deletedEntity);
 
-        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.getState(),
+        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.state(),
                                                        activeEntity.getLifecycleFlags());
-        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState(),
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.state(),
                                                          archivedEntity.getLifecycleFlags());
-        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState(),
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.getLifecycleFlags());
 
         RecordStorage<ProjectId> storage = getStorage();
@@ -393,11 +393,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         archive(archivedEntity);
         delete(deletedEntity);
 
-        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.getState(),
+        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.state(),
                                                        activeEntity.getLifecycleFlags());
-        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.getState(),
+        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.state(),
                                                          archivedEntity.getLifecycleFlags());
-        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.getState(),
+        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.getLifecycleFlags());
 
         RecordStorage<ProjectId> storage = getStorage();
@@ -513,7 +513,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         List<EntityRecord> readRecords = newArrayList(read);
         assertEquals(1, readRecords.size());
         EntityRecord readRecord = readRecords.get(0);
-        assertEquals(targetEntity.getState(), unpack(readRecord.getState()));
+        assertEquals(targetEntity.state(), unpack(readRecord.getState()));
         assertEquals(targetId, Identifier.unpack(readRecord.getEntityId()));
     }
 
@@ -578,8 +578,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
     private void write(Entity<ProjectId, ?> entity) {
         RecordStorage<ProjectId> storage = getStorage();
-        EntityRecord record = buildStorageRecord(entity.getId(), entity.getState(),
+        EntityRecord record = buildStorageRecord(entity.id(), entity.state(),
                                                  entity.getLifecycleFlags());
-        storage.write(entity.getId(), create(record, entity, storage));
+        storage.write(entity.id(), create(record, entity, storage));
     }
 }

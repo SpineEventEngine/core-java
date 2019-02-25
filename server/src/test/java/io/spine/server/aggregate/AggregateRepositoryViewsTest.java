@@ -41,8 +41,7 @@ class AggregateRepositoryViewsTest {
 
     /** The Aggregate ID used in all tests. */
     private static final Long id = 100L;
-    private final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+    private final ActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
     private BoundedContext boundedContext;
     /**
      * The default behaviour of an {@code AggregateRepository}.
@@ -70,7 +69,7 @@ class AggregateRepositoryViewsTest {
         Command command =
                 requestFactory.command()
                               .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
-        boundedContext.getCommandBus()
+        boundedContext.commandBus()
                       .post(command, StreamObservers.noOpObserver());
     }
 

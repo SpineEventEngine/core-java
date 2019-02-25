@@ -22,13 +22,13 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
 import io.spine.server.procman.given.tx.PatchedProjectBuilder;
 import io.spine.server.procman.given.tx.TestProcessManager;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
@@ -152,7 +152,7 @@ class PmTransactionTest
     protected void breakEntityValidation(
             ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder()
+        entity.builder()
               .setShouldThrow(toThrow);
     }
 }

@@ -79,29 +79,29 @@ public class TestProcessManager
 
     /** Keeps the event message for further inspection in tests. */
     private void keep(Message commandOrEventMsg) {
-        messagesDelivered.put(getState().getId(), commandOrEventMsg);
+        messagesDelivered.put(state().getId(), commandOrEventMsg);
     }
 
     private void handleProjectCreated(ProjectId projectId) {
-        Project newState = getState().toBuilder()
-                                     .setId(projectId)
-                                     .setStatus(Project.Status.CREATED)
-                                     .build();
-        getBuilder().mergeFrom(newState);
+        Project newState = state().toBuilder()
+                                  .setId(projectId)
+                                  .setStatus(Project.Status.CREATED)
+                                  .build();
+        builder().mergeFrom(newState);
     }
 
     private void handleTaskAdded(Task task) {
-        Project newState = getState().toBuilder()
-                                     .addTask(task)
-                                     .build();
-        getBuilder().mergeFrom(newState);
+        Project newState = state().toBuilder()
+                                  .addTask(task)
+                                  .build();
+        builder().mergeFrom(newState);
     }
 
     private void handleProjectStarted() {
-        Project newState = getState().toBuilder()
-                                     .setStatus(Project.Status.STARTED)
-                                     .build();
-        getBuilder().mergeFrom(newState);
+        Project newState = state().toBuilder()
+                                  .setStatus(Project.Status.STARTED)
+                                  .build();
+        builder().mergeFrom(newState);
     }
 
     @Assign
@@ -205,11 +205,11 @@ public class TestProcessManager
 
     @Column
     public String getName() {
-        return getState().getName();
+        return state().getName();
     }
 
     @Override
     public String getIdString() {
-        return getId().toString();
+        return id().toString();
     }
 }

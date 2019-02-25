@@ -20,7 +20,7 @@
 
 package io.spine.testing.server.projection;
 
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.given.entity.TuEventLog;
 import io.spine.testing.server.given.entity.TuProjectId;
@@ -62,12 +62,12 @@ class ProjectionEventDispatcherTest {
 
         EventEnvelope firstEnvelope = EventEnvelope.of(factory.createEvent(firstEvent));
         EventEnvelope secondEnvelope = EventEnvelope.of(factory.createEvent(secondEvent));
-        ProjectionEventDispatcher.dispatch(projection, firstEnvelope.getMessage(),
-                                           firstEnvelope.getEventContext());
-        ProjectionEventDispatcher.dispatch(projection, secondEnvelope.getMessage(),
-                                           secondEnvelope.getEventContext());
+        ProjectionEventDispatcher.dispatch(projection, firstEnvelope.message(),
+                                           firstEnvelope.context());
+        ProjectionEventDispatcher.dispatch(projection, secondEnvelope.message(),
+                                           secondEnvelope.context());
 
-        TuEventLog state = projection.getState();
+        TuEventLog state = projection.state();
         assertEquals(2, state.getEventCount());
         assertTrue(unpack(state.getEvent(0)) instanceof TuProjectCreated);
         assertTrue(unpack(state.getEvent(1)) instanceof TuProjectAssigned);

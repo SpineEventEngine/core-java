@@ -22,7 +22,7 @@ package io.spine.server.bus;
 
 import io.spine.annotation.SPI;
 import io.spine.core.Ack;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 

@@ -25,10 +25,10 @@ import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ExceptionFactory;
@@ -75,7 +75,7 @@ public class InvalidCommandException extends CommandException implements Message
      */
     public static InvalidCommandException missingTenantId(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        Message commandMessage = envelope.getMessage();
+        Message commandMessage = envelope.message();
         String errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to " +
                 "multitenant Command Bus, but has no `tenant_id` attribute in the context.",
@@ -83,7 +83,7 @@ public class InvalidCommandException extends CommandException implements Message
                             .value()
                             .getName(),
                 TypeName.of(commandMessage),
-                Identifier.toString(envelope.getId()));
+                Identifier.toString(envelope.id()));
         Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
@@ -105,15 +105,15 @@ public class InvalidCommandException extends CommandException implements Message
 
     public static InvalidCommandException inapplicableTenantId(Command command) {
         CommandEnvelope cmd = CommandEnvelope.of(command);
-        TypeName typeName = TypeName.of(cmd.getMessage());
+        TypeName typeName = TypeName.of(cmd.message());
         String errMsg = format(
                 "The command (class: %s, type: %s, id: %s) was posted to single-tenant " +
                 "CommandBus, but has tenant_id: %s attribute set in the command context.",
-                cmd.getMessageClass(),
+                cmd.messageClass(),
                 typeName,
-                cmd.getId(),
-                cmd.getTenantId());
-        Error error = inapplicableTenantError(cmd.getMessage(), errMsg);
+                cmd.id(),
+                cmd.tenantId());
+        Error error = inapplicableTenantError(cmd.message(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 

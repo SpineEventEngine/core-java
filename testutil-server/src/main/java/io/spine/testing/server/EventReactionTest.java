@@ -60,9 +60,9 @@ public abstract class EventReactionTest<I,
 
     @Override
     protected EventReactorExpected<S> expectThat(E entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         List<? extends Message> events = dispatchTo(entity);
-        return new EventReactorExpected<>(events, initialState, entity.getState(),
+        return new EventReactorExpected<>(events, initialState, entity.state(),
                                           interceptedCommands());
     }
 

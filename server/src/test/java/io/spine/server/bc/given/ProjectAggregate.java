@@ -62,8 +62,8 @@ public class ProjectAggregate
 
     @Apply
     void event(BcProjectCreated event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
+        builder().setId(event.getProjectId())
+                 .setStatus(Project.Status.CREATED);
     }
 
     @Apply
@@ -73,7 +73,7 @@ public class ProjectAggregate
 
     @Apply
     void event(BcProjectStarted event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Project.Status.STARTED);
+        builder().setId(event.getProjectId())
+                 .setStatus(Project.Status.STARTED);
     }
 }

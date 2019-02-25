@@ -34,9 +34,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("TenantRepository should")
 class TenantRepositoryTest {
 
@@ -46,7 +43,7 @@ class TenantRepositoryTest {
     void setUp() {
         BoundedContext bc = BoundedContext.newBuilder().build();
         TenantRepository<?, ?> impl = new TenantRepositoryImpl();
-        impl.initStorage(bc.getStorageFactory());
+        impl.initStorage(bc.storageFactory());
         repository = spy(impl);
     }
 

@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <p>Defines a transaction-based mechanism for state, version and lifecycle flags update.
  *
- * <p>Exposes {@linkplain #getBuilder()} validating builder} for the state as the only way
+ * <p>Exposes {@linkplain #builder()} validating builder} for the state as the only way
  * to modify the state from the descendants.
  */
 public abstract class TransactionalEntity<I,
@@ -113,9 +113,23 @@ public abstract class TransactionalEntity<I,
      *
      * @return the instance of the new state builder
      * @throws IllegalStateException if the method is called not within a transaction
+     * @deprecated use {@link #builder()}
      */
+    @Deprecated
     protected B getBuilder() {
-        return tx().getBuilder();
+        return builder();
+    }
+
+    /**
+     * Obtains the instance of the state builder.
+     *
+     * <p>This method must be called only from within an active transaction.
+     *
+     * @return the instance of the new state builder
+     * @throws IllegalStateException if the method is called not within a transaction
+     */
+    protected B builder() {
+        return tx().builder();
     }
 
     /**
@@ -125,7 +139,7 @@ public abstract class TransactionalEntity<I,
      */
     private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
-            throw new IllegalStateException(getMissingTxMessage());
+            throw new IllegalStateException(missingTxMessage());
         }
         return transaction;
     }
@@ -134,7 +148,7 @@ public abstract class TransactionalEntity<I,
      * Provides error message text for the case of not having an active transaction when a state
      * modification call is made.
      */
-    protected String getMissingTxMessage() {
+    protected String missingTxMessage() {
         return "Cannot modify entity state: transaction is not available.";
     }
 
@@ -163,9 +177,9 @@ public abstract class TransactionalEntity<I,
             In order to be sure we are not hijacked, we must be sure that the transaction
             is injected to the very same object, wrapped into the transaction.
         */
-        checkState(tx.getEntity() == this,
+        checkState(tx.entity() == this,
                    "Transaction injected to this " + this
-                           + " is wrapped around a different entity: " + tx.getEntity());
+                           + " is wrapped around a different entity: " + tx.entity());
 
         this.transaction = tx;
     }
@@ -189,7 +203,7 @@ public abstract class TransactionalEntity<I,
 
     B builderFromState() {
         B builder = newBuilderInstance();
-        builder.setOriginalState(getState());
+        builder.setOriginalState(state());
         return builder;
     }
 
@@ -211,7 +225,7 @@ public abstract class TransactionalEntity<I,
     @Override
     public LifecycleFlags getLifecycleFlags() {
         if (isTransactionInProgress()) {
-            return tx().getLifecycleFlags();
+            return tx().lifecycleFlags();
         }
         return super.getLifecycleFlags();
     }

@@ -21,9 +21,9 @@
 package io.spine.server.event.given;
 
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.FailRequested;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectStarted;
@@ -71,9 +71,9 @@ public final class EventSubscriberTestEnv {
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            super.onError(envelope, exception);
-            lastErrorEnvelope = envelope;
+        public void onError(EventEnvelope event, RuntimeException exception) {
+            super.onError(event, exception);
+            lastErrorEnvelope = event;
             lastException = exception;
         }
 

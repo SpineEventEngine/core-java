@@ -92,7 +92,7 @@ class IntegrationBusTest {
             assertNull(ProjectCountAggregate.getExternalEvent());
 
             Event event = projectCreated();
-            sourceContext.getEventBus()
+            sourceContext.eventBus()
                          .post(event);
 
             Message expectedMessage = AnyPacker.unpack(event.getMessage());
@@ -112,7 +112,7 @@ class IntegrationBusTest {
             assertNull(ProjectEventsSubscriber.getExternalEvent());
 
             Event event = projectCreated();
-            sourceContext.getEventBus()
+            sourceContext.eventBus()
                          .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()),
                          ProjectEventsSubscriber.getExternalEvent());
@@ -134,7 +134,7 @@ class IntegrationBusTest {
             assertTrue(MemoizingProjection.events()
                                           .isEmpty());
             Event event = projectCreated();
-            sourceContext.getEventBus()
+            sourceContext.eventBus()
                          .post(event);
             assertEquals(2, MemoizingProjection.events().size());
         }
@@ -152,7 +152,7 @@ class IntegrationBusTest {
             assertNull(ProjectStartedExtSubscriber.getExternalEvent());
             assertNull(ProjectEventsSubscriber.getExternalEvent());
 
-            EventBus sourceEventBus = sourceContext.getEventBus();
+            EventBus sourceEventBus = sourceContext.eventBus();
             Event eventA = projectCreated();
             sourceEventBus.post(eventA);
             Event eventB = projectStarted();
@@ -181,14 +181,14 @@ class IntegrationBusTest {
             assertNull(ProjectDetails.getDomesticEvent());
 
             Event event = projectStarted();
-            sourceContext.getEventBus()
+            sourceContext.eventBus()
                          .post(event);
 
             assertNotEquals(AnyPacker.unpack(event.getMessage()),
                             ProjectDetails.getDomesticEvent());
             assertNull(ProjectDetails.getDomesticEvent());
 
-            destContext.getEventBus()
+            destContext.eventBus()
                        .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getDomesticEvent());
         }
@@ -204,14 +204,14 @@ class IntegrationBusTest {
             assertNull(ProjectEventsSubscriber.getDomesticEvent());
 
             Event event = projectStarted();
-            sourceContext.getEventBus()
+            sourceContext.eventBus()
                          .post(event);
 
             assertNotEquals(AnyPacker.unpack(event.getMessage()),
                             ProjectEventsSubscriber.getDomesticEvent());
             assertNull(ProjectEventsSubscriber.getDomesticEvent());
 
-            destContext.getEventBus()
+            destContext.eventBus()
                        .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()),
                          ProjectEventsSubscriber.getDomesticEvent());
@@ -237,12 +237,12 @@ class IntegrationBusTest {
         assertNull(ProjectStartedExtSubscriber.getExternalEvent());
 
         // Both events are prepared along with the `EventBus` of the source bounded context.
-        EventBus sourceEventBus = sourceContext.getEventBus();
+        EventBus sourceEventBus = sourceContext.eventBus();
         Event eventA = projectCreated();
         Event eventB = projectStarted();
 
         // Both events are emitted, `ProjectCreated` subscriber only is present.
-        destinationCtx.getIntegrationBus()
+        destinationCtx.integrationBus()
                       .register(projectCreatedSubscriber);
         sourceEventBus.post(eventA);
         sourceEventBus.post(eventB);
@@ -256,7 +256,7 @@ class IntegrationBusTest {
         ProjectEventsSubscriber.clear();
 
         // Both events are emitted, No external subscribers at all.
-        destinationCtx.getIntegrationBus()
+        destinationCtx.integrationBus()
                       .unregister(projectCreatedSubscriber);
         sourceEventBus.post(eventA);
         sourceEventBus.post(eventB);
@@ -265,7 +265,7 @@ class IntegrationBusTest {
         assertNull(ProjectStartedExtSubscriber.getExternalEvent());
 
         // Both events are emitted, `ProjectStarted` subscriber only is present
-        destinationCtx.getIntegrationBus()
+        destinationCtx.integrationBus()
                       .register(projectStartedSubscriber);
         sourceEventBus.post(eventA);
         sourceEventBus.post(eventB);
@@ -286,7 +286,7 @@ class IntegrationBusTest {
 
             BoundedContext context = contextWithExtEntitySubscribers(transportFactory);
             ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
-            EventBus eventBus = context.getEventBus();
+            EventBus eventBus = context.eventBus();
             eventBus.register(eventSubscriber);
 
             assertNull(ProjectEventsSubscriber.getExternalEvent());
@@ -315,7 +315,7 @@ class IntegrationBusTest {
         ExternalMessage externalMessage = ExternalMessages.of(event,
                                                                     boundedContextName);
         MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-        boundedContext.getIntegrationBus()
+        boundedContext.integrationBus()
                       .post(externalMessage, observer);
         Error error = observer.firstResponse()
                               .getStatus()

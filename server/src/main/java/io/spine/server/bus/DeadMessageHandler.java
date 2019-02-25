@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import io.spine.annotation.Internal;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 /**
  * A definition of a handler for a dead message.
@@ -30,8 +30,6 @@ import io.spine.core.MessageEnvelope;
  * to {@link DeadMessageHandler#handle DeadMessageHandler.handle(MessageEnvelope)}. The method 
  * produces {@link MessageUnhandled} instance describing the dead message. It may also process the 
  * given message (e.g. store it into the bus store).
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface DeadMessageHandler<E extends MessageEnvelope<?, ?, ?>> {

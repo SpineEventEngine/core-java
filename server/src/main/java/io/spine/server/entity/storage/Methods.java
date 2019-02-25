@@ -114,28 +114,33 @@ final class Methods {
         return false;
     }
 
-    static void checkGetter(Method getter) {
-        checkNotNull(getter);
-        checkArgument(GETTER_PREFIX_PATTERN.matcher(getter.getName())
-                                           .find()
-                              && getter.getParameterTypes().length == 0,
-                      "Method `%s` is not a getter.", getter);
-        Class<?> returnType = getter.getReturnType();
-        checkArgument(!getter.getName().startsWith(IS_PREFIX)
+    static void checkGetter(Method method) {
+        checkNotNull(method);
+        boolean prefixFound = GETTER_PREFIX_PATTERN.matcher(method.getName())
+                                                   .find();
+        checkArgument(prefixFound,
+                      "The method `%s` is not a getter:" +
+                              " should have `get` or `is` prefix in the name.");
+        int paramCount = method.getParameterTypes().length;
+        checkArgument(paramCount == 0,
+                      "The method `%s` is not a getter: accepts %s parameters instead of zero.",
+                      method, paramCount);
+        Class<?> returnType = method.getReturnType();
+        checkArgument(!method.getName().startsWith(IS_PREFIX)
                               || boolean.class.isAssignableFrom(returnType)
                               || Boolean.class.isAssignableFrom(returnType),
                       "Getter with an `is` prefix should have `boolean` or `Boolean` return type.");
-        checkArgument(getAnnotatedVersion(getter).isPresent(),
+        checkArgument(getAnnotatedVersion(method).isPresent(),
                       "Entity column getter should be annotated with `%s`.",
                       Column.class.getName());
-        int modifiers = getter.getModifiers();
+        int modifiers = method.getModifiers();
         checkArgument(isPublic(modifiers) && !isStatic(modifiers),
                       "Entity column getter should be public instance method.");
         Class<?> wrapped = wrap(returnType);
         checkArgument(Serializable.class.isAssignableFrom(wrapped),
                       "Cannot create column of non-serializable type %s by method %s.",
                       returnType,
-                      getter);
+                      method);
     }
 
     /**

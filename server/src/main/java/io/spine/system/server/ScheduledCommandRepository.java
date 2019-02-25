@@ -35,7 +35,7 @@ final class ScheduledCommandRepository
 
     ScheduledCommandRepository() {
         super();
-        EventRouting<CommandId> routing = getEventRouting();
+        EventRouting<CommandId> routing = eventRouting();
         routing.route(CommandDispatched.class,
                       (message, context) -> routeToExisting(message));
     }

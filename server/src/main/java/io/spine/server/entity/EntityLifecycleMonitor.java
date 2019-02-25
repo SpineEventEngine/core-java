@@ -118,7 +118,7 @@ public final class EntityLifecycleMonitor<I,
         Set<Message> messageIds = ImmutableSet.copyOf(acknowledgedMessageIds);
         Any newEntityId = change.getPreviousValue()
                                 .getEntityId();
-        I id = Identifier.unpack(newEntityId, repository.getIdClass());
+        I id = Identifier.unpack(newEntityId, repository.idClass());
         repository.lifecycleOf(id)
                   .onStateChanged(change, messageIds);
     }

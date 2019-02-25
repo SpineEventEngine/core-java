@@ -20,9 +20,9 @@
 
 package io.spine.server.integration.given;
 
-import io.spine.core.EventEnvelope;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.test.shared.StringProjection;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.integration.ProjectId;
 
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -31,7 +31,7 @@ class ProjectDetailsRepository
         extends ProjectionRepository<ProjectId, ProjectDetails, StringProjection> {
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         throw illegalStateWithCauseOf(exception);
     }
 }

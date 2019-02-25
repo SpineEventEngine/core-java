@@ -49,6 +49,6 @@ public class SystemClientTestEnv {
         ShoppingListAggregate aggregate =
                 repository.find(aggregateId)
                           .orElseGet(() -> fail("Aggregate should be present."));
-        return aggregate.getState();
+        return aggregate.state();
     }
 }

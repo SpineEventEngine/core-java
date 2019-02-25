@@ -22,9 +22,9 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MessageUnhandled;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 
 import static io.spine.server.event.EventException.eventTypeAttribute;
@@ -33,8 +33,6 @@ import static java.lang.String.format;
 /**
  * Thrown when there are no aggregates that accept an event message for
  * {@linkplain io.spine.server.aggregate.Apply#allowImport() import}.
- *
- * @author Alexander Yevsyukov
  */
 public final class UnsupportedImportEventException
         extends RuntimeException
@@ -43,13 +41,13 @@ public final class UnsupportedImportEventException
     private static final long serialVersionUID = 0L;
     private final Error error;
 
-    UnsupportedImportEventException(EventEnvelope envelope) {
-        super(messageFormat(envelope));
-        this.error = unsupportedImportEvent(envelope.getMessage(), getMessage());
+    UnsupportedImportEventException(EventEnvelope event) {
+        super(messageFormat(event));
+        this.error = unsupportedImportEvent(event.message(), getMessage());
     }
 
-    private static String messageFormat(EventEnvelope envelope) {
-        EventClass eventClass = envelope.getMessageClass();
+    private static String messageFormat(EventEnvelope event) {
+        EventClass eventClass = event.messageClass();
         TypeName typeName = eventClass.typeName();
         String result = format(
             "None of the aggregates declare importing appliers for " +

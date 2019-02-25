@@ -27,22 +27,32 @@ public interface WithLifecycle {
 
     /**
      * Obtains current lifecycle flags.
+     *
+     * @apiNote This method is provided for mixing in with the generated code.
+     * @see #lifecycleFlags()
      */
     @SuppressWarnings("override") // not marked in the generated code
     LifecycleFlags getLifecycleFlags();
 
     /**
+     * Obtains current lifecycle flags.
+     */
+    default LifecycleFlags lifecycleFlags() {
+        return getLifecycleFlags();
+    }
+
+    /**
      * Shows if current instance is marked as archived or not.
      */
     default boolean isArchived() {
-        return getLifecycleFlags().getArchived();
+        return lifecycleFlags().getArchived();
     }
 
     /**
      * Shows if current instance is marked as deleted or not.
      */
     default boolean isDeleted() {
-        return getLifecycleFlags().getDeleted();
+        return lifecycleFlags().getDeleted();
     }
 
     /**

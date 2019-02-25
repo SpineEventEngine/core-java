@@ -25,9 +25,9 @@ import io.spine.base.EventMessage;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.EventReactionTest;
 import io.spine.testing.server.expected.EventReactorExpected;
 
@@ -42,7 +42,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <E> type of the event to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
- * @author Vladyslav Lubenskyi
  */
 public abstract class PmEventReactionTest<I,
                                           E extends EventMessage,

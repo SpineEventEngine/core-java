@@ -32,14 +32,13 @@ import org.junit.jupiter.api.Test;
 import static io.spine.system.server.ReadSideFunction.delegatingTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("TenantAwareSystemReadSide should")
 class TenantAwareSystemReadSideTest {
 
     private static final String QUERY = "query system BC for domain aggregates";
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(TenantAwareSystemReadSideTest.class);
+            new TestActorRequestFactory(TenantAwareSystemReadSideTest.class);
 
     private MemoizingReadSide delegate;
 

@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.given.repo;
 
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;

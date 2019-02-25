@@ -29,7 +29,7 @@ import java.util.HashSet;
 public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
 
     public BbProjectRepository() {
-        getEventRouting().route(BbUserDeleted.class,
-                                (event, context) -> new HashSet<>(event.getProjectList()));
+        eventRouting().route(BbUserDeleted.class,
+                             (event, context) -> new HashSet<>(event.getProjectList()));
     }
 }

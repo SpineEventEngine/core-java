@@ -23,13 +23,13 @@ package io.spine.server.event.model;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -71,7 +71,7 @@ public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends
         if (!getParameterSpec().isAwareOfCommandType()) {
             return createId(eventClass);
         } else {
-            Class<?>[] parameters = getRawMethod().getParameterTypes();
+            Class<?>[] parameters = rawMethod().getParameterTypes();
             Class<? extends CommandMessage> commandMessageClass =
                     castClass(parameters[1], CommandMessage.class);
             CommandClass commandClass = CommandClass.from(commandMessageClass);
@@ -101,9 +101,9 @@ public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends
      * @see io.spine.server.event.React#external()
      */
     @Override
-    protected void checkAttributesMatch(EventEnvelope envelope) {
-        boolean external = envelope.getEventContext()
-                                   .getExternal();
+    protected void checkAttributesMatch(EventEnvelope event) {
+        boolean external = event.context()
+                                .getExternal();
         ensureExternalMatch(external);
     }
 

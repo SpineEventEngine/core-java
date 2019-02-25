@@ -45,7 +45,7 @@ final class GameProcess extends ProcessManager<Integer, Table, TableVBuilder> {
 
     @Assign
     Pong handle(Ping command) {
-        getBuilder().setNumber(command.getTable());
+        builder().setNumber(command.getTable());
         return Pong.newBuilder()
                    .setTable(command.getTable())
                    .setSide(opposite(command.getSide()))

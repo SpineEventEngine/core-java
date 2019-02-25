@@ -23,11 +23,11 @@ package io.spine.server.command.model;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
@@ -51,6 +51,7 @@ import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsL
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -86,7 +87,7 @@ import static org.mockito.Mockito.verify;
 class CommandHandlerMethodTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandHandlerMethodTest.class);
+            new TestActorRequestFactory(CommandHandlerMethodTest.class);
 
     private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
 
@@ -99,11 +100,18 @@ class CommandHandlerMethodTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(CommandEnvelope.class,
-                            requestFactory.generateEnvelope())
+                .setDefault(CommandEnvelope.class, generate())
                 .setDefault(CommandContext.class, emptyContext)
                 .setDefault(Any.class, Any.getDefaultInstance())
                 .testAllPublicStaticMethods(CommandHandlerMethod.class);
+    }
+
+    private static CommandEnvelope generate() {
+        return CommandEnvelope.of(requestFactory.generateCommand());
+    }
+
+    private static CommandEnvelope newCommand(CommandMessage msg) {
+        return CommandEnvelope.of(requestFactory.createCommand(msg));
     }
 
     @Nested
@@ -197,7 +205,7 @@ class CommandHandlerMethodTest {
         ProcessManager<String, ?, ?> entity =
                 new ProcessManagerDoingNothing(commandMessage.getProjectId()
                                                              .getId());
-        CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
+        CommandEnvelope cmd = newCommand(commandMessage);
         List<Event> events = PmDispatcher.dispatch(entity, cmd);
         assertEmpty(events);
     }
@@ -309,7 +317,7 @@ class CommandHandlerMethodTest {
         @DisplayName("command handler")
         void onDispatchToHandler() {
             AbstractCommandHandler handler = new RejectingHandler();
-            CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
+            CommandEnvelope envelope = newCommand(createProject());
             try {
                 handler.dispatch(envelope);
             } catch (HandlerMethodFailedException e) {
@@ -324,11 +332,11 @@ class CommandHandlerMethodTest {
             RefCreateProject commandMessage = createProject();
             Aggregate<ProjectId, ?, ?> entity =
                     new RejectingAggregate(commandMessage.getProjectId());
-            CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
+            CommandEnvelope cmd = newCommand(commandMessage);
             try {
                 AggregateMessageDispatcher.dispatchCommand(entity, cmd);
             } catch (HandlerMethodFailedException e) {
-                assertCauseAndId(e, entity.getId());
+                assertCauseAndId(e, entity.id());
             }
         }
 
@@ -349,7 +357,7 @@ class CommandHandlerMethodTest {
     @DisplayName("throw ISE when dispatching command of non-handled type")
     void notDispatchNonHandledCmd() {
         AbstractCommandHandler handler = new ValidHandlerOneParam();
-        CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
+        CommandEnvelope cmd = newCommand(startProject());
 
         assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
     }

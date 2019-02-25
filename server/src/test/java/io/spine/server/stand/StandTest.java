@@ -46,7 +46,6 @@ import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Response;
 import io.spine.core.Responses;
@@ -61,6 +60,7 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.MemoizingReadSide;
 import io.spine.system.server.NoOpSystemReadSide;
 import io.spine.test.commandservice.customer.Customer;
@@ -197,7 +197,7 @@ class StandTest extends TenantAwareTest {
             BoundedContext boundedContext = BoundedContext.newBuilder()
                                                           .setMultitenant(multitenant)
                                                           .build();
-            Stand stand = boundedContext.getStand();
+            Stand stand = boundedContext.stand();
 
             checkTypesEmpty(stand);
 
@@ -222,7 +222,7 @@ class StandTest extends TenantAwareTest {
         void aggregateRepositories() {
             BoundedContext boundedContext = BoundedContext.newBuilder()
                                                           .build();
-            Stand stand = boundedContext.getStand();
+            Stand stand = boundedContext.stand();
 
             checkTypesEmpty(stand);
 
@@ -250,7 +250,7 @@ class StandTest extends TenantAwareTest {
                                                       .setStand(Stand.newBuilder()
                                                                      .setCallbackExecutor(executor))
                                                       .build();
-        Stand stand = boundedContext.getStand();
+        Stand stand = boundedContext.stand();
 
         StandTestProjectionRepository repository = new StandTestProjectionRepository();
         boundedContext.register(repository);
@@ -554,7 +554,7 @@ class StandTest extends TenantAwareTest {
 
             CommandContext eventOrigin = event.getContext()
                                               .getCommandContext();
-            assertThat(eventOrigin).isEqualTo(cmd.getCommandContext());
+            assertThat(eventOrigin).isEqualTo(cmd.context());
             Any packedMessage = event.getMessage();
             CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
 
@@ -1103,8 +1103,8 @@ class StandTest extends TenantAwareTest {
 
         StandTestProjectionRepository projectionRepository =
                 mock(StandTestProjectionRepository.class);
-        when(projectionRepository.getEntityStateType()).thenReturn(projectType);
-        when(projectionRepository.getProducedEvents()).thenReturn(ImmutableSet.of());
+        when(projectionRepository.entityStateType()).thenReturn(projectType);
+        when(projectionRepository.producibleEventClasses()).thenReturn(ImmutableSet.of());
         setupExpectedFindAllBehaviour(sampleProjects, projectionRepository);
 
         Stand stand = prepareStandWithProjectionRepo(projectionRepository);

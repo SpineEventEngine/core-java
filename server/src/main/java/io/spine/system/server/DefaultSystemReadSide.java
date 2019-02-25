@@ -44,7 +44,7 @@ final class DefaultSystemReadSide implements SystemReadSide {
 
     DefaultSystemReadSide(SystemContext context) {
         this.context = context;
-        this.eventBus = context.getEventBus();
+        this.eventBus = context.eventBus();
     }
 
     @Override
@@ -61,13 +61,12 @@ final class DefaultSystemReadSide implements SystemReadSide {
 
     @Override
     public Iterator<Any> readDomainAggregate(Query query) {
-        @SuppressWarnings("unchecked") // Logically checked.
         MirrorRepository repository = (MirrorRepository)
                 context.findRepository(Mirror.class)
                        .orElseThrow(
                                () -> newIllegalStateException(
                                        "Mirror projection repository is not registered in %s.",
-                                       context.getName()
+                                       context.name()
                                               .getValue()
                                )
                        );

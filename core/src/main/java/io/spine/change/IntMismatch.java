@@ -30,13 +30,11 @@ import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Utility class for working with {@code int} values in {@link ValueMismatch}es.
- *
- * @author Alexander Yevsyukov
  */
 public final class IntMismatch {
 
+    /** Prevent instantiation of this utility class. */
     private IntMismatch() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

@@ -44,7 +44,7 @@ public class AutoIncrement extends VersionIncrement {
 
     @Override
     protected Version nextVersion() {
-        Version current = transaction().getVersion();
+        Version current = transaction().version();
         Version result = Versions.increment(current);
         return result;
     }

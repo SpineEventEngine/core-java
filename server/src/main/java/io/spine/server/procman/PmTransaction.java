@@ -25,7 +25,6 @@ import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.AutoIncrement;
@@ -35,6 +34,8 @@ import io.spine.server.entity.Phase;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.server.procman.model.Lifecycle;
 import io.spine.validate.ValidatingBuilder;
 
@@ -92,7 +93,7 @@ public class PmTransaction<I,
     List<Event> dispatchEvent(EventEnvelope event) {
         VersionIncrement versionIncrement = createVersionIncrement();
         Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
-                new EventDispatch<>(this::dispatch, getEntity(), event),
+                new EventDispatch<>(this::dispatch, entity(), event),
                 versionIncrement
         );
         List<Event> events = propagate(phase);

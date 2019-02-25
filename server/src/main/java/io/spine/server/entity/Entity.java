@@ -47,7 +47,7 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
     /**
      * Obtains the identifier of the entity.
      */
-    I getId();
+    I id();
 
     /**
      * Obtains string representation of the entity identifier.
@@ -56,13 +56,13 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
      *          form in debug and error messages.
      */
     default String idAsString() {
-        return Stringifiers.toString(getId());
+        return Stringifiers.toString(id());
     }
 
     /**
      * Obtains the state of the entity.
      */
-    S getState();
+    S state();
 
     /**
      * {@inheritDoc}
@@ -89,9 +89,20 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
 
     /**
      * Obtains the version of the entity.
+     *
+     * @apiNote This method has the {@code get} prefix for conforming to Java Beans convention which
+     *          is used for the column methods.
+     * @see #version()
      */
     @Column
     Version getVersion();
+
+    /**
+     * Obtains the version of the entity.
+     */
+    default Version version() {
+        return getVersion();
+    }
 
     /**
      * Enumeration of generic type parameters of this interface.

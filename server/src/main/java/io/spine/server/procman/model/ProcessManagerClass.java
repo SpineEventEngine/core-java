@@ -21,8 +21,6 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.Sets.SetView;
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -32,6 +30,8 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;

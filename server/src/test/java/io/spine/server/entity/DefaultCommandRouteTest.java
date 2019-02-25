@@ -31,13 +31,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- */
 @DisplayName("DefaultCommandRoute should")
 class DefaultCommandRouteTest {
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We call isPresent() in assertion.
     @Test
     @DisplayName("get ID from command message")
     void getIdFromCommand() {

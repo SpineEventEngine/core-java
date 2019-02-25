@@ -67,7 +67,7 @@ class EntityQueryProcessor implements QueryProcessor {
             entities = repository.find(filters, orderBy, pagination, fieldMask);
         }
         ImmutableList<Any> result = stream(entities)
-                .map(Entity::getState)
+                .map(Entity::state)
                 .map(AnyPacker::pack)
                 .collect(toImmutableList());
         return result;

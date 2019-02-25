@@ -20,8 +20,8 @@
 
 package io.spine.server.integration.given;
 
-import io.spine.core.CommandEnvelope;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.integration.Project;
 import io.spine.test.integration.ProjectId;
 

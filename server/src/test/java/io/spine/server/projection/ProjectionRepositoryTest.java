@@ -27,13 +27,9 @@ import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
@@ -45,6 +41,10 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDepri
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.projection.given.TestProjection;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.test.projection.Project;
@@ -102,7 +102,7 @@ class ProjectionRepositoryTest
 
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
         TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(ProjectionRepositoryTest.class, tenantId);
+                new TestActorRequestFactory(ProjectionRepositoryTest.class, tenantId);
         return newInstance(producerId, requestFactory);
     }
 
@@ -121,7 +121,7 @@ class ProjectionRepositoryTest
                                  .getActorContext()
                                  .getTenantId();
         if (boundedContext.isMultitenant()) {
-            boundedContext.getTenantIndex()
+            boundedContext.tenantIndex()
                           .keep(tenantId);
         }
     }
@@ -195,7 +195,7 @@ class ProjectionRepositoryTest
     }
 
     private static String entityName(TestProjection entity) {
-        return entity.getState()
+        return entity.state()
                      .getName();
     }
 
@@ -273,7 +273,7 @@ class ProjectionRepositoryTest
             assertFalse(allItems.hasNext());
 
             // Check that the stored instance has the same ID as the instance handling the event.
-            assertEquals(storedProjection.getId(), receiverId);
+            assertEquals(storedProjection.id(), receiverId);
         }
 
         @Test
@@ -297,7 +297,7 @@ class ProjectionRepositoryTest
             // Dispatch an event to the archived projection.
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             projection = repository().findOrCreate(projectId);
-            List<Task> addedTasks = projection.getState()
+            List<Task> addedTasks = projection.state()
                                               .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -318,7 +318,7 @@ class ProjectionRepositoryTest
             // Dispatch an event to the deleted projection.
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             projection = repository().findOrCreate(projectId);
-            List<Task> addedTasks = projection.getState()
+            List<Task> addedTasks = projection.state()
                                               .getTaskList();
             assertTrue(projection.isDeleted());
 
@@ -338,7 +338,7 @@ class ProjectionRepositoryTest
             TestProjection project = new TestProjection(id);
             dispatch(project, eventFactory.createEvent(projectCreated));
             dispatch(project, eventFactory.createEvent(taskAdded));
-            Any newState = pack(project.getState());
+            Any newState = pack(project.state());
             EntityHistoryId historyId = EntityHistoryId
                     .newBuilder()
                     .setTypeUrl(newState.getTypeUrl())
@@ -365,7 +365,7 @@ class ProjectionRepositoryTest
                     .build();
             Optional<EntitySubscriberProjection> projection = repository.find(id);
             assertTrue(projection.isPresent());
-            assertEquals(expectedValue, projection.get().getState());
+            assertEquals(expectedValue, projection.get().state());
 
             context.close();
         }
@@ -446,9 +446,9 @@ class ProjectionRepositoryTest
 
         assertThat(lastMessage)
                 .isInstanceOf(EventEnvelope.class);
-        assertThat(lastMessage.getMessage())
+        assertThat(lastMessage.message())
                 .isEqualTo(getMessage(event));
-        assertThat(lastMessage.getOuterObject())
+        assertThat(lastMessage.outerObject())
                 .isEqualTo(event);
 
         // It must be "illegal argument type" since projections of this repository
@@ -465,7 +465,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("processed event classes")
         void eventClasses() {
-            Set<EventClass> eventClasses = repository().getMessageClasses();
+            Set<EventClass> eventClasses = repository().messageClasses();
             assertEventClasses(eventClasses,
                                PrjProjectCreated.class,
                                PrjTaskAdded.class,
@@ -536,25 +536,14 @@ class ProjectionRepositoryTest
     class ExposeToPackage {
 
         /**
-         * Ensures that {@link ProjectionRepository#getEventStore()} which is used by the catch-up
+         * Ensures that {@link ProjectionRepository#eventStore()} which is used by the catch-up
          * functionality is exposed to the package.
          */
         @Test
         @DisplayName("event store")
         void eventStore() {
             ProjectionRepository<?, ?, ?> repository = repository();
-            assertNotNull(repository.getEventStore());
-        }
-
-        /**
-         * Ensures that {@link ProjectionRepository#boundedContext()} which is used by the catch-up
-         * functionality is exposed to the package.
-         */
-        @Test
-        @DisplayName("bounded context")
-        void boundedContext() {
-            ProjectionRepository<?, ?, ?> repository = repository();
-            assertNotNull(repository.boundedContext());
+            assertNotNull(repository.eventStore());
         }
     }
 

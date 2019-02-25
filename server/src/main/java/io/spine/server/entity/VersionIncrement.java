@@ -42,7 +42,7 @@ public abstract class VersionIncrement {
      */
     void apply() {
         Version nextVersion = nextVersion();
-        checkIsIncrement(transaction.getVersion(), nextVersion);
+        checkIsIncrement(transaction.version(), nextVersion);
         transaction.setVersion(nextVersion);
     }
 

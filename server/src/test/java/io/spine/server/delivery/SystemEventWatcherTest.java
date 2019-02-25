@@ -46,7 +46,7 @@ class SystemEventWatcherTest {
     @DisplayName("not subscribe to external events")
     void notDomestic() {
         SystemEventWatcher watcher = new ExternalWatcher();
-        IntegrationBus bus = boundedContext.getIntegrationBus();
+        IntegrationBus bus = boundedContext.integrationBus();
         assertThrows(IllegalStateException.class, () -> bus.register(watcher));
     }
 
@@ -54,7 +54,7 @@ class SystemEventWatcherTest {
     @DisplayName("not subscribe to external non-system events")
     void onlySystem() {
         SystemEventWatcher watcher = new NonSystemWatcher();
-        EventBus bus = boundedContext.getEventBus();
+        EventBus bus = boundedContext.eventBus();
         assertThrows(IllegalStateException.class, () -> bus.register(watcher));
     }
 
@@ -62,7 +62,7 @@ class SystemEventWatcherTest {
     @DisplayName("subscribe to domestic system events")
     void subscribe() {
         SystemEventWatcher watcher = new ValidSystemWatcher();
-        EventBus bus = boundedContext.getEventBus();
+        EventBus bus = boundedContext.eventBus();
         bus.register(watcher);
     }
 }

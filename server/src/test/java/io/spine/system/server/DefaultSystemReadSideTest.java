@@ -71,7 +71,7 @@ class DefaultSystemReadSideTest {
         domainContext = BoundedContext
                 .newBuilder()
                 .build();
-        systemReadSide = domainContext.getSystemClient().readSide();
+        systemReadSide = domainContext.systemClient().readSide();
     }
 
     @AfterEach
@@ -136,7 +136,7 @@ class DefaultSystemReadSideTest {
                     .setName("System Bus test project")
                     .build();
             Event event = events.createEvent(systemEvent);
-            systemContext.getEventBus().post(event);
+            systemContext.eventBus().post(event);
             return systemEvent;
         }
     }
@@ -146,7 +146,7 @@ class DefaultSystemReadSideTest {
     class ReadDomainAggregates {
 
         private final TestActorRequestFactory actorRequestFactory =
-                TestActorRequestFactory.newInstance(DefaultSystemWriteSideTest.class);
+                new TestActorRequestFactory(DefaultSystemWriteSideTest.class);
 
         private ListId aggregateId;
 
@@ -179,7 +179,7 @@ class DefaultSystemReadSideTest {
                     .setId(aggregateId)
                     .build();
             Command cmd = actorRequestFactory.createCommand(command);
-            domainContext.getCommandBus()
+            domainContext.commandBus()
                          .post(cmd, noOpObserver());
         }
     }

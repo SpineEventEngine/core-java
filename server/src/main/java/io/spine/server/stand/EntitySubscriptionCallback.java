@@ -30,8 +30,8 @@ import io.spine.client.EntityUpdatesVBuilder;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionUpdateVBuilder;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Responses;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityStateChanged;
 
 /**
@@ -49,7 +49,7 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
      */
     @Override
     protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
-        EntityStateChanged theEvent = (EntityStateChanged) event.getMessage();
+        EntityStateChanged theEvent = (EntityStateChanged) event.message();
         EntityUpdates updates = extractEntityUpdates(theEvent);
         SubscriptionUpdate result = SubscriptionUpdateVBuilder
                 .newBuilder()

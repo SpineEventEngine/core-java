@@ -38,6 +38,6 @@ public class DotSpace extends AggregateRepository<ObjectId, Dot> {
      * of creating {@code Event} instances. Real imports would need to create those.
      */
     public DotSpace() {
-        getEventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
+        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
     }
 }
