@@ -42,7 +42,7 @@ public final class SwitchmanBureau extends AggregateRepository<String, Switchman
     // Can ignore the value since we're calling own builder-like method.
     public SwitchmanBureau() {
         super();
-        getCommandRouting().route(SetSwitch.class, new CommandRoute<String, SetSwitch>() {
+        commandRouting().route(SetSwitch.class, new CommandRoute<String, SetSwitch>() {
             private static final long serialVersionUID = 0L;
 
             @Override

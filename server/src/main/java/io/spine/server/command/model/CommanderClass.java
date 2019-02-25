@@ -21,13 +21,13 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.Sets.SetView;
-import io.spine.core.CommandClass;
-import io.spine.core.EmptyClass;
-import io.spine.core.EventClass;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Commander;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
 
 import java.util.Set;
 

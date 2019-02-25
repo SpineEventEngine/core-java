@@ -55,7 +55,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
 
     @Assign
     PmQuizStarted handle(PmStartQuiz command) {
-        getBuilder().setId(command.getQuizId());
+        builder().setId(command.getQuizId());
         return PmQuizStarted.newBuilder()
                             .setQuizId(command.getQuizId())
                             .addAllQuestion(command.getQuestionList())
@@ -91,14 +91,14 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     private boolean questionIsClosed(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
+        List<PmQuestionId> openQuestions = builder().getOpenQuestion();
         boolean containedInOpenQuestions = openQuestions.contains(questionId);
         return !containedInOpenQuestions;
     }
 
     @React
     Nothing on(PmQuizStarted event) {
-        getBuilder().setId(event.getQuizId());
+        builder().setId(event.getQuizId());
         return nothing();
     }
 
@@ -106,7 +106,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     Nothing on(PmQuestionSolved event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
-        getBuilder().addSolvedQuestion(questionId);
+        builder().addSolvedQuestion(questionId);
         return nothing();
     }
 
@@ -114,13 +114,14 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     Nothing on(PmQuestionFailed event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
-        getBuilder().addFailedQuestion(questionId);
+        builder().addFailedQuestion(questionId);
         return nothing();
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
+        PmQuizVBuilder builder = builder();
+        List<PmQuestionId> openQuestions = builder.getOpenQuestion();
         int index = openQuestions.indexOf(questionId);
-        getBuilder().removeOpenQuestion(index);
+        builder.removeOpenQuestion(index);
     }
 }

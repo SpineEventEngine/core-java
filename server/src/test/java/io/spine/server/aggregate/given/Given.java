@@ -124,9 +124,10 @@ public class Given {
          * userId and timestamp using default
          * {@link io.spine.core.CommandId CommandId} instance.
          */
-        public static Command create(io.spine.base.CommandMessage command, UserId userId, Timestamp when) {
-            Command result = TestActorRequestFactory.newInstance(userId)
-                                                    .createCommand(command, when);
+        public static Command create(io.spine.base.CommandMessage command,
+                                     UserId userId,
+                                     Timestamp when) {
+            Command result = new TestActorRequestFactory(userId).createCommand(command, when);
             return result;
         }
     }

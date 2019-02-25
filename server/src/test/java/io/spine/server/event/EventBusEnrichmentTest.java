@@ -23,12 +23,12 @@ package io.spine.server.event;
 import com.google.common.truth.MapSubject;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.event.enrich.Enricher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EnrichmentByContextFields;
 import io.spine.test.event.EnrichmentForSeveralEvents;
 import io.spine.test.event.ProjectCreatedSeparateEnrichment;
@@ -57,7 +57,7 @@ class EventBusEnrichmentTest {
 
         ProjectRepository projectRepository = new ProjectRepository();
         bc.register(projectRepository);
-        eventBus = bc.getEventBus();
+        eventBus = bc.eventBus();
     }
 
     @AfterEach
@@ -82,7 +82,7 @@ class EventBusEnrichmentTest {
         RememberingSubscriber subscriber = new RememberingSubscriber();
         eventBus.register(subscriber);
 
-        eventBus.post(event.getOuterObject());
+        eventBus.post(event.outerObject());
 
         MapSubject assertMap =
                 assertThat(subscriber.getEventContext()

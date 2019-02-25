@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>All the user interactions with the system (such as
  * {@linkplain BoundedContext#register(Repository) repository registration},
- * {@linkplain BoundedContext#getCommandBus() command posting},
+ * {@linkplain BoundedContext#commandBus() command posting},
  * {@linkplain BoundedContext#findRepository(Class) query processing}, etc.) happen through
  * an instance of this class.
  *
@@ -63,7 +63,7 @@ final class DomainContext extends BoundedContext {
     }
 
     @Override
-    public SystemClient getSystemClient() {
+    public SystemClient systemClient() {
         return system;
     }
 

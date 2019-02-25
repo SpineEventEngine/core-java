@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.MessageInvalid;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
@@ -54,7 +54,7 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
         if (violation.isPresent()) {
             Error error = violation.get()
                                    .asError();
-            Any packedId = Identifier.pack(envelope.getId());
+            Any packedId = Identifier.pack(envelope.id());
             Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {

@@ -20,9 +20,9 @@
 
 package io.spine.server.procman;
 
-import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.List;
 

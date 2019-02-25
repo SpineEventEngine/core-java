@@ -47,8 +47,8 @@ public class PersonProjection
 
     @Subscribe
     public void on(PersonCreated event) {
-        getBuilder().setId(event.getId())
-                    .setName(event.getName());
+        builder().setId(event.getId())
+                 .setName(event.getName());
     }
 
     @Subscribe

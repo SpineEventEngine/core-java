@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * Abstract base for endpoints that dispatch events to aggregates.
@@ -30,13 +30,11 @@ import io.spine.core.EventEnvelope;
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates
- *
- * @author Alexander Yevsyukov
  */
 abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, EventEnvelope> {
 
-    AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
-        super(repository, envelope);
+    AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope event) {
+        super(repository, event);
     }
 }

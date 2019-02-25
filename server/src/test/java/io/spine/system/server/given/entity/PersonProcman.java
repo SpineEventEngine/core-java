@@ -48,21 +48,21 @@ public class PersonProcman
 
     @Assign
     Nothing handle(StartPersonCreation command) {
-        getBuilder().setId(command.getId());
+        builder().setId(command.getId());
         return nothing();
     }
 
     @Assign
     Nothing handle(CompletePersonCreation command) {
-        getBuilder().setId(command.getId())
+        builder().setId(command.getId())
                     .setCreated(true);
         return nothing();
     }
 
     @React
     Nothing reactOn(PersonNameCreated event) {
-        getBuilder().setId(event.getId())
-                    .setCreated(true);
+        builder().setId(event.getId())
+                 .setCreated(true);
         return nothing();
     }
 }

@@ -22,11 +22,11 @@ package io.spine.server.command.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.StringValue;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.test.shared.EmptyEntity;
 import io.spine.server.test.shared.EmptyEntityVBuilder;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 

@@ -22,13 +22,13 @@ package io.spine.server.projection.given;
 
 import io.spine.base.Identifier;
 import io.spine.core.EventContext;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.organizations.OrganizationEstablished;
 import io.spine.server.organizations.OrganizationId;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;

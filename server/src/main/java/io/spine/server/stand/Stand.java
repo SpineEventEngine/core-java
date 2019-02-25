@@ -33,8 +33,6 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -52,6 +50,8 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeUrl;
@@ -159,8 +159,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     @Deprecated
     public void post(Entity entity, EntityLifecycle lifecycle) {
-        Any id = Identifier.pack(entity.getId());
-        Any state = AnyPacker.pack(entity.getState());
+        Any id = Identifier.pack(entity.id());
+        Any state = AnyPacker.pack(entity.state());
         EntityRecord record = EntityRecordVBuilder
                 .newBuilder()
                 .setEntityId(id)
@@ -177,16 +177,16 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * Receives an event and notifies matching subscriptions.
      */
     @Override
-    protected void handle(EventEnvelope envelope) {
-        TypeUrl typeUrl = TypeUrl.of(envelope.getMessage());
+    protected void handle(EventEnvelope event) {
+        TypeUrl typeUrl = TypeUrl.of(event.message());
         if (!subscriptionRegistry.hasType(typeUrl)) {
             return;
         }
         subscriptionRegistry.byType(typeUrl)
                             .stream()
                             .filter(SubscriptionRecord::isActive)
-                            .filter(record -> record.matches(envelope))
-                            .forEach(record -> runSubscriptionUpdate(record, envelope));
+                            .filter(record -> record.matches(event))
+                            .forEach(record -> runSubscriptionUpdate(record, event));
     }
 
     /**
@@ -195,7 +195,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Always returns {@code true} as the filtering happens in {@link #handle(EventEnvelope)}.
      */
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
+    public boolean canDispatch(EventEnvelope event) {
         return true;
     }
 
@@ -209,7 +209,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Also receives {@link EntityStateChanged} event class to enable entity subscriptions.
      */
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);
         Set<EventClass> result =
                 union(eventRegistry.eventClasses(), singleton(entityStateChanged));
@@ -222,7 +222,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Stand does not consume external events.
      */
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

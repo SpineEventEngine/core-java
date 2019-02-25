@@ -56,8 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("CommandRouting rejection should")
 class CommandRoutingRejectionTest {
 
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+    private final TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
     private final StreamObserver<Ack> observer = noOpObserver();
 
     private BoundedContext boundedContext;
@@ -73,11 +72,11 @@ class CommandRoutingRejectionTest {
                                        .build();
         boundedContext.register(new SwitchmanBureau());
         switchmanObserver = new SwitchmanObserver();
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .register(switchmanObserver);
         logRepository = new Log.Repository();
         boundedContext.register(logRepository);
-        commandBus = boundedContext.getCommandBus();
+        commandBus = boundedContext.commandBus();
     }
 
     @AfterEach
@@ -122,7 +121,7 @@ class CommandRoutingRejectionTest {
         commandBus.post(commandToReject, observer);
         Optional<Log> foundLog = logRepository.find(Log.ID);
         assertTrue(foundLog.isPresent());
-        LogState log = foundLog.get().getState();
+        LogState log = foundLog.get().state();
         assertTrue(log.containsCounters(switchmanName));
         assertTrue(log.getMissingSwitchmanList()
                       .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));

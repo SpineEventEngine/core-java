@@ -23,15 +23,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
 
 import java.util.List;
@@ -44,14 +44,11 @@ import static org.mockito.Mockito.when;
 
 /**
  * A test utility for dispatching commands and events to a {@code ProcessManager} in test purposes.
- *
- * @author Alex Tymchenko
  */
 @VisibleForTesting
 @CanIgnoreReturnValue
 public final class PmDispatcher {
 
-    @SuppressWarnings("unchecked") // casts are ensured by type matching in key-value pairs
     private static final
     ImmutableMap<Class<? extends MessageEnvelope>, EndpointFn> endpoints =
             ImmutableMap.<Class<? extends MessageEnvelope>, EndpointFn>
@@ -127,13 +124,13 @@ public final class PmDispatcher {
                                              S extends Message>
             extends PmEventEndpoint<I, P> {
 
-        private TestPmEventEndpoint(EventEnvelope envelope) {
-            super(mockRepository(), envelope);
+        private TestPmEventEndpoint(EventEnvelope event) {
+            super(mockRepository(), event);
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
-        List<Event> dispatch(P manager, EventEnvelope envelope) {
-            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(envelope);
+        List<Event> dispatch(P manager, EventEnvelope event) {
+            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(event);
             List<Event> events = endpoint.runTransactionFor(manager);
             return events;
         }
@@ -144,7 +141,7 @@ public final class PmDispatcher {
     ProcessManagerRepository<I, P, S> mockRepository() {
         TestPmRepository mockedRepo = mock(TestPmRepository.class);
         when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-        when(mockedRepo.getIdClass()).thenReturn(Object.class);
+        when(mockedRepo.idClass()).thenReturn(Object.class);
         return mockedRepo;
     }
 

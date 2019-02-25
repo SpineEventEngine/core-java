@@ -24,8 +24,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -172,7 +172,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Method getRawMethod() {
+    public Method rawMethod() {
         return method;
     }
 
@@ -185,7 +185,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<P> getProducedMessages() {
+    public Set<P> producedMessages() {
         return producedTypes.typeSet();
     }
 
@@ -208,7 +208,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<MethodAttribute<?>> getAttributes() {
+    public Set<MethodAttribute<?>> attributes() {
         return attributes;
     }
 
@@ -230,8 +230,8 @@ public abstract class AbstractHandlerMethod<T,
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            Message message = envelope.getMessage();
-            Message context = envelope.getMessageContext();
+            Message message = envelope.message();
+            Message context = envelope.context();
             throw new HandlerMethodFailedException(target, message, context, e);
         }
     }

@@ -24,10 +24,10 @@ import com.google.protobuf.Any;
 import io.spine.base.FieldPath;
 import io.spine.base.FieldPaths;
 import io.spine.core.ByField;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
@@ -47,7 +47,7 @@ public final class EventSubscriberMethod extends SubscriberMethod {
 
     @Override
     public MessageFilter filter() {
-        Subscribe annotation = getRawMethod().getAnnotation(Subscribe.class);
+        Subscribe annotation = rawMethod().getAnnotation(Subscribe.class);
         ByField byFieldFilter = annotation.filter();
         String rawFieldPath = byFieldFilter.path();
         if (rawFieldPath.isEmpty()) {
@@ -66,8 +66,8 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     }
 
     @Override
-    protected void checkAttributesMatch(EventEnvelope envelope) throws IllegalArgumentException {
-        super.checkAttributesMatch(envelope);
-        ensureExternalMatch(envelope.getEventContext().getExternal());
+    protected void checkAttributesMatch(EventEnvelope event) throws IllegalArgumentException {
+        super.checkAttributesMatch(event);
+        ensureExternalMatch(event.context().getExternal());
     }
 }

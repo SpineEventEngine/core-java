@@ -28,10 +28,10 @@ import io.spine.base.Error;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
+import io.spine.server.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +71,7 @@ public class CommandService
         if (boundedContext == null) {
             handleUnsupported(request, responseObserver);
         } else {
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             commandBus.post(request, responseObserver);
         }
     }
@@ -146,7 +146,7 @@ public class CommandService
          */
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
                 builder.put(commandClass, boundedContext);

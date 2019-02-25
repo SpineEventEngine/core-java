@@ -20,8 +20,8 @@
 
 package io.spine.server.command;
 
-import io.spine.core.CommandEnvelope;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Optional;
 

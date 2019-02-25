@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.type.TypeUrl;
 
 /**
- * Storage fields for persisting entity {@linkplain io.spine.server.entity.Entity#getState state}.
+ * Storage fields for persisting entity {@linkplain io.spine.server.entity.Entity#state state}.
  *
  * @see StorageField
  */

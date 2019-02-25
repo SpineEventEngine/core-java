@@ -129,7 +129,7 @@ public class Given {
                                                  .setValue(newUuid())
                                                  .build();
             TestActorRequestFactory factory =
-                    TestActorRequestFactory.newInstance(userId, generatedTenantId);
+                    new TestActorRequestFactory(userId, generatedTenantId);
             Command result = factory.createCommand(command, when);
             return result;
         }
@@ -187,7 +187,7 @@ public class Given {
     static class AQuery {
 
         private static final ActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(AQuery.class);
+                new TestActorRequestFactory(AQuery.class);
 
         private AQuery() {
         }
@@ -246,9 +246,8 @@ public class Given {
 
         @Apply
         void event(AggProjectCreated event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Status.CREATED);
+            builder().setId(event.getProjectId())
+                     .setStatus(Status.CREATED);
         }
 
         @Apply
@@ -257,9 +256,8 @@ public class Given {
 
         @Apply
         void event(AggProjectStarted event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Status.STARTED);
+            builder().setId(event.getProjectId())
+                     .setStatus(Status.STARTED);
         }
     }
 
@@ -295,7 +293,7 @@ public class Given {
 
         @Apply
         void event(CustomerCreated event) {
-            getBuilder().mergeFrom(event.getCustomer());
+            builder().mergeFrom(event.getCustomer());
         }
     }
 

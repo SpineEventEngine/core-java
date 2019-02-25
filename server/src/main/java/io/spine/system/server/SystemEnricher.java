@@ -25,7 +25,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.event.enrich.Enricher;
+import io.spine.server.enrich.Enricher;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -34,8 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A factory of {@link Enricher} instances for the system bounded context.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 final class SystemEnricher {
@@ -54,10 +52,10 @@ final class SystemEnricher {
      */
     public static Enricher create(CommandLifecycleRepository commandRepository) {
         checkNotNull(commandRepository);
-        Enricher enricher = Enricher.newBuilder()
-                                    .add(CommandId.class, Command.class,
-                                         commandLookup(commandRepository))
-                                    .build();
+        Enricher enricher = Enricher
+                .newBuilder()
+                .add(CommandId.class, Command.class, commandLookup(commandRepository))
+                .build();
         return enricher;
     }
 
@@ -68,7 +66,7 @@ final class SystemEnricher {
 
     private static Command findCommand(CommandLifecycleRepository repository, CommandId id) {
         Optional<CommandLifecycleAggregate> commandLifecycle = repository.find(id);
-        Command command = commandLifecycle.map(Aggregate::getState)
+        Command command = commandLifecycle.map(Aggregate::state)
                                           .map(CommandLifecycle::getCommand)
                                           .orElse(Command.getDefaultInstance());
         return command;

@@ -62,7 +62,7 @@ class DefaultSystemWriteSideTest {
         @BeforeEach
         void setUp() {
             domainContext = contextWithSystemAggregate();
-            systemWriteSide = domainContext.getSystemClient().writeSide();
+            systemWriteSide = domainContext.systemClient().writeSide();
             systemContext = systemOf(domainContext);
             createAggregate();
         }

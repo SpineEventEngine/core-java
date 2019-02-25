@@ -27,8 +27,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -43,6 +41,8 @@ import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -84,19 +84,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
-    EventStore getEventStore() {
-        return getBoundedContext().getEventBus()
-                                  .getEventStore();
+    EventStore eventStore() {
+        return boundedContext()
+                .eventBus()
+                .eventStore();
     }
 
     /** Obtains class information of projection managed by this repository. */
     private ProjectionClass<P> projectionClass() {
-        return (ProjectionClass<P>) entityClass();
+        return (ProjectionClass<P>) entityModelClass();
     }
 
     @Internal
     @Override
-    protected final ProjectionClass<P> getModelClass(Class<P> cls) {
+    protected final ProjectionClass<P> toModelClass(Class<P> cls) {
         return asProjectionClass(cls);
     }
 
@@ -129,7 +130,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         ProjectionSystemEventWatcher<I> systemSubscriber =
                 new ProjectionSystemEventWatcher<>(this);
-        BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = this.boundedContext();
         systemSubscriber.registerIn(boundedContext);
     }
 
@@ -146,7 +147,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     private Set<EventFilter> createEventFilters() {
         ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
-        Set<EventClass> eventClasses = getMessageClasses();
+        Set<EventClass> eventClasses = messageClasses();
         for (EventClass eventClass : eventClasses) {
             String typeName = TypeName.of(eventClass.value())
                                       .value();
@@ -157,16 +158,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return builder.build();
     }
 
-    /** Opens access to the {@link BoundedContext} of the repository to the package. */
-    BoundedContext boundedContext() {
-        return getBoundedContext();
-    }
-
     /**
      * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
      */
     protected final Stand getStand() {
-        return getBoundedContext().getStand();
+        return boundedContext().stand();
     }
 
     /**
@@ -193,7 +189,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        Class<P> projectionClass = getEntityClass();
+        Class<P> projectionClass = entityClass();
         ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
         this.recordStorage = projectionStorage.recordStorage();
         return projectionStorage;
@@ -217,24 +213,24 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     protected ProjectionStorage<I> projectionStorage() {
         @SuppressWarnings("unchecked") /* OK as we control the creation in createStorage(). */
-        ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
+        ProjectionStorage<I> storage = (ProjectionStorage<I>) storage();
         return storage;
     }
 
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return projectionClass().getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return projectionClass().getExternalEventClasses();
     }
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(envelope);
+    public boolean canDispatch(EventEnvelope event) {
+        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(event);
         return subscriber.isPresent();
     }
 
@@ -253,12 +249,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * @param id
      *         the ID of the target projection
-     * @param envelope
+     * @param event
      *         the event to dispatch
      */
     @Internal
-    protected void dispatchNowTo(I id, EventEnvelope envelope) {
-        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
+    protected void dispatchNowTo(I id, EventEnvelope event) {
+        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, event);
         endpoint.dispatchTo(id);
     }
 
@@ -294,7 +290,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     private class ProjectionExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
+        public Set<ExternalMessageClass> messageClasses() {
             Set<EventClass> eventClasses = projectionClass().getExternalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }

@@ -62,14 +62,14 @@ class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
     @Apply
     void event(EBProjectCreated event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
+        builder().setId(event.getProjectId())
+                 .setStatus(Project.Status.CREATED);
     }
 
     @Apply
     void event(EBTaskAdded event) {
-        getBuilder().setId(event.getProjectId())
-                    .addTask(event.getTask());
+        builder().setId(event.getProjectId())
+                 .addTask(event.getTask());
     }
 
     private static EBProjectCreated projectCreated(ProjectId projectId) {

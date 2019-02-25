@@ -24,9 +24,9 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
-import io.spine.core.RejectionClass;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.RejectionClass;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;

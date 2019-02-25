@@ -23,9 +23,7 @@ package io.spine.server.aggregate;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
@@ -33,6 +31,8 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -131,7 +131,7 @@ class IdempotencyGuardTest {
         }
 
         private void post(Command command) {
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(command, noOpObserver);
         }
@@ -148,7 +148,7 @@ class IdempotencyGuardTest {
 
         @BeforeEach
         void setUp() {
-            boundedContext.getCommandBus()
+            boundedContext.commandBus()
                           .post(command(createProject(projectId)), noOpObserver());
         }
 
@@ -192,7 +192,7 @@ class IdempotencyGuardTest {
             Event taskEvent = event(taskStarted(projectId));
             Event projectEvent = event(projectPaused(projectId));
 
-            EventBus eventBus = boundedContext.getEventBus();
+            EventBus eventBus = boundedContext.eventBus();
             eventBus.post(taskEvent);
 
             IgTestAggregate aggregate = repository.loadAggregate(projectId);
@@ -202,7 +202,7 @@ class IdempotencyGuardTest {
         }
 
         private void post(Event event) {
-            boundedContext.getEventBus()
+            boundedContext.eventBus()
                           .post(event);
         }
 

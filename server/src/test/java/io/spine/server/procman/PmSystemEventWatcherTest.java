@@ -27,12 +27,12 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.server.procman.given.delivery.GivenMessage;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CommandDispatchedToHandler;
 import io.spine.system.server.CommandDispatchedToHandlerVBuilder;
 import io.spine.system.server.EntityHistoryId;
@@ -72,7 +72,7 @@ class PmSystemEventWatcherTest {
     @BeforeEach
     void setUp() {
         repository = mock(ProcessManagerRepository.class);
-        when(repository.getEntityStateType()).thenReturn(REPOSITORY_TYPE);
+        when(repository.entityStateType()).thenReturn(REPOSITORY_TYPE);
 
         watcher = new PmSystemEventWatcher<>(repository);
     }

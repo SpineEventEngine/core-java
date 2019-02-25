@@ -20,8 +20,6 @@
 
 package io.spine.server.aggregate.model;
 
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
 import io.spine.server.aggregate.given.klasse.EngineAggregate;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
 import io.spine.server.aggregate.given.klasse.command.StopEngine;
@@ -32,6 +30,8 @@ import io.spine.server.aggregate.given.klasse.event.EngineStopped;
 import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.TankEmpty;
 import io.spine.server.aggregate.given.klasse.rejection.Rejections;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

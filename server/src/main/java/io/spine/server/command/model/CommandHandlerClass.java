@@ -20,8 +20,8 @@
 
 package io.spine.server.command.model;
 
-import io.spine.core.EventClass;
 import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.type.EventClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

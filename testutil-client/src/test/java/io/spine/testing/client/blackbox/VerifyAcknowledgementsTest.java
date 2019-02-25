@@ -21,7 +21,7 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.core.RejectionClass;
+import io.spine.code.proto.RejectionType;
 import io.spine.testing.client.blackbox.Rejections.BbProjectAlreadyStarted;
 import io.spine.testing.client.blackbox.Rejections.BbTaskCreatedInCompletedProject;
 import io.spine.testing.client.blackbox.Rejections.BbTaskLimitReached;
@@ -144,14 +144,15 @@ class VerifyAcknowledgementsTest {
                 newRejectionAck(taskLimitReached())
         ));
 
-        RejectionClass taskLimitReached = RejectionClass.of(BbTaskLimitReached.class);
         Class<BbProjectAlreadyStarted> projectAlreadyStarted = BbProjectAlreadyStarted.class;
         verify(acked(thrice()).withRejections(projectAlreadyStarted), rejectionAcks);
+
+        RejectionType taskLimitReached = new RejectionType(BbTaskLimitReached.getDescriptor());
         verify(acked(thrice()).withRejections(taskLimitReached), rejectionAcks);
 
         assertThrows(AssertionError.class, () -> {
-            RejectionClass taskInCompletedProject =
-                    RejectionClass.of(BbTaskCreatedInCompletedProject.class);
+            RejectionType taskInCompletedProject =
+                    new RejectionType(BbTaskCreatedInCompletedProject.getDescriptor());
             verify(acked(thrice()).withRejections(taskInCompletedProject), rejectionAcks);
         });
     }
@@ -179,6 +180,7 @@ class VerifyAcknowledgementsTest {
         });
     }
 
+    @SuppressWarnings("TypeMayBeWeakened")
     private static String getTaskTitle(BbTaskCreatedInCompletedProject rejection) {
         return rejection.getTask()
                         .getTitle();
@@ -195,7 +197,7 @@ class VerifyAcknowledgementsTest {
                 newRejectionAck(taskCreatedInCompletedProject(newTask(DUPLICATE_TASK_TITLE)))
         ));
 
-        RejectionClass taskLimitReached = RejectionClass.of(BbTaskLimitReached.class);
+        RejectionType taskLimitReached = new RejectionType(BbTaskLimitReached.getDescriptor());
         Class<BbProjectAlreadyStarted> projectAlreadyStarted = BbProjectAlreadyStarted.class;
 
         verify(ackedWithRejections(count(5)), rejectionAcks);

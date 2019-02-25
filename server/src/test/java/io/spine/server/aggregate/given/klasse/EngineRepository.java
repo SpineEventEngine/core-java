@@ -32,6 +32,6 @@ import io.spine.server.route.EventRoute;
 public class EngineRepository extends AggregateRepository<EngineId, EngineAggregate> {
 
     public void routeImportByFirstMessageField() {
-        getEventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
+        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
     }
 }

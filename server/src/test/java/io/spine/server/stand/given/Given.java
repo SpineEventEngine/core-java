@@ -60,7 +60,7 @@ public class Given {
 
         public StandTestProjectionRepository() {
             super();
-            getEventRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
+            eventRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
         }
 
         @Override
@@ -79,7 +79,7 @@ public class Given {
         @SuppressWarnings("unused") // OK for test class.
         @Subscribe
         public void handle(PrjProjectCreated event, EventContext context) {
-            getBuilder().setId(event.getProjectId());
+            builder().setId(event.getProjectId());
         }
     }
 }

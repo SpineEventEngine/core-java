@@ -80,6 +80,6 @@ public class EntitySubject<T extends EntitySubject<T, S, E>,
      */
     public ProtoSubject<?, Message> hasStateThat() {
         exists();
-        return ProtoTruth.assertThat(actual().getState());
+        return ProtoTruth.assertThat(actual().state());
     }
 }

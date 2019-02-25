@@ -23,8 +23,8 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.enrich.Enricher;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
@@ -102,7 +102,7 @@ public final class SystemContext extends BoundedContext {
      * a {@link NoOpSystemWriteSide} instance.
      */
     @Override
-    public NoOpSystemClient getSystemClient() {
+    public NoOpSystemClient systemClient() {
         return NoOpSystemClient.INSTANCE;
     }
 }

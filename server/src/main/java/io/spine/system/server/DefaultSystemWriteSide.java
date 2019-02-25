@@ -54,7 +54,7 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         checkNotNull(systemCommand);
         CommandFactory commandFactory = SystemCommandFactory.newInstance(system.isMultitenant());
         Command command = commandFactory.create(systemCommand);
-        system.getCommandBus()
+        system.commandBus()
               .post(command, noOpObserver());
     }
 
@@ -64,7 +64,7 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         SystemEventFactory factory = SystemEventFactory.forMessage(systemEvent,
                                                                    system.isMultitenant());
         Event event = factory.createEvent(systemEvent, null);
-        system.getImportBus()
+        system.importBus()
               .post(event, noOpObserver());
     }
 }

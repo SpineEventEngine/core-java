@@ -20,9 +20,9 @@
 
 package io.spine.server.commandbus;
 
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.UnicastDispatcher;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 /**
  * Delivers commands to their handlers.
@@ -35,6 +35,6 @@ public interface CommandDispatcher<I> extends UnicastDispatcher<CommandClass, Co
      * Verifies if this instance dispatches at least one command.
      */
     default boolean dispatchesCommands() {
-        return !getMessageClasses().isEmpty();
+        return !messageClasses().isEmpty();
     }
 }

@@ -49,8 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * See `client/spine/test/option/entity_options_should.proto` for definition of messages
  * used for aggregates and repositories in this test.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("VisibilityGuard should")
 class VisibilityGuardTest {

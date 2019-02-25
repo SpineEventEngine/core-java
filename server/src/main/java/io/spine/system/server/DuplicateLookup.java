@@ -34,8 +34,6 @@ import static io.spine.type.TypeUrl.parse;
 /**
  * Performs a lookup over a given recent history to tell whether or not a given message has already
  * been dispatched to the given entity.
- *
- * @author Dmytro Dashenkov
  */
 final class DuplicateLookup {
 

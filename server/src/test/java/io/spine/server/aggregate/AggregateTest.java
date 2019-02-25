@@ -27,10 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.Given;
@@ -44,6 +41,9 @@ import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
@@ -199,11 +199,11 @@ public class AggregateTest {
         @DisplayName("current state")
         void currentState() {
             dispatchCommand(aggregate, env(createProject));
-            assertEquals(Status.CREATED, aggregate.getState()
+            assertEquals(Status.CREATED, aggregate.state()
                                                   .getStatus());
 
             dispatchCommand(aggregate, env(startProject));
-            assertEquals(Status.STARTED, aggregate.getState()
+            assertEquals(Status.STARTED, aggregate.state()
                                                   .getStatus());
         }
 
@@ -291,8 +291,8 @@ public class AggregateTest {
         List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
 
-        assertEquals(this.aggregate.getVersion(), event.getContext()
-                                                       .getVersion());
+        assertEquals(this.aggregate.version(), event.getContext()
+                                                    .getVersion());
     }
 
     @Test
@@ -367,7 +367,7 @@ public class AggregateTest {
         void updatedUponCommandHandled() {
             dispatchCommand(aggregate, env(createProject));
 
-            Project state = aggregate.getState();
+            Project state = aggregate.state();
 
             assertEquals(ID, state.getId());
             assertEquals(Status.CREATED, state.getStatus());
@@ -414,7 +414,7 @@ public class AggregateTest {
 
         Snapshot snapshot = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.getId());
+        Aggregate anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.play(AggregateHistory.newBuilder()
@@ -519,26 +519,26 @@ public class AggregateTest {
 
         Snapshot snapshotNewProject = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.getId());
+        Aggregate anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.restore(snapshotNewProject);
         tx.commit();
 
-        assertEquals(aggregate.getState(), anotherAggregate.getState());
-        assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
+        assertEquals(aggregate.state(), anotherAggregate.state());
+        assertEquals(aggregate.version(), anotherAggregate.version());
         assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
     }
 
     @Test
     @DisplayName("increment version upon state changing event applied")
     void incrementVersionOnEventApplied() {
-        int version = aggregate.getVersion()
+        int version = aggregate.version()
                                .getNumber();
         // Dispatch two commands that cause events that modify aggregate state.
         aggregate.dispatchCommands(command(createProject), command(startProject));
 
-        assertEquals(version + 2, aggregate.getVersion()
+        assertEquals(version + 2, aggregate.version()
                                            .getNumber());
     }
 
@@ -635,7 +635,7 @@ public class AggregateTest {
     @Test
     @DisplayName("not allow getting state builder from outside event applier")
     void notGetStateBuilderOutsideOfApplier() {
-        assertThrows(IllegalStateException.class, () -> new IntAggregate(100).getBuilder());
+        assertThrows(IllegalStateException.class, () -> new IntAggregate(100).builder());
     }
 
     @Nested
@@ -651,7 +651,7 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(addTaskCommand, noOpObserver);
@@ -679,7 +679,7 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(startCommand, noOpObserver);

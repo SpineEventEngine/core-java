@@ -27,9 +27,9 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.code.proto.EntityStateOption;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.option.EntityOption;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeName;
 
@@ -60,7 +60,7 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     MESSAGE_AND_EVENT_CONTEXT(ImmutableList.of(Message.class, EventContext.class)) {
         @Override
         protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
-            return new Object[]{entityState, event.getEventContext()};
+            return new Object[]{entityState, event.context()};
         }
     };
 
@@ -99,13 +99,13 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     }
 
     @Override
-    public Object[] extractArguments(EventEnvelope envelope) {
-        EventMessage eventMessage = envelope.getMessage();
+    public Object[] extractArguments(EventEnvelope event) {
+        EventMessage eventMessage = event.message();
         checkArgument(eventMessage instanceof EntityStateChanged,
                       "Must be an %s event.", EntityStateChanged.class.getSimpleName());
         EntityStateChanged systemEvent = (EntityStateChanged) eventMessage;
         Message entityState = unpack(systemEvent.getNewState());
-        return arrangeArguments(entityState, envelope);
+        return arrangeArguments(entityState, event);
     }
 
     protected abstract Object[] arrangeArguments(Message entityState, EventEnvelope event);

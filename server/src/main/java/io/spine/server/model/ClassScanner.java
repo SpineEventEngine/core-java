@@ -138,9 +138,9 @@ public final class ClassScanner {
             HandlerId id = handler.id();
             if (seenMethods.containsKey(id)) {
                 Method alreadyPresent = seenMethods.get(id)
-                                                   .getRawMethod();
+                                                   .rawMethod();
                 String methodName = alreadyPresent.getName();
-                String duplicateMethodName = handler.getRawMethod().getName();
+                String duplicateMethodName = handler.rawMethod().getName();
                 throw new DuplicateHandlerMethodError(declaringClass, id,
                                                       methodName, duplicateMethodName);
             } else {
@@ -158,8 +158,8 @@ public final class ClassScanner {
                 );
                 if (previousValue != null && previousValue.fieldDiffersFrom(field)) {
                     throw new HandlerFieldFilterClashError(declaringClass,
-                                                           handler.getRawMethod(),
-                                                           previousValue.handler.getRawMethod());
+                                                           handler.rawMethod(),
+                                                           previousValue.handler.rawMethod());
                 }
             }
         }

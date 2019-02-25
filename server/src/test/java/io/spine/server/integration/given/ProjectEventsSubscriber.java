@@ -20,9 +20,9 @@
 
 package io.spine.server.integration.given;
 
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 
@@ -62,7 +62,7 @@ public class ProjectEventsSubscriber extends AbstractEventSubscriber {
      * Rethrow all the issues, so that they are visible to tests.
      */
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         throw illegalStateWithCauseOf(exception);
     }
 }

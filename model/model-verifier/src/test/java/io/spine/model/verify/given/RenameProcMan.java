@@ -46,7 +46,7 @@ public class RenameProcMan extends ProcessManager<String, RenameState, RenameSta
 
     @Apply
     private void on(TitleChanged event, EventContext context) {
-        getBuilder().setEditor(Events.getActor(context)
-                                     .getValue());
+        builder().setEditor(Events.getActor(context)
+                                  .getValue());
     }
 }

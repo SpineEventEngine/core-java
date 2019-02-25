@@ -21,9 +21,9 @@
 package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.type.MessageEnvelope;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

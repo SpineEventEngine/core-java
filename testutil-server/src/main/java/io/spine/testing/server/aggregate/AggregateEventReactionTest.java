@@ -23,8 +23,8 @@ package io.spine.testing.server.aggregate;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.EventReactionTest;
 
 import java.util.List;

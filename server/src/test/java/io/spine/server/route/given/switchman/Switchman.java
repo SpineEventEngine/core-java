@@ -39,7 +39,7 @@ public final class Switchman extends Aggregate<String, SwitchmanLog, SwitchmanLo
     SwitchPositionConfirmed on(SetSwitch cmd) {
         return SwitchPositionConfirmed
                 .newBuilder()
-                .setSwitchmanName(getId())
+                .setSwitchmanName(id())
                 .setSwitchId(cmd.getSwitchId())
                 .setPosition(cmd.getPosition())
                 .build();
@@ -47,8 +47,8 @@ public final class Switchman extends Aggregate<String, SwitchmanLog, SwitchmanLo
 
     @Apply
     void event(SwitchPositionConfirmed event) {
-        getBuilder()
+        builder()
                 .setName(event.getSwitchmanName())
-                .setSwitchCount(getState().getSwitchCount() + 1);
+                .setSwitchCount(state().getSwitchCount() + 1);
     }
 }

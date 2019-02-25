@@ -24,8 +24,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

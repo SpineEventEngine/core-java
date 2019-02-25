@@ -20,7 +20,7 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;

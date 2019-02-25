@@ -22,13 +22,13 @@ package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
 import io.spine.server.aggregate.given.part.TaskDescriptionPart;
 import io.spine.server.aggregate.given.part.TaskDescriptionRepository;
 import io.spine.server.aggregate.given.part.TaskPart;
 import io.spine.server.aggregate.given.part.TaskRepository;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -51,7 +51,7 @@ class AggregatePartTest {
 
     private static final String TASK_DESCRIPTION = "Description";
     private static final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(AggregatePartTest.class);
+            new TestActorRequestFactory(AggregatePartTest.class);
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
     private TaskPart taskPart;

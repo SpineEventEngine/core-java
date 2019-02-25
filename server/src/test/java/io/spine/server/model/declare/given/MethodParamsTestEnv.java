@@ -26,9 +26,9 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.UserId;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.ScheduleCommand;
 
 import java.lang.reflect.Method;
@@ -92,7 +92,7 @@ public class MethodParamsTestEnv {
 
             @Override
             public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.getMessage(), envelope.getCommandContext()};
+                return new Object[]{envelope.message(), envelope.context()};
             }
         }
     }

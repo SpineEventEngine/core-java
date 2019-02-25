@@ -62,7 +62,7 @@ public class PersonNamePart
 
     @Apply
     void on(PersonNameCreated event) {
-        getBuilder().setId(event.getId())
-                    .setFirstName(event.getFirstName());
+        builder().setId(event.getId())
+                 .setFirstName(event.getFirstName());
     }
 }

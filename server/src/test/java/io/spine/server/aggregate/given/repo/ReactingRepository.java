@@ -38,7 +38,7 @@ public class ReactingRepository
 
     public ReactingRepository() {
         super();
-        getEventRouting()
+        eventRouting()
                 .route(AggProjectArchived.class,
                        new EventRoute<ProjectId, AggProjectArchived>() {
                            private static final long serialVersionUID = 0L;

@@ -28,14 +28,12 @@ import io.spine.server.route.EventRoute;
  * Abstract base for system aggregate repositories.
  *
  * <p>System repositories dispatch imported events using the first event message field.
- *
- * @author Alexander Yevsyukov
  */
 abstract class SystemRepository<I, A extends Aggregate<I, ?, ?>>
         extends AggregateRepository<I, A> {
 
     SystemRepository() {
         super();
-        getEventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
+        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
     }
 }

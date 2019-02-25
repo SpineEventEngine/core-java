@@ -22,7 +22,7 @@ package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import io.spine.core.given.GivenEvent;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

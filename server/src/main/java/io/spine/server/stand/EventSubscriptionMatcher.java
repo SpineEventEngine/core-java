@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.Subscription;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
 /**
@@ -45,7 +45,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected TypeUrl extractType(EventEnvelope event) {
-        TypeUrl result = TypeUrl.of(event.getMessage());
+        TypeUrl result = TypeUrl.of(event.message());
         return result;
     }
 
@@ -56,7 +56,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected Any extractId(EventEnvelope event) {
-        EventId eventId = event.getId();
+        EventId eventId = event.id();
         Any result = Identifier.pack(eventId);
         return result;
     }
@@ -68,7 +68,7 @@ final class EventSubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected Message extractMessage(EventEnvelope event) {
-        EventMessage result = event.getMessage();
+        EventMessage result = event.message();
         return result;
     }
 }

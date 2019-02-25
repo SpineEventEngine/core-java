@@ -31,18 +31,18 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
-import io.spine.server.event.enrich.Enricher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -167,7 +167,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     /** Returns {@link EventStore} associated with the bus. */
-    public EventStore getEventStore() {
+    public EventStore eventStore() {
         return eventStore;
     }
 
@@ -218,11 +218,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     @Override
-    protected void dispatch(EventEnvelope envelope) {
-        EventEnvelope enrichedEnvelope = enrich(envelope);
+    protected void dispatch(EventEnvelope event) {
+        EventEnvelope enrichedEnvelope = enrich(event);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", envelope.getMessage()));
+                   format("Message %s has no dispatchers.", event.message()));
     }
 
     @Override
@@ -452,12 +452,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      */
     private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
-        public UnsupportedEventException handle(EventEnvelope envelope) {
+        public UnsupportedEventException handle(EventEnvelope event) {
+            store(ImmutableSet.of(event.outerObject()));
 
-            Event event = envelope.getOuterObject();
-            store(ImmutableSet.of(event));
-
-            EventMessage message = envelope.getMessage();
+            EventMessage message = event.message();
             UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }
