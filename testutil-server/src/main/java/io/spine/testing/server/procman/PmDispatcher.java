@@ -124,13 +124,13 @@ public final class PmDispatcher {
                                              S extends Message>
             extends PmEventEndpoint<I, P> {
 
-        private TestPmEventEndpoint(EventEnvelope envelope) {
-            super(mockRepository(), envelope);
+        private TestPmEventEndpoint(EventEnvelope event) {
+            super(mockRepository(), event);
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
-        List<Event> dispatch(P manager, EventEnvelope envelope) {
-            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(envelope);
+        List<Event> dispatch(P manager, EventEnvelope event) {
+            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(event);
             List<Event> events = endpoint.runTransactionFor(manager);
             return events;
         }

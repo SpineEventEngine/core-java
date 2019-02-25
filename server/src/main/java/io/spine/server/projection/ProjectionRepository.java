@@ -229,8 +229,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(envelope);
+    public boolean canDispatch(EventEnvelope event) {
+        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(event);
         return subscriber.isPresent();
     }
 
@@ -249,12 +249,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * @param id
      *         the ID of the target projection
-     * @param envelope
+     * @param event
      *         the event to dispatch
      */
     @Internal
-    protected void dispatchNowTo(I id, EventEnvelope envelope) {
-        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
+    protected void dispatchNowTo(I id, EventEnvelope event) {
+        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, event);
         endpoint.dispatchTo(id);
     }
 

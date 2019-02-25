@@ -41,13 +41,13 @@ public final class UnsupportedImportEventException
     private static final long serialVersionUID = 0L;
     private final Error error;
 
-    UnsupportedImportEventException(EventEnvelope envelope) {
-        super(messageFormat(envelope));
-        this.error = unsupportedImportEvent(envelope.message(), getMessage());
+    UnsupportedImportEventException(EventEnvelope event) {
+        super(messageFormat(event));
+        this.error = unsupportedImportEvent(event.message(), getMessage());
     }
 
-    private static String messageFormat(EventEnvelope envelope) {
-        EventClass eventClass = envelope.messageClass();
+    private static String messageFormat(EventEnvelope event) {
+        EventClass eventClass = event.messageClass();
         TypeName typeName = eventClass.typeName();
         String result = format(
             "None of the aggregates declare importing appliers for " +

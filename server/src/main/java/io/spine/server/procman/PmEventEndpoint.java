@@ -37,9 +37,8 @@ import java.util.List;
 public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, EventEnvelope> {
 
-    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository,
-                              EventEnvelope envelope) {
-        super(repository, envelope);
+    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
+        super(repository, event);
     }
 
     static <I, P extends ProcessManager<I, ?, ?>>
@@ -48,9 +47,9 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> invokeDispatcher(P processManager, EventEnvelope envelope) {
+    protected List<Event> invokeDispatcher(P processManager, EventEnvelope event) {
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
-        List<Event> events = tx.dispatchEvent(envelope);
+        List<Event> events = tx.dispatchEvent(event);
         return events;
     }
 
@@ -59,12 +58,12 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
      * updated upon reacting on an event.
      */
     @Override
-    protected void onEmptyResult(P pm, EventEnvelope envelope) {
+    protected void onEmptyResult(P pm, EventEnvelope event) {
         // Do nothing.
     }
 
     @Override
-    protected void onError(EventEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
+    protected void onError(EventEnvelope event, RuntimeException exception) {
+        repository().onError(event, exception);
     }
 }

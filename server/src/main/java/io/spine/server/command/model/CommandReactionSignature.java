@@ -103,8 +103,8 @@ public class CommandReactionSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope.message()};
+            public Object[] extractArguments(EventEnvelope event) {
+                return new Object[]{event.message()};
             }
         },
 
@@ -127,10 +127,10 @@ public class CommandReactionSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                CommandContext originContext = envelope.context()
-                                                       .getCommandContext();
-                return new Object[]{envelope.message(), originContext};
+            public Object[] extractArguments(EventEnvelope event) {
+                CommandContext originContext = event.context()
+                                                    .getCommandContext();
+                return new Object[]{event.message(), originContext};
             }
         }
     }

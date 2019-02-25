@@ -77,8 +77,8 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope.message()};
+            public Object[] extractArguments(EventEnvelope event) {
+                return new Object[]{event.message()};
             }
         }
     }

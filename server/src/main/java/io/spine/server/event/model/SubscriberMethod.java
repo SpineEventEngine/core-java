@@ -86,17 +86,17 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
      * <p>It is assumed that the type of the event is correct and only the field filter should be
      * checked.
      *
-     * @param envelope the event to check
+     * @param event the event to check
      * @return {@code true} if this method can handle the given event, {@code false} otherwise
      */
-    final boolean canHandle(EventEnvelope envelope) {
+    final boolean canHandle(EventEnvelope event) {
         MessageFilter filter = filter();
         FieldPath fieldPath = filter.getField();
         if (fieldPath.getFieldNameList().isEmpty()) {
             return true;
         } else {
-            EventMessage event = envelope.message();
-            return match(event, filter);
+            EventMessage msg = event.message();
+            return match(msg, filter);
         }
     }
 

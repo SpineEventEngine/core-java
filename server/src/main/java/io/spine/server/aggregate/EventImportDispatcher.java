@@ -79,15 +79,15 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
 
     @CanIgnoreReturnValue
     @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
-        I result = repository.importEvent(envelope);
+    public Set<I> dispatch(EventEnvelope event) {
+        I result = repository.importEvent(event);
         return ImmutableSet.of(result);
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        EventClass eventClass = envelope.messageClass();
-        String id = envelope.idAsString();
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        EventClass eventClass = event.messageClass();
+        String id = event.idAsString();
         _error("Unable to import event class: `{}` id: {``} repository: `{}`",
                eventClass, id, repository);
     }

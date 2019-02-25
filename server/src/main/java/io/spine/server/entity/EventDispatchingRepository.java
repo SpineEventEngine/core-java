@@ -124,13 +124,15 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Logs error into the repository {@linkplain #log() log}.
      *
-     * @param envelope  the message which caused the error
-     * @param exception the error
+     * @param event
+     *         the message which caused the error
+     * @param exception
+     *         the error
      */
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         logError("Error dispatching event (class: `%s`, id: `%s`) to entity of type `%s`.",
-                 envelope, exception);
+                 event, exception);
     }
 
     /**
@@ -141,14 +143,14 @@ public abstract class EventDispatchingRepository<I,
             implements ExternalMessageDispatcher<I> {
 
         @Override
-        public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope event = envelope.toEventEnvelope();
+        public Set<I> dispatch(ExternalMessageEnvelope externalEvent) {
+            EventEnvelope event = externalEvent.toEventEnvelope();
             return EventDispatchingRepository.this.dispatch(event);
         }
 
         @Override
-        public boolean canDispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope event = envelope.toEventEnvelope();
+        public boolean canDispatch(ExternalMessageEnvelope externalEvent) {
+            EventEnvelope event = externalEvent.toEventEnvelope();
             return EventDispatchingRepository.this.canDispatch(event);
         }
     }

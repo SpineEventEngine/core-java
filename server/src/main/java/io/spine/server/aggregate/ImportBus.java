@@ -114,9 +114,9 @@ public final class ImportBus
     }
 
     @Override
-    protected void dispatch(EventEnvelope envelope) {
-        EventDispatcher<?> dispatcher = getDispatcher(envelope);
-        dispatcher.dispatch(envelope);
+    protected void dispatch(EventEnvelope event) {
+        EventDispatcher<?> dispatcher = getDispatcher(event);
+        dispatcher.dispatch(event);
     }
 
     @Override
@@ -150,8 +150,8 @@ public final class ImportBus
     private static class DeadImportEventHandler implements DeadMessageHandler<EventEnvelope> {
 
         @Override
-        public MessageUnhandled handle(EventEnvelope envelope) {
-            return new UnsupportedImportEventException(envelope);
+        public MessageUnhandled handle(EventEnvelope event) {
+            return new UnsupportedImportEventException(event);
         }
     }
 
@@ -164,8 +164,8 @@ public final class ImportBus
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
         protected
-        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventEnvelope envelope) {
-            return super.getDispatcher(envelope);
+        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventEnvelope event) {
+            return super.getDispatcher(event);
         }
     }
 

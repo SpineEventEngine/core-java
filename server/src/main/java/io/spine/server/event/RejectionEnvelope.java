@@ -102,9 +102,9 @@ public final class RejectionEnvelope
 
         ThrowableMessage throwableMessage = unwrap(throwable);
         Event rejectionEvent = produceEvent(origin, throwableMessage);
-        EventEnvelope envelope = EventEnvelope.of(rejectionEvent);
+        EventEnvelope event = EventEnvelope.of(rejectionEvent);
 
-        return from(envelope);
+        return from(event);
     }
 
     private static ThrowableMessage unwrap(Throwable causedByRejection) {
