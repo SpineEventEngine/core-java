@@ -91,7 +91,7 @@ public final class EventClassSet implements Serializable {
     }
 
     /**
-     * Checks if any of the specified events or rejections are contained in this set.
+     * Checks if any of the specified events or rejections are present in this set.
      */
     public boolean containsAnyOf(Iterable<Event> events) {
         return containsAnyEvent(events) || containsAnyRejection(events);
@@ -118,7 +118,7 @@ public final class EventClassSet implements Serializable {
     }
 
     /**
-     * Checks if rejection's enclosed message type is contained among the {@code rejectionClasses}.
+     * Checks if rejection's enclosed message type is present among the {@code rejectionClasses}.
      */
     public boolean contains(ThrowableMessage rejection) {
         RejectionClass rejectionClass = RejectionClass.of(rejection);
