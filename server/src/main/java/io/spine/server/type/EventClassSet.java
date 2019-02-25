@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.ThrowableMessage;
 import io.spine.code.proto.ref.TypeRef;
+import io.spine.core.Event;
+import io.spine.core.Events;
 import io.spine.type.KnownTypes;
 import io.spine.type.MessageType;
 

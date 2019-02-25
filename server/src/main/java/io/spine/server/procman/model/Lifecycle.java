@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.code.proto.EntityLifecycleOption;
 import io.spine.core.Event;
-import io.spine.core.EventClassSet;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.type.EventClassSet;
 import io.spine.type.MessageType;
 
 import java.io.Serializable;

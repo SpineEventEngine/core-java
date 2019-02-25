@@ -63,7 +63,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
         super(cls);
         this.reactorDelegate = new ReactorClassDelegate<>(cls);
         this.commanderDelegate = CommanderClass.delegateFor(cls);
-        this.lifecycle = Lifecycle.of(getStateClass());
+        this.lifecycle = Lifecycle.of(stateClass());
     }
 
     /**
