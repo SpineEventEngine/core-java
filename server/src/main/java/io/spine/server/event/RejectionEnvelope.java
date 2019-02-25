@@ -156,8 +156,8 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public EventContext messageContext() {
-        return event.messageContext();
+    public EventContext context() {
+        return event.context();
     }
 
     @Override
@@ -176,8 +176,8 @@ public final class RejectionEnvelope
      * @return the rejected command
      */
     public DispatchedCommand getOrigin() {
-        EventContext context = messageContext();
-        RejectionEventContext rejectionContext = messageContext().getRejection();
+        EventContext context = context();
+        RejectionEventContext rejectionContext = context().getRejection();
         Any commandMessage = rejectionContext.getCommandMessage();
         CommandContext commandContext = context.getCommandContext();
         DispatchedCommand result = DispatchedCommand
@@ -194,7 +194,7 @@ public final class RejectionEnvelope
      * @return the rejected command message
      */
     public Message getOriginMessage() {
-        RejectionEventContext context = messageContext().getRejection();
+        RejectionEventContext context = context().getRejection();
         Any commandMessage = context.getCommandMessage();
         return unpack(commandMessage);
     }

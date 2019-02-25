@@ -63,7 +63,7 @@ class ImportOriginTest {
         assertEquals(empty, origin.id());
         assertEquals(empty, origin.outerObject());
         assertEquals(empty, origin.message());
-        assertEquals(empty, origin.messageContext());
+        assertEquals(empty, origin.context());
         assertEquals(EmptyClass.instance(), origin.messageClass());
     }
 }

@@ -104,11 +104,6 @@ public final class CommandEnvelope
         return commandClass;
     }
 
-    @Override
-    public CommandContext messageContext() {
-        return context();
-    }
-
     /**
      * Obtains the actor context of the enclosed command.
      */
@@ -140,6 +135,7 @@ public final class CommandEnvelope
     /**
      * Obtains the command context.
      */
+    @Override
     public CommandContext context() {
         return outerObject().getContext();
     }

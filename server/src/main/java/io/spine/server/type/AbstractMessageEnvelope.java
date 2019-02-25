@@ -21,7 +21,6 @@
 package io.spine.server.type;
 
 import com.google.protobuf.Message;
-import io.spine.base.MessageContext;
 
 import java.util.Objects;
 
@@ -35,7 +34,7 @@ import static java.lang.String.format;
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
  */
-public abstract class AbstractMessageEnvelope<I extends Message, T, C extends MessageContext>
+public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Message>
         implements MessageEnvelope<I, T, C> {
 
     private final T object;

@@ -101,11 +101,6 @@ public final class EventEnvelope
     }
 
     @Override
-    public EventContext messageContext() {
-        return context();
-    }
-
-    @Override
     public ActorContext actorContext() {
         return Events.getActorContext(outerObject());
     }
@@ -134,6 +129,7 @@ public final class EventEnvelope
     /**
      * Obtains the context of the event.
      */
+    @Override
     public EventContext context() {
         return this.eventContext;
     }
@@ -185,7 +181,7 @@ public final class EventEnvelope
         if (!isEnrichmentEnabled()) {
             return this;
         }
-        Optional<Enrichment> enrichment = service.createEnrichment(message(), messageContext());
+        Optional<Enrichment> enrichment = service.createEnrichment(message(), this.context());
         EventEnvelope result = enrichment.map(this::withEnrichment)
                                          .orElse(this);
         return result;
@@ -204,9 +200,9 @@ public final class EventEnvelope
     }
 
     private EventEnvelope withEnrichment(Enrichment enrichment) {
-        EventContext context = messageContext().toBuilder()
-                                               .setEnrichment(enrichment)
-                                               .build();
+        EventContext context = this.context().toBuilder()
+                                   .setEnrichment(enrichment)
+                                   .build();
         Event.Builder enrichedCopy = outerObject().toBuilder()
                                                   .setContext(context);
         return of(enrichedCopy.build());

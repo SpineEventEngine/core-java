@@ -110,7 +110,7 @@ public final class ExternalMessageEnvelope
     }
 
     @Override
-    public ActorContext messageContext() {
+    public ActorContext context() {
         return actorContext;
     }
 
