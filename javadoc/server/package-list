@@ -4,10 +4,10 @@ io.spine.server.annotation
 io.spine.server.bus
 io.spine.server.command
 io.spine.server.commandbus
+io.spine.server.enrich
 io.spine.server.entity
 io.spine.server.entity.storage
 io.spine.server.event
-io.spine.server.event.enrich
 io.spine.server.event.storage
 io.spine.server.event.store
 io.spine.server.integration
@@ -21,3 +21,4 @@ io.spine.server.tenant
 io.spine.server.transport
 io.spine.server.transport.memory
 io.spine.server.tuple
+io.spine.server.type
