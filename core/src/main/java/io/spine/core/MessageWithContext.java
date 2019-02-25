@@ -24,13 +24,22 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
 /**
- * Base interfaces for outer objects of messages with contexts.
+ * Base interfaces for outer objects of messages with contexts, such as commands or events.
  */
 public interface MessageWithContext extends Message {
 
+    /**
+     * Obtains the identifier of the message.
+     */
     Message getId();
 
+    /**
+     * Obtains the enclosed message.
+     */
     Any getMessage();
 
+    /**
+     * Obtains the context of the enclosed message.
+     */
     Message getContext();
 }
