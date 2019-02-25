@@ -59,25 +59,25 @@ public abstract class AbstractEventSubscriber
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
 
     /**
-     * Dispatches event to the handling method.
+     * Dispatches the event to the handling method.
      *
-     * @param envelope
-     *         the envelope with the message
+     * @param event
+     *         the envelope with the event
      * @return a one element set with the result of {@link #toString()} as the identify of the
      *         subscriber, or empty set if dispatching failed
      */
     @Override
-    public final Set<String> dispatch(EventEnvelope envelope) {
-        EventOperation op = new EventOperation(envelope.outerObject()) {
+    public final Set<String> dispatch(EventEnvelope event) {
+        EventOperation op = new EventOperation(event.outerObject()) {
             @Override
             public void run() {
-                handle(envelope);
+                handle(event);
             }
         };
         try {
             op.execute();
         } catch (RuntimeException exception) {
-            onError(envelope, exception);
+            onError(event, exception);
             return ImmutableSet.of();
         }
         return identity();
@@ -89,23 +89,25 @@ public abstract class AbstractEventSubscriber
      * <p>By default passes the event to the corresponding {@linkplain io.spine.core.Subscribe
      * subscriber} method of the entity.
      */
-    protected void handle(EventEnvelope envelope) {
-        thisClass.getSubscriber(envelope)
-                 .ifPresent(method -> method.invoke(this, envelope));
+    protected void handle(EventEnvelope event) {
+        thisClass.getSubscriber(event)
+                 .ifPresent(method -> method.invoke(this, event));
     }
 
     /**
      * Logs the error into the subscriber {@linkplain #log() log}.
      *
-     * @param envelope  the message which caused the error
-     * @param exception the error
+     * @param event
+     *         the event which caused the error
+     * @param exception
+     *         the error
      */
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        checkNotNull(event);
         checkNotNull(exception);
-        MessageClass messageClass = envelope.messageClass();
-        String messageId = envelope.idAsString();
+        MessageClass messageClass = event.messageClass();
+        String messageId = event.idAsString();
         String errorMessage =
                 format("Error handling event subscription (class: %s id: %s) in %s.",
                        messageClass, messageId, thisClass);
@@ -113,8 +115,8 @@ public abstract class AbstractEventSubscriber
     }
 
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(envelope);
+    public boolean canDispatch(EventEnvelope event) {
+        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(event);
         return subscriber.isPresent();
     }
 

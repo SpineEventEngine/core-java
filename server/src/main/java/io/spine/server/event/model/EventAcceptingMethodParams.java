@@ -44,8 +44,8 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
     MESSAGE(ImmutableList.of(EventMessage.class), false) {
         @Override
-        public Object[] extractArguments(EventEnvelope envelope) {
-            return new Object[] {envelope.message()};
+        public Object[] extractArguments(EventEnvelope event) {
+            return new Object[] {event.message()};
         }
     },
 
@@ -58,9 +58,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
     MESSAGE_COMMAND_CTX(ImmutableList.of(RejectionMessage.class, CommandContext.class), false) {
         @Override
-        public Object[] extractArguments(EventEnvelope envelope) {
-            Message message = envelope.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
+        public Object[] extractArguments(EventEnvelope event) {
+            Message message = event.message();
+            RejectionEnvelope rejection = RejectionEnvelope.from(event);
             CommandContext context = rejection.getOrigin()
                                               .getContext();
             return new Object[] {message, context};
@@ -69,9 +69,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
     MESSAGE_COMMAND_MSG(ImmutableList.of(RejectionMessage.class, CommandMessage.class), true) {
         @Override
-        public Object[] extractArguments(EventEnvelope envelope) {
-            Message message = envelope.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
+        public Object[] extractArguments(EventEnvelope event) {
+            Message message = event.message();
+            RejectionEnvelope rejection = RejectionEnvelope.from(event);
             Message commandMessage = rejection.getOriginMessage();
             return new Object[] {message, commandMessage};
         }
@@ -82,9 +82,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
                                                      CommandContext.class),
                                     true) {
         @Override
-        public Object[] extractArguments(EventEnvelope envelope) {
-            Message message = envelope.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
+        public Object[] extractArguments(EventEnvelope event) {
+            Message message = event.message();
+            RejectionEnvelope rejection = RejectionEnvelope.from(event);
             DispatchedCommand origin = rejection.getOrigin();
             Message commandMessage = unpack(origin.getMessage());
             CommandContext context = origin.getContext();

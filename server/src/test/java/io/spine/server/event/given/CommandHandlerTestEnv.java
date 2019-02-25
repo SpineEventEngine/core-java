@@ -87,13 +87,13 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
-        public Set<String> dispatch(EventEnvelope envelope) {
-            dispatched.add(envelope);
+        public Set<String> dispatch(EventEnvelope event) {
+            dispatched.add(event);
             return identity();
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
+        public void onError(EventEnvelope event, RuntimeException exception) {
             // Do nothing.
         }
 

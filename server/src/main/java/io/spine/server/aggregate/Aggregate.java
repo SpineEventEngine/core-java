@@ -47,6 +47,7 @@ import io.spine.validate.ValidatingBuilder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -414,6 +415,16 @@ public abstract class Aggregate<I,
      */
     protected Iterator<Event> historyBackward() {
         return recentHistory().iterator();
+    }
+
+    /**
+     * Verifies if the aggregate history contains an event which satisfies the passed predicate.
+     */
+    protected final boolean historyContains(Predicate<Event> predicate) {
+        Iterator<Event> iterator = historyBackward();
+        boolean found = Streams.stream(iterator)
+                               .anyMatch(predicate);
+        return found;
     }
 
     /**

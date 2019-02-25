@@ -88,12 +88,12 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        checkNotNull(event);
         checkNotNull(exception);
         _error(exception,
                "Unable to create a command from event (class: `{}` id: `{}`).",
-               envelope.messageClass(),
-               envelope.idAsString());
+               event.messageClass(),
+               event.idAsString());
     }
 }

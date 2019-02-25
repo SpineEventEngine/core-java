@@ -55,15 +55,17 @@ public interface EventDispatcherDelegate<I> {
     /**
      * Dispatches the event.
      */
-    Set<I> dispatchEvent(EventEnvelope envelope);
+    Set<I> dispatchEvent(EventEnvelope event);
 
     /**
      * Handles an error occurred during event dispatching.
      *
-     * @param envelope  the event which caused the error
-     * @param exception the error
+     * @param event
+     *         the event which caused the error
+     * @param exception
+     *         the error
      */
-    void onError(EventEnvelope envelope, RuntimeException exception);
+    void onError(EventEnvelope event, RuntimeException exception);
 
     /**
      * Returns immutable set with one element with the identity of the multicast dispatcher

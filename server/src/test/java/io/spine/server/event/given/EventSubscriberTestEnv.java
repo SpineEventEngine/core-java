@@ -71,9 +71,9 @@ public final class EventSubscriberTestEnv {
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            super.onError(envelope, exception);
-            lastErrorEnvelope = envelope;
+        public void onError(EventEnvelope event, RuntimeException exception) {
+            super.onError(event, exception);
+            lastErrorEnvelope = event;
             lastException = exception;
         }
 

@@ -54,13 +54,13 @@ public class DelegatingEventDispatcherTestEnv {
         }
 
         @Override
-        public Set<String> dispatchEvent(EventEnvelope envelope) {
+        public Set<String> dispatchEvent(EventEnvelope event) {
             // Do nothing.
             return ImmutableSet.of(getClass().getName());
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
+        public void onError(EventEnvelope event, RuntimeException exception) {
             onErrorCalled = true;
             lastException = exception;
         }

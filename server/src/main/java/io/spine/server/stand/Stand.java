@@ -177,16 +177,16 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * Receives an event and notifies matching subscriptions.
      */
     @Override
-    protected void handle(EventEnvelope envelope) {
-        TypeUrl typeUrl = TypeUrl.of(envelope.message());
+    protected void handle(EventEnvelope event) {
+        TypeUrl typeUrl = TypeUrl.of(event.message());
         if (!subscriptionRegistry.hasType(typeUrl)) {
             return;
         }
         subscriptionRegistry.byType(typeUrl)
                             .stream()
                             .filter(SubscriptionRecord::isActive)
-                            .filter(record -> record.matches(envelope))
-                            .forEach(record -> runSubscriptionUpdate(record, envelope));
+                            .filter(record -> record.matches(event))
+                            .forEach(record -> runSubscriptionUpdate(record, event));
     }
 
     /**
@@ -195,7 +195,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Always returns {@code true} as the filtering happens in {@link #handle(EventEnvelope)}.
      */
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
+    public boolean canDispatch(EventEnvelope event) {
         return true;
     }
 

@@ -41,15 +41,14 @@ import static java.util.Optional.ofNullable;
 final class EventValidator implements EnvelopeValidator<EventEnvelope> {
 
     @Override
-    public Optional<MessageInvalid> validate(EventEnvelope envelope) {
-        checkNotNull(envelope);
-
-        Event event = envelope.outerObject();
+    public Optional<MessageInvalid> validate(EventEnvelope event) {
+        checkNotNull(event);
+        Event outerObject = event.outerObject();
         MessageInvalid result = null;
-        MessageValidator validator = MessageValidator.newInstance(event);
+        MessageValidator validator = MessageValidator.newInstance(outerObject);
         List<ConstraintViolation> violations = validator.validate();
         if (!violations.isEmpty()) {
-            EventMessage message = envelope.message();
+            EventMessage message = event.message();
             result = onConstraintViolations(message, violations);
         }
         return ofNullable(result);

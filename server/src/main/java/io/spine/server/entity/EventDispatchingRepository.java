@@ -82,20 +82,20 @@ public abstract class EventDispatchingRepository<I,
      * <p>If there is no stored entity with such an ID, a new one is created and stored after it
      * handles the passed event.
      *
-     * @param envelope the event to dispatch
+     * @param event the event to dispatch
      */
     @Override
-    public final Set<I> dispatch(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        Set<I> targets = with(envelope.tenantId())
-                .evaluate(() -> doDispatch(envelope));
+    public final Set<I> dispatch(EventEnvelope event) {
+        checkNotNull(event);
+        Set<I> targets = with(event.tenantId())
+                .evaluate(() -> doDispatch(event));
         return targets;
     }
 
-    private Set<I> doDispatch(EventEnvelope envelope) {
-        Set<I> targets = route(envelope);
-        Event event = envelope.outerObject();
-        targets.forEach(id -> dispatchTo(id, event));
+    private Set<I> doDispatch(EventEnvelope event) {
+        Set<I> targets = route(event);
+        Event outerObject = event.outerObject();
+        targets.forEach(id -> dispatchTo(id, outerObject));
         return targets;
     }
 

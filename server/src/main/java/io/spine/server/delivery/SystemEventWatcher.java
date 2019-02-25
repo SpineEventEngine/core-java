@@ -73,8 +73,8 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     }
 
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        return producerOfCorrectType(envelope) && super.canDispatch(envelope);
+    public boolean canDispatch(EventEnvelope event) {
+        return producerOfCorrectType(event) && super.canDispatch(event);
     }
 
     @Override

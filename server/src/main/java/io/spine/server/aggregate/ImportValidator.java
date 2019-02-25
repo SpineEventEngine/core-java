@@ -39,9 +39,9 @@ import static io.spine.server.event.InvalidEventException.onConstraintViolations
 final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
 
     @Override
-    public Optional<MessageInvalid> validate(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        EventMessage eventMessage = envelope.message();
+    public Optional<MessageInvalid> validate(EventEnvelope event) {
+        checkNotNull(event);
+        EventMessage eventMessage = event.message();
         MessageValidator validator = MessageValidator.newInstance(eventMessage);
         List<ConstraintViolation> violations = validator.validate();
         if (violations.isEmpty()) {

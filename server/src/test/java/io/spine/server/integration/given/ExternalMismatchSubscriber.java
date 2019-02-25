@@ -48,7 +48,7 @@ public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
      * Rethrow all the issues, so that they are visible to tests.
      */
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         throw illegalStateWithCauseOf(exception);
     }
 }

@@ -74,13 +74,13 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     }
 
     @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
-        return delegate.dispatchEvent(envelope);
+    public Set<I> dispatch(EventEnvelope event) {
+        return delegate.dispatchEvent(event);
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        delegate.onError(envelope, exception);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        delegate.onError(event, exception);
     }
 
     /**
