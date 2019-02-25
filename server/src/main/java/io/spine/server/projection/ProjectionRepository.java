@@ -85,9 +85,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
     EventStore eventStore() {
-        return this.boundedContext()
-                   .eventBus()
-                   .eventStore();
+        return boundedContext()
+                .eventBus()
+                .eventStore();
     }
 
     /** Obtains class information of projection managed by this repository. */
