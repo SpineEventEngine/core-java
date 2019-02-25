@@ -58,15 +58,33 @@ abstract class PmEndpoint<I,
         return (ProcessManagerRepository<I, P, ?>) super.repository();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @implNote This method works differently to its analogues as it saves the process manager
+     *          state even if a rejection was thrown. It is done so because the process manager
+     *          {@linkplain ProcessManagerRepository#lifecycle() lifecycle rules} may demand that
+     *          entity becomes archived/deleted upon emitting certain rejection types.
+     */
+    @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
     protected void dispatchInTx(I id) {
-        ProcessManagerRepository<I, P, ?> repository = repository();
-        P manager = repository.findOrCreate(id);
+        P manager = repository().findOrCreate(id);
+        tryDispatchAndSave(manager);
+    }
+
+    /**
+     * Dispatches the message to a process manager and saves entity state regardless of successful
+     * delivery.
+     */
+    private void tryDispatchAndSave(P manager) {
         try {
             List<Event> events = runTransactionFor(manager);
-            repository.postEvents(events);
-        } finally {
             store(manager);
+            repository().postEvents(events);
+        } catch (RuntimeException ex) {
+            store(manager);
+            throw ex;
         }
     }
 
