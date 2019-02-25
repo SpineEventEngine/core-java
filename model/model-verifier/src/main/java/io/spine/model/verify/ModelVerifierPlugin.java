@@ -33,13 +33,17 @@ import org.gradle.api.Task;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import static io.spine.tools.gradle.TaskName.CLASSES;
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
 import static io.spine.tools.gradle.TaskName.VERIFY_MODEL;
 import static io.spine.tools.gradle.compiler.Extension.getMainDescriptorSet;
 import static java.nio.file.Files.exists;
+import static java.nio.file.Files.newInputStream;
 
 /**
  * The plugin performing the Spine type model verification.
@@ -134,8 +138,17 @@ public final class ModelVerifierPlugin extends SpinePlugin {
          * @param project the Gradle project to process the model upon
          */
         private void verifyModel(Project project) {
-            ModelVerifier modelVerifier = ModelVerifier.forModel(rawModelPath);
-            modelVerifier.verifyUpon(project);
+            ModelVerifier verifier = new ModelVerifier(project);
+            CommandHandlers commandHandlers = readCommandHandlers();
+            verifier.verify(commandHandlers);
+        }
+
+        private CommandHandlers readCommandHandlers() {
+            try (InputStream in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
+                return CommandHandlers.parseFrom(in);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
 
         @Override

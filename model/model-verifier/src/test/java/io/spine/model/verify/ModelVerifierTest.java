@@ -20,10 +20,10 @@
 
 package io.spine.model.verify;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
+import com.google.common.io.Files;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
+import io.spine.model.verify.ModelVerifier.GetDestinationDir;
 import io.spine.model.verify.given.DuplicateCommandHandler;
 import io.spine.model.verify.given.EditAggregate;
 import io.spine.model.verify.given.InvalidDeleteAggregate;
@@ -33,20 +33,14 @@ import io.spine.model.verify.given.RenameProcMan;
 import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
-import io.spine.server.model.EntityKindMismatchError;
-import io.spine.server.model.TypeMismatchError;
 import io.spine.server.model.declare.SignatureMismatchException;
-import io.spine.test.model.verify.command.UploadPhoto;
-import io.spine.test.model.verify.given.ArchiveState;
-import io.spine.test.model.verify.given.DeleteState;
-import io.spine.test.model.verify.given.RenameState;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.type.MessageType;
-import io.spine.type.UnresolvedReferenceException;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,28 +51,37 @@ import org.slf4j.event.Level;
 import org.slf4j.event.SubstituteLoggingEvent;
 import org.slf4j.helpers.SubstituteLogger;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
 import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("OverlyCoupledClass")
 @DisplayName("ModelVerifier should")
 class ModelVerifierTest {
 
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
-    private Project project;
+    private Project project = null;
+
+    static Project actualProject() {
+        Project result = ProjectBuilder.builder().build();
+        result.getPluginManager().apply("java");
+        return result;
+    }
 
     @SuppressWarnings("unchecked") // OK for test mocks.
     @BeforeEach
@@ -99,36 +102,34 @@ class ModelVerifierTest {
     }
 
     @Test
-    @DisplayName("verify model against valid classpath")
-    void passAgainstValidClasspath() {
+    @DisplayName("verify model from classpath")
+    void verifyModel() {
+        ModelVerifier verifier = new ModelVerifier(project);
+
+        verify(project).getSubprojects();
+
         String commandHandlerTypeName = UploadCommandHandler.class.getName();
         String aggregateTypeName = EditAggregate.class.getName();
         String procManTypeName = RenameProcMan.class.getName();
-        CommandHandlers commandHandlers = CommandHandlers
+        CommandHandlers spineModel = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(commandHandlerTypeName)
                 .addCommandHandlingTypes(aggregateTypeName)
                 .addCommandHandlingTypes(procManTypeName)
                 .build();
-
-        CommandHandlerSet handlerSet = spy(new CommandHandlerSet(commandHandlers));
-        ModelVerifier modelVerifier = new ModelVerifier(handlerSet, validLifecycle());
-        modelVerifier.verifyUpon(project);
-
-        verify(handlerSet, times(1)).checkAgainst(any(ProjectClassLoader.class));
+        verifier.verify(spineModel);
     }
 
     @ParameterizedTest
-    @DisplayName("throw `SignatureMismatchException` on invalid command handler")
+    @DisplayName("throw when attempting to verify a model that declares an invalid command handler")
     @MethodSource("getBadHandlers")
     void throwOnSignatureMismatch(String badHandlerName) {
-        CommandHandlers handlers = CommandHandlers
+        ModelVerifier verifier = new ModelVerifier(project);
+        CommandHandlers model = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(badHandlerName)
                 .build();
-        ModelVerifier modelVerifier = modelVerifierWith(handlers);
-        assertThrows(SignatureMismatchException.class,
-                     () -> modelVerifier.verifyUpon(project));
+        assertThrows(SignatureMismatchException.class, () -> verifier.verify(model));
     }
 
     private static Stream<Arguments> getBadHandlers() {
@@ -138,31 +139,30 @@ class ModelVerifierTest {
     }
 
     @Test
-    @DisplayName("throw `DuplicateCommandHandlerError` on duplicate command handlers")
-    void throwOnDuplicateHandlers() {
+    @DisplayName("fail on duplicate command handlers")
+    void failOnDuplicateHandlers() {
+        ModelVerifier verifier = new ModelVerifier(project);
         String firstType = UploadCommandHandler.class.getName();
         String secondType = DuplicateCommandHandler.class.getName();
 
-        CommandHandlers handlers = CommandHandlers
+        CommandHandlers spineModel = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(firstType)
                 .addCommandHandlingTypes(secondType)
                 .build();
-        ModelVerifier modelVerifier = modelVerifierWith(handlers);
-        assertThrows(DuplicateCommandHandlerError.class,
-                     () -> modelVerifier.verifyUpon(project));
+        assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
 
     @Test
     @DisplayName("produce a warning on private command handling methods")
-    void warnOnPrivateHandlers() {
+    void warnOnPrivateHandlers(){
+        ModelVerifier verifier = new ModelVerifier(project);
         Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging();
-        CommandHandlers handlers = CommandHandlers
+        CommandHandlers model = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(InvalidRestoreAggregate.class.getName())
                 .build();
-        ModelVerifier modelVerifier = modelVerifierWith(handlers);
-        modelVerifier.verifyUpon(project);
+        verifier.verify(model);
         assertEquals(1, loggedMessages.size());
         SubstituteLoggingEvent event = loggedMessages.poll();
         assertEquals(event.getLevel(), Level.WARN);
@@ -171,8 +171,7 @@ class ModelVerifierTest {
     /** Redirects logging produced by model verifier to a {@code Queue} that is returned. */
     private static Queue<SubstituteLoggingEvent> redirectLogging() {
         Queue<SubstituteLoggingEvent> loggedMessages = new ArrayDeque<>();
-        Logging.redirect((SubstituteLogger) Logging.get(CommandHandlerSignature.class),
-                         loggedMessages);
+        Logging.redirect((SubstituteLogger) Logging.get(CommandHandlerSignature.class), loggedMessages);
         return loggedMessages;
     }
 
@@ -181,85 +180,43 @@ class ModelVerifierTest {
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
         String invalidClassname = "non.existing.class.Name";
-        CommandHandlers handlers = CommandHandlers
+        CommandHandlers spineModel = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(invalidClassname)
                 .build();
-        ModelVerifier modelVerifier = modelVerifierWith(handlers);
-        modelVerifier.verifyUpon(project);
+        new ModelVerifier(project).verify(spineModel);
     }
 
     @Test
-    @DisplayName("throw `IllegalArgumentException` on non-`CommandHandler` types")
-    void throwNonHandlerTypes() {
+    @DisplayName("not accept non-CommandHandler types")
+    void rejectNonHandlerTypes() {
         String invalidClassname = ModelVerifierTest.class.getName();
-        CommandHandlers handlers = CommandHandlers
+        CommandHandlers spineModel = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingTypes(invalidClassname)
                 .build();
-        ModelVerifier modelVerifier = modelVerifierWith(handlers);
         assertThrows(IllegalArgumentException.class,
-                     () -> modelVerifier.verifyUpon(project));
+                     () -> new ModelVerifier(project).verify(spineModel));
     }
 
     @Test
-    @MuteLogging
-    @DisplayName("throw `EntityKindMismatchError` when lifecycle is declared for non-PM type")
-    void throwOnNonPmLifecycle() {
-        MessageType nonPmType = typeOf(UploadPhoto.class);
-        EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
-        ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
-        assertThrows(EntityKindMismatchError.class, () -> modelVerifier.verifyUpon(project));
+    @DisplayName("retrieve compilation destination directory from task")
+    void getCompilationDestDir() throws MalformedURLException {
+        JavaCompile compileTask = actualProject().getTasks()
+                                                 .withType(JavaCompile.class)
+                                                 .getByName(COMPILE_JAVA.getValue());
+        File dest = Files.createTempDir();
+        compileTask.setDestinationDir(dest);
+        Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
+        URL destUrl = dest.toURI().toURL();
+        assertEquals(destUrl, func.apply(compileTask));
     }
 
     @Test
-    @DisplayName("throw `UnresolvedReferenceException` when option references unknown types")
-    void throwOnUnknownLifecycleTriggers() {
-        MessageType nonPmType = typeOf(ArchiveState.class);
-        EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
-        ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
-        assertThrows(UnresolvedReferenceException.class,
-                     () -> modelVerifier.verifyUpon(project));
-    }
-
-    @Test
-    @DisplayName("throw `TypeMismatchError` when option references non-event types")
-    void throwOnNonEventTriggers() {
-        MessageType nonPmType = typeOf(DeleteState.class);
-        EntitiesLifecycle lifecycle = new EntitiesLifecycle(ImmutableSet.of(nonPmType));
-        ModelVerifier modelVerifier = modelVerifierWith(lifecycle);
-        assertThrows(TypeMismatchError.class,
-                     () -> modelVerifier.verifyUpon(project));
-    }
-
-    private static ModelVerifier modelVerifierWith(CommandHandlers handlers) {
-        CommandHandlerSet handlerSet = new CommandHandlerSet(handlers);
-        EntitiesLifecycle lifecycle = validLifecycle();
-        ModelVerifier result = new ModelVerifier(handlerSet, lifecycle);
-        return result;
-    }
-
-    private static ModelVerifier modelVerifierWith(EntitiesLifecycle lifecycle) {
-        CommandHandlers handlers = CommandHandlers
-                .newBuilder()
-                .build();
-        CommandHandlerSet handlerSet = new CommandHandlerSet(handlers);
-        ModelVerifier result = new ModelVerifier(handlerSet, lifecycle);
-        return result;
-    }
-
-    /**
-     * Provides a valid lifecycle as entity lifecycle in {@link io.spine.type.KnownTypes} is
-     * invalid due to {@link io.spine.test.model.verify.given.ArchiveState} and
-     * {@link io.spine.test.model.verify.given.DeleteState} messages.
-     */
-    private static EntitiesLifecycle validLifecycle() {
-        MessageType validPmType = typeOf(RenameState.class);
-        return new EntitiesLifecycle(ImmutableSet.of(validPmType));
-    }
-
-    private static MessageType typeOf(Class<? extends Message> messageClass) {
-        MessageType result = new MessageType(messageClass);
-        return result;
+    @DisplayName("retrieve null if destination directory is null")
+    void getNullDestDir() {
+        JavaCompile compileTask = mock(JavaCompile.class);
+        Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
+        assertNull(func.apply(compileTask));
     }
 }

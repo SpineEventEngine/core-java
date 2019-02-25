@@ -21,55 +21,125 @@
 package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.logging.Logging;
+import io.spine.model.CommandHandlers;
+import io.spine.server.command.model.DuplicateHandlerCheck;
+import io.spine.server.model.Model;
+import io.spine.tools.gradle.ProjectHierarchy;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
+import org.gradle.api.tasks.compile.JavaCompile;
 
-import java.nio.file.Path;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Collection;
+import java.util.function.Function;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.format;
+import static java.util.Arrays.deepToString;
+import static java.util.stream.Collectors.toList;
 
 /**
- * A utility for verifying Spine Model elements.
+ * A utility for verifying Spine model.
+ *
+ * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
+ *           string literal for security check.
  */
-final class ModelVerifier {
+final class ModelVerifier implements Logging {
+
+    private static final URL[] EMPTY_URL_ARRAY = new URL[0];
+
+    private final URLClassLoader projectClassLoader;
 
     /**
-     * Command handler declarations to verify.
-     */
-    private final CommandHandlerSet commandHandlers;
-
-    /**
-     * Entity lifecycle declarations to verify.
-     */
-    private final EntitiesLifecycle entitiesLifecycle;
-
-    @VisibleForTesting
-    ModelVerifier(CommandHandlerSet commandHandlers, EntitiesLifecycle entitiesLifecycle) {
-        this.commandHandlers = commandHandlers;
-        this.entitiesLifecycle = entitiesLifecycle;
-    }
-
-    /**
-     * Creates a new {@code ModelVerifier} for the model located at the given path.
+     * Creates a new instance of the {@code ModelVerifier}.
      *
-     * <p>Entity lifecycle declarations are gathered from the Spine options of the
-     * {@linkplain io.spine.type.KnownTypes known types}.
-     *
-     * @param modelPath
-     *         the path with serialized Spine Model
+     * @param project the Gradle project to verify the model upon
      */
-    static ModelVerifier forModel(Path modelPath) {
-        CommandHandlerSet commandHandlers = CommandHandlerSet.parse(modelPath);
-        EntitiesLifecycle entitiesLifecycle = EntitiesLifecycle.ofKnownTypes();
-        return new ModelVerifier(commandHandlers, entitiesLifecycle);
+    ModelVerifier(Project project) {
+        this.projectClassLoader = createClassLoader(project);
     }
 
     /**
      * Verifies Spine model upon the given Gradle project.
      *
-     * @param project
-     *         the project to gather classpath from
+     * @param handlers the listing of the Spine model classes
      */
-    void verifyUpon(Project project) {
-        ProjectClassLoader classLoader = new ProjectClassLoader(project);
-        commandHandlers.checkAgainst(classLoader);
-        entitiesLifecycle.checkLifecycleDeclarations();
+    void verify(CommandHandlers handlers) {
+        ClassSet classSet = new ClassSet(projectClassLoader,
+                                         handlers.getCommandHandlingTypesList());
+        classSet.reportNotFoundIfAny(log());
+        DuplicateHandlerCheck.newInstance()
+                             .check(classSet.elements());
+    }
+
+    /**
+     * Creates a ClassLoader for the passed project.
+     */
+    private URLClassLoader createClassLoader(Project project) {
+        Collection<JavaCompile> tasks = allJavaCompile(project);
+        URL[] compiledCodePath = extractDestinationDirs(tasks);
+        log().debug("Initializing ClassLoader for URLs: {}", deepToString(compiledCodePath));
+        try {
+            ClassLoader projectClassloader = project.getBuildscript()
+                                                    .getClassLoader();
+            @SuppressWarnings("ClassLoaderInstantiation") // Caught exception.
+            URLClassLoader result = new URLClassLoader(compiledCodePath, projectClassloader);
+            return result;
+        } catch (SecurityException e) {
+            String msg = format("Cannot create ClassLoader for the project %s", project);
+            throw new IllegalStateException(msg, e);
+        }
+    }
+
+    private static Collection<JavaCompile> allJavaCompile(Project project) {
+        Collection<JavaCompile> tasks = newArrayList();
+        ProjectHierarchy.applyToAll(project.getRootProject(),
+                                    p -> tasks.addAll(javaCompile(p)));
+        return tasks;
+    }
+
+    private static Collection<JavaCompile> javaCompile(Project project) {
+        return project.getTasks()
+                      .withType(JavaCompile.class);
+    }
+
+    private static URL[] extractDestinationDirs(Collection<JavaCompile> tasks) {
+        Collection<URL> urls = tasks.stream()
+                                    .map(GetDestinationDir.FUNCTION)
+                                    .collect(toList());
+        URL[] result = urls.toArray(EMPTY_URL_ARRAY);
+        return result;
+    }
+
+    /**
+     * A function which retrieves the output directory from the passed Gradle task.
+     */
+    @VisibleForTesting
+    enum GetDestinationDir implements Function<JavaCompile, URL> {
+        FUNCTION;
+
+        @Override
+        public @Nullable URL apply(@Nullable JavaCompile task) {
+            checkNotNull(task);
+            File dir = task.getDestinationDir();
+            if (dir == null) {
+                return null;
+            }
+            URI uri = dir.toURI();
+            try {
+                URL url = uri.toURL();
+                return url;
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException(format(
+                        "Could not retrieve destination directory for task `%s`.",
+                        task.getName()), e);
+            }
+        }
     }
 }
