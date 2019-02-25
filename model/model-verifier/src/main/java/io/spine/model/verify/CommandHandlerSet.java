@@ -63,7 +63,8 @@ class CommandHandlerSet implements Logging {
     /**
      * Checks the command handler data against the project class loader.
      *
-     * <p>Checks that all handler types are resolved and do not contain duplicate handler methods.
+     * <p>Verifies that all handler types are resolved and do not contain duplicate handler
+     * methods.
      *
      * @throws io.spine.server.model.declare.SignatureMismatchException
      *         on invalid command handler declaration

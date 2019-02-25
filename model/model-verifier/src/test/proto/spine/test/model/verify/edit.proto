@@ -55,7 +55,6 @@ message ArchiveState {
     option (lifecycle).archive_upon = "NonExistentType";
 
     string id = 1 [(required) = true];
-
 }
 
 message DeleteState {

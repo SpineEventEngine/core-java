@@ -56,7 +56,7 @@ final class ProjectClassLoader implements Logging {
     private final Project project;
 
     /**
-     * The class loader lazily created for the project.
+     * The class loader, lazily created for the project.
      */
     @LazyInit
     private @MonotonicNonNull ClassLoader classLoader;
