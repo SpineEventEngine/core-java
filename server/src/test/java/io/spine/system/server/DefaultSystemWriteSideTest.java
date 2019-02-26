@@ -119,5 +119,4 @@ class DefaultSystemWriteSideTest {
             systemWriteSide.postCommand(command);
         }
     }
-
 }
