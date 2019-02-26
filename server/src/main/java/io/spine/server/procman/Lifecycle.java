@@ -45,14 +45,12 @@ import static java.util.Arrays.asList;
 public final class Lifecycle {
 
     /**
-     * Event/rejection classes which, when emitted by a process manager, will cause the entity to
-     * become archived.
+     * Event/rejection classes which will cause the entity to become archived.
      */
     private final Set<Class<? extends EventMessage>> archiveOn;
 
     /**
-     * Event/rejection classes which, when emitted by a process manager, will cause the entity to
-     * become deleted.
+     * Event/rejection classes which will cause the entity to become deleted.
      */
     private final Set<Class<? extends EventMessage>> deleteOn;
 

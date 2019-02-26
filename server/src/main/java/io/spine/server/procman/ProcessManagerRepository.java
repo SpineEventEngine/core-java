@@ -93,8 +93,8 @@ public abstract class ProcessManagerRepository<I,
     /**
      * The configurable lifecycle rules of the repository.
      *
-     * <p>Allow to automatically mark entities as archived/deleted upon certain event and rejection
-     * types emitted.
+     * <p>The rules allow to automatically mark entities as archived/deleted upon certain event and
+     * rejection types emitted.
      *
      * @see Lifecycle#archiveOn(Class[])
      * @see Lifecycle#deleteOn(Class[])
@@ -215,9 +215,9 @@ public abstract class ProcessManagerRepository<I,
      * <p>The rules allow to automatically archive/delete entities upon certain event and rejection
      * types produced.
      *
-     * <p>The rules can be configured as follows:
+     * <p>The rules can be set as follows:
      * <pre>{@code
-     *   repository.lifecycleOf()
+     *   repository.lifecycle()
      *             .archiveOn(Event1.class, Rejection1.class)
      *             .deleteOn(Rejection2.class)
      * }</pre>

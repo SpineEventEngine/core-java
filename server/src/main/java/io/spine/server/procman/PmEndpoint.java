@@ -61,7 +61,7 @@ abstract class PmEndpoint<I,
     /**
      * {@inheritDoc}
      *
-     * @implNote This method works differently to its analogues as it saves the process manager
+     * @implNote This method works differently to its analogues as it saves the entity
      *          state even if a rejection is thrown. It is done so because the process manager
      *          {@linkplain ProcessManagerRepository#lifecycle() lifecycle rules} may demand that
      *          entity becomes archived/deleted upon emitting certain rejection types.
@@ -74,8 +74,8 @@ abstract class PmEndpoint<I,
     }
 
     /**
-     * Dispatches the message to a process manager and saves entity state regardless of successful
-     * delivery.
+     * Dispatches the message to a process manager and saves the entity state regardless of
+     * successful delivery.
      */
     private void tryDispatchAndSave(P manager) {
         try {
