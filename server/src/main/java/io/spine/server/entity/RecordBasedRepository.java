@@ -281,7 +281,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Obtains iterator over {@link EntityRecord} for all entities present in the repository.
+     * Obtains iterator over all present {@linkplain EntityRecord entity records}.
      *
      * @return an iterator over all records
      */
@@ -331,7 +331,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Obtains iterator over {@link EntityRecord} for entities matching the passed filters.
+     * Obtains iterator over {@linkplain EntityRecord entity records} matching the passed filters.
      *
      ** @param filters
      *         entity filters
