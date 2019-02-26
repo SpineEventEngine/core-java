@@ -28,6 +28,7 @@ import io.spine.client.IdFilter;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.core.Subscribe;
+import io.spine.core.Version;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
@@ -70,7 +71,8 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     @Subscribe
     public void on(EntityStateChanged event) {
         builder().setId(id())
-                 .setState(event.getNewState());
+                 .setState(event.getNewState())
+                 .setVersion(event.getNewVersion());
     }
 
     @Subscribe
@@ -82,7 +84,8 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
                 .setArchived(true)
                 .build();
         builder.setId(id())
-                    .setLifecycle(flags);
+               .setLifecycle(flags)
+               .setVersion(event.getVersion());
         setArchived(true);
     }
 
@@ -95,12 +98,14 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
                 .setDeleted(true)
                 .build();
         builder.setId(id())
-                    .setLifecycle(flags);
+               .setLifecycle(flags)
+               .setVersion(event.getVersion());
         setDeleted(true);
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") EntityExtractedFromArchive event) {
+    public void
+    on(@SuppressWarnings("unused") EntityExtractedFromArchive event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
@@ -108,7 +113,8 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
                 .setArchived(false)
                 .build();
         builder.setId(id())
-               .setLifecycle(flags);
+               .setLifecycle(flags)
+               .setVersion(event.getVersion());
         setArchived(false);
     }
 
@@ -121,7 +127,8 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
                 .setDeleted(false)
                 .build();
         builder.setId(id())
-               .setLifecycle(flags);
+               .setLifecycle(flags)
+               .setVersion(event.getVersion());
         setDeleted(false);
     }
 
@@ -198,6 +205,15 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         Message trimmedState = applyMask(fields, unpacked);
         Any result = pack(trimmedState);
         return result;
+    }
+
+    /**
+     * Obtains an aggregate version.
+     *
+     * @return the version of the mirrored aggregate
+     */
+    final Version aggregateVersion() {
+        return state().getVersion();
     }
 
     /**

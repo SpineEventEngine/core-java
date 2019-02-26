@@ -31,6 +31,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.system.server.AssignTargetToCommand;
 import io.spine.system.server.AssignTargetToCommandVBuilder;
@@ -283,11 +284,14 @@ public class EntityLifecycle {
         Any newState = change.getNewValue()
                              .getState();
         if (!oldState.equals(newState)) {
+            Version newVersion = change.getNewValue()
+                                       .getVersion();
             EntityStateChanged event = EntityStateChangedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .setNewState(newState)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setNewVersion(newVersion)
                     .build();
             postEvent(event);
         }
@@ -302,10 +306,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (newValue && !oldValue) {
+            Version newVersion = change.getNewValue()
+                                       .getVersion();
             EntityArchived event = EntityArchivedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(newVersion)
                     .build();
             postEvent(event);
         }
@@ -320,10 +327,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (newValue && !oldValue) {
+            Version newVersion = change.getNewValue()
+                                       .getVersion();
             EntityDeleted event = EntityDeletedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(newVersion)
                     .build();
             postEvent(event);
         }
@@ -338,10 +348,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (!newValue && oldValue) {
+            Version newVersion = change.getNewValue()
+                                       .getVersion();
             EntityExtractedFromArchive event = EntityExtractedFromArchiveVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(newVersion)
                     .build();
             postEvent(event);
         }
@@ -356,10 +369,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (!newValue && oldValue) {
+            Version newVersion = change.getNewValue()
+                                       .getVersion();
             EntityRestored event = EntityRestoredVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(newVersion)
                     .build();
             postEvent(event);
         }
