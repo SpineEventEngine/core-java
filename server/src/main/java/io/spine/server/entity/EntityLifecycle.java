@@ -306,13 +306,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (newValue && !oldValue) {
-            Version newVersion = change.getNewValue()
-                                       .getVersion();
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityArchived event = EntityArchivedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
-                    .setVersion(newVersion)
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -327,13 +327,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (newValue && !oldValue) {
-            Version newVersion = change.getNewValue()
-                                       .getVersion();
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityDeleted event = EntityDeletedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
-                    .setVersion(newVersion)
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -348,13 +348,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (!newValue && oldValue) {
-            Version newVersion = change.getNewValue()
-                                       .getVersion();
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityExtractedFromArchive event = EntityExtractedFromArchiveVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
-                    .setVersion(newVersion)
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -369,13 +369,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (!newValue && oldValue) {
-            Version newVersion = change.getNewValue()
-                                       .getVersion();
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityRestored event = EntityRestoredVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
-                    .setVersion(newVersion)
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
