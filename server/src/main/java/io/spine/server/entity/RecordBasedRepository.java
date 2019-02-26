@@ -333,7 +333,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Obtains iterator over {@linkplain EntityRecord entity records} matching the passed filters.
      *
-     ** @param filters
+     * @param filters
      *         entity filters
      * @param orderBy
      *         an orderBy to sort the filtered results before pagination
