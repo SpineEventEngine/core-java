@@ -104,8 +104,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void
-    on(@SuppressWarnings("unused") EntityExtractedFromArchive event) {
+    public void on(@SuppressWarnings("unused") EntityExtractedFromArchive event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
