@@ -26,8 +26,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.code.proto.enrichment.EnrichmentType;
 import io.spine.type.KnownTypes;
+import io.spine.type.enrichment.EnrichmentType;
 
 import java.util.Optional;
 import java.util.function.Function;
