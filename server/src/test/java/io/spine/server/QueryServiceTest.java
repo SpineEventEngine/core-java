@@ -141,7 +141,7 @@ class QueryServiceTest {
     @MuteLogging
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
-        when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
+        when(projectDetailsRepository.loadAllRecords()).thenThrow(RuntimeException.class);
         Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);

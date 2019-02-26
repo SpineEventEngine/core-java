@@ -344,7 +344,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return an iterator over the matching records
      */
     @Internal
-    public Iterator<EntityRecord> findRecords(EntityFilters filters, OrderBy orderBy,
+    public Iterator<EntityRecord> findRecords(TargetFilters filters, OrderBy orderBy,
                                               Pagination pagination, FieldMask fieldMask) {
         checkNotNull(filters);
         checkNotNull(orderBy);
@@ -360,7 +360,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Converts the passed entity into the record.
      */
-    private EntityRecordWithColumns toRecord(E entity) {
+    @VisibleForTesting
+    EntityRecordWithColumns toRecord(E entity) {
         EntityRecord entityRecord = entityConverter().convert(entity);
         checkNotNull(entityRecord);
         EntityRecordWithColumns result =

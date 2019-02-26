@@ -386,7 +386,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             assertThat(found).hasSize(entities.size());
 
             for (E entity : entities) {
-                final EntityRecordWithColumns record = repository.toRecord(entity);
+                EntityRecordWithColumns record = repository.toRecord(entity);
                 assertThat(found).contains(record.getRecord());
             }
         }

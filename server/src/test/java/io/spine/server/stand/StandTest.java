@@ -51,6 +51,7 @@ import io.spine.core.Event;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
+import io.spine.core.Version;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
 import io.spine.protobuf.AnyPacker;
@@ -1198,8 +1199,8 @@ class StandTest extends TenantAwareTest {
                 input -> {
                     checkNotNull(input);
                     StandTestProjection projection = new StandTestProjection(input);
-                    Any id = AnyPacker.pack(projection.getId());
-                    Any state = AnyPacker.pack(projection.getState());
+                    Any id = AnyPacker.pack(projection.id());
+                    Any state = AnyPacker.pack(projection.state());
                     EntityRecord record = EntityRecord
                             .newBuilder()
                             .setEntityId(id)
