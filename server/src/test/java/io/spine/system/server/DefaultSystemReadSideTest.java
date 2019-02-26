@@ -35,6 +35,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.system.server.given.client.ShoppingListAggregate;
 import io.spine.system.server.given.client.ShoppingListRepository;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
@@ -164,15 +165,18 @@ class DefaultSystemReadSideTest {
         @Test
         @DisplayName("by the given query")
         void query() {
-            Query query = actorRequestFactory.query()
-                                             .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
+            Query query =
+                    actorRequestFactory.query()
+                                       .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
             EntityStateWithVersion next = systemReadSide.readDomainAggregate(query)
                                                         .next();
             Message foundMessage = unpack(next.getState());
-            assertEquals(aggregate(), foundMessage);
+
+            assertEquals(aggregate().state(), foundMessage);
+            assertEquals(aggregate().version(), next.getVersion());
         }
 
-        private ShoppingList aggregate() {
+        private ShoppingListAggregate aggregate() {
             return findAggregate(aggregateId, domainContext);
         }
 

@@ -423,7 +423,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("when event of observed type occurs in the system")
         void ofEvents() {
-           checkReceivesUpdatesOn(CustomerCreated.class);
+            checkReceivesUpdatesOn(CustomerCreated.class);
         }
 
         private void checkReceivesUpdatesOn(Class<? extends Message> targetType) {
