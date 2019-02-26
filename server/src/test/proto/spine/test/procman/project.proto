@@ -33,9 +33,7 @@ message ProjectId {
 
 message Project {
     ProjectId id = 1;
-
     string name = 2;
-
     repeated Task task = 3;
 
     enum Status {

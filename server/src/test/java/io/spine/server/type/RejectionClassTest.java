@@ -20,15 +20,10 @@
 package io.spine.server.type;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.test.core.ProjectCreated;
-import io.spine.test.core.rejection.Rejections.CannotAssignTask;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("RejectionClass should")
 class RejectionClassTest {
@@ -38,22 +33,5 @@ class RejectionClassTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(RejectionClass.class);
-    }
-
-    @Test
-    @DisplayName("be constructed from `TypeUrl` instance")
-    void constructFromTypeUrl() {
-        TypeUrl typeUrl = TypeUrl.from(CannotAssignTask.getDescriptor());
-        RejectionClass rejectionClass = RejectionClass.from(typeUrl);
-        assertEquals(CannotAssignTask.class, rejectionClass.value());
-    }
-
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Method called to throw exception.
-    @Test
-    @DisplayName("throw IAE when constructing from non-rejection type URL")
-    void throwOnNonEventType() {
-        TypeUrl typeUrl = TypeUrl.from(ProjectCreated.getDescriptor());
-        assertThrows(IllegalArgumentException.class, () -> RejectionClass.from(typeUrl));
     }
 }

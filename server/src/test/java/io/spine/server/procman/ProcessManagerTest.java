@@ -40,6 +40,7 @@ import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.test.shared.AnyProcess;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -47,7 +48,6 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
-import io.spine.test.procman.Project;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmPlanIteration;
@@ -155,7 +155,7 @@ class ProcessManagerTest {
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
-                              .withState(Project.getDefaultInstance())
+                              .withState(AnyProcess.getDefaultInstance())
                               .build();
         commandBus.register(new TestProcessManagerDispatcher());
         InjectCommandBus.of(commandBus)
@@ -171,7 +171,8 @@ class ProcessManagerTest {
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
-        Any pmState = processManager.lastReceivedMessage();
+        Any pmState = processManager.state()
+                                    .getAny();
         Any expected = pack(eventMessage);
         assertEquals(expected, pmState);
         return result;
@@ -182,7 +183,8 @@ class ProcessManagerTest {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
-        assertEquals(pack(commandMsg), processManager.lastReceivedMessage());
+        assertEquals(pack(commandMsg), processManager.state()
+                                                     .getAny());
         return events;
     }
 
@@ -299,7 +301,8 @@ class ProcessManagerTest {
         }
 
         private void assertReceived(Any expected) {
-            assertEquals(expected, processManager.lastReceivedMessage());
+            assertEquals(expected, processManager.state()
+                                                 .getAny());
         }
     }
 

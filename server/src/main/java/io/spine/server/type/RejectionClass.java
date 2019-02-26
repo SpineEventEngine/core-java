@@ -24,13 +24,9 @@ import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
 import io.spine.type.MessageClass;
-import io.spine.type.MessageType;
-import io.spine.type.TypeUrl;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.ensureMessage;
-import static io.spine.core.Events.typeUrl;
 
 /**
  * A value object holding a class of a business rejection.
@@ -55,40 +51,6 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
     }
 
     /**
-     * Creates a new instance from the given type URL.
-     *
-     * @throws IllegalArgumentException
-     *         if the type URL does not represent a rejection type
-     */
-    @SuppressWarnings("unchecked") // Checked logically.
-    public static RejectionClass from(TypeUrl typeUrl) {
-        Class<? extends Message> messageClass = typeUrl.getMessageClass();
-        checkArgument(RejectionMessage.class.isAssignableFrom(messageClass),
-                      "Rejection class is constructed from non-RejectionMessage type URL: %s",
-                      typeUrl.value());
-        return of((Class<? extends RejectionMessage>) messageClass);
-    }
-
-    /**
-     * Creates a new instance from the rejection message enclosed by the given {@code Event}.
-     *
-     * <p>If the event stores not a rejection message but an ordinary event, an
-     * {@link IllegalArgumentException} is thrown.
-     */
-    public static RejectionClass from(Event rejection) {
-        TypeUrl typeUrl = typeUrl(rejection);
-        return from(typeUrl);
-    }
-
-    /**
-     * Creates a new instance from the given {@code ThrowableMessage}.
-     */
-    public static RejectionClass of(ThrowableMessage rejection) {
-        RejectionMessage rejectionMessage = rejection.getMessageThrown();
-        return of(rejectionMessage);
-    }
-
-    /**
      * Creates a new instance of the rejection class by passed rejection instance.
      *
      * <p>If an instance of {@link Event} (which implements {@code Message}) is
@@ -106,12 +68,10 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
     }
 
     /**
-     * Creates a new instance from the given {@code MessageType}.
-     *
-     * @throws IllegalArgumentException
-     *         if the message type represents a non-{@link RejectionMessage} Protobuf type
+     * Creates a new instance from the given {@code ThrowableMessage}.
      */
-    public static RejectionClass of(MessageType type) {
-        return from(type.url());
+    public static RejectionClass of(ThrowableMessage rejection) {
+        RejectionMessage rejectionMessage = rejection.getMessageThrown();
+        return of(rejectionMessage);
     }
 }

@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.type.MessageClass;
-import io.spine.type.MessageType;
 import io.spine.type.TypeUrl;
 
 import java.util.Arrays;
@@ -97,16 +96,6 @@ public final class EventClass extends MessageClass<EventMessage> {
     public static EventClass of(Message eventOrMessage) {
         EventMessage eventMessage = ensureMessage(eventOrMessage);
         return from(eventMessage.getClass());
-    }
-
-    /**
-     * Creates a new instance from the given {@code MessageType}.
-     *
-     * @throws IllegalArgumentException
-     *         if the message type represents a non-{@link EventMessage} Protobuf type
-     */
-    public static EventClass of(MessageType type) {
-        return from(type.url());
     }
 
     /** Creates immutable set of {@code EventClass} from the passed set. */

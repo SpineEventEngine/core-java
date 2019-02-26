@@ -157,7 +157,7 @@ public final class PmDispatcher {
     private static class TestPmRepository<I, P extends ProcessManager<I, S, ?>, S extends Message>
             extends ProcessManagerRepository<I, P, S> {
 
-        @SuppressWarnings("unchecked") // OK for this test repository.
+        @SuppressWarnings("unchecked") // OK for this test implementation.
         @Override
         protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
             PmTransaction<?, ?, ?> tx = new TestPmTransaction(manager);

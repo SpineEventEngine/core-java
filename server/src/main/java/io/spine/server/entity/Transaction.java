@@ -345,7 +345,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Prepares the transaction for rollback.
+     * Does necessary preparations before the transaction is marked as inactive and released.
      */
     @SuppressWarnings("NoopMethodInAbstractClass")
     // Do not force descendants to override the method.
@@ -389,6 +389,9 @@ public abstract class Transaction<I,
         entity.releaseTransaction();
     }
 
+    /**
+     * Applies lifecycle flag modifications to the entity under transaction.
+     */
     protected void commitAttributeChanges() {
         entity.setLifecycleFlags(lifecycleFlags());
         entity.updateStateChanged();

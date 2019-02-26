@@ -20,7 +20,6 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
@@ -28,10 +27,10 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.test.shared.AnyProcess;
+import io.spine.server.test.shared.AnyProcessVBuilder;
 import io.spine.server.tuple.Pair;
-import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
@@ -59,11 +58,9 @@ import static io.spine.testdata.Sample.messageOfType;
  * A test Process Manager which remembers the last received message.
  */
 public class TestProcessManager
-        extends ProcessManager<ProjectId, Project, ProjectVBuilder> {
+        extends ProcessManager<ProjectId, AnyProcess, AnyProcessVBuilder> {
 
     public static final ProjectId ID = messageOfType(ProjectId.class);
-
-    private Any lastReceivedMessage;
 
     public TestProcessManager(ProjectId id) {
         super(id);
@@ -71,11 +68,7 @@ public class TestProcessManager
 
     /** Updates the state with putting incoming message.*/
     private void remember(Message incoming) {
-        lastReceivedMessage = pack(incoming);
-    }
-
-    public Any lastReceivedMessage() {
-        return lastReceivedMessage;
+        builder().setAny(pack(incoming));
     }
 
     /*

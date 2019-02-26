@@ -555,7 +555,7 @@ class ProcessManagerRepositoryTest
     }
 
     @Nested
-    @DisplayName("follow process lifecycle rules")
+    @DisplayName("follow configured lifecycle rules")
     class FollowLifecycleRules {
 
         @Test
