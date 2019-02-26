@@ -37,19 +37,26 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;
 
 /**
- * Lifecycle of a process manager class as represented in the domain model.
+ * Lifecycle rules of a process manager repository.
  *
- * <p>Lists events and rejections which are "terminal" for the process, causing the process manager
- * to become {@linkplain LifecycleFlags#getArchived()} archived} or
- * {@linkplain LifecycleFlags#getDeleted()} deleted}.
- *
- * @see io.spine.option.LifecycleOption
+ * <p>The rules can be configured by user to automatically
+ * {@linkplain LifecycleFlags#getArchived()} archive} or {@linkplain LifecycleFlags#getDeleted()}
+ * delete} entities when certain events or rejections occur.
  */
 public final class Lifecycle implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
+    /**
+     * Event/rejection classes which, when emitted by a process manager, will cause the entity to
+     * become archived.
+     */
     private final Set<Class<? extends EventMessage>> archiveOn;
+
+    /**
+     * Event/rejection classes which, when emitted by a process manager, will cause the entity to
+     * become deleted.
+     */
     private final Set<Class<? extends EventMessage>> deleteOn;
 
     @VisibleForTesting
@@ -58,6 +65,16 @@ public final class Lifecycle implements Serializable {
         this.deleteOn = new HashSet<>();
     }
 
+    /**
+     * Configures the repository to archive its entities when certain events/rejections occur.
+     *
+     * <p>Subsequent calls to this method do not clear the previously added event classes (i.e. not
+     * override each other).
+     *
+     * @param messageClasses
+     *         the event and rejection classes which will cause the entity to become archived
+     * @return self for convenient method chaining
+     */
     @SafeVarargs
     @CanIgnoreReturnValue
     public final Lifecycle archiveOn(Class<? extends EventMessage>... messageClasses) {
@@ -66,8 +83,7 @@ public final class Lifecycle implements Serializable {
     }
 
     /**
-     * Checks if the process manager should become archived when the given {@code events} are
-     * emitted.
+     * Checks if the process hould become archived when the given {@code events} are emitted.
      */
     boolean archivesOn(Iterable<Event> events) {
         boolean result = containsAnyClasses(archiveOn, events);
@@ -75,8 +91,7 @@ public final class Lifecycle implements Serializable {
     }
 
     /**
-     * Checks if the process manager should become archived when the given {@code rejection} is
-     * thrown.
+     * Checks if the process should become archived when the given {@code rejection} is thrown.
      */
     boolean archivesOn(ThrowableMessage rejection) {
         RejectionClass rejectionClass = RejectionClass.of(rejection);
@@ -84,6 +99,16 @@ public final class Lifecycle implements Serializable {
         return result;
     }
 
+    /**
+     * Configures the repository to delete its entities when certain events/rejections occur.
+     *
+     * <p>Subsequent calls to this method do not clear the previously added event classes (i.e. not
+     * override each other).
+     *
+     * @param messageClasses
+     *         the event and rejection classes which will cause the entity to become deleted
+     * @return self for convenient method chaining
+     */
     @SafeVarargs
     @CanIgnoreReturnValue
     public final Lifecycle deleteOn(Class<? extends EventMessage>... messageClasses) {
@@ -92,8 +117,7 @@ public final class Lifecycle implements Serializable {
     }
 
     /**
-     * Checks if the process manager should become deleted when the given {@code events} are
-     * emitted.
+     * Checks if the process should become deleted when the given {@code events} are emitted.
      */
     boolean deletesOn(Iterable<Event> events) {
         boolean result = containsAnyClasses(deleteOn, events);
@@ -101,8 +125,7 @@ public final class Lifecycle implements Serializable {
     }
 
     /**
-     * Checks if the process manager should become deleted when the given {@code rejection} is
-     * thrown.
+     * Checks if the process should become deleted when the given {@code rejection} is thrown.
      */
     boolean deletesOn(ThrowableMessage rejection) {
         RejectionClass rejectionClass = RejectionClass.of(rejection);

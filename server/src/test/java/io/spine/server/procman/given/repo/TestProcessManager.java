@@ -125,7 +125,17 @@ public class TestProcessManager
     Pair<PmAddTask, PmDoNothing> handle(PmStartProject command, CommandContext context)
             throws PmCannotStartArchivedProject {
         keep(command);
+        checkNotArchived(command);
 
+        ProjectId projectId = command.getProjectId();
+        PmAddTask.Builder addTask = builderForType(PmAddTask.class);
+        addTask.setProjectId(projectId);
+        PmDoNothing.Builder doNothing = builderForType(PmDoNothing.class);
+        doNothing.setProjectId(projectId);
+        return Pair.of(addTask.build(), doNothing.build());
+    }
+
+    private void checkNotArchived(PmStartProject command) throws PmCannotStartArchivedProject {
         if (getLifecycleFlags().getArchived()) {
             PmCannotStartArchivedProject rejection = PmCannotStartArchivedProject
                     .newBuilder()
@@ -133,12 +143,6 @@ public class TestProcessManager
                     .build();
             throw rejection;
         }
-        ProjectId projectId = command.getProjectId();
-        PmAddTask.Builder addTask = builderForType(PmAddTask.class);
-        addTask.setProjectId(projectId);
-        PmDoNothing.Builder doNothing = builderForType(PmDoNothing.class);
-        doNothing.setProjectId(projectId);
-        return Pair.of(addTask.build(), doNothing.build());
     }
 
     @Assign

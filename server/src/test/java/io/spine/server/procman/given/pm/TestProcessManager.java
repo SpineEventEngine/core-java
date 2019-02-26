@@ -55,7 +55,7 @@ import static io.spine.testdata.Sample.builderForType;
 import static io.spine.testdata.Sample.messageOfType;
 
 /**
- * A test Process Manager which remembers the last received message.
+ * A test Process Manager which remembers past message as its state.
  */
 public class TestProcessManager
         extends ProcessManager<ProjectId, AnyProcess, AnyProcessVBuilder> {

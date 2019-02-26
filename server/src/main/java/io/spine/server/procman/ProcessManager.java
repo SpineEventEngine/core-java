@@ -239,26 +239,6 @@ public abstract class ProcessManager<I,
         );
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overridden to expose the method to the {@code procman} package.
-     */
-    @Override
-    protected void setArchived(boolean archived) {
-        super.setArchived(archived);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overridden to expose the method to the {@code procman} package.
-     */
-    @Override
-    protected void setDeleted(boolean deleted) {
-        super.setDeleted(deleted);
-    }
-
     private static List<Event> noEvents() {
         return ImmutableList.of();
     }

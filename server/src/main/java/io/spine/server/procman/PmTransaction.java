@@ -57,6 +57,9 @@ public class PmTransaction<I,
                            B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
+    /**
+     * The lifecycle rules which will be applied to the process manager instance.
+     */
     private final Lifecycle lifecycle;
 
     private PmTransaction(ProcessManager<I, S, B> processManager, Lifecycle lifecycle) {
@@ -125,7 +128,7 @@ public class PmTransaction<I,
     }
 
     /**
-     * Updates and commits the process manager lifecycle flags.
+     * Updates and commits the process manager lifecycle flags after a rejection is thrown.
      */
     @Override
     protected void beforeRollback(Throwable cause) {
@@ -150,8 +153,10 @@ public class PmTransaction<I,
     /**
      * Creates a new transaction for a given {@code ProcessManager}.
      *
-     * @param  processManager
-     *          the {@code ProcessManager} instance to start the transaction for
+     * @param processManager
+     *         the {@code ProcessManager} instance to start the transaction for
+     * @param lifecycle
+     *         the lifecycle rules to apply to the entity
      * @return the new transaction instance
      */
     static <I,
@@ -180,6 +185,8 @@ public class PmTransaction<I,
 
     /**
      * Updates the process lifecycle after a rejection is thrown.
+     *
+     * <p>Manually commits the changes as they are not going to be committed normally.
      */
     private void updateLifecycle(ThrowableMessage rejection) {
         if (lifecycle.archivesOn(rejection)) {

@@ -259,7 +259,7 @@ public final class Events {
     }
 
     /**
-     * Obtains a type URL of the event message enclosed by a given {@code Event}.
+     * Obtains the type URL of the event message enclosed by a given {@code Event}.
      */
     public static TypeUrl typeUrl(Event event) {
         String typeUrl = event.getMessage()
