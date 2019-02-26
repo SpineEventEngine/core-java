@@ -29,7 +29,6 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.RejectionClass;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,9 +42,7 @@ import static java.util.Arrays.asList;
  * {@linkplain LifecycleFlags#getArchived()} archive} or {@linkplain LifecycleFlags#getDeleted()}
  * delete} entities when certain events or rejections occur.
  */
-public final class Lifecycle implements Serializable {
-
-    private static final long serialVersionUID = 0L;
+public final class Lifecycle {
 
     /**
      * Event/rejection classes which, when emitted by a process manager, will cause the entity to
