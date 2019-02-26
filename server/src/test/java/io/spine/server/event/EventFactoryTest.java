@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,7 @@
 package io.spine.server.event;
 
 import com.google.protobuf.Any;
-import io.spine.core.CommandEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.command.event.MandatoryFieldEvent;
 import io.spine.testing.Tests;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -34,14 +34,10 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("EventFactory should")
 class EventFactoryTest {
 
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+    private final TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
 
     private Any producerId;
     private CommandEnvelope origin;
@@ -49,7 +45,7 @@ class EventFactoryTest {
     @BeforeEach
     void setUp() {
         producerId = pack(newUuidValue());
-        origin = requestFactory.generateEnvelope();
+        origin = CommandEnvelope.of(requestFactory.generateCommand());
     }
 
     @Test

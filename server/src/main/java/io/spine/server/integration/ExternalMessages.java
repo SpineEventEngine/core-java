@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,16 +28,11 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.delivery.ShardedMessage;
-import io.spine.server.delivery.ShardedMessageId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Utilities for working with {@linkplain ExternalMessage external messages}.
- *
- * @author Alex Tymchenko
  */
 @Internal
 public final class ExternalMessages {
@@ -92,39 +87,6 @@ public final class ExternalMessages {
                                                .build(),
                                     request,
                                     origin);
-        return result;
-    }
-
-    /**
-     * Wraps the instance of {@link ShardedMessage} into an {@code ExternalMessage}.
-     *
-     * @param message the message to wrap
-     * @param origin  the name of bounded context in which the request message created
-     * @return the external message wrapping the given message
-     */
-    public static ExternalMessage of(ShardedMessage message, BoundedContextName origin) {
-        checkNotNull(message);
-        checkNotNull(origin);
-
-        ShardedMessageId id = message.getId();
-        ExternalMessage result = of(id, message, origin);
-        return result;
-    }
-
-    /**
-     * Unpacks the given {@code ExternalMessage} into a {@link ShardedMessage}.
-     *
-     * <p>Callees of this method should ensure that the given external message indeed wraps
-     * an instance of {@code ShardedMessage}, before calling this method.
-     * A {@link ClassCastException} is thrown otherwise.
-     *
-     * @param value the value to unpack
-     * @return the unpacked value
-     */
-    public static ShardedMessage asShardedMessage(ExternalMessage value) {
-        checkNotNull(value);
-        Any originalMessage = value.getOriginalMessage();
-        ShardedMessage result = unpack(originalMessage, ShardedMessage.class);
         return result;
     }
 

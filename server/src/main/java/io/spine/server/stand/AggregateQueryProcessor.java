@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,7 +31,6 @@ import io.spine.system.server.SystemReadSide;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.copyOf;
 import static io.spine.system.server.ReadSideFunction.delegatingTo;
 
 /**
@@ -50,7 +49,7 @@ class AggregateQueryProcessor implements QueryProcessor {
         TenantId tenant = tenantOf(query);
         SystemReadSide readSide = delegatingTo(systemReadSide).get(tenant);
         Iterator<EntityStateWithVersion> read = readSide.readDomainAggregate(query);
-        ImmutableList<EntityStateWithVersion> result = copyOf(read);
+        ImmutableList<EntityStateWithVersion> result = ImmutableList.copyOf(read);
         return result;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,8 +23,8 @@ package io.spine.testing.server.procman;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.server.MessageHandlerTest;
 import io.spine.testing.server.expected.CommanderExpected;
 
@@ -65,10 +65,10 @@ class PmCommandGenerationTest<I,
     protected CommanderExpected<S> expectThat(P processManager) {
         InjectCommandBus.of(boundedContext())
                         .to(processManager);
-        S initialState = processManager.getState();
+        S initialState = processManager.state();
         List<? extends Message> messages = dispatchTo(processManager);
         ImmutableList<Message> commands = interceptedCommands();
-        S updatedState = processManager.getState();
+        S updatedState = processManager.state();
         CommanderExpected<S> result =
                 new CommanderExpected<>(messages, initialState, updatedState, commands);
         return result;

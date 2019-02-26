@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,16 +20,15 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Empty;
-import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
-import io.spine.server.model.given.HandlerMethodTestEnv.OneParamMethod;
-import io.spine.server.model.given.HandlerMethodTestEnv.StubHandler;
-import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamMethod;
-import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamSpec;
+import io.spine.server.model.given.method.OneParamMethod;
+import io.spine.server.model.given.method.OneParamSignature;
+import io.spine.server.model.given.method.OneParamSpec;
+import io.spine.server.model.given.method.StubHandler;
+import io.spine.server.model.given.method.TwoParamMethod;
+import io.spine.server.model.given.method.TwoParamSpec;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.model.ModProjectCreated;
 import io.spine.test.model.ModProjectStarted;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,10 +41,8 @@ import java.util.Optional;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.AbstractHandlerMethod.getFirstParamType;
-import static io.spine.server.model.given.HandlerMethodTestEnv.OneParamSignature;
-import static io.spine.server.model.given.HandlerMethodTestEnv.OneParamSpec;
-import static io.spine.server.model.given.HandlerMethodTestEnv.StubHandler.getMethodWithCheckedException;
-import static io.spine.server.model.given.HandlerMethodTestEnv.StubHandler.getMethodWithRuntimeException;
+import static io.spine.server.model.given.method.StubHandler.getMethodWithCheckedException;
+import static io.spine.server.model.given.method.StubHandler.getMethodWithRuntimeException;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -53,22 +50,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("AbstractHandlerMethod should")
 class AbstractHandlerMethodTest {
 
     private final OneParamSignature signature = new OneParamSignature();
 
-    private
-    AbstractHandlerMethod<Object, EventMessage, EventClass, EventEnvelope, MethodResult<Empty>>
-            twoParamMethod;
-    private
-    AbstractHandlerMethod<Object, EventMessage, EventClass, EventEnvelope, MethodResult<Empty>>
-            oneParamMethod;
+    private TwoParamMethod twoParamMethod;
+    private OneParamMethod oneParamMethod;
 
     private Object target;
 
@@ -91,7 +80,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("return method")
     void returnMethod() {
-        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getRawMethod());
+        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.rawMethod());
     }
 
     @Nested
@@ -114,7 +103,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
-        assertEquals(ModProjectStarted.class, getFirstParamType(oneParamMethod.getRawMethod()));
+        assertEquals(ModProjectStarted.class, getFirstParamType(oneParamMethod.rawMethod()));
     }
 
     @Nested
@@ -190,7 +179,7 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<?, ?, ?, ?, ?> anotherMethod =
+            AbstractHandlerMethod<?, ?, ?, ?, ?, ?> anotherMethod =
                     new TwoParamMethod(StubHandler.getTwoParameterMethod(),
                                        TwoParamSpec.INSTANCE);
             assertEquals(twoParamMethod, anotherMethod);

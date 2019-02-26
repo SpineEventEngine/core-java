@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,30 +22,26 @@ package io.spine.server.entity.given;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.EntityFilters;
 import io.spine.client.OrderBy;
 import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.client.TargetFilters;
+import io.spine.server.entity.AbstractEntity;
 
 import static io.spine.testing.Tests.assertMatchesMask;
 
-/**
- * @author Mykhailo Drachuk
- */
 public final class RecordBasedRepositoryTestEnv {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Specific to this tests.
     private static final String ENTITY_NAME_COLUMN = "name";
 
     /** Prevents instantiation of this test environment class. */
     private RecordBasedRepositoryTestEnv() {
     }
 
-    public static <E extends AbstractVersionableEntity<?, ?>>
+    public static <E extends AbstractEntity<?, ?>>
     void assertMatches(E entity, FieldMask fieldMask) {
-        Message state = entity.getState();
+        Message state = entity.state();
         assertMatchesMask(state, fieldMask);
     }
 
@@ -73,8 +69,8 @@ public final class RecordBasedRepositoryTestEnv {
                               .build();
     }
 
-    public static EntityFilters emptyFilters() {
-        return EntityFilters.getDefaultInstance();
+    public static TargetFilters emptyFilters() {
+        return TargetFilters.getDefaultInstance();
     }
 
     public static FieldMask emptyFieldMask() {

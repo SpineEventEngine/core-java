@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,8 +33,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Base routines for the {@linkplain Subscriber#addObserver(StreamObserver)}
  * subscriber observers}.
- *
- * @author Alex Tymchenko
  */
 @SPI
 public abstract class AbstractChannelObserver implements StreamObserver<ExternalMessage> {
@@ -86,7 +84,7 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof AbstractChannelObserver)) {
             return false;
         }
         AbstractChannelObserver that = (AbstractChannelObserver) o;

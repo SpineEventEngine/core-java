@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * a {@link CommandDispatchingException}.
  *
  * <p>On {@link #asRejection()}, returns {@link java.util.Optional#empty() Optional.empty()}
- *
- * @author Dmytro Dashenkov
  */
 final class CaughtRuntimeError implements CaughtError {
 

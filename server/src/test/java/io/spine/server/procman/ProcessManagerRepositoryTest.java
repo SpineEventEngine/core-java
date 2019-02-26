@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,15 +25,10 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.EventFilter;
@@ -48,6 +43,11 @@ import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.TestProcessManager;
 import io.spine.server.procman.given.repo.TestProcessManagerRepository;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
@@ -66,7 +66,6 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.type.TypeUrl;
@@ -75,7 +74,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 import java.util.Set;
@@ -115,16 +113,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("ProcessManagerRepository should")
 class ProcessManagerRepositoryTest
         extends RecordBasedRepositoryTest<TestProcessManager, ProjectId, Project> {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass(),
-                                                TenantId.newBuilder()
-                                                        .setValue(newUuid())
-                                                        .build());
+            new TestActorRequestFactory(getClass(), TenantId.newBuilder()
+                                                            .setValue(newUuid())
+                                                            .build());
     private BoundedContext boundedContext;
 
     @Override
@@ -184,7 +180,7 @@ class ProcessManagerRepositoryTest
     }
 
     private static String entityName(TestProcessManager entity) {
-        return entity.getState()
+        return entity.state()
                      .getName();
     }
 
@@ -203,7 +199,7 @@ class ProcessManagerRepositoryTest
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
-        boundedContext.register(repository);
+        boundedContext.register(repository());
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
@@ -214,8 +210,9 @@ class ProcessManagerRepositoryTest
         super.tearDown();
     }
 
-    private TestProcessManagerRepository repository() {
-        return (TestProcessManagerRepository) repository;
+    @Override
+    protected TestProcessManagerRepository repository() {
+        return (TestProcessManagerRepository) super.repository();
     }
 
     @SuppressWarnings("CheckReturnValue")
@@ -354,7 +351,7 @@ class ProcessManagerRepositoryTest
             // Dispatch a command to the deleted process manager.
             testDispatchCommand(addTask());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.getState()
+            List<Task> addedTasks = processManager.state()
                                                   .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -374,7 +371,7 @@ class ProcessManagerRepositoryTest
             // Dispatch an event to the archived process manager.
             testDispatchEvent(taskAdded());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.getState()
+            List<Task> addedTasks = processManager.state()
                                                   .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -399,7 +396,7 @@ class ProcessManagerRepositoryTest
             // Dispatch a command to the archived process manager.
             testDispatchCommand(addTask());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.getState()
+            List<Task> addedTasks = processManager.state()
                                                   .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -419,7 +416,7 @@ class ProcessManagerRepositoryTest
             // Dispatch an event to the deleted process manager.
             testDispatchEvent(taskAdded());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.getState()
+            List<Task> addedTasks = processManager.state()
                                                   .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -465,7 +462,7 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("events")
         void event() {
-            Set<EventClass> eventClasses = repository().getMessageClasses();
+            Set<EventClass> eventClasses = repository().messageClasses();
 
             assertEventClasses(
                     eventClasses,

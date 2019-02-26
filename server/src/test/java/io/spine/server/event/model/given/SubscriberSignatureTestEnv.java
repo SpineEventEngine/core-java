@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -141,8 +141,8 @@ public class SubscriberSignatureTestEnv {
         }
 
         @Subscribe
-        void messageAndCommand(ProjectAlreadyExists rejection,
-                               CreateProject command) {
+        public void messageAndCommand(ProjectAlreadyExists rejection,
+                                      CreateProject command) {
             this.event = rejection;
             this.command = command;
         }

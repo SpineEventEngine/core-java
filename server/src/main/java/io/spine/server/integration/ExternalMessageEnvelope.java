@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,11 +20,11 @@
 package io.spine.server.integration;
 
 import com.google.protobuf.Message;
-import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.AbstractMessageEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -80,7 +80,7 @@ public final class ExternalMessageEnvelope
     }
 
     @Override
-    public Message getId() {
+    public Message id() {
         return id;
     }
 
@@ -92,7 +92,7 @@ public final class ExternalMessageEnvelope
      * @return the instance of origin message
      */
     @Override
-    public Message getMessage() {
+    public Message message() {
         return message;
     }
 
@@ -101,16 +101,16 @@ public final class ExternalMessageEnvelope
      * {@code io.spine.sample.TaskCreated} class.
      *
      * @return the event message
-     * @see #getMessage()
+     * @see #message()
      * @see #of(ExternalMessage, Message)
      */
     @Override
-    public MessageClass getMessageClass() {
+    public MessageClass messageClass() {
         return messageClass;
     }
 
     @Override
-    public ActorContext getMessageContext() {
+    public ActorContext context() {
         return actorContext;
     }
 
@@ -118,7 +118,7 @@ public final class ExternalMessageEnvelope
      * Converts this instance to an envelope of the external event.
      */
     public EventEnvelope toEventEnvelope() {
-        ExternalMessage externalMessage = getOuterObject();
+        ExternalMessage externalMessage = outerObject();
         Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
         EventEnvelope result = EventEnvelope.of(event);
         return result;

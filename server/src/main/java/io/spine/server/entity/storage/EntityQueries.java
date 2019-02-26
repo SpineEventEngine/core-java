@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,15 +24,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.base.FieldPath;
 import io.spine.base.Identifier;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.CompositeColumnFilter.CompositeOperator;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
+import io.spine.client.CompositeFilter;
+import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.client.Filter;
+import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.TargetFilters;
 import io.spine.server.storage.RecordStorage;
 
 import java.util.Collection;
@@ -45,6 +45,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -62,7 +63,7 @@ public final class EntityQueries {
 
     /**
      * Creates new {@link EntityQuery} instances for the given {@link OrderBy},
-     * {@link EntityFilters}, {@link Pagination}, and {@link RecordStorage}.
+     * {@link TargetFilters}, {@link Pagination}, and {@link RecordStorage}.
      *
      * @param filters
      *         filters for the Entities specifying the query predicate
@@ -74,7 +75,7 @@ public final class EntityQueries {
      *         a storage for which the query is created
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
-    public static <I> EntityQuery<I> from(EntityFilters filters,
+    public static <I> EntityQuery<I> from(TargetFilters filters,
                                           OrderBy orderBy,
                                           Pagination pagination,
                                           RecordStorage<I> storage) {
@@ -89,7 +90,7 @@ public final class EntityQueries {
     }
 
     @VisibleForTesting
-    static <I> EntityQuery<I> from(EntityFilters filters,
+    static <I> EntityQuery<I> from(TargetFilters filters,
                                    OrderBy orderBy,
                                    Pagination pagination,
                                    Collection<EntityColumn> columns) {
@@ -106,7 +107,7 @@ public final class EntityQueries {
     }
 
     private static QueryParameters toQueryParams(OrderBy orderBy,
-                                                 EntityFilters filters,
+                                                 TargetFilters filters,
                                                  Pagination pagination,
                                                  Collection<EntityColumn> entityColumns) {
 
@@ -115,7 +116,7 @@ public final class EntityQueries {
     }
 
     private static List<CompositeQueryParameter>
-    getFiltersQueryParams(EntityFilters filters, Collection<EntityColumn> entityColumns) {
+    getFiltersQueryParams(TargetFilters filters, Collection<EntityColumn> entityColumns) {
         return filters.getFilterList()
                       .stream()
                       .map(filter -> queryParameterFromFilter(filter, entityColumns))
@@ -132,39 +133,43 @@ public final class EntityQueries {
     }
 
     private static CompositeQueryParameter
-    queryParameterFromFilter(CompositeColumnFilter filter, Collection<EntityColumn> entityColumns) {
-        Multimap<EntityColumn, ColumnFilter> columnFilters = splitFilters(filter, entityColumns);
+    queryParameterFromFilter(CompositeFilter filter, Collection<EntityColumn> entityColumns) {
+        Multimap<EntityColumn, Filter> filters = splitFilters(filter, entityColumns);
         CompositeOperator operator = filter.getOperator();
-        return CompositeQueryParameter.from(columnFilters, operator);
+        return CompositeQueryParameter.from(filters, operator);
     }
 
-    private static Multimap<EntityColumn, ColumnFilter> splitFilters(CompositeColumnFilter filter,
-                                                                     Collection<EntityColumn> entityColumns) {
-        Multimap<EntityColumn, ColumnFilter> columnFilters =
-                create(filter.getFilterCount(), 1);
-        for (ColumnFilter columnFilter : filter.getFilterList()) {
+    private static Multimap<EntityColumn, Filter>
+    splitFilters(CompositeFilter filter, Collection<EntityColumn> entityColumns) {
+        Multimap<EntityColumn, Filter> filters = create(filter.getFilterCount(), 1);
+        for (Filter columnFilter : filter.getFilterList()) {
             EntityColumn column = findMatchingColumn(columnFilter, entityColumns);
             checkFilterType(column, columnFilter);
-            columnFilters.put(column, columnFilter);
+            filters.put(column, columnFilter);
         }
-        return columnFilters;
+        return filters;
     }
 
-    private static EntityColumn findMatchingColumn(ColumnFilter filter,
+    private static EntityColumn findMatchingColumn(Filter filter,
                                                    Collection<EntityColumn> entityColumns) {
+        FieldPath fieldPath = filter.getFieldPath();
+        checkArgument(fieldPath.getFieldNameCount() == 1,
+                      "Incorrect Entity Column name in Entity Filter: %s",
+                      join(".", fieldPath.getFieldNameList()));
+        String columnName = fieldPath.getFieldName(0);
         for (EntityColumn column : entityColumns) {
             if (column.getName()
-                      .equals(filter.getColumnName())) {
+                      .equals(columnName)) {
                 return column;
             }
         }
 
         throw new IllegalArgumentException(
                 format("Could not find an EntityColumn description for column with name %s.",
-                       filter.getColumnName()));
+                       columnName));
     }
 
-    private static void checkFilterType(EntityColumn column, ColumnFilter filter) {
+    private static void checkFilterType(EntityColumn column, Filter filter) {
         Class<?> expectedType = column.getType();
         Any filterConvent = filter.getValue();
         Object filterValue = toObject(filterConvent, expectedType);
@@ -175,13 +180,12 @@ public final class EntityQueries {
                       filterValue);
     }
 
-    private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {
-        EntityIdFilter idFilter = entityFilters.getIdFilter();
+    private static <I> Collection<I> toGenericIdValues(TargetFilters filters) {
+        IdFilter idFilter = filters.getIdFilter();
         Collection<I> ids = newArrayList();
-        for (EntityId entityId : idFilter.getIdsList()) {
-            Any wrappedMessageId = entityId.getId();
+        for (Any entityId : idFilter.getIdsList()) {
             @SuppressWarnings("unchecked" /* The caller is responsible to pass the proper IDs. */)
-            I unpackedId = (I) Identifier.unpack(wrappedMessageId);
+            I unpackedId = (I) Identifier.unpack(entityId);
             ids.add(unpackedId);
         }
         return ids;

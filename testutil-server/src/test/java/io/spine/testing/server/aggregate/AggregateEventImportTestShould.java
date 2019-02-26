@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * A unit test for {@link io.spine.testing.server.aggregate.AggregateEventImportTest}.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("AggregateEventImportTest should")
 class AggregateEventImportTestShould {
 
@@ -110,7 +109,7 @@ class AggregateEventImportTestShould {
             TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
             TuAggregatePart part = TuAggregatePart.newInstance(root);
             EventApplierExpected<TuComments> expected = partImportEventTest.expectThat(part);
-            expected.hasState(state -> assertEquals(1, state.getCommentsRecievedByEmail()));
+            expected.hasState(state -> assertEquals(1, state.getCommentsReceivedByEmail()));
         }
     }
 }

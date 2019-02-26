@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,13 +20,15 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
-import io.spine.client.EntityFilters;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
+import io.spine.code.proto.EntityStateOption;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.type.TypeUrl;
@@ -35,13 +37,10 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
-import static io.spine.option.Options.option;
-import static io.spine.option.OptionsProto.entity;
 import static io.spine.system.server.Mirror.ID_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
 import static io.spine.system.server.MirrorProjection.buildFilters;
@@ -56,8 +55,6 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  * </ul>
  *
  * <p>In other cases, an entity won't have a {@link Mirror}.
- *
- * @author Dmytro Dashenkov
  */
 final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
@@ -72,7 +69,7 @@ final class MirrorRepository
     }
 
     private void prepareRouting() {
-        getEventRouting()
+        eventRouting()
                 .route(EntityStateChanged.class,
                        (message, context) -> targetsFrom(message.getId()))
                 .route(EntityArchived.class,
@@ -89,14 +86,14 @@ final class MirrorRepository
         TypeUrl type = TypeUrl.parse(historyId.getTypeUrl());
         boolean shouldMirror = shouldMirror(type);
         return shouldMirror
-               ? of(idFrom(historyId))
-               : of();
+               ? ImmutableSet.of(idFrom(historyId))
+               : ImmutableSet.of();
     }
 
     private static boolean shouldMirror(TypeUrl type) {
-        Descriptor descriptor = type.toName()
-                                    .getMessageDescriptor();
-        Optional<EntityOption> option = option(descriptor, entity);
+        Descriptor descriptor = type.toTypeName()
+                                    .messageDescriptor();
+        Optional<EntityOption> option = EntityStateOption.valueOf(descriptor);
         Kind kind = option.map(EntityOption::getKind)
                           .orElse(KIND_UNKNOWN);
         boolean aggregate = kind == AGGREGATE;
@@ -126,7 +123,7 @@ final class MirrorRepository
     Iterator<EntityStateWithVersion> execute(Query query) {
         FieldMask aggregateFields = query.getFieldMask();
         Target target = query.getTarget();
-        EntityFilters filters = buildFilters(target);
+        TargetFilters filters = buildFilters(target);
         Iterator<MirrorProjection> mirrors = find(filters, 
                                                   query.getOrderBy(), 
                                                   query.getPagination(), 

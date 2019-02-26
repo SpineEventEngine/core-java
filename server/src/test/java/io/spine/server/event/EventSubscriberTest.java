@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,8 +21,8 @@
 package io.spine.server.event;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.FailRequested;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
@@ -50,8 +50,8 @@ class EventSubscriberTest {
     }
 
     @Test
-    @DisplayName("catch exceptions caused by methods")
     @MuteLogging
+    @DisplayName("catch exceptions caused by methods")
     void catchMethodExceptions() {
         // Create event which should fail.
         EventEnvelope eventEnvelope = createEvent(false);
@@ -78,7 +78,6 @@ class EventSubscriberTest {
         assertNull(sub.getLastException());
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("have log")
     void haveLog() {
@@ -91,14 +90,14 @@ class EventSubscriberTest {
     @Test
     @DisplayName("expose handled message classes")
     void exposeMessageClasses() {
-        assertEquals(3, subscriber.getMessageClasses()
+        assertEquals(3, subscriber.messageClasses()
                                   .size());
     }
 
     @Test
     @DisplayName("expose handled external message classes")
     void exposeExternalClasses() {
-        assertEquals(1, subscriber.getExternalEventClasses()
+        assertEquals(1, subscriber.externalEventClasses()
                                   .size());
     }
 

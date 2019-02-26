@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,13 +24,13 @@ import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventValidationError;
 import io.spine.core.MessageInvalid;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCreated;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.core.EventEnvelope.of;
 import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -46,7 +46,9 @@ class EventValidatorTest {
                 .setMessage(pack(ProjectCreated.getDefaultInstance()))
                 .build();
         EventValidator eventValidator = new EventValidator();
-        Optional<MessageInvalid> error = eventValidator.validate(of(eventWithDefaultMessage));
+        Optional<MessageInvalid> error = eventValidator.validate(
+                EventEnvelope.of(eventWithDefaultMessage)
+        );
         assertTrue(error.isPresent());
         Error actualError = error.get().asError();
         assertEquals(EventValidationError.getDescriptor().getFullName(), actualError.getType());

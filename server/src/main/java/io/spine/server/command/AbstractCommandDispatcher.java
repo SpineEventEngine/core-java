@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,12 +21,12 @@
 package io.spine.server.command;
 
 import com.google.protobuf.Any;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.function.Supplier;
 
@@ -37,8 +37,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 /**
  * The abstract base for non-aggregate classes that dispatch commands to their methods
  * and post resulting events to to {@link EventBus}.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class AbstractCommandDispatcher implements CommandDispatcher<String>, Logging {
 
@@ -69,7 +67,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     /**
      * Obtains {@linkplain #getId() ID} packed into {@code Any} for being used in generated events.
      */
-    public Any getProducerId() {
+    public Any producerId() {
         return producerId.get();
     }
 
@@ -91,7 +89,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
         checkNotNull(exception);
         _error(exception,
                "Error handling command (class: `{}` id: `{}`).",
-               envelope.getMessageClass(),
+               envelope.messageClass(),
                envelope.idAsString());
     }
 
@@ -102,18 +100,17 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
      *
      * @return if the passed {@code CommandHandler} handles the same
      * set of command classes.
-     * @see #getMessageClasses()
+     * @see #messageClasses()
      */
     @Override
-    public boolean equals(Object otherObj) {
-        if (this == otherObj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (otherObj == null ||
-                getClass() != otherObj.getClass()) {
+        if (!(o instanceof AbstractCommandDispatcher)) {
             return false;
         }
-        AbstractCommandDispatcher otherHandler = (AbstractCommandDispatcher) otherObj;
+        AbstractCommandDispatcher otherHandler = (AbstractCommandDispatcher) o;
         boolean equals = getId().equals(otherHandler.getId());
         return equals;
     }

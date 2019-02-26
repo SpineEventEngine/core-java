@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -50,7 +50,7 @@ public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuil
         if (TAKEN_NAME.equals(command.getFinalName())) {
             throw CompanyNameAlreadyTaken
                     .newBuilder()
-                    .setId(getId())
+                    .setId(id())
                     .setTakenName(TAKEN_NAME)
                     .build();
         }
@@ -63,7 +63,7 @@ public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuil
 
     @Apply
     void on(CompanyEstablished event) {
-        getBuilder().setId(event.getId())
-                    .setName(event.getName());
+        builder().setId(event.getId())
+                 .setName(event.getName());
     }
 }

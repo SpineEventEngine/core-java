@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,9 +31,6 @@ import static io.spine.system.server.DefaultSystemWriteSide.SYSTEM_USER;
 
 /**
  * Creates a command factory for producing commands under the context of specified tenant.
- *
- * @author Dmytro Dashenkov
- * @author Alexander Yevsyukov
  */
 final class SystemCommandFactory {
 

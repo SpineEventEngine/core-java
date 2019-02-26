@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,48 +20,37 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.annotation.SPI;
-import io.spine.core.BoundedContextName;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets.SetView;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.core.EventId;
-import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.delivery.Shardable;
-import io.spine.server.delivery.ShardedStreamConsumer;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Suppliers.memoize;
-import static com.google.common.collect.ImmutableList.of;
+import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -77,12 +66,11 @@ import static java.lang.Math.max;
  * This class is made {@code abstract} for preserving type information of aggregate ID and
  * aggregate classes used by implementations.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher<I>,
-                   EventDispatcherDelegate<I>,
-                   Shardable {
+                   EventDispatcherDelegate<I> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -100,12 +88,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private final EventRouting<I> eventImportRoute =
             EventRouting.withDefault(EventRoute.byProducerId());
-
-    private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
-            memoize(this::createCommandDelivery);
-
-    private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
-            memoize(this::createEventDelivery);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -130,11 +112,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <ul>
      *     <li>{@link io.spine.server.commandbus.CommandBus CommandBus},
-     *         {@link io.spine.server.event.EventBus EventBus}, and
-     *         {@link io.spine.server.aggregate.ImportBus ImportBus} of
+     *     <li>{@link io.spine.server.event.EventBus EventBus},
+     *     <li>{@link io.spine.server.aggregate.ImportBus ImportBus} of
      *         the parent {@code BoundedContext} for dispatching messages to its aggregates;
-     *     <li>{@link io.spine.server.delivery.Sharding#register(io.spine.server.delivery.Shardable)
-     *     Sharding} for grouping of messages sent to its aggregates.
      * </ul>
      */
     @Override
@@ -143,15 +123,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         super.onRegistered();
 
-        BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = boundedContext();
         boundedContext.registerCommandDispatcher(this);
         boundedContext.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {
-            boundedContext.getImportBus()
+            boundedContext.importBus()
                           .register(EventImportDispatcher.of(this));
         }
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
-        registerWithSharding();
     }
 
     /**
@@ -176,24 +155,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** Obtains class information of aggregates managed by this repository. */
     protected final AggregateClass<A> aggregateClass() {
-        return (AggregateClass<A>) entityClass();
+        return (AggregateClass<A>) entityModelClass();
     }
 
     @Override
-    protected AggregateClass<A> getModelClass(Class<A> cls) {
+    protected AggregateClass<A> toModelClass(Class<A> cls) {
         return asAggregateClass(cls);
-    }
-
-    @Override
-    public AggregateClass<A> getShardedModelClass() {
-        return aggregateClass();
     }
 
     /**
      * Stores the passed aggregate and commits its uncommitted events.
      */
     @Override
-    protected void store(A aggregate) {
+    protected final void store(A aggregate) {
         Write<I> operation = Write.operationFor(this, aggregate);
         operation.perform();
     }
@@ -206,12 +180,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected Storage<I, ?, ?> createStorage(StorageFactory factory) {
-        Storage<I, ?, ?> result = factory.createAggregateStorage(getEntityClass());
+        Storage<I, ?, ?> result = factory.createAggregateStorage(entityClass());
         return result;
     }
 
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return aggregateClass().getCommands();
     }
 
@@ -223,32 +197,32 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The repository loads the aggregate by this ID, or creates a new aggregate
      * if there is no aggregate with such ID.
      *
-     * @param envelope the envelope of the command to dispatch
+     * @param cmd the command to dispatch
      */
     @Override
-    public I dispatch(CommandEnvelope envelope) {
-        checkNotNull(envelope);
-        I target = with(envelope.getTenantId())
-                .evaluate(() -> doDispatch(envelope));
+    public I dispatch(CommandEnvelope cmd) {
+        checkNotNull(cmd);
+        I target = with(cmd.tenantId())
+                .evaluate(() -> doDispatch(cmd));
         return target;
     }
 
-    private I doDispatch(CommandEnvelope envelope) {
-        I target = route(envelope);
-        lifecycleOf(target).onDispatchCommand(envelope.getCommand());
-        dispatchTo(target, envelope);
+    private I doDispatch(CommandEnvelope cmd) {
+        I target = route(cmd);
+        lifecycleOf(target).onDispatchCommand(cmd.command());
+        dispatchTo(target, cmd);
         return target;
     }
 
-    private I route(CommandEnvelope envelope) {
-        CommandRouting<I> routing = getCommandRouting();
-        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
-        onCommandTargetSet(target, envelope.getId());
+    private I route(CommandEnvelope cmd) {
+        CommandRouting<I> routing = commandRouting();
+        I target = routing.apply(cmd.message(), cmd.context());
+        onCommandTargetSet(target, cmd.id());
         return target;
     }
 
-    private void dispatchTo(I id, CommandEnvelope envelope) {
-        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, envelope);
+    private void dispatchTo(I id, CommandEnvelope cmd) {
+        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, cmd);
         endpoint.dispatchTo(id);
     }
 
@@ -258,125 +232,138 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>If the given error is a rejection, posts the rejection event into
      * the {@link EventBus}. Otherwise, logs the error.
      *
-     * @param envelope  the command which caused the error
-     * @param exception the error occurred during processing of the command
+     * @param cmd
+     *         the command which caused the error
+     * @param exception
+     *         the error occurred during processing of the command
      */
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        CaughtError error = commandErrorHandler.handleError(envelope, exception);
-        error.asRejection()
-             .map(RejectionEnvelope::getOuterObject)
-             .ifPresent(event -> postEvents(of(event)));
-        error.rethrowOnce();
+    public void onError(CommandEnvelope cmd, RuntimeException exception) {
+        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return aggregateClass().getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return aggregateClass().getExternalEventClasses();
     }
 
-    public Set<EventClass> getImportableEventClasses() {
+    /**
+     * Obtains classes of events that can be imported by aggregates of this repository.
+     */
+    public Set<EventClass> importableEventClasses() {
         return aggregateClass().getImportableEventClasses();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns events emitted by the aggregate class as well as importable events.
+     *
+     * <p>Although technically imported events are not "produced" in this repository, they end up
+     * in the same {@code EventBus} and have the same behaviour as the ones emitted by the
+     * aggregates.
+     */
+    @Override
+    public ImmutableSet<EventClass> producibleEventClasses() {
+        SetView<EventClass> eventClasses =
+                union(aggregateClass().getProducedEvents(), importableEventClasses());
+        return ImmutableSet.copyOf(eventClasses);
     }
 
     /**
      * Dispatches event to one or more aggregates reacting on the event.
      *
-     * @param envelope the event
+     * @param event the event to dispatch
      * @return identifiers of aggregates that reacted on the event
      */
     @Override
-    public Set<I> dispatchEvent(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        Set<I> targets = with(envelope.getTenantId())
-                .evaluate(() -> doDispatch(envelope));
+    public Set<I> dispatchEvent(EventEnvelope event) {
+        checkNotNull(event);
+        Set<I> targets = with(event.tenantId())
+                .evaluate(() -> doDispatch(event));
         return targets;
     }
 
-    private Set<I> doDispatch(EventEnvelope envelope) {
-        Set<I> targets = route(envelope);
-        targets.forEach(id -> dispatchTo(id, envelope));
+    private Set<I> doDispatch(EventEnvelope event) {
+        Set<I> targets = route(event);
+        targets.forEach(id -> dispatchTo(id, event));
         return targets;
     }
 
-    private Set<I> route(EventEnvelope envelope) {
-        EventRouting<I> routing = getEventRouting();
-        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+    private Set<I> route(EventEnvelope event) {
+        EventRouting<I> routing = eventRouting();
+        Set<I> targets = routing.apply(event.message(), event.context());
         return targets;
     }
 
-    private void dispatchTo(I id, EventEnvelope envelope) {
-        AggregateEventEndpoint<I, A> endpoint =
-                new AggregateEventReactionEndpoint<>(this, envelope);
+    private void dispatchTo(I id, EventEnvelope event) {
+        AggregateEventEndpoint<I, A> endpoint = new AggregateEventReactionEndpoint<>(this, event);
         endpoint.dispatchTo(id);
-    }
-
-    boolean importsEvent(EventClass eventClass) {
-        boolean result = aggregateClass().getImportableEventClasses()
-                                         .contains(eventClass);
-        return result;
     }
 
     /**
      * Imports the passed event into one of the aggregates.
      */
-    I importEvent(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        I target = routeImport(envelope);
-        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, envelope);
+    I importEvent(EventEnvelope event) {
+        checkNotNull(event);
+        I target = with(event.tenantId()).evaluate(() -> doImport(event));
+        return target;
+    }
+
+    private I doImport(EventEnvelope event) {
+        I target = routeImport(event);
+        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, event);
         endpoint.dispatchTo(target);
         return target;
     }
 
-    private I routeImport(EventEnvelope envelope) {
-        Set<I> ids = getEventImportRouting().apply(envelope.getMessage(),
-                                                   envelope.getEventContext());
+    private I routeImport(EventEnvelope event) {
+        Set<I> ids = eventImportRouting().apply(event.message(), event.context());
         int numberOfTargets = ids.size();
         checkState(
                 numberOfTargets > 0,
                 "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
-                envelope.getEventContext(),
-                envelope.getMessageClass()
+                event.context(),
+                event.messageClass()
         );
         checkState(
                 numberOfTargets == 1,
                 "Expected one aggregate ID, but got %s (`%s`). Event class: `%s`, context: `%s`.",
                 String.valueOf(numberOfTargets),
                 ids,
-                envelope.getMessageClass(),
-                envelope.getEventContext()
+                event.messageClass(),
+                event.context()
         );
         I id = ids.stream()
                   .findFirst()
                   .get();
-        onImportTargetSet(id, envelope.getId());
         return id;
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        checkNotNull(event);
         checkNotNull(exception);
-        logError("Error reacting on event (class: %s id: %s) in aggregate of type %s.",
-                 envelope, exception);
+        logError("Error reacting on event (class: `%s` id: `%s`) in aggregate of type `%s.`",
+                 event, exception);
     }
 
     /**
      * Obtains command routing instance used by this repository.
      */
-    protected final CommandRouting<I> getCommandRouting() {
+    protected final CommandRouting<I> commandRouting() {
         return commandRouting;
     }
 
     /**
      * Obtains event routing instance used by this repository.
      */
-    protected final EventRouting<I> getEventRouting() {
+    protected final EventRouting<I> eventRouting() {
         return eventRouting;
     }
 
@@ -401,7 +388,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * Consider adding this code to the constructor of your {@code AggregateRepository} class.
      */
-    protected final EventRouting<I> getEventImportRouting() {
+    protected final EventRouting<I> eventImportRouting() {
         return eventImportRoute;
     }
 
@@ -409,14 +396,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Posts passed events to {@link EventBus}.
      */
     void postEvents(Collection<Event> events) {
-        EventFilter filter = eventFilter();
-        Iterable<Event> filteredEvents = filter.filter(events);
-        EventBus bus = getBoundedContext().getEventBus();
+        Iterable<Event> filteredEvents = eventFilter().filter(events);
+        EventBus bus = boundedContext().eventBus();
         bus.post(filteredEvents);
-    }
-
-    private void updateStand(TenantId tenantId, A aggregate) {
-        getStand().post(tenantId, aggregate);
     }
 
     /**
@@ -425,7 +407,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return a positive integer value
      * @see #DEFAULT_SNAPSHOT_TRIGGER
      */
-    protected int getSnapshotTrigger() {
+    protected int snapshotTrigger() {
         return this.snapshotTrigger;
     }
 
@@ -449,7 +431,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
+        AggregateStorage<I> result = (AggregateStorage<I>) storage();
         return result;
     }
 
@@ -460,22 +442,23 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return loaded or created aggregate instance
      */
     A loadOrCreate(I id) {
-        Optional<A> optional = load(id);
-
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-
-        A result = create(id);
+        A result = load(id).orElseGet(() -> createNew(id));
         return result;
+    }
+
+    /** Creates a new entity with the passed ID. */
+    private A createNew(I id) {
+        A created = create(id);
+        lifecycleOf(id).onEntityCreated(AGGREGATE);
+        return created;
     }
 
     /**
      * Loads an aggregate by the passed ID.
      *
      * <p>This method defines the basic flow of an {@code Aggregate} loading. First,
-     * the {@linkplain AggregateStateRecord Aggregate history} is
-     * {@linkplain #fetchHistory fetched} from the storage. Then the {@code Aggregate} is
+     * the {@linkplain AggregateHistory Aggregate history} is
+     * {@linkplain #loadHistory fetched} from the storage. Then the {@code Aggregate} is
      * {@linkplain #play restored} from its state history.
      *
      * @param id the ID of the aggregate
@@ -483,23 +466,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         with the ID
      */
     private Optional<A> load(I id) {
-        Optional<AggregateStateRecord> eventsFromStorage = fetchHistory(id);
-        if (eventsFromStorage.isPresent()) {
-            A result = play(id, eventsFromStorage.get());
-            return Optional.of(result);
-        } else {
-            lifecycleOf(id).onEntityCreated(AGGREGATE);
-            return Optional.empty();
-        }
+        Optional<AggregateHistory> found = loadHistory(id);
+        Optional<A> result = found.map(history -> play(id, history));
+        return result;
     }
 
     /**
-     * Fetches the history of the {@code Aggregate} with the given ID.
+     * Loads the history of the {@code Aggregate} with the given ID.
      *
-     * <p>The method fetches only the recent history of the aggregate. The maximum depth of the read
-     * operation is defined as the greater number between
+     * <p>The method loads only the recent history of the aggregate.
+     * The maximum depth of the read operation is defined as the greater number between
      * the {@linkplain AggregateStorage#readEventCountAfterLastSnapshot(Object) event count after
-     * last snapshot} and the {@linkplain #getSnapshotTrigger() snapshot trigger}, plus one.
+     * the last snapshot} and the {@linkplain #snapshotTrigger() snapshot trigger}, plus one.
      * This way, we secure the read operation from:
      * <ol>
      *     <li>snapshot trigger decrease;
@@ -510,29 +488,29 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * itself.
      *
      * @param id the ID of the {@code Aggregate} to fetch
-     * @return the {@link AggregateStateRecord} for the {@code Aggregate} or
+     * @return the {@link AggregateHistory} for the {@code Aggregate} or
      *         {@code Optional.empty()} if there is no record with the ID
      */
-    protected Optional<AggregateStateRecord> fetchHistory(I id) {
+    private Optional<AggregateHistory> loadHistory(I id) {
         AggregateStorage<I> storage = aggregateStorage();
 
         int eventsAfterLastSnapshot = storage.readEventCountAfterLastSnapshot(id);
         int batchSize = max(snapshotTrigger, eventsAfterLastSnapshot) + 1;
 
         AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
-        Optional<AggregateStateRecord> eventsFromStorage = storage.read(request);
-        return eventsFromStorage;
+        Optional<AggregateHistory> result = storage.read(request);
+        return result;
     }
 
     /**
-     * Plays the given {@linkplain AggregateStateRecord Aggregate history} for an instance
+     * Plays the given {@linkplain AggregateHistory Aggregate history} for an instance
      * of {@link Aggregate} with the given ID.
      *
      * @param id      the ID of the {@code Aggregate} to load
      * @param history the state record of the {@code Aggregate} to load
      * @return an instance of {@link Aggregate}
      */
-    protected A play(I id, AggregateStateRecord history) {
+    protected A play(I id, AggregateHistory history) {
         A result = create(id);
         AggregateTransaction tx = AggregateTransaction.start(result);
         result.play(history);
@@ -541,22 +519,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Invoked by an endpoint after a message was dispatched to the aggregate.
-     *
-     * @param tenantId  the tenant associated with the processed message
-     * @param aggregate the updated aggregate
-     */
-    void onModifiedAggregate(TenantId tenantId, A aggregate) {
-        store(aggregate);
-        updateStand(tenantId, aggregate);
-    }
-
-    /**
      * Loads an aggregate by the passed ID.
      *
      * <p>An aggregate will be loaded even if
-     * {@link io.spine.server.entity.EntityWithLifecycle#isArchived() archived}
-     * or {@link io.spine.server.entity.EntityWithLifecycle#isDeleted() deleted} lifecycle
+     * {@link io.spine.server.entity.Entity#isArchived() archived}
+     * or {@link io.spine.server.entity.Entity#isDeleted() deleted} lifecycle
      * attribute, or both of them, are set to {@code true}.
      *
      * @param  id the ID of the aggregate to load
@@ -565,45 +532,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Optional<A> find(I id) throws IllegalStateException {
-        Optional<A> result = load(id);
-        return result;
-    }
-
-    /** The Stand instance for sending updated aggregate states. */
-    private Stand getStand() {
-        return getBoundedContext().getStand();
-    }
-
-    /**
-     * Defines a strategy of event delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain event to a particular aggregate
-     * instance at runtime.
-     *
-     * @return delivery strategy for events applied to the instances managed by this repository
-     */
-    @SPI
-    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEventEndpointDelivery() {
-        return eventDeliverySupplier.get();
-    }
-
-    /**
-     * Defines a strategy of command delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain command to a particular aggregate
-     * instance at runtime.
-     *
-     * @return delivery strategy for rejections
-     */
-    @SPI
-    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
-        return commandDeliverySupplier.get();
+        return load(id);
     }
 
     /**
@@ -624,46 +553,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
-    private void onImportTargetSet(I id, EventId eventId) {
-        lifecycleOf(id).onImportTargetSet(eventId);
-    }
-
     void onEventImported(I id, Event event) {
         lifecycleOf(id).onEventImported(event);
-    }
-
-    private AggregateEventDelivery<I, A> createEventDelivery() {
-        return new AggregateEventDelivery<>(this);
-    }
-
-    private AggregateCommandDelivery<I, A> createCommandDelivery() {
-        return new AggregateCommandDelivery<>(this);
-    }
-
-    @Override
-    public ShardingStrategy getShardingStrategy() {
-        return UniformAcrossTargets.singleShard();
-    }
-
-    @Override
-    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        Iterable<ShardedStreamConsumer<?, ?>> result =
-                of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
-                );
-        return result;
-    }
-
-    @Override
-    public BoundedContextName getBoundedContextName() {
-        BoundedContextName name = getBoundedContext().getName();
-        return name;
-    }
-
-    @Override
-    public void close() {
-        unregisterWithSharding();
-        super.close();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,39 +20,33 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.core.BoundedContextName;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
-import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
-import io.spine.server.delivery.Shardable;
-import io.spine.server.delivery.ShardedStreamConsumer;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.dataflow.qual.Pure;
@@ -60,11 +54,8 @@ import org.checkerframework.dataflow.qual.Pure;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Suppliers.memoize;
-import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.entity.EventBlackList.discardEvents;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
@@ -79,22 +70,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S> the type of process manager state messages
  * @see ProcessManager
  */
-@SuppressWarnings("OverlyCoupledClass")
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
-                implements CommandDispatcherDelegate<I>,
-                           Shardable {
+                implements CommandDispatcherDelegate<I> {
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
-
-    private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
-            memoize(this::createCommandDelivery);
-
-    private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
-            memoize(this::createEventDelivery);
 
     private final EventFilter entityStateChangedFilter = discardEvents(EntityStateChanged.class);
 
@@ -116,19 +99,14 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Obtains class information of process managers managed by this repository.
      */
-    ProcessManagerClass<P> processManagerClass() {
-        return (ProcessManagerClass<P>) entityClass();
+    private ProcessManagerClass<P> processManagerClass() {
+        return (ProcessManagerClass<P>) entityModelClass();
     }
 
     @Internal
     @Override
-    protected final ProcessManagerClass<P> getModelClass(Class<P> cls) {
+    protected final ProcessManagerClass<P> toModelClass(Class<P> cls) {
         return asProcessManagerClass(cls);
-    }
-
-    @Override
-    public ProcessManagerClass<P> getShardedModelClass() {
-        return processManagerClass();
     }
 
     /**
@@ -155,7 +133,7 @@ public abstract class ProcessManagerRepository<I,
     public void onRegistered() {
         super.onRegistered();
 
-        BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = boundedContext();
         boundedContext.registerCommandDispatcher(this);
 
         checkNotDeaf();
@@ -163,8 +141,6 @@ public abstract class ProcessManagerRepository<I,
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
         systemSubscriber.registerIn(boundedContext);
-
-        registerWithSharding();
     }
 
     /**
@@ -187,7 +163,7 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return processManagerClass().getEventClasses();
     }
 
@@ -199,7 +175,7 @@ public abstract class ProcessManagerRepository<I,
      *         external events
      */
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return processManagerClass().getExternalEventClasses();
     }
 
@@ -221,6 +197,12 @@ public abstract class ProcessManagerRepository<I,
         return commandRouting;
     }
 
+    @Override
+    public ImmutableSet<EventClass> producibleEventClasses() {
+        Set<EventClass> eventClasses = processManagerClass().getProducedEvents();
+        return ImmutableSet.copyOf(eventClasses);
+    }
+
     /**
      * Dispatches the command to a corresponding process manager.
      *
@@ -228,25 +210,24 @@ public abstract class ProcessManagerRepository<I,
      * a new process manager is created and stored after it handles the passed command.
      *
      * @param command a request to dispatch
-     * @see CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      */
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I target = with(command.getTenantId()).evaluate(() -> doDispatch(command));
+        I target = with(command.tenantId()).evaluate(() -> doDispatch(command));
         return target;
     }
 
     private I doDispatch(CommandEnvelope command) {
         I target = route(command);
-        lifecycleOf(target).onDispatchCommand(command.getCommand());
+        lifecycleOf(target).onDispatchCommand(command.command());
         return target;
     }
 
-    private I route(CommandEnvelope envelope) {
+    private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = getCommandRouting();
-        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
-        lifecycleOf(target).onTargetAssignedToCommand(envelope.getId());
+        I target = routing.apply(cmd.message(), cmd.context());
+        lifecycleOf(target).onTargetAssignedToCommand(cmd.id());
         return target;
     }
 
@@ -287,12 +268,8 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        CaughtError error = commandErrorHandler.handleError(envelope, exception);
-        error.asRejection()
-             .map(RejectionEnvelope::getOuterObject)
-             .ifPresent(event -> postEvents(of(event)));
-        error.rethrowOnce();
+    public void onError(CommandEnvelope cmd, RuntimeException exception) {
+        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
@@ -308,7 +285,7 @@ public abstract class ProcessManagerRepository<I,
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = getBoundedContext().getEventBus();
+        EventBus bus = boundedContext().eventBus();
         bus.post(filteredEvents);
     }
 
@@ -336,7 +313,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected P findOrCreate(I id) {
         P result = super.findOrCreate(id);
-        CommandBus commandBus = getBoundedContext().getCommandBus();
+        CommandBus commandBus = boundedContext().commandBus();
         result.setCommandBus(commandBus);
         return result;
     }
@@ -348,65 +325,12 @@ public abstract class ProcessManagerRepository<I,
         return procman;
     }
 
-    /**
-     * Defines a strategy of event delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain event to a particular process manager
-     * instance at runtime.
-     *
-     * @return delivery strategy for events applied to the instances managed by this repository
-     */
-    @SPI
-    protected PmEventDelivery<I, P> getEventEndpointDelivery() {
-        return eventDeliverySupplier.get();
-    }
-
-    /**
-     * Defines a strategy of command delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain command to a particular process manager
-     * instance at runtime.
-     *
-     * @return delivery strategy for rejections
-     */
-    @SPI
-    protected PmCommandDelivery<I, P> getCommandEndpointDelivery() {
-        return commandDeliverySupplier.get();
-    }
-
     @Override
     public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
         if (!dispatchesExternalEvents()) {
             return Optional.empty();
         }
         return Optional.of(new PmExternalEventDispatcher());
-    }
-
-    @Override
-    public ShardingStrategy getShardingStrategy() {
-        return UniformAcrossTargets.singleShard();
-    }
-
-    @Override
-    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        Iterable<ShardedStreamConsumer<?, ?>> result =
-                of(
-                        getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer()
-                );
-        return result;
-    }
-
-    @Override
-    public BoundedContextName getBoundedContextName() {
-        BoundedContextName name = getBoundedContext().getName();
-        return name;
     }
 
     /**
@@ -425,20 +349,6 @@ public abstract class ProcessManagerRepository<I,
         return entityStateChangedFilter;
     }
 
-    @Override
-    public void close() {
-        unregisterWithSharding();
-        super.close();
-    }
-
-    private PmCommandDelivery<I, P> createCommandDelivery() {
-        return new PmCommandDelivery<>(this);
-    }
-
-    private PmEventDelivery<I, P> createEventDelivery() {
-        return new PmEventDelivery<>(this);
-    }
-
     /**
      * An implementation of an external message dispatcher feeding external events
      * to {@code ProcessManager} instances.
@@ -446,8 +356,8 @@ public abstract class ProcessManagerRepository<I,
     private class PmExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
-            ProcessManagerClass<?> pmClass = asProcessManagerClass(getEntityClass());
+        public Set<ExternalMessageClass> messageClasses() {
+            ProcessManagerClass<?> pmClass = asProcessManagerClass(entityClass());
             Set<EventClass> eventClasses = pmClass.getExternalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }

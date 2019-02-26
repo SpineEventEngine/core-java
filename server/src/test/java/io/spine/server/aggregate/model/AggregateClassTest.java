@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,17 +20,18 @@
 
 package io.spine.server.aggregate.model;
 
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
 import io.spine.server.aggregate.given.klasse.EngineAggregate;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
 import io.spine.server.aggregate.given.klasse.command.StopEngine;
 import io.spine.server.aggregate.given.klasse.event.EmissionTestStarted;
 import io.spine.server.aggregate.given.klasse.event.EmissionTestStopped;
+import io.spine.server.aggregate.given.klasse.event.EngineStarted;
 import io.spine.server.aggregate.given.klasse.event.EngineStopped;
 import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.TankEmpty;
 import io.spine.server.aggregate.given.klasse.rejection.Rejections;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,8 +40,6 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 
 /**
  * Test obtaining dispatched message classes from {@link AggregateClass}.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("AggregateClass should")
 class AggregateClassTest {
@@ -79,8 +78,6 @@ class AggregateClassTest {
                 ));
     }
 
-
-
     @Test
     @DisplayName("provide classes of events that are imported by the aggregate")
     void importedEvents() {
@@ -88,6 +85,16 @@ class AggregateClassTest {
                 .containsExactlyElementsIn(EventClass.setOf(
                         EngineStopped.class,
                         SettingsAdjusted.class
+                ));
+    }
+
+    @Test
+    @DisplayName("provide classes of events produced by the aggregate")
+    void producedEvents() {
+        assertThat(aggregateClass.getProducedEvents())
+                .containsExactlyElementsIn(EventClass.setOf(
+                        EngineStarted.class,
+                        EngineStopped.class
                 ));
     }
 }

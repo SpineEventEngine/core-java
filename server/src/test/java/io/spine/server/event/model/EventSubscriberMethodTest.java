@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,7 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.model.given.subscriber.ARejectionSubscriber;
 import io.spine.server.event.model.given.subscriber.ExternalSubscriber;
 import io.spine.server.event.model.given.subscriber.InvalidNoAnnotation;
@@ -40,7 +39,9 @@ import io.spine.server.event.model.given.subscriber.ValidOneParam;
 import io.spine.server.event.model.given.subscriber.ValidTwoParams;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.model.given.Given;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -117,6 +118,7 @@ class EventSubscriberMethodTest {
         }
 
         @Test
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("non-public access")
         void nonPublicAccess() {
             Method method = new ValidButPrivate().getMethod();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,6 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
@@ -28,6 +27,8 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.test.shared.AnyProcess;
+import io.spine.server.test.shared.AnyProcessVBuilder;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
@@ -46,7 +47,6 @@ import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.validate.AnyVBuilder;
 
 import java.util.Optional;
 
@@ -58,7 +58,7 @@ import static io.spine.testdata.Sample.messageOfType;
  * A test Process Manager which remembers past message as its state.
  */
 public class TestProcessManager
-        extends ProcessManager<ProjectId, Any, AnyVBuilder> {
+        extends ProcessManager<ProjectId, AnyProcess, AnyProcessVBuilder> {
 
     public static final ProjectId ID = messageOfType(ProjectId.class);
 
@@ -68,7 +68,7 @@ public class TestProcessManager
 
     /** Updates the state with putting incoming message.*/
     private void remember(Message incoming) {
-        getBuilder().mergeFrom(pack(incoming));
+        builder().setAny(pack(incoming));
     }
 
     /*

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,15 +21,14 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 
 /**
  * Dispatches an event to aggregates of the associated {@code AggregateRepository}.
  *
- * @author Alexander Yevsyukov
  * @see React
  */
 final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
@@ -40,19 +39,14 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
+    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope event) {
+        repository().onDispatchEvent(aggregate.id(), event.outerObject());
+        return aggregate.reactOn(event);
     }
 
     @Override
-    protected List<Event> doDispatch(A aggregate, EventEnvelope envelope) {
-        repository().onDispatchEvent(aggregate.getId(), envelope.getOuterObject());
-        return aggregate.reactOn(envelope);
-    }
-
-    @Override
-    protected void onError(EventEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
+    protected void onError(EventEnvelope event, RuntimeException exception) {
+        repository().onError(event, exception);
     }
 
     /**
@@ -60,7 +54,7 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
      * updated upon reacting on an event.
      */
     @Override
-    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
+    protected void onEmptyResult(A aggregate, EventEnvelope event) {
         // Do nothing.
     }
 }

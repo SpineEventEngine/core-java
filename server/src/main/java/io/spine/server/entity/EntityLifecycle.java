@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -69,7 +70,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableList.copyOf;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.server.entity.EventFilter.allowAll;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -227,10 +227,6 @@ public class EntityLifecycle {
         postCommand(systemCommand);
     }
 
-    public final void onImportTargetSet(EventId id) {
-        //TODO:2018-08-22:alexander.yevsyukov: Post a system event when EventLifecycleAggregate is available.
-    }
-
     public final void onEventImported(Event event) {
         EventImported systemEvent = EventImportedVBuilder
                 .newBuilder()
@@ -269,8 +265,8 @@ public class EntityLifecycle {
      *         the IDs of the messages which caused the {@code change}; typically,
      *         {@link EventId EventId}s or {@link CommandId}s
      */
-    final void onStateChanged(EntityRecordChange change,
-                              Set<? extends Message> messageIds) {
+    public final void onStateChanged(EntityRecordChange change,
+                                     Set<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);
@@ -291,7 +287,7 @@ public class EntityLifecycle {
                     .newBuilder()
                     .setId(historyId)
                     .setNewState(newState)
-                    .addAllMessageId(copyOf(messageIds))
+                    .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .build();
             postEvent(event);
         }
@@ -309,7 +305,7 @@ public class EntityLifecycle {
             EntityArchived event = EntityArchivedVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .addAllMessageId(copyOf(messageIds))
+                    .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .build();
             postEvent(event);
         }
@@ -327,7 +323,7 @@ public class EntityLifecycle {
             EntityDeleted event = EntityDeletedVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .addAllMessageId(copyOf(messageIds))
+                    .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .build();
             postEvent(event);
         }
@@ -345,7 +341,7 @@ public class EntityLifecycle {
             EntityExtractedFromArchive event = EntityExtractedFromArchiveVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .addAllMessageId(copyOf(messageIds))
+                    .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .build();
             postEvent(event);
         }
@@ -363,7 +359,7 @@ public class EntityLifecycle {
             EntityRestored event = EntityRestoredVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .addAllMessageId(copyOf(messageIds))
+                    .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .build();
             postEvent(event);
         }

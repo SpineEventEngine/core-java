@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,11 +24,11 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.getMessage;
@@ -36,12 +36,10 @@ import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * An adapter for {@link EventBus} to use it along with {@link IntegrationBus}.
- *
- * @author Alex Tymchenko
  */
 final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
 
-    EventBusAdapter(Builder builder) {
+    private EventBusAdapter(Builder builder) {
         super(builder);
     }
 

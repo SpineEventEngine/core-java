@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,8 +23,8 @@ package io.spine.server.route;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+import io.spine.server.type.CommandClass;
 
 import java.util.Optional;
 
@@ -40,7 +40,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * will be {@linkplain CommandRoute#apply(Message, Message) applied}.
  *
  * @param <I> the type of the entity IDs of this repository
- * @author Alexander Yevsyukov
  */
 public final class CommandRouting<I>
         extends MessageRouting<CommandMessage, CommandContext, CommandClass, I> {
@@ -117,8 +116,11 @@ public final class CommandRouting<I>
     public <M extends CommandMessage> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
         Optional<? extends Route<CommandMessage, CommandContext, I>> optional = doGet(commandClass);
         if (optional.isPresent()) {
-            CommandRoute<I, M> route = (CommandRoute<I, M>) optional.get();
-            return Optional.of(route);
+            Route<CommandMessage, CommandContext, I> route = optional.get();
+            @SuppressWarnings({"unchecked", "RedundantSuppression"})
+                // The cast is safe as we deal only with CommandRoute's.
+            CommandRoute<I, M> commandRoute = (CommandRoute<I, M>) route;
+            return Optional.of(commandRoute);
         }
         return Optional.empty();
     }

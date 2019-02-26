@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,14 +26,12 @@ import io.spine.core.CommandId;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
+import io.spine.type.TypeName;
 
-import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Information about a scheduled command.
- *
- * @author Dmytro Dashenkov
  */
 final class ScheduledCommand
         extends Projection<CommandId, ScheduledCommandRecord, ScheduledCommandRecordVBuilder> {
@@ -43,15 +41,17 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    void on(CommandScheduled event, EventContext context) {
+    public void on(CommandScheduled event, EventContext context) {
         CommandEnrichment enrichment =
-                getEnrichment(CommandEnrichment.class, context)
-                .orElseThrow(() -> newIllegalStateException("Command enrichment must be present."));
+                context.find(CommandEnrichment.class)
+                       .orElseThrow(() -> newIllegalStateException(
+                               "`%s` must be present.", TypeName.of(CommandEnrichment.class))
+                       );
 
         Command commandWithSchedule = withSchedule(enrichment.getCommand(), event.getSchedule());
-        getBuilder().setId(event.getId())
-                    .setCommand(commandWithSchedule)
-                    .setSchedulingTime(context.getTimestamp());
+        builder().setId(event.getId())
+                 .setCommand(commandWithSchedule)
+                 .setSchedulingTime(context.getTimestamp());
     }
 
     private static Command withSchedule(Command source, CommandContext.Schedule schedule) {
@@ -68,7 +68,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
+    public void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
         setDeleted(true);
     }
 }

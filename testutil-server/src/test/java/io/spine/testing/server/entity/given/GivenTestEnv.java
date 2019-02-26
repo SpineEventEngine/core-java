@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,19 +20,22 @@
 
 package io.spine.testing.server.entity.given;
 
-import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.UInt32Value;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.projection.Projection;
-import io.spine.validate.StringValueVBuilder;
-import io.spine.validate.TimestampVBuilder;
-import io.spine.validate.UInt32ValueVBuilder;
+import io.spine.testing.server.given.entity.TuComments;
+import io.spine.testing.server.given.entity.TuCommentsVBuilder;
+import io.spine.testing.server.given.entity.TuPmState;
+import io.spine.testing.server.given.entity.TuPmStateVBuilder;
+import io.spine.testing.server.given.entity.TuProject;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.TuProjectPart;
+import io.spine.testing.server.given.entity.TuProjectPartVBuilder;
+import io.spine.testing.server.given.entity.TuProjectVBuilder;
+import io.spine.testing.server.given.entity.TuTaskId;
 
 class GivenTestEnv {
 
@@ -40,52 +43,36 @@ class GivenTestEnv {
     private GivenTestEnv() {
     }
 
-    static class AnEntity extends AbstractVersionableEntity<String, Timestamp> {
-        protected AnEntity(String id) {
-            super(id);
-        }
-    }
-
     static class AnAggregate
-            extends Aggregate<Integer, StringValue, StringValueVBuilder> {
-        protected AnAggregate(Integer id) {
+            extends Aggregate<TuProjectId, TuProject, TuProjectVBuilder> {
+        protected AnAggregate(TuProjectId id) {
             super(id);
         }
     }
 
-    static class AnAggregatePart extends AggregatePart<Long,
-            Timestamp,
-            TimestampVBuilder,
-            AnAggregateRoot> {
-        protected AnAggregatePart(AnAggregateRoot root) {
+    static class AnAggregatePart
+            extends AggregatePart<TuProjectId, TuProjectPart, TuProjectPartVBuilder, ARoot> {
+        protected AnAggregatePart(ARoot root) {
             super(root);
         }
     }
 
-    static class AProjection extends Projection<String,
-            UInt32Value,
-            UInt32ValueVBuilder> {
-        protected AProjection(String id) {
+    static class AProjection
+            extends Projection<TuTaskId, TuComments, TuCommentsVBuilder> {
+        protected AProjection(TuTaskId id) {
             super(id);
         }
     }
 
-    static class AProcessManager extends ProcessManager<Timestamp,
-            StringValue,
-            StringValueVBuilder> {
-        protected AProcessManager(Timestamp id) {
+    static class AProcessManager
+            extends ProcessManager<TuProjectId, TuPmState, TuPmStateVBuilder> {
+        protected AProcessManager(TuProjectId id) {
             super(id);
         }
     }
 
-    private static class AnAggregateRoot extends AggregateRoot<Long> {
-        /**
-         * Creates an new instance.
-         *
-         * @param boundedContext the bounded context to which the aggregate belongs
-         * @param id             the ID of the aggregate
-         */
-        protected AnAggregateRoot(BoundedContext boundedContext, Long id) {
+    private static class ARoot extends AggregateRoot<TuProjectId> {
+        protected ARoot(BoundedContext boundedContext, TuProjectId id) {
             super(boundedContext, id);
         }
     }

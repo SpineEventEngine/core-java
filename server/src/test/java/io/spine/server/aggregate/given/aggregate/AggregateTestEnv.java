@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,9 +23,9 @@ package io.spine.server.aggregate.given.aggregate;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
@@ -95,11 +95,11 @@ public class AggregateTestEnv {
     }
 
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateTestEnv.class, tenantId);
+        return new TestActorRequestFactory(AggregateTestEnv.class, tenantId);
     }
 
     public static TestActorRequestFactory requestFactory() {
-        return TestActorRequestFactory.newInstance(AggregateTestEnv.class);
+        return new TestActorRequestFactory(AggregateTestEnv.class);
     }
 
     public static TestEventFactory eventFactory() {

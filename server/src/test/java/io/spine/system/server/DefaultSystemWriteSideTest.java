@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,13 +24,11 @@ import io.spine.server.BoundedContext;
 import io.spine.system.server.given.client.SystemClientTestEnv;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
-import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -40,7 +38,6 @@ import static io.spine.system.server.given.client.SystemClientTestEnv.contextWit
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("Default implementation of SystemWriteSide should")
 class DefaultSystemWriteSideTest {
 
@@ -65,7 +62,7 @@ class DefaultSystemWriteSideTest {
         @BeforeEach
         void setUp() {
             domainContext = contextWithSystemAggregate();
-            systemWriteSide = domainContext.getSystemClient().writeSide();
+            systemWriteSide = domainContext.systemClient().writeSide();
             systemContext = systemOf(domainContext);
             createAggregate();
         }

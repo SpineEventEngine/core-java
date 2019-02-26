@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,10 +25,10 @@ import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ExceptionFactory;
@@ -42,8 +42,6 @@ import static java.lang.String.format;
  *
  * <p>A command is invalid if it's supported (there's a handler for the command), but it's
  * attributes are not populated according to framework conventions or validation constraints.
- *
- * @author Alexander Yevsyukov
  */
 public class InvalidCommandException extends CommandException implements MessageInvalid {
 
@@ -66,8 +64,8 @@ public class InvalidCommandException extends CommandException implements Message
     public static InvalidCommandException onConstraintViolations(
             Command command, Iterable<ConstraintViolation> violations) {
 
-        ConstraintViolationExceptionFactory helper =
-                new ConstraintViolationExceptionFactory(command, violations);
+        Factory helper =
+                new Factory(command, violations);
         return helper.newException();
     }
 
@@ -77,7 +75,7 @@ public class InvalidCommandException extends CommandException implements Message
      */
     public static InvalidCommandException missingTenantId(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        Message commandMessage = envelope.getMessage();
+        Message commandMessage = envelope.message();
         String errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to " +
                 "multitenant Command Bus, but has no `tenant_id` attribute in the context.",
@@ -85,7 +83,7 @@ public class InvalidCommandException extends CommandException implements Message
                             .value()
                             .getName(),
                 TypeName.of(commandMessage),
-                Identifier.toString(envelope.getId()));
+                Identifier.toString(envelope.id()));
         Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
@@ -107,15 +105,15 @@ public class InvalidCommandException extends CommandException implements Message
 
     public static InvalidCommandException inapplicableTenantId(Command command) {
         CommandEnvelope cmd = CommandEnvelope.of(command);
-        TypeName typeName = TypeName.of(cmd.getMessage());
+        TypeName typeName = TypeName.of(cmd.message());
         String errMsg = format(
                 "The command (class: %s, type: %s, id: %s) was posted to single-tenant " +
                 "CommandBus, but has tenant_id: %s attribute set in the command context.",
-                cmd.getMessageClass(),
+                cmd.messageClass(),
                 typeName,
-                cmd.getId(),
-                cmd.getTenantId());
-        Error error = inapplicableTenantError(cmd.getMessage(), errMsg);
+                cmd.id(),
+                cmd.tenantId());
+        Error error = inapplicableTenantError(cmd.message(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 
@@ -133,7 +131,7 @@ public class InvalidCommandException extends CommandException implements Message
      * A helper utility aimed to create an {@code InvalidCommandException} to report the
      * command which field values violate validation constraint(s).
      */
-    private static class ConstraintViolationExceptionFactory
+    private static final class Factory
             extends ExceptionFactory<InvalidCommandException,
                                      Command,
                                      CommandClass,
@@ -141,8 +139,7 @@ public class InvalidCommandException extends CommandException implements Message
 
         private final CommandClass commandClass;
 
-        protected ConstraintViolationExceptionFactory(Command command,
-                                                      Iterable<ConstraintViolation> violations) {
+        private Factory(Command command, Iterable<ConstraintViolation> violations) {
             super(command, violations);
             this.commandClass = CommandClass.of(command);
         }

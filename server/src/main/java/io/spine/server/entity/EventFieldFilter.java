@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.Events;
+import io.spine.server.type.EventClass;
 
 import java.util.Collection;
 import java.util.Map;
@@ -34,7 +34,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.ImmutableMap.copyOf;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.FieldMasks.applyMask;
@@ -49,15 +48,13 @@ import static io.spine.validate.Validate.isDefault;
  *
  * <p>Note that the mask should contain all the {@code (required) = true} fields. Otherwise,
  * the event will not be acknowledged by the bus.
- *
- * @author Dmytro Dashenkov
  */
 public final class EventFieldFilter implements EventFilter {
 
     private final ImmutableMap<EventClass, FieldMask> fieldMasks;
 
     private EventFieldFilter(Builder builder) {
-        this.fieldMasks = copyOf(builder.masks);
+        this.fieldMasks = ImmutableMap.copyOf(builder.masks);
     }
 
     @Override

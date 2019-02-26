@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -44,15 +44,15 @@ public class Dot extends Aggregate<ObjectId, Point, PointVBuilder> {
         return Moved.newBuilder()
                     .setObject(command.getObject())
                     .setDirection(command.getDirection())
-                    .setCurrentPosition(move(getState(), command.getDirection()))
+                    .setCurrentPosition(move(state(), command.getDirection()))
                     .build();
     }
 
     @Apply(allowImport = true)
     void event(Moved event) {
-        Point newPosition = move(getState(), event.getDirection());
-        getBuilder().setX(newPosition.getX())
-                    .setY(newPosition.getY());
+        Point newPosition = move(state(), event.getDirection());
+        builder().setX(newPosition.getX())
+                 .setY(newPosition.getY());
     }
 
     private static Point move(Point p, Direction direction) {

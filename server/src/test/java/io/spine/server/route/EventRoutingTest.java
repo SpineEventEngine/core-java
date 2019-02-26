@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,8 +25,8 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
-import io.spine.core.given.GivenEvent;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.route.UsedLoggedIn;
 import io.spine.test.route.UserRegistered;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,12 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass"
-        /* OK as custom routes do not refer to the test suite. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
+/* OK as custom routes do not refer to the test suite. */
+@SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
 @DisplayName("EventRouting should")
 class EventRoutingTest {
 
@@ -69,7 +65,6 @@ class EventRoutingTest {
 
         private static final long serialVersionUID = 0L;
 
-        @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType") // return immutable instance
         @Override
         public Set<Long> apply(UserRegistered message, EventContext context) {
             return CUSTOM_ROUTE;
@@ -186,7 +181,7 @@ class EventRoutingTest {
                 .build();
         EventEnvelope event = EventEnvelope.of(GivenEvent.withMessage(eventMessage));
 
-        Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
+        Set<Long> ids = eventRouting.apply(event.message(), event.context());
         assertEquals(CUSTOM_ROUTE, ids);
     }
 }

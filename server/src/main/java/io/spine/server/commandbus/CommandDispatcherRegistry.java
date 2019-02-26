@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,9 +21,9 @@
 package io.spine.server.commandbus;
 
 import com.google.common.collect.Maps;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.DispatcherRegistry;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Map;
 import java.util.Optional;
@@ -43,7 +43,7 @@ class CommandDispatcherRegistry
      * {@inheritDoc}
      *
      * <p>If an instance of {@link DelegatingCommandDispatcher} is passed to registration
-     * and it does not {@linkplain DelegatingCommandDispatcher#getMessageClasses() expose}
+     * and it does not {@linkplain DelegatingCommandDispatcher#messageClasses() expose}
      * command classes (because the underlying
      * {@link CommandDispatcherDelegate delegate} does not handle
      * commands), the repository is not registered.
@@ -55,7 +55,7 @@ class CommandDispatcherRegistry
     @Override
     public void register(CommandDispatcher<?> dispatcher) {
         if (dispatcher instanceof DelegatingCommandDispatcher
-                && dispatcher.getMessageClasses().isEmpty()) {
+                && dispatcher.messageClasses().isEmpty()) {
             return;
         }
         super.register(dispatcher);
@@ -86,7 +86,7 @@ class CommandDispatcherRegistry
      *                                  a registered dispatcher
      */
     private void checkNotAlreadyRegistered(CommandDispatcher<?> dispatcher) {
-        Set<CommandClass> commandClasses = dispatcher.getMessageClasses();
+        Set<CommandClass> commandClasses = dispatcher.messageClasses();
         Map<CommandClass, CommandDispatcher<?>> alreadyRegistered = Maps.newHashMap();
         // Gather command classes from this dispatcher that are registered.
         for (CommandClass commandClass : commandClasses) {

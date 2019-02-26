@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -36,11 +36,7 @@ import static io.spine.core.Responses.ok;
 /**
  * A utility class for the routines related to
  * {@linkplain StreamObserver gRPC StreamObserver instances}.
- *
- * @author Alex Tymchenko
  */
-@SuppressWarnings("OverlyComplexAnonymousInnerClass")
-    // We allow custom `toString()` in the anonymous classes for easier diagnostics.
 public class StreamObservers {
 
     /** Prevents instantiation of this utility class. */
@@ -57,27 +53,7 @@ public class StreamObservers {
      * @return an instance of {@code StreamObserver} which does nothing
      */
     public static <T> StreamObserver<T> noOpObserver() {
-        return new StreamObserver<T>() {
-            @Override
-            public void onNext(T value) {
-                // Do nothing.
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                // Do nothing.
-            }
-
-            @Override
-            public void onCompleted() {
-                // Do nothing.
-            }
-
-            @Override
-            public String toString() {
-                return "StreamObservers.noOpObserver()";
-            }
-        };
+        return new NoOpObserver<>();
     }
 
     /**
@@ -99,27 +75,7 @@ public class StreamObservers {
      */
     @Internal
     public static <T> StreamObserver<T> forwardErrorsOnly(StreamObserver<?> delegate) {
-        return new StreamObserver<T>() {
-            @Override
-            public void onError(Throwable t) {
-                delegate.onError(t);
-            }
-
-            @Override
-            public void onNext(T value) {
-                // do nothing.
-            }
-
-            @Override
-            public void onCompleted() {
-                // do nothing.
-            }
-
-            @Override
-            public String toString() {
-                return "StreamObservers.forwardErrorsOnly()";
-            }
-        };
+        return new ErrorForwardingObserver<>(delegate);
     }
 
     /**
@@ -130,7 +86,7 @@ public class StreamObservers {
      */
     @Internal
     public static <T> MemoizingObserver<T> memoizingObserver() {
-        return MemoizingObserver.newInstance();
+        return new MemoizingObserver<>();
     }
 
     /**
@@ -160,5 +116,68 @@ public class StreamObservers {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * An observer which does nothing.
+     *
+     * @param <T> the type of the observable value
+     */
+    private static class NoOpObserver<T> implements StreamObserver<T> {
+
+        @Override
+        public void onNext(T value) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onCompleted() {
+            // Do nothing.
+        }
+
+        @Override
+        public String toString() {
+            return "StreamObservers.noOpObserver()";
+        }
+    }
+
+    /**
+     * An observer which forward error handling to the passed delegate.
+     * Otherwise does nothing.
+     *
+     * @param <T> the type of the observable value
+     */
+    private static class ErrorForwardingObserver<T> implements StreamObserver<T> {
+
+        private final StreamObserver<?> delegate;
+
+        private ErrorForwardingObserver(StreamObserver<?> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            delegate.onError(t);
+        }
+
+        @Override
+        public void onNext(T value) {
+            // do nothing.
+        }
+
+        @Override
+        public void onCompleted() {
+            // do nothing.
+        }
+
+        @Override
+        public String toString() {
+            return "StreamObservers.forwardErrorsOnly()";
+        }
     }
 }

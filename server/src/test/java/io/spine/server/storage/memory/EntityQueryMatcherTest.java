@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,10 +21,11 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.ColumnFilter;
+import io.spine.client.Filter;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.CompositeQueryParameter;
@@ -44,11 +45,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.google.common.collect.ImmutableMultimap.of;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+import static io.spine.client.Filters.eq;
 import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
 import static io.spine.server.entity.storage.TestEntityQueryFactory.createQuery;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
@@ -61,9 +60,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("EntityQueryMatcher should")
 class EntityQueryMatcherTest {
 
@@ -76,7 +72,7 @@ class EntityQueryMatcherTest {
         EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
 
         assertFalse(matcher.test(null));
-        assertTrue(matcher.test(of(EntityRecord.getDefaultInstance())));
+        assertTrue(matcher.test(EntityRecordWithColumns.of(EntityRecord.getDefaultInstance())));
     }
 
     @Test
@@ -95,14 +91,13 @@ class EntityQueryMatcherTest {
         EntityRecord nonMatching = EntityRecord.newBuilder()
                                                .setEntityId(otherEntityId)
                                                .build();
-        EntityRecordWithColumns matchingRecord = of(matching);
-        EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
+        EntityRecordWithColumns matchingRecord = EntityRecordWithColumns.of(matching);
+        EntityRecordWithColumns nonMatchingRecord = EntityRecordWithColumns.of(nonMatching);
         assertTrue(matcher.test(matchingRecord));
         assertFalse(matcher.test(nonMatchingRecord));
     }
 
-    @SuppressWarnings({"unchecked",           // Mocks <-> reflection issues
-                       "ConstantConditions"}) // Test data is constant
+    @SuppressWarnings("ConstantConditions") // Test data is constant
     @Test
     @DisplayName("match columns")
     void matchColumns() {
@@ -116,7 +111,8 @@ class EntityQueryMatcherTest {
 
         Collection<Object> ids = Collections.emptyList();
 
-        Multimap<EntityColumn, ColumnFilter> filters = of(target, eq(targetName, acceptedValue));
+        Multimap<EntityColumn, Filter> filters =
+                ImmutableMultimap.of(target, eq(targetName, acceptedValue));
         CompositeQueryParameter parameter = createParams(filters, ALL);
         QueryParameters params = QueryParameters.newBuilder()
                                                 .add(parameter)
@@ -138,7 +134,7 @@ class EntityQueryMatcherTest {
         when(storedValue.getValue()).thenReturn(acceptedValue);
         Map<String, EntityColumn.MemoizedValue> matchingColumns =
                 ImmutableMap.of(targetName, storedValue);
-        EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
+        EntityRecordWithColumns nonMatchingRecord = EntityRecordWithColumns.of(nonMatching);
         EntityRecordWithColumns matchingRecord = createRecord(matching, matchingColumns);
 
         assertTrue(matcher.test(matchingRecord));
@@ -166,7 +162,8 @@ class EntityQueryMatcherTest {
         Map<String, EntityColumn.MemoizedValue> columns = singletonMap(columnName, value);
         EntityRecordWithColumns recordWithColumns = createRecord(record, columns);
 
-        Multimap<EntityColumn, ColumnFilter> filters = of(column, eq(columnName, actualValue));
+        Multimap<EntityColumn, Filter> filters =
+                ImmutableMultimap.of(column, eq(columnName, actualValue));
         CompositeQueryParameter parameter = createParams(filters, ALL);
         QueryParameters parameters = QueryParameters.newBuilder()
                                                     .add(parameter)
@@ -183,7 +180,8 @@ class EntityQueryMatcherTest {
         String wrongName = "wrong";
         EntityColumn target = mock(EntityColumn.class);
 
-        Multimap<EntityColumn, ColumnFilter> filters = of(target, eq(wrongName, "any"));
+        Multimap<EntityColumn, Filter> filters =
+                ImmutableMultimap.of(target, eq(wrongName, "any"));
         CompositeQueryParameter parameter = createParams(filters, EITHER);
         QueryParameters params = QueryParameters.newBuilder()
                                                 .add(parameter)
@@ -194,7 +192,7 @@ class EntityQueryMatcherTest {
         EntityRecord record = EntityRecord.newBuilder()
                                           .setEntityId(Any.getDefaultInstance())
                                           .build();
-        EntityRecordWithColumns recordWithColumns = of(record);
+        EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record);
         assertFalse(matcher.test(recordWithColumns));
     }
 

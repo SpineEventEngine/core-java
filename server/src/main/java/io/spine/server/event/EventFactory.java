@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,10 +29,10 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.TypeName;
 import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,8 +45,6 @@ import static io.spine.validate.Validate.checkValid;
 
 /**
  * Produces events in response to a command.
- *
- * @author Alexander Yevsyukov
  */
 public class EventFactory {
 

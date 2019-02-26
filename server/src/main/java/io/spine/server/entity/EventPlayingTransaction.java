@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,12 +22,11 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import com.google.protobuf.Message.Builder;
 import io.spine.annotation.Internal;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventDispatch;
 import io.spine.server.model.Nothing;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -43,10 +42,11 @@ import io.spine.validate.ValidatingBuilder;
  *         the type of a {@code ValidatingBuilder} for the entity state
  */
 @Internal
-public abstract class EventPlayingTransaction<I,
-                                              E extends TransactionalEntity<I, S, B>,
-                                              S extends Message,
-                                              B extends ValidatingBuilder<S, ? extends Builder>>
+public abstract
+class EventPlayingTransaction<I,
+                              E extends TransactionalEntity<I, S, B>,
+                              S extends Message,
+                              B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, E, S, B> {
 
     protected EventPlayingTransaction(E entity) {
@@ -64,7 +64,7 @@ public abstract class EventPlayingTransaction<I,
     public void play(EventEnvelope event) {
         VersionIncrement increment = createVersionIncrement(event);
         Phase<I, Nothing> phase = new EventDispatchingPhase<>(
-                new EventDispatch<>(this::dispatch, getEntity(), event),
+                new EventDispatch<>(this::dispatch, entity(), event),
                 increment
         );
         propagate(phase);

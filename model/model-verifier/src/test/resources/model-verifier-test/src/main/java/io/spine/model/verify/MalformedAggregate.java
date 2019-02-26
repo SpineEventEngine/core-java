@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,20 +24,17 @@ import com.google.protobuf.Any;
 import com.google.protobuf.UInt64Value;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
-import io.spine.validate.AnyVBuilder;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * An Aggregate with n invalid command handler method.
+ * An Aggregate with invalid command handler method.
  *
  * <p>{@link #handle()} method has no arguments and is marked with {@link Assign}, which makes it
  * an invalid command handler method.
- *
- * @author Dmytro Dashenkov
  */
-public class MalformedAggregate extends Aggregate<String, Any, AnyVBuilder> {
+public class MalformedAggregate extends Aggregate<String, VoidState, VoidStateVBuilder> {
 
     protected MalformedAggregate(String id) {
         super(id);

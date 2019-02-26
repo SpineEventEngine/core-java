@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,15 +20,15 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.StringValue;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.test.shared.StringEntity;
+import io.spine.server.test.shared.StringEntityVBuilder;
+import io.spine.server.type.EventEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.given.GivenEvent.arbitrary;
+import static io.spine.server.type.given.GivenEvent.arbitrary;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -68,7 +68,7 @@ class TransactionalEventPlayerTest {
         EventPlayingTransaction tx = spy(mock(EventPlayingTransaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
-        when(tx.getEntity()).thenReturn(entity);
+        when(tx.entity()).thenReturn(entity);
 
         entity.injectTransaction(tx);
         return entity;
@@ -79,7 +79,7 @@ class TransactionalEventPlayerTest {
     }
 
     private static class TxPlayingEntity
-            extends TransactionalEntity<Long, StringValue, StringValueVBuilder>
+            extends TransactionalEntity<Long, StringEntity, StringEntityVBuilder>
             implements EventPlayer {
 
         private TxPlayingEntity() {

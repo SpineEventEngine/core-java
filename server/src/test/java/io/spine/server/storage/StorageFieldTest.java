@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,22 +20,13 @@
 
 package io.spine.server.storage;
 
-import io.spine.server.aggregate.AggregateField;
-import io.spine.server.event.storage.EventContextField;
-import io.spine.server.event.storage.EventField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Dmytro Dashenkov.
- */
 @DisplayName("StorageField should")
 class StorageFieldTest {
 
@@ -46,48 +37,5 @@ class StorageFieldTest {
         Method[] methods = clazz.getDeclaredMethods();
 
         assertEquals(0, methods.length);
-    }
-
-    @Test
-    @DisplayName("enclose all aggregate fields")
-    void encloseAggregateFields() {
-        assertField(AggregateField.aggregate_id);
-    }
-
-    @Test
-    @DisplayName("enclose all event fields")
-    void encloseEventFields() {
-        assertField(EventField.event_id);
-        assertField(EventField.event_type);
-        assertField(EventField.producer_id);
-    }
-
-    @Test
-    @DisplayName("enclose all event context fields")
-    void encloseEventContextFields() {
-        assertField(EventContextField.context_of_command);
-        assertField(EventContextField.context_timestamp);
-        assertField(EventContextField.context_version);
-    }
-
-    @Test
-    @DisplayName("enclose all entity status fields")
-    void encloseEntityStatusFields() {
-        assertField(LifecycleFlagField.archived);
-        assertField(LifecycleFlagField.deleted);
-    }
-
-    @Test
-    @DisplayName("enclose all entity fields")
-    void encloseEntityFields() {
-        assertField(EntityField.timestamp);
-        assertField(EntityField.timestamp_nanos);
-        assertField(EntityField.type_url);
-        assertField(EntityField.bytes);
-    }
-
-    private static void assertField(Enum field) {
-        assertNotNull(field);
-        assertThat(field, instanceOf(StorageField.class));
     }
 }

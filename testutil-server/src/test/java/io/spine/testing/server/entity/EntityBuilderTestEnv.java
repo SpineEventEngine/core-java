@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,7 @@ package io.spine.testing.server.entity;
 import com.google.protobuf.StringValue;
 import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.testing.server.User;
 import io.spine.testing.server.UserVBuilder;
 
@@ -41,7 +41,7 @@ class EntityBuilderTestEnv {
         }
     }
 
-    static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {
+    static class TestEntity extends AbstractEntity<Long, StringValue> {
         protected TestEntity(Long id) {
             super(id);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,51 +20,44 @@
 
 package io.spine.system.server;
 
+import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.util.Durations;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.client.EntityFilters;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.CommandId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.system.server.given.schedule.TestCommandScheduler;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.Iterator;
 import java.util.Optional;
 
-import static io.spine.client.ColumnFilters.eq;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("ScheduledCommand should")
 class ScheduledCommandTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(ScheduledCommandTest.class);
+            new TestActorRequestFactory(ScheduledCommandTest.class);
 
     private RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> repository;
     private BoundedContext context;
@@ -109,12 +102,16 @@ class ScheduledCommandTest {
 
         scheduler.postScheduled();
 
-        Optional<ScheduledCommand> command = repository.find(scheduled.getId());
-        assertFalse(command.isPresent());
+        Optional<ScheduledCommand> command = repository.findActive(scheduled.getId());
+        Truth8.assertThat(command).isEmpty();
 
-        ScheduledCommand deletedCommand = findDeleted(scheduled.getId());
-        assertTrue(deletedCommand.getLifecycleFlags().getDeleted());
-        assertFalse(deletedCommand.getLifecycleFlags().getArchived());
+        Optional<ScheduledCommand> optional = repository.find(scheduled.getId());
+        assertTrue(optional.isPresent());
+        ScheduledCommand deletedCommand = optional.get();
+        LifecycleFlags flags = deletedCommand.getLifecycleFlags();
+
+        assertThat(flags.getDeleted()).isTrue();
+        assertThat(flags.getArchived()).isFalse();
     }
 
     @Test
@@ -126,39 +123,14 @@ class ScheduledCommandTest {
         CommandId commandId = command.getId();
 
         Optional<ScheduledCommand> found = repository.find(commandId);
-        assertFalse(found.isPresent());
-
-        Iterator<ScheduledCommand> foundDeleted = findAllDeleted(commandId);
-        assertFalse(foundDeleted.hasNext());
-    }
-
-    private ScheduledCommand findDeleted(CommandId id) {
-        Iterator<ScheduledCommand> commands = findAllDeleted(id);
-        assertTrue(commands.hasNext());
-        ScheduledCommand result = commands.next();
-        assertFalse(commands.hasNext());
-        return result;
-    }
-
-    private Iterator<ScheduledCommand> findAllDeleted(CommandId id) {
-        EntityFilters filters = requestFactory.query()
-                                              .select(ScheduledCommandRecord.class)
-                                              .byId(id)
-                                              .where(eq(deleted.name(), true))
-                                              .build()
-                                              .getTarget()
-                                              .getFilters();
-        Iterator<ScheduledCommand> commands = repository.find(filters, 
-                                                              OrderBy.getDefaultInstance(),
-                                                              Pagination.getDefaultInstance(),
-                                                              FieldMask.getDefaultInstance());
-        return commands;
+        Truth8.assertThat(found)
+              .isEmpty();
     }
 
     private void checkScheduled(Command scheduled) {
         Optional<ScheduledCommand> found = repository.find(scheduled.getId());
         assertTrue(found.isPresent());
-        ScheduledCommandRecord scheduledCommand = found.get().getState();
+        ScheduledCommandRecord scheduledCommand = found.get().state();
 
         assertFalse(isDefault(scheduledCommand.getSchedulingTime()));
         Command savedCommand = scheduledCommand.getCommand();
@@ -196,7 +168,7 @@ class ScheduledCommandTest {
     }
 
     private void post(Command command) {
-        context.getCommandBus()
+        context.commandBus()
                .post(command, noOpObserver());
     }
 

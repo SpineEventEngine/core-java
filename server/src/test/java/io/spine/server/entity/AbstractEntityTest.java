@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,10 +20,12 @@
 
 package io.spine.server.entity;
 
+import com.google.common.reflect.Invokable;
+import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.server.entity.given.AbstractEntityTestEnv.AnEntity;
-import io.spine.server.entity.given.AbstractEntityTestEnv.NaturalNumberEntity;
+import io.spine.server.entity.given.entity.AnEntity;
+import io.spine.server.entity.given.entity.NaturalNumberEntity;
 import io.spine.test.entity.number.NaturalNumber;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,7 +35,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.given.AbstractEntityTestEnv.newNaturalNumber;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -76,7 +77,7 @@ class AbstractEntityTest {
     @Test
     @DisplayName("throw InvalidEntityStateException if state is invalid")
     void rejectInvalidState() {
-        NaturalNumberEntity entity = new NaturalNumberEntity(0L);
+        AbstractEntity<?, NaturalNumber> entity = new NaturalNumberEntity(0L);
         NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
         try {
             // This should pass.
@@ -117,5 +118,47 @@ class AbstractEntityTest {
 
         assertEquals("1234567", entity.idAsString());
         assertSame(entity.idAsString(), entity.idAsString());
+    }
+
+    @SuppressWarnings("MagicNumber")
+    @Test
+    @DisplayName("support equality")
+    void supportEquality() {
+        AvEntity entity = new AvEntity(88L);
+        AvEntity another = new AvEntity(88L);
+        another.updateState(entity.state(), entity.version());
+
+        new EqualsTester().addEqualityGroup(entity, another)
+                          .addEqualityGroup(new AvEntity(42L))
+                          .testEquals();
+    }
+
+    @Test
+    @DisplayName("have `updateState` method visible to package only")
+    void haveUpdateStatePackagePrivate() {
+        boolean methodFound = false;
+
+        Method[] methods = AbstractEntity.class.getDeclaredMethods();
+        for (Method method : methods) {
+            if ("updateState".equals(method.getName())) {
+                Invokable<?, Object> updateState = Invokable.from(method);
+                assertTrue(updateState.isPackagePrivate());
+                methodFound = true;
+            }
+        }
+        assertTrue(methodFound,
+                   "Cannot check 'updateState(...)' in " + AbstractEntity.class);
+    }
+
+    private static class AvEntity extends AbstractEntity<Long, StringValue> {
+        private AvEntity(Long id) {
+            super(id);
+        }
+    }
+
+    static NaturalNumber newNaturalNumber(int value) {
+        return NaturalNumber.newBuilder()
+                            .setValue(value)
+                            .build();
     }
 }

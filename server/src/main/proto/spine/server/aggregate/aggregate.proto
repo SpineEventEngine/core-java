@@ -1,22 +1,22 @@
-//
-// Copyright 2018, TeamDev. All rights reserved.
-//
-// Redistribution and use in source and/or binary forms, with or without
-// modification, must retain the above copyright notice and the following
-// disclaimer.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 syntax = "proto3";
 
 package spine.server.aggregate;
@@ -56,6 +56,9 @@ message Snapshot {
 }
 
 // A record with information about an event or a snapshot of an aggregate.
+//
+// This message is used by storage implementations.
+//
 message AggregateEventRecord {
 
     // A timestamp of the event or snapshot in this record.
@@ -70,22 +73,24 @@ message AggregateEventRecord {
     }
 }
 
-// The message for restoring an aggregate state.
-message AggregateStateRecord {
+// A history of an aggregate is a sequence of its events which is used by the aggregate
+// to restore its state.
+//
+// The history may start from a snapshot of the aggregate state. If so, the snapshot will be
+// used as the starting point before playing events that occurred after the snapshot.
+//
+// If no snapshot is available, events represent the full history of the aggregate.
+//
+message AggregateHistory {
 
-    // If the `snapshot` field is populated, it contains the last snapshot in
-    // the history of the aggregate.
-    //
-    // This value will be used for restoring the aggregate state before playing
-    // events that occurred after this snapshot was made.
-    //
+    // If populated, contains the last snapshot of the aggregate state.
     server.aggregate.Snapshot snapshot = 1;
 
     // Events of the aggregate.
     //
     // If `snapshot` field is populated, events represent the 'tail' of
-    // the event history of the aggregate.
-    // Otherwise, events are full history of the aggregate.
+    // the event history of the aggregate after the snapshot was made.
+    // Otherwise, it is the full history of the aggregate.
     //
     repeated core.Event event = 2;
 }

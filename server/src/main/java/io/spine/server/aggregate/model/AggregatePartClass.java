@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -38,7 +38,6 @@ import static java.lang.String.format;
  * Provides type information on an aggregate part class.
  *
  * @param <A> the type of aggregate parts.
- * @author Alexander Yevsyukov
  */
 public final class AggregatePartClass<A extends AggregatePart> extends AggregateClass<A> {
 
@@ -70,7 +69,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
     private Class<? extends AggregateRoot> rootClass() {
         if (rootClass == null) {
-            rootClass = (Class<? extends AggregateRoot>) AGGREGATE_ROOT.getArgumentIn(value());
+            rootClass = (Class<? extends AggregateRoot>) AGGREGATE_ROOT.argumentIn(value());
         }
         return rootClass;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,19 +21,16 @@
 package io.spine.server.event.given;
 
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.FailRequested;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.TaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class EventSubscriberTestEnv {
+public final class EventSubscriberTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private EventSubscriberTestEnv() {
@@ -47,7 +44,7 @@ public class EventSubscriberTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        void on(FailRequested message, EventContext context) {
+        public void on(FailRequested message, EventContext context) {
             methodCalled = true;
             if (!message.getShouldFail()) {
                 throw new UnsupportedOperationException("Do not want false messages!");
@@ -55,17 +52,17 @@ public class EventSubscriberTestEnv {
         }
 
         @Subscribe
-        void on(ProjectCreated message) {
+        public void on(ProjectCreated message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe
-        void on(ProjectStarted message) {
+        public void on(ProjectStarted message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe(external = true)
-        void on(TaskAdded message) {
+        public void on(TaskAdded message) {
             // Do nothing. Just expose the method.
         }
 
@@ -74,9 +71,9 @@ public class EventSubscriberTestEnv {
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            super.onError(envelope, exception);
-            lastErrorEnvelope = envelope;
+        public void onError(EventEnvelope event, RuntimeException exception) {
+            super.onError(event, exception);
+            lastErrorEnvelope = event;
             lastException = exception;
         }
 

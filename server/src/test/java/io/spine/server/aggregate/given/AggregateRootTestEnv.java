@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -68,8 +68,8 @@ public class AggregateRootTestEnv {
 
         @Apply
         void apply(AggProjectCreated event) {
-            getBuilder().setId(event.getProjectId())
-                        .setName(event.getName());
+            builder().setId(event.getProjectId())
+                     .setName(event.getName());
         }
     }
 
@@ -96,7 +96,7 @@ public class AggregateRootTestEnv {
 
         @Apply
         void apply(AggProjectStarted event) {
-            getBuilder().setStatus(Status.STARTED);
+            builder().setStatus(Status.STARTED);
         }
     }
 

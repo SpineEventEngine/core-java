@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,9 +22,9 @@ package io.spine.server.procman.given.pm;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
@@ -42,7 +42,7 @@ import java.util.Set;
 public class TestProcessManagerDispatcher implements CommandDispatcher<Message> {
 
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return CommandClass.setOf(PmAddTask.class,
                                   PmReviewBacklog.class,
                                   PmScheduleRetrospective.class,

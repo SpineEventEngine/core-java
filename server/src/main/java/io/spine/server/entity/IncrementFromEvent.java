@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * A version increment which sets the new version from the given event.
@@ -47,7 +47,7 @@ public class IncrementFromEvent extends VersionIncrement {
 
     @Override
     protected Version nextVersion() {
-        Version result = event.getEventContext()
+        Version result = event.context()
                               .getVersion();
         return result;
     }

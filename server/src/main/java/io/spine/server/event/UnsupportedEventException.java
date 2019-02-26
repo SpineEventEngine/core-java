@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,9 +22,9 @@ package io.spine.server.event;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
-import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.server.bus.MessageUnhandled;
+import io.spine.server.type.EventClass;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;
@@ -32,8 +32,6 @@ import static java.lang.String.format;
 /**
  * Exception that is thrown when unsupported event is obtained
  * or in case there is no class for given Protobuf event message.
- *
- * @author Alexander Litus
  */
 public class UnsupportedEventException extends EventException implements MessageUnhandled {
 
@@ -45,7 +43,7 @@ public class UnsupportedEventException extends EventException implements Message
 
     private static String messageFormat(Message eventMsg) {
         EventClass eventClass = EventClass.of(eventMsg);
-        TypeName typeName = eventClass.getTypeName();
+        TypeName typeName = eventClass.typeName();
         String result = format(
                 "There is no registered handler or dispatcher for the event of the class: `%s` " +
                 " (proto type: `%s`).",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -75,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class AggregateStorageTest
         extends AbstractStorageTest<ProjectId,
-                                    AggregateStateRecord,
+                                    AggregateHistory,
                                     AggregateReadRequest<ProjectId>,
                                     AggregateStorage<ProjectId>> {
 
@@ -107,12 +107,12 @@ public abstract class AggregateStorageTest
     }
 
     @Override
-    protected AggregateStateRecord newStorageRecord() {
+    protected AggregateHistory newStorageRecord() {
         List<AggregateEventRecord> records = sequenceFor(id);
         List<Event> expectedEvents = records.stream()
                                             .map(TO_EVENT)
                                             .collect(toList());
-        AggregateStateRecord record = AggregateStateRecord
+        AggregateHistory record = AggregateHistory
                 .newBuilder()
                 .addAllEvent(expectedEvents)
                 .build();
@@ -167,7 +167,7 @@ public abstract class AggregateStorageTest
         @DisplayName("absent AggregateStateRecord on reading record")
         void absentRecord() {
             AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
-            Optional<AggregateStateRecord> record = storage.read(readRequest);
+            Optional<AggregateHistory> record = storage.read(readRequest);
 
             assertFalse(record.isPresent());
         }
@@ -361,10 +361,10 @@ public abstract class AggregateStorageTest
         }
 
         private void readRecordsWithLifecycle(LifecycleFlags flags) {
-            AggregateStateRecord record = newStorageRecord();
+            AggregateHistory record = newStorageRecord();
             storage.write(id, record);
             storage.writeLifecycleFlags(id, flags);
-            AggregateStateRecord readRecord = readRecord(id);
+            AggregateHistory readRecord = readRecord(id);
             assertEquals(record, readRecord);
         }
     }
@@ -425,7 +425,7 @@ public abstract class AggregateStorageTest
         storage.writeEvent(id, expectedSecond);
         storage.writeEvent(id, expectedFirst);
 
-        AggregateStateRecord record = readRecord(id);
+        AggregateHistory record = readRecord(id);
         List<Event> events = record.getEventList();
         assertTrue(events.indexOf(expectedFirst) < events.indexOf(expectedSecond));
     }
@@ -523,10 +523,10 @@ public abstract class AggregateStorageTest
 
         int batchSize = 1;
         AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
-        Optional<AggregateStateRecord> optionalStateRecord = storage.read(request);
+        Optional<AggregateHistory> optionalStateRecord = storage.read(request);
 
         assertTrue(optionalStateRecord.isPresent());
-        AggregateStateRecord stateRecord = optionalStateRecord.get();
+        AggregateHistory stateRecord = optionalStateRecord.get();
         assertEquals(snapshot, stateRecord.getSnapshot());
         assertEquals(eventCountAfterSnapshot, stateRecord.getEventCount());
     }
@@ -550,7 +550,7 @@ public abstract class AggregateStorageTest
                     .build();
             storage.writeEvent(id, event);
 
-            AggregateStateRecord record = readRecord(id);
+            AggregateHistory record = readRecord(id);
             EventContext loadedContext = record.getEvent(0)
                                                .getContext();
             assertTrue(isDefault(loadedContext.getEnrichment()));
@@ -574,7 +574,7 @@ public abstract class AggregateStorageTest
                     .setMessage(Any.getDefaultInstance())
                     .build();
             storage.writeEvent(id, event);
-            AggregateStateRecord record = readRecord(id);
+            AggregateHistory record = readRecord(id);
             EventContext loadedOrigin = record.getEvent(0)
                                               .getContext()
                                               .getEventContext();
@@ -582,8 +582,8 @@ public abstract class AggregateStorageTest
         }
     }
 
-    private AggregateStateRecord readRecord(ProjectId id) {
-        Optional<AggregateStateRecord> optional = storage.read(newReadRequest(id));
+    private AggregateHistory readRecord(ProjectId id) {
+        Optional<AggregateHistory> optional = storage.read(newReadRequest(id));
         assertTrue(optional.isPresent());
         return optional.get();
     }
@@ -617,9 +617,9 @@ public abstract class AggregateStorageTest
         storage.writeEvent(id, expectedEvent);
 
         AggregateReadRequest<I> readRequest = new AggregateReadRequest<>(id, MAX_VALUE);
-        Optional<AggregateStateRecord> optional = storage.read(readRequest);
+        Optional<AggregateHistory> optional = storage.read(readRequest);
         assertTrue(optional.isPresent());
-        AggregateStateRecord events = optional.get();
+        AggregateHistory events = optional.get();
         assertEquals(1, events.getEventCount());
         Event actualEvent = events.getEvent(0);
         assertEquals(expectedEvent, actualEvent);
@@ -632,7 +632,7 @@ public abstract class AggregateStorageTest
 
         writeAll(id, records);
 
-        AggregateStateRecord events = readRecord(id);
+        AggregateHistory events = readRecord(id);
         List<Event> expectedEvents = records.stream()
                                             .map(TO_EVENT)
                                             .collect(Collectors.toList());

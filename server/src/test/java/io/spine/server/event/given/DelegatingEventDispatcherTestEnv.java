@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,9 +21,9 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EvTeamCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -43,24 +43,24 @@ public class DelegatingEventDispatcherTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Override
-        public Set<EventClass> getEventClasses() {
+        public Set<EventClass> eventClasses() {
             return ImmutableSet.of();
         }
 
         @Override
-        public Set<EventClass> getExternalEventClasses() {
+        public Set<EventClass> externalEventClasses() {
             // Return at least one event class so that we can create external delegate.
             return EventClass.setOf(EvTeamCreated.class);
         }
 
         @Override
-        public Set<String> dispatchEvent(EventEnvelope envelope) {
+        public Set<String> dispatchEvent(EventEnvelope event) {
             // Do nothing.
             return ImmutableSet.of(getClass().getName());
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
+        public void onError(EventEnvelope event, RuntimeException exception) {
             onErrorCalled = true;
             lastException = exception;
         }

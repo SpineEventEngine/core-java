@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,10 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.Given;
@@ -44,6 +41,9 @@ import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
@@ -76,10 +76,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.collect.ImmutableList.copyOf;
-import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -202,11 +199,11 @@ public class AggregateTest {
         @DisplayName("current state")
         void currentState() {
             dispatchCommand(aggregate, env(createProject));
-            assertEquals(Status.CREATED, aggregate.getState()
+            assertEquals(Status.CREATED, aggregate.state()
                                                   .getStatus());
 
             dispatchCommand(aggregate, env(startProject));
-            assertEquals(Status.STARTED, aggregate.getState()
+            assertEquals(Status.STARTED, aggregate.state()
                                                   .getStatus());
         }
 
@@ -294,8 +291,8 @@ public class AggregateTest {
         List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
 
-        assertEquals(this.aggregate.getVersion(), event.getContext()
-                                                       .getVersion());
+        assertEquals(this.aggregate.version(), event.getContext()
+                                                    .getVersion());
     }
 
     @Test
@@ -370,7 +367,7 @@ public class AggregateTest {
         void updatedUponCommandHandled() {
             dispatchCommand(aggregate, env(createProject));
 
-            Project state = aggregate.getState();
+            Project state = aggregate.state();
 
             assertEquals(ID, state.getId());
             assertEquals(Status.CREATED, state.getStatus());
@@ -396,13 +393,13 @@ public class AggregateTest {
     @DisplayName("play events")
     void playEvents() {
         List<Event> events = generateProjectEvents();
-        AggregateStateRecord aggregateStateRecord =
-                AggregateStateRecord.newBuilder()
-                                    .addAllEvent(events)
-                                    .build();
+        AggregateHistory aggregateHistory =
+                AggregateHistory.newBuilder()
+                                .addAllEvent(events)
+                                .build();
 
         AggregateTransaction tx = AggregateTransaction.start(aggregate);
-        aggregate().play(aggregateStateRecord);
+        aggregate().play(aggregateHistory);
         tx.commit();
 
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -417,12 +414,12 @@ public class AggregateTest {
 
         Snapshot snapshot = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.getId());
+        Aggregate anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
-        anotherAggregate.play(AggregateStateRecord.newBuilder()
-                                                  .setSnapshot(snapshot)
-                                                  .build());
+        anotherAggregate.play(AggregateHistory.newBuilder()
+                                              .setSnapshot(snapshot)
+                                              .build());
         tx.commit();
 
         assertEquals(aggregate, anotherAggregate);
@@ -452,8 +449,12 @@ public class AggregateTest {
                                        command(addTask),
                                        command(startProject));
             aggregate().commitEvents();
-            assertEventClasses(getEventClasses(copyOf(aggregate().historyBackward())),
-                               AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
+            ImmutableList<Event> historyBackward =
+                    ImmutableList.copyOf(aggregate().historyBackward());
+            assertEventClasses(
+                    getEventClasses(historyBackward),
+                    AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class
+            );
         }
 
         private Collection<EventClass> getEventClasses(Collection<Event> events) {
@@ -518,26 +519,26 @@ public class AggregateTest {
 
         Snapshot snapshotNewProject = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.getId());
+        Aggregate anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.restore(snapshotNewProject);
         tx.commit();
 
-        assertEquals(aggregate.getState(), anotherAggregate.getState());
-        assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
+        assertEquals(aggregate.state(), anotherAggregate.state());
+        assertEquals(aggregate.version(), anotherAggregate.version());
         assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
     }
 
     @Test
     @DisplayName("increment version upon state changing event applied")
     void incrementVersionOnEventApplied() {
-        int version = aggregate.getVersion()
+        int version = aggregate.version()
                                .getNumber();
         // Dispatch two commands that cause events that modify aggregate state.
         aggregate.dispatchCommands(command(createProject), command(startProject));
 
-        assertEquals(version + 2, aggregate.getVersion()
+        assertEquals(version + 2, aggregate.version()
                                            .getNumber());
     }
 
@@ -614,9 +615,9 @@ public class AggregateTest {
                 Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
 
                 AggregateTransaction tx = AggregateTransaction.start(faultyAggregate);
-                ((Aggregate) faultyAggregate).play(AggregateStateRecord.newBuilder()
-                                                                       .addEvent(event)
-                                                                       .build());
+                ((Aggregate) faultyAggregate).play(AggregateHistory.newBuilder()
+                                                                   .addEvent(event)
+                                                                   .build());
                 tx.commit();
                 failNotThrows();
             } catch (RuntimeException e) {
@@ -634,7 +635,7 @@ public class AggregateTest {
     @Test
     @DisplayName("not allow getting state builder from outside event applier")
     void notGetStateBuilderOutsideOfApplier() {
-        assertThrows(IllegalStateException.class, () -> new IntAggregate(100).getBuilder());
+        assertThrows(IllegalStateException.class, () -> new IntAggregate(100).builder());
     }
 
     @Nested
@@ -650,7 +651,7 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(addTaskCommand, noOpObserver);
@@ -678,11 +679,11 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(startCommand, noOpObserver);
-            commandBus.post(of(addTaskCommand, addTaskCommand2), noOpObserver);
+            commandBus.post(ImmutableList.of(addTaskCommand, addTaskCommand2), noOpObserver);
 
             TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
 
@@ -702,7 +703,7 @@ public class AggregateTest {
     void acknowledgeExceptionForDuplicateCommand() {
         TenantId tenantId = newTenantId();
         Command createCommand = command(createProject, tenantId);
-        CommandEnvelope envelope = of(createCommand);
+        CommandEnvelope envelope = CommandEnvelope.of(createCommand);
         repository.dispatch(envelope);
 
         RuntimeException exception = assertThrows(RuntimeException.class,

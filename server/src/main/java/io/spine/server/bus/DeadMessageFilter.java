@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -37,8 +37,6 @@ import static io.spine.server.bus.Buses.reject;
 /**
  * The {@link BusFilter} preventing the messages that have no dispatchers from being posted to
  * the bus.
- *
- * @author Dmytro Dashenkov
  */
 final class DeadMessageFilter<T extends Message,
                               E extends MessageEnvelope<?, T, ?>,
@@ -62,7 +60,7 @@ final class DeadMessageFilter<T extends Message,
         if (dispatchers.isEmpty()) {
             MessageUnhandled report = deadMessageHandler.handle(envelope);
             Error error = report.asError();
-            Any packedId = Identifier.pack(envelope.getId());
+            Any packedId = Identifier.pack(envelope.id());
             Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {

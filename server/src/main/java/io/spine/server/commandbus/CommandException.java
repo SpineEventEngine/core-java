@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,11 +24,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
+import io.spine.code.java.ClassName;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageRejection;
-import io.spine.type.ClassName;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 
 import java.util.Map;
@@ -37,8 +37,6 @@ import static java.lang.String.format;
 
 /**
  * Abstract base for exceptions related to commands.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class CommandException extends RuntimeException implements MessageRejection {
 
@@ -86,7 +84,7 @@ public abstract class CommandException extends RuntimeException implements Messa
                                        Command command,
                                        CommandValidationError errorCode) {
         Message commandMessage = CommandEnvelope.of(command)
-                                                .getMessage();
+                                                .message();
 
         String commandType = commandMessage.getDescriptorForType()
                                            .getFullName();
@@ -126,10 +124,10 @@ public abstract class CommandException extends RuntimeException implements Messa
      */
     protected static String messageFormat(String format, Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        Class<? extends Message> commandClass = envelope.getMessageClass()
+        Class<? extends Message> commandClass = envelope.messageClass()
                                                         .value();
         ClassName commandClassName = ClassName.of(commandClass);
-        TypeName typeName = envelope.getTypeName();
+        TypeName typeName = envelope.messageTypeName();
         String result = format(format, commandClassName, typeName);
         return result;
     }

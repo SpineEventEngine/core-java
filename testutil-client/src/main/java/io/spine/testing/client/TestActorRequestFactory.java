@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,19 +27,18 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.testing.TestValues;
 import io.spine.testing.client.command.TestCommandMessage;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.ZonedDateTime;
-
-import static io.spine.testing.core.given.GivenUserId.of;
 
 /**
  * An {@code ActorRequestFactory} for running tests.
@@ -47,7 +46,7 @@ import static io.spine.testing.core.given.GivenUserId.of;
 @VisibleForTesting
 public class TestActorRequestFactory extends ActorRequestFactory {
 
-    protected TestActorRequestFactory(UserId actor, ZoneId zoneId) {
+    public TestActorRequestFactory(UserId actor, ZoneId zoneId) {
         super(ActorRequestFactory
                       .newBuilder()
                       .setActor(actor)
@@ -56,10 +55,10 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         );
     }
 
-    protected TestActorRequestFactory(TenantId tenantId,
-                                      UserId actor,
-                                      ZoneOffset zoneOffset,
-                                      ZoneId zoneId) {
+    public TestActorRequestFactory(@Nullable TenantId tenantId,
+                                   UserId actor,
+                                   ZoneOffset zoneOffset,
+                                   ZoneId zoneId) {
         super(ActorRequestFactory
                       .newBuilder()
                       .setTenantId(tenantId)
@@ -69,9 +68,18 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         );
     }
 
+    /**
+     * Deprecated.
+     * @deprecated use {@link TestActorRequestFactory(String, ZoneId)}
+     */
+    @Deprecated
     public static
     TestActorRequestFactory newInstance(String actor, ZoneId zoneId) {
-        return newInstance(of(actor), zoneId);
+        return new TestActorRequestFactory(actor, zoneId);
+    }
+
+    public TestActorRequestFactory(String actor, ZoneId zoneId) {
+        this(GivenUserId.of(actor), zoneId);
     }
 
     public static
@@ -79,25 +87,59 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         return new TestActorRequestFactory(actor, zoneId);
     }
 
+    /**
+     * Deprecated.
+     * @deprecated use {@link TestActorRequestFactory(Class)}
+     */
+    @Deprecated
     public static TestActorRequestFactory newInstance(Class<?> testClass) {
-        return newInstance(testClass.getName(), ZoneIds.systemDefault());
+        return new TestActorRequestFactory(testClass);
     }
 
+    public TestActorRequestFactory(Class<?> testClass) {
+        this(testClass.getName(), ZoneIds.systemDefault());
+    }
+
+    /**
+     * Deprecated.
+     * @deprecated use {@link TestActorRequestFactory(UserId)}
+     */
+    @Deprecated
     public static TestActorRequestFactory newInstance(UserId actor) {
         return newInstance(actor, ZoneIds.systemDefault());
     }
 
-    public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
-        return new TestActorRequestFactory(tenantId, actor,
-                                           ZoneOffsets.getDefault(),
-                                           ZoneIds.systemDefault());
+    public TestActorRequestFactory(UserId actor) {
+        this(actor, ZoneIds.systemDefault());
     }
 
+    /**
+     * Deprecated.
+     * @deprecated use {@link TestActorRequestFactory(UserId, TenantId)}
+     */
+    @Deprecated
+    public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
+        return new TestActorRequestFactory(actor, tenantId);
+    }
+
+    public TestActorRequestFactory(UserId actor, TenantId tenantId) {
+        this(tenantId, actor, ZoneOffsets.getDefault(), ZoneIds.systemDefault());
+    }
+
+    /**
+     * Deprecated.
+     * @deprecated use {@link TestActorRequestFactory(Class, TenantId)}
+     */
+    @Deprecated
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
-        return new TestActorRequestFactory(tenantId,
-                                           of(testClass.getName()),
-                                           ZoneOffsets.getDefault(),
-                                           ZoneIds.systemDefault());
+        return new TestActorRequestFactory(testClass, tenantId);
+    }
+
+    public TestActorRequestFactory(Class<?> testClass, TenantId tenantId) {
+        this(tenantId,
+             GivenUserId.of(testClass.getName()),
+             ZoneOffsets.getDefault(),
+             ZoneIds.systemDefault());
     }
 
     private static ZoneOffset idToZoneOffset(ZoneId zoneId) {
@@ -135,10 +177,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         return command;
     }
 
-    public CommandEnvelope createEnvelope(CommandMessage message) {
-        return CommandEnvelope.of(createCommand(message));
-    }
-
     /**
      * Generates a test instance of a command with the message
      * {@link io.spine.testing.client.command.TestCommandMessage TestCommandMessage}.
@@ -151,15 +189,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
                 .setId("random-number-" + randomSuffix)
                 .build();
         return createCommand(msg);
-    }
-
-    /**
-     * Generates a command and wraps it into envelope.
-     */
-    public CommandEnvelope generateEnvelope() {
-        Command command = generateCommand();
-        CommandEnvelope result = CommandEnvelope.of(command);
-        return result;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,8 +20,8 @@
 
 package io.spine.server.bus;
 
-import io.spine.core.MessageEnvelope;
 import io.spine.core.MessageInvalid;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
@@ -29,7 +29,6 @@ import java.util.Optional;
  * An interface defining the validator for a {@link MessageEnvelope}.
  *
  * @param <E> the type of the {@link MessageEnvelope} to validate
- * @author Dmytro Dashenkov
  */
 public interface EnvelopeValidator<E extends MessageEnvelope<?, ?, ?>> {
 

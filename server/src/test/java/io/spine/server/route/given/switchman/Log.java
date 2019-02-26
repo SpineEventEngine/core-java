@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,21 +26,15 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
-import io.spine.server.rout.given.switchman.LogState;
-import io.spine.server.rout.given.switchman.LogStateVBuilder;
 import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 import io.spine.server.route.given.switchman.event.SwitchWorkRecorded;
 import io.spine.server.route.given.switchman.event.SwitchmanAbsenceRecorded;
 import io.spine.server.route.given.switchman.rejection.Rejections;
 
-import static com.google.common.collect.ImmutableSet.of;
-
 /**
  * The aggregate that accumulates information about switchman work and absence.
  *
  * <p>There's only one log per system.
- *
- * @author Alexander Yevsyukov
  */
 public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
 
@@ -53,44 +47,42 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
 
     @React
     SwitchmanAbsenceRecorded on(Rejections.SwitchmanUnavailable rejection) {
-        return SwitchmanAbsenceRecorded.newBuilder()
-                                       .setSwitchmanName(rejection.getSwitchmanName())
-                                       .setTimestamp(Time.getCurrentTime())
-                                       .build();
+        return SwitchmanAbsenceRecorded
+                .newBuilder()
+                .setSwitchmanName(rejection.getSwitchmanName())
+                .setTimestamp(Time.getCurrentTime())
+                .build();
     }
 
     @Apply
     void event(SwitchmanAbsenceRecorded event) {
-        getBuilder().addMissingSwitchman(event.getSwitchmanName());
+        builder().addMissingSwitchman(event.getSwitchmanName());
     }
 
     @React
     SwitchWorkRecorded on(SwitchPositionConfirmed event) {
-        return SwitchWorkRecorded.newBuilder()
-                                 .setSwitchId(event.getSwitchId())
-                                 .setSwitchmanName(event.getSwitchmanName())
-                                 .build();
+        return SwitchWorkRecorded
+                .newBuilder()
+                .setSwitchId(event.getSwitchId())
+                .setSwitchmanName(event.getSwitchmanName())
+                .build();
     }
 
     @Apply
     void event(SwitchWorkRecorded event) {
         String switchmanName = event.getSwitchmanName();
-        Integer currentCount = getState().getCountersMap()
-                                         .get(switchmanName);
-        getBuilder().putCounters(switchmanName,
-                                 currentCount == null ? 1 : currentCount + 1);
+        Integer currentCount = state().getCountersMap()
+                                      .get(switchmanName);
+        builder().putCounters(switchmanName,
+                              currentCount == null ? 1 : currentCount + 1);
     }
 
     /**
      * The repository with default routing functions that route to the singleton aggregate.
      */
-    @SuppressWarnings({
-            "SerializableInnerClassWithNonSerializableOuterClass",
-            "AssignmentOrReturnOfFieldWithMutableType" // Returning immutable impl.
-    })
     public static final class Repository extends AggregateRepository<Long, Log> {
 
-        private static final ImmutableSet<Long> SINGLETON_ID_SET = of(ID);
+        private static final ImmutableSet<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
 
         public Repository() {
             super();
@@ -99,7 +91,7 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
         @Override
         public void onRegistered() {
             super.onRegistered();
-            getEventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
+            eventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
         }
     }
 }

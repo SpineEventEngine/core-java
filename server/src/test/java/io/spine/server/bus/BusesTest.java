@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,9 +25,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.commandbus.CmdBusStartProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,9 +37,6 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Buses utility should")
 class BusesTest {
 

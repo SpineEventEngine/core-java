@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,15 +26,13 @@ import io.spine.server.model.Nothing;
 
 /**
  * An object with identity which produces events.
- *
- * @author Alexander Yevsyukov
  */
 public interface EventProducer {
 
     /**
      * The object identity packed into {@link Any}.
      */
-    Any getProducerId();
+    Any producerId();
 
     /**
      * The version of the object to be put into events.
@@ -42,7 +40,7 @@ public interface EventProducer {
      * <p>If {@linkplain Version#getDefaultInstance() empty}, no version will be added to
      * the generated events.
      */
-    Version getVersion();
+    Version version();
 
     /**
      * Obtains the {@link io.spine.server.model.Nothing} event message.

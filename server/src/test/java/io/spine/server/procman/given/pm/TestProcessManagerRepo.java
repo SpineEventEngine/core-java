@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,10 +20,10 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.protobuf.Any;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.test.shared.AnyProcess;
 import io.spine.test.procman.ProjectId;
 
 public class TestProcessManagerRepo
-        extends ProcessManagerRepository<ProjectId, TestProcessManager, Any> {
+        extends ProcessManagerRepository<ProjectId, TestProcessManager, AnyProcess> {
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -75,8 +75,8 @@ public class AggregateCommandEndpointTestEnv {
 
         @Apply
         void apply(AggProjectCreated event) {
-            getBuilder().setId(event.getProjectId())
-                        .setName(event.getName());
+            builder().setId(event.getProjectId())
+                     .setName(event.getName());
         }
 
         @Assign
@@ -89,7 +89,7 @@ public class AggregateCommandEndpointTestEnv {
 
         @Apply
         void apply(AggTaskAdded event) {
-            getBuilder().setId(event.getProjectId());
+            builder().setId(event.getProjectId());
         }
 
         @Assign

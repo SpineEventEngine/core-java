@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,7 +22,7 @@ package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 
@@ -31,16 +31,14 @@ import java.util.List;
  *
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
 public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, EventEnvelope> {
 
-    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository,
-                              EventEnvelope envelope) {
-        super(repository, envelope);
+    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
+        super(repository, event);
     }
 
     static <I, P extends ProcessManager<I, ?, ?>>
@@ -49,14 +47,9 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected PmEventDelivery<I, P> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
-    }
-
-    @Override
-    protected List<Event> doDispatch(P processManager, EventEnvelope envelope) {
+    protected List<Event> invokeDispatcher(P processManager, EventEnvelope event) {
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
-        List<Event> events = tx.dispatchEvent(envelope);
+        List<Event> events = tx.dispatchEvent(event);
         return events;
     }
 
@@ -65,12 +58,12 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
      * updated upon reacting on an event.
      */
     @Override
-    protected void onEmptyResult(P pm, EventEnvelope envelope) {
+    protected void onEmptyResult(P pm, EventEnvelope event) {
         // Do nothing.
     }
 
     @Override
-    protected void onError(EventEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
+    protected void onError(EventEnvelope event, RuntimeException exception) {
+        repository().onError(event, exception);
     }
 }

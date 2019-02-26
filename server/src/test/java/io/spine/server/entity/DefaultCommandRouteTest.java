@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,13 +31,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- */
 @DisplayName("DefaultCommandRoute should")
 class DefaultCommandRouteTest {
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We call isPresent() in assertion.
     @Test
     @DisplayName("get ID from command message")
     void getIdFromCommand() {

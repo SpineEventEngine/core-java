@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,8 +20,8 @@
 
 package io.spine.server.commandbus;
 
-import io.spine.core.CommandEnvelope;
 import io.spine.server.commandbus.given.DelegatingCommandDispatcherTestEnv.EmptyCommandDispatcherDelegate;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,8 +39,9 @@ class DelegatingCommandDispatcherTest {
         DelegatingCommandDispatcher<String> delegatingDispatcher =
                 DelegatingCommandDispatcher.of(delegate);
 
-        CommandEnvelope commandEnvelope =
-                TestActorRequestFactory.newInstance(getClass()).generateEnvelope();
+        CommandEnvelope commandEnvelope = CommandEnvelope.of(
+                new TestActorRequestFactory(getClass()).generateCommand()
+        );
 
         delegatingDispatcher.onError(commandEnvelope, new RuntimeException(getClass().getName()));
 

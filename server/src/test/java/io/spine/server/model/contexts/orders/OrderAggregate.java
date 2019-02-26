@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,9 +31,6 @@ import io.spine.test.model.contexts.orders.command.CreateOrder;
 import io.spine.test.model.contexts.orders.event.ItemAdded;
 import io.spine.test.model.contexts.orders.event.OrderCreated;
 
-/**
- * @author Alexander Yevsyukov
- */
 class OrderAggregate extends Aggregate<OrderId, Order, OrderVBuilder> {
 
     private OrderAggregate(OrderId id) {
@@ -53,8 +50,7 @@ class OrderAggregate extends Aggregate<OrderId, Order, OrderVBuilder> {
 
     @Apply
     void event(OrderCreated event) {
-        getBuilder()
-                .mergeFrom(event.getOrder());
+        builder().mergeFrom(event.getOrder());
     }
 
     @Assign
@@ -68,6 +64,6 @@ class OrderAggregate extends Aggregate<OrderId, Order, OrderVBuilder> {
 
     @Apply
     void event(ItemAdded event) {
-        getBuilder().addItem(event.getItem());
+        builder().addItem(event.getItem());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,12 +23,10 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 
 /**
- * Meta-data set to a {@link HandlerMethod#getAttributes()} HandlerMethod} attributes.
+ * Meta-data set to a {@link HandlerMethod#attributes()} HandlerMethod} attributes.
  *
  * <p>Typical way to add more semantics to a method is via a parameterized annotation,
  * such as {@link io.spine.core.Subscribe Subscribe}.
- *
- * @author Alex Tymchenko
  */
 @Internal
 @Immutable(containerOf = "V")

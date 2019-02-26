@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.InvalidEntityStateException;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.testing.server.User;
 import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntity;
 import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntityBuilder;
@@ -94,7 +94,7 @@ class EntityBuilderTest {
         StringValue state = StringValue.of(getClass().getName());
         Timestamp timestamp = Time.getCurrentTime();
 
-        VersionableEntity entity = givenEntity()
+        Entity entity = givenEntity()
                 .withId(id)
                 .withVersion(version)
                 .withState(state)
@@ -102,17 +102,17 @@ class EntityBuilderTest {
                 .build();
 
         assertEquals(TestEntity.class, entity.getClass());
-        assertEquals(id, entity.getId());
+        assertEquals(id, entity.id());
     }
 
     @Test
     @DisplayName("create entity with default values")
     void createWithDefaultValues() {
-        VersionableEntity entity = givenEntity().build();
+        Entity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
-        assertEquals(0L, entity.getId());
-        assertEquals(StringValue.of(""), entity.getState());
+        assertEquals(0L, entity.id());
+        assertEquals(StringValue.of(""), entity.state());
         assertEquals(0, entity.getVersion().getNumber());
     }
 
@@ -152,6 +152,6 @@ class EntityBuilderTest {
                 .withState(user)
                 .build();
 
-        assertEquals(user, aggregate.getState());
+        assertEquals(user, aggregate.state());
     }
 }

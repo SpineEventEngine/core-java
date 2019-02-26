@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,18 +20,15 @@
 
 package io.spine.server.groups;
 
-import com.google.protobuf.StringValue;
+import com.google.common.collect.ImmutableSet;
 import io.spine.core.Subscribe;
 import io.spine.server.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;
-import io.spine.validate.StringValueVBuilder;
-
-import static com.google.common.collect.ImmutableSet.of;
 
 public final class GroupNameProjection
-        extends Projection<GroupId, StringValue, StringValueVBuilder> {
+        extends Projection<GroupId, GroupName, GroupNameVBuilder> {
 
     private GroupNameProjection(GroupId id) {
         super(id);
@@ -39,23 +36,25 @@ public final class GroupNameProjection
 
     @Subscribe(external = true)
     public void onUpdate(Organization organization) {
-        getBuilder().setValue(organization.getName());
+        builder()
+                .setId(id())
+                .setName(organization.getName());
     }
 
     public static final class Repository
-            extends ProjectionRepository<GroupId, GroupNameProjection, StringValue> {
+            extends ProjectionRepository<GroupId, GroupNameProjection, GroupName> {
 
         @Override
         public void onRegistered() {
             super.onRegistered();
 
             StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
-            routing.route(Organization.class, (org, ctx) -> of(
+            routing.route(Organization.class, (org, ctx) -> ImmutableSet.of(
                     GroupId.newBuilder()
                            .setUuid(org.getId()
                                        .getUuid())
                            .build()));
-            getEventRouting().routeEntityStateUpdates(routing);
+            eventRouting().routeEntityStateUpdates(routing);
         }
     }
 }

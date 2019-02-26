@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,6 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.server.delivery.ShardedMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -32,9 +31,6 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("ExternalMessages utility should")
 class ExternalMessagesTest {
 
@@ -53,7 +49,6 @@ class ExternalMessagesTest {
                 .setDefault(Command.class, Command.getDefaultInstance())
                 .setDefault(RequestForExternalMessages.class,
                             RequestForExternalMessages.getDefaultInstance())
-                .setDefault(ShardedMessage.class, ShardedMessage.getDefaultInstance())
                 .testStaticMethods(ExternalMessages.class, PACKAGE);
     }
 }

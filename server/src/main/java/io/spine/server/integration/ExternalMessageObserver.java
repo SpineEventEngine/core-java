@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,10 +28,8 @@ import io.spine.grpc.StreamObservers;
  *
  * <p>Responsible of receiving those from the transport layer and posting those to the local
  * instance of {@code IntegrationBus}.
- *
- * @author Alex Tymchenko
  */
-class ExternalMessageObserver extends AbstractChannelObserver {
+final class ExternalMessageObserver extends AbstractChannelObserver {
 
     private final IntegrationBus integrationBus;
 

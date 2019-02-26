@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,6 +28,8 @@ import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
+import io.spine.core.Commands;
+import io.spine.core.Events;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
@@ -41,16 +43,12 @@ import io.spine.system.server.given.entity.PersonProjection;
 import io.spine.system.server.given.entity.PersonProjectionRepository;
 import io.spine.system.server.given.entity.PersonRepository;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.ShardingReset;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import static io.spine.core.Commands.getMessage;
-import static io.spine.core.Events.getMessage;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
@@ -62,13 +60,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("EntityHistory should")
 @SuppressWarnings("InnerClassMayBeStatic")
 class EntityHistoryTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EntityHistoryTest.class);
+            new TestActorRequestFactory(EntityHistoryTest.class);
 
     private BoundedContext context;
     private BoundedContext system;
@@ -102,7 +99,7 @@ class EntityHistoryTest {
         @BeforeEach
         void setUp() {
             eventAccumulator = new HistoryEventWatcher();
-            system.getEventBus()
+            system.eventBus()
                   .register(eventAccumulator);
             id = Identifier.generate(PersonId.class);
         }
@@ -304,7 +301,7 @@ class EntityHistoryTest {
             CommandDispatchedToHandler event =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             assertId(event.getReceiver());
-            Message commandMessage = getMessage(event.getPayload());
+            Message commandMessage = Commands.getMessage(event.getPayload());
             assertEquals(command, commandMessage);
         }
 
@@ -321,7 +318,7 @@ class EntityHistoryTest {
             EventDispatchedToSubscriber event =
                     eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
             EntityHistoryId receiver = event.getReceiver();
-            PersonCreated payload = (PersonCreated) getMessage(event.getPayload());
+            PersonCreated payload = (PersonCreated) Events.getMessage(event.getPayload());
             assertId(receiver);
             assertEquals(PersonProjection.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
@@ -339,7 +336,8 @@ class EntityHistoryTest {
             CommandDispatchedToHandler commandDispatchedEvent =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
-            CreatePerson payload = (CreatePerson) getMessage(commandDispatchedEvent.getPayload());
+            CreatePerson payload = (CreatePerson)
+                    Commands.getMessage(commandDispatchedEvent.getPayload());
             assertId(receiver);
             assertEquals(PersonAggregate.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
@@ -390,7 +388,7 @@ class EntityHistoryTest {
 
         private void postCommand(CommandMessage commandMessage) {
             Command command = requestFactory.createCommand(commandMessage);
-            context.getCommandBus()
+            context.commandBus()
                    .post(command, noOpObserver());
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class CommandHistory {
     }
 
     public void add(CommandEnvelope e) {
-        add(e.getMessage(), e.getCommandContext());
+        add(e.message(), e.context());
     }
 
     public boolean contains(Command command) {

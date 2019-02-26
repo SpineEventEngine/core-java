@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,13 +20,8 @@
 
 package io.spine.server.entity.given;
 
-import com.google.protobuf.Any;
-import io.spine.core.BoundedContextName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.entity.AbstractVersionableEntity;
-import io.spine.server.entity.DefaultRecordBasedRepository;
-import io.spine.server.entity.storage.Column;
 import io.spine.test.entity.FullAccessAggregate;
 import io.spine.test.entity.FullAccessAggregateVBuilder;
 import io.spine.test.entity.HiddenAggregate;
@@ -34,14 +29,7 @@ import io.spine.test.entity.HiddenAggregateVBuilder;
 import io.spine.test.entity.SubscribableAggregate;
 import io.spine.test.entity.SubscribableAggregateVBuilder;
 
-import static io.spine.core.BoundedContextNames.newName;
-
-/**
- * @author Dmytro Grankin
- */
 public class VisibilityGuardTestEnv {
-
-    private static final BoundedContextName BOUNDED_CONTEXT_NAME = newName("Visibility Guards");
 
     private VisibilityGuardTestEnv() {
         // Prevent instantiation of this utility class.
@@ -58,11 +46,6 @@ public class VisibilityGuardTestEnv {
         public ExposedRepository() {
             super();
         }
-
-        @Override
-        public BoundedContextName getBoundedContextName() {
-            return BOUNDED_CONTEXT_NAME;
-        }
     }
 
     public static class Subscribable
@@ -75,11 +58,6 @@ public class VisibilityGuardTestEnv {
     public static class SubscribableRepository extends AggregateRepository<Long, Subscribable> {
         public SubscribableRepository() {
             super();
-        }
-
-        @Override
-        public BoundedContextName getBoundedContextName() {
-            return BOUNDED_CONTEXT_NAME;
         }
     }
 
@@ -94,32 +72,5 @@ public class VisibilityGuardTestEnv {
         public HiddenRepository() {
             super();
         }
-
-        @Override
-        public BoundedContextName getBoundedContextName() {
-            return BOUNDED_CONTEXT_NAME;
-        }
-    }
-
-    public static class EntityWithInvalidColumns extends AbstractVersionableEntity<String, Any> {
-        private static final String COLUMN_NAME = "columnNameFromAnnotation";
-
-        public EntityWithInvalidColumns(String id) {
-            super(id);
-        }
-
-        @Column(name = COLUMN_NAME)
-        public int getInt() {
-            return 0;
-        }
-
-        @Column(name = COLUMN_NAME)
-        public long getLong() {
-            return 0L;
-        }
-    }
-
-    public static class RepositoryForInvalidEntity
-            extends DefaultRecordBasedRepository<String, EntityWithInvalidColumns, Any> {
     }
 }

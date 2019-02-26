@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -49,8 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * See `client/spine/test/option/entity_options_should.proto` for definition of messages
  * used for aggregates and repositories in this test.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("VisibilityGuard should")
 class VisibilityGuardTest {

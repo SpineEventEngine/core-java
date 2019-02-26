@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,10 +20,17 @@
 
 package io.spine.server.command.model;
 
+import io.spine.server.type.CommandClass;
+
+import java.util.Set;
+
 /**
  * An interface common for model classes of objects that create commands.
- *
- * @author Alexander Yevsyukov
  */
 public interface CommandingClass {
+
+    /**
+     * Obtains the classes of commands produced by this commanding class.
+     */
+    Set<CommandClass> getProducedCommands();
 }

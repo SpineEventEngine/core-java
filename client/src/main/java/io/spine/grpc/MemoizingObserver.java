@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,27 +33,18 @@ import static com.google.common.collect.Lists.newLinkedList;
  * The {@link StreamObserver} which stores the input data and then exposes it via API calls.
  *
  * @param <T> the type of streamed objects
- * @author Alex Tymchenko
  */
 @Internal
 public class MemoizingObserver<T> implements StreamObserver<T> {
     
     private final List<T> responses = newLinkedList();
-    private Throwable throwable;
+    private @Nullable Throwable throwable;
     private boolean completed = false;
 
     /**
-     * Creates an instance of observer, which memoizes the responses.
-     *
-     * @param <T> the type of objects streamed to this observer
-     * @return the memoizing observer
+     * Creates new empty instance.
      */
-    public static <T> MemoizingObserver<T> newInstance() {
-        return new MemoizingObserver<>();
-    }
-
-    /** Prevent instantiation from the outside. */
-    private MemoizingObserver() {
+    public MemoizingObserver() {
     }
 
     @Override

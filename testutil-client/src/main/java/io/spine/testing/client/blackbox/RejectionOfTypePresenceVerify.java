@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,23 +20,19 @@
 
 package io.spine.testing.client.blackbox;
 
-import com.google.protobuf.Message;
-import io.spine.core.RejectionClass;
+import io.spine.code.proto.RejectionType;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Verifies that a command was handled with a {@link io.spine.base.ThrowableMessage rejection} of
  * the provided type.
- *
- * @author Mykhailo Drachuk
  */
 final class RejectionOfTypePresenceVerify extends VerifyAcknowledgements {
 
-    private final RejectionClass type;
+    private final RejectionType type;
 
-    /** @param type rejection type in a form of {@link RejectionClass RejectionClass} */
-    RejectionOfTypePresenceVerify(RejectionClass type) {
+    RejectionOfTypePresenceVerify(RejectionType type) {
         super();
         this.type = type;
     }
@@ -44,9 +40,8 @@ final class RejectionOfTypePresenceVerify extends VerifyAcknowledgements {
     @Override
     public void verify(Acknowledgements acks) {
         if (!acks.containRejections(type)) {
-            Class<? extends Message> domainRejection = type.value();
-            fail("Bounded Context did not reject a message of type:" +
-                         domainRejection.getSimpleName());
+            fail("A rejection of the type `" +
+                         type.descriptor().getFullName() + "` was not emitted.");
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,12 +22,12 @@ package io.spine.server.aggregate;
 
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
@@ -66,7 +66,7 @@ class AggregateCommandEndpointTest {
 
         // Create a subscriber of ProjectCreated event.
         subscriber = new Subscriber();
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .register(subscriber);
 
         repository = new ProjectAggregateRepository();
@@ -95,7 +95,7 @@ class AggregateCommandEndpointTest {
     @DisplayName("store aggregate on command dispatching")
     void storeAggregateOnCommandDispatching() {
         CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        AggCreateProject msg = (AggCreateProject) cmd.getMessage();
+        AggCreateProject msg = (AggCreateProject) cmd.message();
 
         ProjectId id = repository.dispatch(cmd);
         assertEquals(projectId, id);
@@ -104,9 +104,9 @@ class AggregateCommandEndpointTest {
         assertTrue(optional.isPresent());
 
         ProjectAggregate aggregate = optional.get();
-        assertEquals(projectId, aggregate.getId());
+        assertEquals(projectId, aggregate.id());
 
-        assertEquals(msg.getName(), aggregate.getState()
+        assertEquals(msg.getName(), aggregate.state()
                                              .getName());
     }
 
@@ -141,7 +141,7 @@ class AggregateCommandEndpointTest {
         private AggProjectCreated remembered;
 
         @Subscribe
-        void on(AggProjectCreated msg) {
+        public void on(AggProjectCreated msg) {
             remembered = msg;
         }
     }

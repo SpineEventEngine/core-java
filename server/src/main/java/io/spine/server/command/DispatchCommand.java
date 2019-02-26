@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,9 +22,9 @@ package io.spine.server.command;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +83,7 @@ public final class DispatchCommand<I> {
      */
     public List<Event> perform() {
         List<Event> result = entity.dispatchCommand(command);
-        onCommandResult(command.getCommand(), result);
+        onCommandResult(command.command(), result);
         return result;
     }
 

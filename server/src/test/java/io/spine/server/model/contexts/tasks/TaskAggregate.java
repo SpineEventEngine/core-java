@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -55,7 +55,7 @@ class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
     @Apply
     void event(TaskCreated event) {
         Task task = event.getTask();
-        getBuilder()
+        builder()
                 .setId(event.getId())
                 .setName(task.getName())
                 .setDescription(task.getDescription());
@@ -72,6 +72,6 @@ class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
 
     @Apply
     void event(TaskRenamed event) {
-        getBuilder().setName(event.getNewName());
+        builder().setName(event.getNewName());
     }
 }

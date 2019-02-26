@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,7 +26,6 @@ import io.spine.server.bus.MulticastDispatcher;
  * that are {@linkplain io.spine.core.Subscribe#external() configured} to receive external events.
  *
  * @param <I> the type of IDs of entities to which messages are dispatched
- * @author Alex Tymchenko
  */
 public interface ExternalMessageDispatcher<I>
         extends MulticastDispatcher<ExternalMessageClass, ExternalMessageEnvelope, I> {

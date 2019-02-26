@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,36 +27,34 @@ import io.spine.testing.server.entity.EntityBuilder;
 
 import static io.spine.base.Identifier.newUuid;
 
-/**
- * Extracted from {@link EntityTest}
- *
- * @author Mikhail Mikhaylov
- */
-public class TestEntity extends AbstractVersionableEntity<String, Project> {
+public class TestEntity extends AbstractEntity<String, Project> {
 
     static TestEntity newInstance(String id) {
-        TestEntity result = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                   .withId(id)
-                                                   .build();
+        TestEntity result = new TestEntityBuilder()
+                .setResultClass(TestEntity.class)
+                .withId(id)
+                .build();
         return result;
     }
 
     static TestEntity withState() {
-        TestEntity result = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                   .withId(newUuid())
-                                                   .withState(Sample.messageOfType(Project.class))
-                                                   .withVersion(3)
-                                                   .build();
+        TestEntity result = new TestEntityBuilder()
+                .setResultClass(TestEntity.class)
+                .withId(newUuid())
+                .withState(Sample.messageOfType(Project.class))
+                .withVersion(3)
+                .build();
         return result;
     }
 
     static TestEntity withStateOf(TestEntity entity) {
-        TestEntity result = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                   .withId(entity.getId())
-                                                   .withState(entity.getState())
-                                                   .withVersion(entity.getVersion()
-                                                   .getNumber())
-                                                   .build();
+        TestEntity result = new TestEntityBuilder()
+                .setResultClass(TestEntity.class)
+                .withId(entity.id())
+                .withState(entity.state())
+                .withVersion(entity.version()
+                                   .getNumber())
+                .build();
         return result;
     }
 

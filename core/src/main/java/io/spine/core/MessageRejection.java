@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,8 +32,6 @@ import io.spine.base.Error;
  *     <li>a command;
  *     <li>an actor request (query, topic or subscription).
  * </ul>
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface MessageRejection {

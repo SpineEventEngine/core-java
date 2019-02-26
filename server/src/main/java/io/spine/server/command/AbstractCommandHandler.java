@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,8 +20,6 @@
 
 package io.spine.server.command;
 
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.command.model.CommandHandlerClass;
@@ -29,6 +27,8 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerMethod.Result;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 import java.util.Set;
@@ -88,7 +88,7 @@ public abstract class AbstractCommandHandler
      */
     @Override
     public String dispatch(CommandEnvelope envelope) {
-        CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
+        CommandHandlerMethod method = thisClass.getHandler(envelope.messageClass());
         Result result = method.invoke(this, envelope);
         List<Event> events = result.produceEvents(envelope);
         postEvents(events);
@@ -97,7 +97,7 @@ public abstract class AbstractCommandHandler
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return thisClass.getCommands();
     }
 
@@ -105,7 +105,7 @@ public abstract class AbstractCommandHandler
      * Always returns {@linkplain Version#getDefaultInstance() empty} version.
      */
     @Override
-    public Version getVersion() {
+    public Version version() {
         return Version.getDefaultInstance();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -60,9 +60,9 @@ public abstract class EventReactionTest<I,
 
     @Override
     protected EventReactorExpected<S> expectThat(E entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         List<? extends Message> events = dispatchTo(entity);
-        return new EventReactorExpected<>(events, initialState, entity.getState(),
+        return new EventReactorExpected<>(events, initialState, entity.state(),
                                           interceptedCommands());
     }
 

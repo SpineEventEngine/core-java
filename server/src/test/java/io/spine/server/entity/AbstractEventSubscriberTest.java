@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,7 +26,6 @@ import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
 import io.spine.core.UserId;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.model.InsufficientVisibilityError;
 import io.spine.server.groups.FilteredStateSubscriber;
@@ -36,10 +35,10 @@ import io.spine.server.groups.HiddenEntitySubscriber;
 import io.spine.server.groups.TestSubscriber;
 import io.spine.server.groups.WronglyDomesticSubscriber;
 import io.spine.server.groups.WronglyExternalSubscriber;
-import io.spine.server.integration.IntegrationBus;
 import io.spine.server.organizations.Organization;
 import io.spine.server.organizations.OrganizationId;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.SystemBoundedContexts;
@@ -56,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("AbstractEventSubscriber should")
 class AbstractEventSubscriberTest {
 
     private TestSubscriber subscriber;
@@ -68,12 +68,12 @@ class AbstractEventSubscriberTest {
         groupsContext = BoundedContext
                 .newBuilder()
                 .setName("Groups")
-                .setIntegrationBus(IntegrationBus.newBuilder().setTransportFactory(transport))
+                .setTransportFactory(transport)
                 .build();
         organizationsContext = BoundedContext
                 .newBuilder()
                 .setName("Organizations")
-                .setIntegrationBus(IntegrationBus.newBuilder().setTransportFactory(transport))
+                .setTransportFactory(transport)
                 .build();
         subscriber = new TestSubscriber();
         groupsContext.registerEventDispatcher(subscriber);
@@ -96,7 +96,7 @@ class AbstractEventSubscriberTest {
                 .setNewState(pack(state))
                 .build();
         SystemBoundedContexts.systemOf(groupsContext)
-                             .getEventBus()
+                             .eventBus()
                              .post(GivenEvent.withMessage(event));
         Optional<Group> receivedState = subscriber.domestic();
         assertTrue(receivedState.isPresent());
@@ -122,7 +122,7 @@ class AbstractEventSubscriberTest {
                 .setNewState(pack(state))
                 .build();
         SystemBoundedContexts.systemOf(organizationsContext)
-                             .getEventBus()
+                             .eventBus()
                              .post(GivenEvent.withMessage(event));
         Optional<Organization> receivedState = subscriber.external();
         assertTrue(receivedState.isPresent());

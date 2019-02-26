@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
-import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
+import io.spine.server.aggregate.given.repo.AggregateWithLifecycle;
+import io.spine.server.aggregate.given.repo.RepoOfAggregateWithLifecycle;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,16 +36,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("AggregateRepository views should")
 class AggregateRepositoryViewsTest {
 
-    /** The Aggregate ID used in all tests */
+    /** The Aggregate ID used in all tests. */
     private static final Long id = 100L;
-    private final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+    private final ActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
     private BoundedContext boundedContext;
     /**
      * The default behaviour of an {@code AggregateRepository}.
@@ -73,7 +69,7 @@ class AggregateRepositoryViewsTest {
         Command command =
                 requestFactory.command()
                               .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
-        boundedContext.getCommandBus()
+        boundedContext.commandBus()
                       .post(command, StreamObservers.noOpObserver());
     }
 

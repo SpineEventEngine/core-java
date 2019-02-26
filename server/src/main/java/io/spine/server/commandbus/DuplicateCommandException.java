@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,9 +24,9 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;
@@ -36,8 +36,6 @@ import static java.lang.String.format;
  *
  * <p>A command is considered a duplicate when its ID matches the ID of a command which was
  * already dispatched emitting events in a target aggregate.
- *
- * @author Mykhailo Drachuk
  */
 public class DuplicateCommandException extends CommandException implements MessageInvalid {
 
@@ -55,7 +53,7 @@ public class DuplicateCommandException extends CommandException implements Messa
      */
     public static DuplicateCommandException of(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        Message commandMessage = envelope.getMessage();
+        Message commandMessage = envelope.message();
         String errorMessage = aggregateErrorMessage(envelope);
         Error error = error(commandMessage, errorMessage);
         return new DuplicateCommandException(errorMessage, command, error);
@@ -87,10 +85,10 @@ public class DuplicateCommandException extends CommandException implements Messa
         return format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched to a "
                         + "single entity twice.",
-                envelope.getMessageClass()
+                envelope.messageClass()
                         .value()
                         .getName(),
-                TypeName.of(envelope.getMessage()),
-                Identifier.toString(envelope.getId()));
+                TypeName.of(envelope.message()),
+                Identifier.toString(envelope.id()));
     }
 }

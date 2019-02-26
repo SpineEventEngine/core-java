@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -44,7 +44,7 @@ final class DefaultSystemReadSide implements SystemReadSide {
 
     DefaultSystemReadSide(SystemContext context) {
         this.context = context;
-        this.eventBus = context.getEventBus();
+        this.eventBus = context.eventBus();
     }
 
     @Override
@@ -61,13 +61,12 @@ final class DefaultSystemReadSide implements SystemReadSide {
 
     @Override
     public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
-        @SuppressWarnings("unchecked") // Logically checked.
         MirrorRepository repository = (MirrorRepository)
                 context.findRepository(Mirror.class)
                        .orElseThrow(
                                () -> newIllegalStateException(
                                        "Mirror projection repository is not registered in %s.",
-                                       context.getName()
+                                       context.name()
                                               .getValue()
                                )
                        );

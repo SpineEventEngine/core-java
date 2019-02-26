@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
 import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * A builder for the {@link Query} instances.
@@ -55,9 +53,8 @@ import static java.util.Optional.of;
  *     }
  * </pre>
  *
- * @author Dmytro Dashenkov
  * @see QueryFactory#select(Class) to start query building
- * @see io.spine.client.ColumnFilters for filter creation shortcuts
+ * @see Filters for filter creation shortcuts
  * @see AbstractTargetBuilder for more details on this builders API
  */
 public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilder> {
@@ -108,6 +105,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         return self();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")  /* See https://github.com/pmd/pmd/issues/770. */
     private static void checkLimit(Number count) {
         checkArgument(count.longValue() > 0, "A Query limit must be more than 0.");
     }
@@ -139,23 +137,23 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
 
     private Optional<Pagination> pagination() {
         if (limit == 0) {
-            return empty();
+            return Optional.empty();
         }
         Pagination result = PaginationVBuilder.newBuilder()
                                               .setPageSize(limit)
                                               .build();
-        return of(result);
+        return Optional.of(result);
     }
 
     private Optional<OrderBy> orderBy() {
         if (orderingColumn == null) {
-            return empty();
+            return Optional.empty();
         }
         OrderBy result = OrderByVBuilder.newBuilder()
                                         .setColumn(orderingColumn)
                                         .setDirection(direction)
                                         .build();
-        return of(result);
+        return Optional.of(result);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,7 +29,6 @@ import java.util.function.Supplier;
  * such as classes of messages being handled by the methods exposed by the class.
  *
  * @param <T> the type of objects
- * @author Alexander Yevsyukov
  */
 public abstract class ModelClass<T> extends ClassTypeValue<T> {
 

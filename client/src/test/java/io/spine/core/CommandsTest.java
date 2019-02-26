@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,7 +26,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.client.ActorRequestFactory;
 import io.spine.protobuf.Durations2;
 import io.spine.string.Stringifiers;
 import io.spine.test.commands.CmdCreateProject;
@@ -38,8 +37,6 @@ import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import io.spine.type.TypeName;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -62,7 +59,6 @@ import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -92,7 +88,7 @@ class CommandsTest {
             .build();
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandsTest.class);
+            new TestActorRequestFactory(CommandsTest.class);
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
@@ -248,35 +244,5 @@ class CommandsTest {
     void returnIdWhenChecked() {
         CommandId id = Commands.generateId();
         assertEquals(id, Commands.checkValid(id));
-    }
-
-    @Test
-    @DisplayName("obtain type of given command")
-    void getCommandType() {
-        Command command = requestFactory.generateCommand();
-
-        TypeName typeName = CommandEnvelope.of(command)
-                                           .getTypeName();
-        assertNotNull(typeName);
-        assertEquals(TypeName.of(TestCommandMessage.class), typeName);
-    }
-
-    @Test
-    @DisplayName("obtain type url of given command")
-    void getCommandTypeUrl() {
-        ActorRequestFactory factory =
-                TestActorRequestFactory.newInstance(CommandsTest.class);
-        CommandMessage message = TestCommandMessage
-                .newBuilder()
-                .setId(Identifier.newUuid())
-                .build();
-        Command command = factory.command()
-                                 .create(message);
-
-        TypeUrl typeUrl = CommandEnvelope.of(command)
-                                         .getTypeName()
-                                         .toUrl();
-
-        assertEquals(TypeUrl.of(TestCommandMessage.class), typeUrl);
     }
 }

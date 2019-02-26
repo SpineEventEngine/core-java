@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -38,14 +38,12 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * <p>The test suite is located under the "client" module since actor request generation
  * is required. So we want to avoid circular dependencies between "core" and "client" modules.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("Command attribute should")
 class CommandAttributeTest {
 
     private final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(CommandAttributeTest.class);
+            new TestActorRequestFactory(CommandAttributeTest.class);
 
     private CommandContext.Builder contextBuilder;
 

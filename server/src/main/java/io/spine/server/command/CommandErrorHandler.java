@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,18 +25,20 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Errors;
 import io.spine.base.EventMessage;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
+import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.CommandErrored;
 import io.spine.system.server.CommandRejected;
 import io.spine.system.server.SystemWriteSide;
 
+import java.util.function.Consumer;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.command.Rejections.causedByRejection;
-import static java.lang.String.format;
 
 /**
  * The handler of the errors thrown while command dispatching.
@@ -45,8 +47,7 @@ import static java.lang.String.format;
  * the {@linkplain CommandDispatcher#onError error handling} to an instance of
  * {@code CommandErrorHandler}.
  *
- * @author Dmytro Dashenkov
- * @see #handleError(CommandEnvelope, RuntimeException)
+ * @see #handle(CommandEnvelope, RuntimeException)
  */
 @Internal
 public final class CommandErrorHandler implements Logging {
@@ -74,44 +75,59 @@ public final class CommandErrorHandler implements Logging {
      * @return the result of the error handing
      */
     @CanIgnoreReturnValue
-    public CaughtError handleError(CommandEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
+    public CaughtError handle(CommandEnvelope command, RuntimeException exception) {
+        checkNotNull(command);
         checkNotNull(exception);
-
         boolean rejection = causedByRejection(exception);
-        if (rejection) {
-            return handleRejection(envelope, exception);
-        } else {
-            return handleRuntimeError(envelope, exception);
-        }
+        CaughtError result = rejection
+                             ? handleRejection(command, exception)
+                             : handleRuntimeError(command, exception);
+        return result;
     }
 
-    private CaughtError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
-        RejectionEnvelope rejection = RejectionEnvelope.from(envelope, exception);
-        markRejected(envelope, rejection);
-        return CaughtError.ofRejection(exception, envelope);
+    private CaughtError handleRejection(CommandEnvelope command, RuntimeException exception) {
+        RejectionEnvelope rejection = RejectionEnvelope.from(command, exception);
+        markRejected(command, rejection);
+        return CaughtError.ofRejection(command, exception);
     }
 
     private CaughtError handleRuntimeError(CommandEnvelope envelope, RuntimeException exception) {
-        if (isHandled(exception)) {
-            return CaughtError.handled();
-        } else {
-            return handleNewRuntimeError(envelope, exception);
-        }
+        CaughtError result = isHandled(exception)
+                             ? CaughtError.handled()
+                             : handleNewRuntimeError(envelope, exception);
+        return result;
     }
 
-    private CaughtError handleNewRuntimeError(CommandEnvelope envelope,
-                                              RuntimeException exception) {
-        String commandTypeName = envelope.getMessage()
-                                         .getClass()
-                                         .getName();
-        String commandId = envelope.idAsString();
-        log().error(format("Error dispatching command (class: %s id: %s).",
-                           commandTypeName, commandId),
-                    exception);
+    private CaughtError handleNewRuntimeError(CommandEnvelope cmd, RuntimeException exception) {
+        String commandTypeName = cmd.message()
+                                    .getClass()
+                                    .getName();
+        String commandId = cmd.idAsString();
+        _error(exception, "Error dispatching command (class: `{}` id: {}).",
+               commandTypeName, commandId);
         Error error = Errors.causeOf(exception);
-        markErrored(envelope, error);
+        markErrored(cmd, error);
         return CaughtError.ofRuntime(exception);
+    }
+
+    /**
+     * Handles the passed exception, and if it represents a rejection event it is passed to
+     * the consumer. If the exception was not caused by a rejection, or rethrown earlier, it
+     * will be rethrown.
+     *
+     * @param cmd
+     *         the command which caused the exception
+     * @param exception
+     *         the thrown exception
+     * @param consumer
+     *         the consumer of the rejection event
+     */
+    public void handle(CommandEnvelope cmd, RuntimeException exception, Consumer<Event> consumer) {
+        CaughtError error = handle(cmd, exception);
+        error.asRejection()
+             .map(RejectionEnvelope::outerObject)
+             .ifPresent(consumer);
+        error.rethrowOnce();
     }
 
     /**
@@ -131,7 +147,7 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private void markErrored(CommandEnvelope command, Error error) {
-        CommandId commandId = command.getId();
+        CommandId commandId = command.id();
         CommandErrored systemEvent = CommandErrored
                 .newBuilder()
                 .setId(commandId)
@@ -141,12 +157,12 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private void markRejected(CommandEnvelope command, RejectionEnvelope rejection) {
-        CommandId commandId = command.getId();
+        CommandId commandId = command.id();
 
         CommandRejected systemEvent = CommandRejected
                 .newBuilder()
                 .setId(commandId)
-                .setRejectionEvent(rejection.getOuterObject())
+                .setRejectionEvent(rejection.outerObject())
                 .build();
         postSystem(systemEvent);
     }

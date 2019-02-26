@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.model.declare;
 
 import io.spine.server.model.HandlerMethod;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.TestInstance;
@@ -34,9 +35,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-/**
- * @author Dmytro Dashenkov
- */
 @TestInstance(PER_CLASS)
 public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
 
@@ -46,6 +44,7 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
 
     protected abstract S signature();
 
+    @MuteLogging /* Signature mismatch warnings are expected. */
     @DisplayName("create handlers from valid methods")
     @ParameterizedTest
     @MethodSource("validMethods")

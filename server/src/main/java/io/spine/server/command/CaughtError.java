@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,8 +21,8 @@
 package io.spine.server.command;
 
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Optional;
 
@@ -36,8 +36,6 @@ import java.util.Optional;
  *
  * <p>If the error represents a command rejection, the rejection can be
  * {@linkplain #asRejection() obtained} for further manipulations. A rejection cannot be rethrown.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface CaughtError {
@@ -63,14 +61,14 @@ public interface CaughtError {
     }
 
     /**
-     * Obtains a {@link CaughtError} for a previously handled error.
+     * Obtains an instance for a previously handled error.
      */
     static CaughtError handled() {
         return HandledError.INSTANCE;
     }
 
     /**
-     * Obtains a {@link CaughtError} for the given {@link RuntimeException}.
+     * Obtains an instance for the given {@link RuntimeException}.
      *
      * @param exception the caught error
      * @return wrapped error
@@ -80,15 +78,16 @@ public interface CaughtError {
     }
 
     /**
-     * Obtains a {@link CaughtError} for the given {@linkplain io.spine.base.ThrowableMessage
-     * rejection}.
+     * Obtains an instance for the given {@linkplain io.spine.base.ThrowableMessage rejection}.
      *
-     * @param rejection the {@link RuntimeException} caused by
-     *                  a {@linkplain io.spine.base.ThrowableMessage ThrowableMessage}
-     * @param command   the rejected command
+     * @param command
+     *         the rejected command
+     * @param rejection
+     *         the {@link RuntimeException} caused by
+     *         a {@linkplain io.spine.base.ThrowableMessage ThrowableMessage}
      * @return wrapped rejection
      */
-    static CaughtError ofRejection(RuntimeException rejection, CommandEnvelope command) {
+    static CaughtError ofRejection(CommandEnvelope command, RuntimeException rejection) {
         return new CaughtRejection(command, rejection);
     }
 }

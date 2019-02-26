@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,9 +22,9 @@ package io.spine.server.entity;
 
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.entity.given.RepositoryTestEnv.ProjectEntity;
-import io.spine.server.entity.given.RepositoryTestEnv.RepoForEntityWithUnsupportedId;
-import io.spine.server.entity.given.RepositoryTestEnv.TestRepo;
+import io.spine.server.entity.given.repository.ProjectEntity;
+import io.spine.server.entity.given.repository.RepoForEntityWithUnsupportedId;
+import io.spine.server.entity.given.repository.TestRepo;
 import io.spine.server.model.ModelError;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -47,10 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- */
 @DisplayName("Repository should")
 class RepositoryTest {
 
@@ -71,7 +67,7 @@ class RepositoryTest {
                                        .setMultitenant(true)
                                        .build();
         repository = new TestRepo();
-        storageFactory = boundedContext.getStorageFactory();
+        storageFactory = boundedContext.storageFactory();
         tenantId = newUuid();
     }
 
@@ -83,7 +79,7 @@ class RepositoryTest {
     @Test
     @DisplayName("check for entity ID class")
     void checkEntityIdType() {
-        assertThrows(ModelError.class, () -> new RepoForEntityWithUnsupportedId().getIdClass());
+        assertThrows(ModelError.class, () -> new RepoForEntityWithUnsupportedId().idClass());
     }
 
     @Test
@@ -95,7 +91,7 @@ class RepositoryTest {
     @Test
     @DisplayName("not allow getting BoundedContext before registration")
     void notGetBcIfUnregistered() {
-        assertThrows(IllegalStateException.class, () -> new TestRepo().getBoundedContext());
+        assertThrows(IllegalStateException.class, () -> new TestRepo().boundedContext());
     }
 
     @Test
@@ -115,7 +111,7 @@ class RepositoryTest {
     @Test
     @DisplayName("prohibit obtaining unassigned storage")
     void notGetUnassignedStorage() {
-        assertThrows(IllegalStateException.class, () -> repository.getStorage());
+        assertThrows(IllegalStateException.class, () -> repository.storage());
     }
 
     @Test
@@ -123,7 +119,7 @@ class RepositoryTest {
     void initStorageWithFactory() {
         repository.initStorage(storageFactory);
         assertTrue(repository.isStorageAssigned());
-        assertNotNull(repository.getStorage());
+        assertNotNull(repository.storage());
     }
 
     @Test
@@ -138,7 +134,7 @@ class RepositoryTest {
     void closeStorageOnClose() {
         repository.initStorage(storageFactory);
 
-        RecordStorage<?> storage = (RecordStorage<?>) repository.getStorage();
+        RecordStorage<?> storage = (RecordStorage<?>) repository.storage();
         repository.close();
 
         assertTrue(storage.isClosed());

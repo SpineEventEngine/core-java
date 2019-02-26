@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -87,7 +87,7 @@ public class Buses {
         checkNotNull(id);
         checkNotNull(cause);
 
-        Event event = cause.getOuterObject();
+        Event event = cause.outerObject();
         checkArgument(isNotDefault(event));
         Status status = Status
                 .newBuilder()

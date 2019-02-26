@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,8 +23,8 @@ package io.spine.testing.server.procman;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;

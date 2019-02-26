@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,8 +29,9 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
-import io.spine.server.event.Enricher;
-import io.spine.server.event.EnricherTest;
+import io.spine.server.enrich.Enricher;
+import io.spine.server.enrich.EnricherBuilder;
+import io.spine.server.enrich.EnricherTest;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -51,9 +52,6 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class EventEnricherTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -206,7 +204,7 @@ public class EventEnricherTestEnv {
 
         /** Creates a new enricher with all required enrichment functions set. */
         public static Enricher newEventEnricher() {
-            Enricher.Builder builder = Enricher
+            EnricherBuilder builder = Enricher
                     .newBuilder()
                     .add(ProjectId.class, String.class, new GetProjectName())
                     .add(ProjectId.class, UserId.class, new GetProjectOwnerId())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,9 +29,6 @@ import static io.spine.server.command.given.CommandHandlingEntityTestEnv.msg;
 import static io.spine.server.command.given.CommandHandlingEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("CommandHandlingEntity should")
 class CommandHandlingEntityTest {
 
@@ -40,13 +37,13 @@ class CommandHandlingEntityTest {
 
     @BeforeEach
     void setUp() {
-        entity = new HandlingEntity(1L);
+        entity = new HandlingEntity(getClass().getName());
     }
 
     @Test
     @DisplayName("assign own version to created mismatches")
     void assignVersionToMismatches() {
-        int version = entity.getVersion().getNumber();
+        int version = entity.version().getNumber();
 
         assertEquals(version, entity.expectedDefault(msg(), msg()).getVersion());
         assertEquals(version, entity.expectedNotDefault(msg()).getVersion());

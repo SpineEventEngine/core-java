@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
@@ -37,7 +38,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.option.EntityOption.Kind.ENTITY;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -95,7 +95,6 @@ class EntityLifecycleTest {
         MemoizedSystemMessage lastSeenEvent = writeSide.lastSeenEvent();
         assertThat(lastSeenEvent.message(), instanceOf(EntityCreated.class));
 
-
         EntityRecord previousRecord = EntityRecord
                 .newBuilder()
                 .setEntityId(Identifier.pack(entityId))
@@ -110,7 +109,7 @@ class EntityLifecycleTest {
                 .setPreviousValue(previousRecord)
                 .setNewValue(newRecord)
                 .build();
-        lifecycle.onStateChanged(change, of(EventId.getDefaultInstance()));
+        lifecycle.onStateChanged(change, ImmutableSet.of(EventId.getDefaultInstance()));
         assertSame(lastSeenEvent, writeSide.lastSeenEvent());
     }
 }

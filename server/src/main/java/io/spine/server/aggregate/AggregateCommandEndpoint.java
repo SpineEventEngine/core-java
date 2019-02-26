@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,21 +20,22 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 
 import static io.spine.server.command.DispatchCommand.operationFor;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates managed by the parent repository
- * @author Alexander Yevsyukov
  */
 final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, CommandEnvelope> {
@@ -44,15 +45,10 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> doDispatch(A aggregate, CommandEnvelope envelope) {
-        EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.getId());
+    protected List<Event> invokeDispatcher(A aggregate, CommandEnvelope envelope) {
+        EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();
-    }
-
-    @Override
-    protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getCommandEndpointDelivery();
     }
 
     @Override
@@ -71,5 +67,32 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         String format = "The aggregate (class: %s, id: %s) produced empty response for " +
                         "the command (class: %s, id: %s).";
         onUnhandledCommand(aggregate, cmd, format);
+    }
+
+    /**
+     * Throws {@link IllegalStateException} with the diagnostics message on the unhandled command.
+     *
+     * @param aggregate
+     *         the aggregate which failed to handle the command
+     * @param cmd
+     *         the envelope with the command
+     * @param format
+     *         the format string with the parameters as follows:
+     *          <ol>
+     *              <li>the name of the aggregate class;
+     *              <li>the ID of the aggregate;
+     *              <li>the name of the command class;
+     *              <li>the ID of the command.
+     *          </ol>
+     * @throws IllegalStateException
+     *         always
+     */
+    private void onUnhandledCommand(A aggregate, CommandEnvelope cmd, String format) {
+        String entityId = aggregate.idAsString();
+        String entityClass = aggregate.getClass()
+                                      .getName();
+        String commandId = cmd.idAsString();
+        CommandClass commandClass = cmd.messageClass();
+        throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
     }
 }

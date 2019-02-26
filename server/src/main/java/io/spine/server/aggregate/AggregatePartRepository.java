@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -45,7 +45,6 @@ public abstract class AggregatePartRepository<I,
         super();
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // We create objects of another class.
     @Override
     public A create(I id) {
         AggregateRoot<I> root = createAggregateRoot(id);
@@ -55,17 +54,17 @@ public abstract class AggregatePartRepository<I,
 
     @Internal
     @Override
-    protected final AggregatePartClass<A> getModelClass(Class<A> cls) {
+    protected final AggregatePartClass<A> toModelClass(Class<A> cls) {
         return asAggregatePartClass(cls);
     }
 
     private AggregatePartClass<A> aggregatePartClass() {
-        return (AggregatePartClass<A>) entityClass();
+        return (AggregatePartClass<A>) entityModelClass();
     }
 
     //TODO:2017-06-06:alexander.yevsyukov: Cache aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
-        AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
+        AggregateRoot<I> result = aggregatePartClass().createRoot(boundedContext(), id);
         return result;
     }
 

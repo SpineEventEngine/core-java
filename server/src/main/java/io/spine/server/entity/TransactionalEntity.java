@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,7 +26,6 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
-import io.spine.validate.ValidatingBuilders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,15 +36,13 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <p>Defines a transaction-based mechanism for state, version and lifecycle flags update.
  *
- * <p>Exposes {@linkplain #getBuilder()} validating builder} for the state as the only way
+ * <p>Exposes {@linkplain #builder()} validating builder} for the state as the only way
  * to modify the state from the descendants.
- *
- * @author Alex Tymchenko
  */
 public abstract class TransactionalEntity<I,
                                           S extends Message,
                                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
-                      extends AbstractVersionableEntity<I, S> {
+                      extends AbstractEntity<I, S> {
 
     private final RecentHistory recentHistory = new RecentHistory();
 
@@ -116,9 +113,23 @@ public abstract class TransactionalEntity<I,
      *
      * @return the instance of the new state builder
      * @throws IllegalStateException if the method is called not within a transaction
+     * @deprecated use {@link #builder()}
      */
+    @Deprecated
     protected B getBuilder() {
-        return tx().getBuilder();
+        return builder();
+    }
+
+    /**
+     * Obtains the instance of the state builder.
+     *
+     * <p>This method must be called only from within an active transaction.
+     *
+     * @return the instance of the new state builder
+     * @throws IllegalStateException if the method is called not within a transaction
+     */
+    protected B builder() {
+        return tx().builder();
     }
 
     /**
@@ -126,10 +137,9 @@ public abstract class TransactionalEntity<I,
      *
      * @throws IllegalStateException if the transaction is null or not active
      */
-    @SuppressWarnings("ConstantConditions") // see Javadoc
     private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
-            throw new IllegalStateException(getMissingTxMessage());
+            throw new IllegalStateException(missingTxMessage());
         }
         return transaction;
     }
@@ -138,7 +148,7 @@ public abstract class TransactionalEntity<I,
      * Provides error message text for the case of not having an active transaction when a state
      * modification call is made.
      */
-    protected String getMissingTxMessage() {
+    protected String missingTxMessage() {
         return "Cannot modify entity state: transaction is not available.";
     }
 
@@ -167,9 +177,9 @@ public abstract class TransactionalEntity<I,
             In order to be sure we are not hijacked, we must be sure that the transaction
             is injected to the very same object, wrapped into the transaction.
         */
-        checkState(tx.getEntity() == this,
+        checkState(tx.entity() == this,
                    "Transaction injected to this " + this
-                           + " is wrapped around a different entity: " + tx.getEntity());
+                           + " is wrapped around a different entity: " + tx.entity());
 
         this.transaction = tx;
     }
@@ -193,7 +203,7 @@ public abstract class TransactionalEntity<I,
 
     B builderFromState() {
         B builder = newBuilderInstance();
-        builder.setOriginalState(getState());
+        builder.setOriginalState(state());
         return builder;
     }
 
@@ -215,7 +225,7 @@ public abstract class TransactionalEntity<I,
     @Override
     public LifecycleFlags getLifecycleFlags() {
         if (isTransactionInProgress()) {
-            return tx().getLifecycleFlags();
+            return tx().lifecycleFlags();
         }
         return super.getLifecycleFlags();
     }
@@ -247,7 +257,7 @@ public abstract class TransactionalEntity<I,
         Class<? extends TransactionalEntity<I, S, B>> cls =
                 (Class<? extends TransactionalEntity<I, S, B>>) getClass();
         Class<B> builderClass = getBuilderClass(cls);
-        B builder = ValidatingBuilders.newInstance(builderClass);
+        B builder = ValidatingBuilder.newInstance(builderClass);
         return builder;
     }
 
@@ -287,7 +297,7 @@ public abstract class TransactionalEntity<I,
         checkNotNull(entityClass);
         @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
         Class<B> builderClass = (Class<B>)
-                    GenericParameter.STATE_BUILDER.getArgumentIn(entityClass);
+                    GenericParameter.STATE_BUILDER.argumentIn(entityClass);
         return builderClass;
     }
 }

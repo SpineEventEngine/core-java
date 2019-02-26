@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,10 +22,10 @@ package io.spine.server.model;
 
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.EventProducer;
 import io.spine.server.event.EventFactory;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.List;
 import java.util.function.Function;
@@ -35,8 +35,6 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for method results that generate events.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class EventsResult extends MethodResult<EventMessage> {
 
@@ -78,8 +76,8 @@ public abstract class EventsResult extends MethodResult<EventMessage> {
         private final Version version;
 
         private ToEvent(EventProducer producer, MessageEnvelope origin) {
-            this.eventFactory = EventFactory.on(origin, producer.getProducerId());
-            this.version = producer.getVersion();
+            this.eventFactory = EventFactory.on(origin, producer.producerId());
+            this.version = producer.version();
         }
 
         @Override

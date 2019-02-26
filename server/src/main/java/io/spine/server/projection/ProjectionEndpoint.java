@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,14 +26,15 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
-import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
+
+import static io.spine.server.projection.ProjectionTransaction.start;
 
 /**
  * Dispatches an event to projections.
@@ -57,31 +58,26 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected void deliverNowTo(I entityId) {
+    protected void dispatchInTx(I entityId) {
         ProjectionRepository<I, P, ?> repository = repository();
         P projection = repository.findOrCreate(entityId);
-        dispatchInTx(projection);
+        runTransactionFor(projection);
         store(projection);
     }
 
-    protected void dispatchInTx(P projection) {
-        ProjectionTransaction<I, ?, ?> tx =
-                ProjectionTransaction.start((Projection<I, ?, ?>) projection);
+    @SuppressWarnings("unchecked") // Simplify massive generic args.
+    protected void runTransactionFor(P projection) {
+        ProjectionTransaction<I, ?, ?> tx = start((Projection<I, ?, ?>) projection);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
-        doDispatch(projection, envelope());
+        invokeDispatcher(projection, envelope());
         tx.commit();
-    }
-
-    @Override
-    protected Delivery<I, P, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEndpointDelivery();
     }
 
     @CanIgnoreReturnValue
     @Override
-    protected List<Event> doDispatch(P projection, EventEnvelope event) {
-        projection.play(event.getOuterObject());
+    protected List<Event> invokeDispatcher(P projection, EventEnvelope event) {
+        projection.play(event.outerObject());
         return ImmutableList.of();
     }
 
@@ -96,13 +92,10 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         ProjectionRepository<I, P, ?> repository = repository();
         repository.store(projection);
 
-        EventContext eventContext = envelope().getEventContext();
+        EventContext eventContext = envelope().context();
         Timestamp eventTime = eventContext.getTimestamp();
         repository.projectionStorage()
                   .writeLastHandledEventTime(eventTime);
-
-        repository.getStand()
-                  .post(envelope().getTenantId(), projection);
     }
 
     /**

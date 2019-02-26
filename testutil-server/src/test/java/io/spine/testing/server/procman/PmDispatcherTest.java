@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,10 +22,10 @@ package io.spine.testing.server.procman;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
@@ -37,8 +37,7 @@ import static org.mockito.Mockito.mock;
 @DisplayName("ProcessManagerDispatcher utility should")
 class PmDispatcherTest extends UtilityClassTest<PmDispatcher> {
 
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+    private final TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
     PmDispatcherTest() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,19 +20,20 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
-import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -55,8 +56,7 @@ import static java.lang.String.format;
  * Abstract base class for repositories.
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
-public abstract class Repository<I, E extends Entity<I, ?>>
-        implements RepositoryView<I, E>, AutoCloseable, Logging {
+public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable, Logging {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -71,7 +71,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Model class of entities managed by this repository.
      *
-     * <p>This field is null if {@link #entityClass()} is never called.
+     * <p>This field is null if {@link #entityModelClass()} is never called.
      */
     private volatile @MonotonicNonNull EntityClass<E> entityClass;
 
@@ -87,125 +87,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Creates the repository.
      */
     protected Repository() {
-    }
-
-    /**
-     * Obtains model class for the entities managed by this repository.
-     */
-    protected final EntityClass<E> entityClass() {
-        if (entityClass == null) {
-            @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            Class<E> cast = (Class<E>) GenericParameter.ENTITY.getArgumentIn(getClass());
-            entityClass = getModelClass(cast);
-        }
-        return entityClass;
-    }
-
-    /**
-     * Obtains a model class for the passed entity class value.
-     */
-    @Internal
-    protected EntityClass<E> getModelClass(Class<E> cls) {
-        return asEntityClass(cls);
-    }
-
-    /** Returns the class of IDs used by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public Class<I> getIdClass() {
-        return (Class<I>) entityClass().getIdClass();
-    }
-
-    /** Returns the class of entities managed by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public Class<E> getEntityClass() {
-        return (Class<E>) entityClass().value();
-    }
-
-    /**
-     * Obtains the {@link TypeUrl} for the state objects wrapped by entities
-     * managed by this repository.
-     */
-    public TypeUrl getEntityStateType() {
-        return entityClass().getStateType();
-    }
-
-    /**
-     * Assigns a {@code BoundedContext} to this repository.
-     *
-     * <p>If the repository does not have a storage assigned prior to this call, the storage
-     * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
-     * associated with the passed {@code BoundedContext}.
-     */
-    @Internal
-    public final void setBoundedContext(BoundedContext boundedContext) {
-        this.boundedContext = boundedContext;
-        if (!isStorageAssigned()) {
-            initStorage(boundedContext.getStorageFactory());
-        }
-    }
-
-    /**
-     * Verifies whether the registry is registered with a {@code BoundedContext}.
-     */
-    protected boolean isRegistered() {
-        return boundedContext != null;
-    }
-
-    /**
-     * Obtains {@code BoundedContext} to which this repository belongs.
-     *
-     * @return parent {@code BoundedContext}
-     * @throws IllegalStateException if the repository is not registered {@linkplain
-     *                               BoundedContext#register(Repository) registered} yet
-     */
-    protected final BoundedContext getBoundedContext() {
-        checkState(boundedContext != null,
-                   "The repository (class: %s) is not registered with a BoundedContext.",
-                   getClass().getName());
-        return boundedContext;
-    }
-
-    /**
-     * The callback called by a {@link BoundedContext} during the {@linkplain
-     * BoundedContext#register(Repository) registration} of the repository.
-     *
-     * <p>If entities managed by this repository are {@linkplain VersionableEntity versionable},
-     * registers itself as a type supplier with the {@link Stand} of the parent
-     * {@linkplain #getBoundedContext() parent} {@code BoundedContext}.
-     */
-    @OverridingMethodsMustInvokeSuper
-    public void onRegistered() {
-        if (managesVersionableEntities()) {
-            getBoundedContext().getStand()
-                               .registerTypeSupplier(cast(this));
-        }
-    }
-
-    /**
-     * Verifies if the repository manages instances of {@link VersionableEntity}.
-     */
-    private boolean managesVersionableEntities() {
-        Class entityClass = getEntityClass();
-        boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
-        return result;
-    }
-
-    /**
-     * Casts the passed repository to one that manages {@link VersionableEntity}
-     * instead of just {@link Entity}.
-     *
-     * <p>The cast is required for registering the repository as a type supplier
-     * in the {@link Stand}.
-     *
-     * <p>The cast is safe because the method is called after the
-     * {@linkplain #managesVersionableEntities() type check}.
-     *
-     * @see #onRegistered()
-     */
-    @SuppressWarnings("unchecked") // See Javadoc above.
-    private static <I, E extends Entity<I, ?>>
-    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
-        return (Repository<I, VersionableEntity<I, ?>>) repository;
     }
 
     /**
@@ -226,18 +107,122 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected abstract void store(E obj);
 
     /**
-     * {@inheritDoc}
+     * Finds an entity with the passed ID.
+     *
+     * @param id the ID of the entity to load
+     * @return the entity or {@link Optional#empty()} if there's no entity with such ID
+     */
+    public abstract Optional<E> find(I id);
+
+    /**
+     * Returns an iterator over the entities managed by the repository that match the passed filter.
      *
      * <p>The returned iterator does not support removal.
      *
      * <p>Iteration through entities is performed by {@linkplain #find(Object) loading}
      * them one by one.
      */
-    @Override
     public Iterator<E> iterator(Predicate<E> filter) {
         Iterator<E> unfiltered = new EntityIterator<>(this);
         Iterator<E> filtered = Iterators.filter(unfiltered, filter::test);
         return filtered;
+    }
+
+    /**
+     * Obtains model class for the entities managed by this repository.
+     */
+    protected final EntityClass<E> entityModelClass() {
+        if (entityClass == null) {
+            @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
+            Class<E> cast = (Class<E>) GenericParameter.ENTITY.argumentIn(getClass());
+            entityClass = toModelClass(cast);
+        }
+        return entityClass;
+    }
+
+    /**
+     * Obtains a model class for the passed entity class value.
+     */
+    @Internal
+    protected EntityClass<E> toModelClass(Class<E> cls) {
+        return asEntityClass(cls);
+    }
+
+    /** Returns the class of IDs used by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    public Class<I> idClass() {
+        return (Class<I>) entityModelClass().idClass();
+    }
+
+    /** Returns the class of entities managed by this repository. */
+    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    public Class<E> entityClass() {
+        return (Class<E>) entityModelClass().value();
+    }
+
+    /**
+     * Obtains the {@link TypeUrl} for the state objects wrapped by entities
+     * managed by this repository.
+     */
+    public TypeUrl entityStateType() {
+        return entityModelClass().stateType();
+    }
+
+    /**
+     * Obtains classes of the events produced by this {@code Repository}.
+     *
+     * <p>For convenience, the default version returns empty collection. This method should be
+     * overridden by repositories which actually produce events.
+     */
+    public ImmutableSet<EventClass> producibleEventClasses() {
+        return ImmutableSet.of();
+    }
+
+    /**
+     * Assigns a {@code BoundedContext} to this repository.
+     *
+     * <p>If the repository does not have a storage assigned prior to this call, the storage
+     * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
+     * associated with the passed {@code BoundedContext}.
+     */
+    @Internal
+    public final void setBoundedContext(BoundedContext boundedContext) {
+        this.boundedContext = boundedContext;
+        if (!isStorageAssigned()) {
+            initStorage(boundedContext.storageFactory());
+        }
+    }
+
+    /**
+     * Verifies whether the registry is registered with a {@code BoundedContext}.
+     */
+    protected boolean isRegistered() {
+        return boundedContext != null;
+    }
+
+    /**
+     * Obtains {@code BoundedContext} to which this repository belongs.
+     *
+     * @return parent {@code BoundedContext}
+     * @throws IllegalStateException
+     *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
+     *         registered} yet
+     */
+    protected final BoundedContext boundedContext() {
+        checkState(boundedContext != null,
+                   "The repository (class: %s) is not registered with a BoundedContext.",
+                   getClass().getName());
+        return boundedContext;
+    }
+
+    /**
+     * The callback called by a {@link BoundedContext} during the {@linkplain
+     * BoundedContext#register(Repository) registration} of the repository.
+     */
+    @OverridingMethodsMustInvokeSuper
+    public void onRegistered() {
+        boundedContext().stand()
+                        .registerTypeSupplier(this);
     }
 
     /**
@@ -262,7 +247,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @throws IllegalStateException if the storage is not assigned
      */
-    protected final Storage<I, ?, ?> getStorage() {
+    protected final Storage<I, ?, ?> storage() {
         return checkStorage(this.storage);
     }
 
@@ -332,8 +317,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected void logError(String msgFormat,
                             MessageEnvelope envelope,
                             RuntimeException exception) {
-        MessageClass messageClass = envelope.getMessageClass();
-        String stateType = getEntityStateType().value();
+        MessageClass messageClass = envelope.messageClass();
+        String stateType = entityStateType().value();
         String errorMessage = format(msgFormat, messageClass, envelope.idAsString(), stateType);
         _error(errorMessage, exception);
     }
@@ -350,9 +335,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Internal
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
-        TypeUrl stateType = getEntityStateType();
-        SystemWriteSide writeSide = getBoundedContext().getSystemClient()
-                                                       .writeSide();
+        TypeUrl stateType = entityStateType();
+        SystemWriteSide writeSide = boundedContext().systemClient()
+                                                    .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
@@ -420,7 +405,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         private EntityIterator(Repository<I, E> repository) {
             this.repository = repository;
-            this.index = repository.getStorage()
+            this.index = repository.storage()
                                    .index();
         }
 

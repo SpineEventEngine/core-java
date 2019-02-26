@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,13 +31,13 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.client.ColumnFilter.Operator;
-import static io.spine.client.ColumnFilter.Operator.CFO_UNDEFINED;
-import static io.spine.client.ColumnFilter.Operator.EQUAL;
-import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
-import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
-import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
-import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
+import static io.spine.client.Filter.Operator;
+import static io.spine.client.Filter.Operator.CFO_UNDEFINED;
+import static io.spine.client.Filter.Operator.EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_THAN;
+import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;

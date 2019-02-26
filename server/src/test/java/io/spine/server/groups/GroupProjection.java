@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package io.spine.server.groups;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
@@ -27,8 +28,6 @@ import io.spine.server.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;
-
-import static com.google.common.collect.ImmutableSet.of;
 
 public final class GroupProjection extends Projection<GroupId, Group, GroupVBuilder> {
 
@@ -39,10 +38,10 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
     @Subscribe(external = true)
     public void on(Organization organization, EventContext systemContext) {
         Timestamp updateTime = systemContext.getTimestamp();
-        getBuilder().setId(getId())
-                    .setName(organization.getName() + updateTime)
-                    .addAllParticipants(organization.getMembersList())
-                    .addParticipants(organization.getHead());
+        builder().setId(id())
+                 .setName(organization.getName() + updateTime)
+                 .addAllParticipants(organization.getMembersList())
+                 .addParticipants(organization.getHead());
     }
 
     public static final class Repository
@@ -53,11 +52,11 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
             super.onRegistered();
             StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
             routing.route(Organization.class, (org, eventContext) ->
-                    of(GroupId.newBuilder()
-                              .setUuid(org.getHead()
-                                          .getValue())
-                              .build()));
-            getEventRouting().routeEntityStateUpdates(routing);
+                    ImmutableSet.of(GroupId.newBuilder()
+                                           .setUuid(org.getHead()
+                                                       .getValue())
+                                           .build()));
+            eventRouting().routeEntityStateUpdates(routing);
         }
     }
 }

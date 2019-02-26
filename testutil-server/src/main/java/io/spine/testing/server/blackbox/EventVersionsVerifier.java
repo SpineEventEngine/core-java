@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,8 @@
 
 package io.spine.testing.server.blackbox;
 
-import static java.util.Arrays.copyOf;
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -31,7 +32,7 @@ public final class EventVersionsVerifier implements Verify<EmittedEvents> {
     private final int[] versions;
 
     public EventVersionsVerifier(int[] versions) {
-        this.versions = copyOf(versions, versions.length);
+        this.versions = Arrays.copyOf(versions, versions.length);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,9 +20,9 @@
 
 package io.spine.server.procman.given.repo;
 
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -37,15 +37,15 @@ public class TestProcessManagerRepository
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         this.latestException = exception;
-        super.onError(envelope, exception);
+        super.onError(event, exception);
     }
 
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+    public void onError(CommandEnvelope cmd, RuntimeException exception) {
         this.latestException = exception;
-        super.onError(envelope, exception);
+        super.onError(cmd, exception);
     }
 
     public @Nullable RuntimeException getLatestException() {

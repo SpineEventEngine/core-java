@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,12 +25,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.command.model.given.reaction.ReOneParam;
 import io.spine.server.command.model.given.reaction.ReOptionalResult;
 import io.spine.server.command.model.given.reaction.ReTwoParams;
 import io.spine.server.command.model.given.reaction.TestCommandReactor;
 import io.spine.server.event.EventReceiver;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.event.CmdProjectCreated;

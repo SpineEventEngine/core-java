@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,9 +22,7 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.AutoIncrement;
@@ -34,6 +32,8 @@ import io.spine.server.entity.Phase;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
@@ -44,7 +44,6 @@ import java.util.List;
  * @param <I> the type of process manager IDs
  * @param <S> the type of process manager state
  * @param <B> the type of a {@code ValidatingBuilder} for the process manager state
- * @author Alex Tymchenko
  */
 @Internal
 public class PmTransaction<I,
@@ -88,7 +87,7 @@ public class PmTransaction<I,
     List<Event> dispatchEvent(EventEnvelope event) {
         VersionIncrement versionIncrement = createVersionIncrement();
         Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
-                new EventDispatch<>(this::dispatch, getEntity(), event),
+                new EventDispatch<>(this::dispatch, entity(), event),
                 versionIncrement
         );
         List<Event> events = propagate(phase);

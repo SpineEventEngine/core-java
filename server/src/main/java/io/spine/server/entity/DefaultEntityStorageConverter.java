@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -56,8 +56,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     }
 
     /**
-     * Sets lifecycle flags in the builder from the entity, if the entity is
-     * {@linkplain AbstractVersionableEntity versionable}.
+     * Sets lifecycle flags in the builder from the entity.
      *
      * @param builder
      *         the entity builder to update
@@ -67,11 +66,8 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
-        if (entity instanceof AbstractVersionableEntity) {
-            AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
-            builder.setVersion(versionable.getVersion())
-                   .setLifecycleFlags(versionable.getLifecycleFlags());
-        }
+        builder.setVersion(entity.version())
+               .setLifecycleFlags(entity.getLifecycleFlags());
     }
 
     /**
@@ -89,15 +85,9 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
      * @param entityRecord
      *         the {@link EntityRecord} which contains additional attributes that may be injected
      */
-    @SuppressWarnings("unchecked" /* The state type is the same as the parameter of this class. */)
     @Override
     protected void injectState(E entity, S state, EntityRecord entityRecord) {
-        if (entity instanceof AbstractVersionableEntity) {
-            AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
-            versionable.updateState(state, entityRecord.getVersion());
-            versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
-        } else {
-            entity.setState(state);
-        }
+        entity.updateState(state, entityRecord.getVersion());
+        entity.setLifecycleFlags(entityRecord.getLifecycleFlags());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -108,8 +108,8 @@ public class TestAggregate
 
     @Apply
     void event(AggProjectCreated event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Status.CREATED);
+        builder().setId(event.getProjectId())
+                 .setStatus(Status.CREATED);
 
         isProjectCreatedEventApplied = true;
     }
@@ -117,13 +117,13 @@ public class TestAggregate
     @Apply
     void event(AggTaskAdded event) {
         isTaskAddedEventApplied = true;
-        getBuilder().addTask(event.getTask());
+        builder().addTask(event.getTask());
     }
 
     @Apply
     void event(AggProjectStarted event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Status.STARTED);
+        builder().setId(event.getProjectId())
+                 .setStatus(Status.STARTED);
 
         isProjectStartedEventApplied = true;
     }

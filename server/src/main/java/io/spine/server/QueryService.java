@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,18 +29,17 @@ import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.logging.Logging;
+import io.spine.server.model.UnknownEntityTypeException;
 import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkState;
-
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
  *
- * <p> For asynchronous read-side updates please see {@link SubscriptionService}.
+ * <p>For asynchronous read-side updates please see {@link SubscriptionService}.
  */
 public class QueryService
         extends QueryServiceGrpc.QueryServiceImplBase
@@ -59,21 +58,33 @@ public class QueryService
 
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
-        log().debug("Incoming query: {}", query);
+        _debug("Incoming query: {}", query);
 
         TypeUrl type = Queries.typeOf(query);
         BoundedContext boundedContext = typeToContextMap.get(type);
+        if (boundedContext == null) {
+            handleUnsupported(type, responseObserver);
+        } else {
+            handleQuery(boundedContext, query, responseObserver);
+        }
+    }
 
-        checkState(boundedContext != null, "Query target type %s is not stored in any of the " +
-                "registered repositories", type);
-
-        Stand stand = boundedContext.getStand();
+    private void handleQuery(BoundedContext boundedContext,
+                             Query query,
+                             StreamObserver<QueryResponse> responseObserver) {
+        Stand stand = boundedContext.stand();
         try {
             stand.execute(query, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            log().error("Error processing query", e);
+            _error(e, "Error processing query.");
             responseObserver.onError(e);
         }
+    }
+
+    private void handleUnsupported(TypeUrl type, StreamObserver<QueryResponse> observer) {
+        UnknownEntityTypeException exception = new UnknownEntityTypeException(type);
+        _error(exception, "Unknown type encountered.");
+        observer.onError(exception);
     }
 
     public static class Builder {
@@ -122,7 +133,7 @@ public class QueryService
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
 
-            Stand stand = boundedContext.getStand();
+            Stand stand = boundedContext.stand();
             ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
 
             for (TypeUrl availableType : exposedTypes) {

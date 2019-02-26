@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,7 +28,6 @@ import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
@@ -37,6 +36,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Buses;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.CommandAcknowledged;
 import io.spine.system.server.CommandErrored;
 import io.spine.system.server.MemoizingWriteSide;

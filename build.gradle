@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
+buildscript { final scriptHandler ->
 
     // Applying from `version.gradle` inside the `buildscript` section to reuse the properties.
     //
@@ -27,16 +27,7 @@ buildscript {
     apply from: 'version.gradle'
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
-    repositories {
-        maven { url = repos.oldSpine }
-        maven { url = repos.oldSpineSnapshots }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
-        google()
-        maven { url = repos.gradlePlugins }
-        mavenLocal()
-    }
-
+    defaultRepositories(scriptHandler)
     dependencies {
         classpath deps.build.guava
         classpath deps.build.gradlePlugins.errorProne
@@ -44,19 +35,23 @@ buildscript {
         classpath "io.spine.tools:spine-model-compiler:$spineBaseVersion"
     }
 
-    configurations.all({
+    forceConfiguration(scriptHandler)
+    configurations.all {
         resolutionStrategy {
-            force deps.build.guava
+            //noinspection GroovyAssignabilityCheck
+            force "io.spine:spine-base:$spineBaseVersion"
         }
-    })
+    }
 }
 
 apply from: 'version.gradle'
 
 ext {
+    spineJacocoScript = "${rootDir}/config/gradle/jacoco.gradle"
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
     credentialsPropertyFile = 'credentials.properties'
+    publishPlugin = "$rootDir/config/gradle/publish.gradle"
     projectsToPublish = ["core",
                          "client",
                          "server",
@@ -94,20 +89,6 @@ static boolean shouldPublishJavadoc(final Project project) {
 }
 
 subprojects {
-
-    configurations {
-        // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
-        runtime.exclude group: "com.google.protobuf", module: "protobuf-lite"
-        testRuntime.exclude group: "com.google.protobuf", module: "protobuf-lite"
-
-        all {
-            resolutionStrategy {
-                force deps.build.guava
-                force deps.test.guavaTestlib
-            }
-        }
-    }
-
     project.ext {
         sourcesRootDir = "$projectDir/src"
         generatedRootDir = "$projectDir/generated"
@@ -129,6 +110,7 @@ subprojects {
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java-library'
     apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'pmd'
     apply plugin: spineProtobufPluginId
 
     apply from: deps.scripts.javacArgs
@@ -157,16 +139,7 @@ subprojects {
     // # suppress inspection "UnusedProperty"
     // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/
 
-    repositories {
-        google()
-        maven { url = repos.gradlePlugins }
-        mavenLocal()
-        maven { url = repos.oldSpine }
-        maven { url = repos.oldSpineSnapshots }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
-    }
-
+    defaultRepositories(project)
     dependencies {
         errorprone deps.build.errorProneCore
         errorproneJavac deps.build.errorProneJavac
@@ -191,6 +164,20 @@ subprojects {
         testImplementation deps.test.guavaTestlib
         testImplementation deps.test.junit5Api
         testImplementation deps.test.junit5Runner
+        testImplementation "io.spine.tools:spine-mute-logging:$spineBaseVersion"
+    }
+
+    forceConfiguration(project)
+    configurations {
+        all {
+            resolutionStrategy {
+                //noinspection GroovyAssignabilityCheck
+                force "io.spine:spine-base:$spineBaseVersion"
+            }
+        }
+        // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
+        runtime.exclude group: "com.google.protobuf", module: "protobuf-lite"
+        testRuntime.exclude group: "com.google.protobuf", module: "protobuf-lite"
     }
 
     sourceSets {
@@ -217,17 +204,17 @@ subprojects {
     
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
-        classifier "sources"
+        archiveClassifier.set("sources")
     }
 
     task testOutputJar(type: Jar) {
         from sourceSets.test.output
-        classifier "test"
+        archiveClassifier.set("test")
     }
 
     task javadocJar(type: Jar, dependsOn: 'javadoc') {
         from ("$projectDir/build/docs/javadoc")
-        classifier "javadoc"
+        archiveClassifier.set("javadoc")
     }
 
     // Apply the same IDEA module configuration for each of sub-projects.
@@ -262,7 +249,11 @@ subprojects {
     if (shouldPublishJavadoc(project)) {
         apply from: updateDocsPlugin
     }
+    
+    apply from: deps.scripts.pmd
 }
+
+apply from: publishPlugin
 
 // IDEA project configuration.
 idea {
@@ -280,8 +271,5 @@ idea {
     }
 }
 
-apply from: deps.scripts.publish
-
 // Aggregated coverage report across all subprojects.
-apply from: deps.scripts.jacoco
-
+apply from: spineJacocoScript

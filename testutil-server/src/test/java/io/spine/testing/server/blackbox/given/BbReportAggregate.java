@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -51,7 +51,7 @@ public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportV
     BbTaskAddedToReport on(BbTaskAdded event) {
         return BbTaskAddedToReport
                 .newBuilder()
-                .setReportId(getId())
+                .setReportId(id())
                 .setProjectId(event.getProjectId())
                 .setTask(event.getTask())
                 .build();
@@ -60,12 +60,12 @@ public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportV
 
     @Apply
     void on(BbReportCreated event) {
-        getBuilder().setId(event.getReportId())
-                    .addAllProjectIds(event.getProjectIdList());
+        builder().setId(event.getReportId())
+                 .addAllProjectIds(event.getProjectIdList());
     }
 
     @Apply
     void on(BbTaskAddedToReport event) {
-        getBuilder().addTasks(event.getTask());
+        builder().addTasks(event.getTask());
     }
 }

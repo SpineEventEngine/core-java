@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,18 +24,19 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
-import static io.spine.protobuf.FieldPaths.fieldAt;
+import static io.spine.base.FieldPaths.getValue;
 import static io.spine.protobuf.TypeConverter.toObject;
 
 /**
@@ -50,6 +51,7 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
                                                                      EventMessage,
                                                                      EventClass,
                                                                      EventEnvelope,
+                                                                     EmptyClass,
                                                                      MethodResult<Empty>> {
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
@@ -84,23 +86,23 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
      * <p>It is assumed that the type of the event is correct and only the field filter should be
      * checked.
      *
-     * @param envelope the event to check
+     * @param event the event to check
      * @return {@code true} if this method can handle the given event, {@code false} otherwise
      */
-    final boolean canHandle(EventEnvelope envelope) {
+    final boolean canHandle(EventEnvelope event) {
         MessageFilter filter = filter();
         FieldPath fieldPath = filter.getField();
         if (fieldPath.getFieldNameList().isEmpty()) {
             return true;
         } else {
-            EventMessage event = envelope.getMessage();
-            return match(event, filter);
+            EventMessage msg = event.message();
+            return match(msg, filter);
         }
     }
 
     private static boolean match(EventMessage event, MessageFilter filter) {
         FieldPath path = filter.getField();
-        Object valueOfField = fieldAt(event, path);
+        Object valueOfField = getValue(path, event);
         Any value = filter.getValue();
         Object expectedValue = toObject(value, valueOfField.getClass());
         boolean filterMatches = valueOfField.equals(expectedValue);

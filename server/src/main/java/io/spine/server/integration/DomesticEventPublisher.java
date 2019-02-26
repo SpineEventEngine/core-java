@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,13 +23,13 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -63,33 +63,33 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField")     // Returning an immutable impl.
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return eventClasses;
     }
 
     @Override
-    public Set<String> dispatch(EventEnvelope envelope) {
-        Event event = envelope.getOuterObject();
-        ExternalMessage msg = ExternalMessages.of(event, originContextName);
-        ExternalMessageClass messageClass = ExternalMessageClass.of(envelope.getMessageClass());
+    public Set<String> dispatch(EventEnvelope event) {
+        Event outerObject = event.outerObject();
+        ExternalMessage msg = ExternalMessages.of(outerObject, originContextName);
+        ExternalMessageClass messageClass = ExternalMessageClass.of(event.messageClass());
         ChannelId channelId = toId(messageClass);
         Publisher channel = publisherHub.get(channelId);
-        channel.publish(AnyPacker.pack(envelope.getId()), msg);
+        channel.publish(AnyPacker.pack(event.id()), msg);
 
         return ImmutableSet.of(channel.toString());
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(envelope);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        checkNotNull(event);
+        checkNotNull(event);
         _error(exception,
                "Error publishing event (class: `%s`, ID: `%s`) from bounded context `%s`.",
-               envelope.getMessageClass(), envelope.getId(), originContextName);
+               event.messageClass(), event.id(), originContextName);
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 
@@ -98,7 +98,6 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
         return Optional.empty();
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

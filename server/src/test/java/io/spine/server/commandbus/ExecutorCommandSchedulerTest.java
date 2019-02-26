@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,6 +29,7 @@ import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +43,8 @@ import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessa
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -59,9 +62,9 @@ class ExecutorCommandSchedulerTest {
     private static final int WAIT_FOR_PROPAGATION_MS = 300;
 
     private final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerTest.class)
-                                   .command();
+            new TestActorRequestFactory(ExecutorCommandSchedulerTest.class).command();
 
+    private CommandBus commandBus;
     private CommandScheduler scheduler;
     private CommandContext context;
 
@@ -70,7 +73,8 @@ class ExecutorCommandSchedulerTest {
         scheduler = spy(ExecutorCommandScheduler.class);
         context = GivenCommandContext.withScheduledDelayOf(DELAY);
 
-        scheduler.setCommandBus(mock(CommandBus.class));
+        commandBus = mock(CommandBus.class);
+        scheduler.setCommandBus(commandBus);
 
         // System BC integration is NOT tested in this suite.
         SystemWriteSide systemWriteSide = NoOpSystemWriteSide.INSTANCE;
@@ -119,6 +123,27 @@ class ExecutorCommandSchedulerTest {
 
         verify(scheduler, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).post(any(Command.class));
         verify(scheduler, never()).post(extraCmd);
+    }
+
+    @Test
+    @MuteLogging
+    @DisplayName("continue scheduling commands after error in `post`")
+    void recoverFromPostFail() {
+        doThrow(new IllegalStateException("Post failed"))
+                .when(commandBus)
+                .postPreviouslyScheduled(any());
+        Command cmd1 =
+                commandFactory.createBasedOnContext(createProjectMessage(), context);
+        scheduler.schedule(cmd1);
+        verify(scheduler, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).post(any(Command.class));
+
+        doCallRealMethod()
+                .when(commandBus)
+                .postPreviouslyScheduled(any());
+        Command cmd2 =
+                commandFactory.createBasedOnContext(createProjectMessage(), context);
+        scheduler.schedule(cmd2);
+        verify(commandBus, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).dispatch(any());
     }
 
     @Test

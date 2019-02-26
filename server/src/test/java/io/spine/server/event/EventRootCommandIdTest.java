@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,18 +31,17 @@ import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRep
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
-import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
@@ -61,7 +60,6 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("Event root CommandId should")
 public class EventRootCommandIdTest {
 
@@ -100,49 +98,52 @@ public class EventRootCommandIdTest {
             postCommand(command);
 
             List<Event> events = readEvents();
-            assertEquals(command.getId(), getRootCommandId(events.get(0)));
+            assertIsRootCommand(command, events.get(0));
         }
 
         @Test
         @DisplayName("aggregate in case command returns multiple events")
         void aggregateForMultipleEvents() {
             Command command = command(addTasks(projectId(), 3));
-
             postCommand(command);
 
             List<Event> events = readEvents();
             assertThat(events).hasSize(3);
-            assertEquals(command.getId(), getRootCommandId(events.get(0)));
-            assertEquals(command.getId(), getRootCommandId(events.get(1)));
-            assertEquals(command.getId(), getRootCommandId(events.get(2)));
+            assertIsRootCommand(command, events.get(0));
+            assertIsRootCommand(command, events.get(1));
+            assertIsRootCommand(command, events.get(2));
         }
 
         @Test
         @DisplayName("process manager")
         void processManager() {
             Command command = command(addTeamMember(teamId()));
-
             postCommand(command);
 
             List<Event> events = readEvents();
             assertThat(events).hasSize(1);
-
-            Event event = events.get(0);
-            assertEquals(command.getId(), getRootCommandId(event));
+            assertIsRootCommand(command, events.get(0));
         }
 
         @Test
         @DisplayName("process manager in case command returns multiple events")
         void processManagerForMultipleEvents() {
             Command command = command(inviteTeamMembers(teamId(), 3));
-
             postCommand(command);
 
             List<Event> events = readEvents();
             assertThat(events).hasSize(3);
-            assertEquals(command.getId(), getRootCommandId(events.get(0)));
-            assertEquals(command.getId(), getRootCommandId(events.get(1)));
-            assertEquals(command.getId(), getRootCommandId(events.get(2)));
+            assertIsRootCommand(command, events.get(0));
+            assertIsRootCommand(command, events.get(1));
+            assertIsRootCommand(command, events.get(2));
+        }
+
+        /**
+         * Asserts that the ID of the passed command is the root command ID of the passed event.
+         */
+        private void assertIsRootCommand(Command command, Event event) {
+            assertThat(getRootCommandId(event))
+                    .isEqualTo(command.getId());
         }
     }
 
@@ -208,7 +209,7 @@ public class EventRootCommandIdTest {
 
     private void postCommand(Command command) {
         StreamObserver<Ack> observer = noOpObserver();
-        boundedContext.getCommandBus()
+        boundedContext.commandBus()
                       .post(command, observer);
     }
 
@@ -221,8 +222,8 @@ public class EventRootCommandIdTest {
         TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
-                boundedContext.getEventBus()
-                              .getEventStore()
+                boundedContext.eventBus()
+                              .eventStore()
                               .read(allEventsQuery(), observer);
             }
         };

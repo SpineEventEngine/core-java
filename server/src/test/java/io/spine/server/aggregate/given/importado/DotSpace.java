@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -38,6 +38,6 @@ public class DotSpace extends AggregateRepository<ObjectId, Dot> {
      * of creating {@code Event} instances. Real imports would need to create those.
      */
     public DotSpace() {
-        getEventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
+        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
     }
 }

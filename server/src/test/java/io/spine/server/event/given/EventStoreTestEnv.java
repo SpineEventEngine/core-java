@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,8 +26,8 @@ import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
-import io.spine.server.event.EventStore;
-import io.spine.server.event.EventStoreTest;
+import io.spine.server.event.store.EventStore;
+import io.spine.server.event.store.EventStoreTest;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
@@ -56,7 +56,7 @@ public class EventStoreTestEnv {
                                           .setMultitenant(false)
                                           .build();
         return EventStore.newBuilder()
-                         .setStorageFactory(bc.getStorageFactory())
+                         .setStorageFactory(bc.storageFactory())
                          .setStreamExecutor(MoreExecutors.directExecutor())
                          .withDefaultLogger()
                          .build();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,9 +26,9 @@ import io.spine.base.Identifier;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
@@ -36,7 +36,6 @@ import java.util.List;
 /**
  * An entity that {@linkplain Assign handles} commands.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.command.Assign @Assign
  */
 public abstract
@@ -58,7 +57,7 @@ class CommandHandlingEntity<I,
     }
 
     @Override
-    public Any getProducerId() {
+    public Any producerId() {
         return idAsAny;
     }
 

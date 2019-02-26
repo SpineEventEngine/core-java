@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -61,30 +61,30 @@ public final class TuAggregatePart
     }
 
     @Assign
-    public TuCommentAdded handle(TuAddComment command) {
+    TuCommentAdded handle(TuAddComment command) {
         return TuCommentAdded.newBuilder()
                              .setId(command.getId())
                              .build();
     }
 
     @Assign
-    public TuCommentRemoved handle(TuRemoveComment command) throws TuFailedToRemoveComment {
+    TuCommentRemoved handle(TuRemoveComment command) throws TuFailedToRemoveComment {
         throw TuFailedToRemoveComment
                 .newBuilder()
-                .setId(getId())
+                .setId(id())
                 .build();
     }
 
     @Apply
     void on(TuCommentAdded event) {
-        getBuilder().setId(event.getId())
-                    .setTimestamp(fromMillis(1234567));
+        builder().setId(event.getId())
+                 .setTimestamp(fromMillis(1234567));
     }
 
     @Apply(allowImport = true)
     void on(TuCommentReceivedByEmail event) {
-        getBuilder().setId(event.getId())
-                    .setCommentsRecievedByEmail(getState().getCommentsRecievedByEmail() + 1)
-                    .setTimestamp(fromMillis(1234567));
+        builder().setId(event.getId())
+                 .setCommentsReceivedByEmail(state().getCommentsReceivedByEmail() + 1)
+                 .setTimestamp(fromMillis(1234567));
     }
 }

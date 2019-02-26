@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
@@ -32,6 +31,7 @@ import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
@@ -148,7 +148,7 @@ class AggregateTransactionTest
     protected void breakEntityValidation(
             Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder().setShouldThrow(toThrow);
+        entity.builder().setShouldThrow(toThrow);
     }
 
     @Test
@@ -157,7 +157,7 @@ class AggregateTransactionTest
        advanceVersionFromEvent();
     }
 
-    @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
+    @SuppressWarnings("unused")  // Methods accessed via reflection.
     static class TestAggregate
             extends Aggregate<ProjectId, Project, PatchedProjectBuilder> {
 
@@ -190,11 +190,11 @@ class AggregateTransactionTest
         void event(AggProjectCreated event) {
             receivedEvents.add(event);
             Project newState = Project
-                    .newBuilder(getState())
+                    .newBuilder(state())
                     .setId(event.getProjectId())
                     .setName(event.getName())
                     .build();
-            getBuilder().mergeFrom(newState);
+            builder().mergeFrom(newState);
         }
 
         @Apply

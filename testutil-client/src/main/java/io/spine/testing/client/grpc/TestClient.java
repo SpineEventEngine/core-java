@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -61,7 +61,7 @@ public class TestClient implements Logging {
     public TestClient(UserId userId, String host, int port) {
         checkNotNull(userId);
         checkNotNull(host);
-        this.requestFactory = TestActorRequestFactory.newInstance(userId);
+        this.requestFactory = new TestActorRequestFactory(userId);
         this.channel = ManagedChannelBuilder
                 .forAddress(host, port)
                 .usePlaintext()

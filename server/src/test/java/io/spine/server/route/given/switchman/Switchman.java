@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,39 +20,35 @@
 
 package io.spine.server.route.given.switchman;
 
-import com.google.protobuf.UInt32Value;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.route.given.switchman.command.SetSwitch;
 import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
-import io.spine.validate.UInt32ValueVBuilder;
 
 /**
  * The aggregate that handles commands send to a switchman.
- *
- * @author Alexander Yevsyukov
  */
-public final class Switchman extends Aggregate<String, UInt32Value, UInt32ValueVBuilder> {
+public final class Switchman extends Aggregate<String, SwitchmanLog, SwitchmanLogVBuilder> {
 
-    @SuppressWarnings("unused")
-        // Invoked by reflection.
     Switchman(String id) {
         super(id);
     }
 
     @Assign
     SwitchPositionConfirmed on(SetSwitch cmd) {
-        return SwitchPositionConfirmed.newBuilder()
-                                      .setSwitchmanName(getId())
-                                      .setSwitchId(cmd.getSwitchId())
-                                      .setPosition(cmd.getPosition())
-                                      .build();
+        return SwitchPositionConfirmed
+                .newBuilder()
+                .setSwitchmanName(id())
+                .setSwitchId(cmd.getSwitchId())
+                .setPosition(cmd.getPosition())
+                .build();
     }
 
-    @SuppressWarnings("CheckReturnValue") // Calling builder.
     @Apply
     void event(SwitchPositionConfirmed event) {
-        getBuilder().setValue(getState().getValue() + 1);
+        builder()
+                .setName(event.getSwitchmanName())
+                .setSwitchCount(state().getSwitchCount() + 1);
     }
 }

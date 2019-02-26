@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,10 +21,10 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 
@@ -35,7 +35,6 @@ import static io.spine.server.command.DispatchCommand.operationFor;
  *
  * @param <I> the type of process manager IDs
  * @param <P> the type of process managers
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
@@ -53,13 +52,8 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected PmCommandDelivery<I, P> getEndpointDelivery() {
-        return repository().getCommandEndpointDelivery();
-    }
-
-    @Override
-    protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
-        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
+    protected List<Event> invokeDispatcher(P processManager, CommandEnvelope envelope) {
+        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope);
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
         return tx.perform(dispatch);

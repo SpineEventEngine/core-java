@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -64,7 +64,7 @@ class TopicFactoryTest {
     class CreateTopic {
 
         @Test
-        @DisplayName("for all entities of kind")
+        @DisplayName("for all of a kind")
         void forAllOfKind() {
             Topic topic = factory.select(TEST_ENTITY_TYPE)
                                  .build();
@@ -78,7 +78,7 @@ class TopicFactoryTest {
         }
 
         @Test
-        @DisplayName("for specified entities of kind")
+        @DisplayName("for objects with specified IDs")
         void forSomeOfKind() {
             Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
             Topic topic = factory.select(TEST_ENTITY_TYPE)
@@ -87,14 +87,13 @@ class TopicFactoryTest {
 
             verifyTargetAndContext(topic);
 
-            List<EntityId> actualIds = topic.getTarget()
-                                            .getFilters()
-                                            .getIdFilter()
-                                            .getIdsList();
+            List<Any> actualIds = topic.getTarget()
+                                       .getFilters()
+                                       .getIdFilter()
+                                       .getIdsList();
             assertEquals(ids.size(), actualIds.size());
-            for (EntityId actualId : actualIds) {
-                Any rawId = actualId.getId();
-                TestEntityId unpackedId = unpack(rawId, TestEntityId.class);
+            for (Any actualId : actualIds) {
+                TestEntityId unpackedId = unpack(actualId, TestEntityId.class);
                 assertTrue(ids.contains(unpackedId));
             }
         }

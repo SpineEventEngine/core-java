@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import io.spine.core.Event;
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbProjectStarted;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
@@ -41,9 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Mykhailo Drachuk
- */
 @DisplayName("Emitted Events should")
 class EmittedEventsTest {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -184,10 +184,10 @@ public final class QueryFactory {
 
     Query composeQuery(Class<? extends Message> entityClass,
                        @Nullable Set<?> ids,
-                       @Nullable Set<CompositeColumnFilter> columnFilters,
+                       @Nullable Set<CompositeFilter> filters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
-        QueryVBuilder builder = queryBuilderFor(entityClass, ids, columnFilters, fieldMask);
+        QueryVBuilder builder = queryBuilderFor(entityClass, ids, filters, fieldMask);
         Query query = newQuery(builder);
         return query;
     }

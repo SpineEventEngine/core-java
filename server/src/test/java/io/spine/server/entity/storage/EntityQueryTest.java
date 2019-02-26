@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,10 +27,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.StringSubject;
-import io.spine.client.ColumnFilter;
-import io.spine.client.ColumnFilters;
-import io.spine.client.EntityIdFilter;
-import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.base.FieldPath;
+import io.spine.base.FieldPaths;
+import io.spine.client.Filter;
+import io.spine.client.Filters;
+import io.spine.client.IdFilter;
+import io.spine.server.entity.Entity;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
@@ -44,11 +46,10 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.client.ColumnFilter.Operator.EQUAL;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.Filter.Operator.EQUAL;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
@@ -68,7 +69,7 @@ class EntityQueryTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(EntityIdFilter.class, EntityIdFilter.getDefaultInstance())
+                .setDefault(IdFilter.class, IdFilter.getDefaultInstance())
                 .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                   .build())
                 .testStaticMethods(EntityQuery.class, NullPointerTester.Visibility.PACKAGE);
@@ -78,9 +79,9 @@ class EntityQueryTest {
     @DisplayName("be serializable")
     void beSerializable() {
         String columnName = deleted.name();
-        EntityColumn column = findColumn(EntityWithLifecycle.class, columnName);
-        ColumnFilter filter = ColumnFilters.eq(columnName, false);
-        Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
+        EntityColumn column = findColumn(Entity.class, columnName);
+        Filter filter = Filters.eq(columnName, false);
+        Multimap<EntityColumn, Filter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         QueryParameters parameters = QueryParameters
                 .newBuilder()
@@ -125,9 +126,9 @@ class EntityQueryTest {
     @Test
     @DisplayName("fail to append lifecycle columns if they are already present")
     void notDuplicateLifecycleColumns() {
-        EntityColumn deletedColumn = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
+        EntityColumn deletedColumn = Columns.findColumn(Entity.class, deleted.name());
         CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()), ALL
+                ImmutableMultimap.of(deletedColumn, Filter.getDefaultInstance()), ALL
         );
         QueryParameters parameters = QueryParameters
                 .newBuilder()
@@ -193,7 +194,6 @@ class EntityQueryTest {
     }
 
     private static EntityColumn mockColumn() {
-        @SuppressWarnings("unchecked") // Mock cannot have type parameters
         EntityColumn column = mock(EntityColumn.class);
         when(column.getName()).thenReturn("mockColumn");
         return column;
@@ -201,14 +201,15 @@ class EntityQueryTest {
 
     private static QueryParameters paramsFromValues(Map<EntityColumn, Object> values) {
         QueryParameters.Builder builder = QueryParameters.newBuilder();
-        Multimap<EntityColumn, ColumnFilter> filters = HashMultimap.create(values.size(), 1);
+        Multimap<EntityColumn, Filter> filters = HashMultimap.create(values.size(), 1);
         for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
             EntityColumn column = param.getKey();
-            ColumnFilter filter = ColumnFilter
+            FieldPath fieldPath = FieldPaths.parse(column.getName());
+            Filter filter = Filter
                     .newBuilder()
                     .setOperator(EQUAL)
                     .setValue(toAny(param.getValue()))
-                    .setColumnName(column.getName())
+                    .setFieldPath(fieldPath)
                     .build();
             filters.put(column, filter);
         }

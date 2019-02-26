@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,9 +23,11 @@
  */
 
 @SPI
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.event.storage;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.SPI;
 
 import javax.annotation.ParametersAreNonnullByDefault;

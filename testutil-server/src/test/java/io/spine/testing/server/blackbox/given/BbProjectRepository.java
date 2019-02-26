@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,7 +29,7 @@ import java.util.HashSet;
 public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
 
     public BbProjectRepository() {
-        getEventRouting().route(BbUserDeleted.class,
-                                (event, context) -> new HashSet<>(event.getProjectList()));
+        eventRouting().route(BbUserDeleted.class,
+                             (event, context) -> new HashSet<>(event.getProjectList()));
     }
 }

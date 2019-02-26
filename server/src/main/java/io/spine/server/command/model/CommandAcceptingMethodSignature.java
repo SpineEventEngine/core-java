@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,18 +24,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.lang.annotation.Annotation;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
@@ -43,10 +41,9 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
  * The signature of a method, that accepts {@code Command} envelopes as parameter values.
  *
  * @param <H> the type of {@link HandlerMethod} which signature this is
- * @author Alex Tymchenko
  */
 abstract class CommandAcceptingMethodSignature
-        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
+        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
     CommandAcceptingMethodSignature(Class<? extends Annotation> annotation) {
@@ -55,12 +52,12 @@ abstract class CommandAcceptingMethodSignature
 
     @Override
     public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> getParamSpecs() {
-        return copyOf(CommandAcceptingMethodParams.values());
+        return ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
     }
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE);
+        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     /**
@@ -71,7 +68,7 @@ abstract class CommandAcceptingMethodSignature
      */
     @Override
     protected ImmutableSet<Class<? extends Throwable>> getAllowedExceptions() {
-        return of(ThrowableMessage.class);
+        return ImmutableSet.of(ThrowableMessage.class);
     }
 
     /**
@@ -88,7 +85,7 @@ abstract class CommandAcceptingMethodSignature
 
             @Override
             public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.getMessage()};
+                return new Object[]{envelope.message()};
             }
         },
 
@@ -99,8 +96,8 @@ abstract class CommandAcceptingMethodSignature
             }
 
             @Override
-            public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.getMessage(), envelope.getCommandContext()};
+            public Object[] extractArguments(CommandEnvelope cmd) {
+                return new Object[]{cmd.message(), cmd.context()};
             }
         }
     }

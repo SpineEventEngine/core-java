@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -62,8 +62,8 @@ public class ProjectAggregate
 
     @Apply
     void event(BcProjectCreated event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
+        builder().setId(event.getProjectId())
+                 .setStatus(Project.Status.CREATED);
     }
 
     @Apply
@@ -73,7 +73,7 @@ public class ProjectAggregate
 
     @Apply
     void event(BcProjectStarted event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Project.Status.STARTED);
+        builder().setId(event.getProjectId())
+                 .setStatus(Project.Status.STARTED);
     }
 }

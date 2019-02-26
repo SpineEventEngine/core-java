@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,13 +23,14 @@ package io.spine.server.event.model;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -40,10 +41,15 @@ import static io.spine.server.model.Handlers.createId;
 /**
  * An abstract base for methods handling events.
  *
- * @author Dmytro Dashenkov
+ * @param <T>
+ *         the type of the target object
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <R>
+ *         the type of the method invocation result
  */
-public abstract class EventHandlerMethod<T, R extends MethodResult>
-        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R> {
+public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends MethodResult<?>>
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, P, R> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -65,7 +71,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         if (!getParameterSpec().isAwareOfCommandType()) {
             return createId(eventClass);
         } else {
-            Class<?>[] parameters = getRawMethod().getParameterTypes();
+            Class<?>[] parameters = rawMethod().getParameterTypes();
             Class<? extends CommandMessage> commandMessageClass =
                     castClass(parameters[1], CommandMessage.class);
             CommandClass commandClass = CommandClass.from(commandMessageClass);
@@ -95,9 +101,9 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
      * @see io.spine.server.event.React#external()
      */
     @Override
-    protected void checkAttributesMatch(EventEnvelope envelope) {
-        boolean external = envelope.getEventContext()
-                                   .getExternal();
+    protected void checkAttributesMatch(EventEnvelope event) {
+        boolean external = event.context()
+                                .getExternal();
         ensureExternalMatch(external);
     }
 

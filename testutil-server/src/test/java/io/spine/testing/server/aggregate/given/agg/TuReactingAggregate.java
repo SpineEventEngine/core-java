@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -56,14 +56,14 @@ public final class TuReactingAggregate
     }
 
     @React
-    public TuProjectAssigned handle(TuProjectCreated event) {
+    TuProjectAssigned handle(TuProjectCreated event) {
         return TuProjectAssigned.newBuilder()
                                 .setId(event.getId())
                                 .build();
     }
 
     @Apply
-    void on(TuProjectAssigned event) {
-        getBuilder().setTimestamp(fromMillis(123456));
+    void on(@SuppressWarnings("unused") TuProjectAssigned event) {
+        builder().setTimestamp(fromMillis(123456));
     }
 }

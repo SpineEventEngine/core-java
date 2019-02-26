@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,8 +26,8 @@ import io.spine.base.CommandMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EventCausedCommands;
 import io.spine.system.server.SystemWriteSide;
 
@@ -37,8 +37,6 @@ import static com.google.common.base.Preconditions.checkState;
  * A sequence with two or more commands generated in response to an incoming event.
  *
  * <p>The result of the sequence is the system command for event lifecycle aggregate.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 public class SeveralCommands
@@ -52,7 +50,7 @@ public class SeveralCommands
      * Creates an empty sequence for creating two or more commands in response to the passed event.
      */
     public static SeveralCommands respondMany(EventEnvelope event) {
-        return new SeveralCommands(event.getId(), event.getActorContext());
+        return new SeveralCommands(event.id(), event.actorContext());
     }
 
     @CanIgnoreReturnValue

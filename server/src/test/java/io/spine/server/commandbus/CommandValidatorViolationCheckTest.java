@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,9 +24,9 @@ import com.google.protobuf.Any;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ConstraintViolation;
@@ -41,9 +41,6 @@ import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessa
 import static io.spine.testing.core.given.GivenCommandContext.withRandomActor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Litus
- */
 @DisplayName("CommandValidator violation check should")
 class CommandValidatorViolationCheckTest {
 
@@ -87,9 +84,8 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("return violations if command has invalid context")
     void notAllowInvalidContext() {
-        Command command = TestActorRequestFactory.newInstance(getClass())
-                                                 .createCommand(createProjectMessage(),
-                                                                Time.getCurrentTime());
+        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
+        Command command = factory.createCommand(createProjectMessage(), Time.getCurrentTime());
         Command commandWithoutContext = command.toBuilder()
                                                .setContext(CommandContext.getDefaultInstance())
                                                .build();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,11 +23,11 @@ package io.spine.server.command.model;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
@@ -51,10 +51,12 @@ import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsL
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.PmDispatcher;
@@ -81,18 +83,11 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("CommandHandlerMethod should")
 class CommandHandlerMethodTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandHandlerMethodTest.class);
+            new TestActorRequestFactory(CommandHandlerMethodTest.class);
 
     private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
 
@@ -105,14 +100,22 @@ class CommandHandlerMethodTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(CommandEnvelope.class,
-                            requestFactory.generateEnvelope())
+                .setDefault(CommandEnvelope.class, generate())
                 .setDefault(CommandContext.class, emptyContext)
                 .setDefault(Any.class, Any.getDefaultInstance())
                 .testAllPublicStaticMethods(CommandHandlerMethod.class);
     }
 
+    private static CommandEnvelope generate() {
+        return CommandEnvelope.of(requestFactory.generateCommand());
+    }
+
+    private static CommandEnvelope newCommand(CommandMessage msg) {
+        return CommandEnvelope.of(requestFactory.createCommand(msg));
+    }
+
     @Nested
+    @MuteLogging /* Signature mismatch warnings are expected. */
     @DisplayName("invoke handler method which returns")
     class InvokeHandlerMethod {
 
@@ -199,9 +202,10 @@ class CommandHandlerMethodTest {
     @DisplayName("allow `ProcessManager` methods producing `Empty`")
     void allowEmptyInProcman() {
         RefCreateProject commandMessage = createProject();
-        ProcessManager<ProjectId, ?, ?> entity =
-                new ProcessManagerDoingNothing(commandMessage.getProjectId());
-        CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
+        ProcessManager<String, ?, ?> entity =
+                new ProcessManagerDoingNothing(commandMessage.getProjectId()
+                                                             .getId());
+        CommandEnvelope cmd = newCommand(commandMessage);
         List<Event> events = PmDispatcher.dispatch(entity, cmd);
         assertEmpty(events);
     }
@@ -219,6 +223,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("one Message param and `List` return type")
         void messageParamAndListReturn() {
             Method handler = new ValidHandlerOneParamReturnsList().getHandler();
@@ -227,6 +232,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("Message and Context params")
         void messageAndContextParam() {
             Method handler = new ValidHandlerTwoParams().getHandler();
@@ -243,6 +249,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
+        @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("non-public access")
         void nonPublicAccess() {
             Method method = new ValidHandlerButPrivate().getHandler();
@@ -310,7 +317,7 @@ class CommandHandlerMethodTest {
         @DisplayName("command handler")
         void onDispatchToHandler() {
             AbstractCommandHandler handler = new RejectingHandler();
-            CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
+            CommandEnvelope envelope = newCommand(createProject());
             try {
                 handler.dispatch(envelope);
             } catch (HandlerMethodFailedException e) {
@@ -325,11 +332,11 @@ class CommandHandlerMethodTest {
             RefCreateProject commandMessage = createProject();
             Aggregate<ProjectId, ?, ?> entity =
                     new RejectingAggregate(commandMessage.getProjectId());
-            CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
+            CommandEnvelope cmd = newCommand(commandMessage);
             try {
                 AggregateMessageDispatcher.dispatchCommand(entity, cmd);
             } catch (HandlerMethodFailedException e) {
-                assertCauseAndId(e, entity.getId());
+                assertCauseAndId(e, entity.id());
             }
         }
 
@@ -350,7 +357,7 @@ class CommandHandlerMethodTest {
     @DisplayName("throw ISE when dispatching command of non-handled type")
     void notDispatchNonHandledCmd() {
         AbstractCommandHandler handler = new ValidHandlerOneParam();
-        CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
+        CommandEnvelope cmd = newCommand(startProject());
 
         assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
     }

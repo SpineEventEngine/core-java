@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,28 +21,19 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.annotation.SPI;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.delivery.Shardable;
-import io.spine.server.delivery.ShardedStreamConsumer;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
-import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -50,15 +41,15 @@ import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.server.route.EventRoute.byProducerId;
@@ -73,13 +64,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S> the type of projection state messages
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
-        extends EventDispatchingRepository<I, P, S>
-        implements Shardable {
-
-    @SuppressWarnings("ThisEscapedInObjectConstruction")
-        // OK since `this` is referenced from the supplier
-    private final Supplier<ProjectionEventDelivery<I, P>> eventDeliverySupplier =
-            memoize(() -> new ProjectionEventDelivery<>(this));
+        extends EventDispatchingRepository<I, P, S> {
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
@@ -99,21 +84,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
-    EventStore getEventStore() {
-        return getBoundedContext().getEventBus()
-                                  .getEventStore();
+    EventStore eventStore() {
+        return boundedContext()
+                .eventBus()
+                .eventStore();
     }
 
     /** Obtains class information of projection managed by this repository. */
-    @SuppressWarnings("unchecked")
-        // The cast is ensured by generic parameters of the repository.
-    ProjectionClass<P> projectionClass() {
-        return (ProjectionClass<P>) entityClass();
+    private ProjectionClass<P> projectionClass() {
+        return (ProjectionClass<P>) entityModelClass();
     }
 
     @Internal
     @Override
-    protected final ProjectionClass<P> getModelClass(Class<P> cls) {
+    protected final ProjectionClass<P> toModelClass(Class<P> cls) {
         return asProjectionClass(cls);
     }
 
@@ -122,12 +106,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         P projection = super.create(id);
         lifecycleOf(id).onEntityCreated(PROJECTION);
         return projection;
-    }
-
-    @Override
-    public void close() {
-        unregisterWithSharding();
-        super.close();
     }
 
     /**
@@ -152,10 +130,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         ProjectionSystemEventWatcher<I> systemSubscriber =
                 new ProjectionSystemEventWatcher<>(this);
-        BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = this.boundedContext();
         systemSubscriber.registerIn(boundedContext);
-
-        registerWithSharding();
     }
 
     @Override
@@ -171,7 +147,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     private Set<EventFilter> createEventFilters() {
         ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
-        Set<EventClass> eventClasses = getMessageClasses();
+        Set<EventClass> eventClasses = messageClasses();
         for (EventClass eventClass : eventClasses) {
             String typeName = TypeName.of(eventClass.value())
                                       .value();
@@ -182,16 +158,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return builder.build();
     }
 
-    /** Opens access to the {@link BoundedContext} of the repository to the package. */
-    BoundedContext boundedContext() {
-        return getBoundedContext();
-    }
-
     /**
      * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
      */
     protected final Stand getStand() {
-        return getBoundedContext().getStand();
+        return boundedContext().stand();
     }
 
     /**
@@ -212,17 +183,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @throws IllegalStateException if the storage is null
      */
     @Override
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
     protected RecordStorage<I> recordStorage() {
         return checkStorage(recordStorage);
     }
 
     @Override
-    @SuppressWarnings("MethodDoesntCallSuperMethod" /* We do not call super.createStorage() because
-                       we create a specific type of a storage, not a regular entity storage created
-                       in the parent. */)
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        Class<P> projectionClass = getEntityClass();
+        Class<P> projectionClass = entityClass();
         ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
         this.recordStorage = projectionStorage.recordStorage();
         return projectionStorage;
@@ -246,24 +213,24 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     protected ProjectionStorage<I> projectionStorage() {
         @SuppressWarnings("unchecked") /* OK as we control the creation in createStorage(). */
-        ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
+        ProjectionStorage<I> storage = (ProjectionStorage<I>) storage();
         return storage;
     }
 
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return projectionClass().getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return projectionClass().getExternalEventClasses();
     }
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(envelope);
+    public boolean canDispatch(EventEnvelope event) {
+        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(event);
         return subscriber.isPresent();
     }
 
@@ -282,12 +249,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * @param id
      *         the ID of the target projection
-     * @param envelope
+     * @param event
      *         the event to dispatch
      */
     @Internal
-    protected void dispatchNowTo(I id, EventEnvelope envelope) {
-        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
+    protected void dispatchNowTo(I id, EventEnvelope event) {
+        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, event);
         endpoint.dispatchTo(id);
     }
 
@@ -317,52 +284,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * Defines a strategy of event delivery applied to the projections managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain event to a particular projection
-     * instance at runtime.
-     *
-     * @return delivery strategy for events applied to the instances managed by this repository
-     */
-    @SPI
-    protected ProjectionEventDelivery<I, P> getEndpointDelivery() {
-        return eventDeliverySupplier.get();
-    }
-
-    @Override
-    public ShardingStrategy getShardingStrategy() {
-        return UniformAcrossTargets.singleShard();
-    }
-
-    @Override
-    public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.of(getEndpointDelivery().getConsumer());
-        return result;
-    }
-
-    @Override
-    public BoundedContextName getBoundedContextName() {
-        BoundedContextName name = getBoundedContext().getName();
-        return name;
-    }
-
-    @Override
-    public ProjectionClass<P> getShardedModelClass() {
-        return projectionClass();
-    }
-
-    /**
      * An implementation of an external message dispatcher feeding external events
      * to {@code Projection} instances.
      */
     private class ProjectionExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
+        public Set<ExternalMessageClass> messageClasses() {
             Set<EventClass> eventClasses = projectionClass().getExternalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }

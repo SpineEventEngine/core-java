@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package spine.test.core.given;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.core.given";
+option java_outer_classname = "EnrichmentsTestEventsProto";
+option java_multiple_files = true;
+
+import "spine/core/user_id.proto";
+
+message EtProjectCreated {
+    string id = 1;
+}
+
+message EtProjectStarted {
+    string id = 1;
+}
+
+message EtProjectInfo {
+    option (enrichment_for) = "EtProjectCreated, EtProjectStarted";
+    string project_name = 1 [(by) = "id", (required) = true];
+}
+
+message EtProjectDetails {
+    option (enrichment_for) = "EtProjectCreated, EtProjectStarted";
+    string project_description = 1 [(by) = "id"];
+    string logo_url = 2 [(by) = "id"];
+    // This field is added as a smoke test for having a repeated message field in an enrichment.
+    repeated spine.core.UserId member = 3 [(by) = "id"];
+}

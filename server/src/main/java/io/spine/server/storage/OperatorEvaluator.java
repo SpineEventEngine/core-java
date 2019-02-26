@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,7 +29,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.ColumnFilter.Operator;
+import static io.spine.client.Filter.Operator;
 import static io.spine.protobuf.Timestamps2.isLaterThan;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
@@ -37,7 +37,7 @@ import static java.lang.String.format;
 /**
  * A boolean non-typed comparison operation on two given instances.
  *
- * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
+ * @see io.spine.client.CompositeFilter.CompositeOperator for the comparison strategies
  */
 @Internal
 public enum OperatorEvaluator {

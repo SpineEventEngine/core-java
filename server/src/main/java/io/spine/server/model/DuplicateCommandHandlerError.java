@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,9 +21,9 @@
 package io.spine.server.model;
 
 import com.google.common.base.Joiner;
-import io.spine.core.CommandClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlingClass;
+import io.spine.server.type.CommandClass;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,8 +39,6 @@ import static java.util.stream.Collectors.toList;
  * An error thrown on attempt to add a class which declares a
  * {@linkplain CommandHandlerMethod method} that handles a command which is
  * already handled by a class already added to the {@link Model}.
- *
- * @author Alexander Yevsyukov
  */
 public class DuplicateCommandHandlerError extends ModelError {
 

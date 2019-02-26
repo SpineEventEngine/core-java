@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -33,7 +34,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
 
 /**
@@ -115,10 +115,10 @@ public final class EntityLifecycleMonitor<I,
      */
     @Override
     public void onAfterCommit(EntityRecordChange change) {
-        Set<Message> messageIds = copyOf(acknowledgedMessageIds);
+        Set<Message> messageIds = ImmutableSet.copyOf(acknowledgedMessageIds);
         Any newEntityId = change.getPreviousValue()
                                 .getEntityId();
-        I id = Identifier.unpack(newEntityId, repository.getIdClass());
+        I id = Identifier.unpack(newEntityId, repository.idClass());
         repository.lifecycleOf(id)
                   .onStateChanged(change, messageIds);
     }

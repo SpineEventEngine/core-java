@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,21 +21,17 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
+import io.spine.server.entity.storage.given.column.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
-import static io.spine.server.entity.storage.ColumnValueConverters.of;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Dmytro Kuzmin
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Many literals for method names.
 @DisplayName("ColumnValueConverters utility should")
 class ColumnValueConvertersTest {
@@ -83,7 +79,7 @@ class ColumnValueConvertersTest {
     private static ColumnValueConverter ofGetter(String name) {
         try {
             Method getter = TestEntity.class.getDeclaredMethod(name);
-            ColumnValueConverter converter = of(getter);
+            ColumnValueConverter converter = ColumnValueConverters.of(getter);
             return converter;
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Empty;
 import io.spine.core.ActorContext;
-import io.spine.core.EmptyClass;
 import io.spine.core.EventContext;
+import io.spine.server.type.EmptyClass;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,8 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("ImportOrigin should")
 class ImportOriginTest {
 
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+    private final TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
 
     private ActorContext actorContext;
     private ImportOrigin origin;
@@ -61,10 +60,10 @@ class ImportOriginTest {
     @DisplayName("return Empty in other methods")
     void emptyValues() {
         Empty empty = Empty.getDefaultInstance();
-        assertEquals(empty, origin.getId());
-        assertEquals(empty, origin.getOuterObject());
-        assertEquals(empty, origin.getMessage());
-        assertEquals(empty, origin.getMessageContext());
-        assertEquals(EmptyClass.instance(), origin.getMessageClass());
+        assertEquals(empty, origin.id());
+        assertEquals(empty, origin.outerObject());
+        assertEquals(empty, origin.message());
+        assertEquals(empty, origin.context());
+        assertEquals(EmptyClass.instance(), origin.messageClass());
     }
 }

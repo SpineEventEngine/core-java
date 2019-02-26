@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,25 +24,20 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
  * The signature of the {@link EventApplier} method.
- *
- * @author Alex Tymchenko
  */
-class EventApplierSignature
-        extends MethodSignature<EventApplier, EventEnvelope> {
+class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope> {
 
     EventApplierSignature() {
         super(Apply.class);
@@ -50,7 +45,7 @@ class EventApplierSignature
 
     @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(void.class);
+        return ImmutableSet.of(void.class);
     }
 
     @Override
@@ -60,12 +55,12 @@ class EventApplierSignature
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE);
+        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
-        return copyOf(EventApplierParams.values());
+        return ImmutableSet.copyOf(EventApplierParams.values());
     }
 
     /**
@@ -82,8 +77,8 @@ class EventApplierSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope.getMessage()};
+            public Object[] extractArguments(EventEnvelope event) {
+                return new Object[]{event.message()};
             }
         }
     }

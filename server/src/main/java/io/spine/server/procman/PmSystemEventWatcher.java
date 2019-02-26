@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,14 +21,14 @@
 package io.spine.server.procman;
 
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CommandDispatchedToHandler;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.HistoryRejections;
@@ -42,7 +42,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
     private final ProcessManagerRepository<I, ?, ?> repository;
 
     PmSystemEventWatcher(ProcessManagerRepository<I, ?, ?> repository) {
-        super(repository.getEntityStateType());
+        super(repository.entityStateType());
         this.repository = repository;
     }
 

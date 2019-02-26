@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,7 @@
 package io.spine.server.bus;
 
 import com.google.protobuf.Message;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -32,7 +32,6 @@ import java.util.Collection;
  * @param <E> the type of envelopes for outer objects used by this bus
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
- * @author Alex Tymchenko
  */
 public abstract class MulticastBus<M extends Message,
                                    E extends MessageEnvelope<?, M, ?>,

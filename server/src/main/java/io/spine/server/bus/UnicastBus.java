@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,7 +22,7 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import static java.lang.String.format;
@@ -47,9 +47,9 @@ public abstract class UnicastBus<T extends Message,
     }
 
     private static IllegalStateException noDispatcherFound(MessageEnvelope envelope) {
-        String id = Identifier.toString(envelope.getId());
+        String id = Identifier.toString(envelope.id());
         String msg = format("No dispatcher found for the command (class: %s id: %s).",
-                            envelope.getMessageClass(),
+                            envelope.messageClass(),
                             id);
         throw new IllegalStateException(msg);
     }

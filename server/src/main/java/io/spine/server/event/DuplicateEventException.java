@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,8 +33,6 @@ import static java.lang.String.format;
  *
  * <p>An event is considered a duplicate when its ID matches the ID of another event which was
  * already dispatched to a given entity.
- *
- * @author Dmytro Dashenkov
  */
 public final class DuplicateEventException extends RuntimeException {
 

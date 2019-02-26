@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,7 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 
 import java.util.Set;
 
@@ -29,8 +29,6 @@ import java.util.Set;
  *
  * <p>A class can declare methods to receive events from the same Bounded Context (“domestic”
  * events), or events originated in another Bounded Context (“external” events).
- *
- * @author Alexander Yevsyukov
  */
 public interface EventReceiverClass {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,10 +20,10 @@
 
 package io.spine.server.event;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
 import io.spine.server.integration.ExternalDispatcherFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 
@@ -31,7 +31,6 @@ import java.util.Set;
  * {@code EventDispatcher} delivers events to {@linkplain EventReceiver receiving} objects.
  *
  * @param <I> the type of entity IDs
- * @author Alexander Yevsyukov
  */
 public interface EventDispatcher<I>
         extends MulticastDispatcher<EventClass, EventEnvelope, I>, ExternalDispatcherFactory<I> {
@@ -39,26 +38,26 @@ public interface EventDispatcher<I>
     /**
      * Obtains classes of domestic events processed by this dispatcher.
      */
-    default Set<EventClass> getEventClasses() {
-        return getMessageClasses();
+    default Set<EventClass> eventClasses() {
+        return messageClasses();
     }
 
     /**
      * Obtains classes of external events processed by this dispatcher.
      */
-    Set<EventClass> getExternalEventClasses();
+    Set<EventClass> externalEventClasses();
 
     /**
      * Verifies if this instance dispatches at least one domestic event.
      */
     default boolean dispatchesEvents() {
-        return !getEventClasses().isEmpty();
+        return !eventClasses().isEmpty();
     }
 
     /**
      * Verifies if this instance dispatches at least one external event.
      */
     default boolean dispatchesExternalEvents() {
-        return !getExternalEventClasses().isEmpty();
+        return !externalEventClasses().isEmpty();
     }
 }

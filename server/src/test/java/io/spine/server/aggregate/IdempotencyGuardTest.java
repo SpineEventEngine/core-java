@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,9 +23,7 @@ package io.spine.server.aggregate;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
@@ -33,6 +31,8 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -41,8 +41,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.CommandEnvelope.of;
-import static io.spine.core.EventEnvelope.of;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.command;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProject;
@@ -53,9 +51,6 @@ import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProje
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.taskStarted;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Mykhailo Drachuk
- */
 @DisplayName("IdempotencyGuard should")
 class IdempotencyGuardTest {
 
@@ -78,13 +73,13 @@ class IdempotencyGuardTest {
         boundedContext.close();
     }
 
-    private IgTestAggregate aggregate() {
-        return repository.loadAggregate(projectId);
-    }
-
     @Nested
     @DisplayName("check commands and")
+
     class Commands {
+        private IgTestAggregate aggregate() {
+            return repository.loadAggregate(projectId);
+        }
 
         @Test
         @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
@@ -118,7 +113,7 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = new IgTestAggregate(projectId);
 
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            guard.check(of(createCommand));
+            guard.check(CommandEnvelope.of(createCommand));
         }
 
         @Test
@@ -136,13 +131,13 @@ class IdempotencyGuardTest {
         }
 
         private void post(Command command) {
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(command, noOpObserver);
         }
 
         private void check(IdempotencyGuard guard, Command command) {
-            CommandEnvelope envelope = of(command);
+            CommandEnvelope envelope = CommandEnvelope.of(command);
             guard.check(envelope);
         }
     }
@@ -153,7 +148,7 @@ class IdempotencyGuardTest {
 
         @BeforeEach
         void setUp() {
-            boundedContext.getCommandBus()
+            boundedContext.commandBus()
                           .post(command(createProject(projectId)), noOpObserver());
         }
 
@@ -195,9 +190,9 @@ class IdempotencyGuardTest {
         @DisplayName("not throw exception if another event was handled")
         void notThrowIfAnotherCommandHandled() {
             Event taskEvent = event(taskStarted(projectId));
-            Event projectEvent = event(projectPaused(projectId));;
+            Event projectEvent = event(projectPaused(projectId));
 
-            EventBus eventBus = boundedContext.getEventBus();
+            EventBus eventBus = boundedContext.eventBus();
             eventBus.post(taskEvent);
 
             IgTestAggregate aggregate = repository.loadAggregate(projectId);
@@ -207,12 +202,12 @@ class IdempotencyGuardTest {
         }
 
         private void post(Event event) {
-            boundedContext.getEventBus()
+            boundedContext.eventBus()
                           .post(event);
         }
 
         private void check(IdempotencyGuard guard, Event event) {
-            EventEnvelope envelope = of(event);
+            EventEnvelope envelope = EventEnvelope.of(event);
             guard.check(envelope);
         }
     }

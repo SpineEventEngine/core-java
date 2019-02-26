@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,8 +21,8 @@
 package io.spine.server.bus.given;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -41,7 +41,7 @@ public class MulticastDispatcherIdentityTestEnv {
         public static final String ID = newUuid();
 
         @Override
-        public Set<MessageClass> getMessageClasses() {
+        public Set<MessageClass> messageClasses() {
             return ImmutableSet.of();
         }
 

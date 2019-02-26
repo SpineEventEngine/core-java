@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,7 @@
 
 package io.spine.system.server.given.command;
 
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 import io.spine.system.server.ModelInfo;
 import io.spine.system.server.given.AbstractEventAccumulator;
 
@@ -34,7 +34,7 @@ import java.util.Set;
 public class CommandLifecycleWatcher extends AbstractEventAccumulator {
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return ModelInfo.commandLifecycle()
                         .getStateEventClasses();
     }

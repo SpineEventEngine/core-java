@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,9 +24,6 @@ import static java.lang.String.format;
 /**
  * Indicates that more than one handling method for the same message class are present
  * in the declaring class.
- *
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
  */
 public class DuplicateHandlerMethodError extends ModelError {
 
@@ -38,8 +35,8 @@ public class DuplicateHandlerMethodError extends ModelError {
             String firstMethodName,
             String secondMethodName) {
 
-        super(format("The %s class defines more than one method with ID %s." +
-                             " Methods encountered: %s, %s.",
+        super(format("The `%s` class defines more than one method with ID `%s`." +
+                             " Methods encountered: `%s`, `%s`.",
                      targetClass.getName(), handlerId,
                      firstMethodName, secondMethodName));
     }

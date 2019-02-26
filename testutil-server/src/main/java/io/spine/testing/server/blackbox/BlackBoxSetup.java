@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -72,10 +72,10 @@ final class BlackBoxSetup {
     BlackBoxSetup(BoundedContext boundedContext,
                   TestActorRequestFactory requestFactory,
                   MemoizingObserver<Ack> observer) {
-        this.commandBus = boundedContext.getCommandBus();
-        this.eventBus = boundedContext.getEventBus();
-        this.importBus = boundedContext.getImportBus();
-        this.integrationBus = boundedContext.getIntegrationBus();
+        this.commandBus = boundedContext.commandBus();
+        this.eventBus = boundedContext.eventBus();
+        this.importBus = boundedContext.importBus();
+        this.integrationBus = boundedContext.integrationBus();
         this.requestFactory = checkNotNull(requestFactory);
         this.eventFactory = eventFactory(requestFactory);
         this.observer = checkNotNull(observer);

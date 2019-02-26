@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,14 +25,14 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.Ack;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.server.expected.AbstractExpected;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
@@ -43,14 +43,13 @@ import org.junit.jupiter.api.BeforeEach;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
-import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -160,7 +159,7 @@ public abstract class MessageHandlerTest<I,
         repository = createRepository();
         assertNotNull(repository);
 
-        Set<CommandClass> commandClasses = getAllCommandClasses();
+        Set<CommandClass> commandClasses = allCommandClasses();
         boundedContext.registerCommandDispatcher(new VoidCommandDispatcher(commandClasses));
     }
 
@@ -181,31 +180,29 @@ public abstract class MessageHandlerTest<I,
         }
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // checked when filtering
-    private static Set<CommandClass> getAllCommandClasses() {
+    private static Set<CommandClass> allCommandClasses() {
         return KnownTypes
                 .instance()
-                .getAllUrls()
+                .allUrls()
                 .stream()
-                .filter(typeUrl -> commandOfType(typeUrl).isPresent())
-                .map(typeUrl -> commandOfType(typeUrl).get())
+                .flatMap(MessageHandlerTest::commandOfType)
                 .collect(toSet());
     }
 
-    private static Optional<CommandClass> commandOfType(TypeUrl type) {
-        Class<?> cls = type.getJavaClass();
-        if (Message.class.isAssignableFrom(cls)) {
+    private static Stream<CommandClass> commandOfType(TypeUrl type) {
+        Class<?> cls = type.toJavaClass();
+        if (CommandMessage.class.isAssignableFrom(cls)) {
             @SuppressWarnings("unchecked")
             Class<? extends CommandMessage> messageType = (Class<? extends CommandMessage>) cls;
             CommandClass commandClass = CommandClass.from(messageType);
-            return of(commandClass);
+            return Stream.of(commandClass);
         } else {
-            return empty();
+            return Stream.empty();
         }
     }
 
     protected final ImmutableList<Message> interceptedCommands() {
-        return copyOf(interceptedCommands);
+        return ImmutableList.copyOf(interceptedCommands);
     }
 
     /**
@@ -231,7 +228,7 @@ public abstract class MessageHandlerTest<I,
         }
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return newHashSet(expectedCommands);
         }
 
@@ -258,7 +255,7 @@ public abstract class MessageHandlerTest<I,
 
         @Override
         public Optional<Ack> accept(CommandEnvelope envelope) {
-            interceptedCommands.add(unpack(envelope.getCommand()
+            interceptedCommands.add(unpack(envelope.command()
                                                    .getMessage()));
             return empty();
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.MessageHandlerTest;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.expected.EventApplierExpected;
@@ -72,9 +72,9 @@ public abstract class AggregateEventImportTest<I,
 
     @Override
     protected EventApplierExpected<S> expectThat(A entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         dispatchTo(entity);
-        return new EventApplierExpected<>(initialState, entity.getState());
+        return new EventApplierExpected<>(initialState, entity.state());
     }
 
     /**

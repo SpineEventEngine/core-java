@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,6 @@ package io.spine.server.entity.model;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.protobuf.Messages;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
@@ -36,13 +35,13 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.Messages.defaultInstance;
 import static java.lang.String.format;
 
 /**
  * A class of entities.
  *
  * @param <E> the type of entities
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("SynchronizeOnThis") // Double-check idiom for lazy init.
 public class EntityClass<E extends Entity> extends ModelClass<E> {
@@ -71,8 +70,8 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     protected EntityClass(Class<E> cls) {
         super(cls);
         checkNotNull((Class<? extends Entity>) cls);
-        this.idClass = getIdClass(cls);
-        this.stateClass = getStateClass(cls);
+        this.idClass = idClass(cls);
+        this.stateClass = stateClass(cls);
         this.entityStateType = TypeUrl.of(stateClass);
     }
 
@@ -91,7 +90,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public E createEntity(Object constructorArgument) {
         checkNotNull(constructorArgument);
-        Constructor<E> ctor = getConstructor();
+        Constructor<E> ctor = constructor();
         checkArgumentMatches(ctor, constructorArgument);
         try {
             E result = ctor.newInstance(constructorArgument);
@@ -137,9 +136,9 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      *
      * @throws ModelError if unsupported ID class passed
      */
-    private static <I> Class<I> getIdClass(Class<? extends Entity> cls) {
+    private static <I> Class<I> idClass(Class<? extends Entity> cls) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.getArgumentIn(cls);
+        Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.argumentIn(cls);
         try {
             Identifier.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
@@ -155,23 +154,23 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * public API. It is used internally by other framework routines and not designed for efficient
      * execution by Spine users.
      */
-    private static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
+    private static <S extends Message> Class<S> stateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
+        Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
         return result;
     }
 
     /**
      * Obtains the default state for this class of entities.
      */
-    public Message getDefaultState() {
+    public Message defaultState() {
         Message result = defaultState;
         if (result == null) {
             synchronized (this) {
                 result = defaultState;
                 if (result == null) {
-                    Class<? extends Message> stateClass = getStateClass();
-                    defaultState = Messages.newInstance(stateClass);
+                    Class<? extends Message> stateClass = stateClass();
+                    defaultState = defaultInstance(stateClass);
                     result = defaultState;
                 }
             }
@@ -182,7 +181,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains constructor for the entities of this class.
      */
-    public Constructor<E> getConstructor() {
+    public Constructor<E> constructor() {
         Constructor<E> result = entityConstructor;
         if (result == null) {
             synchronized (this) {
@@ -204,11 +203,10 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * 
      * @throws IllegalStateException if the entity class does not have the required constructor
     */
-    @SuppressWarnings({"JavaReflectionMemberAccess" /* Entity ctor must accept ID parameter */,
-                       "unchecked" /* The cast is protected by generic params of this class. */})
+    @SuppressWarnings("unchecked" /* The cast is protected by generic params of this class. */)
     protected Constructor<E> findConstructor() {
         Class<? extends E> entityClass = value();
-        Class<?> idClass = getIdClass();
+        Class<?> idClass = idClass();
         Constructor<E> result;
         try {
             result = (Constructor<E>) entityClass.getDeclaredConstructor(idClass);
@@ -222,21 +220,21 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the class of IDs used by the entities of this class.
      */
-    public final Class<?> getIdClass() {
+    public final Class<?> idClass() {
         return idClass;
     }
 
     /**
      * Obtains the class of the state of entities of this class.
      */
-    public final Class<? extends Message> getStateClass() {
+    public final Class<? extends Message> stateClass() {
         return stateClass;
     }
 
     /**
      * Obtains type URL of the state of entities of this class.
      */
-    public final TypeUrl getStateType() {
+    public final TypeUrl stateType() {
         return entityStateType;
     }
 
@@ -245,7 +243,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof EntityClass)) {
             return false;
         }
         if (!super.equals(o)) {

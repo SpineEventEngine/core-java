@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,7 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.event.Enricher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.event.EventBus;
 
 /**
@@ -102,7 +102,7 @@ public final class SystemContext extends BoundedContext {
      * a {@link NoOpSystemWriteSide} instance.
      */
     @Override
-    public NoOpSystemClient getSystemClient() {
+    public NoOpSystemClient systemClient() {
         return NoOpSystemClient.INSTANCE;
     }
 }

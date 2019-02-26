@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,9 +22,6 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.SeveralCommands;
 import io.spine.server.commandbus.SingleCommand;
@@ -32,6 +29,10 @@ import io.spine.server.commandbus.Split;
 import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodResult;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.List;
@@ -46,19 +47,18 @@ import static io.spine.server.commandbus.Transform.transform;
  * Base interface for methods that generate one or more command messages in response to
  * an incoming message.
  *
- * @param <T> the type of the target object
- * @param <M> the type of the message class
- * @param <E> the type of the message envelope, in which the incoming message is wrapped
- * @param <R> the type of the method result
- *
- * @author Alexander Yevsyukov
+ * @param <T>
+ *         the type of the target object
+ * @param <M>
+ *         the type of the message class
+ * @param <E>
+ *         the type of the message envelope, in which the incoming message is wrapped
  */
 @Immutable
 public interface CommandingMethod<T,
                                   M extends MessageClass,
-                                  E extends MessageEnvelope<?, ?, ?>,
-                                  R extends MethodResult>
-        extends HandlerMethod<T, M, E, R> {
+                                  E extends MessageEnvelope<?, ?, ?>>
+        extends HandlerMethod<T, M, E, CommandClass, CommandingMethod.Result> {
 
     /**
      * A commanding method returns one or more command messages.

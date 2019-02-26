@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -39,8 +39,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>If such check fails, the {@link IllegalStateException} will be thrown. If the check passes,
  * no action is performed.
- *
- * @author Dmytro Kuzmin
  */
 @Internal
 public final class MethodExceptionChecker {

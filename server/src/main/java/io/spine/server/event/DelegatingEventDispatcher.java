@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,11 +22,11 @@ package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A {@link EventDispatcher} which delegates the responsibilities to an aggregated {@link
  * EventDispatcherDelegate delegate instance}.
  *
- * @author Alexander Yevsyukov
  * @see EventDispatcherDelegate
  */
 @Internal
@@ -65,23 +64,23 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     }
 
     @Override
-    public Set<EventClass> getMessageClasses() {
-        return delegate.getEventClasses();
+    public Set<EventClass> messageClasses() {
+        return delegate.eventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
-        return delegate.getExternalEventClasses();
+    public Set<EventClass> externalEventClasses() {
+        return delegate.externalEventClasses();
     }
 
     @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
-        return delegate.dispatchEvent(envelope);
+    public Set<I> dispatch(EventEnvelope event) {
+        return delegate.dispatchEvent(event);
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        delegate.onError(envelope, exception);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        delegate.onError(event, exception);
     }
 
     /**
@@ -125,8 +124,8 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
         }
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
-            Set<EventClass> eventClasses = delegate.getExternalEventClasses();
+        public Set<ExternalMessageClass> messageClasses() {
+            Set<EventClass> eventClasses = delegate.externalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,12 +24,14 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.Command;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
-import io.spine.server.event.Enricher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -83,6 +85,13 @@ public final class MultitenantBlackBoxContext
         return events;
     }
 
+    @Override
+    protected <D> @Nullable D readOperation(Supplier<D> supplier) {
+        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
+        D result = tenantAwareRunner.evaluate(() -> super.readOperation(supplier));
+        return result;
+    }
+
     private TenantId tenantId() {
         checkState(tenantId != null,
                    "Set a tenant ID before calling receive and assert methods");
@@ -98,7 +107,7 @@ public final class MultitenantBlackBoxContext
      * @return a new request factory instance
      */
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(MultitenantBlackBoxContext.class, tenantId);
+        return new TestActorRequestFactory(MultitenantBlackBoxContext.class, tenantId);
     }
 
     /**

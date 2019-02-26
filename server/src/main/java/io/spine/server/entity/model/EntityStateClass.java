@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,9 +26,7 @@ import io.spine.type.MessageClass;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
- *
- * @author Alex Tymchenko
+ * A value object holding a class of an {@linkplain Entity#state() entity state}.
  */
 public final class EntityStateClass extends MessageClass<Message> {
 
@@ -43,7 +41,7 @@ public final class EntityStateClass extends MessageClass<Message> {
      */
     public static EntityStateClass of(Entity entity) {
         checkNotNull(entity);
-        Message state = entity.getState();
+        Message state = entity.state();
         return of(state);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,12 +23,12 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 
@@ -37,11 +37,9 @@ import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class EventDispatchingRepository<I,
-                                                 E extends AbstractVersionableEntity<I, S>,
+                                                 E extends AbstractEntity<I, S>,
                                                  S extends Message>
         extends DefaultRecordBasedRepository<I, E, S>
         implements EventDispatcher<I> {
@@ -62,7 +60,7 @@ public abstract class EventDispatchingRepository<I,
      * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
      * of event targets.
      */
-    protected final EventRouting<I> getEventRouting() {
+    protected final EventRouting<I> eventRouting() {
         return eventRouting;
     }
 
@@ -75,7 +73,7 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public void onRegistered() {
         super.onRegistered();
-        getBoundedContext().registerEventDispatcher(this);
+        boundedContext().registerEventDispatcher(this);
     }
 
     /**
@@ -84,20 +82,20 @@ public abstract class EventDispatchingRepository<I,
      * <p>If there is no stored entity with such an ID, a new one is created and stored after it
      * handles the passed event.
      *
-     * @param envelope the event to dispatch
+     * @param event the event to dispatch
      */
     @Override
-    public final Set<I> dispatch(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        Set<I> targets = with(envelope.getTenantId())
-                .evaluate(() -> doDispatch(envelope));
+    public final Set<I> dispatch(EventEnvelope event) {
+        checkNotNull(event);
+        Set<I> targets = with(event.tenantId())
+                .evaluate(() -> doDispatch(event));
         return targets;
     }
 
-    private Set<I> doDispatch(EventEnvelope envelope) {
-        Set<I> targets = route(envelope);
-        Event event = envelope.getOuterObject();
-        targets.forEach(id -> dispatchTo(id, event));
+    private Set<I> doDispatch(EventEnvelope event) {
+        Set<I> targets = route(event);
+        Event outerObject = event.outerObject();
+        targets.forEach(id -> dispatchTo(id, outerObject));
         return targets;
     }
 
@@ -117,22 +115,24 @@ public abstract class EventDispatchingRepository<I,
      * @param envelope the event to find targets for
      * @return a set of IDs of projections to dispatch the given event to
      */
-    private Set<I> route(EventEnvelope envelope) {
-        EventRouting<I> routing = getEventRouting();
-        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+    private Set<I> route(EventEnvelope event) {
+        EventRouting<I> routing = eventRouting();
+        Set<I> targets = routing.apply(event.message(), event.context());
         return targets;
     }
 
     /**
      * Logs error into the repository {@linkplain #log() log}.
      *
-     * @param envelope  the message which caused the error
-     * @param exception the error
+     * @param event
+     *         the message which caused the error
+     * @param exception
+     *         the error
      */
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         logError("Error dispatching event (class: `%s`, id: `%s`) to entity of type `%s`.",
-                 envelope, exception);
+                 event, exception);
     }
 
     /**
@@ -143,14 +143,14 @@ public abstract class EventDispatchingRepository<I,
             implements ExternalMessageDispatcher<I> {
 
         @Override
-        public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope event = envelope.toEventEnvelope();
+        public Set<I> dispatch(ExternalMessageEnvelope externalEvent) {
+            EventEnvelope event = externalEvent.toEventEnvelope();
             return EventDispatchingRepository.this.dispatch(event);
         }
 
         @Override
-        public boolean canDispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope event = envelope.toEventEnvelope();
+        public boolean canDispatch(ExternalMessageEnvelope externalEvent) {
+            EventEnvelope event = externalEvent.toEventEnvelope();
             return EventDispatchingRepository.this.canDispatch(event);
         }
     }

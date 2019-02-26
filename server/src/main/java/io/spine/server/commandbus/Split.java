@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,7 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.CommandSplit;
 import io.spine.system.server.SystemWriteSide;
 
@@ -33,15 +33,13 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * A {@code CommandSequence} of two or more commands which is generated in response to
  * a source command.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
 
     private Split(CommandEnvelope command) {
-        super(command.getId(), command.getCommandContext()
-                                      .getActorContext());
+        super(command.id(), command.context()
+                                   .getActorContext());
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,13 +21,19 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Message;
+import com.google.common.truth.OptionalSubject;
+import com.google.common.truth.Truth8;
 import com.google.protobuf.StringValue;
-import io.spine.base.EventMessage;
+import io.spine.base.EnrichmentMessage;
 import io.spine.base.Identifier;
-import io.spine.core.given.GivenEvent;
-import io.spine.test.core.given.GivenProjectCreated;
+import io.spine.core.Enrichment.Container;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
+import io.spine.test.core.given.EtProjectCreated;
+import io.spine.test.core.given.EtProjectDetails;
+import io.spine.test.core.given.EtProjectInfo;
+import io.spine.testing.TestValues;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,76 +42,69 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.Enrichments.getEnrichment;
-import static io.spine.core.Enrichments.getEnrichments;
-import static io.spine.core.given.GivenEvent.context;
+import static io.spine.core.Enrichments.container;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static io.spine.server.type.given.GivenEvent.context;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("Enrichments utility should")
-class EnrichmentsTest {
+class EnrichmentsTest extends UtilityClassTest<Enrichments> {
 
-    private GivenProjectCreated projectCreated;
-    private BoolValue boolValue;
+    private EtProjectCreated projectCreated;
+    private EtProjectInfo projectInfo;
     private TestEventFactory eventFactory;
     private EventContext context;
+
+    EnrichmentsTest() {
+        super(Enrichments.class);
+    }
+
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(StringValue.class, StringValue.getDefaultInstance())
+              .setDefault(EventContext.class, context());
+
+    }
 
     /**
      * Creates a new {@link EventContext} enriched with the passed message.
      *
      * <p>The key in the map is a fully-qualified {@code TypeName} of the message.
-     * See {@link Enrichment.Container#getItemsMap()} or {@code Enrichment} proto type definition
+     * See {@link Container#getItemsMap()} or {@code Enrichment} proto type definition
      * for details.
      */
-    private static EventContext givenContextEnrichedWith(Message enrichment) {
+    private static EventContext givenContextEnrichedWith(EnrichmentMessage enrichment) {
         String enrichmentKey = TypeName.of(enrichment)
                                        .value();
-        Enrichment.Builder enrichments =
-                Enrichment.newBuilder()
-                          .setContainer(Enrichment.Container.newBuilder()
-                                                            .putItems(enrichmentKey,
-                                                                      pack(enrichment)));
-        EventContext context = context().toBuilder()
-                                        .setEnrichment(enrichments.build())
-                                        .build();
+        Enrichment.Builder enrichments = Enrichment
+                .newBuilder()
+                .setContainer(Container.newBuilder()
+                                       .putItems(enrichmentKey, pack(enrichment)));
+        EventContext context = context()
+                .toBuilder()
+                .setEnrichment(enrichments)
+                .build();
         return context;
     }
 
     @BeforeEach
     void setUp() {
         String producerId = newUuid();
-        projectCreated = GivenProjectCreated
+        projectCreated = EtProjectCreated
                 .newBuilder()
                 .setId(producerId)
                 .build();
-        boolValue = BoolValue.of(false);
+        projectInfo = EtProjectInfo
+                .newBuilder()
+                .setProjectName("Project info of " + getClass().getSimpleName())
+                .build();
         eventFactory = TestEventFactory.newInstance(Identifier.pack(producerId), getClass());
         context = eventFactory.createEvent(projectCreated)
                               .getContext();
-    }
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Enrichments.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(StringValue.class, StringValue.getDefaultInstance())
-                .setDefault(EventContext.class, context())
-                .testAllPublicStaticMethods(Enrichments.class);
     }
 
     @Test
@@ -124,48 +123,68 @@ class EnrichmentsTest {
         assertFalse(event.isEnrichmentEnabled());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    // We're sure the optional is populated in this method.
     @Test
-    @DisplayName("obtain all event enrichments from context")
+    @DisplayName("verify if there are enrichments")
     void getAllEnrichments() {
-        EventContext context = givenContextEnrichedWith(projectCreated);
+        EventContext context = givenContextEnrichedWith(projectInfo);
 
-        Optional<Enrichment.Container> enrichments = getEnrichments(context);
-
-        assertTrue(enrichments.isPresent());
-        assertEquals(context.getEnrichment()
-                            .getContainer(), enrichments.get());
+        assertThat(hasEnrichments(context))
+                .isTrue();
     }
 
     @Test
-    @DisplayName("return absent if there are no enrichments in context")
+    @DisplayName("tell if there are no enrichments in `EventContext`")
     void returnAbsentOnNoEnrichments() {
-        assertFalse(getEnrichments(context).isPresent());
+        assertThat(hasEnrichments(context))
+                .isFalse();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    // We're sure the optional is populated in this method.
+    private static
+    OptionalSubject assertEnrichment(EventContext ctx, Class<? extends EnrichmentMessage> cls) {
+        return Truth8.assertThat(ctx.find(cls));
+    }
+
     @Test
     @DisplayName("obtain specific event enrichment from context")
     void obtainSpecificEnrichment() {
-        EventContext context = givenContextEnrichedWith(projectCreated);
-        Optional<? extends EventMessage> enrichment =
-                getEnrichment(projectCreated.getClass(), context);
-        assertTrue(enrichment.isPresent());
-        assertEquals(projectCreated, enrichment.get());
+        EventContext context = givenContextEnrichedWith(projectInfo);
+
+        OptionalSubject assertEnrichment = assertEnrichment(context, projectInfo.getClass());
+        assertEnrichment.isPresent();
+        assertEnrichment.hasValue(projectInfo);
     }
 
     @Test
     @DisplayName("return absent if there are no enrichments in context when searching for one")
     void returnAbsentOnNoEnrichmentsSearch() {
-        assertFalse(getEnrichment(StringValue.class, context).isPresent());
+        assertEnrichment(context, EtProjectInfo.class)
+                .isEmpty();
     }
 
     @Test
     @DisplayName("return absent if there is no specified enrichment in context")
     void returnAbsentOnEnrichmentNotFound() {
-        EventContext context = givenContextEnrichedWith(boolValue);
-        assertFalse(getEnrichment(StringValue.class, context).isPresent());
+        EventContext context = givenContextEnrichedWith(
+                EtProjectDetails.newBuilder()
+                .setProjectDescription(TestValues.randomString())
+                .setLogoUrl("https://spine.io/img/spine-logo-white.svg")
+                .build()
+        );
+        assertEnrichment(context, EtProjectInfo.class)
+              .isEmpty();
+    }
+
+    /**
+     * Verifies if the passed event context has at least one enrichment.
+     */
+    private static boolean hasEnrichments(EventContext context) {
+        Optional<Container> optional = container(context.getEnrichment());
+        if (!optional.isPresent()) {
+            return false;
+        }
+        Container container = optional.get();
+        boolean result = !container.getItemsMap()
+                                   .isEmpty();
+        return result;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -49,8 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Base tests for the {@linkplain ActorRequestFactory} descendants.
- *
- * @author Alex Tymchenko
  */
 @SuppressWarnings("unused") /* We're suppressing this warning since IDEA does not recognize
     nested JUnit classes in an abstract test base class. They are used via reflection by JUnit. */
@@ -71,11 +69,11 @@ class ActorRequestFactoryTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, TestEntity.getDefaultInstance())
-                .setDefault((new TypeToken<Class<? extends Message>>() {
-                            }).getRawType(),
+                .setDefault(new TypeToken<Class<? extends Message>>() {
+                            }.getRawType(),
                             TestEntity.class)
-                .setDefault((new TypeToken<Set<? extends Message>>() {
-                            }).getRawType(),
+                .setDefault(new TypeToken<Set<? extends Message>>() {
+                            }.getRawType(),
                             newHashSet(Any.getDefaultInstance()))
                 .setDefault(ZoneId.class, ZoneIds.systemDefault())
                 .setDefault(ZoneOffset.class, ZoneOffsets.getDefault())

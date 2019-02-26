@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -49,6 +49,6 @@ public class SystemClientTestEnv {
         ShoppingListAggregate aggregate =
                 repository.find(aggregateId)
                           .orElseGet(() -> fail("Aggregate should be present."));
-        return aggregate.getState();
+        return aggregate.state();
     }
 }

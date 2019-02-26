@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,13 +24,13 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.DummyEventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.integration.ExternalMessages;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,9 +41,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("DelegatingEventDispatcher should")
 class DelegatingEventDispatcherTest {
 
@@ -68,9 +65,9 @@ class DelegatingEventDispatcherTest {
     @Test
     @DisplayName("delegate `onError`")
     void delegateOnError() {
-        EventEnvelope envelope = EventEnvelope.of(GivenEvent.arbitrary());
+        EventEnvelope event = EventEnvelope.of(GivenEvent.arbitrary());
         RuntimeException exception = new RuntimeException("test delegating onError");
-        delegatingDispatcher.onError(envelope, exception);
+        delegatingDispatcher.onError(event, exception);
 
         assertTrue(delegate.onErrorCalled());
         assertEquals(exception, delegate.getLastException());

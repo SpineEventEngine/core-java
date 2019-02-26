@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,15 +22,15 @@ package io.spine.server.projection;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
 import io.spine.server.projection.given.ProjectionTransactionTestEnv.PatchedProjectBuilder;
 import io.spine.server.projection.given.ProjectionTransactionTestEnv.TestProjection;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
@@ -153,7 +153,7 @@ class ProjectionTransactionTest
     protected void breakEntityValidation(
             Projection<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder()
+        entity.builder()
               .setShouldThrow(toThrow);
     }
 
@@ -171,13 +171,13 @@ class ProjectionTransactionTest
     @DisplayName("increment version on event")
     void incrementVersionOnEvent() {
         Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
-        Version oldVersion = entity.getVersion();
+        Version oldVersion = entity.version();
         Event event = GivenEvent.withMessage(createEventMessage());
         Projection.playOn(entity, Collections.singleton(event));
         Version expected = Versions.increment(oldVersion);
-        assertEquals(expected.getNumber(), entity.getVersion()
+        assertEquals(expected.getNumber(), entity.version()
                                                  .getNumber());
         assertNotEquals(event.getContext()
-                             .getVersion(), entity.getVersion());
+                             .getVersion(), entity.version());
     }
 }

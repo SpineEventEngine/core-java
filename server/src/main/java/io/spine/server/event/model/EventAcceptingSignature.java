@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,22 +21,19 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.annotation.Annotation;
-
-import static com.google.common.collect.ImmutableSet.copyOf;
 
 /**
  * An abstract base of signatures for methods that accept {@code Event}s.
  *
  * @param <H> the type of {@link HandlerMethod} which signature this is
- * @author Alex Tymchenko
  */
-abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelope, ?>>
+abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelope, ?, ?>>
         extends MethodSignature<H, EventEnvelope> {
 
     EventAcceptingSignature(Class<? extends Annotation> annotation) {
@@ -45,6 +42,6 @@ abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelo
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
-        return copyOf(EventAcceptingMethodParams.values());
+        return ImmutableSet.copyOf(EventAcceptingMethodParams.values());
     }
 }

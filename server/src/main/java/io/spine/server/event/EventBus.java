@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -30,16 +31,18 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
+import io.spine.server.enrich.Enricher;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -49,7 +52,6 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableSet.of;
 import static java.lang.String.format;
 
 /**
@@ -165,7 +167,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     /** Returns {@link EventStore} associated with the bus. */
-    public EventStore getEventStore() {
+    public EventStore eventStore() {
         return eventStore;
     }
 
@@ -208,19 +210,19 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     protected EventEnvelope enrich(EventEnvelope event) {
-        if (enricher == null || !enricher.canBeEnriched(event)) {
+        if (enricher == null) {
             return event;
         }
-        EventEnvelope enriched = enricher.enrich(event);
-        return enriched;
+        EventEnvelope maybeEnriched = enricher.enrich(event);
+        return maybeEnriched;
     }
 
     @Override
-    protected void dispatch(EventEnvelope envelope) {
-        EventEnvelope enrichedEnvelope = enrich(envelope);
+    protected void dispatch(EventEnvelope event) {
+        EventEnvelope enrichedEnvelope = enrich(event);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", envelope.getMessage()));
+                   format("Message %s has no dispatchers.", event.message()));
     }
 
     @Override
@@ -428,7 +430,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
                         .newBuilder()
                         .setStreamExecutor(eventStoreStreamExecutor)
                         .setStorageFactory(storageFactory)
-                        .setLogger(EventStore.log())
+                        .withDefaultLogger()
                         .build();
             }
             EventBus result = new EventBus(this);
@@ -450,12 +452,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      */
     private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
-        public UnsupportedEventException handle(EventEnvelope envelope) {
+        public UnsupportedEventException handle(EventEnvelope event) {
+            store(ImmutableSet.of(event.outerObject()));
 
-            Event event = envelope.getOuterObject();
-            store(of(event));
-
-            EventMessage message = envelope.getMessage();
+            EventMessage message = event.message();
             UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }

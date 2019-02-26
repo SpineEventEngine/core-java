@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,13 +22,13 @@ package io.spine.server.command;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Set;
 
-import static io.spine.core.CommandClass.setOf;
+import static io.spine.server.type.CommandClass.setOf;
 
 /**
  * Utility class that remembers all commands issued by a commander class.
@@ -43,9 +43,9 @@ public class CommandInterceptor extends AbstractCommandHandler {
     @SafeVarargs
     @SuppressWarnings("ThisEscapedInObjectConstruction") // Already configured.
     CommandInterceptor(BoundedContext context, Class<? extends CommandMessage>... commandClasses) {
-        super(context.getEventBus());
+        super(context.eventBus());
         this.intercept = setOf(commandClasses);
-        context.getCommandBus()
+        context.commandBus()
                .register(this);
     }
 
@@ -56,7 +56,7 @@ public class CommandInterceptor extends AbstractCommandHandler {
     }
 
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return intercept;
     }
 

@@ -5,7 +5,7 @@ package spine.test.model.verify;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.model.verify";
+option java_package = "io.spine.test.model.verify.command";
 option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
@@ -20,4 +20,16 @@ message EditPhoto {
 
 message ChangeTitle {
     string new_title = 1;
+}
+
+message DeletePhoto {
+    string title = 1;
+}
+
+message RestorePhoto {
+    string title = 1;
+}
+
+message EnhancePhoto {
+    string title = 1;
 }

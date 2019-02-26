@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,9 +25,9 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 import java.util.Map;
@@ -62,8 +62,8 @@ public final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        commandMessages.put(envelope.getId(), envelope.getMessage());
-        commands.add(envelope.getCommand());
+        commandMessages.put(envelope.id(), envelope.message());
+        commands.add(envelope.command());
         return Optional.empty();
     }
 

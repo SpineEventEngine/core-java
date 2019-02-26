@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.testing.ReflectiveBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -44,10 +44,9 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
  * @param <E> the type of the entity to build
  * @param <I> the type of the entity identifier
  * @param <S> the type of the entity state
- * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public abstract class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
+public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends Message>
         extends ReflectiveBuilder<E> {
 
     /**
@@ -117,7 +116,7 @@ public abstract class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I
     /** Returns the class of IDs used by entities. */
     @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the builder.
     public Class<I> getIdClass() {
-        return (Class<I>) entityClass().getIdClass();
+        return (Class<I>) entityClass().idClass();
     }
 
     private I createDefaultId() {
@@ -156,7 +155,7 @@ public abstract class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I
         }
         checkNotNull(entityClass, "Entity class is not set");
         @SuppressWarnings("unchecked") // The cast is preserved by generic params of this class.
-        S result = (S) entityClass.getDefaultState();
+        S result = (S) entityClass.defaultState();
         return result;
     }
 
@@ -171,7 +170,7 @@ public abstract class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I
 
     @Override
     protected Constructor<E> getConstructor() {
-        Constructor<E> constructor = entityClass().getConstructor();
+        Constructor<E> constructor = entityClass().constructor();
         constructor.setAccessible(true);
         return constructor;
     }

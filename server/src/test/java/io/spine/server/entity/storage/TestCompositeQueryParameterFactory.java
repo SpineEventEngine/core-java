@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,16 +21,17 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.Multimap;
-import io.spine.client.ColumnFilter;
+import io.spine.client.Filter;
 
-import static io.spine.client.CompositeColumnFilter.CompositeOperator;
+import static io.spine.client.CompositeFilter.CompositeOperator;
 
-/**
- * @author Dmytro Dashenkov
- */
-public class TestCompositeQueryParameterFactory {
+public final class TestCompositeQueryParameterFactory {
 
-    public static CompositeQueryParameter createParams(Multimap<EntityColumn, ColumnFilter> filters,
+    /** Prevents instantiation of test environment class. */
+    private TestCompositeQueryParameterFactory() {
+    }
+
+    public static CompositeQueryParameter createParams(Multimap<EntityColumn, Filter> filters,
                                                        CompositeOperator operator) {
         return CompositeQueryParameter.from(filters, operator);
     }

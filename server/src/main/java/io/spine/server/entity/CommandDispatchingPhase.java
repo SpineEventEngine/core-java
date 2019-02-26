@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
 
@@ -31,10 +30,9 @@ import java.util.List;
 /**
  * A phase that dispatched a command to the entity in transaction.
  *
- * <p>The result of such dispatch is always a {@link List} of {@linkplain Event events} as
- * described in the {@code CommandHandlingEntity}
- * {@linkplain io.spine.server.command.CommandHandlingEntity#dispatchCommand(CommandEnvelope)
- * contract}.
+ * <p>The result of such dispatch is always a {@link List} of
+ * {@linkplain io.spine.server.command.CommandHandlingEntity#dispatchCommand(io.spine.server.type.CommandEnvelope)
+ * events}.
  *
  * @param <I>
  *         the type of entity ID
@@ -59,12 +57,12 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     @Override
     public I getEntityId() {
         return dispatch.entity()
-                       .getId();
+                       .id();
     }
 
     @Override
     public Message getMessageId() {
         return dispatch.command()
-                       .getId();
+                       .id();
     }
 }

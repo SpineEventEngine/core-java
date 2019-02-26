@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,9 +20,8 @@
 package io.spine.server.commandbus;
 
 import io.spine.annotation.Internal;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Set;
 
@@ -39,12 +38,12 @@ import java.util.Set;
  * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} child interfaces
  * (such as {@link io.spine.server.commandbus.CommandDispatcher CommandDispatcher} or
  * {@link io.spine.server.event.EventDispatcher EventDispatcher}). However, it is impossible
- * to implement the same {@link io.spine.server.bus.MessageDispatcher#getMessageClasses()
+ * to implement the same {@link io.spine.server.bus.MessageDispatcher#messageClasses()
  * getMessageClasses()} method several times with the different types of {@code MessageClass}es
  * returned.
  *
  * <p>The same interference takes place in attempt to implement
- * {@link io.spine.server.bus.UnicastDispatcher#dispatch(MessageEnvelope)
+ * {@link io.spine.server.bus.UnicastDispatcher#dispatch(io.spine.server.type.MessageEnvelope)
  * UnicastDispatcher.dispatch(MessageEnvelope)} method with the different types of
  * {@code MessageEnvelope}s dispatches simultaneously.
  *
@@ -54,7 +53,6 @@ import java.util.Set;
  * {@code MessageDispatcher} API.
  *
  * @param <I> the type of IDs of entities that handle the commands dispatched by the delegate
- * @author Alex Tymchenko
  * @see DelegatingCommandDispatcher
  */
 @Internal

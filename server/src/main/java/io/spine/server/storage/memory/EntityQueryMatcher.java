@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter.CompositeOperator;
+import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.client.Filter;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
@@ -112,9 +112,9 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return true;
     }
 
-    private static boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters,
+    private static boolean checkAll(Multimap<EntityColumn, Filter> filters,
                                     EntityRecordWithColumns record) {
-        for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
+        for (Map.Entry<EntityColumn, Filter> filter : filters.entries()) {
             Optional<MemoizedValue> columnValue = getColumnValue(record, filter.getKey());
             if (!columnValue.isPresent()) {
                 return false;
@@ -127,9 +127,9 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return true;
     }
 
-    private static boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters,
+    private static boolean checkEither(Multimap<EntityColumn, Filter> filters,
                                        EntityRecordWithColumns record) {
-        for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
+        for (Map.Entry<EntityColumn, Filter> filter : filters.entries()) {
             Optional<MemoizedValue> columnValue = getColumnValue(record, filter.getKey());
             if (columnValue.isPresent()) {
                 boolean matches = checkSingleParameter(filter.getValue(), columnValue.get());
@@ -141,7 +141,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return filters.isEmpty();
     }
 
-    private static boolean checkSingleParameter(ColumnFilter filter,
+    private static boolean checkSingleParameter(Filter filter,
                                                 @Nullable MemoizedValue actualValue) {
         if (actualValue == null) {
             return false;

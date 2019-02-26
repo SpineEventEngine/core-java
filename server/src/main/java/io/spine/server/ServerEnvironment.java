@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,87 +21,102 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.annotation.Internal;
-import io.spine.server.delivery.InProcessSharding;
-import io.spine.server.delivery.Sharding;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.emptyToNull;
 
-@SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
-public class ServerEnvironment {
+/**
+ * The server conditions and configuration under which the application operates.
+ */
+public final class ServerEnvironment {
+
+    private static final ServerEnvironment INSTANCE = new ServerEnvironment();
 
     /** The key of the Google AppEngine runtime version system property. */
-    @VisibleForTesting
-    static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
+    private static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION =
+            "com.google.appengine.runtime.version";
 
     /** If set, contains the version of AppEngine obtained from the system property. */
+    @SuppressWarnings("AccessOfSystemProperties") /*  Based on system property. */
     private static final @Nullable String appEngineRuntimeVersion =
-            System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
+            emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
 
-    /** A sharding strategy for this server environment. */
-    private Sharding sharding;
+    /**
+     * The deployment detector is instantiated with a system {@link DeploymentDetector} and
+     * can be reassigned the value via {@link #configureDeployment(Supplier)}.
+     *
+     * <p>Value from this supplier are used to {@linkplain #getDeploymentType() get the deployment
+     * type}.
+     */
+    private static Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
-        //TODO:2018-04-17:alex.tymchenko: instead of factories use ServerEnvironment.Builder().
-        // See https://github.com/SpineEventEngine/core-java/issues/690.
-        this.sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
     }
 
     /**
      * Returns a singleton instance.
      */
     public static ServerEnvironment getInstance() {
-        return Singleton.INSTANCE;
+        return INSTANCE;
     }
 
     /**
-     * Returns {@code true} if the code is running on the Google AppEngine,
+     * Returns {@code true} if the code is running on the Google App Engine,
      * {@code false} otherwise.
+     *
+     * @deprecated this method will be removed in 1.0, check {@linkplain #getDeploymentType()
+     *         deployment type} to match any of
+     *         {@link DeploymentType#APPENGINE_EMULATOR APPENGINE_EMULATOR} or
+     *         {@link DeploymentType#APPENGINE_CLOUD APPENGINE_CLOUD} instead.
      */
+    @Deprecated
     public boolean isAppEngine() {
-        boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
-                !appEngineRuntimeVersion.isEmpty();
+        boolean isVersionPresent = appEngineRuntimeVersion != null;
         return isVersionPresent;
     }
 
     /**
-     * Returns the current Google AppEngine version
-     * or {@code null} if the program is running not on the AppEngine.
+     * Returns an optional with current Google App Engine version
+     * or {@code empty} if the program is not running on the App Engine.
+     *
+     * @deprecated this method will be removed in 1.0.
      */
+    @Deprecated
     public Optional<String> appEngineVersion() {
         return Optional.ofNullable(appEngineRuntimeVersion);
     }
 
-    public Sharding getSharding() {
-        return sharding;
+    /**
+     * The type of the environment application is deployed to.
+     */
+    public static DeploymentType getDeploymentType() {
+        return deploymentDetector.get();
     }
 
     /**
-     * Replaces the current sharding service with the given value.
-     *
-     * <p>This method is used internally by the framework, and should not be called from outside.
-     *
-     * @param sharding the new sharding service to set for this server environment
+     * Sets the default {@linkplain DeploymentType deployment type}
+     * {@linkplain Supplier supplier} which utilizes system properties.
      */
-    @Internal
-    public void replaceSharding(Sharding sharding) {
-        //TODO:2018-04-17:alex.tymchenko: migrate to ServerEnvironment.Builder().
-        // See https://github.com/SpineEventEngine/core-java/issues/690.
-        checkNotNull(sharding);
-        this.sharding = sharding;
+    @VisibleForTesting
+    public static void resetDeploymentType() {
+        Supplier<DeploymentType> supplier = DeploymentDetector.newInstance();
+        configureDeployment(supplier);
     }
 
     /**
-     * A singleton holder.
+     * Makes the {@link #getDeploymentType()} return the values from the provided supplier.
      *
-     * <p>Server environment is a singleton in scope of JVM.
+     * <p>When supplying your own deployment type in tests, do not forget to
+     * {@linkplain #resetDeploymentType() reset it} during tear down.
      */
-    private static final class Singleton {
-        private static final ServerEnvironment INSTANCE = new ServerEnvironment();
+    @VisibleForTesting
+    public static void configureDeployment(Supplier<DeploymentType> supplier) {
+        checkNotNull(supplier);
+        deploymentDetector = supplier;
     }
 }

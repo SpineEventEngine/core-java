@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -59,9 +59,9 @@ class ReadOperationTest {
         fillEvents(eventCount);
         AggregateReadRequest<String> request = new AggregateReadRequest<>(ID, 100);
         ReadOperation<String> operation = new ReadOperation<>(storage, request);
-        Optional<AggregateStateRecord> record = operation.perform();
+        Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
-        AggregateStateRecord stateRecord = record.get();
+        AggregateHistory stateRecord = record.get();
 
         assertFalse(stateRecord.hasSnapshot());
         List<Event> events = stateRecord.getEventList();
@@ -74,9 +74,9 @@ class ReadOperationTest {
         fillEventsWithSnapshot(5);
         AggregateReadRequest<String> request = new AggregateReadRequest<>(ID, 100);
         ReadOperation<String> operation = new ReadOperation<>(storage, request);
-        Optional<AggregateStateRecord> record = operation.perform();
+        Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
-        AggregateStateRecord stateRecord = record.get();
+        AggregateHistory stateRecord = record.get();
 
         assertTrue(stateRecord.hasSnapshot());
     }
@@ -91,9 +91,9 @@ class ReadOperationTest {
 
         AggregateReadRequest<String> request = new AggregateReadRequest<>(ID, 100);
         ReadOperation<String> operation = new ReadOperation<>(storage, request);
-        Optional<AggregateStateRecord> record = operation.perform();
+        Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
-        AggregateStateRecord stateRecord = record.get();
+        AggregateHistory stateRecord = record.get();
 
         assertTrue(stateRecord.hasSnapshot());
         assertThat(stateRecord.getEventList()).hasSize(expectedEventCount);
@@ -101,7 +101,7 @@ class ReadOperationTest {
 
     private void fillEvents(int count) {
         List<Event> events = events(count);
-        storage.write(ID, AggregateStateRecord
+        storage.write(ID, AggregateHistory
                 .newBuilder()
                 .addAllEvent(events)
                 .build());
@@ -110,7 +110,7 @@ class ReadOperationTest {
     private void fillEventsWithSnapshot(int count) {
         List<Event> events = events(count);
         Snapshot snapshot = snapshot();
-        storage.write(ID, AggregateStateRecord
+        storage.write(ID, AggregateHistory
                 .newBuilder()
                 .addAllEvent(events)
                 .setSnapshot(snapshot)

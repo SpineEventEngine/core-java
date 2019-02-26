@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,8 +26,6 @@ import io.spine.annotation.Internal;
  * An interface for the {@link MessageRejection} types which report a message being invalid.
  *
  * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public interface MessageInvalid extends MessageRejection {

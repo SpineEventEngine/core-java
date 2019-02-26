@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,16 +20,16 @@
 
 package io.spine.server.bc.given;
 
-import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
+import io.spine.server.test.shared.EmptyProjection;
+import io.spine.server.test.shared.EmptyProjectionVBuilder;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.event.BcProjectCreated;
-import io.spine.validate.EmptyVBuilder;
 
 public class ProjectReport
-        extends Projection<ProjectId, Empty, EmptyVBuilder> {
+        extends Projection<ProjectId, EmptyProjection, EmptyProjectionVBuilder> {
 
     public ProjectReport(ProjectId id) {
         super(id);
@@ -37,7 +37,7 @@ public class ProjectReport
 
     @Subscribe
     @SuppressWarnings("unused")
-    void on(BcProjectCreated event, EventContext context) {
+    public void on(BcProjectCreated event, EventContext context) {
         // Do nothing. We have the method so that there's one event class exposed
         // by the repository.
     }

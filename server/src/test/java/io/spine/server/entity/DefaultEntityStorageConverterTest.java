@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,10 +32,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.entity.DefaultEntityStorageConverter.forAllFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("DefaultEntityStorageConverter should")
 class DefaultEntityStorageConverterTest {
 
@@ -48,8 +44,8 @@ class DefaultEntityStorageConverterTest {
         RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
         bc.register(repository);
 
-        TypeUrl stateType = repository.entityClass()
-                                      .getStateType();
+        TypeUrl stateType = repository.entityModelClass()
+                                      .stateType();
         converter = forAllFields(stateType, repository.entityFactory());
     }
 

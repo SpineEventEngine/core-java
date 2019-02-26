@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,11 +23,11 @@ package io.spine.server.integration;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.testdata.Sample;
@@ -78,7 +78,7 @@ class DomesticEventPublisherTest {
         DomesticEventPublisher publisher = new DomesticEventPublisher(
                 assumingTests(), publisherHub, TARGET_EVENT_CLASS
         );
-        Set<EventClass> classes = publisher.getMessageClasses();
+        Set<EventClass> classes = publisher.messageClasses();
         assertThat(classes).containsExactly(TARGET_EVENT_CLASS);
     }
 
@@ -88,7 +88,7 @@ class DomesticEventPublisherTest {
         DomesticEventPublisher publisher = new DomesticEventPublisher(
                 assumingTests(), publisherHub, TARGET_EVENT_CLASS
         );
-        Set<EventClass> classes = publisher.getExternalEventClasses();
+        Set<EventClass> classes = publisher.externalEventClasses();
         assertThat(classes).isEmpty();
         Optional<?> externalDispatcher = publisher.createExternalDispatcher();
         assertFalse(externalDispatcher.isPresent());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,7 +28,6 @@ import io.spine.server.EventProducer;
  *
  * <p>This means that a reactor does <em>not</em> have to <em>always</em> generate an event.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.event.React @React
  */
 public interface EventReactor extends EventReceiver, EventProducer {

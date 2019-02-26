@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,8 +21,6 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.Sets.SetView;
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -32,6 +30,8 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -43,7 +43,6 @@ import static com.google.common.collect.Sets.union;
  * Provides message handling information on a process manager class.
  *
  * @param <P> the type of process managers
- * @author Alexander Yevsyukov
  */
 public final class ProcessManagerClass<P extends ProcessManager>
         extends CommandHandlingEntityClass<P>
@@ -93,9 +92,27 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return result;
     }
 
+    /**
+     * Obtains event classes produced by this process manager class.
+     */
+    public Set<EventClass> getProducedEvents() {
+        SetView<EventClass> result = union(getCommandOutput(), getReactionOutput());
+        return result;
+    }
+
     @Override
     public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
         return reactorDelegate.getReactor(eventClass, originClass);
+    }
+
+    @Override
+    public Set<EventClass> getReactionOutput() {
+        return reactorDelegate.getReactionOutput();
+    }
+
+    @Override
+    public Set<CommandClass> getProducedCommands() {
+        return commanderDelegate.getProducedCommands();
     }
 
     public CommandSubstituteMethod getCommander(CommandClass commandClass) {

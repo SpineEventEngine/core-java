@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,10 +21,6 @@
 package io.spine.server.command;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -32,6 +28,10 @@ import io.spine.server.command.model.CommandingMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 
@@ -56,44 +56,44 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> messageClasses() {
         return thisClass.getCommands();
     }
 
     @CanIgnoreReturnValue
     @Override
     public String dispatch(CommandEnvelope command) {
-        CommandSubstituteMethod method = thisClass.getHandler(command.getMessageClass());
+        CommandSubstituteMethod method = thisClass.getHandler(command.messageClass());
         CommandingMethod.Result result = method.invoke(this, command);
         result.transformOrSplitAndPost(command, commandBus);
         return getId();
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return thisClass.getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return thisClass.getExternalEventClasses();
     }
 
     @Override
     public Set<String> dispatchEvent(EventEnvelope event) {
-        CommandReactionMethod method = thisClass.getCommander(event.getMessageClass());
+        CommandReactionMethod method = thisClass.getCommander(event.messageClass());
         CommandingMethod.Result result = method.invoke(this, event);
         result.produceAndPost(event, commandBus);
         return identity();
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        checkNotNull(event);
         checkNotNull(exception);
         _error(exception,
                "Unable to create a command from event (class: `{}` id: `{}`).",
-               envelope.getMessageClass(),
-               envelope.idAsString());
+               event.messageClass(),
+               event.idAsString());
     }
 }

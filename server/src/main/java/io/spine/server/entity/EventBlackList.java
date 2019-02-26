@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,17 +22,13 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 
 import java.util.Optional;
-
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * An {@link EventFilter} which allows any events except for the events of given types.
  *
- * @author Dmytro Dashenkov
  * @see EventWhiteList
  */
 public final class EventBlackList implements EventFilter {
@@ -60,7 +56,7 @@ public final class EventBlackList implements EventFilter {
     public Optional<? extends EventMessage> filter(EventMessage event) {
         EventClass type = EventClass.of(event);
         return forbiddenEvents.contains(type)
-               ? empty()
-               : of(event);
+               ? Optional.empty()
+               : Optional.of(event);
     }
 }

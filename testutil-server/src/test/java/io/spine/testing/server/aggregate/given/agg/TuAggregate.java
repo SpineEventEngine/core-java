@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -61,25 +61,25 @@ public final class TuAggregate
     }
 
     @Assign
-    public TuProjectCreated handle(TuCreateProject command) {
+    TuProjectCreated handle(TuCreateProject command) {
         return TuProjectCreated.getDefaultInstance();
     }
 
     @Assign
-    public TuProjectAssigned handle(TuAssignProject command) throws TuFailedToAssignProject {
+    TuProjectAssigned handle(TuAssignProject command) throws TuFailedToAssignProject {
         throw TuFailedToAssignProject
                 .newBuilder()
-                .setId(getId())
+                .setId(id())
                 .build();
     }
 
     @Apply
-    void on(TuProjectCreated event) {
-        getBuilder().setTimestamp(fromMillis(1234567));
+    void on(@SuppressWarnings("unused") TuProjectCreated event) {
+        builder().setTimestamp(fromMillis(1234567));
     }
 
     @Apply(allowImport = true)
-    void on(TuTrelloProjectCreated event) {
-        getBuilder().setTimestamp(fromMillis(1234567));
+    void on(@SuppressWarnings("unused") TuTrelloProjectCreated event) {
+        builder().setTimestamp(fromMillis(1234567));
     }
 }

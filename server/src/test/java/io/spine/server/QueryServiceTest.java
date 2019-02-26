@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,11 +19,14 @@
  */
 package io.spine.server;
 
+import com.google.common.truth.ThrowableSubject;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.Given.ProjectDetailsRepository;
+import io.spine.server.model.UnknownEntityTypeException;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +36,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.Given.PROJECTS_CONTEXT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -133,20 +138,27 @@ class QueryServiceTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
-        when(projectDetailsRepository.loadAllRecords()).thenThrow(RuntimeException.class);
+        when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
         Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
     }
 
     @Test
-    @DisplayName("throw ISE if the Query target type is not found among registered repositories")
-    void throwOnTargetNotFound() {
-        // There is no registered repository for `ProjectTaskNames` projection.
-        Query query = Given.AQuery.readAllProjectTaskNames();
-        assertThrows(IllegalStateException.class, () -> service.read(query, responseObserver));
+    @MuteLogging
+    @DisplayName("throw an IllegalStateException if the requested entity type is unknown")
+    void failOnUnknownType() {
+        Query query = Given.AQuery.readUnknownType();
+        service.read(query, responseObserver);
+        Throwable error = responseObserver.getError();
+        ThrowableSubject assertError = assertThat(error);
+        assertError.isNotNull();
+        assertError.isInstanceOf(UnknownEntityTypeException.class);
+        String unknownTypeUrl = typeOf(query).value();
+        assertError.hasMessageThat().contains(unknownTypeUrl);
     }
 
     private static void checkOkResponse(MemoizingObserver<QueryResponse> responseObserver) {

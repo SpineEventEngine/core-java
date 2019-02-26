@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,12 +21,12 @@
 package io.spine.server.aggregate;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TransactionListener;
+import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.List;
 
@@ -36,7 +36,6 @@ import java.util.List;
  * @param <I> the type of aggregate IDs
  * @param <A> the type of aggregates
  * @param <M> the type of message envelopes
- * @author Alexander Yevsyukov
  */
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
@@ -48,14 +47,14 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected final void deliverNowTo(I aggregateId) {
+    protected final void dispatchInTx(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
-        LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
+        LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
 
-        List<Event> produced = dispatchInTx(aggregate);
+        List<Event> produced = runTransactionWith(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
-        LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
+        LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
         if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
             storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }
@@ -69,8 +68,8 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    final List<Event> dispatchInTx(A aggregate) {
-        List<Event> events = doDispatch(aggregate, envelope());
+    final List<Event> runTransactionWith(A aggregate) {
+        List<Event> events = invokeDispatcher(aggregate, envelope());
         AggregateTransaction tx = startTransaction(aggregate);
         List<Event> producedEvents = aggregate.apply(events);
         tx.commit();
@@ -106,7 +105,7 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected final void onModified(A entity) {
-        repository().onModifiedAggregate(envelope().getTenantId(), entity);
+        repository().store(entity);
     }
 
     @Override

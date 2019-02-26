@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,22 +24,18 @@ import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.test.shared.StringAggregate;
+import io.spine.server.test.shared.StringAggregateVBuilder;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
-import io.spine.validate.StringValueVBuilder;
 
 /**
  * An aggregate part with {@link StringValue} state, which belongs to an aggregate
  * represented by {@link AnAggregateRoot}.
- *
- * @author Alexander Yevsyukov
  */
 public class TaskDescriptionPart
-        extends AggregatePart<String,
-                              StringValue,
-                              StringValueVBuilder,
-                              AnAggregateRoot> {
+        extends AggregatePart<String, StringAggregate, StringAggregateVBuilder, AnAggregateRoot> {
 
     public TaskDescriptionPart(AnAggregateRoot root) {
         super(root);
@@ -57,6 +53,6 @@ public class TaskDescriptionPart
 
     @Apply
     void apply(AggTaskAdded event) {
-        getBuilder().setValue("Description value");
+        builder().setValue("Description value");
     }
 }

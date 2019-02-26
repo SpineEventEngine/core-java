@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,8 +22,8 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 
@@ -37,7 +37,6 @@ import java.util.Set;
  * MessageDispatcher}), and dispatch events by implementing this interface.
  *
  * @param <I> the type of IDs of entities subscribed to events
- * @author Alexander Yevsyukov
  * @see DelegatingEventDispatcher
  */
 @Internal
@@ -46,25 +45,27 @@ public interface EventDispatcherDelegate<I> {
     /**
      * Obtains event classes dispatched by this delegate.
      */
-    Set<EventClass> getEventClasses();
+    Set<EventClass> eventClasses();
 
     /**
      * Obtains external event classes dispatched by this delegate.
      */
-    Set<EventClass> getExternalEventClasses();
+    Set<EventClass> externalEventClasses();
 
     /**
      * Dispatches the event.
      */
-    Set<I> dispatchEvent(EventEnvelope envelope);
+    Set<I> dispatchEvent(EventEnvelope event);
 
     /**
      * Handles an error occurred during event dispatching.
      *
-     * @param envelope  the event which caused the error
-     * @param exception the error
+     * @param event
+     *         the event which caused the error
+     * @param exception
+     *         the error
      */
-    void onError(EventEnvelope envelope, RuntimeException exception);
+    void onError(EventEnvelope event, RuntimeException exception);
 
     /**
      * Returns immutable set with one element with the identity of the multicast dispatcher
@@ -83,13 +84,13 @@ public interface EventDispatcherDelegate<I> {
      * Verifies if this instance dispatches at least one domestic event.
      */
     default boolean dispatchesEvents() {
-        return !getEventClasses().isEmpty();
+        return !eventClasses().isEmpty();
     }
 
     /**
      * Verifies if this instance dispatches at least one external event.
      */
     default boolean dispatchesExternalEvents() {
-        return !getExternalEventClasses().isEmpty();
+        return !externalEventClasses().isEmpty();
     }
 }

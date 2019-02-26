@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package io.spine.server.projection.given;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -32,7 +33,6 @@ import io.spine.test.projection.Task;
 
 import java.util.List;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static java.util.stream.Collectors.toList;
 
 public final class EntitySubscriberProjection
@@ -48,10 +48,10 @@ public final class EntitySubscriberProjection
                                                .stream()
                                                .map(Task::getTitle)
                                                .collect(toList());
-        getBuilder().setProjectId(aggregateState.getId())
-                    .setProjectName(aggregateState.getName())
-                    .clearTaskName()
-                    .addAllTaskName(taskNames);
+        builder().setProjectId(aggregateState.getId())
+                 .setProjectName(aggregateState.getName())
+                 .clearTaskName()
+                 .addAllTaskName(taskNames);
     }
 
     public static final class Repository
@@ -60,10 +60,11 @@ public final class EntitySubscriberProjection
         @Override
         public void onRegistered() {
             super.onRegistered();
-            getEventRouting().routeEntityStateUpdates(
+            eventRouting().routeEntityStateUpdates(
                     StateUpdateRouting
                             .<ProjectId>newInstance()
-                            .route(Project.class, (state, context) -> of(state.getId()))
+                            .route(Project.class,
+                                   (state, context) -> ImmutableSet.of(state.getId()))
             );
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -102,9 +102,9 @@ public class InMemoryStorageFactory implements StorageFactory {
      * Obtains storage specification for the passed entity class.
      */
     private <I> StorageSpec<I> toStorageSpec(EntityClass<?> modelClass) {
-        Class<? extends Message> stateClass = modelClass.getStateClass();
+        Class<? extends Message> stateClass = modelClass.stateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
-        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+        Class<I> idClass = (Class<I>) modelClass.idClass();
         TypeUrl stateUrl = TypeUrl.of(stateClass);
         StorageSpec<I> result = StorageSpec.of(boundedContextName, stateUrl, idClass);
         return result;

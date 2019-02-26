@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,10 +20,6 @@
 
 package io.spine.server.entity.storage.given;
 
-import io.spine.client.OrderBy;
-import io.spine.client.OrderByVBuilder;
-import io.spine.client.Pagination;
-import io.spine.client.PaginationVBuilder;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.LifecycleFlagField;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -75,7 +75,7 @@ class AggregateCommandTestShould {
         void shouldDispatchCommand() {
             TuAggregate testAggregate = TuAggregate.newInstance();
             aggregateCommandTest.expectThat(testAggregate);
-            Timestamp newState = testAggregate.getState()
+            Timestamp newState = testAggregate.state()
                                               .getTimestamp();
             assertTrue(isNotDefault(newState));
         }
@@ -116,7 +116,7 @@ class AggregateCommandTestShould {
             TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
             TuAggregatePart part = TuAggregatePart.newInstance(root);
             partCommandTest.expectThat(part);
-            Timestamp newState = part.getState()
+            Timestamp newState = part.state()
                                      .getTimestamp();
             assertTrue(isNotDefault(newState));
         }

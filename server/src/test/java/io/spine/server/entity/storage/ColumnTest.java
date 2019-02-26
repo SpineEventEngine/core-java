@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,15 +24,13 @@ import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityWithLifecycle;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import io.spine.server.entity.storage.given.ColumnTestEnv.BrokenTestEntity;
-import io.spine.server.entity.storage.given.ColumnTestEnv.EntityRedefiningColumnAnnotation;
-import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithCustomColumnNameForStoring;
-import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColumnNameForStoring;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TestAggregate;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
+import io.spine.server.entity.storage.given.column.BrokenTestEntity;
+import io.spine.server.entity.storage.given.column.EntityRedefiningColumnAnnotation;
+import io.spine.server.entity.storage.given.column.EntityWithCustomColumnNameForStoring;
+import io.spine.server.entity.storage.given.column.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.column.TestAggregate;
+import io.spine.server.entity.storage.given.column.TestEntity;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,9 +39,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.CUSTOM_COLUMN_NAME;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
-import static io.spine.server.entity.storage.given.ColumnTestEnv.forMethod;
+import static io.spine.server.entity.storage.given.column.EntityWithCustomColumnNameForStoring.CUSTOM_COLUMN_NAME;
+import static io.spine.server.entity.storage.given.column.TaskStatus.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,10 +55,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Column should")
 class ColumnTest {
 
+    static EntityColumn forMethod(String name, Class<?> enclosingClass) {
+        try {
+            Method result = enclosingClass.getDeclaredMethod(name);
+            return EntityColumn.from(result);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        EntityColumn column = forMethod("getVersion", Entity.class);
         reserializeAndAssert(column);
     }
 
@@ -74,7 +80,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null getter without errors")
         void getter() {
-            EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+            EntityColumn column = forMethod("getVersion", Entity.class);
             column.restoreGetter();
         }
 
@@ -83,7 +89,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null value converter without errors")
         void valueConverter() {
-            EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+            EntityColumn column = forMethod("getVersion", Entity.class);
             column.restoreValueConverter();
         }
     }
@@ -91,15 +97,15 @@ class ColumnTest {
     @Test
     @DisplayName("support `toString`")
     void supportToString() {
-        EntityColumn column = forMethod("getVersion", VersionableEntity.class);
-        assertEquals("VersionableEntity.version", column.toString());
+        EntityColumn column = forMethod("getVersion", Entity.class);
+        assertEquals("Entity.version", column.toString());
     }
 
     @Test
     @DisplayName("invoke getter")
     void invokeGetter() {
         int version = 2;
-        EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+        EntityColumn column = forMethod("getVersion", Entity.class);
         TestAggregate entity = Given.aggregateOfClass(TestAggregate.class)
                                     .withId(1L)
                                     .withVersion(version)
@@ -111,9 +117,9 @@ class ColumnTest {
     @Test
     @DisplayName("have `equals` and `hashCode`")
     void haveEqualsAndHashCode() {
-        EntityColumn col1 = forMethod("getVersion", VersionableEntity.class);
-        EntityColumn col2 = forMethod("getVersion", VersionableEntity.class);
-        EntityColumn col3 = forMethod("isDeleted", EntityWithLifecycle.class);
+        EntityColumn col1 = forMethod("getVersion", Entity.class);
+        EntityColumn col2 = forMethod("getVersion", Entity.class);
+        EntityColumn col3 = forMethod("isDeleted", Entity.class);
         new EqualsTester()
                 .addEqualityGroup(col1, col2)
                 .addEqualityGroup(col3)
@@ -325,7 +331,7 @@ class ColumnTest {
     @DisplayName("not allow to redefine column annotation")
     void rejectRedefinedAnnotation() {
         assertThrows(IllegalStateException.class,
-                     () -> forMethod("getVersion", EntityRedefiningColumnAnnotation.class));
+                     () -> forMethod("getCustomColumn", EntityRedefiningColumnAnnotation.class));
     }
 
     @Test

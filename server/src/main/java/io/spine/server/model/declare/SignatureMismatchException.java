@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,7 +25,7 @@ import io.spine.server.model.HandlerMethod;
 
 /**
  * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
- * its {@link HandlerMethod#getRawMethod() wrapped method} does not match
+ * its {@link HandlerMethod#rawMethod() wrapped method} does not match
  * {@linkplain MethodSignature method signature}, set for the handler.
  *
  * @author Alex Tymchenko

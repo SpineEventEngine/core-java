@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,19 +22,20 @@ package io.spine.server.aggregate.model;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
-import com.google.protobuf.StringValue;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.model.EventApplierSignature.EventApplierParams;
 import io.spine.server.model.declare.MatchCriterion;
 import io.spine.server.model.declare.SignatureMismatch;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,9 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EventApplierMethod should")
 class EventApplierTest {
 
@@ -76,7 +74,8 @@ class EventApplierTest {
         Optional<EventApplier> actual = signature.create(method);
         assertTrue(actual.isPresent());
 
-        assertEquals(new EventApplier(method, EventApplierParams.MESSAGE), actual.get());
+        EventApplier expected = new EventApplier(method, EventApplierParams.MESSAGE);
+        assertEquals(expected, actual.get());
     }
 
     @Test
@@ -123,6 +122,7 @@ class EventApplierTest {
         }
 
         @Test
+        @MuteLogging // Mute the warning about signature mismatch as it's expected.
         @DisplayName("it's not package-private")
         void isNotPrivate() {
             Method method = new ValidApplierButNotPackagePrivate().getMethod();
@@ -246,7 +246,7 @@ class EventApplierTest {
     }
 
     private abstract static class TestEventApplier
-            extends Aggregate<Long, StringValue, StringValueVBuilder> {
+            extends Aggregate<Long, EmptyAggregate, EmptyAggregateVBuilder> {
 
         TestEventApplier() {
             super(0L);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,11 +21,13 @@
 package io.spine.server.event;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderTest;
+import io.spine.server.enrich.Enricher;
+import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +65,7 @@ class EventBusBuilderTest
                 .newBuilder()
                 .setMultitenant(true)
                 .build();
-        this.storageFactory = bc.getStorageFactory();
+        this.storageFactory = bc.storageFactory();
     }
 
     @Nested
@@ -189,7 +191,7 @@ class EventBusBuilderTest
             EventBus build = builder()
                     .setStorageFactory(storageFactory)
                     .build();
-            Executor streamExecutor = build.getEventStore()
+            Executor streamExecutor = build.eventStore()
                                            .getStreamExecutor();
             ensureExecutorDirect(streamExecutor);
         }
@@ -204,7 +206,7 @@ class EventBusBuilderTest
             EventBus.Builder builder = builder().setStorageFactory(storageFactory)
                                                 .setEventStoreStreamExecutor(simpleExecutor);
             EventBus build = builder.build();
-            Executor streamExecutor = build.getEventStore()
+            Executor streamExecutor = build.eventStore()
                                            .getStreamExecutor();
             streamExecutor.execute(mock(Runnable.class));
             try {

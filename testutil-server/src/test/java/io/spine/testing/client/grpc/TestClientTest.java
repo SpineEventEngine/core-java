@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,11 +30,9 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Server;
 import io.spine.testing.client.grpc.command.Ping;
 import io.spine.testing.client.grpc.given.GameRepository;
-import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -46,7 +44,6 @@ import static io.spine.testing.client.grpc.TableSide.RIGHT;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(ShardingReset.class)
 class TestClientTest {
 
     private Server server;

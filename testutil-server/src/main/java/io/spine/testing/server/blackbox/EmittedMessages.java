@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,6 @@ import io.spine.type.MessageClass;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.copyOf;
 
 /**
  * Abstract base for classes providing information on messages emitted
@@ -51,7 +50,7 @@ public abstract class EmittedMessages<C extends MessageClass<M>,
     EmittedMessages(List<W> messages, MessageTypeCounter<C, W, M> counter, Class<W> wrapperClass) {
         checkNotNull(messages);
         checkNotNull(counter);
-        this.messages = copyOf(messages);
+        this.messages = ImmutableList.copyOf(messages);
         this.countByType = counter;
         this.wrapperClass = wrapperClass;
     }

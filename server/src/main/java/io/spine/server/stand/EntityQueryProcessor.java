@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,12 +23,12 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.EntityFilters;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.Query;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.RecordBasedRepository;
@@ -59,7 +59,7 @@ class EntityQueryProcessor implements QueryProcessor {
                                                .isEmpty()) {
             entities = repository.loadAllRecords();
         } else {
-            EntityFilters filters = target.getFilters();
+            TargetFilters filters = target.getFilters();
             OrderBy orderBy = query.getOrderBy();
             Pagination pagination = query.getPagination();
             entities = repository.findRecords(filters, orderBy, pagination, fieldMask);

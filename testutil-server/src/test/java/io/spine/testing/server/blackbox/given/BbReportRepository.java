@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -42,7 +42,7 @@ public class BbReportRepository extends AggregateRepository<BbReportId, BbReport
     private final List<BbReportAggregate> aggregates = newArrayList();
 
     public BbReportRepository() {
-        getEventRouting().route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
+        eventRouting().route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
                 (event, context) -> getReportsContainingProject(event.getProjectId()));
     }
 
@@ -57,12 +57,12 @@ public class BbReportRepository extends AggregateRepository<BbReportId, BbReport
         return aggregates
                 .stream()
                 .filter(report -> reportContainsProject(report, projectId))
-                .map(AbstractEntity::getId)
+                .map(AbstractEntity::id)
                 .collect(toSet());
     }
 
     private static boolean reportContainsProject(BbReportAggregate report, BbProjectId projectId) {
-        return report.getState()
+        return report.state()
                      .getProjectIdsList()
                      .contains(projectId);
     }

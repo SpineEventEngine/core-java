@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,10 +21,10 @@
 package io.spine.testing.server.projection.given;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.expected.EventSubscriberExpected;
 import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.TuString;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
 import io.spine.testing.server.projection.ProjectionTest;
 import io.spine.testing.server.projection.given.prj.TuProjection;
@@ -34,7 +34,7 @@ import io.spine.testing.server.projection.given.prj.TuProjectionRepository;
  * The test class for the {@code StringValue} event handler in {@code TestProjection}.
  */
 public class SampleProjectionTest
-        extends ProjectionTest<Long, TuProjectCreated, StringValue, TuProjection> {
+        extends ProjectionTest<Long, TuProjectCreated, TuString, TuProjection> {
 
     public static final TuProjectCreated TEST_EVENT =
             TuProjectCreated.newBuilder()
@@ -49,7 +49,7 @@ public class SampleProjectionTest
     }
 
     @Override
-    public EventSubscriberExpected<StringValue> expectThat(TuProjection entity) {
+    public EventSubscriberExpected<TuString> expectThat(TuProjection entity) {
         return super.expectThat(entity);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -54,9 +54,9 @@ public abstract class EventSubscriptionTest<I,
     @Override
     @SuppressWarnings("CheckReturnValue")
     protected EventSubscriberExpected<S> expectThat(E entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         dispatchTo(entity);
-        return new EventSubscriberExpected<>(initialState, entity.getState());
+        return new EventSubscriberExpected<>(initialState, entity.state());
     }
 
     /**

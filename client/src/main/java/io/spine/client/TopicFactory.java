@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,12 +23,13 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.core.ActorContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Targets.composeTarget;
-import static io.spine.client.Topics.generateId;
+import static java.lang.String.format;
 
 /**
  * A factory of {@link Topic} instances.
@@ -39,6 +40,11 @@ import static io.spine.client.Topics.generateId;
  * @see ActorRequestFactory#topic()
  */
 public final class TopicFactory {
+
+    /**
+     * The format of all {@linkplain TopicId topic identifiers}.
+     */
+    private static final String TOPIC_ID_FORMAT = "t-%s";
 
     private final ActorContext actorContext;
 
@@ -52,7 +58,7 @@ public final class TopicFactory {
      * construction.
      *
      * @param targetType
-     *         a class of target entities
+     *         a class of target events/entities
      * @return new {@link TopicBuilder} instance
      */
     public TopicBuilder select(Class<? extends Message> targetType) {
@@ -62,10 +68,10 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for all of the specified entity states.
+     * Creates a {@link Topic} for all events/entities of the specified type.
      *
      * @param targetType
-     *         a class of target entities
+     *         a class of target events/entities
      * @return the instance of {@code Topic} assembled according to the parameters
      */
     public Topic allOf(Class<? extends Message> targetType) {
@@ -78,7 +84,7 @@ public final class TopicFactory {
 
     /**
      * Creates a {@link Topic} for the specified {@link Target}, updates for which will include
-     * only the columns specified by the {@link FieldMask}.
+     * only the fields specified by the {@link FieldMask}.
      *
      * @param target
      *         a {@code Target} to create a topic for
@@ -117,5 +123,12 @@ public final class TopicFactory {
                             .setId(generateId())
                             .setContext(actorContext)
                             .setTarget(target);
+    }
+
+    private static TopicId generateId() {
+        String formattedId = format(TOPIC_ID_FORMAT, Identifier.newUuid());
+        return TopicId.newBuilder()
+                      .setValue(formattedId)
+                      .build();
     }
 }

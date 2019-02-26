@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,14 +22,14 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.code.proto.EntityStateOption;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.option.EntityOption;
-import io.spine.option.OptionsProto;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.type.TypeName;
 
@@ -37,12 +37,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static io.spine.option.EntityOption.Visibility.FULL;
 import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 import static io.spine.option.EntityOption.Visibility.VISIBILITY_UNKNOWN;
-import static io.spine.option.Options.option;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 
@@ -52,17 +50,17 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 @Immutable
 enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(of(Message.class)) {
+    MESSAGE(ImmutableList.of(Message.class)) {
         @Override
         protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
             return new Object[]{entityState};
         }
     },
 
-    MESSAGE_AND_EVENT_CONTEXT(of(Message.class, EventContext.class)) {
+    MESSAGE_AND_EVENT_CONTEXT(ImmutableList.of(Message.class, EventContext.class)) {
         @Override
         protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
-            return new Object[]{entityState, event.getEventContext()};
+            return new Object[]{entityState, event.context()};
         }
     };
 
@@ -101,21 +99,21 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     }
 
     @Override
-    public Object[] extractArguments(EventEnvelope envelope) {
-        EventMessage eventMessage = envelope.getMessage();
+    public Object[] extractArguments(EventEnvelope event) {
+        EventMessage eventMessage = event.message();
         checkArgument(eventMessage instanceof EntityStateChanged,
                       "Must be an %s event.", EntityStateChanged.class.getSimpleName());
         EntityStateChanged systemEvent = (EntityStateChanged) eventMessage;
         Message entityState = unpack(systemEvent.getNewState());
-        return arrangeArguments(entityState, envelope);
+        return arrangeArguments(entityState, event);
     }
 
     protected abstract Object[] arrangeArguments(Message entityState, EventEnvelope event);
 
     private static Optional<EntityOption> getEntityOption(TypeName messageType) {
-        Descriptors.Descriptor descriptor = messageType.getMessageDescriptor();
-        Optional<EntityOption> entityOption = option(descriptor, OptionsProto.entity);
-        return entityOption;
+        Descriptor descriptor = messageType.messageDescriptor();
+        Optional<EntityOption> result = EntityStateOption.valueOf(descriptor);
+        return result;
     }
 
     private static boolean visibleForSubscription(EntityOption entity) {

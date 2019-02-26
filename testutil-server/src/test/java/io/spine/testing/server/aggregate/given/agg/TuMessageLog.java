@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,19 +20,19 @@
 
 package io.spine.testing.server.aggregate.given.agg;
 
-import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.testing.server.given.entity.TuString;
+import io.spine.testing.server.given.entity.TuStringVBuilder;
 import io.spine.testing.server.log.FloatLogged;
 import io.spine.testing.server.log.LogInteger;
 import io.spine.testing.server.log.ValueLogged;
-import io.spine.validate.StringValueVBuilder;
 
-public class TuMessageLog extends Aggregate<Long, StringValue, StringValueVBuilder> {
+public class TuMessageLog extends Aggregate<Long, TuString, TuStringVBuilder> {
 
     public TuMessageLog(Long id) {
         super(id);
@@ -52,8 +52,8 @@ public class TuMessageLog extends Aggregate<Long, StringValue, StringValueVBuild
 
     @Apply
     void newLine(ValueLogged line) {
-        String current = getState().getValue();
-        getBuilder().setValue(current + System.lineSeparator() + line.getValue());
+        String current = state().getValue();
+        builder().setValue(current + System.lineSeparator() + line.getValue());
     }
 
     private static ValueLogged logItem(String digitalPart) {

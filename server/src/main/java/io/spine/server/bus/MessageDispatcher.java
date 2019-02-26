@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -36,8 +36,6 @@ import java.util.Set;
  *            the IDs of entity that receives a dispatched message.
  *            For {@linkplain MulticastDispatcher multicast dispatching} is the type of the set
  *            of entity IDs.
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  */
 public interface MessageDispatcher<C extends MessageClass, E extends MessageEnvelope, R> {
 
@@ -46,7 +44,7 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      *
      * @return non-empty set of message classes
      */
-    Set<C> getMessageClasses();
+    Set<C> messageClasses();
 
     /**
      * Dispatches the message contained in the passed envelope.
@@ -69,7 +67,7 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      * Checks if this dispatcher can dispatch the given message.
      *
      * <p>This method does not check that the type of the message is one of
-     * the {@linkplain #getMessageClasses() dispatched message classes}. Instead, it validates
+     * the {@linkplain #messageClasses() dispatched message classes}. Instead, it validates
      * the message upon some custom rules of this dispatcher.
      *
      * <p>Extend this method to forbid messages from being dispatched to this instance.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,9 +20,9 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -44,7 +44,7 @@ public interface SubscribingClass extends Logging {
      */
     default Optional<SubscriberMethod> getSubscriber(EventEnvelope event) {
         Collection<SubscriberMethod> subscribers =
-                getSubscribers(event.getMessageClass(), event.getOriginClass());
+                getSubscribers(event.messageClass(), event.originClass());
         Comparator<SubscriberMethod> methodOrder = comparing(
                 (SubscriberMethod subscriber) -> subscriber.filter().getField().getFieldNameCount()
         ).reversed();
@@ -59,7 +59,7 @@ public interface SubscribingClass extends Logging {
             _debug("None of the subscriber methods could handle %s event." +
                            "%n  Methods: %s" +
                            "%n  Event message: %s.",
-                   event.getMessageClass(), subscribers, event.getMessage());
+                   event.messageClass(), subscribers, event.message());
             return Optional.empty();
         }
     }

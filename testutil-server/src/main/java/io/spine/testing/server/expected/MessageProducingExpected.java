@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,7 +29,6 @@ import com.google.protobuf.Message;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.google.common.collect.ImmutableList.copyOf;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,8 +56,8 @@ public abstract class MessageProducingExpected<S extends Message,
                              S state,
                              List<Message> interceptedCommands) {
         super(initialState, state);
-        this.generatedMessages = copyOf(generatedMessages);
-        this.commands = copyOf(interceptedCommands);
+        this.generatedMessages = ImmutableList.copyOf(generatedMessages);
+        this.commands = ImmutableList.copyOf(interceptedCommands);
     }
 
     @Override

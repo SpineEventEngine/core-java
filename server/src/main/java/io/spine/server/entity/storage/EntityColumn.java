@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,6 @@ import java.util.Comparator;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.gson.internal.Primitives.wrap;
-import static io.spine.server.entity.storage.ColumnValueConverters.of;
 import static io.spine.server.entity.storage.Methods.checkGetter;
 import static io.spine.server.entity.storage.Methods.mayReturnNull;
 import static io.spine.server.entity.storage.Methods.nameFromAnnotation;
@@ -62,7 +61,7 @@ import static java.lang.String.format;
  *
  * <p>A {@linkplain #getName() name} for working with {@linkplain EntityQueries queries}
  * is determined by a name of column getter, e.g. {@code value} for {@code getValue()}.
- * A client should specify this value to a {@linkplain io.spine.client.ColumnFilters
+ * A client should specify this value to a {@linkplain io.spine.client.TargetFilters
  * column filters}.
  *
  * <p>A {@linkplain #getStoredName() stored name} is used as a {@code Storage} column name
@@ -229,7 +228,7 @@ public class EntityColumn implements Serializable {
         this.name = name;
         this.storedName = storedName;
         this.nullable = nullable;
-        this.valueConverter = of(getter);
+        this.valueConverter = ColumnValueConverters.of(getter);
     }
 
     /**
@@ -359,7 +358,8 @@ public class EntityColumn implements Serializable {
      * the {@code null} input argument this method will always return {@code null}.
      *
      * <p>The method is accessible outside of the {@code EntityColumn} class to enable the proper
-     * {@link io.spine.client.ColumnFilter} conversion for the {@link Enumerated} column values.
+     * {@linkplain io.spine.client.Filter filters} conversion for the {@link Enumerated} column
+     * values.
      *
      * @param columnValue
      *         the column value to convert
@@ -381,7 +381,7 @@ public class EntityColumn implements Serializable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof EntityColumn)) {
             return false;
         }
         EntityColumn column = (EntityColumn) o;
@@ -453,7 +453,7 @@ public class EntityColumn implements Serializable {
         if (valueConverter != null) {
             return valueConverter;
         }
-        ColumnValueConverter converter = of(getter);
+        ColumnValueConverter converter = ColumnValueConverters.of(getter);
         return converter;
     }
 
@@ -500,7 +500,7 @@ public class EntityColumn implements Serializable {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (!(o instanceof MemoizedValue)) {
                 return false;
             }
             MemoizedValue value1 = (MemoizedValue) o;
@@ -541,8 +541,9 @@ public class EntityColumn implements Serializable {
                     return +1;
                 }
                 if (aValue instanceof Comparable) {
-                    //noinspection unchecked the values are chhecked to be of the same column
-                    return ((Comparable) aValue).compareTo(bValue);
+                    @SuppressWarnings("unchecked") // values are checked to be of the same column
+                    int result = ((Comparable) aValue).compareTo(bValue);
+                    return result;
                 }
                 throw newIllegalStateException("Memoized value is not a Comparable");
             };

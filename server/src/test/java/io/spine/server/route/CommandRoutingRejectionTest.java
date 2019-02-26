@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,10 +27,10 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.rout.given.switchman.LogState;
-import io.spine.server.rout.given.switchman.SwitchId;
-import io.spine.server.rout.given.switchman.SwitchPosition;
 import io.spine.server.route.given.switchman.Log;
+import io.spine.server.route.given.switchman.LogState;
+import io.spine.server.route.given.switchman.SwitchId;
+import io.spine.server.route.given.switchman.SwitchPosition;
 import io.spine.server.route.given.switchman.Switchman;
 import io.spine.server.route.given.switchman.SwitchmanBureau;
 import io.spine.server.route.given.switchman.command.SetSwitch;
@@ -52,14 +52,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests that a command can be rejected within a {@linkplain CommandRoute routing function}.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("CommandRouting rejection should")
 class CommandRoutingRejectionTest {
 
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+    private final TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
     private final StreamObserver<Ack> observer = noOpObserver();
 
     private BoundedContext boundedContext;
@@ -75,11 +72,11 @@ class CommandRoutingRejectionTest {
                                        .build();
         boundedContext.register(new SwitchmanBureau());
         switchmanObserver = new SwitchmanObserver();
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .register(switchmanObserver);
         logRepository = new Log.Repository();
         boundedContext.register(logRepository);
-        commandBus = boundedContext.getCommandBus();
+        commandBus = boundedContext.commandBus();
     }
 
     @AfterEach
@@ -124,7 +121,7 @@ class CommandRoutingRejectionTest {
         commandBus.post(commandToReject, observer);
         Optional<Log> foundLog = logRepository.find(Log.ID);
         assertTrue(foundLog.isPresent());
-        LogState log = foundLog.get().getState();
+        LogState log = foundLog.get().state();
         assertTrue(log.containsCounters(switchmanName));
         assertTrue(log.getMissingSwitchmanList()
                       .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));
@@ -141,7 +138,7 @@ class CommandRoutingRejectionTest {
         private final List<SwitchPositionConfirmed> events = newLinkedList();
 
         @Subscribe
-        void to(SwitchPositionConfirmed event) {
+        public void to(SwitchPositionConfirmed event) {
             events.add(event);
         }
     }

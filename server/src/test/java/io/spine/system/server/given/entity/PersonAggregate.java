@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -39,8 +39,6 @@ import io.spine.type.TypeUrl;
 
 /**
  * Test aggregate on which to track history.
- *
- * @author Dmytro Dashenkov
  */
 public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder> {
 
@@ -82,8 +80,8 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
 
     @Apply
     void on(PersonCreated event) {
-        getBuilder().setId(event.getId())
-                    .setName(event.getName());
+        builder().setId(event.getId())
+                 .setName(event.getName());
     }
 
     @Apply
@@ -98,10 +96,12 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
 
     @Apply
     void on(PersonRenamed event) {
-        PersonName newName = getBuilder().getName()
-                                         .toBuilder()
-                                         .setGivenName(event.getNewFirstName())
-                                         .build();
-        getBuilder().setName(newName);
+        PersonVBuilder builder = builder();
+        PersonName newName =
+                builder.getName()
+                       .toBuilder()
+                       .setGivenName(event.getNewFirstName())
+                       .build();
+        builder.setName(newName);
     }
 }

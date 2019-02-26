@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -47,7 +48,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -72,7 +72,7 @@ class DefaultSystemReadSideTest {
         domainContext = BoundedContext
                 .newBuilder()
                 .build();
-        systemReadSide = domainContext.getSystemClient().readSide();
+        systemReadSide = domainContext.systemClient().readSide();
     }
 
     @AfterEach
@@ -137,7 +137,7 @@ class DefaultSystemReadSideTest {
                     .setName("System Bus test project")
                     .build();
             Event event = events.createEvent(systemEvent);
-            systemContext.getEventBus().post(event);
+            systemContext.eventBus().post(event);
             return systemEvent;
         }
     }
@@ -147,7 +147,7 @@ class DefaultSystemReadSideTest {
     class ReadDomainAggregates {
 
         private final TestActorRequestFactory actorRequestFactory =
-                TestActorRequestFactory.newInstance(DefaultSystemWriteSideTest.class);
+                new TestActorRequestFactory(DefaultSystemWriteSideTest.class);
 
         private ListId aggregateId;
 
@@ -165,7 +165,7 @@ class DefaultSystemReadSideTest {
         @DisplayName("by the given query")
         void query() {
             Query query = actorRequestFactory.query()
-                                             .byIds(ShoppingList.class, of(aggregateId));
+                                             .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
             EntityStateWithVersion next = systemReadSide.readDomainAggregate(query)
                                                         .next();
             Message foundMessage = unpack(next.getState());
@@ -182,7 +182,7 @@ class DefaultSystemReadSideTest {
                     .setId(aggregateId)
                     .build();
             Command cmd = actorRequestFactory.createCommand(command);
-            domainContext.getCommandBus()
+            domainContext.commandBus()
                          .post(cmd, noOpObserver());
         }
     }

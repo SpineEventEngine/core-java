@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
@@ -28,8 +29,8 @@ import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.system.server.IncompleteAudio;
 import io.spine.test.system.server.LocalizedVideo;
 import io.spine.test.system.server.Photo;
@@ -37,24 +38,20 @@ import io.spine.test.system.server.PhotoId;
 import io.spine.test.system.server.Video;
 import io.spine.test.system.server.VideoId;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.ShardingReset;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.ImmutableSet.of;
-import static com.google.common.collect.Streams.stream;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -71,7 +68,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@ExtendWith(ShardingReset.class)
 @DisplayName("MirrorRepository should")
 class MirrorRepositoryTest {
 
@@ -87,7 +83,7 @@ class MirrorRepositoryTest {
         repository = (MirrorRepository) systemContext
                 .findRepository(Mirror.class)
                 .orElseGet(() -> fail("MirrorRepository must be registered."));
-        queries = TestActorRequestFactory.newInstance(MirrorRepositoryTest.class).query();
+        queries = new TestActorRequestFactory(MirrorRepositoryTest.class).query();
 
         givenPhotos = givenPhotos();
         prepareAggregates(givenPhotos);
@@ -175,7 +171,7 @@ class MirrorRepositoryTest {
 
             private void readAndCheck(Photo target) {
                 PhotoId targetId = target.getId();
-                Query query = queries.byIds(Photo.class, of(targetId));
+                Query query = queries.byIds(Photo.class, ImmutableSet.of(targetId));
                 checkRead(query, target);
             }
 

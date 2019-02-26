@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,8 +30,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
@@ -45,6 +43,8 @@ import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -107,7 +107,6 @@ public class CommandBus extends UnicastBus<Command,
     /**
      * Creates new instance according to the passed {@link Builder}.
      */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
         super(builder);
         this.multitenant = builder.multitenant != null
@@ -212,9 +211,9 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     private void onError(CommandEnvelope envelope, RuntimeException exception) {
-        Optional<Event> rejection = errorHandler.handleError(envelope, exception)
+        Optional<Event> rejection = errorHandler.handle(envelope, exception)
                                                 .asRejection()
-                                                .map(RejectionEnvelope::getOuterObject);
+                                                .map(RejectionEnvelope::outerObject);
         rejection.ifPresent(eventBus::post);
     }
 
@@ -396,7 +395,7 @@ public class CommandBus extends UnicastBus<Command,
 
         @Override
         public UnsupportedCommandException handle(CommandEnvelope message) {
-            Command command = message.getCommand();
+            Command command = message.command();
             UnsupportedCommandException exception = new UnsupportedCommandException(command);
             return exception;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,20 +20,20 @@
 
 package io.spine.server.route;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
-import io.spine.server.rout.given.switchman.LogState;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.route.given.switchman.LogState;
 import io.spine.system.server.EntityStateChanged;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.protobuf.AnyPacker.pack;
 
 @DisplayName("StateUpdateRouting should")
 class StateUpdateRoutingTest {
@@ -65,7 +65,8 @@ class StateUpdateRoutingTest {
         String counterKey = "sample_key";
         StateUpdateRouting<Integer> routing = StateUpdateRouting
                 .<Integer>newInstance()
-                .route(LogState.class, (log, context) -> of(log.getCountersOrThrow(counterKey)));
+                .route(LogState.class, (log, context) ->
+                        ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
         LogState log = LogState
                 .newBuilder()
@@ -81,7 +82,8 @@ class StateUpdateRoutingTest {
         String counterKey = "test_key";
         StateUpdateRouting<Integer> routing = StateUpdateRouting
                 .<Integer>newInstance()
-                .route(LogState.class, (log, context) -> of(log.getCountersOrThrow(counterKey)));
+                .route(LogState.class,
+                       (log, context) -> ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
         LogState log = LogState
                 .newBuilder()
@@ -89,7 +91,7 @@ class StateUpdateRoutingTest {
                 .build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
-                .setNewState(pack(log))
+                .setNewState(AnyPacker.pack(log))
                 .setWhen(getCurrentTime())
                 .build();
         EventRoute<Integer, EntityStateChanged> eventRoute = routing.eventRoute();

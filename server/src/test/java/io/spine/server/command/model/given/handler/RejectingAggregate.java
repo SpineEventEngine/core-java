@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,23 +20,21 @@
 
 package io.spine.server.command.model.given.handler;
 
-import com.google.protobuf.Empty;
 import io.spine.base.Identifier;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
-import io.spine.validate.EmptyVBuilder;
 
 /**
  * An aggregate which always rejects the passed command.
- *
- * @author Alexander Yevsyukov
  */
-public class RejectingAggregate extends Aggregate<ProjectId, Empty, EmptyVBuilder> {
+public class RejectingAggregate extends Aggregate<ProjectId, EmptyAggregate, EmptyAggregateVBuilder> {
     public RejectingAggregate(ProjectId id) {
         super(id);
     }

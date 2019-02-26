@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,9 +26,6 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
@@ -36,6 +33,9 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.tuple.Pair;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdCreateTask;
@@ -55,7 +55,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.core.EventClass.from;
 import static io.spine.util.Exceptions.unsupported;
 
 public class CommandHandlerTestEnv {
@@ -69,16 +68,16 @@ public class CommandHandlerTestEnv {
         private final List<EventEnvelope> dispatched = newLinkedList();
 
         @Override
-        public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(
-                    from(CmdProjectStarted.class),
-                    from(CmdTaskAssigned.class),
-                    from(CmdTaskStarted.class)
+        public Set<EventClass> messageClasses() {
+            return EventClass.setOf(
+                    CmdProjectStarted.class,
+                    CmdTaskAssigned.class,
+                    CmdTaskStarted.class
             );
         }
 
         @Override
-        public Set<EventClass> getExternalEventClasses() {
+        public Set<EventClass> externalEventClasses() {
             return ImmutableSet.of();
         }
 
@@ -88,13 +87,13 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
-        public Set<String> dispatch(EventEnvelope envelope) {
-            dispatched.add(envelope);
+        public Set<String> dispatch(EventEnvelope event) {
+            dispatched.add(event);
             return identity();
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
+        public void onError(EventEnvelope event, RuntimeException exception) {
             // Do nothing.
         }
 
@@ -104,8 +103,6 @@ public class CommandHandlerTestEnv {
         }
     }
 
-    @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters",
-                       "ReturnOfCollectionOrArrayField"})
     public static class TestCommandHandler extends AbstractCommandHandler {
 
         private final ImmutableList<EventMessage> eventsOnStartProjectCmd =

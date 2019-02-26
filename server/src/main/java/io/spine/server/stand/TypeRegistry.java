@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,9 +20,9 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
@@ -32,14 +32,12 @@ import java.util.Optional;
  *
  * <p>In addition to types, manages the information about the {@linkplain Repository repositories}
  * for the objects of known types.
- *
- * @author Alex Tymchenko
  */
 interface TypeRegistry extends AutoCloseable {
 
     /**
      * Registers a {@linkplain Repository repository} of objects and
-     * {@linkplain Repository#getEntityStateType its entity state type} in this registry.
+     * {@linkplain Repository#entityStateType its entity state type} in this registry.
      *
      * <p>For {@linkplain RecordBasedRepository record-based repositories},
      * the reference to the {@code repository} is also kept to allow accessing its records
@@ -48,14 +46,15 @@ interface TypeRegistry extends AutoCloseable {
      * <p>In case {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
      * instance is passed, only its {@code type} is registered.
      */
-    <I, E extends VersionableEntity<I, ?>> void register(Repository<I, E> repository);
+    <I, E extends Entity<I, ?>> void register(Repository<I, E> repository);
 
     /**
      * Obtains the instance of {@linkplain RecordBasedRepository repository} for the passed
      * {@linkplain TypeUrl type}, if it {@linkplain #register(Repository) has been registered}
      * previously.
      *
-     * @param type the type of {@code Entity} to obtain a repository for
+     * @param type
+     *         the type of {@code Entity} to obtain a repository for
      * @return {@code RecordBasedRepository} managing the objects of the given {@code type},
      *         or {@code Optional.empty()} if no such repository has been registered
      */
@@ -70,22 +69,11 @@ interface TypeRegistry extends AutoCloseable {
     ImmutableSet<TypeUrl> getAggregateTypes();
 
     /**
-     * Reads all {@linkplain VersionableEntity entity types}, which repositories are registered
-     * in this instance of registry.
+     * Reads all entity types, which repositories are registered in this instance of registry.
      *
      * <p>The result includes all values from {@link #getAggregateTypes()} as well.
      *
      * @return the set of types as {@link TypeUrl} instances
      */
     ImmutableSet<TypeUrl> getTypes();
-
-    /**
-     * Tells if this registry has a type of the given
-     * {@linkplain io.spine.server.aggregate.Aggregate#getState() aggregate state} registered.
-     *
-     * @param typeUrl the type of {@code Entity} state
-     * @return {@code true} if the known {@code Aggregate} types contain the given one,
-     *         {@code false} otherwise
-     */
-    boolean hasAggregateType(TypeUrl typeUrl);
 }

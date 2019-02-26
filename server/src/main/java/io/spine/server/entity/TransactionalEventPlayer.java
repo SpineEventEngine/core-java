@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,14 +21,12 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An {@link EventPlayer} which plays events upon the given {@link Transaction}.
- *
- * @author Dmytro Dashenkov
  */
 final class TransactionalEventPlayer implements EventPlayer {
 

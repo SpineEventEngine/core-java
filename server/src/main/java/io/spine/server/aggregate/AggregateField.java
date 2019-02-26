@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,6 @@ import io.spine.server.storage.StorageField;
  * A container for the storage fields specific for the {@link AggregateStorage}
  * and its implementations.
  *
- * @author Dmytro Dashenkov
  * @see StorageField
  */
 @SPI

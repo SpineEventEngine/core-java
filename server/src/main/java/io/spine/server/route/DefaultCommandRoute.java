@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,17 +27,12 @@ import io.spine.protobuf.MessageFieldException;
 
 import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 /**
  * Obtains a command target entity ID based on a command message and context.
  *
  * <p>The command target must be the first field defined in the command message.
  *
  * @param <I> the type of target entity IDs
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
 public class DefaultCommandRoute<I> extends FieldAtIndex<I, CommandMessage, CommandContext>
         implements CommandRoute<I, CommandMessage> {
@@ -66,9 +61,9 @@ public class DefaultCommandRoute<I> extends FieldAtIndex<I, CommandMessage, Comm
         try {
             DefaultCommandRoute<I> function = newInstance();
             I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
-            return of(id);
+            return Optional.of(id);
         } catch (MessageFieldException | ClassCastException ignored) {
-            return empty();
+            return Optional.empty();
         }
     }
 }

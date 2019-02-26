@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,12 +27,9 @@ import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
@@ -44,6 +41,10 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDepri
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.projection.given.TestProjection;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.test.projection.Project;
@@ -57,7 +58,6 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.AfterEach;
@@ -65,7 +65,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Iterator;
 import java.util.List;
@@ -77,6 +76,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertEventClasses;
@@ -92,9 +92,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("ProjectionRepository should")
-@ExtendWith(ShardingReset.class)
 class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
 
@@ -104,13 +102,11 @@ class ProjectionRepositoryTest
 
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
         TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(ProjectionRepositoryTest.class, tenantId);
+                new TestActorRequestFactory(ProjectionRepositoryTest.class, tenantId);
         return newInstance(producerId, requestFactory);
     }
 
-    private static Event createEvent(TenantId tenantId,
-                                     EventMessage eventMessage,
-                                     Timestamp when) {
+    private static Event createEvent(TenantId tenantId, EventMessage eventMessage, Timestamp when) {
         Version version = Versions.increment(Versions.zero());
         return newEventFactory(tenantId, PRODUCER_ID).createEvent(eventMessage, version, when);
     }
@@ -125,13 +121,14 @@ class ProjectionRepositoryTest
                                  .getActorContext()
                                  .getTenantId();
         if (boundedContext.isMultitenant()) {
-            boundedContext.getTenantIndex()
+            boundedContext.tenantIndex()
                           .keep(tenantId);
         }
     }
 
-    private TestProjectionRepository repository() {
-        return (TestProjectionRepository) repository;
+    @Override
+    protected TestProjectionRepository repository() {
+        return (TestProjectionRepository) super.repository();
     }
 
     @Override
@@ -198,7 +195,7 @@ class ProjectionRepositoryTest
     }
 
     private static String entityName(TestProjection entity) {
-        return entity.getState()
+        return entity.state()
                      .getName();
     }
 
@@ -226,7 +223,7 @@ class ProjectionRepositoryTest
                 .build();
         super.setUp();
 
-        boundedContext.register(repository);
+        boundedContext.register(this.repository());
 
         TestProjection.clearMessageDeliveryHistory();
     }
@@ -276,7 +273,7 @@ class ProjectionRepositoryTest
             assertFalse(allItems.hasNext());
 
             // Check that the stored instance has the same ID as the instance handling the event.
-            assertEquals(storedProjection.getId(), receiverId);
+            assertEquals(storedProjection.id(), receiverId);
         }
 
         @Test
@@ -300,7 +297,7 @@ class ProjectionRepositoryTest
             // Dispatch an event to the archived projection.
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             projection = repository().findOrCreate(projectId);
-            List<Task> addedTasks = projection.getState()
+            List<Task> addedTasks = projection.state()
                                               .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
@@ -321,7 +318,7 @@ class ProjectionRepositoryTest
             // Dispatch an event to the deleted projection.
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             projection = repository().findOrCreate(projectId);
-            List<Task> addedTasks = projection.getState()
+            List<Task> addedTasks = projection.state()
                                               .getTaskList();
             assertTrue(projection.isDeleted());
 
@@ -341,7 +338,7 @@ class ProjectionRepositoryTest
             TestProjection project = new TestProjection(id);
             dispatch(project, eventFactory.createEvent(projectCreated));
             dispatch(project, eventFactory.createEvent(taskAdded));
-            Any newState = pack(project.getState());
+            Any newState = pack(project.state());
             EntityHistoryId historyId = EntityHistoryId
                     .newBuilder()
                     .setTypeUrl(newState.getTypeUrl())
@@ -368,7 +365,7 @@ class ProjectionRepositoryTest
                     .build();
             Optional<EntitySubscriberProjection> projection = repository.find(id);
             assertTrue(projection.isPresent());
-            assertEquals(expectedValue, projection.get().getState());
+            assertEquals(expectedValue, projection.get().state());
 
             context.close();
         }
@@ -444,17 +441,21 @@ class ProjectionRepositoryTest
 
         dispatchEvent(event);
 
-        TestProjectionRepository testRepo = repository();
+        TestProjectionRepository repo = repository();
+        MessageEnvelope lastMessage = repo.getLastErrorEnvelope();
 
-        assertTrue(testRepo.getLastErrorEnvelope() instanceof EventEnvelope);
-        assertEquals(getMessage(event), testRepo.getLastErrorEnvelope()
-                                                .getMessage());
-        assertEquals(event, testRepo.getLastErrorEnvelope()
-                                    .getOuterObject());
+        assertThat(lastMessage)
+                .isInstanceOf(EventEnvelope.class);
+        assertThat(lastMessage.message())
+                .isEqualTo(getMessage(event));
+        assertThat(lastMessage.outerObject())
+                .isEqualTo(event);
 
         // It must be "illegal argument type" since projections of this repository
         // do not handle such events.
-        assertTrue(testRepo.getLastException() instanceof IllegalArgumentException);
+        RuntimeException lastException = repo.getLastException();
+        assertThat(lastException)
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Nested
@@ -464,7 +465,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("processed event classes")
         void eventClasses() {
-            Set<EventClass> eventClasses = repository().getMessageClasses();
+            Set<EventClass> eventClasses = repository().messageClasses();
             assertEventClasses(eventClasses,
                                PrjProjectCreated.class,
                                PrjTaskAdded.class,
@@ -483,8 +484,8 @@ class ProjectionRepositoryTest
     @DisplayName("convert null timestamp to default")
     void convertNullTimestamp() {
         Timestamp timestamp = getCurrentTime();
-        assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
-        assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
+        assertThat(nullToDefault(timestamp)).isEqualTo(timestamp);
+        assertThat(nullToDefault(null)).isEqualTo(Timestamp.getDefaultInstance());
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore dispatch() result in this test
@@ -512,8 +513,11 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("expose read and write methods for the timestamp of the last handled event")
     void getSetLastHandled() {
-        assertNotNull(repository().readLastHandledEventTime());
-        repository().writeLastHandledEventTime(getCurrentTime());
+        TestProjectionRepository repository = repository();
+        assertThat(repository.readLastHandledEventTime()).isNotNull();
+        Timestamp time = getCurrentTime();
+        repository.writeLastHandledEventTime(time);
+        assertThat(repository.readLastHandledEventTime()).isEqualTo(time);
     }
 
     /**
@@ -532,25 +536,14 @@ class ProjectionRepositoryTest
     class ExposeToPackage {
 
         /**
-         * Ensures that {@link ProjectionRepository#getEventStore()} which is used by the catch-up
+         * Ensures that {@link ProjectionRepository#eventStore()} which is used by the catch-up
          * functionality is exposed to the package.
          */
         @Test
         @DisplayName("event store")
         void eventStore() {
             ProjectionRepository<?, ?, ?> repository = repository();
-            assertNotNull(repository.getEventStore());
-        }
-
-        /**
-         * Ensures that {@link ProjectionRepository#boundedContext()} which is used by the catch-up
-         * functionality is exposed to the package.
-         */
-        @Test
-        @DisplayName("bounded context")
-        void boundedContext() {
-            ProjectionRepository<?, ?, ?> repository = repository();
-            assertNotNull(repository.boundedContext());
+            assertNotNull(repository.eventStore());
         }
     }
 

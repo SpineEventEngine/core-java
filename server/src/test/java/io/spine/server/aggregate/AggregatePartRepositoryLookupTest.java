@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -129,8 +129,8 @@ class AggregatePartRepositoryLookupTest {
 
         @Apply
         void apply(AggProjectCreated event) {
-            getBuilder().setId(event.getProjectId())
-                        .setName(event.getName());
+            builder().setId(event.getProjectId())
+                     .setName(event.getName());
         }
     }
 
@@ -171,8 +171,8 @@ class AggregatePartRepositoryLookupTest {
         @Apply
         void apply(AggTaskAdded event) {
             Task task = event.getTask();
-            getBuilder().setTitle(task.getTitle())
-                        .setDescription(task.getDescription());
+            builder().setTitle(task.getTitle())
+                     .setDescription(task.getDescription());
         }
     }
 

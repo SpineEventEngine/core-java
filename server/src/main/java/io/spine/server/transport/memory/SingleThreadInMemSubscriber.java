@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,11 +19,16 @@
  */
 package io.spine.server.transport.memory;
 
+import io.spine.base.Identifier;
+import io.spine.logging.Logging;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 /**
  * The in-memory subscriber, which uses single-thread delivery of messages.
@@ -33,10 +38,8 @@ import java.util.concurrent.Executors;
  *
  * <p>This implementation should not be used in production environments, as it is not designed
  * to operate with external transport.
- *
- * @author Alex Tymchenko
  */
-class SingleThreadInMemSubscriber extends InMemorySubscriber {
+class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -44,23 +47,26 @@ class SingleThreadInMemSubscriber extends InMemorySubscriber {
         super(channelId);
     }
 
+    @SuppressWarnings("FutureReturnValueIgnored") // Error handling is done manually.
     @Override
     public void onMessage(ExternalMessage message) {
-        executor.submit(new SubmissionJob(message));
+        CompletableFuture.runAsync(() -> callObservers(message), executor)
+                         .exceptionally(throwable -> logError(throwable, message));
     }
 
-    private final class SubmissionJob implements Runnable {
-
-        private final ExternalMessage message;
-
-        private SubmissionJob(ExternalMessage message) {
-            this.message = message;
-        }
-
-        @Override
-        public void run() {
-            callObservers(message);
-        }
+    /**
+     * Conveniently logs an error in {@link CompletableFuture#exceptionally(Function)}.
+     *
+     * @return {@code null} always
+     */
+    private @Nullable Void logError(Throwable throwable, ExternalMessage message) {
+        Object id = Identifier.unpack(message.getId());
+        _error(throwable,
+               "Error dispatching an external message `{}` with ID `{}`: {}",
+               message.getOriginalMessage().getTypeUrl(),
+               id,
+               throwable.getLocalizedMessage());
+        return null;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
-import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
+import io.spine.server.entity.storage.given.column.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -85,7 +85,7 @@ class ColumnMemoizedValueTest {
 
         MemoizedValue valueB = columnB.memoizeFor(entity);
 
-        MemoizedValue valueC = new MemoizedValue(columnC, entity.getState());
+        MemoizedValue valueC = new MemoizedValue(columnC, entity.state());
 
         new EqualsTester().addEqualityGroup(valueA1, valueA2, valueA3)
                           .addEqualityGroup(valueAMutated)

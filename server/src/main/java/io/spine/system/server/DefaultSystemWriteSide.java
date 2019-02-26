@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -54,7 +54,7 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         checkNotNull(systemCommand);
         CommandFactory commandFactory = SystemCommandFactory.newInstance(system.isMultitenant());
         Command command = commandFactory.create(systemCommand);
-        system.getCommandBus()
+        system.commandBus()
               .post(command, noOpObserver());
     }
 
@@ -64,7 +64,7 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         SystemEventFactory factory = SystemEventFactory.forMessage(systemEvent,
                                                                    system.isMultitenant());
         Event event = factory.createEvent(systemEvent, null);
-        system.getImportBus()
+        system.importBus()
               .post(event, noOpObserver());
     }
 }

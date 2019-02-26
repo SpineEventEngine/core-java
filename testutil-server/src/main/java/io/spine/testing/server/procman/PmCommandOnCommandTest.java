@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <M> type of the command to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
- * @author Alexander Yevsyukov
  */
 public abstract
 class PmCommandOnCommandTest<I,
@@ -47,8 +46,7 @@ class PmCommandOnCommandTest<I,
     extends PmCommandGenerationTest<I, M, S, P, CommandEnvelope> {
 
     private final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(getClass())
-                                   .command();
+            new TestActorRequestFactory(getClass()).command();
 
     protected PmCommandOnCommandTest(I processManagerId, M commandMessage) {
         super(processManagerId, commandMessage);

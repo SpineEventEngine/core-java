@@ -24,3 +24,12 @@ message Group {
 
     repeated spine.core.UserId participants = 3;
 }
+
+message GroupName {
+
+    option (entity).kind = PROJECTION;
+
+    GroupId id = 1;
+
+    string name = 2;
+}

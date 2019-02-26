@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,25 +27,21 @@ import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
 /**
  * A signature of {@link CommandReactionMethod}.
- *
- * @author Alex Tymchenko
  */
 public class CommandReactionSignature
         extends MethodSignature<CommandReactionMethod, EventEnvelope> {
@@ -56,17 +52,17 @@ public class CommandReactionSignature
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
-        return copyOf(CommandReactionParams.values());
+        return ImmutableSet.copyOf(CommandReactionParams.values());
     }
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE);
+        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(CommandMessage.class, Iterable.class, Optional.class);
+        return ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
     }
 
     @Override
@@ -77,7 +73,7 @@ public class CommandReactionSignature
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * @implNote This method distinguishes {@linkplain Command Commander} methods one from another,
      * as they use the same annotation, but have different parameter list. It skips the methods
      * which first parameter {@linkplain MethodParams#isFirstParamCommand(Method) is }
@@ -107,8 +103,8 @@ public class CommandReactionSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope.getMessage()};
+            public Object[] extractArguments(EventEnvelope event) {
+                return new Object[]{event.message()};
             }
         },
 
@@ -119,8 +115,8 @@ public class CommandReactionSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope.getMessage(), envelope.getEventContext()};
+            public Object[] extractArguments(EventEnvelope event) {
+                return new Object[]{event.message(), event.context()};
             }
         },
 
@@ -131,10 +127,10 @@ public class CommandReactionSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                CommandContext originContext = envelope.getEventContext()
-                                                       .getCommandContext();
-                return new Object[]{envelope.getMessage(), originContext};
+            public Object[] extractArguments(EventEnvelope event) {
+                CommandContext originContext = event.context()
+                                                    .getCommandContext();
+                return new Object[]{event.message(), originContext};
             }
         }
     }

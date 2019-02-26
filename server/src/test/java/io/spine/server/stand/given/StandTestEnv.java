@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,23 +20,23 @@
 
 package io.spine.server.stand.given;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.client.SubscriptionUpdate;
+import io.spine.core.Event;
+import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.system.server.NoOpSystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.stream.Stream;
-
-import static io.spine.core.BoundedContextNames.assumingTests;
-import static io.spine.server.storage.StorageFactorySwitch.newInstance;
+import java.util.concurrent.Executor;
 
 public class StandTestEnv {
 
@@ -49,22 +49,27 @@ public class StandTestEnv {
                         new CustomerAggregateRepository(), new StandTestProjectionRepository());
     }
 
-    @SuppressWarnings("unchecked") // Generic type matching issues. OK for tests.
     public static Stand newStand(boolean multitenant, Repository... repositories) {
-        Stand stand = Stand
+        return newStand(multitenant, MoreExecutors.directExecutor(), repositories);
+    }
+
+    @SuppressWarnings("unchecked") // Generic type matching issues. OK for tests.
+    public static Stand
+    newStand(boolean multitenant, Executor executor, Repository... repositories) {
+        Stand.Builder standBuilder = Stand
                 .newBuilder()
                 .setMultitenant(multitenant)
-                .setSystemReadSide(NoOpSystemReadSide.INSTANCE)
+                .setCallbackExecutor(executor)
+                .setSystemReadSide(NoOpSystemReadSide.INSTANCE);
+        BoundedContext boundedContext = BoundedContext
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setStand(standBuilder)
                 .build();
-        StorageFactorySwitch storage = newInstance(assumingTests(), multitenant);
+        Stand stand = boundedContext.stand();
         for (Repository repository : repositories) {
-            stand.registerTypeSupplier(repository);
-            repository.initStorage(storage.get());
+            boundedContext.register(repository);
         }
-        Stream.of(repositories)
-              .forEach(repository -> {
-
-              });
         return stand;
     }
 
@@ -105,17 +110,42 @@ public class StandTestEnv {
         }
     }
 
-    public static class MemoizeEntityUpdateCallback implements Stand.EntityUpdateCallback {
+    public static class MemoizeNotifySubscriptionAction implements Stand.NotifySubscriptionAction {
 
-        private Any newEntityState = null;
+        private @Nullable Any newEntityState = null;
+        private @Nullable Event newEvent = null;
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Currently there is always exactly one {@code EntityStateUpdate} in a
+         * {@code SubscriptionUpdate}.
+         */
         @Override
-        public void onStateChanged(EntityStateUpdate newEntityState) {
-            this.newEntityState = newEntityState.getState();
+        public void accept(SubscriptionUpdate update) {
+            switch (update.getUpdateCase()) {
+                case ENTITY_UPDATES:
+                    EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
+                                                                .getUpdatesList()
+                                                                .get(0);
+                    newEntityState = entityStateUpdate.getState();
+                    break;
+                case EVENT_UPDATES:
+                    newEvent = update.getEventUpdates()
+                                     .getEventsList()
+                                     .get(0);
+                    break;
+                default:
+                    // Do nothing.
+            }
         }
 
         public @Nullable Any newEntityState() {
             return newEntityState;
+        }
+
+        public @Nullable Event newEvent() {
+            return newEvent;
         }
     }
 }

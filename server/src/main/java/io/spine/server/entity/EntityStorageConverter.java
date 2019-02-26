@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -85,8 +85,8 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
 
     @Override
     protected EntityRecord doForward(E entity) {
-        Any entityId = Identifier.pack(entity.getId());
-        Any stateAny = pack(entity.getState());
+        Any entityId = Identifier.pack(entity.id());
+        Any stateAny = pack(entity.state());
         EntityRecord.Builder builder = EntityRecord
                 .newBuilder()
                 .setEntityId(entityId)
@@ -140,7 +140,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof EntityStorageConverter)) {
             return false;
         }
         EntityStorageConverter other = (EntityStorageConverter) obj;

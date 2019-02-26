@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,8 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.Streams;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
@@ -33,6 +31,8 @@ import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.bus.UnicastBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
 
@@ -60,7 +60,7 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * </ol>
  *
  * <p>{@linkplain Apply#allowImport() Marking} events and ensuring proper
- * {@linkplain AggregateRepository#getEventImportRouting() routing} allows to store aggregate
+ * {@linkplain AggregateRepository#eventImportRouting() routing} allows to store aggregate
  * events without having intermediate messages.
  *
  * <h1>Temporal Logic</h1>
@@ -114,9 +114,9 @@ public final class ImportBus
     }
 
     @Override
-    protected void dispatch(EventEnvelope envelope) {
-        EventDispatcher<?> dispatcher = getDispatcher(envelope);
-        dispatcher.dispatch(envelope);
+    protected void dispatch(EventEnvelope event) {
+        EventDispatcher<?> dispatcher = getDispatcher(event);
+        dispatcher.dispatch(event);
     }
 
     @Override
@@ -150,8 +150,8 @@ public final class ImportBus
     private static class DeadImportEventHandler implements DeadMessageHandler<EventEnvelope> {
 
         @Override
-        public MessageUnhandled handle(EventEnvelope envelope) {
-            return new UnsupportedImportEventException(envelope);
+        public MessageUnhandled handle(EventEnvelope event) {
+            return new UnsupportedImportEventException(event);
         }
     }
 
@@ -164,8 +164,8 @@ public final class ImportBus
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
         protected
-        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventEnvelope envelope) {
-            return super.getDispatcher(envelope);
+        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventEnvelope event) {
+            return super.getDispatcher(event);
         }
     }
 

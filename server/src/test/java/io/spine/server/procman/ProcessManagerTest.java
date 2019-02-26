@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,10 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
@@ -40,8 +37,15 @@ import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerDispatcher;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
+import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.test.shared.AnyProcess;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
@@ -52,6 +56,9 @@ import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartIteration;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationCompleted;
+import io.spine.test.procman.event.PmIterationPlanned;
+import io.spine.test.procman.event.PmIterationStarted;
+import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
@@ -63,7 +70,6 @@ import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
@@ -76,11 +82,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.pm.GivenMessages.addTask;
@@ -94,6 +101,7 @@ import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
 import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testdata.Sample.messageOfType;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -110,10 +118,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-@SuppressWarnings({"OverlyCoupledClass",
+@SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
-@ExtendWith(ShardingReset.class)
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
 
@@ -122,7 +129,7 @@ class ProcessManagerTest {
     private final TestEventFactory eventFactory =
             TestEventFactory.newInstance(Identifier.pack(TestProcessManager.ID), getClass());
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+            new TestActorRequestFactory(getClass());
 
     private BoundedContext context;
     private TestProcessManager processManager;
@@ -134,7 +141,7 @@ class ProcessManagerTest {
                 .newBuilder()
                 .setMultitenant(true)
                 .build();
-        StorageFactory storageFactory = context.getStorageFactory();
+        StorageFactory storageFactory = context.storageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
         EventBus eventBus = EventBus.newBuilder()
@@ -148,7 +155,7 @@ class ProcessManagerTest {
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
-                              .withState(Any.getDefaultInstance())
+                              .withState(AnyProcess.getDefaultInstance())
                               .build();
         commandBus.register(new TestProcessManagerDispatcher());
         InjectCommandBus.of(commandBus)
@@ -164,7 +171,8 @@ class ProcessManagerTest {
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
-        Any pmState = processManager.getState();
+        Any pmState = processManager.state()
+                                    .getAny();
         Any expected = pack(eventMessage);
         assertEquals(expected, pmState);
         return result;
@@ -175,7 +183,8 @@ class ProcessManagerTest {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
-        assertEquals(pack(commandMsg), processManager.getState());
+        assertEquals(pack(commandMsg), processManager.state()
+                                                     .getAny());
         return events;
     }
 
@@ -241,18 +250,18 @@ class ProcessManagerTest {
         }
 
         private void checkIncrementsOnCommand(CommandMessage commandMessage) {
-            assertEquals(VERSION, processManager.getVersion()
+            assertEquals(VERSION, processManager.version()
                                                 .getNumber());
             testDispatchCommand(commandMessage);
-            assertEquals(VERSION + 1, processManager.getVersion()
+            assertEquals(VERSION + 1, processManager.version()
                                                     .getNumber());
         }
 
         private void checkIncrementsOnEvent(EventMessage eventMessage) {
-            assertEquals(VERSION, processManager.getVersion()
+            assertEquals(VERSION, processManager.version()
                                                 .getNumber());
             testDispatchEvent(eventMessage);
-            assertEquals(VERSION + 1, processManager.getVersion()
+            assertEquals(VERSION + 1, processManager.version()
                                                     .getNumber());
         }
     }
@@ -278,8 +287,8 @@ class ProcessManagerTest {
         void rejectionMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
             dispatch(processManager, rejection.getEvent());
-            assertEquals(rejection.getOuterObject().getMessage(),
-                         processManager.getState());
+            assertReceived(rejection.outerObject()
+                                    .getMessage());
         }
 
         @Test
@@ -287,8 +296,13 @@ class ProcessManagerTest {
         void rejectionAndCommandMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
             dispatch(processManager, rejection.getEvent());
-            assertEquals(rejection.getOrigin().getMessage(),
-                         processManager.getState());
+            assertReceived(rejection.getOrigin()
+                                    .getMessage());
+        }
+
+        private void assertReceived(Any expected) {
+            assertEquals(expected, processManager.state()
+                                                 .getAny());
         }
     }
 
@@ -498,6 +512,41 @@ class ProcessManagerTest {
                     .assertThat(emittedEvents(PmQuizStarted.class))
                     .assertThat(emittedEvent(Nothing.class, none()))
                     .close();
+        }
+    }
+
+    @Nested
+    @DisplayName("in its class, expose")
+    class ExposeInClass {
+
+        @Test
+        @DisplayName("produced commands")
+        void producedCommands() {
+            ProcessManagerClass<TestProcessManager> pmClass =
+                    asProcessManagerClass(TestProcessManager.class);
+            Set<CommandClass> commands = pmClass.getProducedCommands();
+            assertThat(commands).containsExactlyElementsIn(CommandClass.setOf(
+                    PmAddTask.class,
+                    PmReviewBacklog.class,
+                    PmScheduleRetrospective.class,
+                    PmPlanIteration.class,
+                    PmStartIteration.class
+            ));
+        }
+
+        @Test
+        @DisplayName("produced events")
+        void producedEvents() {
+            ProcessManagerClass<TestProcessManager> pmClass =
+                    asProcessManagerClass(TestProcessManager.class);
+            Set<EventClass> events = pmClass.getProducedEvents();
+            assertThat(events).containsExactlyElementsIn(EventClass.setOf(
+                    PmProjectCreated.class,
+                    PmTaskAdded.class,
+                    PmNotificationSent.class,
+                    PmIterationPlanned.class,
+                    PmIterationStarted.class
+            ));
         }
     }
 }

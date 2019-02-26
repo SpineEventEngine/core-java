@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,7 +33,7 @@ import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Method object for reading {@link AggregateStateRecord}s.
+ * Method object for reading {@link AggregateHistory}s.
  *
  * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov
@@ -53,7 +53,7 @@ final class ReadOperation<I> {
         this.history = newLinkedList();
     }
 
-    Optional<AggregateStateRecord> perform() {
+    Optional<AggregateHistory> perform() {
         Iterator<AggregateEventRecord> historyBackward = storage.historyBackward(request);
         if (!historyBackward.hasNext()) {
             return Optional.empty();
@@ -64,7 +64,7 @@ final class ReadOperation<I> {
             handleRecord(record);
         }
 
-        AggregateStateRecord result = buildRecord();
+        AggregateHistory result = buildRecord();
         return Optional.of(result);
     }
 
@@ -84,31 +84,31 @@ final class ReadOperation<I> {
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    private AggregateStateRecord buildRecord() {
-        AggregateStateRecord.Builder builder = AggregateStateRecord.newBuilder();
+    private AggregateHistory buildRecord() {
+        AggregateHistory.Builder builder = AggregateHistory.newBuilder();
         if (snapshot != null) {
             builder.setSnapshot(snapshot);
         }
         builder.addAllEvent(history);
 
-        AggregateStateRecord result = builder.build();
+        AggregateHistory result = builder.build();
         checkRecord(result);
         return result;
     }
 
     /**
-     * Ensures that the {@link AggregateStateRecord} is valid.
+     * Ensures that the {@link AggregateHistory} is valid.
      *
-     * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
+     * <p>{@link AggregateHistory} is considered valid when one of the following is true:
      * <ul>
-     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;
-     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.
+     *     <li>{@linkplain AggregateHistory#getSnapshot() snapshot} is not default;
+     *     <li>{@linkplain AggregateHistory#getEventList() event list} is not empty.
      * </ul>
      *
      * @param record the record to check
-     * @throws IllegalStateException if the {@link AggregateStateRecord} is not valid
+     * @throws IllegalStateException if the {@link AggregateHistory} is not valid
      */
-    private static void checkRecord(AggregateStateRecord record) throws IllegalStateException {
+    private static void checkRecord(AggregateHistory record) throws IllegalStateException {
         boolean snapshotIsNotSet = !record.hasSnapshot();
         boolean noEvents = record.getEventList()
                                  .isEmpty();

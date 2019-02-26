@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,11 +25,11 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.expected.CommandHandlerExpected;
@@ -73,7 +73,7 @@ public abstract class CommandHandlerTest<I,
     @SuppressWarnings("TestOnlyProblems") // OK for a test-util.
     protected CommandHandlerTest(I entityId, C commandMessage) {
         super(entityId, commandMessage);
-        this.requestFactory = TestActorRequestFactory.newInstance(getClass());
+        this.requestFactory = new TestActorRequestFactory(getClass());
     }
 
     /**
@@ -99,23 +99,23 @@ public abstract class CommandHandlerTest<I,
 
     @Override
     protected CommandHandlerExpected<S> expectThat(E entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         Message rejection = null;
         List<? extends Message> events = emptyList();
         try {
             events = dispatchTo(entity);
         } catch (RuntimeException e) {
-            rejection = rejection(e).getMessage();
+            rejection = rejection(e).message();
         }
         return new CommandHandlerExpected<>(events, rejection, initialState,
-                                            entity.getState(), interceptedCommands());
+                                            entity.state(), interceptedCommands());
     }
 
     private RejectionEnvelope rejection(RuntimeException wrapped) {
         Command command = createCommand(message());
         CommandEnvelope envelope = CommandEnvelope.of(command);
         CaughtError error = CommandErrorHandler.with(NoOpSystemWriteSide.INSTANCE)
-                                               .handleError(envelope, wrapped);
+                                               .handle(envelope, wrapped);
         Optional<RejectionEnvelope> rejectionEnvelope = error.asRejection();
         if (rejectionEnvelope.isPresent()) {
             return rejectionEnvelope.get();

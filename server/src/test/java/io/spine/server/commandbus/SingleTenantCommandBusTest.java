@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,12 +24,12 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.CommandPostingHandler;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -55,11 +55,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("Single tenant CommandBus should")
 class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
+
+    private static final TestActorRequestFactory requestFactory =
+            new TestActorRequestFactory(SingleTenantCommandBusTest.class);
 
     SingleTenantCommandBusTest() {
         super(false);
@@ -157,7 +157,6 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Override
     protected Command newCommand() {
         CommandMessage commandMessage = Given.CommandMessage.createProjectMessage();
-        return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
-                                      .createCommand(commandMessage);
+        return requestFactory.createCommand(commandMessage);
     }
 }

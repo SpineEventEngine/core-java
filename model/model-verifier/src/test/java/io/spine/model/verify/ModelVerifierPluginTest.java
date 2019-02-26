@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,6 +22,7 @@ package io.spine.model.verify;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
@@ -50,6 +51,7 @@ class ModelVerifierPluginTest {
     private static final String VALID_AGGREGATE_JAVA =
             "io/spine/model/verify/ValidAggregate.java";
     private static final ImmutableCollection<String> PROTO_FILES = ImmutableList.of(
+            "spine/model/verify/call_entity.proto",
             "spine/model/verify/commands.proto",
             "spine/model/verify/events.proto"
     );
@@ -72,6 +74,7 @@ class ModelVerifierPluginTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("halt build on duplicate command handling methods")
     void rejectDuplicateHandlingMethods() {
         BuildResult result = newProjectWithJava(

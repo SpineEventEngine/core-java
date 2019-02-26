@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,8 +33,6 @@ import java.lang.reflect.Method;
  *
  * <p>The derived classes must declare a method named {@link #REACTOR_METHOD_NAME "react()"}
  * with appropriate arguments.
- *
- * @author Alexander Yevsyukov
  */
 public class TestEventReactor implements EventReactor {
 
@@ -43,12 +41,12 @@ public class TestEventReactor implements EventReactor {
     private final Any producerId = Identifier.pack(getClass().getName());
 
     @Override
-    public Any getProducerId() {
+    public Any producerId() {
         return producerId;
     }
 
     @Override
-    public Version getVersion() {
+    public Version version() {
         return Version.getDefaultInstance();
     }
 

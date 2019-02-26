@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -45,7 +45,7 @@ final class GameProcess extends ProcessManager<Integer, Table, TableVBuilder> {
 
     @Assign
     Pong handle(Ping command) {
-        getBuilder().setNumber(command.getTable());
+        builder().setNumber(command.getTable());
         return Pong.newBuilder()
                    .setTable(command.getTable())
                    .setSide(opposite(command.getSide()))

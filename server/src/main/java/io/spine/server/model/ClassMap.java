@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,8 +22,8 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import io.spine.core.CommandClass;
 import io.spine.server.command.model.CommandHandlingClass;
+import io.spine.server.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;
@@ -33,8 +33,6 @@ import static com.google.common.collect.Sets.intersection;
 
 /**
  * Maps a Java class to its {@link ModelClass}.
- *
- * @author Alexander Yevsyukov
  */
 final class ClassMap {
 
@@ -105,7 +103,7 @@ final class ClassMap {
         ModelClass<T> modelClass;
         modelClass = supplier.get();
         if (modelClass instanceof CommandHandlingClass) {
-            checkDuplicates((CommandHandlingClass<?>) modelClass);
+            checkDuplicates((CommandHandlingClass<?, ?>) modelClass);
         }
         classes.put(key, modelClass);
         return modelClass;
@@ -115,7 +113,7 @@ final class ClassMap {
         classes.clear();
     }
 
-    private void checkDuplicates(CommandHandlingClass<?> candidate)
+    private void checkDuplicates(CommandHandlingClass<?, ?> candidate)
             throws DuplicateCommandHandlerError {
         Set<CommandClass> candidateCommands = candidate.getCommands();
         ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> duplicates =
@@ -123,7 +121,8 @@ final class ClassMap {
 
         for (ModelClass<?> modelClass : classes.values()) {
             if (modelClass instanceof CommandHandlingClass) {
-                CommandHandlingClass<?> commandHandler = (CommandHandlingClass<?>) modelClass;
+                CommandHandlingClass<?, ?> commandHandler =
+                        (CommandHandlingClass<?, ?>) modelClass;
                 Set<CommandClass> alreadyHandled = commandHandler.getCommands();
                 Set<CommandClass> intersection = intersection(alreadyHandled, candidateCommands);
                 if (intersection.size() > 0) {

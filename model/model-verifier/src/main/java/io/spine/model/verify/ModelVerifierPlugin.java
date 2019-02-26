@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,7 +25,6 @@ import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.assemble.AssignLookup;
 import io.spine.tools.gradle.SpinePlugin;
-import io.spine.tools.gradle.compiler.Extension;
 import io.spine.tools.gradle.compiler.ModelCompilerPlugin;
 import io.spine.tools.type.MoreKnownTypes;
 import org.gradle.api.Action;
@@ -42,13 +41,12 @@ import java.nio.file.StandardOpenOption;
 import static io.spine.tools.gradle.TaskName.CLASSES;
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
 import static io.spine.tools.gradle.TaskName.VERIFY_MODEL;
+import static io.spine.tools.gradle.compiler.Extension.getMainDescriptorSet;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newInputStream;
 
 /**
  * The plugin performing the Spine type model verification.
- *
- * @author Dmytro Dashenkov
  */
 @Experimental
 public final class ModelVerifierPlugin extends SpinePlugin {
@@ -86,15 +84,6 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     }
 
     /**
-     * Opens the method to the helper class.
-     */
-    @SuppressWarnings("RedundantMethodOverride") // See Javadoc.
-    @Override
-    protected Logger log() {
-        return super.log();
-    }
-
-    /**
      * The action performing the model processing.
      *
      * <p>The action is executed only if the passed {@code rawModelPath} is present.
@@ -126,8 +115,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         private void extendKnownTypes(Project project) {
             String pluginExtensionName = ModelCompilerPlugin.extensionName();
             if (project.getExtensions().findByName(pluginExtensionName) != null) {
-                String path = Extension.getMainDescriptorSetPath(project);
-                File descriptorFile = new File(path);
+                File descriptorFile = getMainDescriptorSet(project);
                 tryExtend(descriptorFile);
             } else {
                 _warn("{} plugin extension is not found. Apply the Spine model compiler plugin.",

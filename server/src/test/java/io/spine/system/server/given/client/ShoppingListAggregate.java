@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -57,26 +57,27 @@ public class ShoppingListAggregate extends Aggregate<ListId, ShoppingList, Shopp
     }
 
     @Apply
-    private void on(ShoppingListCreated event) {
-        getBuilder().setId(event.getId());
+    void on(ShoppingListCreated event) {
+        builder().setId(event.getId());
     }
 
     @Apply
-    private void on(ListItemAdded event) {
-        getBuilder().addItem(event.getItem());
+    void on(ListItemAdded event) {
+        builder().addItem(event.getItem());
     }
 
     @Apply(allowImport = true)
-    private void on(HardCopyPrinted event) {
-        int newCount = getBuilder().getHardCopiesCount() + 1;
-        getBuilder().setHardCopiesCount(newCount);
+    void on(HardCopyPrinted event) {
+        int newCount = builder().getHardCopiesCount() + 1;
+        builder().setHardCopiesCount(newCount);
     }
 
     @Apply(allowImport = true)
-    private void on(HardCopyLost event) {
-        int newCount = getBuilder().getHardCopiesCount() - 1;
+    void on(HardCopyLost event) {
+        ShoppingListVBuilder builder = builder();
+        int newCount = builder.getHardCopiesCount() - 1;
         if (newCount >= 0) {
-            getBuilder().setHardCopiesCount(newCount);
+            builder.setHardCopiesCount(newCount);
         }
     }
 }

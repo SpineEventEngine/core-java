@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,8 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
-import io.spine.server.event.Enricher;
+import io.spine.server.enrich.Enricher;
+import io.spine.server.enrich.EnricherBuilder;
 import io.spine.test.event.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
@@ -35,9 +36,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.BiFunction;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class EnricherBuilderTestEnv {
 
     /** Prevent instantiation of this utility class. */
@@ -52,7 +50,7 @@ public class EnricherBuilderTestEnv {
 
         /** Creates a new enricher with all required enrichment functions set. */
         public static Enricher newEnricher() {
-            Enricher.Builder builder = Enricher
+            EnricherBuilder builder = Enricher
                     .newBuilder()
                     .add(ProjectId.class, String.class, new GetProjectName())
                     .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
