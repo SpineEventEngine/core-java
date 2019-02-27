@@ -43,6 +43,15 @@ message TaskAdded {
     Task task = 2;
 }
 
+message TaskAssigned {
+    Task task = 1;
+    core.UserId assignee = 2;
+}
+
+message TaskBecameUnavailable {
+    TaskId id = 1;
+}
+
 message ProjectStarted {
     ProjectId project_id = 1;
 }
