@@ -73,8 +73,7 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
         } catch (Throwable t) {
             _error(t,
                    "Error scheduling command `{}` with ID `{}`: {}",
-                   command.getMessage()
-                          .getTypeUrl(),
+                   command.typeUrl(),
                    command.getId()
                           .getUuid(),
                    t.getLocalizedMessage());

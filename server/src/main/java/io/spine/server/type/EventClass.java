@@ -33,7 +33,6 @@ import java.util.Arrays;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.ensureMessage;
-import static io.spine.core.Events.typeUrl;
 
 /**
  * A value object holding a class of events.
@@ -77,8 +76,7 @@ public final class EventClass extends MessageClass<EventMessage> {
      * <p>Named {@code from} to avoid collision with {@link #of(Message)}.
      */
     public static EventClass from(Event event) {
-        TypeUrl typeUrl = typeUrl(event);
-        return from(typeUrl);
+        return from(event.typeUrl());
     }
 
     /**

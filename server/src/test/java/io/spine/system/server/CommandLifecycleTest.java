@@ -53,7 +53,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
@@ -252,7 +251,7 @@ class CommandLifecycleTest {
             CommandRejected rejected = eventAccumulator.assertNextEventIs(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Event rejectionEvent = rejected.getRejectionEvent();
-            TypeUrl rejectionType = TypeUrl.ofEnclosed(rejectionEvent.getMessage());
+            TypeUrl rejectionType = rejectionEvent.typeUrl();
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }

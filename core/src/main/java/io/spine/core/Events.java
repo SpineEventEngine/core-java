@@ -32,7 +32,6 @@ import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
-import io.spine.type.TypeUrl;
 
 import java.util.Comparator;
 import java.util.List;
@@ -256,16 +255,6 @@ public final class Events {
                                     .setCommandMessage(pack(commandMessage))
                                     .setStacktrace(stacktrace)
                                     .build();
-    }
-
-    /**
-     * Obtains the type URL of the event message enclosed by a given {@code Event}.
-     */
-    public static TypeUrl typeUrl(Event event) {
-        String typeUrl = event.getMessage()
-                              .getTypeUrl();
-        TypeUrl result = TypeUrl.parse(typeUrl);
-        return result;
     }
 
     /**

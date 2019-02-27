@@ -66,7 +66,7 @@ message EventId {
 //
 // There is a special case of an event - a rejection event.
 // A rejection event represents erroneous conditions in business, which do not allow to execute
-// a command. The event is a rejection event iff the `EventContext.rejection` field is present.
+// a command. The event is a rejection event if the `EventContext.rejection` field is present.
 //
 // See `EventContext.rejection` to determine the event kind.
 //
