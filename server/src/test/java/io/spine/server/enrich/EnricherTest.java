@@ -20,7 +20,6 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.truth.BooleanSubject;
 import io.spine.base.EnrichmentMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -30,9 +29,7 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.given.EventEnricherTestEnv.GivenEvent;
 import io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage;
-import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectCreatedEnrichment;
@@ -45,30 +42,27 @@ import io.spine.test.event.SeparateEnrichmentForMultipleProjectEvents;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
-import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.permissionGranted;
-import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.permissionRevoked;
-import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.projectStarted;
 import static io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage.projectCompleted;
 import static io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage.projectStarred;
 import static io.spine.server.event.given.EventEnricherTestEnv.createEvent;
-import static io.spine.server.type.given.GivenEvent.arbitrary;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("Enricher should")
+@Disabled("Until new enrichment implementation is finalized")
 public class EnricherTest {
 
     private BoundedContext boundedContext;
@@ -175,50 +169,6 @@ public class EnricherTest {
                          subscriber.projectCompletedEnrichment.getProjectName());
             assertEquals(getProjectName.apply(starredProjectId, starredEvent.getContext()),
                          subscriber.projectStarredEnrichment.getProjectName());
-        }
-
-        @Test
-        @DisplayName("bound by fields")
-        void boundByFields() {
-            EventEnvelope permissionGranted = EventEnvelope.of(permissionGranted());
-            EventEnvelope permissionRevoked = EventEnvelope.of(permissionRevoked());
-            EventEnvelope sharingRequestApproved =
-                    EventEnvelope.of(GivenEvent.sharingRequestApproved());
-
-            assertCanBeEnriched(permissionGranted);
-            assertCanBeEnriched(permissionRevoked);
-            assertCanBeEnriched(sharingRequestApproved);
-        }
-    }
-
-    void assertCanBeEnriched(EventEnvelope e) {
-        assertThatCanBeEnriched(e).isTrue();
-    }
-
-    void assertCannotBeEnriched(EventEnvelope e) {
-        assertThatCanBeEnriched(e).isFalse();
-    }
-
-    private BooleanSubject assertThatCanBeEnriched(EventEnvelope e) {
-        return assertThat(enricher.canBeEnriched(e));
-    }
-
-    @Test
-    @DisplayName("state event can be enriched if its enrichment is registered")
-    void stateEventEnrichable() {
-        assertCanBeEnriched(EventEnvelope.of(projectStarted()));
-    }
-
-    @Nested
-    @DisplayName("state event cannot be enriched")
-    class StateEventNonEnrichable {
-
-        @Test
-        @DisplayName("if there is no enrichment registered for it")
-        void withoutEnrichment() {
-            EventEnvelope dummyEvent = EventEnvelope.of(arbitrary());
-
-            assertCannotBeEnriched(dummyEvent);
         }
     }
 

@@ -20,13 +20,12 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.EnrichableMessageContext;
 import io.spine.core.Enrichment;
 import io.spine.server.type.EnrichableMessageEnvelope;
-import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
@@ -37,10 +36,8 @@ import java.util.Optional;
  * <pre>{@code
  *   Enricher enricher = Enricher
  *       .newBuilder()
- *       .add(ProjectId.class, String.class,
- *            new BiFunction<ProjectId, EventContext, String> { ... } )
- *       .add(ProjectId.class, UserId.class,
- *            new BiFunction<ProjectId, EventContext, UserId> { ... } )
+ *       .add(MyEvent.class,
+ *            new EventEnrichmentFn<MyEvent, EventContext, MyEnrichment> { ... } )
  *       ...
  *       .build();
  * }</pre>
@@ -48,8 +45,7 @@ import java.util.Optional;
 @SPI
 public final class Enricher implements EnrichmentService {
 
-    /** Enrichment schema used by this enricher. */
-    private final Schema schema;
+    private final ImmutableMap<Class<? extends Message>, EnrichmentFn<?, ?, ?>> functions;
 
     /**
      * Creates a new builder.
@@ -60,20 +56,13 @@ public final class Enricher implements EnrichmentService {
 
     /**
      * Creates a new instance taking functions from the passed builder.
-     *
-     * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
     Enricher(EnricherBuilder builder) {
-        this.schema = createSchema(builder);
-        this.schema.activate();
+        this.functions = builder.functions();
     }
 
-    private Schema createSchema(EnricherBuilder builder) {
-        return Schema.create(this, builder);
-    }
-
-    Schema schema() {
-        return schema;
+    ImmutableMap<Class<? extends Message>, EnrichmentFn<?, ?, ?>> functions() {
+        return functions;
     }
 
     /**
@@ -100,23 +89,9 @@ public final class Enricher implements EnrichmentService {
         return  result;
     }
 
-    /**
-     * Verifies if the passed message can be enriched.
-     */
-    @VisibleForTesting
-    boolean canBeEnriched(MessageEnvelope message) {
-        boolean supported = schema.supports(message.messageClass()
-                                                   .value());
-        return supported;
-    }
-
     @Override
-    public Optional<Enrichment> createEnrichment(Message message,
-                                                 EnrichableMessageContext context) {
-        if (!schema.supports(message.getClass())) {
-            return Optional.empty();
-        }
-
+    public
+    Optional<Enrichment> createEnrichment(Message message, EnrichableMessageContext context) {
         Action action = new Action(this, message, context);
         Enrichment result = action.perform();
         return Optional.of(result);

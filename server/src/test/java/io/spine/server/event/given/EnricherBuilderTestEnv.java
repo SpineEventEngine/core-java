@@ -20,21 +20,8 @@
 
 package io.spine.server.event.given;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
-import io.spine.core.CommandContext;
-import io.spine.core.EventContext;
-import io.spine.core.EventId;
-import io.spine.core.UserId;
-import io.spine.people.PersonName;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.enrich.EnricherBuilder;
-import io.spine.test.event.ProjectId;
-import io.spine.testing.core.given.GivenUserId;
-import io.spine.time.ZoneOffset;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.function.BiFunction;
 
 public class EnricherBuilderTestEnv {
 
@@ -51,69 +38,8 @@ public class EnricherBuilderTestEnv {
         /** Creates a new enricher with all required enrichment functions set. */
         public static Enricher newEnricher() {
             EnricherBuilder builder = Enricher
-                    .newBuilder()
-                    .add(ProjectId.class, String.class, new GetProjectName())
-                    .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
-                    .add(EventId.class, String.class, EVENT_ID_TO_STRING)
-                    .add(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
-                    .add(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
-                    .add(Any.class, String.class, ANY_TO_STRING)
-                    .add(Integer.class, String.class, VERSION_TO_STRING)
-                    .add(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
-                    .add(String.class, PersonName.class, STRING_TO_PERSON_NAME)
-                    .add(String.class, Integer.class, STRING_TO_INT);
+                    .newBuilder();
             return builder.build();
         }
-
-        public static class GetProjectName implements BiFunction<ProjectId, EventContext, String> {
-            @Override
-            public @Nullable String apply(@Nullable ProjectId id, EventContext context) {
-                if (id == null) {
-                    return null;
-                }
-                String name = "P-" + id.getId();
-                return name;
-            }
-        }
-
-        public static class GetProjectOwnerId implements BiFunction<ProjectId, EventContext, UserId> {
-            @Override
-            public @Nullable UserId apply(@Nullable ProjectId id, EventContext context) {
-                if (id == null) {
-                    return null;
-                }
-                return GivenUserId.of("PO-" + id.getId());
-            }
-        }
-
-        private static final BiFunction<EventId, EventContext, String> EVENT_ID_TO_STRING =
-                new BiFunction<EventId, EventContext, String>() {
-                    @Override
-                    public @Nullable String apply(@Nullable EventId input, EventContext context) {
-                        return input == null ? "" : input.getValue();
-                    }
-                };
-
-        private static final BiFunction<Timestamp, EventContext, String>
-                TIMESTAMP_TO_STRING = (input, context) -> input == null ? "" : input.toString();
-
-        private static final BiFunction<CommandContext, EventContext, String>
-                CMD_CONTEXT_TO_STRING = (input, context) -> input == null ? "" : input.toString();
-
-        private static final BiFunction<Any, EventContext, String>
-                ANY_TO_STRING = (input, context) -> input == null ? "" : input.toString();
-
-        private static final BiFunction<Integer, EventContext, String>
-                VERSION_TO_STRING = (input, context) -> input == null ? "" : input.toString();
-
-        private static final BiFunction<String, EventContext, ZoneOffset>
-                STRING_TO_ZONE_OFFSET = new StringToZoneOffset();
-
-        private static final BiFunction<String, EventContext, PersonName>
-                STRING_TO_PERSON_NAME = new StringToPersonName();
-
-        private static final BiFunction<String, EventContext, Integer> STRING_TO_INT =
-                (input, context) -> Integer.valueOf(input);
-
     }
 }

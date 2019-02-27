@@ -20,34 +20,23 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.core.EnrichableMessageContext;
-import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by
- * the {@code Enricher} and set a custom translation function, if needed.
+ * The {@code Builder} allows to register enrichment functions used by
+ * the {@code Enricher}.
  */
 public final class EnricherBuilder {
 
-    /** Functions which perform the enrichment. */
-    private final Set<EnrichmentFunction<?, ?, ?>> functions = Sets.newHashSet();
-
-    private final Map<MessageClass, EnrichmentFn<?, ?, ?>> map = Maps.newHashMap();
+    private final Map<Class<? extends Message>, EnrichmentFn<?, ?, ?>> functions = new HashMap<>();
 
     /** Creates new instance. */
     EnricherBuilder() {
@@ -73,14 +62,13 @@ public final class EnricherBuilder {
     EnricherBuilder add(Class<M> eventClass, EventEnrichmentFn<M, T> func) {
         checkNotNull(eventClass);
         checkNotNull(func);
-        EventClass key = EventClass.from(eventClass);
         checkState(
-                !map.containsKey(key),
+                !functions.containsKey(eventClass),
                 "The event class `%s` already has enrichment function." +
                         " If you want to provide another function, please call `remove()` first.",
-                key
+                eventClass.getCanonicalName()
         );
-        map.put(key, func);
+        functions.put(eventClass, func);
         return this;
     }
 
@@ -90,38 +78,7 @@ public final class EnricherBuilder {
      * <p>If the function for this class was not added, the call has no effect.
      */
     public <M extends EventMessage> EnricherBuilder remove(Class<M> eventClass) {
-        map.remove(EventClass.from(eventClass));
-        return this;
-    }
-
-    /**
-     * Adds a new field enrichment function.
-     *
-     * @param sourceFieldClass
-     *         a class of the field in the source message
-     * @param enrichmentFieldClass
-     *         a class of the field in the enrichment message
-     * @param func
-     *         a function which converts fields
-     * @return the builder instance
-     */
-    public <S, T> EnricherBuilder add(Class<S> sourceFieldClass,
-                                      Class<T> enrichmentFieldClass,
-                                      BiFunction<S, ? extends EnrichableMessageContext, T> func) {
-        checkNotNull(sourceFieldClass);
-        checkNotNull(enrichmentFieldClass);
-        checkNotNull(func);
-
-        EnrichmentFunction<S, ?, T> newEntry =
-                FieldEnrichment.of(sourceFieldClass, enrichmentFieldClass, func);
-        checkDuplicate(newEntry);
-        functions.add(newEntry);
-        return this;
-    }
-
-    /** Removes a translation for the passed type. */
-    public EnricherBuilder remove(EnrichmentFunction entry) {
-        functions.remove(entry);
+        functions.remove(eventClass);
         return this;
     }
 
@@ -132,27 +89,9 @@ public final class EnricherBuilder {
     }
 
     /**
-     * Obtains immutable set of functions added to the builder by the time of the call.
+     * Obtains immutable functions of functions added to the builder by the time of the call.
      */
-    ImmutableSet<EnrichmentFunction<?, ?, ?>> functions() {
-        return ImmutableSet.copyOf(functions);
-    }
-
-    /**
-     * Ensures that the passed enrichment function is not yet registered in this builder.
-     *
-     * @throws IllegalArgumentException
-     *         if the builder already has a function, which has the same couple of
-     *         source message and target enrichment classes
-     */
-    private void checkDuplicate(EnrichmentFunction<?, ?, ?> candidate) {
-        Optional<EnrichmentFunction<?, ?, ?>> duplicate =
-                EnrichmentFunction.firstThat(functions, SameTransition.asFor(candidate));
-        if (duplicate.isPresent()) {
-            throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
-                                              candidate.sourceClass(),
-                                              candidate.targetClass(),
-                                              duplicate.get());
-        }
+    ImmutableMap<Class<? extends Message>, EnrichmentFn<?, ?, ?>> functions() {
+        return ImmutableMap.copyOf(functions);
     }
 }

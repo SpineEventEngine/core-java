@@ -23,8 +23,8 @@ package io.spine.server.enrich;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
-import io.spine.code.proto.enrichment.EnrichmentType;
 import io.spine.type.TypeName;
+import io.spine.type.enrichment.EnrichmentType;
 
 import static com.google.common.truth.Truth.assertThat;
 

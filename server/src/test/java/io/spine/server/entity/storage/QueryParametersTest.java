@@ -37,13 +37,13 @@ import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
@@ -214,7 +214,7 @@ class QueryParametersTest {
     @DisplayName("create parameters with active lifecycle flags")
     void createActiveParams() {
         RecordStorage storage = mock(RecordStorage.class);
-        Map<String, EntityColumn> columns = newHashMap();
+        Map<String, EntityColumn> columns = new HashMap<>();
 
         String archivedStoredName = "archived-stored";
         EntityColumn archivedColumn = mockColumn(archived, archivedStoredName);

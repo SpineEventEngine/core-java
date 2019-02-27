@@ -83,6 +83,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,6 @@ import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
@@ -1097,7 +1097,7 @@ class StandTest extends TenantAwareTest {
 
     private void doCheckReadingProjectsById(int numberOfProjects) {
         // Define the types and values used as a test data.
-        Map<ProjectId, Project> sampleProjects = newHashMap();
+        Map<ProjectId, Project> sampleProjects = new HashMap<>();
         TypeUrl projectType = TypeUrl.of(Project.class);
         fillSampleProjects(sampleProjects, numberOfProjects);
 

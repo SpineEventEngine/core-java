@@ -23,12 +23,11 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.enrich.Enricher;
+import io.spine.server.enrich.EventEnrichmentFn;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -54,21 +53,23 @@ final class SystemEnricher {
         checkNotNull(commandRepository);
         Enricher enricher = Enricher
                 .newBuilder()
-                .add(CommandId.class, Command.class, commandLookup(commandRepository))
+                .add(CommandScheduled.class, commandLookup(commandRepository))
                 .build();
         return enricher;
     }
 
-    private static BiFunction<CommandId, EventContext, Command>
+    private static EventEnrichmentFn<CommandScheduled, CommandEnrichment>
     commandLookup(CommandLifecycleRepository repository) {
-        return (commandId, context) -> findCommand(repository, commandId);
+        return (commandScheduled, context) -> findCommand(repository, commandScheduled.getId());
     }
 
-    private static Command findCommand(CommandLifecycleRepository repository, CommandId id) {
+    private static CommandEnrichment findCommand(CommandLifecycleRepository repository, CommandId id) {
         Optional<CommandLifecycleAggregate> commandLifecycle = repository.find(id);
         Command command = commandLifecycle.map(Aggregate::state)
                                           .map(CommandLifecycle::getCommand)
                                           .orElse(Command.getDefaultInstance());
-        return command;
+        return CommandEnrichmentVBuilder.newBuilder()
+                                        .setCommand(command)
+                                        .build();
     }
 }

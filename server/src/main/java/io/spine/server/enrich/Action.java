@@ -20,7 +20,6 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.EnrichableMessageContext;
 import io.spine.core.Enrichment;
@@ -29,35 +28,66 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
  * Performs enrichment operation for an enrichable message.
  */
 final class Action {
 
+    /** The enricher for which this action works. */
+    private final Enricher parent;
+
     /** The message to be enriched. */
     private final Message message;
+
+    /** The class of the source message. */
+    private final Class<? extends Message> sourceClass;
 
     /** The context of the enrichable message. */
     private final EnrichableMessageContext context;
 
     /** Active functions applicable to the enrichable message. */
-    private final ImmutableList<MessageEnrichment> functions;
+    private final Set<EnrichmentFn> functions = new HashSet<>();
 
     /** The builder of the container of produced enrichments. */
     private final Container.Builder container = Container.newBuilder();
 
     Action(Enricher parent, Message message, EnrichableMessageContext context) {
+        this.parent = parent;
         this.message = message;
+        this.sourceClass = message.getClass();
         this.context = context;
-        Class<? extends Message> sourceClass = message.getClass();
-        this.functions = parent.schema()
-                               .get(sourceClass)
-                               .stream()
-                               .map(MessageEnrichment.class::cast)
-                               .collect(toImmutableList());
+        collectFunctions();
+    }
+
+    private void collectFunctions() {
+        collectForClass(sourceClass);
+        collectForInterfacesOf(sourceClass);
+    }
+
+    private void collectForClass(Class<? extends Message> cls) {
+        EnrichmentFn<?, ?, ?> fn = parent.functions()
+                                         .get(cls);
+        if (fn != null) {
+            functions.add(fn);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void collectForInterfacesOf(Class<? extends Message> cls) {
+        Class<?>[] interfaces = cls.getInterfaces();
+        Arrays.stream(interfaces)
+              .filter(Message.class::isAssignableFrom)
+              .map(i -> (Class<? extends Message>) i)
+              .forEach(i -> {
+                  collectForClass(i);
+                  collectForInterfacesOf(i);
+              });
     }
 
     /**
@@ -75,9 +105,9 @@ final class Action {
      * messages into the {@link #container}.
      */
     private void createEnrichments() {
-        for (MessageEnrichment function : functions) {
+        for (EnrichmentFn function : functions) {
             @SuppressWarnings("unchecked") // OK since we cast to most common interface.
-            Message enrichment = function.apply(message, context);
+            Message enrichment = (Message) function.apply(message, context);
             checkResult(enrichment, function);
             put(enrichment);
         }
@@ -93,10 +123,10 @@ final class Action {
         container.putItems(typeName, AnyPacker.pack(enrichment));
     }
 
-    private void checkResult(@Nullable Message enriched, MessageEnrichment function) {
+    private void checkResult(@Nullable Message enrichment, EnrichmentFn function) {
         checkNotNull(
-            enriched,
-            "MessageEnrichment `%s` produced `null` for the source message `%s`.",
+            enrichment,
+            "EnrichmentFn `%s` produced `null` for the source message `%s`.",
             function, message
         );
     }

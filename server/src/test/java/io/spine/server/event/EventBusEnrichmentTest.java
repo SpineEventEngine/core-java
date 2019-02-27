@@ -20,20 +20,12 @@
 
 package io.spine.server.event;
 
-import com.google.common.truth.MapSubject;
-import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;
-import io.spine.server.type.EventEnvelope;
-import io.spine.test.event.EnrichmentByContextFields;
-import io.spine.test.event.EnrichmentForSeveralEvents;
-import io.spine.test.event.ProjectCreatedSeparateEnrichment;
-import io.spine.test.event.ProjectId;
-import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,39 +55,6 @@ class EventBusEnrichmentTest {
     @AfterEach
     void closeBoundedContext() throws Exception {
         bc.close();
-    }
-
-    @Test
-    @DisplayName("for event that can be enriched")
-    void forEnrichable() {
-        EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
-        Enricher enricher = Enricher
-                .newBuilder()
-                // This enrichment function turns on enrichments that map `ProjectId` to `String`.
-                // See `proto/spine/test/event/events.proto` for the declaration of `ProtoCreated`
-                // event and its enrichments.
-                .add(ProjectId.class, String.class,
-                     (id, context) -> String.valueOf(id.getId()))
-                .build();
-
-        setUp(enricher);
-        RememberingSubscriber subscriber = new RememberingSubscriber();
-        eventBus.register(subscriber);
-
-        eventBus.post(event.outerObject());
-
-        MapSubject assertMap =
-                assertThat(subscriber.getEventContext()
-                                     .getEnrichment()
-                                     .getContainer()
-                                     .getItemsMap());
-        assertMap.containsKey(ofType(EnrichmentByContextFields.class));
-        assertMap.containsKey(ofType(EnrichmentForSeveralEvents.class));
-        assertMap.containsKey(ofType(ProjectCreatedSeparateEnrichment.class));
-    }
-
-    private static String ofType(Class<? extends Message> enrichmentClass) {
-        return TypeName.of(enrichmentClass).value();
     }
 
     @Test

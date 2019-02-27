@@ -20,62 +20,18 @@
 
 package io.spine.server.enrich;
 
-import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-import io.spine.core.EventContext;
-import io.spine.core.UserId;
-import io.spine.server.event.given.EnricherBuilderTestEnv.Enrichment;
-import io.spine.test.event.ProjectId;
-import io.spine.testing.Tests;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.BiFunction;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @DisplayName("Enricher Builder should")
 class EnricherBuilderTest {
-
-    private EnricherBuilder builder;
-    private BiFunction<Timestamp, EventContext, StringValue> function;
-    private FieldEnrichment<Timestamp, ?, StringValue> fieldEnrichment;
-
-    @BeforeEach
-    void setUp() {
-        this.builder = Enricher.newBuilder();
-        this.function = new BiFunction<Timestamp, EventContext, StringValue>() {
-            @Override
-            public @Nullable StringValue apply(@Nullable Timestamp input, EventContext context) {
-                if (input == null) {
-                    return null;
-                }
-                String rawTimestamp = Timestamps.toString(input);
-                return StringValue.of(rawTimestamp);
-            }
-        };
-        this.fieldEnrichment = FieldEnrichment.of(Timestamp.class, StringValue.class, function);
-    }
 
     @Nested
     @DisplayName("build Enricher")
     class BuildEnricher {
-
-        @Test
-        @DisplayName("if all functions have been registered")
-        void forAllFunctionsRegistered() {
-            Enricher enricher = Enrichment.newEnricher();
-
-            assertNotNull(enricher);
-        }
 
         @Test
         @DisplayName("if no functions have been registered")
@@ -84,88 +40,5 @@ class EnricherBuilderTest {
                                         .build();
             assertNotNull(enricher);
         }
-
-        @Test
-        @DisplayName("if only some of expected functions have been registered")
-        void forSomeFunctionsRegistered() {
-            builder.add(ProjectId.class, UserId.class,
-                        new Enrichment.GetProjectOwnerId())
-                   .add(ProjectId.class, String.class,
-                        new Enrichment.GetProjectName());
-            Enricher enricher = builder.build();
-            assertNotNull(enricher);
-        }
-    }
-
-    @Test
-    @DisplayName("add field enrichment")
-    void addFieldEnrichment() {
-        builder.add(Timestamp.class, StringValue.class, function);
-
-        assertTrue(builder.functions()
-                          .contains(fieldEnrichment));
-    }
-
-    @Test
-    @DisplayName("remove enrichment function")
-    void removeEnrichmentFunction() {
-        builder.add(Timestamp.class, StringValue.class, function);
-
-        builder.remove(fieldEnrichment);
-
-        assertTrue(builder.functions()
-                          .isEmpty());
-    }
-
-    @Nested
-    @DisplayName("not accept")
-    class NotAccept {
-
-        @Test
-        @DisplayName("null source class")
-        void nullSourceClass() {
-            assertThrows(NullPointerException.class,
-                         () -> builder.add(Tests.nullRef(),
-                                           StringValue.class,
-                                           function));
-        }
-
-        @Test
-        @DisplayName("null target class")
-        void nullTargetClass() {
-            assertThrows(NullPointerException.class,
-                         () -> builder.add(Timestamp.class,
-                                           Tests.nullRef(),
-                                           function));
-        }
-
-        @Test
-        @DisplayName("null function")
-        void nullFunction() {
-            assertThrows(NullPointerException.class,
-                         () -> builder.add(Timestamp.class,
-                                           StringValue.class,
-                                           Tests.nullRef()));
-        }
-
-        @Test
-        @DisplayName("duplicate field enrichment function")
-        void duplicates() {
-            builder.add(Timestamp.class, StringValue.class, function);
-            assertThrows(IllegalArgumentException.class,
-                         () -> builder.add(Timestamp.class, StringValue.class, function));
-        }
-    }
-
-    @Test
-    @DisplayName("assure that function performs same transition")
-    void assureSameTransition() {
-        assertTrue(SameTransition.asFor(fieldEnrichment).test(fieldEnrichment));
-    }
-
-    @Test
-    @DisplayName("return false if input to SameTransition predicate is null")
-    void assureNotSameForNull() {
-        assertFalse(SameTransition.asFor(fieldEnrichment).test(null));
     }
 }
