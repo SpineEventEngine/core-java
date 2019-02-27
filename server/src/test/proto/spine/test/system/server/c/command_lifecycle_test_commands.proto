@@ -32,7 +32,6 @@ option java_multiple_files = true;
 import "spine/test/system/server/command_lifecycle_test.proto";
 
 message EstablishCompany {
-    option (rejections) = "CompanyNameAlreadyTaken";
 
     CompanyId id = 1;
 
@@ -45,7 +44,6 @@ message StartCompanyEstablishing {
 }
 
 message ProposeCompanyName {
-    option (rejections) = "CompanyNameAlreadyTaken";
 
     CompanyId id = 1;
 
@@ -53,7 +51,6 @@ message ProposeCompanyName {
 }
 
 message FinalizeCompanyName {
-    option (rejections) = "CompanyNameAlreadyTaken";
 
     CompanyId id = 1;
 }
