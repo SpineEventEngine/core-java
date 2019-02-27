@@ -30,13 +30,11 @@ import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Utility class for working with {@code long} values in {@link ValueMismatch}es.
- *
- * @author Alexander Yevsyukov
  */
 public final class LongMismatch {
 
+    /** Prevent instantiation of this utility class. */
     private LongMismatch() {
-        // Prevent instantiation.
     }
 
     /**

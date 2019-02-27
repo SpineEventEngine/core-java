@@ -21,10 +21,10 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.transport.PublisherHub;
+import io.spine.server.type.MessageEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <E> the type of envelopes which are handled by the local bus, which is being adapted
  * @param <D> the type of dispatchers suitable for the local bus, which is being adapted
- * @author Alex Tymchenko
  */
 abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
                           D extends MessageDispatcher<?, E, ?>> {
@@ -83,7 +82,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
 
     /**
      * Tells whether a message of a given message class is eligible for processing with this
-     * bus adapter
+     * bus adapter.
      *
      * @param messageClass a {@code Class} of message
      * @return {@code true} if this bus adapter is able to accept messages of this type,

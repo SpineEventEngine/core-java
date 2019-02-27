@@ -26,12 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
@@ -46,6 +41,11 @@ import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.test.shared.AnyProcess;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
@@ -129,7 +129,7 @@ class ProcessManagerTest {
     private final TestEventFactory eventFactory =
             TestEventFactory.newInstance(Identifier.pack(TestProcessManager.ID), getClass());
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
+            new TestActorRequestFactory(getClass());
 
     private BoundedContext context;
     private TestProcessManager processManager;
@@ -141,7 +141,7 @@ class ProcessManagerTest {
                 .newBuilder()
                 .setMultitenant(true)
                 .build();
-        StorageFactory storageFactory = context.getStorageFactory();
+        StorageFactory storageFactory = context.storageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
         EventBus eventBus = EventBus.newBuilder()
@@ -171,7 +171,7 @@ class ProcessManagerTest {
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
         List<Event> result = dispatch(processManager, EventEnvelope.of(event));
-        Any pmState = processManager.getState()
+        Any pmState = processManager.state()
                                     .getAny();
         Any expected = pack(eventMessage);
         assertEquals(expected, pmState);
@@ -183,7 +183,7 @@ class ProcessManagerTest {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
         List<Event> events = dispatch(processManager, envelope);
-        assertEquals(pack(commandMsg), processManager.getState()
+        assertEquals(pack(commandMsg), processManager.state()
                                                      .getAny());
         return events;
     }
@@ -250,18 +250,18 @@ class ProcessManagerTest {
         }
 
         private void checkIncrementsOnCommand(CommandMessage commandMessage) {
-            assertEquals(VERSION, processManager.getVersion()
+            assertEquals(VERSION, processManager.version()
                                                 .getNumber());
             testDispatchCommand(commandMessage);
-            assertEquals(VERSION + 1, processManager.getVersion()
+            assertEquals(VERSION + 1, processManager.version()
                                                     .getNumber());
         }
 
         private void checkIncrementsOnEvent(EventMessage eventMessage) {
-            assertEquals(VERSION, processManager.getVersion()
+            assertEquals(VERSION, processManager.version()
                                                 .getNumber());
             testDispatchEvent(eventMessage);
-            assertEquals(VERSION + 1, processManager.getVersion()
+            assertEquals(VERSION + 1, processManager.version()
                                                     .getNumber());
         }
     }
@@ -287,7 +287,7 @@ class ProcessManagerTest {
         void rejectionMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
             dispatch(processManager, rejection.getEvent());
-            assertReceived(rejection.getOuterObject()
+            assertReceived(rejection.outerObject()
                                     .getMessage());
         }
 
@@ -301,7 +301,7 @@ class ProcessManagerTest {
         }
 
         private void assertReceived(Any expected) {
-            assertEquals(expected, processManager.getState()
+            assertEquals(expected, processManager.state()
                                                  .getAny());
         }
     }

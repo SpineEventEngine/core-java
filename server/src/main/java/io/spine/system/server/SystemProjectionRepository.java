@@ -22,17 +22,15 @@ package io.spine.system.server;
 
 import com.google.protobuf.Message;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * A repository for projections in a system bounded context.
  *
  * <p>Unlike an arbitrary {@link ProjectionRepository}, a {@code SystemProjectionRepository}
  * dispatches the events directly to the target projections.
- *
- * @author Dmytro Dashenkov
  */
 public class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends ProjectionRepository<I, P, S> {
@@ -40,9 +38,10 @@ public class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S exte
     /**
      * {@inheritDoc}
      *
-     * @implNote
-     * A {@code SystemProjectionRepository} dispatches the given event directly to its targets,
-     * whereas a domain repository would send a command to the system context.
+     * <p>Dispatches the event directly.
+     *
+     * @implNote A {@code SystemProjectionRepository} dispatches the given event directly to
+     *         its targets, whereas a domain repository would send a command to the system context.
      */
     @Override
     protected void dispatchTo(I id, Event event) {

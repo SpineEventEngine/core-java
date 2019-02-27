@@ -107,10 +107,11 @@ class CommandServiceTest {
     @Test
     @DisplayName("never retrieve removed bounded contexts from builder")
     void notRetrieveRemovedBc() {
-        CommandService.Builder builder = CommandService.newBuilder()
-                                                       .add(projectsContext)
-                                                       .add(customersContext)
-                                                       .remove(projectsContext);
+        CommandService.Builder builder = CommandService
+                .newBuilder()
+                .add(projectsContext)
+                .add(customersContext)
+                .remove(projectsContext);
 
         // Create BoundedContext map.
         CommandService service = builder.build();
@@ -135,7 +136,7 @@ class CommandServiceTest {
     @DisplayName("return error status if command is unsupported")
     @MuteLogging
     void returnCommandUnsupportedError() {
-        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
 
         Command unsupportedCmd = factory.createCommand(CmdServDontHandle.getDefaultInstance());
 

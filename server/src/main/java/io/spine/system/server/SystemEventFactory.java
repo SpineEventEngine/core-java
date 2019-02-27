@@ -36,8 +36,6 @@ import static io.spine.system.server.SystemCommandFactory.requestFactory;
 
 /**
  * Creates events that will be imported into system aggregates.
- *
- * @author Alexander Yevsyukov
  */
 final class SystemEventFactory extends EventFactory {
 

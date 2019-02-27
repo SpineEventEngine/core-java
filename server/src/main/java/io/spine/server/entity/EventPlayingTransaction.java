@@ -23,10 +23,10 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventDispatch;
 import io.spine.server.model.Nothing;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -64,7 +64,7 @@ class EventPlayingTransaction<I,
     public void play(EventEnvelope event) {
         VersionIncrement increment = createVersionIncrement(event);
         Phase<I, Nothing> phase = new EventDispatchingPhase<>(
-                new EventDispatch<>(this::dispatch, getEntity(), event),
+                new EventDispatch<>(this::dispatch, entity(), event),
                 increment
         );
         propagate(phase);

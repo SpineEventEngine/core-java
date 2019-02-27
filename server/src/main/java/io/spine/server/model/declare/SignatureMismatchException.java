@@ -25,7 +25,7 @@ import io.spine.server.model.HandlerMethod;
 
 /**
  * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
- * its {@link HandlerMethod#getRawMethod() wrapped method} does not match
+ * its {@link HandlerMethod#rawMethod() wrapped method} does not match
  * {@linkplain MethodSignature method signature}, set for the handler.
  *
  * @author Alex Tymchenko

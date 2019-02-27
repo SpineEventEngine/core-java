@@ -25,12 +25,12 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Errors;
 import io.spine.base.EventMessage;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.CommandErrored;
 import io.spine.system.server.CommandRejected;
 import io.spine.system.server.SystemWriteSide;
@@ -99,7 +99,7 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private CaughtError handleNewRuntimeError(CommandEnvelope cmd, RuntimeException exception) {
-        String commandTypeName = cmd.getMessage()
+        String commandTypeName = cmd.message()
                                     .getClass()
                                     .getName();
         String commandId = cmd.idAsString();
@@ -125,7 +125,7 @@ public final class CommandErrorHandler implements Logging {
     public void handle(CommandEnvelope cmd, RuntimeException exception, Consumer<Event> consumer) {
         CaughtError error = handle(cmd, exception);
         error.asRejection()
-             .map(RejectionEnvelope::getOuterObject)
+             .map(RejectionEnvelope::outerObject)
              .ifPresent(consumer);
         error.rethrowOnce();
     }
@@ -147,7 +147,7 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private void markErrored(CommandEnvelope command, Error error) {
-        CommandId commandId = command.getId();
+        CommandId commandId = command.id();
         CommandErrored systemEvent = CommandErrored
                 .newBuilder()
                 .setId(commandId)
@@ -157,12 +157,12 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private void markRejected(CommandEnvelope command, RejectionEnvelope rejection) {
-        CommandId commandId = command.getId();
+        CommandId commandId = command.id();
 
         CommandRejected systemEvent = CommandRejected
                 .newBuilder()
                 .setId(commandId)
-                .setRejectionEvent(rejection.getOuterObject())
+                .setRejectionEvent(rejection.outerObject())
                 .build();
         postSystem(systemEvent);
     }

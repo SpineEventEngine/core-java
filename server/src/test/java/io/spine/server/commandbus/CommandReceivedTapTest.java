@@ -22,8 +22,8 @@ package io.spine.server.commandbus;
 
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.CommandReceived;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.WriteSideFunction;
@@ -37,13 +37,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("CommandReceivedTap should")
 class CommandReceivedTapTest {
 
@@ -98,7 +94,7 @@ class CommandReceivedTapTest {
 
         CommandReceived systemEvent = (CommandReceived) writeSide.lastSeenEvent()
                                                                  .message();
-        assertEquals(envelope.getId(), systemEvent.getId());
+        assertEquals(envelope.id(), systemEvent.getId());
     }
 
     private static TenantId tenantId() {
@@ -112,8 +108,8 @@ class CommandReceivedTapTest {
     private static Command command(CommandMessage message, @Nullable TenantId tenantId) {
         TestActorRequestFactory requestFactory =
                 tenantId == null
-                ? newInstance(CommandReceivedTapTest.class)
-                : newInstance(CommandReceivedTapTest.class, tenantId);
+                ? new TestActorRequestFactory(CommandReceivedTapTest.class)
+                : new TestActorRequestFactory(CommandReceivedTapTest.class, tenantId);
         Command command = requestFactory.createCommand(message);
         return command;
     }

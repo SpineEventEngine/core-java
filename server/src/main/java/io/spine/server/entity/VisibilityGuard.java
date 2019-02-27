@@ -67,8 +67,8 @@ public final class VisibilityGuard {
      */
     public void register(Repository<?, ?> repository) {
         checkNotNull(repository);
-        EntityClass<?> entityClass = repository.entityClass();
-        Class<? extends Message> stateClass = entityClass.getStateClass();
+        EntityClass<?> entityClass = repository.entityModelClass();
+        Class<? extends Message> stateClass = entityClass.stateClass();
         checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
@@ -132,7 +132,7 @@ public final class VisibilityGuard {
         // Get type names for entities of the filtered repositories.
         Set<TypeName> entityTypes =
                 repos.stream()
-                     .map(input -> input.repository.getEntityStateType()
+                     .map(input -> input.repository.entityStateType()
                                                    .toTypeName())
                      .collect(toImmutableSet());
         return entityTypes;
@@ -159,8 +159,8 @@ public final class VisibilityGuard {
         private RepositoryAccess(Repository repository) {
             this.repository = repository;
             @SuppressWarnings("unchecked") // Safe as it's bounded by Repository class definition.
-            Class<? extends Message> stateClass = repository.entityClass()
-                                                            .getStateClass();
+            Class<? extends Message> stateClass = repository.entityModelClass()
+                                                            .stateClass();
             this.visibility = EntityOptions.getVisibility(stateClass);
         }
 

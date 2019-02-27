@@ -20,10 +20,10 @@
 
 package io.spine.server.event;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
 import io.spine.server.integration.ExternalDispatcherFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 
@@ -38,26 +38,26 @@ public interface EventDispatcher<I>
     /**
      * Obtains classes of domestic events processed by this dispatcher.
      */
-    default Set<EventClass> getEventClasses() {
-        return getMessageClasses();
+    default Set<EventClass> eventClasses() {
+        return messageClasses();
     }
 
     /**
      * Obtains classes of external events processed by this dispatcher.
      */
-    Set<EventClass> getExternalEventClasses();
+    Set<EventClass> externalEventClasses();
 
     /**
      * Verifies if this instance dispatches at least one domestic event.
      */
     default boolean dispatchesEvents() {
-        return !getEventClasses().isEmpty();
+        return !eventClasses().isEmpty();
     }
 
     /**
      * Verifies if this instance dispatches at least one external event.
      */
     default boolean dispatchesExternalEvents() {
-        return !getExternalEventClasses().isEmpty();
+        return !externalEventClasses().isEmpty();
     }
 }

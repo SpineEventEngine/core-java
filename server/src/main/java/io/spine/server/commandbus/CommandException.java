@@ -26,9 +26,9 @@ import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.code.java.ClassName;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.MessageRejection;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 
 import java.util.Map;
@@ -84,7 +84,7 @@ public abstract class CommandException extends RuntimeException implements Messa
                                        Command command,
                                        CommandValidationError errorCode) {
         Message commandMessage = CommandEnvelope.of(command)
-                                                .getMessage();
+                                                .message();
 
         String commandType = commandMessage.getDescriptorForType()
                                            .getFullName();
@@ -124,10 +124,10 @@ public abstract class CommandException extends RuntimeException implements Messa
      */
     protected static String messageFormat(String format, Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        Class<? extends Message> commandClass = envelope.getMessageClass()
+        Class<? extends Message> commandClass = envelope.messageClass()
                                                         .value();
         ClassName commandClassName = ClassName.of(commandClass);
-        TypeName typeName = envelope.getTypeName();
+        TypeName typeName = envelope.messageTypeName();
         String result = format(format, commandClassName, typeName);
         return result;
     }

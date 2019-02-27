@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;

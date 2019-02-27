@@ -102,7 +102,7 @@ class EntityBuilderTest {
                 .build();
 
         assertEquals(TestEntity.class, entity.getClass());
-        assertEquals(id, entity.getId());
+        assertEquals(id, entity.id());
     }
 
     @Test
@@ -111,8 +111,8 @@ class EntityBuilderTest {
         Entity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
-        assertEquals(0L, entity.getId());
-        assertEquals(StringValue.of(""), entity.getState());
+        assertEquals(0L, entity.id());
+        assertEquals(StringValue.of(""), entity.state());
         assertEquals(0, entity.getVersion().getNumber());
     }
 
@@ -152,6 +152,6 @@ class EntityBuilderTest {
                 .withState(user)
                 .build();
 
-        assertEquals(user, aggregate.getState());
+        assertEquals(user, aggregate.state());
     }
 }

@@ -22,13 +22,13 @@ package io.spine.server.model;
 
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.given.method.OneParamMethod;
 import io.spine.server.model.given.method.OneParamSignature;
 import io.spine.server.model.given.method.OneParamSpec;
 import io.spine.server.model.given.method.StubHandler;
 import io.spine.server.model.given.method.TwoParamMethod;
 import io.spine.server.model.given.method.TwoParamSpec;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.model.ModProjectCreated;
 import io.spine.test.model.ModProjectStarted;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +80,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("return method")
     void returnMethod() {
-        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getRawMethod());
+        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.rawMethod());
     }
 
     @Nested
@@ -103,7 +103,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
-        assertEquals(ModProjectStarted.class, getFirstParamType(oneParamMethod.getRawMethod()));
+        assertEquals(ModProjectStarted.class, getFirstParamType(oneParamMethod.rawMethod()));
     }
 
     @Nested

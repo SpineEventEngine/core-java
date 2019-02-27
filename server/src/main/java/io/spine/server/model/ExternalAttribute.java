@@ -34,7 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @see Subscribe#external()
  * @see React#external()
- * @author Alex Tymchenko
  */
 @Immutable
 @Internal

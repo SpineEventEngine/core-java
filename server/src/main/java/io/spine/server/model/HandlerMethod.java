@@ -22,7 +22,7 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.PostConstruct;
@@ -70,19 +70,19 @@ public interface HandlerMethod<T,
     /**
      * Obtains the set of method attributes configured for this method.
      */
-    Set<MethodAttribute<?>> getAttributes();
+    Set<MethodAttribute<?>> attributes();
 
     /**
      * Obtains the handling method.
      */
-    Method getRawMethod();
+    Method rawMethod();
 
     /**
      * Retrieves the message classes produced by this handler method.
      *
      * @see MethodResult#toMessages(Object).
      */
-    Set<P> getProducedMessages();
+    Set<P> producedMessages();
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.
@@ -100,7 +100,7 @@ public interface HandlerMethod<T,
      * Tells if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.
      */
     default boolean isExternal() {
-        return getAttributes().contains(ExternalAttribute.EXTERNAL);
+        return attributes().contains(ExternalAttribute.EXTERNAL);
     }
 
     /**

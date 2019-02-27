@@ -35,9 +35,6 @@ import java.util.function.Supplier;
 
 /**
  * Stores information of message handling classes.
- *
- * @author Alexander Yevsyukov
- * @author Dmitry Ganzha
  */
 @Internal
 public class Model {

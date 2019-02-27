@@ -35,10 +35,10 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.event.enrich.Enricher;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.transport.TransportFactory;
@@ -209,14 +209,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
             if (visibility == Visibility.VISIBILITY_UNKNOWN) {
                 continue;
             }
-            result.addAll(boundedContext.getEntityStateTypes(visibility));
+            result.addAll(boundedContext.entityStateTypes(visibility));
         }
         return result.build();
     }
 
     @VisibleForTesting
     EventBus getEventBus() {
-        return boundedContext.getEventBus();
+        return boundedContext.eventBus();
     }
 
     /**
@@ -567,8 +567,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     protected EmittedEvents emittedEvents() {
         MemoizingObserver<Event> queryObserver = memoizingObserver();
-        boundedContext.getEventBus()
-                      .getEventStore()
+        boundedContext.eventBus()
+                      .eventStore()
                       .read(allEventsQuery(), queryObserver);
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         List<Event> responses = queryObserver.responses()
@@ -603,7 +603,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     public <I, S extends Message, P extends ProcessManager<I, S, ?>>
     PmSubject<S, P> assertThat(Class<? extends P> pmClass, I id) {
-        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).getStateClass();
+        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).stateClass();
         Repository repo = repositoryOf(stateClass);
         @SuppressWarnings("unchecked")
         ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;

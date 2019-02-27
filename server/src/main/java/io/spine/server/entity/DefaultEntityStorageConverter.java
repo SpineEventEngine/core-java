@@ -66,7 +66,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
-        builder.setVersion(entity.getVersion())
+        builder.setVersion(entity.version())
                .setLifecycleFlags(entity.getLifecycleFlags());
     }
 

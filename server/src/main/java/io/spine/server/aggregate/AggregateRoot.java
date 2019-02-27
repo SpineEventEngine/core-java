@@ -85,7 +85,7 @@ public class AggregateRoot<I> {
     S getPartState(Class<S> partStateClass) {
         AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
         AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
-        S partState = aggregatePart.getState();
+        S partState = aggregatePart.state();
         return partState;
     }
 

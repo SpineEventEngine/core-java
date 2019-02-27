@@ -65,7 +65,7 @@ final class InMemoryTypeRegistry implements TypeRegistry {
     @SuppressWarnings("ChainOfInstanceofChecks")
     @Override
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
-        TypeUrl entityType = repository.getEntityStateType();
+        TypeUrl entityType = repository.entityStateType();
 
         if (repository instanceof RecordBasedRepository) {
             typeToRepositoryMap.put(entityType,

@@ -68,7 +68,7 @@ public class TestProcessManager
 
     /** Updates the state with putting incoming message.*/
     private void remember(Message incoming) {
-        getBuilder().setAny(pack(incoming));
+        builder().setAny(pack(incoming));
     }
 
     /*

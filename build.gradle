@@ -36,6 +36,12 @@ buildscript { final scriptHandler ->
     }
 
     forceConfiguration(scriptHandler)
+    configurations.all {
+        resolutionStrategy {
+            //noinspection GroovyAssignabilityCheck
+            force "io.spine:spine-base:$spineBaseVersion"
+        }
+    }
 }
 
 apply from: 'version.gradle'

@@ -23,7 +23,7 @@ package io.spine.testing.server.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
+import io.spine.server.type.CommandClass;
 
 import java.util.List;
 

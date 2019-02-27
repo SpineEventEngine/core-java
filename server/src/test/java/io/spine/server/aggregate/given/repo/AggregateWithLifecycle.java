@@ -65,6 +65,6 @@ public class AggregateWithLifecycle
                    .equalsIgnoreCase(msg)) {
             setDeleted(true);
         }
-        getBuilder().setValue(msg);
+        builder().setValue(msg);
     }
 }

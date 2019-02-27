@@ -26,9 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -42,11 +40,14 @@ import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.EventsResult;
 import io.spine.server.model.ReactorMethodResult;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -100,7 +101,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * event message it handles and returns {@code void}.
  *
  * <p>The modification of the state is done via a builder instance obtained
- * from {@link #getBuilder()}.
+ * from {@link #builder()}.
  *
  * <p>An {@code Aggregate} class must have applier methods for
  * <em>all</em> types of the events that it produces.
@@ -181,8 +182,22 @@ public abstract class Aggregate<I,
 
     @Internal
     @Override
-    protected AggregateClass<?> getModelClass() {
+    protected AggregateClass<?> modelClass() {
         return asAggregateClass(getClass());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>In {@code Aggregate}, this method must be called only from within an event applier.
+     *
+     * @throws IllegalStateException if the method is called from outside an event applier
+     * @deprecated use {@link #builder()}
+     */
+    @Deprecated
+    @Override
+    protected B getBuilder() {
+        return builder();
     }
 
     /**
@@ -193,8 +208,8 @@ public abstract class Aggregate<I,
      * @throws IllegalStateException if the method is called from outside an event applier
      */
     @Override
-    protected B getBuilder() {
-        return super.getBuilder();
+    protected final B builder() {
+        return super.builder();
     }
 
     /**
@@ -209,7 +224,7 @@ public abstract class Aggregate<I,
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
-        CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
+        CommandHandlerMethod method = thisClass().getHandler(command.messageClass());
         EventsResult result = method.invoke(this, command);
         return result.produceEvents(command);
     }
@@ -227,7 +242,7 @@ public abstract class Aggregate<I,
     List<Event> reactOn(EventEnvelope event) {
         idempotencyGuard.check(event);
         EventReactorMethod method =
-                thisClass().getReactor(event.getMessageClass(), event.getOriginClass());
+                thisClass().getReactor(event.messageClass(), event.originClass());
         ReactorMethodResult result =
                 method.invoke(this, event);
         return result.produceEvents(event);
@@ -239,7 +254,7 @@ public abstract class Aggregate<I,
      * @param event the event to apply
      */
     void invokeApplier(EventEnvelope event) {
-        EventApplier method = thisClass().getApplier(event.getMessageClass());
+        EventApplier method = thisClass().getApplier(event.messageClass());
         method.invoke(this, event);
     }
 
@@ -305,7 +320,7 @@ public abstract class Aggregate<I,
      * @see #apply(List)
      */
     private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents) {
-        Version currentVersion = getVersion();
+        Version currentVersion = version();
 
         Stream<Version> versions = Stream.iterate(currentVersion, Versions::increment)
                                          .skip(1) // Skip current version
@@ -322,7 +337,7 @@ public abstract class Aggregate<I,
      *
      * <p>If this method is called during a {@linkplain #play(AggregateHistory) replay}
      * (because the snapshot was encountered) the method uses the state
-     * {@linkplain #getBuilder() builder}, which is used during the replay.
+     * {@linkplain #builder() builder}, which is used during the replay.
      *
      * <p>If not in replay, the method sets the state and version directly to the aggregate.
      *
@@ -359,7 +374,7 @@ public abstract class Aggregate<I,
      * Instructs to modify the state of an aggregate only within an event applier method.
      */
     @Override
-    protected String getMissingTxMessage() {
+    protected String missingTxMessage() {
         return "Modification of aggregate state or its lifecycle flags is not available this way." +
                 " Make sure to modify those only from an event applier method.";
     }
@@ -370,11 +385,11 @@ public abstract class Aggregate<I,
      * @return new snapshot
      */
     Snapshot toSnapshot() {
-        Any state = AnyPacker.pack(getState());
+        Any state = AnyPacker.pack(state());
         Snapshot.Builder builder = Snapshot
                 .newBuilder()
                 .setState(state)
-                .setVersion(getVersion())
+                .setVersion(version())
                 .setTimestamp(getCurrentTime());
         return builder.build();
     }
@@ -403,13 +418,23 @@ public abstract class Aggregate<I,
     }
 
     /**
+     * Verifies if the aggregate history contains an event which satisfies the passed predicate.
+     */
+    protected final boolean historyContains(Predicate<Event> predicate) {
+        Iterator<Event> iterator = historyBackward();
+        boolean found = Streams.stream(iterator)
+                               .anyMatch(predicate);
+        return found;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Overrides to expose the method to the package.
      */
     @Override
     @VisibleForTesting
-    protected int versionNumber() {
+    protected final int versionNumber() {
         return super.versionNumber();
     }
 

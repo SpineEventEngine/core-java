@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.Events;
+import io.spine.server.type.EventClass;
 
 import java.util.Collection;
 import java.util.Map;

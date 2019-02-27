@@ -31,8 +31,8 @@ import io.spine.client.IdFilter;
 import io.spine.client.Subscription;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
-import io.spine.core.EventEnvelope;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
 import java.util.function.Predicate;

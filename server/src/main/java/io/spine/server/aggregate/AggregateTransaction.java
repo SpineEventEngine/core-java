@@ -22,11 +22,11 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.EventPlayingTransaction;
 import io.spine.server.entity.IncrementFromEvent;
 import io.spine.server.entity.VersionIncrement;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 /**

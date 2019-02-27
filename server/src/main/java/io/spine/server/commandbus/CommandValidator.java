@@ -25,11 +25,11 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageInvalid;
 import io.spine.core.TenantId;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.route.DefaultCommandRoute;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
@@ -74,9 +74,9 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     }
 
     private Optional<MessageInvalid> isTenantIdValid(CommandEnvelope envelope) {
-        TenantId tenantId = envelope.getTenantId();
+        TenantId tenantId = envelope.tenantId();
         boolean tenantSpecified = !isDefault(tenantId);
-        Command command = envelope.getCommand();
+        Command command = envelope.command();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
                 MessageInvalid report = missingTenantId(command);
@@ -92,7 +92,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     }
 
     private static Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
-        Command command = envelope.getCommand();
+        Command command = envelope.command();
         List<ConstraintViolation> violations = inspect(envelope);
         InvalidCommandException exception = null;
         if (!violations.isEmpty()) {
@@ -135,14 +135,14 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateId() {
-            String commandId = Identifier.toString(command.getId());
+            String commandId = Identifier.toString(command.id());
             if (commandId.equals(EMPTY_ID)) {
                 addViolation("Command ID cannot be empty or blank.");
             }
         }
 
         private void validateMessage() {
-            CommandMessage message = command.getMessage();
+            CommandMessage message = command.message();
             if (isDefault(message)) {
                 addViolation("Non-default command message must be set.");
             }
@@ -152,13 +152,13 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateContext() {
-            if (isDefault(command.getCommandContext())) {
+            if (isDefault(command.context())) {
                 addViolation("Non-default command context must be set.");
             }
         }
 
         private void validateTargetId() {
-            CommandMessage message = command.getMessage();
+            CommandMessage message = command.message();
             Optional<?> targetId = DefaultCommandRoute.asOptional(message);
             if (targetId.isPresent()) {
                 String targetIdString = Identifier.toString(targetId.get());

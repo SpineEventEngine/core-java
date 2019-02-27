@@ -25,9 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
@@ -36,6 +34,8 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdStartProject;
@@ -50,11 +50,6 @@ import io.spine.test.command.event.CmdTaskAdded;
 import java.util.Collections;
 import java.util.Set;
 
-// Test data imports
-
-/**
- * @author Alexander Yevsyukov
- */
 public class CommandDispatcherRegistryTestEnv {
 
     private CommandDispatcherRegistryTestEnv() {
@@ -76,7 +71,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         private void keep(Message commandOrEventMsg) {
-            messagesDelivered.put(getState().getId(), commandOrEventMsg);
+            messagesDelivered.put(state().getId(), commandOrEventMsg);
         }
 
         @Subscribe
@@ -88,11 +83,11 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         private void handleProjectCreated(ProjectId projectId) {
-            Project newState = getState().toBuilder()
-                                         .setId(projectId)
-                                         .setStatus(Project.Status.CREATED)
-                                         .build();
-            getBuilder().mergeFrom(newState);
+            Project newState = state().toBuilder()
+                                      .setId(projectId)
+                                      .setStatus(Project.Status.CREATED)
+                                      .build();
+            builder().mergeFrom(newState);
         }
 
         @Subscribe
@@ -104,10 +99,10 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         private void handleTaskAdded(Task task) {
-            Project newState = getState().toBuilder()
-                                         .addTask(task)
-                                         .build();
-            getBuilder().mergeFrom(newState);
+            Project newState = state().toBuilder()
+                                      .addTask(task)
+                                      .build();
+            builder().mergeFrom(newState);
         }
 
         @Subscribe
@@ -118,22 +113,22 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         private void handleProjectStarted() {
-            Project newState = getState().toBuilder()
-                                         .setStatus(Project.Status.STARTED)
-                                         .build();
-            getBuilder().mergeFrom(newState);
+            Project newState = state().toBuilder()
+                                      .setStatus(Project.Status.STARTED)
+                                      .build();
+            builder().mergeFrom(newState);
         }
 
         @Override
         public String getIdString() {
-            return getId().toString();
+            return id().toString();
         }
     }
 
     public static class EmptyDispatcher implements CommandDispatcher<Message> {
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return Collections.emptySet();
         }
 
@@ -156,7 +151,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class AllCommandDispatcher implements CommandDispatcher<Message> {
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdCreateProject.class,
                                       CmdStartProject.class,
                                       CmdAddTask.class);
@@ -176,7 +171,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdCreateProject.class);
         }
 
@@ -194,7 +189,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdAddTask.class);
         }
 
@@ -255,7 +250,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return ImmutableSet.of();
         }
     }

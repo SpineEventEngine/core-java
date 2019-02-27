@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.protobuf.Message;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

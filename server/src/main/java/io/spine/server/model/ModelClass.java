@@ -29,7 +29,6 @@ import java.util.function.Supplier;
  * such as classes of messages being handled by the methods exposed by the class.
  *
  * @param <T> the type of objects
- * @author Alexander Yevsyukov
  */
 public abstract class ModelClass<T> extends ClassTypeValue<T> {
 

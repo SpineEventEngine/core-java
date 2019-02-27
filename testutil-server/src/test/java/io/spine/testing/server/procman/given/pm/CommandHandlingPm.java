@@ -70,7 +70,7 @@ public class CommandHandlingPm
 
     @Assign
     TuTaskAssigned handle(TuAssignTask command) {
-        getBuilder().setTimestamp(fromNanos(123456));
+        builder().setTimestamp(fromNanos(123456));
         return TuTaskAssigned.newBuilder()
                              .setId(command.getId())
                              .build();

@@ -57,7 +57,7 @@ public class RepoOfAggregateWithLifecycle
 
     public RepoOfAggregateWithLifecycle() {
         super();
-        getCommandRouting().replaceDefault(parsingRoute);
+        commandRouting().replaceDefault(parsingRoute);
     }
 
     /**

@@ -30,13 +30,11 @@ import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Utility class for working with {@code ValueMismatch}es for {@code Message} values.
- *
- * @author Alexander Yevsyukov
  */
 public final class MessageMismatch {
 
+    /** Prevent instantiation of this utility class. */
     private MessageMismatch() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

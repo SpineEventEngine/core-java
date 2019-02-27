@@ -26,12 +26,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -58,14 +58,14 @@ public class TestEventFactory extends EventFactory {
 
     public static TestEventFactory newInstance(Message producerId, Class<?> testSuiteClass) {
         Any id = toAny(producerId);
-        return newInstance(id, TestActorRequestFactory.newInstance(testSuiteClass));
+        return newInstance(id, new TestActorRequestFactory(testSuiteClass));
     }
 
     public static
     TestEventFactory newInstance(Message producerId, TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
         Any id = toAny(producerId);
-        CommandEnvelope cmd = requestFactory.generateEnvelope();
+        CommandEnvelope cmd = CommandEnvelope.of(requestFactory.generateCommand());
         return new TestEventFactory(cmd, id);
     }
 
@@ -77,7 +77,7 @@ public class TestEventFactory extends EventFactory {
 
     public static TestEventFactory newInstance(Class<?> testSuiteClass) {
         checkNotNull(testSuiteClass);
-        return newInstance(TestActorRequestFactory.newInstance(testSuiteClass));
+        return newInstance(new TestActorRequestFactory(testSuiteClass));
     }
 
     /**

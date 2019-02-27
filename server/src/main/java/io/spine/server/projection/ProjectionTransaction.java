@@ -22,11 +22,11 @@ package io.spine.server.projection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.AutoIncrement;
 import io.spine.server.entity.EventPlayingTransaction;
 import io.spine.server.entity.VersionIncrement;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of projection IDs
  * @param <M> the type of projection state
  * @param <B> the type of a {@code ValidatingBuilder} for the projection state
- * @author Alex Tymchenko
  */
 @Internal
 public class ProjectionTransaction<I,

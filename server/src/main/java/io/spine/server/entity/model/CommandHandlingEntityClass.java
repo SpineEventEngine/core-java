@@ -20,13 +20,13 @@
 
 package io.spine.server.entity.model;
 
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
 
 import java.util.Set;
 

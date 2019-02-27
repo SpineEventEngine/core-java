@@ -21,10 +21,10 @@
 package io.spine.server.event.given.bus;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCreated;
 
 import java.util.Optional;
@@ -41,12 +41,12 @@ public class BareDispatcher implements EventDispatcher<String> {
     private boolean dispatchCalled = false;
 
     @Override
-    public Set<EventClass> getMessageClasses() {
+    public Set<EventClass> messageClasses() {
         return ImmutableSet.of(EventClass.from(ProjectCreated.class));
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

@@ -23,9 +23,9 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
-import io.spine.core.EmptyClass;
 import io.spine.core.EventContext;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,8 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A rudimentary implementation of {@link MessageEnvelope} with the sole purpose
  * of setting {@link io.spine.core.EventContext.Builder#setImportContext(ActorContext)
  * import context} in events created for import into system aggregates.
- *
- * @author Alexander Yevsyukov
  */
 public final class ImportOrigin implements MessageEnvelope<Empty, Empty, Empty> {
 
@@ -60,27 +58,27 @@ public final class ImportOrigin implements MessageEnvelope<Empty, Empty, Empty> 
     }
 
     @Override
-    public Empty getId() {
+    public Empty id() {
         return Empty.getDefaultInstance();
     }
 
     @Override
-    public Empty getOuterObject() {
+    public Empty outerObject() {
         return Empty.getDefaultInstance();
     }
 
     @Override
-    public Message getMessage() {
+    public Message message() {
         return Empty.getDefaultInstance();
     }
 
     @Override
-    public MessageClass getMessageClass() {
+    public MessageClass messageClass() {
         return EmptyClass.instance();
     }
 
     @Override
-    public Empty getMessageContext() {
+    public Empty context() {
         return Empty.getDefaultInstance();
     }
 }

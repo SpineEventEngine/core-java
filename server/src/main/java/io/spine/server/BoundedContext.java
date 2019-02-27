@@ -82,7 +82,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
  *     Martin Fowler on Bounded Contexts</a>
  */
-@SuppressWarnings("OverlyCoupledClass")
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
 public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /**
@@ -216,7 +216,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         repository.setBoundedContext(this);
         guard.register(repository);
         repository.onRegistered();
-        registerEventDispatcher(getStand());
+        registerEventDispatcher(stand());
     }
 
     /**
@@ -226,7 +226,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesCommands()) {
-            getCommandBus().register(dispatcher);
+            commandBus().register(dispatcher);
         }
     }
 
@@ -246,7 +246,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
                 dispatcher.createExternalDispatcher()
                           .orElseThrow(notExternalDispatcherFrom(dispatcher));
 
-        getIntegrationBus().register(externalDispatcher);
+        integrationBus().register(externalDispatcher);
     }
 
     /**
@@ -258,8 +258,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesEvents()) {
-            getEventBus().register(dispatcher);
-            SystemReadSide systemReadSide = getSystemClient().readSide();
+            eventBus().register(dispatcher);
+            SystemReadSide systemReadSide = systemClient().readSide();
             systemReadSide.register(dispatcher);
         }
         if (dispatcher.dispatchesExternalEvents()) {
@@ -292,7 +292,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Creates a {@code CommandErrorHandler} for objects that handle commands.
      */
     public CommandErrorHandler createCommandErrorHandler() {
-        SystemWriteSide systemWriteSide = getSystemClient().writeSide();
+        SystemWriteSide systemWriteSide = systemClient().writeSide();
         CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide);
         return result;
     }
@@ -300,7 +300,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> getEntityStateTypes(Visibility visibility) {
+    public Set<TypeName> entityStateTypes(Visibility visibility) {
         Set<TypeName> result = guard.getEntityStateTypes(visibility);
         return result;
     }
@@ -335,27 +335,27 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */
-    public CommandBus getCommandBus() {
+    public CommandBus commandBus() {
         return this.commandBus;
     }
 
     /** Obtains instance of {@link EventBus} of this {@code BoundedContext}. */
-    public EventBus getEventBus() {
+    public EventBus eventBus() {
         return this.eventBus;
     }
 
     /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
-    public IntegrationBus getIntegrationBus() {
+    public IntegrationBus integrationBus() {
         return this.integrationBus;
     }
 
     /** Obtains instance of {@link ImportBus} of this {@code BoundedContext}. */
-    public ImportBus getImportBus() {
+    public ImportBus importBus() {
         return this.importBus;
     }
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
-    public Stand getStand() {
+    public Stand stand() {
         return stand;
     }
 
@@ -368,14 +368,14 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @return the ID of this {@code BoundedContext}
      */
-    public BoundedContextName getName() {
+    public BoundedContextName name() {
         return name;
     }
 
     /**
      * Obtains {@link StorageFactory} associated with this {@code BoundedContext}.
      */
-    public StorageFactory getStorageFactory() {
+    public StorageFactory storageFactory() {
         return storageFactory.get();
     }
 
@@ -395,7 +395,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * implementation.
      */
     @Internal
-    public TenantIndex getTenantIndex() {
+    public TenantIndex tenantIndex() {
         return tenantIndex;
     }
 
@@ -403,7 +403,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Obtains instance of {@link SystemClient} of this {@code BoundedContext}.
      */
     @Internal
-    public abstract SystemClient getSystemClient();
+    public abstract SystemClient systemClient();
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.
@@ -438,7 +438,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     String nameForLogging() {
-        return BoundedContext.class.getSimpleName() + ' ' + getName().getValue();
+        return BoundedContext.class.getSimpleName() + ' ' + name().getValue();
     }
 
     /**

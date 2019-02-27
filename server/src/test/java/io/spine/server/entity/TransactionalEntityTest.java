@@ -128,7 +128,7 @@ class TransactionalEntityTest {
     void allowInjectingTx() {
         TransactionalEntity entity = newEntity();
         Transaction tx = mock(Transaction.class);
-        when(tx.getEntity()).thenReturn(entity);
+        when(tx.entity()).thenReturn(entity);
         entity.injectTransaction(tx);
 
         assertEquals(tx, entity.getTransaction());
@@ -140,7 +140,7 @@ class TransactionalEntityTest {
     void disallowOtherInstanceTx() {
         TransactionalEntity entity = newEntity();
         Transaction tx = mock(Transaction.class);
-        when(tx.getEntity()).thenReturn(newEntity());
+        when(tx.entity()).thenReturn(newEntity());
         assertThrows(IllegalStateException.class, () -> entity.injectTransaction(tx));
     }
 
@@ -196,7 +196,7 @@ class TransactionalEntityTest {
         Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);
         when(txMock.isActive()).thenReturn(true);
-        when(txMock.getLifecycleFlags()).thenReturn(modifiedFlags);
+        when(txMock.lifecycleFlags()).thenReturn(modifiedFlags);
 
         LifecycleFlags actual = entity.getLifecycleFlags();
         assertEquals(modifiedFlags, actual);
@@ -239,7 +239,7 @@ class TransactionalEntityTest {
 
         Transaction tx = mock(Transaction.class);
         when(tx.isActive()).thenReturn(false);
-        when(tx.getEntity()).thenReturn(entity);
+        when(tx.entity()).thenReturn(entity);
         entity.injectTransaction(tx);
         return entity;
     }
@@ -250,7 +250,7 @@ class TransactionalEntityTest {
         Transaction tx = spy(mock(Transaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
-        when(tx.getEntity()).thenReturn(entity);
+        when(tx.entity()).thenReturn(entity);
 
         entity.injectTransaction(tx);
         return entity;

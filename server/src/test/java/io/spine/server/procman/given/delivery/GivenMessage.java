@@ -32,6 +32,9 @@ import io.spine.testing.server.TestEventFactory;
 
 public class GivenMessage {
 
+    private static final TestActorRequestFactory requestFactory =
+            new TestActorRequestFactory(GivenMessage.class);
+
     /** Prevents instantiation of this test environment class. */
     private GivenMessage() {
     }
@@ -66,8 +69,7 @@ public class GivenMessage {
     }
 
     private static Command createCommand(CommandMessage cmdMessage) {
-        Command result = TestActorRequestFactory.newInstance(GivenMessage.class)
-                                                .createCommand(cmdMessage);
+        Command result = requestFactory.createCommand(cmdMessage);
         return result;
     }
 }

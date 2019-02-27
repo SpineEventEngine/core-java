@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -32,7 +32,6 @@ import java.util.Set;
  * @param <C> the type of dispatched messages
  * @param <E> the type of envelopes for dispatched objects that contain messages
  * @param <I> the type of IDs of entities to which messages are dispatched
- * @author Alexander Yevsyukov
  */
 public interface MulticastDispatcher <C extends MessageClass, E extends MessageEnvelope, I>
         extends MessageDispatcher<C, E, Set<I>> {

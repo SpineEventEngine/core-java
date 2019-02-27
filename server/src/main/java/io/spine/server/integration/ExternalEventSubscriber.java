@@ -19,10 +19,10 @@
  */
 package io.spine.server.integration;
 
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 
@@ -39,8 +39,6 @@ import static java.lang.String.format;
  *
  * <p>Allows to register {@code EventSubscriber}s as dispatchers of
  * {@code IntegrationBus}.
- *
- * @author Alex Tymchenko
  */
 final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>, Logging {
 
@@ -51,8 +49,8 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
     }
 
     @Override
-    public Set<ExternalMessageClass> getMessageClasses() {
-        Set<EventClass> extSubscriptions = delegate.getExternalEventClasses();
+    public Set<ExternalMessageClass> messageClasses() {
+        Set<EventClass> extSubscriptions = delegate.externalEventClasses();
         return ExternalMessageClass.fromEventClasses(extSubscriptions);
     }
 
@@ -61,7 +59,7 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
         EventEnvelope eventEnvelope = envelope.toEventEnvelope();
         checkArgument(eventEnvelope.isExternal(),
                       "External event expected, but got %s",
-                      Stringifiers.toString(eventEnvelope.getOuterObject()));
+                      Stringifiers.toString(eventEnvelope.outerObject()));
         return delegate.dispatch(eventEnvelope);
     }
 
@@ -70,7 +68,7 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
         checkNotNull(envelope);
         checkNotNull(exception);
 
-        MessageClass messageClass = envelope.getMessageClass();
+        MessageClass messageClass = envelope.messageClass();
         String messageId = envelope.idAsString();
         String errorMessage =
                 format("Error handling external event subscription (class: %s id: %s).",

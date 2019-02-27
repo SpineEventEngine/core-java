@@ -59,9 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AbstractCommander should")
 class AbstractCommanderTest {
 
-    private final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(getClass())
-                                   .command();
+    private final CommandFactory commandFactory = new TestActorRequestFactory(getClass()).command();
     private final EventFactory eventFactory =
             TestEventFactory.newInstance(getClass());
 
@@ -71,9 +69,9 @@ class AbstractCommanderTest {
 
     @BeforeEach
     void setUp() {
-        CommandBus commandBus = boundedContext.getCommandBus();
-        EventBus eventBus = boundedContext.getEventBus();
-        AbstractCommander commander = new Commendatore(commandBus, boundedContext.getEventBus());
+        CommandBus commandBus = boundedContext.commandBus();
+        EventBus eventBus = boundedContext.eventBus();
+        AbstractCommander commander = new Commendatore(commandBus, boundedContext.eventBus());
         interceptor = new CommandInterceptor(boundedContext,
                                              FirstCmdCreateProject.class,
                                              CmdSetTaskDescription.class,
@@ -156,13 +154,13 @@ class AbstractCommanderTest {
 
     private void createCommandAndPost(CommandMessage commandMessage) {
         io.spine.core.Command command = commandFactory.create(commandMessage);
-        boundedContext.getCommandBus()
+        boundedContext.commandBus()
                       .post(command, StreamObservers.noOpObserver());
     }
 
     private void createEventAndPost(EventMessage eventMessage) {
         io.spine.core.Event event = eventFactory.createEvent(eventMessage, null);
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .post(event);
     }
 

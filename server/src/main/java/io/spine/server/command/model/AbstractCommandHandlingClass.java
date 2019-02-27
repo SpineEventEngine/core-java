@@ -21,9 +21,9 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.core.CommandClass;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.server.type.CommandClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;

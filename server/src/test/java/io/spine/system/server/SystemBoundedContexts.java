@@ -40,7 +40,7 @@ public final class SystemBoundedContexts {
      * Extracts the {@code System} bounded context from the given bounded context.
      */
     public static BoundedContext systemOf(BoundedContext context) {
-        SystemClient client = context.getSystemClient();
+        SystemClient client = context.systemClient();
         assertThat(client, instanceOf(DefaultSystemClient.class));
         DefaultSystemClient defaultClient = (DefaultSystemClient) client;
         return defaultClient.target();

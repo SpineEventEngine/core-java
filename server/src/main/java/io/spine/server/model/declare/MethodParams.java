@@ -21,7 +21,7 @@
 package io.spine.server.model.declare;
 
 import io.spine.base.CommandMessage;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -33,8 +33,6 @@ import static java.util.Arrays.asList;
 
 /**
  * The utility class for working with {@link Method} parameters.
- *
- * @author Alex Tymchenko
  */
 public final class MethodParams {
 

@@ -23,8 +23,8 @@ package io.spine.server.route;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+import io.spine.server.type.CommandClass;
 
 import java.util.Optional;
 
@@ -40,7 +40,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * will be {@linkplain CommandRoute#apply(Message, Message) applied}.
  *
  * @param <I> the type of the entity IDs of this repository
- * @author Alexander Yevsyukov
  */
 public final class CommandRouting<I>
         extends MessageRouting<CommandMessage, CommandContext, CommandClass, I> {

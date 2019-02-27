@@ -27,8 +27,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.core.EmptyClass;
 import io.spine.server.model.declare.MethodSignature;
+import io.spine.server.type.EmptyClass;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
@@ -124,7 +124,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         ImmutableSet<P> result = map
                 .values()
                 .stream()
-                .map(HandlerMethod::getProducedMessages)
+                .map(HandlerMethod::producedMessages)
                 .flatMap(Set::stream)
                 .collect(toImmutableSet());
         return result;

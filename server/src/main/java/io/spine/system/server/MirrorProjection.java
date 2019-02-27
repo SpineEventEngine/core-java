@@ -69,55 +69,59 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
 
     @Subscribe
     public void on(EntityStateChanged event) {
-        getBuilder().setId(getId())
-                    .setState(event.getNewState());
+        builder().setId(id())
+                 .setState(event.getNewState());
     }
 
     @Subscribe
-    public void on(EntityArchived event) {
-        LifecycleFlags flags = getBuilder()
+    public void on(@SuppressWarnings("unused") EntityArchived event) {
+        MirrorVBuilder builder = builder();
+        LifecycleFlags flags = builder
                 .getLifecycle()
                 .toBuilder()
                 .setArchived(true)
                 .build();
-        getBuilder().setId(getId())
+        builder.setId(id())
                     .setLifecycle(flags);
         setArchived(true);
     }
 
     @Subscribe
-    public void on(EntityDeleted event) {
-        LifecycleFlags flags = getBuilder()
+    public void on(@SuppressWarnings("unused") EntityDeleted event) {
+        MirrorVBuilder builder = builder();
+        LifecycleFlags flags = builder
                 .getLifecycle()
                 .toBuilder()
                 .setDeleted(true)
                 .build();
-        getBuilder().setId(getId())
+        builder.setId(id())
                     .setLifecycle(flags);
         setDeleted(true);
     }
 
     @Subscribe
-    public void on(EntityExtractedFromArchive event) {
-        LifecycleFlags flags = getBuilder()
+    public void on(@SuppressWarnings("unused") EntityExtractedFromArchive event) {
+        MirrorVBuilder builder = builder();
+        LifecycleFlags flags = builder
                 .getLifecycle()
                 .toBuilder()
                 .setArchived(false)
                 .build();
-        getBuilder().setId(getId())
-                    .setLifecycle(flags);
+        builder.setId(id())
+               .setLifecycle(flags);
         setArchived(false);
     }
 
     @Subscribe
-    public void on(EntityRestored event) {
-        LifecycleFlags flags = getBuilder()
+    public void on(@SuppressWarnings("unused") EntityRestored event) {
+        MirrorVBuilder builder = builder();
+        LifecycleFlags flags = builder
                 .getLifecycle()
                 .toBuilder()
                 .setDeleted(false)
                 .build();
-        getBuilder().setId(getId())
-                    .setLifecycle(flags);
+        builder.setId(id())
+               .setLifecycle(flags);
         setDeleted(false);
     }
 
@@ -214,6 +218,6 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     private Any aggregateState() {
-        return getState().getState();
+        return state().getState();
     }
 }

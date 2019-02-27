@@ -101,7 +101,7 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
 
     @Override
     public Set<TenantId> getAll() {
-        Storage<TenantId, ?, ?> storage = getStorage();
+        Storage<TenantId, ?, ?> storage = storage();
         Iterator<TenantId> index = storage.index();
         Set<TenantId> result = ImmutableSet.copyOf(index);
         cache.addAll(result);

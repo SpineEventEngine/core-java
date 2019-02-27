@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 
@@ -39,8 +39,8 @@ import java.util.List;
 class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
     extends AggregateEventEndpoint<I, A> implements Logging {
 
-    EventImportEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
-        super(repository, envelope);
+    EventImportEndpoint(AggregateRepository<I, A> repository, EventEnvelope event) {
+        super(repository, event);
     }
 
     /**
@@ -53,9 +53,8 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      * {@link io.spine.server.aggregate.AggregateEndpoint#runTransactionWith(Aggregate) applied}.
      */
     @Override
-    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope envelope) {
-        Event event = envelope.getOuterObject();
-        return ImmutableList.of(event);
+    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope event) {
+        return ImmutableList.of(event.outerObject());
     }
 
     /**
@@ -63,26 +62,26 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      * on successful completion of the event import.
      */
     @Override
-    protected void onDispatched(A aggregate, EventEnvelope envelope, List<Event> producedEvents) {
-        super.onDispatched(aggregate, envelope, producedEvents);
-        repository().onEventImported(aggregate.getId(), envelope.getOuterObject());
+    protected void onDispatched(A aggregate, EventEnvelope event, List<Event> producedEvents) {
+        super.onDispatched(aggregate, event, producedEvents);
+        repository().onEventImported(aggregate.id(), event.outerObject());
     }
 
     @Override
-    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
+    protected void onEmptyResult(A aggregate, EventEnvelope event) {
         _error("The aggregate `{}` was not modified during the import of the event `{}`.",
-               aggregate, envelope);
+               aggregate, event);
     }
 
     @Override
-    protected void onError(EventEnvelope envelope, RuntimeException exception) {
+    protected void onError(EventEnvelope event, RuntimeException exception) {
         _error(exception,
                "Error importing event of class `{}` into repository `{}`. " +
                        "Event message: `{}` context: `{}` id: `{}`",
-               envelope.getMessageClass(),
+               event.messageClass(),
                repository(),
-               envelope.getMessage(),
-               envelope.getMessageClass(),
-               envelope.idAsString());
+               event.message(),
+               event.messageClass(),
+               event.idAsString());
     }
 }

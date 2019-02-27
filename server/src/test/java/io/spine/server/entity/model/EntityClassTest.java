@@ -50,14 +50,14 @@ class EntityClassTest {
     @DisplayName("return ID class")
     void returnIdClass() {
         @SuppressWarnings("unchecked")
-        Class<Long> actual = (Class<Long>) entityClass.getIdClass();
+        Class<Long> actual = (Class<Long>) entityClass.idClass();
         assertEquals(Long.class, actual);
     }
 
     @Test
     @DisplayName("obtain entity constructor")
     void getEntityConstructor() {
-        Constructor<NanoEntity> ctor = entityClass.getConstructor();
+        Constructor<NanoEntity> ctor = entityClass.constructor();
         assertNotNull(ctor);
     }
 
@@ -76,11 +76,11 @@ class EntityClassTest {
         // The interval with a much earlier start to allow non-zero interval on faster computers.
         Range<Instant> whileWeCreate = Range.closed(toInstant(before), toInstant(after));
 
-        assertEquals(id, entity.getId());
-        assertEquals(0, entity.getVersion()
+        assertEquals(id, entity.id());
+        assertEquals(0, entity.version()
                               .getNumber());
         assertTrue(whileWeCreate.contains(toInstant(entity.whenModified())));
-        assertEquals(StringValue.getDefaultInstance(), entity.getState());
+        assertEquals(StringValue.getDefaultInstance(), entity.state());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());
     }
@@ -89,7 +89,7 @@ class EntityClassTest {
     @DisplayName("complain when there is no one-arg constructor for entity class")
     void searchForOneArgCtor() {
         assertThrows(ModelError.class,
-                     () -> new EntityClass<>(NoArgEntity.class).getConstructor());
+                     () -> new EntityClass<>(NoArgEntity.class).constructor());
     }
 
     /** A test entity which defines ID and state. */
