@@ -96,10 +96,10 @@ public abstract class ProcessManagerRepository<I,
      * <p>The rules allow to automatically mark entities as archived/deleted upon certain event and
      * rejection types emitted.
      *
-     * @see Lifecycle#archiveOn(Class[])
-     * @see Lifecycle#deleteOn(Class[])
+     * @see LifecycleRules#archiveOn(Class[])
+     * @see LifecycleRules#deleteOn(Class[])
      */
-    private final Lifecycle lifecycle = new Lifecycle();
+    private final LifecycleRules lifecycleRules = new LifecycleRules();
 
     /**
      * Creates a new instance with the event routing by the first message field.
@@ -222,8 +222,8 @@ public abstract class ProcessManagerRepository<I,
      *             .deleteOn(Rejection2.class)
      * }</pre>
      */
-    public final Lifecycle lifecycle() {
-        return lifecycle;
+    public final LifecycleRules lifecycle() {
+        return lifecycleRules;
     }
 
     @Override

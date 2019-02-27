@@ -60,29 +60,29 @@ public class PmTransaction<I,
     /**
      * The lifecycle rules which will be applied to the process manager instance.
      */
-    private final Lifecycle lifecycle;
+    private final LifecycleRules lifecycleRules;
 
-    private PmTransaction(ProcessManager<I, S, B> processManager, Lifecycle lifecycle) {
+    private PmTransaction(ProcessManager<I, S, B> processManager, LifecycleRules lifecycleRules) {
         super(processManager);
-        this.lifecycle = lifecycle;
+        this.lifecycleRules = lifecycleRules;
     }
 
     private PmTransaction(ProcessManager<I, S, B> processManager,
                           S state,
                           Version version,
-                          Lifecycle lifecycle) {
+                          LifecycleRules lifecycleRules) {
         super(processManager, state, version);
-        this.lifecycle = lifecycle;
+        this.lifecycleRules = lifecycleRules;
     }
 
     @VisibleForTesting
     protected PmTransaction(ProcessManager<I, S, B> processManager) {
-        this(processManager, new Lifecycle());
+        this(processManager, new LifecycleRules());
     }
 
     @VisibleForTesting
     protected PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
-        this(processManager, state, version, new Lifecycle());
+        this(processManager, state, version, new LifecycleRules());
     }
 
     /**
@@ -155,15 +155,15 @@ public class PmTransaction<I,
      *
      * @param processManager
      *         the {@code ProcessManager} instance to start the transaction for
-     * @param lifecycle
+     * @param lifecycleRules
      *         the lifecycle rules to apply to the entity
      * @return the new transaction instance
      */
     static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager, Lifecycle lifecycle) {
-        PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, lifecycle);
+    PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager, LifecycleRules lifecycleRules) {
+        PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, lifecycleRules);
         return tx;
     }
 
@@ -175,10 +175,10 @@ public class PmTransaction<I,
      * Updates the process lifecycle based on a successful phase propagation result.
      */
     private void updateLifecycle(Iterable<Event> events) {
-        if (lifecycle.archivesOn(events)) {
+        if (lifecycleRules.shouldArchiveOn(events)) {
             setArchived(true);
         }
-        if (lifecycle.deletesOn(events)) {
+        if (lifecycleRules.shouldDeleteOn(events)) {
             setDeleted(true);
         }
     }
@@ -189,10 +189,10 @@ public class PmTransaction<I,
      * <p>Manually commits the changes as they are not going to be committed normally.
      */
     private void updateLifecycle(ThrowableMessage rejection) {
-        if (lifecycle.archivesOn(rejection)) {
+        if (lifecycleRules.shouldArchiveOn(rejection)) {
             setArchived(true);
         }
-        if (lifecycle.deletesOn(rejection)) {
+        if (lifecycleRules.shouldDeleteOn(rejection)) {
             setDeleted(true);
         }
         commitAttributeChanges();

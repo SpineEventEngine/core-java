@@ -36,13 +36,13 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;
 
 /**
- * Lifecycle rules of a process manager repository.
+ * The lifecycle rules of a process manager repository.
  *
  * <p>The rules can be configured by user to automatically
  * {@linkplain LifecycleFlags#getArchived()} archive} or {@linkplain LifecycleFlags#getDeleted()}
  * delete} entities when certain events or rejections occur.
  */
-public final class Lifecycle {
+public final class LifecycleRules {
 
     /**
      * Event/rejection classes which will cause the entity to become archived.
@@ -55,7 +55,7 @@ public final class Lifecycle {
     private final Set<Class<? extends EventMessage>> deleteOn;
 
     @VisibleForTesting
-    public Lifecycle() {
+    public LifecycleRules() {
         this.archiveOn = new HashSet<>();
         this.deleteOn = new HashSet<>();
     }
@@ -72,7 +72,7 @@ public final class Lifecycle {
      */
     @SafeVarargs
     @CanIgnoreReturnValue
-    public final Lifecycle archiveOn(Class<? extends EventMessage>... messageClasses) {
+    public final LifecycleRules archiveOn(Class<? extends EventMessage>... messageClasses) {
         archiveOn.addAll(asList(messageClasses));
         return this;
     }
@@ -80,7 +80,7 @@ public final class Lifecycle {
     /**
      * Checks if the process should become archived when the given {@code events} are emitted.
      */
-    boolean archivesOn(Iterable<Event> events) {
+    boolean shouldArchiveOn(Iterable<Event> events) {
         boolean result = containsAnyClasses(archiveOn, events);
         return result;
     }
@@ -88,7 +88,7 @@ public final class Lifecycle {
     /**
      * Checks if the process should become archived when the given {@code rejection} is thrown.
      */
-    boolean archivesOn(ThrowableMessage rejection) {
+    boolean shouldArchiveOn(ThrowableMessage rejection) {
         RejectionClass rejectionClass = RejectionClass.of(rejection);
         boolean result = archiveOn.contains(rejectionClass.value());
         return result;
@@ -106,7 +106,7 @@ public final class Lifecycle {
      */
     @SafeVarargs
     @CanIgnoreReturnValue
-    public final Lifecycle deleteOn(Class<? extends EventMessage>... messageClasses) {
+    public final LifecycleRules deleteOn(Class<? extends EventMessage>... messageClasses) {
         deleteOn.addAll(asList(messageClasses));
         return this;
     }
@@ -114,7 +114,7 @@ public final class Lifecycle {
     /**
      * Checks if the process should become deleted when the given {@code events} are emitted.
      */
-    boolean deletesOn(Iterable<Event> events) {
+    boolean shouldDeleteOn(Iterable<Event> events) {
         boolean result = containsAnyClasses(deleteOn, events);
         return result;
     }
@@ -122,7 +122,7 @@ public final class Lifecycle {
     /**
      * Checks if the process should become deleted when the given {@code rejection} is thrown.
      */
-    boolean deletesOn(ThrowableMessage rejection) {
+    boolean shouldDeleteOn(ThrowableMessage rejection) {
         RejectionClass rejectionClass = RejectionClass.of(rejection);
         boolean result = deleteOn.contains(rejectionClass.value());
         return result;
