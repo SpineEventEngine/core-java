@@ -30,6 +30,7 @@ import io.spine.core.EventContext;
  * @param <M> the type of the event message
  * @param <E> the type of the enrichment message
  */
+@FunctionalInterface
 public interface EventEnrichmentFn<M extends EventMessage, E extends Message>
     extends EnrichmentFn<M, EventContext, E> {
 }
