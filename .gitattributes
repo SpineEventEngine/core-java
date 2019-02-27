@@ -8,10 +8,15 @@
 *.html text
 *.xml text
 *.css text
+*.scss text
 *.js text
 *.properties text
-*.bat text
 *.rtf text
+*.yaml text
+*.yml text
+*.md text
+
+LICENSE text
 
 # SQL scripts
 *.sql text
@@ -19,19 +24,11 @@
 # Java sources
 *.java text
 
-# Jsf sources
-*.jsf text
-*.xhtml text
-
-# Action script and Flex
-*.as text
-*.mxml text
-*.actionScriptProperties text
-*.flexLibProperties text
+# Python sources
+*.py text
 
 # Gradle build files
 *.gradle text
-gradlew.bat
 
 # Google protocol buffers
 *.proto text
@@ -40,7 +37,12 @@ gradlew.bat
 *.rb text
 
 # Declare files that will always have CRLF line endings on checkout.
-# *.sln text eol=crlf
+*.bat text eol=crlf
+
+# Declare files that will always have LF line endings on checkout.
+*.sh text eol=lf
+gradlew text eol=lf
+pull text eol=lf
 
 # Denote all files that are truly binary and should not be modified.
 *.png binary
