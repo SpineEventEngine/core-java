@@ -78,7 +78,7 @@ public final class Lifecycle {
     }
 
     /**
-     * Checks if the process hould become archived when the given {@code events} are emitted.
+     * Checks if the process should become archived when the given {@code events} are emitted.
      */
     boolean archivesOn(Iterable<Event> events) {
         boolean result = containsAnyClasses(archiveOn, events);
