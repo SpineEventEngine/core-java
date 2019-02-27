@@ -21,14 +21,21 @@
 package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EnrichableMessageContext;
+import io.spine.server.type.EventClass;
+import io.spine.type.MessageClass;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -40,8 +47,51 @@ public final class EnricherBuilder {
     /** Functions which perform the enrichment. */
     private final Set<EnrichmentFunction<?, ?, ?>> functions = Sets.newHashSet();
 
+    private final Map<MessageClass, EnrichmentFn<?, ?, ?>> map = Maps.newHashMap();
+
     /** Creates new instance. */
     EnricherBuilder() {
+    }
+
+    /**
+     * Adds event enrichment function to the builder.
+     *
+     * @param eventClass
+     *         the class of the events the passed function enriches
+     * @param func
+     *         the enrichment function
+     * @param <M>
+     *         the type of the event message
+     * @param <T>
+     *         the type of the enrichment message
+     * @return {@code this} builder
+     * @throws IllegalStateException
+     *         if the builder already contains a function for this event class
+     * @see #remove(Class)
+     */
+    public <M extends EventMessage, T extends Message>
+    EnricherBuilder add(Class<M> eventClass, EventEnrichmentFn<M, T> func) {
+        checkNotNull(eventClass);
+        checkNotNull(func);
+        EventClass key = EventClass.from(eventClass);
+        checkState(
+                !map.containsKey(key),
+                "The event class `%s` already has enrichment function." +
+                        " If you want to provide another function, please call `remove()` first.",
+                key
+        );
+        map.put(key, func);
+        return this;
+    }
+
+    /**
+     * Removes the enrichment function for the passed event class.
+     *
+     * <p>If the function for this class was not added, the call has no effect.
+     */
+    public <M extends EventMessage> EnricherBuilder remove(Class<M> eventClass) {
+        map.remove(EventClass.from(eventClass));
+        return this;
     }
 
     /**

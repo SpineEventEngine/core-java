@@ -18,30 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.client.blackbox;
+package io.spine.server.enrich;
 
-import io.spine.type.RejectionType;
-
-import static org.junit.jupiter.api.Assertions.fail;
+import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
 
 /**
- * Verifies that a command was handled with a {@link io.spine.base.ThrowableMessage rejection} of
- * the provided type.
+ * Base interface for event enrichment functions.
+ *
+ * @param <M> the type of the event message
+ * @param <E> the type of the enrichment message
  */
-final class RejectionOfTypePresenceVerify extends VerifyAcknowledgements {
-
-    private final RejectionType type;
-
-    RejectionOfTypePresenceVerify(RejectionType type) {
-        super();
-        this.type = type;
-    }
-
-    @Override
-    public void verify(Acknowledgements acks) {
-        if (!acks.containRejections(type)) {
-            fail("A rejection of the type `" +
-                         type.descriptor().getFullName() + "` was not emitted.");
-        }
-    }
+public interface EventEnrichmentFn<M extends EventMessage, E extends Message>
+    extends EnrichmentFn<M, EventContext, E> {
 }

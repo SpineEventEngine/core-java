@@ -18,30 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.client.blackbox;
+package io.spine.server.enrich;
 
-import io.spine.type.RejectionType;
+import com.google.protobuf.Message;
+import io.spine.core.EnrichableMessageContext;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import java.util.function.BiFunction;
 
 /**
- * Verifies that a command was handled with a {@link io.spine.base.ThrowableMessage rejection} of
- * the provided type.
+ * Base interface for enrichment functions.
+ *
+ * @param <M> the type of the enrichable message
+ * @param <C> the type of the message context
+ * @param <E> the type of the enrichment message
  */
-final class RejectionOfTypePresenceVerify extends VerifyAcknowledgements {
-
-    private final RejectionType type;
-
-    RejectionOfTypePresenceVerify(RejectionType type) {
-        super();
-        this.type = type;
-    }
-
-    @Override
-    public void verify(Acknowledgements acks) {
-        if (!acks.containRejections(type)) {
-            fail("A rejection of the type `" +
-                         type.descriptor().getFullName() + "` was not emitted.");
-        }
-    }
+public interface EnrichmentFn<M extends Message,
+                              C extends EnrichableMessageContext,
+                              E extends Message>
+        extends BiFunction<M, C, E> {
 }
