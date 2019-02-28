@@ -19,32 +19,31 @@
  */
 syntax = "proto3";
 
-package spine.test.event.user;
+package spine.test.enrichment;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.event.user";
+option java_package="io.spine.server.enrich.given.event";
 option java_multiple_files = true;
+option java_outer_classname = "EnrichmentTestEventsProto";
 
+import "spine/core/user_id.proto";
+import "spine/test/enrichment/enrichment_test_identifiers.proto";
 
-message UserLoggedInEvent {
-    string user_uid = 1;
+message EtProjectCreated {
+    EtProjectId project = 1;
 }
 
-message UserMentionedEvent {
-    string user_uid = 1;
-    string title = 2;
+message EtTaskCreated {
+    EtTaskId task = 1;
 }
 
-message UserLoggedOutEvent {
-    string user_uid = 1;
-    string owner_email = 2;
+message EtUserAccountCreated {
+    spine.core.UserId user = 1;
 }
 
-// Used only in enrichment EnrichmentBoundWithMultipleFieldsWithDifferentNames.
-//
-// Do not reuse this event type to avoid test collisions.
-message UserDeletedEvent {
-    string deleted_uid = 1;
+message EtTaskAssigned {
+    EtTaskId task = 1;
+    spine.core.UserId assignee = 2 [(required) = true];
 }

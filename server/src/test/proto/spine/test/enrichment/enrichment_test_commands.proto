@@ -19,26 +19,38 @@
  */
 syntax = "proto3";
 
-package spine.test.event.user.permission;
+package spine.test.enrichment;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.event.user.permission";
+option java_package="io.spine.server.enrich.given.command";
 option java_multiple_files = true;
+option java_outer_classname = "EnrichmentTestCommandsProto";
 
-message PermissionGrantedEvent {
+import "spine/core/user_id.proto";
+import "spine/test/enrichment/enrichment_test_identifiers.proto";
 
-    string user_uid = 1;
-    string permission_id = 2;
-
-    // ID of the user who granted the permission
-    string granter_uid = 3;
+message EtCreateProject {
+    EtProjectId project = 1;
+    string name = 2 [(required) = true];
+    string description = 3;
 }
 
-message PermissionRevokedEvent {
+message EtCreateTask {
+    EtTaskId task = 1;
+    EtProjectId project = 2 [(required) = true];
+    string name = 3 [(required) = true];
+    string description = 4;
+}
 
-    string user_uid = 1;
-    string permission_id = 2;
-    string cause = 3;
+message EtRegisterUser {
+    spine.core.UserId user = 1;
+    string given_name = 2 [(required) = true];
+    string family_name = 3 [(required) = true];
+}
+
+message EtAssignTask {
+    EtTaskId task = 1;
+    spine.core.UserId assignee = 2 [(required) = true];
 }

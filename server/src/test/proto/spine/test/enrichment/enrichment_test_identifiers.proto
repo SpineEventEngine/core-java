@@ -19,21 +19,19 @@
  */
 syntax = "proto3";
 
-package spine.test.event.user.sharing;
+package spine.test.enrichment;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.event.user.sharing";
+option java_package="io.spine.server.enrich.given";
 option java_multiple_files = true;
+option java_outer_classname = "EnrichmentTestIdentifiersProto";
 
-message SharingRequestSent {
-    string user_uid = 1;
-    string second_user_uid = 2;
+message EtProjectId {
+    string uuid = 1;
 }
 
-message SharingRequestApproved {
-    string user_uid = 1;
-    string second_user_uid = 2;
-    int64 timestamp = 3;
+message EtTaskId {
+    string uuid = 1;
 }

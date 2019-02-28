@@ -17,40 +17,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.enrich;
+package spine.test.enrichment;
 
-import io.spine.server.BoundedContext;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import "spine/options.proto";
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.enrich.given";
+option java_multiple_files = true;
+option java_outer_classname = "EnrichmentTestEntitiesProto";
 
-@DisplayName("Enricher should")
-@Disabled("Until new enrichment implementation is finalized")
-public class EnricherTest {
+import "spine/core/user_id.proto";
+import "spine/test/enrichment/enrichment_test_identifiers.proto";
 
-    private BoundedContext boundedContext;
+message EtProject {
+    option (entity).kind = AGGREGATE;
+    EtProjectId id = 1;
+    string name = 2 [(required) = true];
+    string description = 3;
+}
 
-    @BeforeEach
-    void setUp() {
-        boundedContext = BoundedContext
-                .newBuilder()
-                .setMultitenant(true)
-                .build();
-    }
+message EtTask {
+    option (entity).kind = AGGREGATE;
+    EtTaskId id = 1;
+    EtProjectId project = 2 [(required) = true];
+    string name = 3 [(required) = true];
+    string description = 4;
+}
 
-    @AfterEach
-    void tearDown() throws Exception {
-        boundedContext.close();
-    }
-
-    @Test
-    @DisplayName("have builder")
-    void haveBuilder() {
-        assertNotNull(Enricher.newBuilder());
-    }
+message EtUserAccount {
+    option (entity).kind = AGGREGATE;
+    spine.core.UserId id = 1;
+    string given_name = 2 [(required) = true];
+    string family_name = 3 [(required) = true];
 }
