@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
+import io.spine.client.EntityStateWithVersion;
+import io.spine.client.EntityStateWithVersionVBuilder;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
@@ -42,6 +44,7 @@ import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.system.server.Mirror.ID_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
+import static io.spine.system.server.Mirror.VERSION_FIELD_NUMBER;
 import static io.spine.system.server.MirrorProjection.buildFilters;
 
 /**
@@ -58,8 +61,9 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
-    private static final FieldMask AGGREGATE_STATE_FIELD =
-            fromFieldNumbers(Mirror.class, ID_FIELD_NUMBER, STATE_FIELD_NUMBER);
+    private static final FieldMask AGGREGATE_STATE_WITH_VERSION =
+            fromFieldNumbers(Mirror.class,
+                             ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER);
 
     @Override
     public void onRegistered() {
@@ -119,23 +123,33 @@ final class MirrorRepository
      * @return an {@code Iterator} over the result aggregate states
      * @see SystemReadSide#readDomainAggregate(Query)
      */
-    Iterator<Any> execute(Query query) {
+    Iterator<EntityStateWithVersion> execute(Query query) {
         FieldMask aggregateFields = query.getFieldMask();
         Target target = query.getTarget();
         TargetFilters filters = buildFilters(target);
         Iterator<MirrorProjection> mirrors = find(filters, 
                                                   query.getOrderBy(), 
-                                                  query.getPagination(), 
-                                                  AGGREGATE_STATE_FIELD);
-        Iterator<Any> result = aggregateStates(mirrors, aggregateFields);
+                                                  query.getPagination(),
+                                                  AGGREGATE_STATE_WITH_VERSION);
+        Iterator<EntityStateWithVersion> result = aggregateStates(mirrors, aggregateFields);
         return result;
     }
 
-    private static Iterator<Any> aggregateStates(Iterator<MirrorProjection> projections,
-                                                 FieldMask requiredFields) {
-        Iterator<Any> result = stream(projections)
-                .map(mirror -> mirror.aggregateState(requiredFields))
+    private static Iterator<EntityStateWithVersion>
+    aggregateStates(Iterator<MirrorProjection> projections, FieldMask requiredFields) {
+        Iterator<EntityStateWithVersion> result = stream(projections)
+                .map(mirror -> toAggregateState(mirror, requiredFields))
                 .iterator();
+        return result;
+    }
+
+    private static EntityStateWithVersion
+    toAggregateState(MirrorProjection mirror, FieldMask requiredFields) {
+        EntityStateWithVersion result = EntityStateWithVersionVBuilder
+                .newBuilder()
+                .setState(mirror.aggregateState(requiredFields))
+                .setVersion(mirror.aggregateVersion())
+                .build();
         return result;
     }
 }

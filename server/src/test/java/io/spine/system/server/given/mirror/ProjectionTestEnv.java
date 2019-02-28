@@ -23,6 +23,7 @@ package io.spine.system.server.given.mirror;
 import com.google.protobuf.Empty;
 import io.spine.client.EntityId;
 import io.spine.core.EventId;
+import io.spine.core.Version;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityArchived;
 import io.spine.system.server.EntityDeleted;
@@ -38,9 +39,6 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toAny;
 
-/**
- * @author Dmytro Dashenkov
- */
 public final class ProjectionTestEnv {
 
     public static final String RAW_ID = "42";
@@ -49,6 +47,13 @@ public final class ProjectionTestEnv {
             .newBuilder()
             .setValue(toAny(RAW_ID))
             .build();
+
+    public static final Version VERSION = Version
+            .newBuilder()
+            .setNumber(42)
+            .setTimestamp(getCurrentTime())
+            .build();
+
     private static final TypeUrl AGGREGATE_TYPE_URL = TypeUrl.of(Video.class);
 
     /**
@@ -64,6 +69,7 @@ public final class ProjectionTestEnv {
                 .setNewState(pack(Empty.getDefaultInstance()))
                 .setWhen(getCurrentTime())
                 .addMessageId(cause())
+                .setNewVersion(VERSION)
                 .build();
         return event;
     }
@@ -74,6 +80,7 @@ public final class ProjectionTestEnv {
                 .setId(historyId(RAW_ID))
                 .setWhen(getCurrentTime())
                 .addMessageId(cause())
+                .setVersion(VERSION)
                 .build();
         return event;
     }
@@ -84,6 +91,7 @@ public final class ProjectionTestEnv {
                 .setId(historyId(RAW_ID))
                 .setWhen(getCurrentTime())
                 .addMessageId(cause())
+                .setVersion(VERSION)
                 .build();
         return event;
     }
@@ -94,6 +102,7 @@ public final class ProjectionTestEnv {
                 .setId(historyId(RAW_ID))
                 .setWhen(getCurrentTime())
                 .addMessageId(cause())
+                .setVersion(VERSION)
                 .build();
         return event;
     }
@@ -104,6 +113,7 @@ public final class ProjectionTestEnv {
                 .setId(historyId(RAW_ID))
                 .setWhen(getCurrentTime())
                 .addMessageId(cause())
+                .setVersion(VERSION)
                 .build();
         return event;
     }
