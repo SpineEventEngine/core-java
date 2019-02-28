@@ -63,7 +63,8 @@ public abstract class EntityMessageEndpoint<I,
      * {@link #onError(ActorMessageEnvelope, RuntimeException)
      * onError(envelope, exception)} method.
      *
-     * @param entityId the ID of the entity which to dispatch the message to
+     * @param entityId
+     *         the ID of the entity which to dispatch the message to
      */
     public final void dispatchTo(I entityId) {
         checkNotNull(entityId);
@@ -81,7 +82,8 @@ public abstract class EntityMessageEndpoint<I,
      * <p>Performs the delivery directly to the entity not taking
      * the delivery strategy into account.
      *
-     * @param entityId the ID of the entity which to dispatch the message to
+     * @param entityId
+     *         the ID of the entity which to dispatch the message to
      */
     protected abstract void dispatchInTx(I entityId);
 
