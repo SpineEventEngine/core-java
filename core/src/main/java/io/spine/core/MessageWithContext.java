@@ -45,7 +45,7 @@ public interface MessageWithContext extends Message {
     Message getContext();
 
     /**
-     * Obtains type URL of the enclosed message.
+     * Obtains the type URL of the enclosed message.
      */
     default TypeUrl typeUrl() {
         return TypeUrl.ofEnclosed(getMessage());
