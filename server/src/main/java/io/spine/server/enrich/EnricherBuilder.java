@@ -21,12 +21,13 @@
 package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.server.enrich.Schema.Key;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -100,5 +101,42 @@ public final class EnricherBuilder {
      */
     ImmutableMap<Key, EnrichmentFn<?, ?, ?>> functions() {
         return ImmutableMap.copyOf(functions);
+    }
+
+    /**
+     * The key in the schema map.
+     */
+    @Immutable
+    static class Key {
+
+        private final Class<?> sourceClass;
+        private final Class<?> enrichmentClass;
+
+        Key(Class<?> sourceClass, Class<?> enrichmentClass) {
+            this.sourceClass = checkNotNull(sourceClass);
+            this.enrichmentClass = checkNotNull(enrichmentClass);
+        }
+
+        Class<?> sourceClass() {
+            return sourceClass;
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(sourceClass, enrichmentClass);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            return Objects.equals(this.sourceClass, other.sourceClass)
+                    && Objects.equals(this.enrichmentClass, other.enrichmentClass);
+        }
     }
 }
