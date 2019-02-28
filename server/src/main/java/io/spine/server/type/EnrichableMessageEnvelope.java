@@ -27,7 +27,7 @@ import io.spine.server.enrich.EnrichmentService;
 /**
  * A common interface for enrichable message envelopes.
  *
- * @param E the type of the envelope for the covariance of the return values
+ * @param <E> the type of the envelope for the covariance of the return values
  */
 public interface EnrichableMessageEnvelope<I extends Message,
                                            T,
