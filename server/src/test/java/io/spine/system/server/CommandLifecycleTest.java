@@ -252,7 +252,7 @@ class CommandLifecycleTest {
             CommandRejected rejected = eventAccumulator.assertNextEventIs(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Event rejectionEvent = rejected.getRejectionEvent();
-            TypeUrl rejectionType = TypeUrl.ofEnclosed(rejectionEvent.getMessage());
+            TypeUrl rejectionType = rejectionEvent.typeUrl();
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }
