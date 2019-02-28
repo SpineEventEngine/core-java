@@ -27,11 +27,11 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.RejectionMessage;
-import io.spine.code.proto.RejectionType;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.Events;
 import io.spine.core.Status;
+import io.spine.type.RejectionType;
 import io.spine.type.TypeUrl;
 
 import java.util.HashMap;
