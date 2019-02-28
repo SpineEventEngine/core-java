@@ -23,6 +23,7 @@ package io.spine.server.enrich;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.server.enrich.Schema.Key;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class EnricherBuilder {
 
-    private final Map<Class<? extends Message>, EnrichmentFn<?, ?, ?>> functions = new HashMap<>();
+    private final Map<Key, EnrichmentFn<?, ?, ?>> functions = new HashMap<>();
 
     /** Creates new instance. */
     EnricherBuilder() {
@@ -45,30 +46,35 @@ public final class EnricherBuilder {
     /**
      * Adds event enrichment function to the builder.
      *
-     * @param eventClass
-     *         the class of the events the passed function enriches
-     * @param func
-     *         the enrichment function
      * @param <M>
      *         the type of the event message
      * @param <T>
      *         the type of the enrichment message
+     * @param eventClass
+     *         the class of the events the passed function enriches
+     * @param enrichmentClass
+     *         the class of the enrichments the passed function produces
+     * @param func
+     *         the enrichment function
      * @return {@code this} builder
      * @throws IllegalStateException
      *         if the builder already contains a function for this event class
-     * @see #remove(Class)
+     * @see #remove(Class, Class)
      */
     public <M extends EventMessage, T extends Message>
-    EnricherBuilder add(Class<M> eventClass, EventEnrichmentFn<M, T> func) {
+    EnricherBuilder add(Class<M> eventClass, Class<T> enrichmentClass,
+                        EventEnrichmentFn<M, T> func) {
         checkNotNull(eventClass);
         checkNotNull(func);
+        Key key = new Key(eventClass, enrichmentClass);
         checkState(
-                !functions.containsKey(eventClass),
-                "The event class `%s` already has enrichment function." +
-                        " If you want to provide another function, please call `remove()` first.",
+                !functions.containsKey(key),
+                "The event class `%s` already has the function which produces" +
+                        " enrichments of the class `%s`." +
+                        " Please call `remove(Class, Class)` first.",
                 eventClass.getCanonicalName()
         );
-        functions.put(eventClass, func);
+        functions.put(key, func);
         return this;
     }
 
@@ -77,8 +83,9 @@ public final class EnricherBuilder {
      *
      * <p>If the function for this class was not added, the call has no effect.
      */
-    public <M extends EventMessage> EnricherBuilder remove(Class<M> eventClass) {
-        functions.remove(eventClass);
+    public <M extends EventMessage, T extends Message>
+    EnricherBuilder remove(Class<M> eventClass, Class<T> enrichmentClass) {
+        functions.remove(new Key(eventClass, enrichmentClass));
         return this;
     }
 
@@ -91,7 +98,7 @@ public final class EnricherBuilder {
     /**
      * Obtains immutable functions of functions added to the builder by the time of the call.
      */
-    ImmutableMap<Class<? extends Message>, EnrichmentFn<?, ?, ?>> functions() {
+    ImmutableMap<Key, EnrichmentFn<?, ?, ?>> functions() {
         return ImmutableMap.copyOf(functions);
     }
 }

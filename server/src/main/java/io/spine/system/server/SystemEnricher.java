@@ -53,7 +53,8 @@ final class SystemEnricher {
         checkNotNull(commandRepository);
         Enricher enricher = Enricher
                 .newBuilder()
-                .add(CommandScheduled.class, commandLookup(commandRepository))
+                .add(CommandScheduled.class, CommandEnrichment.class,
+                     commandLookup(commandRepository))
                 .build();
         return enricher;
     }

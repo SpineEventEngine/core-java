@@ -71,11 +71,7 @@ final class Action {
     }
 
     private void collectForClass(Class<? extends Message> cls) {
-        EnrichmentFn<?, ?, ?> fn = parent.functions()
-                                         .get(cls);
-        if (fn != null) {
-            functions.add(fn);
-        }
+        functions.addAll(parent.enrichmentOf(cls));
     }
 
     @SuppressWarnings("unchecked")

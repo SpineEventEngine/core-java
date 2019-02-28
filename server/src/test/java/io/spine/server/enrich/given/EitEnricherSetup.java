@@ -35,14 +35,18 @@ public class EitEnricherSetup {
     private EitEnricherSetup() {
     }
 
+    @SuppressWarnings("OverlyCoupledMethod") // because we match many event to enrichments
     public static Enricher createEnricher(EitUserRepository users,
                                           EitProjectRepository projects,
                                           EitTaskRepository tasks) {
         Enricher enricher = Enricher
                 .newBuilder()
-                .add(EitUserAccountCreated.class, (e, c) -> find(users, e.getUser()))
-                .add(EitProjectCreated.class, (e, c) -> find(projects, e.getProject()))
-                .add(EitTaskCreated.class, (e, c) -> find(tasks, e.getTask()))
+                .add(EitUserAccountCreated.class, EitUserAccount.class,
+                     (e, c) -> find(users, e.getUser()))
+                .add(EitProjectCreated.class, EitProject.class,
+                     (e, c) -> find(projects, e.getProject()))
+                .add(EitTaskCreated.class, EitTask.class,
+                     (e, c) -> find(tasks, e.getTask()))
                 .build();
         return enricher;
     }

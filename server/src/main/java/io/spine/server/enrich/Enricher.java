@@ -20,7 +20,6 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.EnrichableMessageContext;
@@ -28,6 +27,7 @@ import io.spine.core.Enrichment;
 import io.spine.server.type.EnrichableMessageEnvelope;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
@@ -45,7 +45,7 @@ import java.util.Optional;
 @SPI
 public final class Enricher implements EnrichmentService {
 
-    private final ImmutableMap<Class<? extends Message>, EnrichmentFn<?, ?, ?>> functions;
+    private final Schema schema;
 
     /**
      * Creates a new builder.
@@ -58,11 +58,11 @@ public final class Enricher implements EnrichmentService {
      * Creates a new instance taking functions from the passed builder.
      */
     Enricher(EnricherBuilder builder) {
-        this.functions = builder.functions();
+        this.schema = new Schema(builder.functions());
     }
 
-    ImmutableMap<Class<? extends Message>, EnrichmentFn<?, ?, ?>> functions() {
-        return functions;
+    Set<EnrichmentFn<?, ?, ?>> enrichmentOf(Class<? extends Message> cls) {
+        return schema.enrichmentOf(cls);
     }
 
     /**
