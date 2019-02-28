@@ -31,19 +31,26 @@ option java_outer_classname = "EnrichmentTestEventsProto";
 import "spine/core/user_id.proto";
 import "spine/test/enrichment/enrichment_test_identifiers.proto";
 
-message EtProjectCreated {
-    EtProjectId project = 1;
+message EitProjectCreated {
+    EitProjectId project = 1;
+    string name = 2 [(required) = true];
+    string description = 3;
 }
 
-message EtTaskCreated {
-    EtTaskId task = 1;
+message EitTaskCreated {
+    EitTaskId task = 1;
+    EitProjectId project = 2 [(required) = true];
+    string name = 3 [(required) = true];
+    string description = 4;
 }
 
-message EtUserAccountCreated {
+message EitUserAccountCreated {
     spine.core.UserId user = 1;
+    string given_name = 2 [(required) = true];
+    string family_name = 3 [(required) = true];
 }
 
-message EtTaskAssigned {
-    EtTaskId task = 1;
+message EitTaskAssigned {
+    EitTaskId task = 1;
     spine.core.UserId assignee = 2 [(required) = true];
 }

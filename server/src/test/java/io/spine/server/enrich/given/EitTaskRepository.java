@@ -18,39 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.enrich;
+package io.spine.server.enrich.given;
 
-import io.spine.server.BoundedContext;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.server.aggregate.AggregateRepository;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-@DisplayName("Enricher should")
-@Disabled("Until new enrichment implementation is finalized")
-public class EnricherTest {
-
-    private BoundedContext boundedContext;
-
-    @BeforeEach
-    void setUp() {
-        boundedContext = BoundedContext
-                .newBuilder()
-                .setMultitenant(true)
-                .build();
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        boundedContext.close();
-    }
-
-    @Test
-    @DisplayName("have builder")
-    void haveBuilder() {
-        assertNotNull(Enricher.newBuilder());
-    }
+public class EitTaskRepository extends AggregateRepository<EitTaskId, EitTaskAggregate> {
 }

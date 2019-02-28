@@ -18,14 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Test environment for {@link io.spine.server.enrich.EnricherIntegrationTest}.
- */
-
-@CheckReturnValue
-@ParametersAreNonnullByDefault
 package io.spine.server.enrich.given;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.server.enrich.given.command.EitCreateProject;
+import io.spine.server.enrich.given.event.EitProjectCreated;
+import io.spine.server.enrich.given.event.EitProjectCreatedVBuilder;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+final class EitProjectAggregate extends Aggregate<EitProjectId, EitProject, EitProjectVBuilder> {
+
+    EitProjectAggregate(EitProjectId id) {
+        super(id);
+    }
+
+    @Assign
+    EitProjectCreated handle(EitCreateProject cmd) {
+        return EitProjectCreatedVBuilder
+                .newBuilder()
+                .setProject(cmd.getProject())
+                .build();
+    }
+
+    @Apply
+    void event(EitProjectCreated event) {
+        builder().setId(event.getProject())
+                 .setName(event.getName())
+                 .setDescription(event.getDescription());
+    }
+}

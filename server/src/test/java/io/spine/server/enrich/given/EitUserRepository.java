@@ -18,14 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Test environment for {@link io.spine.server.enrich.EnricherIntegrationTest}.
- */
-
-@CheckReturnValue
-@ParametersAreNonnullByDefault
 package io.spine.server.enrich.given;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.core.UserId;
+import io.spine.server.aggregate.AggregateRepository;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+public class EitUserRepository extends AggregateRepository<UserId, EitUserAggregate> {
+}

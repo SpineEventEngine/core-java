@@ -18,14 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Test environment for {@link io.spine.server.enrich.EnricherIntegrationTest}.
- */
-
-@CheckReturnValue
-@ParametersAreNonnullByDefault
 package io.spine.server.enrich.given;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.core.UserId;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.server.enrich.given.command.EitRegisterUser;
+import io.spine.server.enrich.given.event.EitUserAccountCreated;
+import io.spine.server.enrich.given.event.EitUserAccountCreatedVBuilder;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+class EitUserAggregate extends Aggregate<UserId, EitUserAccount, EitUserAccountVBuilder> {
+
+    EitUserAggregate(UserId id) {
+        super(id);
+    }
+
+    @Assign
+    EitUserAccountCreated handle(EitRegisterUser cmd) {
+        return EitUserAccountCreatedVBuilder
+                .newBuilder()
+                .setUser(cmd.getUser())
+                .setGivenName(cmd.getGivenName())
+                .setFamilyName(cmd.getFamilyName())
+                .build();
+    }
+
+    @Apply
+    void event(EitUserAccountCreated event) {
+        builder().setId(event.getUser())
+                 .setGivenName(event.getGivenName())
+                 .setFamilyName(event.getFamilyName());
+    }
+}

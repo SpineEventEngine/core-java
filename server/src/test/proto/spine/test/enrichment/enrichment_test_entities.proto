@@ -31,22 +31,22 @@ option java_outer_classname = "EnrichmentTestEntitiesProto";
 import "spine/core/user_id.proto";
 import "spine/test/enrichment/enrichment_test_identifiers.proto";
 
-message EtProject {
+message EitProject {
     option (entity).kind = AGGREGATE;
-    EtProjectId id = 1;
+    EitProjectId id = 1;
     string name = 2 [(required) = true];
     string description = 3;
 }
 
-message EtTask {
+message EitTask {
     option (entity).kind = AGGREGATE;
-    EtTaskId id = 1;
-    EtProjectId project = 2 [(required) = true];
+    EitTaskId id = 1;
+    EitProjectId project = 2 [(required) = true];
     string name = 3 [(required) = true];
     string description = 4;
 }
 
-message EtUserAccount {
+message EitUserAccount {
     option (entity).kind = AGGREGATE;
     spine.core.UserId id = 1;
     string given_name = 2 [(required) = true];
