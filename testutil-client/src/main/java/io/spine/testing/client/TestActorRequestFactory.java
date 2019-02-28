@@ -70,7 +70,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /**
      * Deprecated.
-     * @deprecated use {@link TestActorRequestFactory(String, ZoneId)}
+     * @deprecated use {@link #TestActorRequestFactory(String, ZoneId)}
      */
     @Deprecated
     public static
@@ -89,7 +89,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /**
      * Deprecated.
-     * @deprecated use {@link TestActorRequestFactory(Class)}
+     * @deprecated use {@link #TestActorRequestFactory(Class)}
      */
     @Deprecated
     public static TestActorRequestFactory newInstance(Class<?> testClass) {
@@ -102,7 +102,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /**
      * Deprecated.
-     * @deprecated use {@link TestActorRequestFactory(UserId)}
+     * @deprecated use {@link #TestActorRequestFactory(UserId)}
      */
     @Deprecated
     public static TestActorRequestFactory newInstance(UserId actor) {
@@ -115,7 +115,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /**
      * Deprecated.
-     * @deprecated use {@link TestActorRequestFactory(UserId, TenantId)}
+     * @deprecated use {@link #TestActorRequestFactory(UserId, TenantId)}
      */
     @Deprecated
     public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
@@ -128,7 +128,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /**
      * Deprecated.
-     * @deprecated use {@link TestActorRequestFactory(Class, TenantId)}
+     * @deprecated use {@link #TestActorRequestFactory(Class, TenantId)}
      */
     @Deprecated
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {

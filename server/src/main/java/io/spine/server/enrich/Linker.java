@@ -23,11 +23,11 @@ package io.spine.server.enrich;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
-import io.spine.code.proto.enrichment.ByOption;
-import io.spine.code.proto.enrichment.FieldRef;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import io.spine.server.reflect.Field;
+import io.spine.type.enrichment.ByOption;
+import io.spine.type.enrichment.FieldRef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;
