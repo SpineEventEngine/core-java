@@ -43,6 +43,9 @@ public final class EnricherBuilder {
 
     private static final String SUGGEST_REMOVAL = " Please call `remove(Class, Class)` first.";
 
+    /**
+     * Maps a pair of [source class, enrichment class] to a function which produces this enrichment.
+     */
     private final Map<Key, EnrichmentFn<?, ?, ?>> functions = new HashMap<>();
 
     /** Creates new instance. */
@@ -80,7 +83,6 @@ public final class EnricherBuilder {
         functions.put(key, func);
         return this;
     }
-
 
     private void checkDirectDuplication(Key key) {
         checkArgument(
@@ -132,7 +134,8 @@ public final class EnricherBuilder {
     }
 
     /**
-     * The key in the schema map.
+     * A pair of source message class and enrichment message class, which is used to match
+     * the pair to a function which produces the enrichment.
      */
     @Immutable
     static class Key {
