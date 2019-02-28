@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.base.Error;
 import io.spine.base.RejectionMessage;
-import io.spine.code.proto.RejectionType;
+import io.spine.type.RejectionType;
 import io.spine.type.TypeName;
 
 /**

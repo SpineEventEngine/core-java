@@ -21,9 +21,9 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.code.proto.RejectionType;
 import io.spine.core.Ack;
 import io.spine.testing.client.blackbox.given.CommandAcksTestEnv;
+import io.spine.type.RejectionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
