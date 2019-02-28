@@ -27,9 +27,9 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.enrich.given.GivenEventMessage;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectCreatedEnrichment;
@@ -49,14 +49,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
 
-import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
-import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
-import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
-import static io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage.projectCompleted;
-import static io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage.projectCreated;
-import static io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage.projectStarred;
-import static io.spine.server.event.given.EventEnricherTestEnv.createEvent;
-import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
+import static io.spine.server.enrich.given.GivenEnricher.GetProjectName;
+import static io.spine.server.enrich.given.GivenEnricher.GetProjectOwnerId;
+import static io.spine.server.enrich.given.GivenEnricher.newEventEnricher;
+import static io.spine.server.enrich.given.GivenEvent.createEvent;
+import static io.spine.server.enrich.given.GivenEventMessage.projectCompleted;
+import static io.spine.server.enrich.given.GivenEventMessage.projectCreated;
+import static io.spine.server.enrich.given.GivenEventMessage.projectStarred;
+import static io.spine.testdata.MultiTenantTestBoundedContextFactory.newBoundedContext;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -175,8 +175,8 @@ public class EnricherTest {
     /**
      * Event subscriber that remembers enrichments.
      *
-     * <p>This class is a part of assert checking, and as such it is not placed under the test
-     * {@linkplain io.spine.server.event.given.EventEnricherTestEnv environment class} .
+     * <p>This class is a part of assert checking, and as such it is not placed under
+     * the package {@code given} with the rest of the test environment classes.
      */
     @SuppressWarnings("InstanceVariableNamingConvention")
     private static class TestEventSubscriber extends AbstractEventSubscriber {
