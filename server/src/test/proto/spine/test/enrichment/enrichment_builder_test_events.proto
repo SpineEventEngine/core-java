@@ -17,23 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package spine.test.enrichment;
 
-def final SPINE_VERSION = '1.0.0-SNAPSHOT'
+import "spine/options.proto";
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.enrich.given.event";
+option java_multiple_files = true;
+option java_outer_classname = "EnrichmentBuilderTestEventsProto";
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = SPINE_VERSION
+message EbtOrderCreated {
+    option (is) = { java_type: "EbtOrderEvent" };
+    string order_id = 1;
+}
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = SPINE_VERSION
+message EbtOrderLineAdded {
+    option (is) = { java_type: "EbtOrderEvent" };
+    uint32 id = 1;
+    string order_id = 2;
+}
+
+message EbtShipmentDispatched {
+    uint64 id = 1;
 }

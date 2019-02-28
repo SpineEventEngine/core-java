@@ -21,6 +21,8 @@
 package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
@@ -29,14 +31,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static io.spine.type.MessageClass.interfacesOf;
 
 /**
  * The {@code Builder} allows to register enrichment functions used by
  * the {@code Enricher}.
  */
 public final class EnricherBuilder {
+
+    private static final String SUGGEST_REMOVAL = " Please call `remove(Class, Class)` first.";
 
     private final Map<Key, EnrichmentFn<?, ?, ?>> functions = new HashMap<>();
 
@@ -62,21 +67,44 @@ public final class EnricherBuilder {
      *         if the builder already contains a function for this event class
      * @see #remove(Class, Class)
      */
+    @CanIgnoreReturnValue
     public <M extends EventMessage, T extends Message>
     EnricherBuilder add(Class<M> eventClass, Class<T> enrichmentClass,
                         EventEnrichmentFn<M, T> func) {
         checkNotNull(eventClass);
+        checkNotNull(enrichmentClass);
         checkNotNull(func);
         Key key = new Key(eventClass, enrichmentClass);
-        checkState(
-                !functions.containsKey(key),
-                "The event class `%s` already has the function which produces" +
-                        " enrichments of the class `%s`." +
-                        " Please call `remove(Class, Class)` first.",
-                eventClass.getCanonicalName()
-        );
+        checkDirectDuplication(key);
+        checkInterfaceDuplication(key);
         functions.put(key, func);
         return this;
+    }
+
+
+    private void checkDirectDuplication(Key key) {
+        checkArgument(
+                !functions.containsKey(key),
+                "The function which enriches `%s` with `%s` is already added." + SUGGEST_REMOVAL,
+                key.sourceClass().getCanonicalName(),
+                key.enrichmentClass().getCanonicalName()
+        );
+    }
+
+    private void checkInterfaceDuplication(Key key) {
+        Class<? extends Message> sourceClass = key.sourceClass();
+        Class<? extends Message> enrichmentClass = key.enrichmentClass();
+        ImmutableSet<Class<? extends Message>> interfaces = interfacesOf(sourceClass);
+        interfaces.forEach(i -> {
+            Key keyByInterface = new Key(i, enrichmentClass);
+            checkArgument(
+                    !functions.containsKey(keyByInterface),
+                    "Enrichment message of the class `%s` is already available via a function" +
+                            " which accepts `%s`, which is a super interface of the class `%s`." +
+                            SUGGEST_REMOVAL,
+                    enrichmentClass, i.getCanonicalName(), sourceClass.getCanonicalName()
+            );
+        });
     }
 
     /**
@@ -109,18 +137,22 @@ public final class EnricherBuilder {
     @Immutable
     static class Key {
 
-        private final Class<?> sourceClass;
-        private final Class<?> enrichmentClass;
+        private final Class<? extends Message> sourceClass;
+        private final Class<? extends Message> enrichmentClass;
 
-        Key(Class<?> sourceClass, Class<?> enrichmentClass) {
+        Key(Class<? extends Message> sourceClass, Class<? extends Message> enrichmentClass) {
             this.sourceClass = checkNotNull(sourceClass);
             this.enrichmentClass = checkNotNull(enrichmentClass);
         }
 
-        Class<?> sourceClass() {
+        Class<? extends Message> sourceClass() {
             return sourceClass;
         }
-        
+
+        Class<? extends Message> enrichmentClass() {
+            return enrichmentClass;
+        }
+
         @Override
         public int hashCode() {
             return Objects.hash(sourceClass, enrichmentClass);

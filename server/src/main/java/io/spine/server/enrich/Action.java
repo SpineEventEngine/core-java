@@ -20,15 +20,16 @@
 
 package io.spine.server.enrich;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EnrichableMessageContext;
 import io.spine.core.Enrichment;
 import io.spine.core.Enrichment.Container;
 import io.spine.protobuf.AnyPacker;
+import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,16 +75,13 @@ final class Action {
         functions.addAll(parent.enrichmentOf(cls));
     }
 
-    @SuppressWarnings("unchecked")
     private void collectForInterfacesOf(Class<? extends Message> cls) {
-        Class<?>[] interfaces = cls.getInterfaces();
-        Arrays.stream(interfaces)
-              .filter(Message.class::isAssignableFrom)
-              .map(i -> (Class<? extends Message>) i)
-              .forEach(i -> {
-                  collectForClass(i);
-                  collectForInterfacesOf(i);
-              });
+        ImmutableSet<Class<? extends Message>> superInterfaces = MessageClass.interfacesOf(cls);
+
+        superInterfaces.forEach(i -> {
+            collectForClass(i);
+            collectForInterfacesOf(i);
+        });
     }
 
     /**

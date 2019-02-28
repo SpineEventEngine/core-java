@@ -19,21 +19,13 @@
  */
 
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * Test environment events for testing enrichment.
  */
 
-def final SPINE_VERSION = '1.0.0-SNAPSHOT'
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.enrich.given.event;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = SPINE_VERSION
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = SPINE_VERSION
-}
+import javax.annotation.ParametersAreNonnullByDefault;

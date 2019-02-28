@@ -18,22 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.enrich.given.event;
+
+import com.google.errorprone.annotations.Immutable;
+import io.spine.base.EventMessage;
+
 /**
- *  The versions of the libraries used.
+ * Common interface for order events in the test environment of
+ * {@link io.spine.server.enrich.EnricherBuilderTest}.
  *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @apiNote
+ * This interface is handwritten (instead of being generated) because of
+ * <a href="https://github.com/SpineEventEngine/base/issues/348">this issue</a>
+ * in the Model Compiler.
+ *
+ * <p>Once the issue is resolved, please set the option {@code (is).generate} to {@code true}
+ * in event types declared in the {@code enrichment_builder_test_events.proto} file,
+ * and then remove this interface in favor of the generated one.
  */
-
-def final SPINE_VERSION = '1.0.0-SNAPSHOT'
-
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = SPINE_VERSION
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = SPINE_VERSION
+@Immutable
+public interface EbtOrderEvent extends EventMessage {
 }

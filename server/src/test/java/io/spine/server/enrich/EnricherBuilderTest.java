@@ -20,14 +20,30 @@
 
 package io.spine.server.enrich;
 
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.FloatValue;
+import com.google.protobuf.StringValue;
+import io.spine.server.enrich.given.event.EbtOrderCreated;
+import io.spine.server.enrich.given.event.EbtOrderEvent;
+import io.spine.server.enrich.given.event.EbtOrderLineAdded;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Enricher Builder should")
 class EnricherBuilderTest {
+
+    private EnricherBuilder builder;
+
+    @BeforeEach
+    void setUp() {
+        builder = Enricher.newBuilder();
+    }
 
     @Nested
     @DisplayName("build Enricher")
@@ -35,10 +51,55 @@ class EnricherBuilderTest {
 
         @Test
         @DisplayName("if no functions have been registered")
-        void forNoFunctionsRegistered() {
-            Enricher enricher = Enricher.newBuilder()
-                                        .build();
-            assertNotNull(enricher);
+        void noFunctions() {
+            assertBuilt(builder.build());
+        }
+
+        @Test
+        @DisplayName("if functions added")
+        void functionsAdded() {
+            builder.add(EbtOrderCreated.class, StringValue.class,
+                        (e, c) -> StringValue.getDefaultInstance())
+                   .add(EbtOrderLineAdded.class, BoolValue.class,
+                        (e, c) -> BoolValue.of(true));
+            assertBuilt(builder.build());
+        }
+
+        void assertBuilt(Enricher enricher) {
+            assertThat(enricher).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("not allow duplicating entries")
+    class DupEntries {
+
+        @Test
+        @DisplayName("of source and enrichment class pair")
+        void classPair() {
+            builder.add(EbtOrderLineAdded.class, BoolValue.class,
+                        (e, c) -> BoolValue.of(true));
+
+            assertRejects(() ->
+                    builder.add(EbtOrderLineAdded.class, BoolValue.class,
+                                (e, c) -> BoolValue.of(false))
+            );
+        }
+
+        @Test
+        @DisplayName("when a function is defined for implemened interface")
+        void interfaceEnrichment() {
+            builder.add(EbtOrderEvent.class, FloatValue.class,
+                        (e, c) -> FloatValue.of(3.14f));
+
+            assertRejects(() ->
+                    builder.add(EbtOrderCreated.class, FloatValue.class,
+                                (e, c) -> FloatValue.of(2.68f))
+            );
+        }
+
+        private void assertRejects(Executable runnable) {
+            assertThrows(IllegalArgumentException.class, runnable);
         }
     }
 }
