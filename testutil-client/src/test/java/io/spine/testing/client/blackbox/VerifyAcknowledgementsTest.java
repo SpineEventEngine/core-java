@@ -21,10 +21,10 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.code.proto.RejectionType;
 import io.spine.testing.client.blackbox.Rejections.BbProjectAlreadyStarted;
 import io.spine.testing.client.blackbox.Rejections.BbTaskCreatedInCompletedProject;
 import io.spine.testing.client.blackbox.Rejections.BbTaskLimitReached;
+import io.spine.type.RejectionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

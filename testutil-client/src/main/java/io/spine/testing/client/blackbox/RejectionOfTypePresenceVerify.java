@@ -20,7 +20,8 @@
 
 package io.spine.testing.client.blackbox;
 
-import io.spine.code.proto.RejectionType;
+
+import io.spine.type.RejectionType;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
