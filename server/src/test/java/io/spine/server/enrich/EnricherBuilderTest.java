@@ -96,10 +96,13 @@ class EnricherBuilderTest {
             @Test
             @DisplayName("for an interface which the passed class implements")
             void interfaceEnrichment() {
+                // Adding a function via an interface.
                 builder.add(EbtOrderEvent.class, FloatValue.class,
                             (e, c) -> FloatValue.of(3.14f));
 
                 assertRejects(
+                        // Attempting to add a function via the class which implements the
+                        // interface in the entry added above.
                         () -> builder.add(EbtOrderCreated.class, FloatValue.class,
                                           (e, c) -> FloatValue.of(2.68f))
                 );
@@ -108,10 +111,13 @@ class EnricherBuilderTest {
             @Test
             @DisplayName("for a class which implements the passed interface")
             void classImplements() {
+                // Adding a function via a class.
                 builder.add(EbtOrderCreated.class, Timestamp.class,
                             (e, c) -> Time.getCurrentTime());
 
                 assertRejects(
+                        // Attempting to add a function via the interface which the class
+                        // from the entry added above implements.
                         () -> builder.add(EbtOrderEvent.class, Timestamp.class,
                                           (e, c) -> Time.getCurrentTime())
                 );
