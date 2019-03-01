@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
@@ -88,6 +89,17 @@ public abstract class ProcessManagerRepository<I,
      * method.
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
+
+    /**
+     * The configurable lifecycle rules of the repository.
+     *
+     * <p>The rules allow to automatically mark entities as archived/deleted upon certain event and
+     * rejection types emitted.
+     *
+     * @see LifecycleRules#archiveOn(Class[])
+     * @see LifecycleRules#deleteOn(Class[])
+     */
+    private final LifecycleRules lifecycleRules = new LifecycleRules();
 
     /**
      * Creates a new instance with the event routing by the first message field.
@@ -197,6 +209,23 @@ public abstract class ProcessManagerRepository<I,
         return commandRouting;
     }
 
+    /**
+     * Obtains configurable lifecycle rules of this repository.
+     *
+     * <p>The rules allow to automatically archive/delete entities upon certain event and rejection
+     * types produced.
+     *
+     * <p>The rules can be set as follows:
+     * <pre>{@code
+     *   repository.lifecycle()
+     *             .archiveOn(Event1.class, Rejection1.class)
+     *             .deleteOn(Rejection2.class)
+     * }</pre>
+     */
+    public final LifecycleRules lifecycle() {
+        return lifecycleRules;
+    }
+
     @Override
     public ImmutableSet<EventClass> producibleEventClasses() {
         Set<EventClass> eventClasses = processManagerClass().getProducedEvents();
@@ -273,8 +302,10 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
-    PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        PmTransaction<I, S, ?> tx = PmTransaction.start((ProcessManager<I, S, ?>) manager);
+    @VisibleForTesting
+    protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
+        PmTransaction<I, S, ?> tx =
+                PmTransaction.start((ProcessManager<I, S, ?>) manager, lifecycle());
         TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
         tx.setListener(listener);
         return tx;

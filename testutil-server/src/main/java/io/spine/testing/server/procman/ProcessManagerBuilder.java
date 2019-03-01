@@ -24,9 +24,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
-import io.spine.server.procman.PmTransaction;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.server.entity.EntityBuilder;
+import io.spine.testing.server.procman.PmDispatcher.TestPmTransaction;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -61,24 +61,7 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        TestPmTransaction transaction = new TestPmTransaction(result, state, version);
+        TestPmTransaction transaction = new TestPmTransaction<>(result, state, version);
         transaction.commit();
-    }
-
-    /**
-     * A test-only implementation of an {@link PmTransaction} that sets the given
-     * {@code state} and {@code version} as a starting point for the transaction.
-     */
-    private final class TestPmTransaction extends PmTransaction<I, S, B> {
-
-        private TestPmTransaction(ProcessManager<I, S, B> processManager, S state,
-                                  Version version) {
-            super(processManager, state, version);
-        }
-
-        @Override
-        protected void commit() {
-            super.commit();
-        }
     }
 }

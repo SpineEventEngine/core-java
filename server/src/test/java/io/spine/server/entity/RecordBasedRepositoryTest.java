@@ -36,6 +36,7 @@ import io.spine.client.IdFilter;
 import io.spine.client.TargetFilters;
 import io.spine.client.TargetFiltersVBuilder;
 import io.spine.server.entity.storage.EntityColumnCache;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.entity.given.GivenLifecycleFlags;
@@ -163,6 +164,10 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
 
     private E loadOrCreate(I id) {
         return repository().findOrCreate(id);
+    }
+
+    private Iterator<EntityRecord> loadAllRecords() {
+        return repository.loadAllRecords();
     }
 
     /*
@@ -371,6 +376,19 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             assertFoundEntities.hasSize(entities.size());
 
             assertThat(entities).containsExactlyElementsIn(found);
+        }
+
+        @Test
+        @DisplayName("all entity records")
+        void allEntityRecords() {
+            List<E> entities = createAndStoreEntities(repository, 150);
+            Collection<EntityRecord> found = newArrayList(loadAllRecords());
+            assertThat(found).hasSize(entities.size());
+
+            for (E entity : entities) {
+                EntityRecordWithColumns record = repository.toRecord(entity);
+                assertThat(found).contains(record.getRecord());
+            }
         }
 
         @Test

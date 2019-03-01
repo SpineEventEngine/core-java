@@ -21,7 +21,7 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
@@ -45,11 +45,11 @@ class AggregateQueryProcessor implements QueryProcessor {
     }
 
     @Override
-    public ImmutableCollection<Any> process(Query query) {
+    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         TenantId tenant = tenantOf(query);
         SystemReadSide readSide = delegatingTo(systemReadSide).get(tenant);
-        Iterator<Any> read = readSide.readDomainAggregate(query);
-        ImmutableList<Any> result = ImmutableList.copyOf(read);
+        Iterator<EntityStateWithVersion> read = readSide.readDomainAggregate(query);
+        ImmutableList<EntityStateWithVersion> result = ImmutableList.copyOf(read);
         return result;
     }
 

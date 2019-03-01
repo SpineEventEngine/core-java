@@ -32,6 +32,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityStateUpdate;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.Query;
@@ -50,11 +51,14 @@ import io.spine.core.Event;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
+import io.spine.core.Version;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
@@ -310,7 +314,7 @@ class StandTest extends TenantAwareTest {
             MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
             stand.execute(readCustomersQuery, responseObserver);
 
-            List<Any> messageList = checkAndGetMessageList(responseObserver);
+            List<EntityStateWithVersion> messageList = checkAndGetMessageList(responseObserver);
             assertTrue(
                     messageList.isEmpty(),
                     "Query returned a non-empty response message list though the target had " +
@@ -358,6 +362,7 @@ class StandTest extends TenantAwareTest {
             Stand stand = createStand(repository);
 
             int querySize = 2;
+            int projectVersion = 1;
 
             Set<ProjectId> ids = new HashSet<>();
             for (int i = 0; i < querySize; i++) {
@@ -370,7 +375,7 @@ class StandTest extends TenantAwareTest {
                 repository.store(projectionOfClass(StandTestProjection.class)
                                          .withId(project.getId())
                                          .withState(project)
-                                         .withVersion(1)
+                                         .withVersion(projectVersion)
                                          .build());
                 ids.add(project.getId());
             }
@@ -385,12 +390,16 @@ class StandTest extends TenantAwareTest {
                 @Override
                 public void onNext(QueryResponse value) {
                     super.onNext(value);
-                    List<Any> messages = value.getMessagesList();
+                    List<EntityStateWithVersion> messages = value.getMessagesList();
                     assertThat(messages).hasSize(ids.size());
-                    for (Any message : messages) {
-                        Project project = unpack(message, Project.class);
+                    for (EntityStateWithVersion stateWithVersion : messages) {
+                        Any state = stateWithVersion.getState();
+                        Project project = unpack(state, Project.class);
                         assertNotEquals(project, null);
                         assertMatchesMask(project, fieldMask);
+
+                        Version version = stateWithVersion.getVersion();
+                        assertEquals(projectVersion, version.getNumber());
                     }
                 }
             };
@@ -414,7 +423,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("when event of observed type occurs in the system")
         void ofEvents() {
-           checkReceivesUpdatesOn(CustomerCreated.class);
+            checkReceivesUpdatesOn(CustomerCreated.class);
         }
 
         private void checkReceivesUpdatesOn(Class<? extends Message> targetType) {
@@ -786,10 +795,11 @@ class StandTest extends TenantAwareTest {
                 .setName("Test Project")
                 .setStatus(CANCELLED)
                 .build();
+        int projectVersion = 42;
         repository.store(projectionOfClass(StandTestProjection.class)
                                  .withId(sampleProject.getId())
                                  .withState(sampleProject)
-                                 .withVersion(42)
+                                 .withVersion(projectVersion)
                                  .build());
         // FieldMask with invalid field paths.
         String[] paths = {"invalid_field_path_example", Project.getDescriptor()
@@ -801,10 +811,12 @@ class StandTest extends TenantAwareTest {
             @Override
             public void onNext(QueryResponse value) {
                 super.onNext(value);
-                List<Any> messages = value.getMessagesList();
+                List<EntityStateWithVersion> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                Project project = unpack(messages.get(0), Project.class);
+                EntityStateWithVersion stateWithVersion = messages.get(0);
+                Any state = stateWithVersion.getState();
+                Project project = unpack(state, Project.class);
 
                 assertNotNull(project);
 
@@ -814,6 +826,9 @@ class StandTest extends TenantAwareTest {
                 assertEquals(UNDEFINED, project.getStatus());
                 assertTrue(project.getTaskList()
                                   .isEmpty());
+
+                Version version = stateWithVersion.getVersion();
+                assertEquals(projectVersion, version.getNumber());
             }
         };
         stand.execute(query, observer);
@@ -1115,11 +1130,12 @@ class StandTest extends TenantAwareTest {
         MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
 
-        List<Any> messageList = checkAndGetMessageList(responseObserver);
+        List<EntityStateWithVersion> messageList = checkAndGetMessageList(responseObserver);
         assertEquals(sampleProjects.size(), messageList.size());
         Collection<Project> allCustomers = sampleProjects.values();
-        for (Any singleRecord : messageList) {
-            Project unpackedSingleResult = unpack(singleRecord, Project.class);
+        for (EntityStateWithVersion singleRecord : messageList) {
+            Any state = singleRecord.getState();
+            Project unpackedSingleResult = unpack(state, Project.class);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
     }
@@ -1137,25 +1153,21 @@ class StandTest extends TenantAwareTest {
             StandTestProjectionRepository projectionRepository) {
 
         Set<ProjectId> projectIds = sampleProjects.keySet();
-        ImmutableCollection<StandTestProjection> allResults = toProjectionCollection(projectIds);
+        ImmutableCollection<EntityRecord> allRecords = toProjectionRecords(projectIds);
 
         for (ProjectId projectId : projectIds) {
             when(projectionRepository.find(eq(projectId)))
                     .thenReturn(Optional.of(new StandTestProjection(projectId)));
         }
 
-        Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
+        when(projectionRepository.loadAllRecords())
+                .thenReturn(allRecords.iterator());
 
-        when(projectionRepository.loadAll(matchingIds, any(FieldMask.class)))
-                .thenReturn(allResults.iterator());
-        when(projectionRepository.loadAll())
-                .thenReturn(allResults.iterator());
-
-        when(projectionRepository.find(argThat(entityFilterMatcher(projectIds)),
-                                       eq(OrderBy.getDefaultInstance()),
-                                       eq(Pagination.getDefaultInstance()),
-                                       any(FieldMask.class)))
-                .thenReturn(allResults.iterator());
+        when(projectionRepository.findRecords(argThat(entityFilterMatcher(projectIds)),
+                                              eq(OrderBy.getDefaultInstance()),
+                                              eq(Pagination.getDefaultInstance()),
+                                              any(FieldMask.class)))
+                .thenReturn(allRecords.iterator());
     }
 
     private static ArgumentMatcher<TargetFilters>
@@ -1180,27 +1192,24 @@ class StandTest extends TenantAwareTest {
         };
     }
 
-    private static ImmutableCollection<StandTestProjection>
-    toProjectionCollection(Collection<ProjectId> values) {
-        Collection<StandTestProjection> transformed = Collections2.transform(
-                values,
+    private static ImmutableCollection<EntityRecord>
+    toProjectionRecords(Collection<ProjectId> projectionIds) {
+        Collection<EntityRecord> transformed = Collections2.transform(
+                projectionIds,
                 input -> {
                     checkNotNull(input);
-                    return new StandTestProjection(input);
+                    StandTestProjection projection = new StandTestProjection(input);
+                    Any id = AnyPacker.pack(projection.id());
+                    Any state = AnyPacker.pack(projection.state());
+                    EntityRecord record = EntityRecord
+                            .newBuilder()
+                            .setEntityId(id)
+                            .setState(state)
+                            .build();
+                    return record;
                 });
-        ImmutableList<StandTestProjection> result = ImmutableList.copyOf(transformed);
+        ImmutableList<EntityRecord> result = ImmutableList.copyOf(transformed);
         return result;
-    }
-
-    private static ArgumentMatcher<Iterable<ProjectId>> projectionIdsIterableMatcher(
-            Set<ProjectId> projectIds) {
-        return argument -> {
-            boolean everyElementPresent = true;
-            for (ProjectId projectId : argument) {
-                everyElementPresent = everyElementPresent && projectIds.contains(projectId);
-            }
-            return everyElementPresent;
-        };
     }
 
     protected static Collection<Customer> fillSampleCustomers(int numberOfCustomers) {
@@ -1241,7 +1250,8 @@ class StandTest extends TenantAwareTest {
         }
     }
 
-    private static List<Any> checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
+    private static List<EntityStateWithVersion>
+    checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
         assertTrue(responseObserver.isCompleted(), "Query has not completed successfully");
         assertNull(responseObserver.throwable(), "Throwable has been caught upon query execution");
 
@@ -1249,9 +1259,9 @@ class StandTest extends TenantAwareTest {
         assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
         assertNotNull(response, "Query response must not be null");
 
-        List<Any> messageList = response.getMessagesList();
-        assertNotNull(messageList, "Query response has null message list");
-        return messageList;
+        List<EntityStateWithVersion> messages = response.getMessagesList();
+        assertNotNull(messages, "Query response has null message list");
+        return messages;
     }
 
     private static void checkTypesEmpty(Stand stand) {
